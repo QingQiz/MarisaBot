@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Mirai_CSharp;
@@ -57,7 +56,9 @@ namespace QQBOT.Core.Utils
             Console.WriteLine("---------------------------------------------------------------");
 
             // run
-            await session.ConnectAsync(options, 2096937554);
+            var qq = long.Parse(ConfigurationManager.AppSettings["QQNumber"] ??
+                                 throw new InvalidOperationException("必须在 `App.config` 中填写 `QQNumber`"));
+            await session.ConnectAsync(options, qq);
 
             // waiting for keyboard
             while (true)

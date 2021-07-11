@@ -39,6 +39,11 @@ namespace QQBOT.EntityFrameworkCore.Entity.Audit
         public string UserAlias { get; set; }
 
         /// <summary>
+        ///  消息ID
+        /// </summary>
+        public string MessageId { get; set; }
+
+        /// <summary>
         ///  涉及的消息内容
         /// </summary>
         public string Message { get; set; }

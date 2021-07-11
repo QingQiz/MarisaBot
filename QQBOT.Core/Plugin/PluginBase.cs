@@ -58,8 +58,9 @@ namespace QQBOT.Core.Plugin
 
         public async Task<bool> UnknownMessage(MiraiHttpSession session, IUnknownMessageEventArgs e)
         {
-            await Logger.UnknownMessage(e);
-            return await UnknownMessageHandler(session, e);
+            Logger.UnknownMessage(e);
+            return await Task.Run(() => false);
+            // return await UnknownMessageHandler(session, e);
         }
 
         #endregion

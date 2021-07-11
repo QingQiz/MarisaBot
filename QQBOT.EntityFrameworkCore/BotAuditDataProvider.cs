@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Audit.Core;
 using QQBOT.EntityFrameworkCore.Entity.Audit;
+using QQBOT.EntityFrameworkCore.Entity.Common;
 
 namespace QQBOT.EntityFrameworkCore
 {
@@ -16,6 +17,10 @@ namespace QQBOT.EntityFrameworkCore
         {
             await using var db = new BotDbContext();
 
+            var message = auditEvent.CustomFields["Message"]?.ToString();
+            
+            var messageId = auditEvent.CustomFields["MessageId"]?.ToString();
+
             var log = new AuditLog
             {
                 EventId   = new Guid(),
@@ -28,12 +33,22 @@ namespace QQBOT.EntityFrameworkCore
                 UserId    = auditEvent.CustomFields["UserId"]?.ToString(),
                 UserName  = auditEvent.CustomFields["UserName"]?.ToString(),
                 UserAlias = auditEvent.CustomFields["UserAlias"]?.ToString(),
-                Message   = auditEvent.CustomFields["Message"]?.ToString()
+                Message   = message?[..Math.Min(message.Length, 150)],
+                MessageId = messageId
             };
-
             await db.Logs.AddAsync(log);
-            await db.SaveChangesAsync();
 
+            if (!string.IsNullOrWhiteSpace(messageId))
+            {
+                await db.Messages.AddAsync(new QMessage
+                {
+                    Message   = message,
+                    MessageId = messageId,
+                    Type      = auditEvent.EventType,
+                });
+            }
+
+            await db.SaveChangesAsync();
             return log.EventId;
         }
     }
