@@ -6,6 +6,7 @@ using Mirai_CSharp;
 using Mirai_CSharp.Models;
 using Mirai_CSharp.Plugin;
 using QQBOT.Core.Attribute;
+using QQBOT.Core.Plugin.Core;
 using QQBOT.EntityFrameworkCore;
 
 namespace QQBOT.Core.Utils
@@ -47,11 +48,14 @@ namespace QQBOT.Core.Utils
 
             // Log plugin info
             Console.WriteLine("---------------------------------------------------------------");
+            Console.WriteLine("-- Add Plugins");
             foreach (var plugin in plugins)
             {
                 Console.WriteLine($"Enabled plugin: `{plugin}`");
                 session.AddPlugin(((IPlugin) Activator.CreateInstance(plugin))!);
             }
+            // plugin fallback
+            session.AddPlugin(((IPlugin) Activator.CreateInstance(typeof(UnHandledMessage)))!);
 
             Console.WriteLine("---------------------------------------------------------------");
 
@@ -61,6 +65,7 @@ namespace QQBOT.Core.Utils
             await session.ConnectAsync(options, qq);
 
             // waiting for keyboard
+            Console.WriteLine("-- Running");
             while (true)
             {
                 if (await Console.In.ReadLineAsync() != "e") continue;

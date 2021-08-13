@@ -47,6 +47,11 @@ namespace QQBOT.EntityFrameworkCore.Entity.Audit
         ///  涉及的消息内容
         /// </summary>
         public string Message { get; set; }
+        
+        /// <summary>
+        /// 消息被哪个插件处理
+        /// </summary>
+        public string HandledBy { get; set; }
     }
 
     [Table("AuditLog")]
