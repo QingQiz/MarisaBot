@@ -17,19 +17,13 @@ namespace QQBOT.Core.Plugin.Core
     {
         #region Handler
 
-        protected abstract Task FriendMessageHandler(MiraiHttpSession session, IFriendMessageEventArgs e);
+        protected abstract Task FriendMessageHandler(MiraiHttpSession session, IFriendInfo sender, string message);
 
-        protected abstract Task GroupMessageHandler(MiraiHttpSession session, IGroupMessageEventArgs e);
+        protected abstract Task GroupMessageHandler(MiraiHttpSession session, IGroupMemberInfo sender, string message);
 
-        protected virtual async Task TempMessageHandler(MiraiHttpSession session, ITempMessageEventArgs e)
+        protected virtual async Task TempMessageHandler(MiraiHttpSession session, IGroupMemberInfo sender, string message)
         {
-#pragma warning disable 618
-            await GroupMessageHandler(session, new GroupMessageEventArgs
-            {
-                Chain = e.Chain,
-                Sender = e.Sender
-            });
-#pragma warning restore 618
+            await GroupMessageHandler(session, sender, message);
         }
 
         protected virtual void UnknownMessageHandler(MiraiHttpSession session,
@@ -61,7 +55,20 @@ namespace QQBOT.Core.Plugin.Core
             
             if (!e.Chain.BeginWith(commandPrefix)) return false;
 
-            await FriendMessageHandler(session, e);
+            try
+            {
+                await FriendMessageHandler(session, e.Sender, e.Chain.GetArguments(commandPrefix));
+            }
+            catch (NotImplementedException)
+            {
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.GetType().FullName + ": " + exception.Message);
+                Console.WriteLine(exception.StackTrace);
+                throw;
+            }
 
             var obj = new AuditLogExternalInfo
             {
@@ -74,7 +81,7 @@ namespace QQBOT.Core.Plugin.Core
             };
 
             await Log("Receive.Friend", obj);
-            return false;
+            return true;
         }
 
         public async Task<bool> GroupMessage(MiraiHttpSession session, IGroupMessageEventArgs e)
@@ -84,7 +91,20 @@ namespace QQBOT.Core.Plugin.Core
             
             if (!e.Chain.BeginWith(commandPrefix)) return false;
 
-            await GroupMessageHandler(session, e);
+            try
+            {
+                await GroupMessageHandler(session, e.Sender, e.Chain.GetArguments(commandPrefix));
+            }
+            catch (NotImplementedException)
+            {
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.GetType().FullName + ": " + exception.Message);
+                Console.WriteLine(exception.StackTrace);
+                throw;
+            }
 
             var obj = new AuditLogExternalInfo
             {
@@ -99,7 +119,7 @@ namespace QQBOT.Core.Plugin.Core
             };
 
             await Log("Receive.Group", obj);
-            return false;
+            return true;
         }
 
         public async Task<bool> TempMessage(MiraiHttpSession session, ITempMessageEventArgs e)
@@ -109,7 +129,20 @@ namespace QQBOT.Core.Plugin.Core
             
             if (!e.Chain.BeginWith(commandPrefix)) return false;
 
-            await TempMessageHandler(session, e);
+            try
+            {
+                await TempMessageHandler(session, e.Sender, e.Chain.GetArguments(commandPrefix));
+            }
+            catch (NotImplementedException)
+            {
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.GetType().FullName + ": " + exception.Message);
+                Console.WriteLine(exception.StackTrace);
+                throw;
+            }
 
             var obj = new AuditLogExternalInfo
             {
@@ -124,7 +157,7 @@ namespace QQBOT.Core.Plugin.Core
             };
 
             await Log("Receive.Temp", obj);
-            return false;
+            return true;
         }
 
         public async Task<bool> UnknownMessage(MiraiHttpSession session, IUnknownMessageEventArgs e)

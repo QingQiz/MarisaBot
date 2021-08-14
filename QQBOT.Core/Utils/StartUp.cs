@@ -48,7 +48,7 @@ namespace QQBOT.Core.Utils
 
             // Log plugin info
             Console.WriteLine("---------------------------------------------------------------");
-            Console.WriteLine("-- Add Plugins");
+            Console.WriteLine("-- Adding Plugins");
             foreach (var plugin in plugins)
             {
                 Console.WriteLine($"Enabled plugin: `{plugin}`");

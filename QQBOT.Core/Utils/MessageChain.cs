@@ -17,7 +17,22 @@ namespace QQBOT.Core.Utils
 
         public static bool BeginWith(this IMessageBase[] message, string prefix)
         {
-            return message.GetMessage().ToLower().StartsWith(prefix.ToLower());
+            var m = message.GetMessage().ToLower();
+            var p = prefix.ToLower().ToLower();
+
+            if (m == p) return true;
+            if (p == "") return true;
+
+            if (m.StartsWith(p + ' ')) return true;
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (m.StartsWith(p + '\t')) return true;
+
+            return false;
+        }
+
+        public static string GetArguments(this IMessageBase[] message, string prefix)
+        {
+            return !message.BeginWith(prefix) ? null : message.GetMessage()[prefix.Length..].Trim();
         }
     }
 }

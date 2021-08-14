@@ -9,12 +9,12 @@ namespace QQBOT.Core.Plugin.Core
     [MiraiPluginDisabled]
     public class UnHandledMessage : PluginBase
     {
-        protected override Task FriendMessageHandler(MiraiHttpSession session, IFriendMessageEventArgs e)
+        protected override Task FriendMessageHandler(MiraiHttpSession session, IFriendInfo sender, string message)
         {
             return Task.CompletedTask;
         }
 
-        protected override Task GroupMessageHandler(MiraiHttpSession session, IGroupMessageEventArgs e)
+        protected override Task GroupMessageHandler(MiraiHttpSession session, IGroupMemberInfo sender, string message)
         {
             return Task.CompletedTask;
         }
