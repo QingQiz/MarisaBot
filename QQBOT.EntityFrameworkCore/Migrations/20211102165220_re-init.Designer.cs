@@ -10,8 +10,8 @@ using QQBOT.EntityFrameworkCore;
 namespace QQBOT.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20210711141544_Init")]
-    partial class Init
+    [Migration("20211102165220_re-init")]
+    partial class reinit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,15 +27,8 @@ namespace QQBOT.EntityFrameworkCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Duration")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("EventType")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GroupId")
                         .HasMaxLength(12)
@@ -50,7 +43,7 @@ namespace QQBOT.EntityFrameworkCore.Migrations
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserAlias")

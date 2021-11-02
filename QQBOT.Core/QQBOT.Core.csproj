@@ -7,14 +7,13 @@
   </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Audit.NET" Version="17.0.8" />
+      <PackageReference Include="Flurl.Http" Version="3.2.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.7">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.7" />
-      <PackageReference Include="Mirai-CSharp" Version="1.0.2.1" />
       <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     </ItemGroup>
 

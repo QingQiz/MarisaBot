@@ -39,19 +39,9 @@ namespace QQBOT.EntityFrameworkCore.Entity.Audit
         public string UserAlias { get; set; }
 
         /// <summary>
-        ///  消息ID
-        /// </summary>
-        public string MessageId { get; set; }
-
-        /// <summary>
         ///  涉及的消息内容
         /// </summary>
         public string Message { get; set; }
-        
-        /// <summary>
-        /// 消息被哪个插件处理
-        /// </summary>
-        public string HandledBy { get; set; }
     }
 
     [Table("AuditLog")]
@@ -59,12 +49,8 @@ namespace QQBOT.EntityFrameworkCore.Entity.Audit
     {
         [Key] public Guid EventId { get; set; }
 
-        [MaxLength(40)] public string EventType { get; set; }
+        public string EventType { get; set; }
 
-        public DateTime StartDate { get; set; }
-
-        public DateTime? EndDate { get; set; }
-
-        public int Duration { get; set; }
+        public DateTime Time { get; set; }
     }
 }

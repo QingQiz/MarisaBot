@@ -25,15 +25,8 @@ namespace QQBOT.EntityFrameworkCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Duration")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("EventType")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GroupId")
                         .HasMaxLength(12)
@@ -45,16 +38,10 @@ namespace QQBOT.EntityFrameworkCore.Migrations
                     b.Property<string>("GroupPermission")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("HandledBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MessageId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserAlias")
@@ -70,22 +57,6 @@ namespace QQBOT.EntityFrameworkCore.Migrations
                     b.HasKey("EventId");
 
                     b.ToTable("AuditLog");
-                });
-
-            modelBuilder.Entity("QQBOT.EntityFrameworkCore.Entity.Common.QMessage", b =>
-                {
-                    b.Property<string>("MessageId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MessageId");
-
-                    b.ToTable("Message");
                 });
 #pragma warning restore 612, 618
         }
