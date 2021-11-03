@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace QQBOT.Core.MiraiHttp.Entity
 {
@@ -7,6 +10,11 @@ namespace QQBOT.Core.MiraiHttp.Entity
     {
 
         public List<MessageData> Messages = new();
+
+        public MessageChain(IEnumerable<MessageData> messages)
+        {
+            Messages = messages.ToList();
+        }
 
         public MessageChain(IEnumerable<dynamic> data)
         {
@@ -21,21 +29,47 @@ namespace QQBOT.Core.MiraiHttp.Entity
                 switch (t)
                 {
                     case MessageType.Source:
-                        Messages.Add(new SourceMessage(m.id, m.time) {Type = t});
+                        Messages.Add(new SourceMessage(m.id, m.time));
                         break;
                     case MessageType.Plain:
-                        Messages.Add(new PlainMessage(m.text) {Type = t});
+                        Messages.Add(new PlainMessage(m.text));
                         break;
                     default:
                         continue;
                 }
             }
         }
+
+        public string PlainText => string.Join(' ',
+            Messages.Where(m => m.Type == MessageType.Plain).Select(m => (m as PlainMessage)?.Text));
     }
 
     public class MessageData
     {
         public MessageType Type;
+
+        public object ConvertToObject()
+        {
+            switch (Type)
+            {
+                case MessageType.Plain:
+                    return new
+                    {
+                        type = "Plain",
+                        text = (this as PlainMessage)!.Text
+                    };
+                case MessageType.At:
+                    return new
+                    {
+                        type    = "At",
+                        target  = (this as AtMessage)!.Target,
+                        display = (this as AtMessage)!.Display
+                    };
+                        
+                default:
+                    throw new NotImplementedException($"Converter for type {Type}Message is not implemented");
+            }
+        }
     }
 
     public class SourceMessage : MessageData
@@ -47,6 +81,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
         {
             Id   = id;
             Time = time;
+            Type = MessageType.Source;
         }
     }
 
@@ -76,6 +111,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
     {
         public PlainMessage(string text)
         {
+            Type = MessageType.Plain;
             Text = text;
         }
         public string Text;
@@ -104,6 +140,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public string Name;
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum MessageType
     {
         Source, Quote, At, AtAll, Face, Plain, Image, FlashImage, Voice, Xml, Json, App, Poke, Dice, MusicShare, Forward, File, MiraiCode

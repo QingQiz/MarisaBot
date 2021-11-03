@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Configuration.Internal;
-using System.Threading;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
@@ -18,7 +16,6 @@ namespace QQBOT.Core.MiraiHttp
         private readonly string _authKey;
 
         private string _session;
-        private readonly BotDbContext _dbContext = new();
         
         public delegate Task MessageHandler(MiraiHttpSession session, Message message);
         public event MessageHandler OnFriendMessage;
@@ -101,6 +98,8 @@ namespace QQBOT.Core.MiraiHttp
                         MessageChain = new MessageChain(m.messageChain)
                     };
 
+                    var handler = OnFriendMessage;
+
                     switch (m.type)
                     {
                         case "FriendMessage":
@@ -111,7 +110,7 @@ namespace QQBOT.Core.MiraiHttp
                             log.UserName = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
-                            OnFriendMessage?.Invoke(this, message);
+                            handler = OnFriendMessage;
                             break;
                         case "StrangerMessage":
                             message.GroupInfo = null;
@@ -121,7 +120,7 @@ namespace QQBOT.Core.MiraiHttp
                             log.UserName = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
-                            OnStrangerMessage?.Invoke(this, message);
+                            handler = OnStrangerMessage;
                             break;
                         case "GroupMessage":
                             message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
@@ -135,7 +134,7 @@ namespace QQBOT.Core.MiraiHttp
                             log.GroupName = message.GroupInfo?.Name;
                             log.GroupId = message.GroupInfo?.Id.ToString();
                             
-                            OnGroupMessage?.Invoke(this, message);
+                            handler = OnGroupMessage;
                             break;
                         case "TempMessage":
                             message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
@@ -148,17 +147,31 @@ namespace QQBOT.Core.MiraiHttp
                             log.UserAlias = message.Sender.Remark;
                             log.GroupName = message.GroupInfo?.Name;
                             log.GroupId = message.GroupInfo?.Id.ToString();
- 
-                            OnTempMessage?.Invoke(this, message);
+
+                            handler = OnTempMessage;
                             break;
                     }
 
-                    await _dbContext.Logs.AddAsync(log);
-                    await _dbContext.SaveChangesAsync();
+                    // no await
+                    var _ = Task.Run(async () =>
+                    {
+                        await using var dbContext = new BotDbContext();
+                        await dbContext.Logs.AddAsync(log);
+                        await dbContext.SaveChangesAsync();
 
-                    Console.WriteLine(log.Message.Length < 120
-                        ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
-                        : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
+                        Console.WriteLine(log.Message.Length < 120
+                            ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
+                            : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
+
+                        try
+                        {
+                            handler?.Invoke(this, message);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.ToString());
+                        }
+                    });
                 }
             }
         }

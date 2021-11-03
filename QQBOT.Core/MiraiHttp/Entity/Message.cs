@@ -7,5 +7,12 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public MessageSenderInfo? Sender;
 
         public MessageChain? MessageChain;
+        
+        public Message() {}
+
+        public Message(MessageChain chain)
+        {
+            MessageChain = chain;
+        }
     }
 }
