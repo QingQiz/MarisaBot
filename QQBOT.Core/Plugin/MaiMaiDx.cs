@@ -95,7 +95,7 @@ namespace QQBOT.Core.Plugin
 
             var source = (message.MessageChain.Messages.First(m => m.Type == MessageType.Source) as SourceMessage)!.Id;
 
-            await session.SendFriendMessage(new Message(mc), message.GroupInfo!.Id, source);
+            await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
         }
     }
 }
