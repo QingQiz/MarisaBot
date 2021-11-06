@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>QQBOT.Core</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
     <ItemGroup>
@@ -19,5 +20,15 @@
 
     <ItemGroup>
         <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Plugin\PluginResource\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Plugin\PluginResource\MaiMaiDx" />
     </ItemGroup>
 </Project>

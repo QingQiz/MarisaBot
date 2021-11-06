@@ -15,6 +15,13 @@ namespace QQBOT.Core.Util
                 select msg[prefix.Length..].Trim()).FirstOrDefault();
         }
 
+        public static string TrimStart(this string msg, string prefix)
+        {
+            msg = msg.Trim();
+
+            return msg.StartsWith(prefix) ? msg[prefix.Length..] : null;
+        }
+
         public static IEnumerable<(string Prefix, int Index)> CheckPrefix(this string msg, IEnumerable<string> prefixes)
         {
             return prefixes.Select((p, i) => (p, i))

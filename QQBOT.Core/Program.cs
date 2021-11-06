@@ -32,7 +32,19 @@ namespace QQBOT.Core
             Console.WriteLine("---------------------------------------------------------------");
             Console.WriteLine("-- Running ");
 
-            await session.Run();
+            while (true)
+            {
+                try
+                {
+                    await session.Run();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("Re-Run");
+                }
+            }
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

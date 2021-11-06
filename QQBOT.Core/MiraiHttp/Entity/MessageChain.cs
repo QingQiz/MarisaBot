@@ -65,7 +65,12 @@ namespace QQBOT.Core.MiraiHttp.Entity
                         target  = (this as AtMessage)!.Target,
                         display = (this as AtMessage)!.Display
                     };
-                        
+                case MessageType.Image:
+                    return new
+                    {
+                        type   = "Image",
+                        base64 = (this as ImageMessage)!.Base64
+                    };
                 default:
                     throw new NotImplementedException($"Converter for type {Type}Message is not implemented");
             }
@@ -123,6 +128,15 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public string Url;
         public string Path;
         public string Base64;
+
+        public static ImageMessage FromBase64(string base64)
+        {
+            return new ImageMessage
+            {
+                Type   = MessageType.Image,
+                Base64 = base64
+            };
+        }
     }
 
     public class Voice : MessageData
