@@ -219,7 +219,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
             var num = r switch
             {
-                < 8000 => r / 1000,
+                < 8000 => r / 1000 + 1,
                 < 8500 => 9,
                 _      => 10L
             };
@@ -229,16 +229,11 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             ratingCard = ratingCard.Resize(2);
             using (var g = Graphics.FromImage(ratingCard))
             {
-                var ra = r.ToString();
-
-                if (ra.Length < 5)
-                {
-                    ra = "0" + ra;
-                }
+                var ra = r.ToString().PadLeft(5, ' ');
 
                 for (var i = ra.Length - 1; i >= 0; i--)
                 {
-                    if (i == 0 && ra[i] == '0') break;
+                    if (ra[i] == ' ') break;
                     g.DrawImage(ResourceManager.GetImage($"num_{ra[i]}.png"), 170 + 29 * i, 20);
                 }
             }
