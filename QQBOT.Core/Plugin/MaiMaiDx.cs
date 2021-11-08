@@ -157,8 +157,8 @@ namespace QQBOT.Core.Plugin
         private async Task<MessageChain> Handler(string msg, MessageSenderInfo sender)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
-            //                           0       1        2      3       4      5       6      7
-            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id"};
+            //                           0       1        2      3       4      5       6      7     8       9     10
+            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "帮助", "help", "h"};
 
             msg = msg.TrimStart(commandPrefix);
 
@@ -214,6 +214,10 @@ namespace QQBOT.Core.Plugin
                             return GetSongInfo(id);
                         }
                         return MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
+                    case 8:
+                    case 9:
+                    case 10:
+                        return MessageChain.FromPlainText($"命令格式：{string.Join('/', commandPrefix)}    {string.Join('/', subCommand)}");
                 }
             }
 
