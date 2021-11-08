@@ -16,6 +16,14 @@ namespace QQBOT.Core.MiraiHttp.Entity
             Messages = messages.ToList();
         }
 
+        public static MessageChain FromPlainText(string text)
+        {
+            return new MessageChain(new[]
+            {
+                new PlainMessage(text)
+            });
+        }
+
         public MessageChain(IEnumerable<dynamic> data)
         {
             foreach (var m in data)

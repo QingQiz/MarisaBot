@@ -7,7 +7,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 {
     public class ResourceManager
     {
-        private const string ResourcePath = "Plugin/PluginResource/MaiMaiDx";
+        public const string ResourcePath = "Plugin/PluginResource/MaiMaiDx";
 
         private static readonly Dictionary<string, Bitmap> ImgCache = new();
         private static readonly Dictionary<long, Bitmap> CoverCache = new();

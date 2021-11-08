@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
@@ -82,9 +84,8 @@ namespace QQBOT.Core.MiraiHttp
                     }).GetJsonAsync();
                 CheckResponse(msg);
 
-                foreach (var m in msg.data)
+                var tasks = ((List<dynamic>)msg.data).Select(async m =>
                 {
-
                     var log = new AuditLog
                     {
                         EventId   = Guid.NewGuid(),
@@ -152,27 +153,18 @@ namespace QQBOT.Core.MiraiHttp
                             break;
                     }
 
-                    // no await
-                    var _ = Task.Run(async () =>
-                    {
-                        await using var dbContext = new BotDbContext();
-                        await dbContext.Logs.AddAsync(log);
-                        await dbContext.SaveChangesAsync();
 
-                        Console.WriteLine(log.Message.Length < 120
-                            ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
-                            : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
+                    await using var dbContext = new BotDbContext();
+                    await dbContext.Logs.AddAsync(log);
+                    await dbContext.SaveChangesAsync();
 
-                        try
-                        {
-                            handler?.Invoke(this, message);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.ToString());
-                        }
-                    });
-                }
+                    Console.WriteLine(log.Message.Length < 120
+                        ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
+                        : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
+
+                    handler?.Invoke(this, message);
+                });
+                await Task.WhenAll(tasks);
             }
         }
     }
