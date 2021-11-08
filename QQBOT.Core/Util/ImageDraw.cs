@@ -152,5 +152,31 @@ namespace QQBOT.Core.Util
         {
             return (Bitmap)c.Clone();
         }
+
+        public static Bitmap GetStringCard(string text, int fontSize, Color fontColor, Color bgColor, int width, int height, int pl=30, bool center=false, bool underLine=true)
+        {
+            var background = new Bitmap(width, height);
+
+            using var g = Graphics.FromImage(background);
+            using var f = new Font("Consolas", fontSize);
+
+            g.Clear(bgColor);
+
+            var x = pl;
+
+            if (center)
+            {
+                x = (int)((width - g.MeasureString(text, f).Width) / 2);
+            }
+            
+            g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, f, new SolidBrush(fontColor), x, (height - f.Height) / 2);
+
+            if (underLine)
+            {
+                g.DrawLine(new Pen(Color.Gray, 2), 0, height, width, height);
+            }
+
+            return background;
+        }
     }
 }

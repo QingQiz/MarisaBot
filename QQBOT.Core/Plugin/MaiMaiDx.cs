@@ -65,6 +65,11 @@ namespace QQBOT.Core.Plugin
                 {
                     _songAlias = new Dictionary<string, string>();
 
+                    foreach (var song in SongList)
+                    {
+                        _songAlias[song.Title] = song.Title;
+                    }
+
                     foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.csv"))
                     {
                         var titles = line
@@ -94,8 +99,19 @@ namespace QQBOT.Core.Plugin
                 return MessageChain.FromPlainText($"“歌曲《{songTitle}》在当前版本的舞萌中已被删除”");
             }
 
-            
-            return MessageChain.FromPlainText(searchResult.Title);
+            return MessageChain.FromBase64(searchResult.GetImage());
+        }
+
+        private MessageChain GetSongInfo(long songId)
+        {
+            var searchResult = SongList.FirstOrDefault(song => song.Id == songId);
+
+            if (searchResult == null)
+            {
+                return MessageChain.FromPlainText($"“未找到 ID 为 {songId} 的歌曲”");
+            }
+
+            return MessageChain.FromBase64(searchResult.GetImage());
         }
 
         private MessageChain SearchSong(string name)
@@ -105,23 +121,31 @@ namespace QQBOT.Core.Plugin
                 return MessageChain.FromPlainText("啥？");
             }
 
+            List<MaiMaiSong> result;
             if (SongAlias.ContainsKey(name))
             {
-                return GetSongInfo(SongAlias[name]);
+                result = SongList
+                    .Where(song => string.Equals(song.Title, SongAlias[name], StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
-
-            var result = SongAlias.Keys
-                .Where(k => k.Contains(name, StringComparison.OrdinalIgnoreCase))
-                .Select(k => SongAlias[k])
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            else
+            {
+                result = SongAlias.Keys
+                    .Where(k => k.Contains(name, StringComparison.OrdinalIgnoreCase))
+                    .Select(k => SongAlias[k])
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Where(s => SongList.Any(song => string.Equals(song.Title, s, StringComparison.OrdinalIgnoreCase)))
+                    .Select(s =>
+                        SongList.First(song => string.Equals(song.Title, s, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+            }
 
             return result.Count switch
             {
                 >= 10 => MessageChain.FromPlainText($"过多的结果（{result.Count}个）"),
                 0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => GetSongInfo(result[0]),
-                _ => MessageChain.FromPlainText(string.Join('\n', result.Select((song, i) => $"[{i + 1}] -> {song}")))
+                1 => GetSongInfo(result[0].Id),
+                _ => MessageChain.FromPlainText(string.Join('\n', result.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
             };
         }
 
@@ -133,8 +157,8 @@ namespace QQBOT.Core.Plugin
         private async Task<MessageChain> Handler(string msg, MessageSenderInfo sender)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
-            //                           0       1        2      3       4      5       6
-            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌"};
+            //                           0       1        2      3       4      5       6      7
+            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id"};
 
             msg = msg.TrimStart(commandPrefix);
 
@@ -183,6 +207,13 @@ namespace QQBOT.Core.Plugin
                     case 6:
                         var name = msg.TrimStart(prefix).Trim();
                         return SearchSong(name);
+                    case 7:
+                        var  last = msg.TrimStart(prefix).Trim();
+                        if (long.TryParse(last, out var id))
+                        {
+                            return GetSongInfo(id);
+                        }
+                        return MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
                 }
             }
 

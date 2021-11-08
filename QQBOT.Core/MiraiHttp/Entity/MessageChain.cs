@@ -24,6 +24,14 @@ namespace QQBOT.Core.MiraiHttp.Entity
             });
         }
 
+        public static MessageChain FromBase64(string b64)
+        {
+            return new MessageChain(new[]
+            {
+                ImageMessage.FromBase64(b64)
+            });
+        }
+
         public MessageChain(IEnumerable<dynamic> data)
         {
             foreach (var m in data)
