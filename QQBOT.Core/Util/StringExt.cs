@@ -19,7 +19,7 @@ namespace QQBOT.Core.Util
         {
             msg = msg.Trim();
 
-            return msg.StartsWith(prefix) ? msg[prefix.Length..] : null;
+            return msg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? msg[prefix.Length..] : null;
         }
 
         public static IEnumerable<(string Prefix, int Index)> CheckPrefix(this string msg, IEnumerable<string> prefixes)

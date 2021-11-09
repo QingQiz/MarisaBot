@@ -70,11 +70,11 @@ namespace QQBOT.Core.Plugin
                         _songAlias[song.Title] = song.Title;
                     }
 
-                    foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.csv"))
+                    foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv"))
                     {
                         var titles = line
                             .Split('\t')
-                            .Select(x => x.Trim())
+                            .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
                             .Where(x => !string.IsNullOrWhiteSpace(x))
                             .ToList();
 
