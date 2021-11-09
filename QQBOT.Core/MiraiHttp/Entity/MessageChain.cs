@@ -50,6 +50,9 @@ namespace QQBOT.Core.MiraiHttp.Entity
                     case MessageType.Plain:
                         Messages.Add(new PlainMessage(m.text));
                         break;
+                    case MessageType.At:
+                        Messages.Add(new AtMessage(m.target, m.display));
+                        break;
                     default:
                         continue;
                 }
@@ -120,6 +123,13 @@ namespace QQBOT.Core.MiraiHttp.Entity
     {
         public long Target;
         public string Display;
+
+        public AtMessage(long target, string display)
+        {
+            Type    = MessageType.At;
+            Target  = target;
+            Display = display;
+        }
     }
 
     public class FaceMessage : MessageData

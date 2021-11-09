@@ -1,7 +1,4 @@
-﻿using System;
-using System.Configuration;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using QQBOT.Core.Attribute;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;

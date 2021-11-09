@@ -14,16 +14,16 @@ namespace QQBOT.Core.MiraiHttp
     public partial class MiraiHttpSession
     {
         private readonly string _serverAddress;
-        private readonly string _qq;
+        private readonly long _qq;
         private readonly string _authKey;
 
         private string _session;
         
-        public delegate Task MessageHandler(MiraiHttpSession session, Message message);
-        public event MessageHandler OnFriendMessage;
-        public event MessageHandler OnGroupMessage;
-        public event MessageHandler OnTempMessage;
-        public event MessageHandler OnStrangerMessage;
+        private delegate Task MessageHandler(MiraiHttpSession session, Message message);
+        private event MessageHandler OnFriendMessage;
+        private event MessageHandler OnGroupMessage;
+        private event MessageHandler OnTempMessage;
+        private event MessageHandler OnStrangerMessage;
 
         private void CheckResponse(dynamic response)
         {
@@ -33,7 +33,9 @@ namespace QQBOT.Core.MiraiHttp
             }
         }
 
-        public MiraiHttpSession(string serverAddress, string qq, string authKey)
+        public long Id => _qq;
+
+        public MiraiHttpSession(string serverAddress, long qq, string authKey)
         {
             _serverAddress = serverAddress;
             _qq            = qq;
@@ -48,7 +50,7 @@ namespace QQBOT.Core.MiraiHttp
             OnStrangerMessage += plugin.StrangerMessageHandler;
         }
 
-        public async Task Run()
+        public async Task Init()
         {
             // get session
             var login = await (await $"{_serverAddress}/verify".PostJsonAsync(new
@@ -63,8 +65,10 @@ namespace QQBOT.Core.MiraiHttp
             CheckResponse(await
                 (await $"{_serverAddress}/bind".PostJsonAsync(new { sessionKey = _session, qq = _qq }))
             .GetJsonAsync());
+        }
 
-
+        public async Task Run()
+        {
             while (true)
             {
                 var msgCnt = await $"{_serverAddress}/countMessage".SetQueryParam("sessionKey", _session).GetJsonAsync();
@@ -166,6 +170,7 @@ namespace QQBOT.Core.MiraiHttp
                 });
                 await Task.WhenAll(tasks);
             }
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

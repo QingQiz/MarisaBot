@@ -11,7 +11,7 @@ namespace QQBOT.Core
     {
         private static async Task Main(string[] args)
         {
-            var session = new MiraiHttpSession(args[0], args[1], args[2]);
+            var session = new MiraiHttpSession(args[0], long.Parse(args[1]), args[2]);
 
             // add plugins to session
             var plugins = AppDomain.CurrentDomain.GetAssemblies()
@@ -30,18 +30,19 @@ namespace QQBOT.Core
                 session.AddPlugin((PluginBase)Activator.CreateInstance(plugin));
             }
             Console.WriteLine("---------------------------------------------------------------");
-            Console.WriteLine("-- Running ");
 
             while (true)
             {
                 try
                 {
+                    Console.WriteLine("-- Init...");
+                    await session.Init();
+                    Console.WriteLine("-- Running ");
                     await session.Run();
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
-                    Console.WriteLine("Re-Run");
                 }
             }
             // ReSharper disable once FunctionNeverReturns
