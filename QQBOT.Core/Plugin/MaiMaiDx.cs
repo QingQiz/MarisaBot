@@ -33,7 +33,7 @@ namespace QQBOT.Core.Plugin
         #region Search
 
         private List<MaiMaiSong> _songList;
-        private Dictionary<string, string> _songAlias;
+        private Dictionary<string, List<string>> _songAlias;
 
         private List<MaiMaiSong> SongList
         {
@@ -57,17 +57,21 @@ namespace QQBOT.Core.Plugin
             }
         }
 
-        private Dictionary<string, string> SongAlias
+        private Dictionary<string, List<string>> SongAlias
         {
             get
             {
                 if (_songAlias == null)
                 {
-                    _songAlias = new Dictionary<string, string>();
+                    _songAlias = new Dictionary<string, List<string>>();
 
                     foreach (var song in SongList)
                     {
-                        _songAlias[song.Title] = song.Title;
+                        if (!_songAlias.ContainsKey(song.Title))
+                        {
+                            _songAlias[song.Title] = new List<string>();
+                        }
+                        _songAlias[song.Title].Add(song.Title);
                     }
 
                     foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv"))
@@ -80,7 +84,12 @@ namespace QQBOT.Core.Plugin
 
                         foreach (var title in titles)
                         {
-                            _songAlias[title] = titles[0];
+                            if (!_songAlias.ContainsKey(title))
+                            {
+                                _songAlias[title] = new List<string>();
+                            }
+
+                            _songAlias[title].Add(titles[0]);
                         }
                     }
                 }
@@ -101,48 +110,36 @@ namespace QQBOT.Core.Plugin
             return MessageChain.FromBase64(searchResult.GetImage());
         }
 
-        private List<MaiMaiSong> SearchSong(string name)
+        private List<MaiMaiSong> SearchSong(string alias)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(alias))
             {
                 return null;
             }
 
-            List<MaiMaiSong> result;
-            if (SongAlias.ContainsKey(name))
-            {
-                result = SongList
-                    .Where(song => string.Equals(song.Title, SongAlias[name], StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-            else
-            {
-                result = SongAlias.Keys
-                    .Where(k => k.Contains(name, StringComparison.OrdinalIgnoreCase))
-                    .Select(k => SongAlias[k])
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .Where(s => SongList.Any(song => string.Equals(song.Title, s, StringComparison.OrdinalIgnoreCase)))
-                    .Select(s =>
-                        SongList.First(song => string.Equals(song.Title, s, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-            }
-
-            return result;
+            return SongAlias.Keys
+                .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(songNameAlias => SongAlias[songNameAlias]/*song name*/)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Where(songName => SongList.Any(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
+                .Select(songName =>
+                    SongList.First(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
         }
 
-        private MessageChain GetSearchResult(List<MaiMaiSong> song)
+        private MessageChain GetSearchResult(List<MaiMaiSong> songs)
         {
-            if (song == null)
+            if (songs == null)
             {
                 return MessageChain.FromPlainText("啥？");
             }
 
-            return song.Count switch
+            return songs.Count switch
             {
-                >= 10 => MessageChain.FromPlainText($"过多的结果（{song.Count}个）"),
+                >= 10 => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
                 0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => MessageChain.FromBase64(song[0].GetImage()),
-                _ => MessageChain.FromPlainText(string.Join('\n', song.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
+                1 => MessageChain.FromBase64(songs[0].GetImage()),
+                _ => MessageChain.FromPlainText(string.Join('\n', songs.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
             };
         }
 

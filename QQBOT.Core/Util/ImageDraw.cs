@@ -100,6 +100,7 @@ namespace QQBOT.Core.Util
             bm.UnlockBits(srcData);
 
             var count = width * height - dropped;
+            count = count == 0 ? 1 : count;
             var avgR = (int)(totals[2] / count);
             var avgG = (int)(totals[1] / count);
             var avgB = (int)(totals[0] / count);
