@@ -206,7 +206,7 @@ namespace QQBOT.Core.Plugin
                         }
                         catch (FlurlHttpException e) when (e.StatusCode == 403)
                         {
-                            return MessageChain.FromPlainText("“403 forbidden");
+                            return MessageChain.FromPlainText("“403 forbidden”");
                         }
                         catch (FlurlHttpException e)
                         {

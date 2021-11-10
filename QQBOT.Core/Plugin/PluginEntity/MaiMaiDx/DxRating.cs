@@ -112,7 +112,9 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 // 达成率小数部分
                 using (var font = new Font("Consolas", 27))
                 {
-                    g.DrawString("." + score.Achievement.ToString(CultureInfo.InvariantCulture).Split('.')[1], font, fontColor, 105, 62);
+                    g.DrawString(
+                        "." + score.Achievement.ToString(CultureInfo.InvariantCulture).Split('.')[1].PadRight(4, '0'),
+                        font, fontColor, 105, 62);
                 }
 
                 var rank = ResourceManager.GetImage($"rank_{score.Rank.ToLower()}.png");
