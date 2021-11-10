@@ -89,19 +89,6 @@ namespace QQBOT.Core.Plugin
             }
         }
 
-        private MessageChain GetSongInfo(string songTitle)
-        {
-            var searchResult = SongList.FirstOrDefault(song =>
-                string.Equals(song.Title, songTitle, StringComparison.OrdinalIgnoreCase));
-
-            if (searchResult == null)
-            {
-                return MessageChain.FromPlainText($"“歌曲《{songTitle}》在当前版本的舞萌中已被删除”");
-            }
-
-            return MessageChain.FromBase64(searchResult.GetImage());
-        }
-
         private MessageChain GetSongInfo(long songId)
         {
             var searchResult = SongList.FirstOrDefault(song => song.Id == songId);
@@ -114,11 +101,11 @@ namespace QQBOT.Core.Plugin
             return MessageChain.FromBase64(searchResult.GetImage());
         }
 
-        private MessageChain SearchSong(string name)
+        private List<MaiMaiSong> SearchSong(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return MessageChain.FromPlainText("啥？");
+                return null;
             }
 
             List<MaiMaiSong> result;
@@ -140,25 +127,50 @@ namespace QQBOT.Core.Plugin
                     .ToList();
             }
 
-            return result.Count switch
+            return result;
+        }
+
+        private MessageChain GetSearchResult(List<MaiMaiSong> song)
+        {
+            if (song == null)
             {
-                >= 10 => MessageChain.FromPlainText($"过多的结果（{result.Count}个）"),
+                return MessageChain.FromPlainText("啥？");
+            }
+
+            return song.Count switch
+            {
+                >= 10 => MessageChain.FromPlainText($"过多的结果（{song.Count}个）"),
                 0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => GetSongInfo(result[0].Id),
-                _ => MessageChain.FromPlainText(string.Join('\n', result.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
+                1 => MessageChain.FromBase64(song[0].GetImage()),
+                _ => MessageChain.FromPlainText(string.Join('\n', song.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
+            };
+        }
+
+        private MessageChain GetSearchResultS(List<MaiMaiSong> song)
+        {
+            if (song == null)
+            {
+                return MessageChain.FromPlainText("啥？");
+            }
+
+            return song.Count switch
+            {
+                >= 30 => MessageChain.FromPlainText($"过多的结果（{song.Count}个）"),
+                0 => MessageChain.FromPlainText("“查无此歌”"),
+                1 => MessageChain.FromPlainText($"Title: {song[0].Title}\nArtist: {song[0].Info.Artist}"),
+                _ => MessageChain.FromPlainText(string.Join('\n', song.Select(s => $"[T:{s.Type}, ID:{s.Id}] -> {s.Title}")))
             };
         }
 
         #endregion
         
-
         #region Message Handler
 
         private async Task<MessageChain> Handler(string msg, MessageSenderInfo sender)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
-            //                           0       1        2      3       4      5       6      7
-            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id"};
+            //                           0       1        2      3       4      5       6      7      8
+            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name"};
 
             msg = msg.TrimStart(commandPrefix);
 
@@ -205,8 +217,11 @@ namespace QQBOT.Core.Plugin
                     case 4:
                     case 5:
                     case 6:
-                        var name = msg.TrimStart(prefix).Trim();
-                        return SearchSong(name);
+                    {
+                        var name   = msg.TrimStart(prefix).Trim();
+                        var search = SearchSong(name);
+                        return GetSearchResult(search);
+                    }
                     case 7:
                         var  last = msg.TrimStart(prefix).Trim();
                         if (long.TryParse(last, out var id))
@@ -214,6 +229,12 @@ namespace QQBOT.Core.Plugin
                             return GetSongInfo(id);
                         }
                         return MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
+                    case 8:
+                    {
+                        var name   = msg.TrimStart(prefix).Trim();
+                        var search = SearchSong(name);
+                        return GetSearchResultS(search);
+                    }
                 }
             }
 
