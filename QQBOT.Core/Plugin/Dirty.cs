@@ -19,6 +19,7 @@ namespace QQBOT.Core.Plugin
                 .Trim()
                 .Replace("\r\n", "\n")
                 .Split('\n')
+                .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
         }
         
