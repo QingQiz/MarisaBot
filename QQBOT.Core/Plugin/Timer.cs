@@ -72,6 +72,8 @@ namespace QQBOT.Core.Plugin
                         new Message(MessageChain.FromPlainText($"Timer `{last}` already ended")), uid);
                 }
             }
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }
