@@ -59,9 +59,6 @@ namespace QQBOT.Core.Util
         {
             var width = bm.Width;
             var height = bm.Height;
-            const int minDiversion = 15;
-            // keep track of dropped pixels
-            var dropped = 0;
             long[] totals = { 0, 0, 0 };
             // cutting corners, will fail on anything else but 32 and 24 bit images
             var bppModifier = bm.PixelFormat == PixelFormat.Format24bppRgb ? 3 : 4;
@@ -82,25 +79,16 @@ namespace QQBOT.Core.Util
                         int red = p![idx  + 2];
                         int green = p[idx + 1];
                         int blue = p[idx];
-                        if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
-                            Math.Abs(green - blue)  > minDiversion)
-                        {
-                            totals[2] += red;
-                            totals[1] += green;
-                            totals[0] += blue;
-                        }
-                        else
-                        {
-                            dropped++;
-                        }
+                        totals[2] += red;
+                        totals[1] += green;
+                        totals[0] += blue;
                     }
                 }
             }
 
             bm.UnlockBits(srcData);
 
-            var count = width * height - dropped;
-            count = count == 0 ? 1 : count;
+            var count = width * height;
             var avgR = (int)(totals[2] / count);
             var avgG = (int)(totals[1] / count);
             var avgB = (int)(totals[0] / count);
