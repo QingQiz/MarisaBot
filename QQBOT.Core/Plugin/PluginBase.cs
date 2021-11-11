@@ -28,5 +28,10 @@ namespace QQBOT.Core.Plugin
         {
             return Task.CompletedTask;
         }
+
+        public virtual Task EventHandler(MiraiHttpSession session, dynamic data)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

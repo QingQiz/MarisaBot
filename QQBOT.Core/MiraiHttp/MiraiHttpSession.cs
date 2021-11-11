@@ -20,10 +20,12 @@ namespace QQBOT.Core.MiraiHttp
         private string _session;
         
         private delegate Task MessageHandler(MiraiHttpSession session, Message message);
+        private delegate Task EventHandler(MiraiHttpSession session, dynamic message);
         private event MessageHandler OnFriendMessage;
         private event MessageHandler OnGroupMessage;
         private event MessageHandler OnTempMessage;
         private event MessageHandler OnStrangerMessage;
+        private event EventHandler OnEvent;
 
         private void CheckResponse(dynamic response)
         {
@@ -48,6 +50,7 @@ namespace QQBOT.Core.MiraiHttp
             OnGroupMessage    += plugin.GroupMessageHandler;
             OnTempMessage     += plugin.TempMessageHandler;
             OnStrangerMessage += plugin.StrangerMessageHandler;
+            OnEvent           += plugin.EventHandler;
         }
 
         public async Task Init()
@@ -88,7 +91,7 @@ namespace QQBOT.Core.MiraiHttp
                     }).GetJsonAsync();
                 CheckResponse(msg);
 
-                var tasks = ((List<dynamic>)msg.data).Select(async m =>
+                var tasks = ((List<dynamic>)msg.data).Where(m => m.type.Contains("Message")).Select(async m =>
                 {
                     var log = new AuditLog
                     {
@@ -168,6 +171,29 @@ namespace QQBOT.Core.MiraiHttp
 
                     handler?.Invoke(this, message);
                 });
+                await Task.WhenAll(tasks);
+
+                tasks = ((List<dynamic>)msg.data).Where(m => m.type.Contains("Event")).Select(async m =>
+                {
+                    var log = new AuditLog
+                    {
+                        EventId   = Guid.NewGuid(),
+                        EventType = m.type,
+                        Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m),
+                        Time      = DateTime.Now,
+                    };
+
+                    await using var dbContext = new BotDbContext();
+                    await dbContext.Logs.AddAsync(log);
+                    await dbContext.SaveChangesAsync();
+
+                    Console.WriteLine(log.Message.Length < 120
+                        ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
+                        : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
+
+                    OnEvent?.Invoke(this, m);
+                });
+
                 await Task.WhenAll(tasks);
             }
             // ReSharper disable once FunctionNeverReturns
