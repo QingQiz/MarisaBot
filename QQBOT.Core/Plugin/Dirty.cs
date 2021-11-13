@@ -35,6 +35,8 @@ namespace QQBOT.Core.Plugin
                         {
                             await session.SendGroupMessage(new Message(new MessageChain(new[]
                             {
+                                (MessageData)new AtMessage(data.fromId),
+                                (MessageData)new PlainMessage(" "),
                                 (MessageData)new PlainMessage(word),
                             })), data.subject.id);
                         }

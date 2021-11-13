@@ -63,7 +63,7 @@ namespace QQBOT.Core.Plugin
                     await session.SendFriendMessage(
                         new Message(
                             MessageChain.FromPlainText(
-                                $"Timer `{last}` ended, duration: {time - update.TimeBegin:yyyy-MM-dd hh:mm:ss fff}")),
+                                $"Timer `{last}` ended, duration: {time - update.TimeBegin:dd\\.hh\\:mm\\:ss}")),
                         uid);
                 }
                 else

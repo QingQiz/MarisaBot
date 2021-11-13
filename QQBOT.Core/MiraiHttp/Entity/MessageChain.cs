@@ -124,7 +124,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public long Target;
         public string Display;
 
-        public AtMessage(long target, string display=null)
+        public AtMessage(long target, string display="")
         {
             Type    = MessageType.At;
             Target  = target;
