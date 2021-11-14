@@ -1,4 +1,6 @@
-﻿#nullable enable
+﻿using System.Linq;
+
+#nullable enable
 namespace QQBOT.Core.MiraiHttp.Entity
 {
     public class Message
@@ -14,5 +16,8 @@ namespace QQBOT.Core.MiraiHttp.Entity
         {
             MessageChain = chain;
         }
+
+        public SourceMessage Source =>
+            (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageType.Source) as SourceMessage)!;
     }
 }

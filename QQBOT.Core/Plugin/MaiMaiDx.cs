@@ -278,7 +278,7 @@ namespace QQBOT.Core.Plugin
 
             if (mc == null) return;
 
-            var source = (message.MessageChain!.Messages.First(m => m.Type == MessageType.Source) as SourceMessage)!.Id;
+            var source = message.Source.Id;
 
             await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
         }

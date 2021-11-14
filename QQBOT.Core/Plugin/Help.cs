@@ -42,9 +42,7 @@ namespace QQBOT.Core.Plugin
             if (message.MessageChain!.Messages.Any(m =>
                 m.Type == MessageType.At && (m as AtMessage)!.Target == session.Id))
             {
-                var source =
-                    (message.MessageChain!.Messages.First(m => m.Type == MessageType.Source) as SourceMessage)!.Id;
-
+                var source = message.Source.Id;
                 await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
             }
         }
