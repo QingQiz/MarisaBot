@@ -14,9 +14,11 @@ namespace QQBOT.Core.Plugin
         {
             string[] commandPrefix = { "help", "帮助", "h" };
 
-            msg = msg.TrimStart(commandPrefix).Trim();
+            msg = msg.TrimStart(commandPrefix);
 
-            if (string.IsNullOrEmpty(msg))
+            if (msg == null) return null;
+
+            if (string.IsNullOrEmpty(msg.Trim()))
             {
                 return MessageChain.FromPlainText("帮助见 https://github.com/QingQiz/QQBOT#%E5%8A%9F%E8%83%BD");
             }

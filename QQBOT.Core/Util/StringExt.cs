@@ -6,6 +6,11 @@ namespace QQBOT.Core.Util
 {
     public static class StringExt
     {
+        /// <summary>
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="prefixes"></param>
+        /// <returns>return null if trim nothing</returns>
         public static string TrimStart(this string msg, IEnumerable<string> prefixes)
         {
             msg = msg.Trim();
