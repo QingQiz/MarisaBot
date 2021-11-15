@@ -12,9 +12,9 @@ namespace QQBOT.Core.Plugin
     {
         private (string a, string b)? Parser(string msg)
         {
-            msg = msg.TrimEnd('?').TrimEnd('呢');
+            msg = msg.TrimEnd('?').TrimEnd('？').TrimEnd('呢');
 
-            var verb  = new[] {"吃", "买", "穿", "喝", "要", "是", "去", "选" };
+            var verb  = new[] {"吃", "买", "穿", "喝", "要", "是", "去", "选", "回", "写", "看", "打", "导", "拉", "开" };
 
             var prefix = msg.CheckPrefix(verb).ToList();
 
@@ -34,6 +34,10 @@ namespace QQBOT.Core.Plugin
             var a = p + match.Groups[1].Value;
             var b = match.Groups[2].Value;
 
+            if (b[0] == '不')
+            {
+                return (a, b);
+            }
             return b.TrimStart(verb) == null ? (a, p + b) : (a, b);
         }
 
