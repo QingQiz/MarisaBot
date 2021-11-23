@@ -127,7 +127,85 @@ namespace QQBOT.Core.Plugin
                 .ToList();
         }
 
-        private MessageChain GetSearchResult(List<MaiMaiSong> songs)
+        private List<MaiMaiSong> ListSongs(string param)
+        {
+            if (string.IsNullOrEmpty(param))
+            {
+                return SongList;
+            }
+
+            string[] subCommand =
+            //      0       1          2        3
+                { "base", "level", "charter", "bpm"};
+            var res = param.CheckPrefix(subCommand).ToList();
+
+            if (!res.Any()) return new List<MaiMaiSong>();
+
+            var (prefix, index) = res.First();
+
+            switch (index)
+            {
+                case 0: // base
+                {
+                    var param1 = param.TrimStart(prefix).Trim();
+
+                    if (param1.Contains('-'))
+                    {
+                        if (double.TryParse(param1.Split('-')[0], out var @base1) &&
+                            double.TryParse(param1.Split('-')[1], out var @base2))
+                        {
+                            return SongList.Where(s => s.Constants.Any(b => b >= base1 && b <= base2)).ToList();
+                        }
+                    }
+                    else
+                    {
+                        if (double.TryParse(param1, out var @base))
+                        {
+                            return SongList.Where(s => s.Constants.Contains(@base)).ToList();
+                        }
+                    }
+                    return new List<MaiMaiSong>();
+                }
+                case 1: // level
+                {
+                    var lv = param.TrimStart(prefix).Trim();
+                    return SongList.Where(s => s.Levels.Contains(lv)).ToList();
+                }
+                case 2: // charter
+                {
+                    var charter = param.TrimStart(prefix).Trim();
+                    return SongList
+                        .Where(s => s.Charts
+                            .Any(c => c.Charter.Contains(charter, StringComparison.OrdinalIgnoreCase)))
+                        .ToList();
+                }
+                case 3: // bpm
+                {
+                    var param1 = param.TrimStart(prefix).Trim();
+
+                    if (param1.Contains('-'))
+                    {
+                        if (long.TryParse(param1.Split('-')[0], out var bpm1) &&
+                            long.TryParse(param1.Split('-')[1], out var bpm2))
+                        {
+                            return SongList.Where(s => s.Info.Bpm >= bpm1 && s.Info.Bpm <= bpm2).ToList();
+                        }
+                    }
+                    else
+                    {
+                        if (long.TryParse(param1, out var bpm))
+                        {
+                            return SongList.Where(s => s.Info.Bpm == bpm).ToList();
+                        }
+                    }
+                    return new List<MaiMaiSong>();
+                }
+            }
+
+            return new List<MaiMaiSong>();
+        }
+
+        private static MessageChain GetSearchResult(IReadOnlyList<MaiMaiSong> songs)
         {
             if (songs == null)
             {
@@ -143,7 +221,11 @@ namespace QQBOT.Core.Plugin
             };
         }
 
-        private MessageChain GetSearchResultS(List<MaiMaiSong> song)
+        /// <summary>
+        /// </summary>
+        /// <param name="song"></param>
+        /// <returns>plain text</returns>
+        private static MessageChain GetSearchResultS(IReadOnlyList<MaiMaiSong> song)
         {
             if (song == null)
             {
@@ -166,8 +248,9 @@ namespace QQBOT.Core.Plugin
         private async Task<MessageChain> Handler(string msg, MessageSenderInfo sender)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
-            //                           0       1        2      3       4      5       6      7      8
-            string[] subCommand    = { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name"};
+            string[] subCommand =
+            //     0       1        2      3       4      5       6      7      8        9       10      11     12
+                { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list" };
 
             msg = msg.TrimStart(commandPrefix);
 
@@ -180,7 +263,7 @@ namespace QQBOT.Core.Plugin
                 switch (index)
                 {
                     case 0:
-                    case 3:
+                    case 3: // b40
                         var username = msg.TrimStart(prefix).Trim();
 
                         try
@@ -213,24 +296,58 @@ namespace QQBOT.Core.Plugin
                     case 2:
                     case 4:
                     case 5:
-                    case 6:
+                    case 6: // search
                     {
                         var name   = msg.TrimStart(prefix).Trim();
                         var search = SearchSong(name);
                         return GetSearchResult(search);
                     }
-                    case 7:
-                        var  last = msg.TrimStart(prefix).Trim();
-                        if (long.TryParse(last, out var id))
-                        {
-                            return GetSongInfo(id);
-                        }
-                        return MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
-                    case 8:
+                    case 7: // id
+                        var last = msg.TrimStart(prefix).Trim();
+
+                        return long.TryParse(last, out var id)
+                            ? GetSongInfo(id)
+                            : MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
+                    case 8: // name
                     {
                         var name   = msg.TrimStart(prefix).Trim();
                         var search = SearchSong(name);
                         return GetSearchResultS(search);
+                    }
+                    case 9:
+                    case 10:
+                    case 11: // random
+                    {
+                        var param = msg.TrimStart(prefix).Trim();
+                        var list  = ListSongs(param);
+
+                        return list.Count == 0
+                            ? MessageChain.FromPlainText("“NULL”")
+                            : MessageChain.FromBase64(list[new Random().Next(list.Count)].GetImage());
+                    }
+                    case 12: // list
+                    {
+                        var param = msg.TrimStart(prefix).Trim();
+                        var list  = ListSongs(param);
+                        var rand  = new Random();
+
+                        if (list.Count == 0)
+                        {
+                            return MessageChain.FromPlainText("“EMPTY”");
+                        }
+
+                        var str = string.Join('\n',
+                            list.OrderBy(_ => rand.Next())
+                                .Take(15)
+                                .OrderBy(x => x.Id)
+                                .Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}"));
+
+                        if (list.Count > 15)
+                        {
+                            str += "\n" + $"太多了（{list.Count}），随机给出15个";
+                        }
+
+                        return MessageChain.FromPlainText(str);
                     }
                 }
             }

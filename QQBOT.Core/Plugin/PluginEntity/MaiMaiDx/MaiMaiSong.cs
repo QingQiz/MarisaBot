@@ -45,7 +45,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
         #region Drawer
 
-        public Bitmap GetSongInfoCard()
+        private Bitmap GetSongInfoCard()
         {
             var       bgColor1 = Color.FromArgb(237, 237, 237);
             var       bgColor2 = Color.FromArgb(250, 250, 250);
@@ -111,7 +111,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             return background;
         }
 
-        public Bitmap GetChartInfoCard()
+        private Bitmap GetChartInfoCard()
         {
             var       bgColor1 = Color.FromArgb(237, 237, 237);
             var       bgColor2 = Color.FromArgb(250, 250, 250);
