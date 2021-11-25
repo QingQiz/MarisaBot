@@ -46,6 +46,8 @@
 
 **注**: 该功能的所有命令均大小写**不**敏感
 
+---
+
 ### Timer
 
 > 计时器
@@ -57,11 +59,15 @@
 | :ts | [timer-name] | 启动一个计时器 |
 | :te | [timer-name] | 停止一个计时器 |
 
+---
+
 ### 吃啥
 
 > 这是一个用来解决「中午吃什么」这一被人类公认排在人生 N 大难题前列的问题的功能
 
 触发条件：包含 `吃什么` 或 `吃啥` 字符串
+
+---
 
 ### Select
 
@@ -71,6 +77,7 @@
 
 从 `A` `B` 随机选一个
 
+---
 
 ## 部署
 
@@ -78,8 +85,13 @@
 <summary> 展开 </summary>
 
 1. 部署 mcl
-2. 改 App.config
-3. 配置数据库 (entity framework标准操作)
-4. 运行
+2. 在 mcl 里登陆 bot
+3. 改 App.config
+   1. `LogPath` 日志地址（目前还没用到）
+4. 配置数据库 (entity framework标准操作)
+5. 运行，命令行参数如下（顺序敏感）：
+   1. [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `http://127.0.0.1:8080`
+   2. bot 的账号，如 `123456789`
+   3. Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
 
 </details>
