@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.Core.Util;
 using QQBOT.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace QQBOT.Core.Plugin
 {
     public class Timer : PluginBase
     {
-        public override async Task FriendMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
             var mc = message.MessageChain!.PlainText;
 
@@ -19,61 +20,68 @@ namespace QQBOT.Core.Plugin
             const string    command2 = ":te";
             var             uid       = message.Sender!.Id;
 
-            if (mc == command1)
+            switch (mc)
             {
-                var last = mc.TrimStart(command1).Trim();
-
-                if (dbContext.Timers.Any(t => t.Uid == uid && t.Name == last && t.TimeEnd == null))
+                case command1:
                 {
-                    await session.SendFriendMessage(
-                        new Message(MessageChain.FromPlainText($"Timer `{last}` already started")), uid);
-                }
-                else
-                {
-                    var time = DateTime.Now;
+                    var last = mc.TrimStart(command1).Trim();
 
-                    dbContext.Timers.Add(new EntityFrameworkCore.Entity.Plugin.Timer
+                    if (dbContext.Timers.Any(t => t.Uid == uid && t.Name == last && t.TimeEnd == null))
                     {
-                        TimeBegin = time,
-                        TimeEnd   = null,
-                        Uid       = uid,
-                        Name      = last
-                    });
+                        await session.SendFriendMessage(
+                            new Message(MessageChain.FromPlainText($"Timer `{last}` already started")), uid);
+                    }
+                    else
+                    {
+                        var time = DateTime.Now;
 
-                    await session.SendFriendMessage(
-                        new Message(
-                            MessageChain.FromPlainText($"Timer `{last}` started: {time:yyyy-MM-dd hh:mm:ss fff}")),
-                        uid);
+                        dbContext.Timers.Add(new EntityFrameworkCore.Entity.Plugin.Timer
+                        {
+                            TimeBegin = time,
+                            TimeEnd   = null,
+                            Uid       = uid,
+                            Name      = last
+                        });
 
+                        await dbContext.SaveChangesAsync();
+                        await session.SendFriendMessage(
+                            new Message(
+                                MessageChain.FromPlainText($"Timer `{last}` started: {time:yyyy-MM-dd hh:mm:ss fff}")),
+                            uid);
+                    }
+                    return PluginTaskState.CompletedTask;
                 }
-            }
-            else if (mc == command2)
-            {
-                var last = mc.TrimStart(command2).Trim();
-
-                var res = dbContext.Timers.Where(t => t.Uid == uid && t.TimeEnd == null && t.Name == last);
-
-                if (res.Any())
+                case command2:
                 {
-                    var update = res.First();
-                    var time   = DateTime.Now;
-                    update.TimeEnd = time;
-                    dbContext.Update(update);
+                    var last = mc.TrimStart(command2).Trim();
 
-                    await session.SendFriendMessage(
-                        new Message(
-                            MessageChain.FromPlainText(
-                                $"Timer `{last}` ended, duration: {time - update.TimeBegin:dd\\.hh\\:mm\\:ss}")),
-                        uid);
+                    var res = dbContext.Timers.Where(t => t.Uid == uid && t.TimeEnd == null && t.Name == last);
+
+                    if (res.Any())
+                    {
+                        var update = res.First();
+                        var time   = DateTime.Now;
+                        update.TimeEnd = time;
+                        dbContext.Update(update);
+
+                        await dbContext.SaveChangesAsync();
+                        await session.SendFriendMessage(
+                            new Message(
+                                MessageChain.FromPlainText(
+                                    $"Timer `{last}` ended, duration: {time - update.TimeBegin:dd\\.hh\\:mm\\:ss}")),
+                            uid);
+                    }
+                    else
+                    {
+                        await session.SendFriendMessage(
+                            new Message(MessageChain.FromPlainText($"Timer `{last}` already ended")), uid);
+                    }
+
+                    return PluginTaskState.CompletedTask;
                 }
-                else
-                {
-                    await session.SendFriendMessage(
-                        new Message(MessageChain.FromPlainText($"Timer `{last}` already ended")), uid);
-                }
+                default:
+                    return PluginTaskState.ToBeContinued;
             }
-
-            await dbContext.SaveChangesAsync();
         }
     }
 }

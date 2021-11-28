@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using QQBOT.Core.Attribute;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin
@@ -26,27 +27,32 @@ namespace QQBOT.Core.Plugin
             return null;
         }
 
-        public override async Task FriendMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
             var mc  = Handler(message.MessageChain!.PlainText);
 
-            if (mc == null) return;
+            if (mc == null) return PluginTaskState.ToBeContinued;
 
             await session.SendFriendMessage(new Message(mc), message.Sender!.Id);
+
+            return PluginTaskState.CompletedTask;
         }
 
-        public override async Task GroupMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
             var mc  = Handler(message.MessageChain!.PlainText);
 
-            if (mc == null) return;
+            if (mc == null) return PluginTaskState.ToBeContinued;
 
-            if (message.MessageChain!.Messages.Any(m =>
+            if (!message.MessageChain!.Messages.Any(m =>
                 m.Type == MessageType.At && (m as AtMessage)!.Target == session.Id))
-            {
-                var source = message.Source.Id;
-                await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
-            }
+                return PluginTaskState.ToBeContinued;
+
+            var source = message.Source.Id;
+            await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
+
+            return PluginTaskState.CompletedTask;
+
         }
     }
 }

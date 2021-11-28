@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 
 namespace QQBOT.Core.Plugin
 {
@@ -22,8 +23,8 @@ namespace QQBOT.Core.Plugin
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
         }
-        
-        public override async Task EventHandler(MiraiHttpSession session, dynamic data)
+
+        protected override async Task<PluginTaskState> EventHandler(MiraiHttpSession session, dynamic data)
         {
             switch (data.type)
             {
@@ -45,9 +46,13 @@ namespace QQBOT.Core.Plugin
                             await session.SendFriendMessage(
                                 new Message(MessageChain.FromPlainText(word)), data.subject.id);
                         }
+
+                        return PluginTaskState.CompletedTask;
                     }
                     break;
             }
+
+            return PluginTaskState.ToBeContinued;
         }
     }
 }

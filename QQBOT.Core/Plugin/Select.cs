@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin
@@ -45,31 +46,34 @@ namespace QQBOT.Core.Plugin
             return b.TrimStart(verb) == null ? (a, p + b) : (a, b);
         }
 
-        public override async Task FriendMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
             var msg = message.MessageChain!.PlainText;
 
             var res = Parser(msg);
 
-            if (res == null) return;
+            if (res == null) return PluginTaskState.ToBeContinued;
 
             var send = new Random().Next(0, 2) == 0 ? res.Value.a : res.Value.b;
 
             await session.SendFriendMessage(new Message(MessageChain.FromPlainText("建议" + send)), message.Sender!.Id);
+            return PluginTaskState.CompletedTask;
         }
 
-        public override async Task GroupMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
             var msg = message.MessageChain!.PlainText;
 
             var res = Parser(msg);
 
-            if (res == null) return;
+            if (res == null) return PluginTaskState.ToBeContinued;
 
             var send = new Random().Next(0, 2) == 0 ? res.Value.a : res.Value.b;
 
             await session.SendGroupMessage(new Message(MessageChain.FromPlainText("建议" + send)),
                 message.GroupInfo!.Id, message.Source.Id);
+
+            return PluginTaskState.CompletedTask;
         }
     }
 }

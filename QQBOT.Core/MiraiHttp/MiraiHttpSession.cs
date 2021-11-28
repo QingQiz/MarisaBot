@@ -6,6 +6,7 @@ using Flurl;
 using Flurl.Http;
 using QQBOT.Core.MiraiHttp.Entity;
 using QQBOT.Core.Plugin;
+using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.EntityFrameworkCore;
 using QQBOT.EntityFrameworkCore.Entity.Audit;
 
@@ -19,12 +20,10 @@ namespace QQBOT.Core.MiraiHttp
 
         private string _session;
         
-        private delegate Task MessageHandler(MiraiHttpSession session, Message message);
-        private delegate Task EventHandler(MiraiHttpSession session, dynamic message);
-        private event MessageHandler OnFriendMessage;
-        private event MessageHandler OnGroupMessage;
-        private event MessageHandler OnTempMessage;
-        private event MessageHandler OnStrangerMessage;
+        private delegate Task MessageHandler(MiraiHttpSession session, Message message, MiraiMessageType type, ref PluginTaskState state);
+        private delegate Task EventHandler(MiraiHttpSession session, dynamic message, ref PluginTaskState state);
+
+        private event MessageHandler OnMessage;
         private event EventHandler OnEvent;
 
         private void CheckResponse(dynamic response)
@@ -46,11 +45,8 @@ namespace QQBOT.Core.MiraiHttp
 
         public void AddPlugin(PluginBase plugin)
         {
-            OnFriendMessage   += plugin.FriendMessageHandler;
-            OnGroupMessage    += plugin.GroupMessageHandler;
-            OnTempMessage     += plugin.TempMessageHandler;
-            OnStrangerMessage += plugin.StrangerMessageHandler;
-            OnEvent           += plugin.EventHandler;
+            OnMessage += plugin.MessageHandlerWrapper;
+            OnEvent   += plugin.EventHandlerWrapper;
         }
 
         public async Task Init()
@@ -72,9 +68,10 @@ namespace QQBOT.Core.MiraiHttp
 
         public async Task Run()
         {
+            var reportAddress = $"{_serverAddress}/countMessage";
             while (true)
             {
-                var msgCnt = await $"{_serverAddress}/countMessage".SetQueryParam("sessionKey", _session).GetJsonAsync();
+                var msgCnt = await reportAddress.SetQueryParam("sessionKey", _session).GetJsonAsync();
                 CheckResponse(msgCnt);
 
                 if (msgCnt.data == 0)
@@ -106,7 +103,8 @@ namespace QQBOT.Core.MiraiHttp
                         MessageChain = new MessageChain(m.messageChain)
                     };
 
-                    var handler = OnFriendMessage;
+                    var mType  = MiraiMessageType.FriendMessage;
+                    var tState = PluginTaskState.ToBeContinued;
 
                     switch (m.type)
                     {
@@ -118,7 +116,6 @@ namespace QQBOT.Core.MiraiHttp
                             log.UserName = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
-                            handler = OnFriendMessage;
                             break;
                         case "StrangerMessage":
                             message.GroupInfo = null;
@@ -128,7 +125,7 @@ namespace QQBOT.Core.MiraiHttp
                             log.UserName = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
-                            handler = OnStrangerMessage;
+                            mType = MiraiMessageType.StrangerMessage;
                             break;
                         case "GroupMessage":
                             message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
@@ -142,7 +139,7 @@ namespace QQBOT.Core.MiraiHttp
                             log.GroupName = message.GroupInfo?.Name;
                             log.GroupId = message.GroupInfo?.Id.ToString();
                             
-                            handler = OnGroupMessage;
+                            mType = MiraiMessageType.GroupMessage;
                             break;
                         case "TempMessage":
                             message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
@@ -156,10 +153,9 @@ namespace QQBOT.Core.MiraiHttp
                             log.GroupName = message.GroupInfo?.Name;
                             log.GroupId = message.GroupInfo?.Id.ToString();
 
-                            handler = OnTempMessage;
+                            mType = MiraiMessageType.TempMessage;
                             break;
                     }
-
 
                     await using var dbContext = new BotDbContext();
                     await dbContext.Logs.AddAsync(log);
@@ -169,7 +165,7 @@ namespace QQBOT.Core.MiraiHttp
                         ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
                         : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
 
-                    handler?.Invoke(this, message);
+                    OnMessage?.Invoke(this, message, mType, ref tState);
                 });
                 await Task.WhenAll(tasks);
 
@@ -183,6 +179,8 @@ namespace QQBOT.Core.MiraiHttp
                         Time      = DateTime.Now,
                     };
 
+                    var tState = PluginTaskState.ToBeContinued;
+
                     await using var dbContext = new BotDbContext();
                     await dbContext.Logs.AddAsync(log);
                     await dbContext.SaveChangesAsync();
@@ -191,7 +189,7 @@ namespace QQBOT.Core.MiraiHttp
                         ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
                         : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
 
-                    OnEvent?.Invoke(this, m);
+                    OnEvent?.Invoke(this, m, ref tState);
                 });
 
                 await Task.WhenAll(tasks);

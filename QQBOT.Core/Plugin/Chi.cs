@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 
 namespace QQBOT.Core.Plugin
 {
@@ -59,33 +60,28 @@ namespace QQBOT.Core.Plugin
             var r = new Random().Next(0, f.Length);
             return f[r];
         }
-        
 
-        public override async Task FriendMessageHandler(MiraiHttpSession session, Message message)
+
+        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (Trigger(message))
-            {
-                var sender = message.Sender!.Id;
+            if (!Trigger(message)) return PluginTaskState.ToBeContinued;
 
-                await session.SendFriendMessage(new Message(MessageChain.FromPlainText(ChiSha(sender))), sender);
-            }
+            var sender = message.Sender!.Id;
+
+            await session.SendFriendMessage(new Message(MessageChain.FromPlainText(ChiSha(sender))), sender);
+            return PluginTaskState.CompletedTask;
         }
 
-        public override async Task GroupMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (Trigger(message))
-            {
-                // if (message.MessageChain!.Messages.Any(m =>
-                //     m.Type == MessageType.At && (m as AtMessage)!.Target == session.Id))
-                // {
-                    var source = message.Source.Id;
+            if (!Trigger(message)) return PluginTaskState.ToBeContinued;
 
-                    var sender = message.Sender!.Id;
-                    
-                    await session.SendGroupMessage(new Message(MessageChain.FromPlainText(ChiSha(sender))),
-                        message.GroupInfo!.Id, source);
-                // }
-            }
+            var source = message.Source.Id;
+            var sender = message.Sender!.Id;
+
+            await session.SendGroupMessage(new Message(MessageChain.FromPlainText(ChiSha(sender))),
+                message.GroupInfo!.Id, source);
+            return PluginTaskState.CompletedTask;
         }
     }
 }

@@ -7,6 +7,7 @@ using Flurl.Http;
 using QQBOT.Core.Attribute;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
+using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.Core.Plugin.PluginEntity.MaiMaiDx;
 using QQBOT.Core.Util;
 
@@ -380,24 +381,26 @@ namespace QQBOT.Core.Plugin
             }
         }
 
-        public override async Task FriendMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
             var mc  = await HandlerWrapper(session, message);
 
-            if (mc == null) return;
+            if (mc == null) return PluginTaskState.ToBeContinued;
 
             await session.SendFriendMessage(new Message(mc), message.Sender!.Id);
+            return PluginTaskState.CompletedTask;
         }
 
-        public override async Task GroupMessageHandler(MiraiHttpSession session, Message message)
+        protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
             var mc  = await HandlerWrapper(session, message);
 
-            if (mc == null) return;
+            if (mc == null) return PluginTaskState.ToBeContinued;
 
             var source = message.Source.Id;
 
             await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
+            return PluginTaskState.CompletedTask;
         }
 
         #endregion
