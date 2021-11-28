@@ -214,10 +214,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 g.DrawImage(cd2, padding, 3 * padding + cd1.Height);
             }
             
-            var ms  = new MemoryStream();
-            background.Save(ms, ImageFormat.Jpeg);
-
-            return Convert.ToBase64String(ms.ToArray());
+            return background.ToB64();
         }
 
         #endregion

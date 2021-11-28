@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using QQBOT.Core.Attribute;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
@@ -23,15 +22,12 @@ namespace QQBOT.Core.Plugin
 
         protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (message.MessageChain!.PlainText.Trim() == "ping")
+            if (message.MessageChain!.PlainText.Trim() == "ping" && message.At(session.Id))
             {
-                if (message.MessageChain!.Messages.Any(m =>
-                    m.Type == MessageType.At && (m as AtMessage)!.Target == session.Id))
-                {
-                    var source = message.Source.Id;
-                    await session.SendGroupMessage(new Message(MessageChain.FromPlainText("ping")), message.GroupInfo!.Id, source);
-                    return PluginTaskState.CompletedTask;
-                }
+                var source = message.Source.Id;
+                await session.SendGroupMessage(new Message(MessageChain.FromPlainText("ping")), message.GroupInfo!.Id,
+                    source);
+                return PluginTaskState.CompletedTask;
             }
 
             return PluginTaskState.ToBeContinued;

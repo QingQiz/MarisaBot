@@ -19,5 +19,8 @@ namespace QQBOT.Core.MiraiHttp.Entity
 
         public SourceMessage Source =>
             (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageType.Source) as SourceMessage)!;
+
+        public bool At(long target) =>
+            MessageChain!.Messages.Any(m => m.Type == MessageType.At && (m as AtMessage)!.Target == target);
     }
 }

@@ -250,8 +250,8 @@ namespace QQBOT.Core.Plugin
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
             string[] subCommand =
-            //     0       1        2      3       4      5       6      7      8        9       10      11     12
-                { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list" };
+            //     0       1        2      3       4      5       6      7      8        9       10      11     12       13
+                { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list", "rand" };
 
             msg = msg.TrimStart(commandPrefix);
 
@@ -317,7 +317,8 @@ namespace QQBOT.Core.Plugin
                     }
                     case 9:
                     case 10:
-                    case 11: // random
+                    case 11:
+                    case 13: // random
                     {
                         var param = msg.TrimStart(prefix).Trim();
                         var list  = ListSongs(param);

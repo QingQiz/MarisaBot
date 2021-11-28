@@ -303,11 +303,8 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 g.DrawImage(ratCard, 0, 0);
                 g.DrawImage(b40, 0, ratCard.Height);
             }
-            
-            var ms  = new MemoryStream();
-            background.Save(ms, ImageFormat.Jpeg);
 
-            return Convert.ToBase64String(ms.ToArray());
+            return background.ToB64();
         }
         
         #endregion

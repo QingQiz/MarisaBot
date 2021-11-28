@@ -44,8 +44,7 @@ namespace QQBOT.Core.Plugin
 
             if (mc == null) return PluginTaskState.ToBeContinued;
 
-            if (!message.MessageChain!.Messages.Any(m =>
-                m.Type == MessageType.At && (m as AtMessage)!.Target == session.Id))
+            if (!message.At(session.Id))
                 return PluginTaskState.ToBeContinued;
 
             var source = message.Source.Id;

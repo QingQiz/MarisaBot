@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 
 namespace QQBOT.Core.Util
 {
@@ -43,11 +44,12 @@ namespace QQBOT.Core.Util
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
                 Brush brush = new TextureBrush(startImage);
-                var gp = new GraphicsPath();
+                var   gp    = new GraphicsPath();
 
                 gp.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
                 gp.AddArc(0 + roundedImage.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
-                gp.AddArc(0 + roundedImage.Width - cornerRadius, 0 + roundedImage.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                gp.AddArc(0 + roundedImage.Width - cornerRadius, 0 + roundedImage.Height - cornerRadius, cornerRadius,
+                    cornerRadius, 0, 90);
                 gp.AddArc(0, 0 + roundedImage.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
                 g.FillPath(brush, gp);
 
@@ -57,18 +59,18 @@ namespace QQBOT.Core.Util
 
         private static Color CalculateAverageColor(this Bitmap bm)
         {
-            var width = bm.Width;
-            var height = bm.Height;
+            var       width        = bm.Width;
+            var       height       = bm.Height;
             const int minDiversion = 10;
             // keep track of dropped pixels
-            var dropped = 0;
-            long[] totals = { 0, 0, 0 };
+            var    dropped = 0;
+            long[] totals  = { 0, 0, 0 };
             // cutting corners, will fail on anything else but 32 and 24 bit images
             var bppModifier = bm.PixelFormat == PixelFormat.Format24bppRgb ? 3 : 4;
 
             var srcData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadOnly, bm.PixelFormat);
-            var stride = srcData.Stride;
-            var scan0 = srcData.Scan0;
+            var stride  = srcData.Stride;
+            var scan0   = srcData.Scan0;
 
             unsafe
             {
@@ -78,10 +80,10 @@ namespace QQBOT.Core.Util
                 {
                     for (var x = 0; x < width; x++)
                     {
-                        var idx = y * stride + x * bppModifier;
-                        int red = p![idx  + 2];
-                        int green = p[idx + 1];
-                        int blue = p[idx];
+                        var idx   = y * stride + x * bppModifier;
+                        int red   = p![idx + 2];
+                        int green = p[idx  + 1];
+                        int blue  = p[idx];
                         if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
                             Math.Abs(green - blue)  > minDiversion)
                         {
@@ -110,9 +112,9 @@ namespace QQBOT.Core.Util
 
         public static (Bitmap coverBackground, Color coverAvgColor) GetCoverBackground(this Bitmap cover)
         {
-            var width = cover.Width;
+            var       width        = cover.Width;
             const int cornerRadius = 20;
-            
+
             cover = Resize(cover, width, width);
 
             // 主题色
@@ -154,7 +156,8 @@ namespace QQBOT.Core.Util
             return (Bitmap)c.Clone();
         }
 
-        public static Bitmap GetStringCard(string text, int fontSize, Color fontColor, Color bgColor, int width, int height, int pl=30, bool center=false, bool underLine=true)
+        public static Bitmap GetStringCard(string text, int fontSize, Color fontColor, Color bgColor, int width,
+            int height, int pl = 30, bool center = false, bool underLine = true)
         {
             var background = new Bitmap(width, height);
 
@@ -169,8 +172,9 @@ namespace QQBOT.Core.Util
             {
                 x = (int)((width - g.MeasureString(text, f).Width) / 2);
             }
-            
-            g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, f, new SolidBrush(fontColor), x, (height - f.Height) / 2);
+
+            g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, f, new SolidBrush(fontColor), x,
+                (height - f.Height) / 2);
 
             if (underLine)
             {
@@ -178,6 +182,85 @@ namespace QQBOT.Core.Util
             }
 
             return background;
+        }
+
+        public static string ToB64(this Bitmap bmp)
+        {
+            var ms = new MemoryStream();
+            bmp.Save(ms, ImageFormat.Jpeg);
+
+            return Convert.ToBase64String(ms.ToArray());
+        }
+
+        public static unsafe Bitmap Blur(this Bitmap image, Rectangle rectangle, Int32 blurSize)
+        {
+            var blurred = new Bitmap(image.Width, image.Height);
+
+            // make an exact copy of the bitmap provided
+            using (var graphics = Graphics.FromImage(blurred))
+                graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height),
+                    new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
+
+            // Lock the bitmap's bits
+            var blurredData = blurred.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                ImageLockMode.ReadWrite, blurred.PixelFormat);
+
+            // Get bits per pixel for current PixelFormat
+            var bitsPerPixel = Image.GetPixelFormatSize(blurred.PixelFormat);
+
+            // Get pointer to first line
+            var scan0 = (byte*)blurredData.Scan0.ToPointer();
+
+            // look at every pixel in the blur rectangle
+            for (var xx = rectangle.X; xx < rectangle.X + rectangle.Width; xx++)
+            {
+                for (var yy = rectangle.Y; yy < rectangle.Y + rectangle.Height; yy++)
+                {
+                    int avgR           = 0, avgG = 0, avgB = 0;
+                    var blurPixelCount = 0;
+
+                    // average the color of the red, green and blue for each pixel in the
+                    // blur size while making sure you don't go outside the image bounds
+                    for (var x = xx; (x < xx + blurSize && x < image.Width); x++)
+                    {
+                        for (var y = yy; (y < yy + blurSize && y < image.Height); y++)
+                        {
+                            // Get pointer to RGB
+                            var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
+
+                            avgB += data[0]; // Blue
+                            avgG += data[1]; // Green
+                            avgR += data[2]; // Red
+
+                            blurPixelCount++;
+                        }
+                    }
+
+                    avgR /= blurPixelCount;
+                    avgG /= blurPixelCount;
+                    avgB /= blurPixelCount;
+
+                    // now that we know the average for the blur size, set each pixel to that color
+                    for (var x = xx; x < xx + blurSize && x < image.Width && x < rectangle.Width; x++)
+                    {
+                        for (var y = yy; y < yy + blurSize && y < image.Height && y < rectangle.Height; y++)
+                        {
+                            // Get pointer to RGB
+                            var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
+
+                            // Change values
+                            data[0] = (byte)avgB;
+                            data[1] = (byte)avgG;
+                            data[2] = (byte)avgR;
+                        }
+                    }
+                }
+            }
+
+            // Unlock the bits
+            blurred.UnlockBits(blurredData);
+
+            return blurred;
         }
     }
 }
