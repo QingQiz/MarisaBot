@@ -16,10 +16,12 @@ namespace QQBOT.Core
             // add plugins to session
             var plugins = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(a => a.GetTypes()
-                    .Where(t => t.GetCustomAttributes(typeof(MiraiPluginAttribute), true) is {Length: > 0})
+                    .Where(t => t.GetCustomAttributes(typeof(MiraiPluginAttribute), true) is { Length: > 0 })
                     .Where(t => t.GetCustomAttributes(typeof(MiraiPluginDisabledAttribute), false) is not
-                        {Length: > 0}))
-                .SelectMany(t => t);
+                        { Length: > 0 }))
+                .SelectMany(t => t)
+                .OrderByDescending(t =>
+                    ((MiraiPluginAttribute)t.GetCustomAttributes(typeof(MiraiPluginAttribute), true).First()).Priority);
             
             // Log plugin info
             Console.WriteLine("---------------------------------------------------------------");

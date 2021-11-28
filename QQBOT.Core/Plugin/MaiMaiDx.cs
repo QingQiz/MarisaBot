@@ -13,7 +13,7 @@ using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin
 {
-    [MiraiPlugin]
+    [MiraiPlugin(priority:1)]
     public class MaiMaiDx : PluginBase
     {
         #region B40
