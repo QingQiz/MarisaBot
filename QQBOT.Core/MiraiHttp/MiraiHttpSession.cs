@@ -104,7 +104,7 @@ namespace QQBOT.Core.MiraiHttp
                     };
 
                     var mType  = MiraiMessageType.FriendMessage;
-                    var tState = PluginTaskState.ToBeContinued;
+                    var tState = PluginTaskState.NoResponse;
 
                     switch (m.type)
                     {
@@ -179,7 +179,7 @@ namespace QQBOT.Core.MiraiHttp
                         Time      = DateTime.Now,
                     };
 
-                    var tState = PluginTaskState.ToBeContinued;
+                    var tState = PluginTaskState.NoResponse;
 
                     await using var dbContext = new BotDbContext();
                     await dbContext.Logs.AddAsync(log);

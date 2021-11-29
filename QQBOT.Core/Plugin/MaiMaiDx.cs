@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -243,18 +244,142 @@ namespace QQBOT.Core.Plugin
         }
 
         #endregion
+
+        #region guess
+
+        private MessageChain StartSongGuess(Message message)
+        {
+            var song = SongList.RandomTake();
+            
+            var cover = ResourceManager.GetCover(song.Id, false);
+
+            var cw = cover.Width  / 3;
+            var ch = cover.Height / 3;
+
+            var rand = new Random();
+
+            var x = rand.Next(0, 200 - cw);
+            var y = rand.Next(0, 200 - ch);
+
+            cover = cover.Crop(new Rectangle(x, y, cw, ch));
+
+            var res = Dialog.AddHandler(message.GroupInfo!.Id, async (session, msg) =>
+            {
+                var m = msg.MessageChain!.PlainText.Trim();
+
+                if (m is "结束猜曲" or "答案")
+                {
+                    var aliases = SongAlias.Where(k => k.Value.Contains(song.Title)).Select(k => k.Key);
+                    await session.SendGroupMessage(new Message(new[]
+                    {
+                        (MessageData)new PlainMessage("猜曲结束，正确答案：\n"),
+                        ImageMessage.FromBase64(song.GetImage()),
+                        new PlainMessage($"当前歌在录的别名有：{string.Join(", ", aliases)}\n若有遗漏，请联系作者")
+                    }), message.GroupInfo!.Id);
+                    return PluginTaskState.CompletedTask;
+                }
+
+                if (m == "来点提示")
+                {
+                    switch (new Random().Next(5))
+                    {
+                        case 0:
+                            await session.SendGroupMessage(new Message(MessageChain.FromPlainText($"作曲家是：{song.Info.Artist}")),
+                                message.GroupInfo!.Id);
+                            return PluginTaskState.ToBeContinued;
+                        case 1:
+                            await session.SendGroupMessage(new Message(MessageChain.FromPlainText($"类别是：{song.Info.Genre}")),
+                                message.GroupInfo!.Id);
+                            return PluginTaskState.ToBeContinued;
+                        case 2:
+                            await session.SendGroupMessage(new Message(MessageChain.FromPlainText($"版本是：{song.Info.From}")),
+                                message.GroupInfo!.Id);
+                            return PluginTaskState.ToBeContinued;
+                        case 3:
+                            await session.SendGroupMessage(new Message(MessageChain.FromPlainText($"是个{song.Levels.Last()}")),
+                                message.GroupInfo!.Id);
+                            return PluginTaskState.ToBeContinued;
+                        case 4:
+                            await session.SendGroupMessage(new Message(MessageChain.FromPlainText($"bpm 在 {song.Info.Bpm / 50 * 50} 到 {song.Info.Bpm / 50 * 50 + 50} 之间")),
+                                message.GroupInfo!.Id);
+                            return PluginTaskState.ToBeContinued;
+                    }
+                }
+
+                async Task<PluginTaskState> ProcResult(MaiMaiSong s)
+                {
+                    if (s == null)
+                    {
+                        await session.SendGroupMessage(new Message(MessageChain.FromPlainText("没找到你说的这首歌")),
+                            message.GroupInfo!.Id, msg.Source!.Id);
+                        return PluginTaskState.ToBeContinued;
+                    }
+
+                    if (s.Title == song.Title)
+                    {
+                        await session.SendGroupMessage(new Message(new[]
+                        {
+                            (MessageData)new PlainMessage("你猜对了！正确答案：\n"),
+                            ImageMessage.FromBase64(song.GetImage()),
+                        }), message.GroupInfo!.Id, msg.Source!.Id);
+                        return PluginTaskState.CompletedTask;
+                    }
+
+                    await session.SendGroupMessage(new Message(MessageChain.FromPlainText("不对不对！")),
+                        message.GroupInfo!.Id, msg.Source!.Id);
+                    return PluginTaskState.ToBeContinued;
+                }
+
+                if (!msg.At(session.Id)) return PluginTaskState.NoResponse;
+
+                var search = SearchSong(m);
+
+                if (long.TryParse(m, out var id))
+                {
+                    search.AddRange(SongList.Where(s => s.Id == id));
+                }
+                
+                switch (search.Count)
+                {
+                    case 0:
+                        return await ProcResult(null);
+                    case 1:
+                        return await ProcResult(search[0]);
+                    default:
+                        await session.SendGroupMessage(new Message(GetSearchResult(search)),
+                            message.GroupInfo!.Id, msg.Source!.Id);
+                        return PluginTaskState.ToBeContinued;
+                }
+            });
+
+            if (!res)
+            {
+                return MessageChain.FromPlainText("？");
+            }
+
+            return new MessageChain(new[]
+            {
+                (MessageData)new PlainMessage("猜曲模式启动！\n"),
+                (MessageData)ImageMessage.FromBase64(cover.ToB64()),
+                (MessageData)new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是歌曲名或者歌曲id\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
+            });
+        }
+
+        #endregion
         
         #region Message Handler
 
-        private async Task<MessageChain> Handler(string msg, MessageSenderInfo sender)
+        private async Task<MessageChain> Handler(Message message)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
             string[] subCommand =
-            //     0       1        2      3       4      5       6      7      8        9       10      11     12       13
-                { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list", "rand" };
+            //     0       1        2      3       4      5       6      7      8        9       10      11     12       13      14     15
+                { "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list", "rand", "猜歌", "猜曲" };
 
-            msg = msg.TrimStart(commandPrefix);
+            var sender = message.Sender;
+            var msg    = message.MessageChain!.PlainText.Trim().TrimStart(commandPrefix);
 
+            
             if (string.IsNullOrEmpty(msg)) return null;
 
             var res = msg.CheckPrefix(subCommand);
@@ -270,7 +395,7 @@ namespace QQBOT.Core.Plugin
                         try
                         {
                             var rating = await MaiB40(string.IsNullOrEmpty(username)
-                                ? new { qq = sender.Id }
+                                ? new { qq = sender!.Id }
                                 : new { username });
 
                             var imgB64 = rating.GetImage();
@@ -351,6 +476,16 @@ namespace QQBOT.Core.Plugin
 
                         return MessageChain.FromPlainText(str);
                     }
+                    case 14:
+                    case 15:
+                    {
+                        if (message.GroupInfo == null)
+                        {
+                            return MessageChain.FromPlainText("仅群组中使用");
+                        }
+
+                        return StartSongGuess(message);
+                    }
                 }
             }
 
@@ -361,8 +496,7 @@ namespace QQBOT.Core.Plugin
         {
             try
             {
-                var msg = message.MessageChain!.PlainText;
-                return await Handler(msg, message.Sender);
+                return await Handler(message);
             }
             catch (Exception e)
             {
@@ -386,7 +520,7 @@ namespace QQBOT.Core.Plugin
         {
             var mc  = await HandlerWrapper(session, message);
 
-            if (mc == null) return PluginTaskState.ToBeContinued;
+            if (mc == null) return PluginTaskState.NoResponse;
 
             await session.SendFriendMessage(new Message(mc), message.Sender!.Id);
             return PluginTaskState.CompletedTask;
@@ -396,7 +530,7 @@ namespace QQBOT.Core.Plugin
         {
             var mc  = await HandlerWrapper(session, message);
 
-            if (mc == null) return PluginTaskState.ToBeContinued;
+            if (mc == null) return PluginTaskState.NoResponse;
 
             var source = message.Source.Id;
 

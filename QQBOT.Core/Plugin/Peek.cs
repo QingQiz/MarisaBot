@@ -35,7 +35,7 @@ namespace QQBOT.Core.Plugin
                 return PluginTaskState.CompletedTask;
             }
 
-            return PluginTaskState.ToBeContinued;
+            return PluginTaskState.NoResponse;
         }
 
         protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
@@ -47,7 +47,7 @@ namespace QQBOT.Core.Plugin
                 return PluginTaskState.CompletedTask;
             }
 
-            return PluginTaskState.ToBeContinued;
+            return PluginTaskState.NoResponse;
         }
     }
 }

@@ -80,7 +80,7 @@ namespace QQBOT.Core.Plugin
                     return PluginTaskState.CompletedTask;
                 }
                 default:
-                    return PluginTaskState.ToBeContinued;
+                    return PluginTaskState.NoResponse;
             }
         }
     }

@@ -40,7 +40,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             return ret.Copy();
         }
 
-        public static Bitmap GetCover(long songId)
+        public static Bitmap GetCover(long songId, bool resize=true)
         {
             const string coverPath = ResourcePath + "/cover";
 
@@ -59,11 +59,11 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 }
                 else
                 {
-                    CoverCache[songId] = Image.FromFile(cp).Resize(200, 200);
+                    CoverCache[songId] = (Bitmap)Image.FromFile(cp);
                 }
             }
 
-            return CoverCache[songId].Copy();
+            return resize ? CoverCache[songId].Resize(200, 200) : CoverCache[songId];
         }
 
         public static (Bitmap, Color) GetCoverBackground(long songId)

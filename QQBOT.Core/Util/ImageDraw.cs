@@ -262,5 +262,15 @@ namespace QQBOT.Core.Util
 
             return blurred;
         }
+
+        public static Bitmap Crop(this Bitmap img, Rectangle cropArea)
+        {
+            var m = new Bitmap(cropArea.Width, cropArea.Height);
+            var g = Graphics.FromImage(m);
+
+            g.DrawImage(img, new Rectangle(0, 0, m.Width, m.Height), cropArea, GraphicsUnit.Pixel);
+
+            return m;
+        }
     }
 }

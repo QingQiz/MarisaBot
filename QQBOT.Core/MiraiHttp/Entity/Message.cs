@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 #nullable enable
 namespace QQBOT.Core.MiraiHttp.Entity
@@ -11,6 +12,11 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public MessageChain? MessageChain;
         
         public Message() {}
+
+        public Message(IEnumerable<MessageData> message)
+        {
+            MessageChain = new MessageChain(message);
+        }
 
         public Message(MessageChain chain)
         {

@@ -52,7 +52,7 @@ namespace QQBOT.Core.Plugin
 
             var res = Parser(msg);
 
-            if (res == null) return PluginTaskState.ToBeContinued;
+            if (res == null) return PluginTaskState.NoResponse;
 
             var send = new Random().Next(0, 2) == 0 ? res.Value.a : res.Value.b;
 
@@ -66,7 +66,7 @@ namespace QQBOT.Core.Plugin
 
             var res = Parser(msg);
 
-            if (res == null) return PluginTaskState.ToBeContinued;
+            if (res == null) return PluginTaskState.NoResponse;
 
             var send = new Random().Next(0, 2) == 0 ? res.Value.a : res.Value.b;
 

@@ -64,7 +64,7 @@ namespace QQBOT.Core.Plugin
 
         protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (!Trigger(message)) return PluginTaskState.ToBeContinued;
+            if (!Trigger(message)) return PluginTaskState.NoResponse;
 
             var sender = message.Sender!.Id;
 
@@ -74,7 +74,7 @@ namespace QQBOT.Core.Plugin
 
         protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (!Trigger(message)) return PluginTaskState.ToBeContinued;
+            if (!Trigger(message)) return PluginTaskState.NoResponse;
 
             var source = message.Source.Id;
             var sender = message.Sender!.Id;

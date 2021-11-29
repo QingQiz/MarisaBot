@@ -52,7 +52,7 @@ namespace QQBOT.Core.Plugin
                     break;
             }
 
-            return PluginTaskState.ToBeContinued;
+            return PluginTaskState.NoResponse;
         }
     }
 }

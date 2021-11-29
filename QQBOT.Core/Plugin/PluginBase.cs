@@ -13,27 +13,27 @@ namespace QQBOT.Core.Plugin
     {
         protected virtual async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
-            return await Task.FromResult(PluginTaskState.ToBeContinued);
+            return await Task.FromResult(PluginTaskState.NoResponse);
         }
 
         protected virtual async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            return await Task.FromResult(PluginTaskState.ToBeContinued);
+            return await Task.FromResult(PluginTaskState.NoResponse);
         }
 
         protected virtual async Task<PluginTaskState> TempMessageHandler(MiraiHttpSession session, Message message)
         {
-            return await Task.FromResult(PluginTaskState.ToBeContinued);
+            return await Task.FromResult(PluginTaskState.NoResponse);
         }
 
         protected virtual async Task<PluginTaskState> StrangerMessageHandler(MiraiHttpSession session, Message message)
         {
-            return await Task.FromResult(PluginTaskState.ToBeContinued);
+            return await Task.FromResult(PluginTaskState.NoResponse);
         }
 
         protected virtual async Task<PluginTaskState> EventHandler(MiraiHttpSession session, dynamic data)
         {
-            return await Task.FromResult(PluginTaskState.ToBeContinued);
+            return await Task.FromResult(PluginTaskState.NoResponse);
         }
 
         public Task MessageHandlerWrapper(MiraiHttpSession session, Message message, MiraiMessageType type,

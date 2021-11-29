@@ -31,7 +31,7 @@ namespace QQBOT.Core.Plugin
         {
             var mc  = Handler(message.MessageChain!.PlainText);
 
-            if (mc == null) return PluginTaskState.ToBeContinued;
+            if (mc == null) return PluginTaskState.NoResponse;
 
             await session.SendFriendMessage(new Message(mc), message.Sender!.Id);
 
@@ -42,10 +42,10 @@ namespace QQBOT.Core.Plugin
         {
             var mc  = Handler(message.MessageChain!.PlainText);
 
-            if (mc == null) return PluginTaskState.ToBeContinued;
+            if (mc == null) return PluginTaskState.NoResponse;
 
             if (!message.At(session.Id))
-                return PluginTaskState.ToBeContinued;
+                return PluginTaskState.NoResponse;
 
             var source = message.Source.Id;
             await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
