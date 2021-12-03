@@ -32,6 +32,8 @@ namespace QQBOT.Core.Plugin
                     if (data.target == session.Id)
                     {
                         var word = _dirtyWords[new Random().Next(_dirtyWords.Count)];
+                        if (data.fromId == 642191352) word = "别戳啦！";
+
                         if (data.subject.kind == "Group")
                         {
                             await session.SendGroupMessage(new Message(new MessageChain(new[]

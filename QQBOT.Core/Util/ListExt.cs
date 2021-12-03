@@ -5,10 +5,11 @@ namespace QQBOT.Core.Util
 {
     public static class ListExt
     {
+        private static readonly Random Rand = new ();
+
         public static T RandomTake<T>(this List<T> list)
         {
-            var cnt = list.Count;
-            return list[new Random().Next(cnt)];
+            return list[Rand.Next(list.Count)];
         }
     }
 }

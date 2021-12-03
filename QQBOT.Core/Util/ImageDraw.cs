@@ -272,5 +272,15 @@ namespace QQBOT.Core.Util
 
             return m;
         }
+
+        public static Bitmap RandomCut(this Bitmap img, int w, int h)
+        {
+            var rand = new Random();
+
+            var x = rand.Next(0, img.Width  - w);
+            var y = rand.Next(0, img.Height - h);
+
+            return img.Crop(new Rectangle(x, y, w, h));
+        }
     }
 }
