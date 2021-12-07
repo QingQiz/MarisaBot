@@ -58,54 +58,42 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
             using (var g = Graphics.FromImage(background))
             {
+                void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth, bool center=false)
+                {
+                    g.DrawImage(
+                        ImageDraw.GetStringCard(key, 21, Color.Black, bgColor1, keyWidth, height, center: true),
+                        x, y);
+                    g.DrawImage(
+                        ImageDraw.GetStringCard(value, 21, Color.Black, bgColor2, totalWidth - (x + keyWidth), height, center: center),
+                        x + keyWidth, y);
+                }
+
                 g.DrawImage(cover, padding, padding);
 
                 var x = 3 * padding + 200;
                 var y = 0;
                 var w = 200;
 
-                g.DrawImage(ImageDraw.GetStringCard("乐曲名", 21, Color.Black, bgColor1, w, h, center: true), x, y);
-                g.DrawImage(ImageDraw.GetStringCard(Title, 21, Color.Black, bgColor2, background.Width - w, h), x + w,
-                    y);
+                DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
 
                 y += h;
-                g.DrawImage(ImageDraw.GetStringCard("演唱/作曲", 21, Color.Black, bgColor1, w, h, center: true), x, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Info.Artist, 21, Color.Black, bgColor2, background.Width - (x + w), h),
-                    x + w,
-                    y);
+                DrawKeyValuePair("演唱/作曲", Info.Artist, x, y, w, h, background.Width);
 
                 y += h;
-                g.DrawImage(ImageDraw.GetStringCard("类别", 21, Color.Black, bgColor1, w, h, center: true), x, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Info.Genre, 21, Color.Black, bgColor2, background.Width - (x + w), h),
-                    x + w,
-                    y);
+                DrawKeyValuePair("类别", Info.Genre, x, y, w, h, background.Width);
 
                 y += h;
-                g.DrawImage(ImageDraw.GetStringCard("追加日期", 21, Color.Black, bgColor1, w, h, center: true), x, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Info.ReleaseDate, 21, Color.Black, bgColor2, background.Width - (x + w), h),
-                    x + w, y);
+                DrawKeyValuePair("追加日期", Info.ReleaseDate, x, y, w, h, background.Width);
 
                 y += h;
-                g.DrawImage(ImageDraw.GetStringCard("版本", 21, Color.Black, bgColor1, w, h, center: true), x, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Info.From, 21, Color.Black, bgColor2, background.Width - (x + w), h), x + w,
-                    y);
+                DrawKeyValuePair("版本", Info.From, x, y, w, h, background.Width);
 
                 y = 3 * h;
                 w = 100;
-                g.DrawImage(ImageDraw.GetStringCard("ID", 21, Color.Black, bgColor1, w, h, center: true), 0, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Id.ToString(), 21, Color.Black, bgColor2, 3 * padding + 200 - w, h,
-                        center: true), w, y);
+                DrawKeyValuePair("ID", Id.ToString(), 0, y, w, h, 3 * padding + 200, true);
 
                 y += h;
-                g.DrawImage(ImageDraw.GetStringCard("BPM", 21, Color.Black, bgColor1, w, h, center: true), 0, y);
-                g.DrawImage(
-                    ImageDraw.GetStringCard(Info.Bpm.ToString(), 21, Color.Black, bgColor2, 3 * padding + 200 - w, h),
-                    w, y);
+                DrawKeyValuePair("BPM", Info.Bpm.ToString(), 0, y, w, h, 3 * padding + 200, true);
             }
 
             return background;

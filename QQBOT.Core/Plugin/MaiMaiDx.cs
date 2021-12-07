@@ -125,7 +125,11 @@ namespace QQBOT.Core.Plugin
                 return MessageChain.FromPlainText($"“未找到 ID 为 {songId} 的歌曲”");
             }
 
-            return MessageChain.FromBase64(searchResult.GetImage());
+            return new MessageChain(new MessageData[]
+            {
+                new PlainMessage(searchResult.Title),
+                ImageMessage.FromBase64(searchResult.GetImage())
+            });
         }
 
         private List<MaiMaiSong> SearchSong(string alias)
@@ -235,7 +239,11 @@ namespace QQBOT.Core.Plugin
             {
                 >= 10 => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
                 0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => MessageChain.FromBase64(songs[0].GetImage()),
+                1 => new MessageChain(new MessageData[]
+                {
+                    new PlainMessage(songs[0].Title),
+                    ImageMessage.FromBase64(songs[0].GetImage())
+                }),
                 _ => MessageChain.FromPlainText(string.Join('\n', songs.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
             };
         }
@@ -287,17 +295,17 @@ namespace QQBOT.Core.Plugin
                 {
                     case "结束猜曲" or "答案":
                     {
-                        await session.SendGroupMessage(new Message(new[]
+                        await session.SendGroupMessage(new Message(new MessageData[]
                         {
-                            (MessageData)new PlainMessage("猜曲结束，正确答案：\n"),
-                            (MessageData)ImageMessage.FromBase64(song.GetImage()),
-                            (MessageData)new PlainMessage(
-                                $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
+                            new PlainMessage("猜曲结束，正确答案："),
+                            ImageMessage.FromBase64(song.GetImage()),
+                            new PlainMessage(
+                                $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者"),
                         }), groupId);
                         return PluginTaskState.CompletedTask;
                     }
                     case "来点提示":
-                        switch (new Random().Next(3))
+                        switch (new Random().Next(4))
                         {
                             case 0:
                                 await session.SendGroupMessage(
@@ -308,14 +316,17 @@ namespace QQBOT.Core.Plugin
                                     new Message(MessageChain.FromPlainText($"是个{song.Levels.Last()}")), groupId);
                                 return PluginTaskState.ToBeContinued;
                             case 2:
-                                await session.SendGroupMessage(new Message(new []
+                                await session.SendGroupMessage(new Message(new MessageData[]
                                 {
-                                    (MessageData)new PlainMessage("重新裁剪："),
-                                    (MessageData)ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()), 
+                                    new PlainMessage("重新裁剪："),
+                                    ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()), 
                                 }), groupId);
                                 return PluginTaskState.ToBeContinued;
+                            case 3:
+                                await session.SendGroupMessage(
+                                    new Message(MessageChain.FromPlainText($"歌曲类别是：{song.Info.Genre}")), groupId);
+                                return PluginTaskState.ToBeContinued;
                         }
-
                         break;
                 }
 
@@ -342,10 +353,10 @@ namespace QQBOT.Core.Plugin
                         dbContext.MaiMaiDxGuesses.InsertOrUpdate(u);
                         await dbContext.SaveChangesAsync();
                         
-                        await session.SendGroupMessage(new Message(new[]
+                        await session.SendGroupMessage(new Message(new MessageData[]
                         {
-                            (MessageData)new PlainMessage("你猜对了！正确答案：\n"),
-                            (MessageData)ImageMessage.FromBase64(song.GetImage()),
+                            new PlainMessage("你猜对了！正确答案："),
+                            ImageMessage.FromBase64(song.GetImage()),
                         }), groupId, msg.Source!.Id);
 
                         return PluginTaskState.CompletedTask;
@@ -413,11 +424,11 @@ namespace QQBOT.Core.Plugin
             }
             dbContext.SaveChanges();
 
-            return new MessageChain(new[]
+            return new MessageChain(new MessageData[]
             {
-                (MessageData)new PlainMessage("猜曲模式启动！\n"),
-                (MessageData)ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()),
-                (MessageData)new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是歌曲名或者歌曲id\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
+                new PlainMessage("猜曲模式启动！"),
+                ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()),
+                new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是歌曲名或者歌曲id\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
             });
         }
 
@@ -433,7 +444,7 @@ namespace QQBOT.Core.Plugin
             return aliases.ToList();
         }
 
-        private async Task<MessageChain> SongAliasHandler(string param)
+        private MessageChain SongAliasHandler(string param)
         {
             string[] subCommand =
             //      0      1
@@ -571,11 +582,13 @@ namespace QQBOT.Core.Plugin
                         return GetSearchResult(search);
                     }
                     case 7: // id
+                    {
                         var last = msg.TrimStart(prefix).Trim();
 
                         return long.TryParse(last, out var id)
                             ? GetSongInfo(id)
-                            : MessageChain.FromPlainText($"“你看你输的这个几把玩意儿像不像个ID”");
+                            : MessageChain.FromPlainText("“你看你输的这个几把玩意儿像不像个ID”");
+                    }
                     case 8: // name
                     {
                         var name   = msg.TrimStart(prefix).Trim();
@@ -634,7 +647,9 @@ namespace QQBOT.Core.Plugin
 
                                 var res = dbContext.MaiMaiDxGuesses
                                     .OrderByDescending(g => g.TimesCorrect)
-                                    .Take(8)
+                                    .ThenBy(g => g.TimesWrong)
+                                    .ThenBy(g => g.TimesStart)
+                                    .Take(10)
                                     .ToList();
 
                                 if (!res.Any()) return MessageChain.FromPlainText("None");
@@ -651,7 +666,7 @@ namespace QQBOT.Core.Plugin
                     case 16: // alias
                     {
                         var param = msg.TrimStart(prefix).Trim();
-                        return await SongAliasHandler(param);
+                        return SongAliasHandler(param);
                     }
                 }
             }

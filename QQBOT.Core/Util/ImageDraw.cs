@@ -162,19 +162,25 @@ namespace QQBOT.Core.Util
             var background = new Bitmap(width, height);
 
             using var g = Graphics.FromImage(background);
-            using var f = new Font("Consolas", fontSize);
+
+            // 调整字体大小
+            var font = new Font("Consolas", fontSize);
+
+            while (g.MeasureString(text, font).Width >= width - pl)
+            {
+                fontSize -= 2;
+                font     =  new Font("Consolas", fontSize);
+            }
 
             g.Clear(bgColor);
 
-            var x = pl;
+            var x = center
+                ? (int)((width - g.MeasureString(text, font).Width) / 2)
+                : pl;
 
-            if (center)
-            {
-                x = (int)((width - g.MeasureString(text, f).Width) / 2);
-            }
+            var y = (int)(height - g.MeasureString(text, font).Height) / 2;
 
-            g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, f, new SolidBrush(fontColor), x,
-                (height - f.Height) / 2);
+            g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, font, new SolidBrush(fontColor), x, y);
 
             if (underLine)
             {

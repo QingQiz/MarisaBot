@@ -119,7 +119,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 using (var font = new Font("Consolas", 12))
                 {
                     g.DrawString("BASE", font, fontColor, 97, 110);
-                    g.DrawString(score.Constant.ToString(CultureInfo.InvariantCulture), font, fontColor, 97, 125);
+                    g.DrawString(score.Constant.ToString("F1"), font, fontColor, 97, 125);
                 }
 
                 // Rating
