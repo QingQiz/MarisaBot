@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using Microsoft.IdentityModel.Tokens;
 using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 {
     public class DxRating
     {
-        public long AdditionalRating;
-        public List<SongScore> DxScores = new();
-        public List<SongScore> SdScores = new();
-        public string Nickname;
+        public readonly long AdditionalRating;
+        public readonly List<SongScore> DxScores = new();
+        public readonly List<SongScore> SdScores = new();
+        public readonly string Nickname;
         public long Rating;
         public string Username;
         
@@ -100,21 +96,18 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                     g.DrawString(score.Title, font, fontColor, 25, 15);
                 }
 
+                var achievement = score.Achievement.ToString("F4").Split('.');
+                
                 // 达成率整数部分
                 using (var font = new Font("Consolas", 36))
                 {
-                    g.DrawString(
-                        (score.Achievement < 100 ? "0" : "") +
-                        score.Achievement.ToString(CultureInfo.InvariantCulture).Split('.')[0]
-                      , font, fontColor, 20, 52);
+                    g.DrawString((score.Achievement < 100 ? "0" : "") + achievement[0], font, fontColor, 20, 52);
                 }
 
                 // 达成率小数部分
                 using (var font = new Font("Consolas", 27))
                 {
-                    g.DrawString(
-                        "." + score.Achievement.ToString(CultureInfo.InvariantCulture).Split('.')[1].PadRight(4, '0'),
-                        font, fontColor, 105, 62);
+                    g.DrawString("." + achievement[1], font, fontColor, 105, 62);
                 }
 
                 var rank = ResourceManager.GetImage($"rank_{score.Rank.ToLower()}.png");
@@ -247,9 +240,21 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             {
                 g.Clear(Color.White);
 
-                using (var font = new Font("Consolas", 57, FontStyle.Bold))
+                var fontSize = 57;
+                var font     = new Font("Consolas", fontSize, FontStyle.Bold);
+
+                while (true)
                 {
-                    g.DrawString(name, font, new SolidBrush(Color.Black), 20, 27);
+                    var w = g.MeasureString(name, font);
+
+                    if (w.Width < 480)
+                    {
+                        g.DrawString(name, font, new SolidBrush(Color.Black), 20, (nameCard.Height - w.Height) / 2);
+                        break;
+                    }
+
+                    fontSize -= 2;
+                    font     =  new Font("Consolas", fontSize, FontStyle.Bold);
                 }
 
                 var dx = ResourceManager.GetImage("icon_dx.png");
