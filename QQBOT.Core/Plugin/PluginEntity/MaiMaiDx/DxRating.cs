@@ -213,7 +213,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
         private Bitmap GetRatingCard()
         {
-            var rating    = Rating;
+            var rating    = DxScores.Sum(s => s.Rating) + SdScores.Sum(s => s.Rating);
             var addRating = AdditionalRating;
             var name      = Nickname;
 
