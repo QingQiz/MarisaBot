@@ -27,7 +27,7 @@ Ragnarok	黄昏	诸神黄昏
 GOODMEN	好男人	好人	良民				
 Oshama Scramble!	牛奶	哦杀妈	牛奶猫				
 最終鬼畜妹・一部声	鬼畜妹	一部声	蓝蓝路				
-コネクト	小圆op	联系	conect				
+コネクト	小圆op	联系	""				
 砂の惑星 feat. HATSUNE MIKU	沙星	沙之行星	砂之惑星				
 Candy Tall Woman	糖果高女士	高血糖女人	糖高女	砍弟搞女人			
 ロキ	口丰	roki	口≠	ruaki			
@@ -50,7 +50,7 @@ Streak	绿庙	米奇妙妙屋	拆房子
 分からない	哇卡拉奶	我不知道	吾伐晓得				
 君の知らない物語	你不知道的故事	君知	君知物语				
 White Traveling Girl	白色旅行少女	白旅女	白色旅人				
-ロミオとシンデレラ	罗密欧	灰姑娘	罗密欧与辛德瑞拉				
+ロミオとシンデレラ	罗密欧	灰姑娘	罗密欧与辛德瑞拉	口三才			
 BATTLE NO.1	打架第一名	战地一	第一战	缝合怪			
 Prophesy One	预言一	p1					
 ECHO	回声	恶臭	一口				
@@ -58,7 +58,7 @@ Caliburne ～Story of the Legendary sword～	生煎1	圣剑1			咖喱棒
 only my railgun	炮姐	超炮					
 The wheel to the right	印度人	电锯	""	三块钱			
 Ultranova	A4纸	摩托车	超新星				
-Alea jacta est!	黑人打架	击剑	白人打架	孤注一掷	打架	黑人击剑	
+Alea jacta est!	黑人打架	""	白人打架	孤注一掷	""	黑人击剑	
 ねぇ、壊れタ人形ハ何処へ棄テらレるノ？	坏人偶	坏人形	坏人偶何处弃				
 魔ジョ狩リ	魔女狩猎	魔狩					
 花と、雪と、ドラムンベース。	花一轮	花雪					
@@ -379,7 +379,7 @@ GO BACK 2 YOUR RAVE	gb2	回去你的2rave	回去你的波
 妖精村の月誕祭 ～Lunate Elf	妖精村						
 サンバランド	桑巴						
 ULTRA B+K	bk2						
-スイートマジック	甜甜魔法						
+スイートマジック	甜甜魔法	甜蜜魔法					
 怒槌	怒锤	怒捶	""	Ikazuchi			
 はやくそれになりたい！	音街						
 夜咄ディセイブ	夜咄	kano角色歌					
@@ -407,7 +407,7 @@ KONNANじゃないっ！	柯南
 幾望の月	几望之月	几望的月					
 アウトサイダー	outsider						
 その群青が愛しかったようだった	群青						
-Help me, ERINNNNNN!!	erin						
+Help me, ERINNNNNN!!	erin	永琳					
 デスパレイト	desperate						
 ジンギスカン	成吉思汗						
 オトヒメモリー☆ウタゲーション	乙姫						
@@ -691,7 +691,7 @@ ARAIS
 命に嫌われている	命嫌	被生活讨厌					
 アンクローズ・ヒューマン	未封闭的人类						
 乙女解剖	处女解剖						
-悪戯センセーション	调皮的感觉						
+悪戯センセーション	调皮的感觉	恶戏					
 Paranoia	偏执狂						
 felys -final remix-							
 Pretender	伪装者						

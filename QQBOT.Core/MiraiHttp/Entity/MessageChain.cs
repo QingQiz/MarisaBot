@@ -90,6 +90,19 @@ namespace QQBOT.Core.MiraiHttp.Entity
                         type   = "Image",
                         base64 = (this as ImageMessage)!.Base64
                     };
+                case MessageType.Voice:
+                {
+                    var d = this as VoiceMessage;
+
+                    return new
+                    {
+                        voiceId = d!.VoiceId,
+                        url     = d!.Url,
+                        path    = d!.Path,
+                        base64  = d!.Base64,
+                        type    = "Voice",
+                    };
+                }
                 default:
                     throw new NotImplementedException($"Converter for type {Type}Message is not implemented");
             }
@@ -165,14 +178,22 @@ namespace QQBOT.Core.MiraiHttp.Entity
         }
     }
 
-    public class Voice : MessageData
+    public class VoiceMessage : MessageData
     {
-        public string VoiceId;
-        public string ImageId;
-        public string Url;
-        public string Path;
+        public string VoiceId = null;
+        public string Url = null;
+        public string Path = null;
         public string Base64;
         public long Length;
+
+        public static VoiceMessage FromBase64(string b64)
+        {
+            return new VoiceMessage
+            {
+                Base64 = b64,
+                Type   = MessageType.Voice
+            };
+        }
     }
 
     public class PokeMessage
