@@ -297,7 +297,7 @@ namespace QQBOT.Core.Plugin
                     {
                         await session.SendGroupMessage(new Message(new MessageData[]
                         {
-                            new PlainMessage("猜曲结束，正确答案："),
+                            new PlainMessage($"猜曲结束，正确答案：{song.Title}"),
                             ImageMessage.FromBase64(song.GetImage()),
                             new PlainMessage(
                                 $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者"),
@@ -355,7 +355,7 @@ namespace QQBOT.Core.Plugin
                         
                         await session.SendGroupMessage(new Message(new MessageData[]
                         {
-                            new PlainMessage("你猜对了！正确答案："),
+                            new PlainMessage($"你猜对了！正确答案：{song.Title}"),
                             ImageMessage.FromBase64(song.GetImage()),
                         }), groupId, msg.Source!.Id);
 
@@ -389,7 +389,15 @@ namespace QQBOT.Core.Plugin
                 {
                     search.AddRange(SongList.Where(s => s.Id == id));
                 }
-                
+
+                if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (long.TryParse(m.TrimStart("id").Trim(), out var songId))
+                    {
+                        search = SongList.Where(s => s.Id == songId).ToList();
+                    }
+                }
+
                 switch (search.Count)
                 {
                     case 0:
@@ -428,7 +436,7 @@ namespace QQBOT.Core.Plugin
             {
                 new PlainMessage("猜曲模式启动！"),
                 ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()),
-                new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是歌曲名或者歌曲id\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
+                new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是 `歌曲名`、`歌曲id` 或 `id歌曲id`\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
             });
         }
 

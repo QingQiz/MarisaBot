@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using QQBOT.Core.Util;
 
@@ -93,7 +92,12 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 // 歌曲标题
                 using (var font = new Font("MotoyaLMaru", 27, FontStyle.Bold))
                 {
-                    g.DrawString(score.Title, font, fontColor, 25, 15);
+                    var title = score.Title;
+                    while (g.MeasureString(title, font).Width > 400 - 25)
+                    {
+                        title = title[..^4] + "...";
+                    }
+                    g.DrawString(title, font, fontColor, 25, 15);
                 }
 
                 var achievement = score.Achievement.ToString("F4").Split('.');
