@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json;
@@ -76,41 +78,74 @@ namespace QQBOT.Core.Plugin
             }
         }
 
+        private Dictionary<string, List<string>> GetSongAliases()
+        {
+            var  songAlias = new Dictionary<string, List<string>>();
+
+            foreach (var song in SongList)
+            {
+                if (!songAlias.ContainsKey(song.Title))
+                {
+                    songAlias[song.Title] = new List<string>();
+                }
+
+                songAlias[song.Title].Add(song.Title);
+            }
+
+            foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv")
+                .Concat(File.ReadAllLines(ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt")))
+            {
+                var titles = line
+                    .Split('\t')
+                    .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                foreach (var title in titles)
+                {
+                    if (!songAlias.ContainsKey(title))
+                    {
+                        songAlias[title] = new List<string>();
+                    }
+
+                    songAlias[title].Add(titles[0]);
+                }
+            }
+
+            return songAlias;
+        }
+
         private Dictionary<string, List<string>> SongAlias
         {
             get
             {
                 if (_songAlias == null)
                 {
-                    _songAlias = new Dictionary<string, List<string>>();
+                    _songAlias = GetSongAliases();
 
-                    foreach (var song in SongList)
+                    var watcher = new FileSystemWatcher
                     {
-                        if (!_songAlias.ContainsKey(song.Title))
-                        {
-                            _songAlias[song.Title] = new List<string>();
-                        }
-                        _songAlias[song.Title].Add(song.Title);
-                    }
+                        Path = ResourceManager.ResourcePath,
+                        NotifyFilter = NotifyFilters.LastWrite,
+                        Filter = "aliases.tsv"
+                    };
 
-                    foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv"))
+                    var processing = false;
+
+                    watcher.Changed += (sender, args) =>
                     {
-                        var titles = line
-                            .Split('\t')
-                            .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
-                            .Where(x => !string.IsNullOrWhiteSpace(x))
-                            .ToList();
+                        if (processing) return;
 
-                        foreach (var title in titles)
+                        lock (watcher)
                         {
-                            if (!_songAlias.ContainsKey(title))
-                            {
-                                _songAlias[title] = new List<string>();
-                            }
-
-                            _songAlias[title].Add(titles[0]);
+                            processing = true;
+                            // 考虑到文件变化时，操作文件的程序可能还未释放文件，因此进行延迟操作
+                            Thread.Sleep(500);
+                            _songAlias = GetSongAliases();
+                            processing = false;
                         }
-                    }
+                    };
+                    watcher.EnableRaisingEvents = true;
                 }
 
                 return _songAlias;
@@ -446,7 +481,7 @@ namespace QQBOT.Core.Plugin
 
         private IEnumerable<MessageChain> StartSongSoundGuess(Message message)
         {
-            const string songPath = @"C:\Users\sofee\Desktop\maifinale";
+            var songPath = ConfigurationManager.AppSettings["MaiMaiDx.WaveFilePath"] ?? string.Empty;
 
             // init song list if needed
             _songIdWithWave ??= Directory.GetFiles(songPath, "*.wav")
@@ -470,7 +505,7 @@ namespace QQBOT.Core.Plugin
 
                 var start = new Random().Next(sec - 12);
 
-                var cutVidPath = $@"D:\MaiMaiDx\song_guess_cut_{groupId}.wav";
+                var cutVidPath = ResourceManager.TempPath + $@"/song_guess_cut_{groupId}.wav";
                 var outStream  = new FileStream(cutVidPath, FileMode.Create);
 
                 wav.TrimWav(outStream, TimeSpan.FromSeconds(start), TimeSpan.FromSeconds(15));
@@ -482,7 +517,7 @@ namespace QQBOT.Core.Plugin
                     p.StartInfo.UseShellExecute        = false;
                     p.StartInfo.CreateNoWindow         = true;
                     p.StartInfo.RedirectStandardOutput = true;
-                    p.StartInfo.FileName               = @"C:\bin\ffmpeg.exe";
+                    p.StartInfo.FileName               = ConfigurationManager.AppSettings["FFMPEG.Path"] ?? string.Empty;
                     p.StartInfo.Arguments =
                         $"-i {cutVidPath} -loglevel quiet -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
                     p.Start();
@@ -638,7 +673,8 @@ namespace QQBOT.Core.Plugin
 
                         if (SongList.Any(song => song.Title == name))
                         {
-                            File.AppendAllText(@"D:\MaiMaiDx\MaiMaiSongAliasTemp.txt", $"\n{name}\t{alias}");
+                            File.AppendAllText(
+                                ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt", $"{name}\t{alias}\n");
 
                             if (SongAlias.ContainsKey(alias))
                             {

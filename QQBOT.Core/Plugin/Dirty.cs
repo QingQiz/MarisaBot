@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace QQBOT.Core.Plugin
     public class Dirty : PluginBase
     {
         private readonly List<string> _dirtyWords;
-        private const string ResourcePath = "Plugin/PluginResource/Dirty";
+        private static readonly string ResourcePath = ConfigurationManager.AppSettings["Dirty.ResourcePath"];
 
         public Dirty()
         {

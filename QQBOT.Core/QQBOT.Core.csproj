@@ -23,11 +23,11 @@
         <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="Plugin\PluginResource\**\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
+<!--    <ItemGroup>-->
+<!--        <Content Include="Plugin\PluginResource\**\*">-->
+<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
+<!--        </Content>-->
+<!--    </ItemGroup>-->
 
     <ItemGroup>
       <Folder Include="Plugin\PluginResource\MaiMaiDx" />

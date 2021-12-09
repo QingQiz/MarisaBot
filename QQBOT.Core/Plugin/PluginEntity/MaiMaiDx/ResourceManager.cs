@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using QQBOT.Core.Util;
@@ -7,7 +8,8 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 {
     public class ResourceManager
     {
-        public const string ResourcePath = "Plugin/PluginResource/MaiMaiDx";
+        public static readonly string ResourcePath = ConfigurationManager.AppSettings["MaiMaiDx.ResourcePath"];
+        public static readonly string TempPath = ConfigurationManager.AppSettings["MaiMaiDx.TempPath"];
 
         private static readonly Dictionary<string, Bitmap> ImgCache = new();
         private static readonly Dictionary<long, Bitmap> CoverCache = new();
@@ -15,7 +17,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
         public static Bitmap GetImage(string imgName, int width = 0, int height = 0)
         {
-            const string imgPath = ResourcePath + "/pic";
+            var imgPath = ResourcePath + "/pic";
 
             if (!ImgCache.ContainsKey(imgName))
             {
@@ -42,7 +44,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
         public static Bitmap GetCover(long songId, bool resize=true)
         {
-            const string coverPath = ResourcePath + "/cover";
+            var coverPath = ResourcePath + "/cover";
 
             if (!CoverCache.ContainsKey(songId))
             {
