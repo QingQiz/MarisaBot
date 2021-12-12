@@ -119,7 +119,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                 if (!msg.At(session.Id))
                 {
                     // continue
-                    if (DateTime.Now - startTime <= TimeSpan.FromMinutes(10)) return PluginTaskState.NoResponse;
+                    if (DateTime.Now - startTime <= TimeSpan.FromMinutes(5)) return PluginTaskState.NoResponse;
 
                     // time out
                     await session.SendGroupMessage(new Message(MessageChain.FromPlainText("舞萌猜曲已结束")), groupId);
@@ -159,8 +159,8 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
         private MessageChain StartGuess(long groupId, long senderId, string senderName, MaiMaiSong song)
         {
-            var res = Dialog.AddHandler(groupId, 
-                (session, msg) => GenGuessDialogHandler(song, groupId, DateTime.Now)(session, msg));
+            var now = DateTime.Now;
+            var res = Dialog.AddHandler(groupId, (session, msg) => GenGuessDialogHandler(song, groupId, now)(session, msg));
 
             if (!res)
             {
