@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Flurl.Http;
 using QQBOT.Core.Attribute;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
-using QQBOT.Core.Plugin.PluginEntity;
 using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin.MaiMaiDx
@@ -14,7 +12,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
     [MiraiPlugin(priority:1)]
     public partial class MaiMaiDx : PluginBase
     {
-        private async IAsyncEnumerable<MessageChain> Handler(Message message)
+        protected override async IAsyncEnumerable<MessageChain> MessageHandler(Message message, MiraiMessageType type)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
             string[] subCommand =
@@ -158,66 +156,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             }
 
             yield return null;
-        }
-
-        private async Task<IAsyncEnumerable<MessageChain>> HandlerWrapper(MiraiHttpSession session, Message message)
-        {
-            try
-            {
-                return Handler(message);
-            }
-            catch (Exception e)
-            {
-                if (message.GroupInfo == null)
-                {
-                    await session.SendFriendMessage(
-                        new Message(MessageChain.FromPlainText(e.ToString())),
-                        message.Sender!.Id);
-                }
-                else
-                {
-                    await session.SendGroupMessage(
-                        new Message(MessageChain.FromPlainText(e.ToString())),
-                        message.GroupInfo!.Id);
-                }
-                throw;
-            }
-        }
-
-        protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
-        {
-            var mc  = await HandlerWrapper(session, message);
-
-            if (mc == null) return PluginTaskState.NoResponse;
-
-            var proceed = false;
-
-            await foreach (var m in mc.WithCancellation(default).ConfigureAwait(false))
-            {
-                if (m == null) break;
-                proceed = true;
-                await session.SendFriendMessage(new Message(m), message.Sender!.Id);
-            }
-            return proceed ? PluginTaskState.CompletedTask : PluginTaskState.NoResponse;
-        }
-
-        protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
-        {
-            var mc  = await HandlerWrapper(session, message);
-
-            if (mc == null) return PluginTaskState.NoResponse;
-
-            var source = message.Source.Id;
-
-            var proceed = false;
-
-            await foreach (var m in mc.WithCancellation(default).ConfigureAwait(false))
-            {
-                if (m == null) break;
-                proceed = true;
-                await session.SendGroupMessage(new Message(m), message.GroupInfo!.Id, source);
-            }
-            return proceed ? PluginTaskState.CompletedTask : PluginTaskState.NoResponse;
         }
     }
 }

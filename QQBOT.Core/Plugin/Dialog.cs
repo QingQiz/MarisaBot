@@ -10,7 +10,7 @@ namespace QQBOT.Core.Plugin
     [MiraiPlugin(priority:1000)]
     public class Dialog : PluginBase
     {
-        public delegate Task<PluginTaskState> MessageHandler(MiraiHttpSession session, Message message);
+        public new delegate Task<PluginTaskState> MessageHandler(MiraiHttpSession session, Message message);
 
         private static readonly Dictionary<long, MessageHandler> Handlers = new ();
 
