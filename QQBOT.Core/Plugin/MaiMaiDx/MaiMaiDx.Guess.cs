@@ -126,7 +126,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     return PluginTaskState.CompletedTask;
                 }
 
-                var search = SearchSong(m);
+                var search = SearchSongByAlias(m);
 
                 if (long.TryParse(m, out var id))
                 {

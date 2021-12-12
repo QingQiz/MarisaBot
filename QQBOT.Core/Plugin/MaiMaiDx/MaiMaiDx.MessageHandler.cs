@@ -78,7 +78,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     case 6: // search
                     {
                         var name   = msg.TrimStart(prefix).Trim();
-                        var search = SearchSong(name);
+                        var search = SearchSongByAlias(name);
                         yield return GetSearchResult(search);
                         break;
                     }
@@ -94,7 +94,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     case 8: // name
                     {
                         var name   = msg.TrimStart(prefix).Trim();
-                        var search = SearchSong(name);
+                        var search = SearchSongByAlias(name);
                         yield return GetSearchResultS(search);
                         break;
                     }

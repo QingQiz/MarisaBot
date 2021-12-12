@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Flurl.Http;
 using Newtonsoft.Json;
 using QQBOT.Core.MiraiHttp.Entity;
@@ -15,7 +14,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
     public partial class MaiMaiDx
     {
         private List<MaiMaiSong> _songList;
-        private Dictionary<string, List<string>> _songAlias;
 
         private List<MaiMaiSong> SongList
         {
@@ -52,80 +50,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             }
         }
 
-        private Dictionary<string, List<string>> GetSongAliases()
-        {
-            var  songAlias = new Dictionary<string, List<string>>();
-
-            foreach (var song in SongList)
-            {
-                if (!songAlias.ContainsKey(song.Title))
-                {
-                    songAlias[song.Title] = new List<string>();
-                }
-
-                songAlias[song.Title].Add(song.Title);
-            }
-
-            foreach (var line in File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv")
-                .Concat(File.ReadAllLines(ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt")))
-            {
-                var titles = line
-                    .Split('\t')
-                    .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .ToList();
-
-                foreach (var title in titles)
-                {
-                    if (!songAlias.ContainsKey(title))
-                    {
-                        songAlias[title] = new List<string>();
-                    }
-
-                    songAlias[title].Add(titles[0]);
-                }
-            }
-
-            return songAlias;
-        }
-
-        private Dictionary<string, List<string>> SongAlias
-        {
-            get
-            {
-                if (_songAlias == null)
-                {
-                    _songAlias = GetSongAliases();
-
-                    var watcher = new FileSystemWatcher
-                    {
-                        Path = ResourceManager.ResourcePath,
-                        NotifyFilter = NotifyFilters.LastWrite,
-                        Filter = "aliases.tsv"
-                    };
-
-                    var processing = false;
-
-                    watcher.Changed += (_, _) =>
-                    {
-                        if (processing) return;
-
-                        lock (watcher)
-                        {
-                            processing = true;
-                            // 考虑到文件变化时，操作文件的程序可能还未释放文件，因此进行延迟操作
-                            Thread.Sleep(500);
-                            _songAlias = GetSongAliases();
-                            processing = false;
-                        }
-                    };
-                    watcher.EnableRaisingEvents = true;
-                }
-
-                return _songAlias;
-            }
-        }
-
         private MessageChain GetSongInfo(long songId)
         {
             var searchResult = SongList.FirstOrDefault(song => song.Id == songId);
@@ -140,23 +64,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                 new PlainMessage(searchResult.Title),
                 ImageMessage.FromBase64(searchResult.GetImage())
             });
-        }
-
-        private List<MaiMaiSong> SearchSong(string alias)
-        {
-            if (string.IsNullOrWhiteSpace(alias))
-            {
-                return null;
-            }
-
-            return SongAlias.Keys
-                .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(songNameAlias => SongAlias[songNameAlias]/*song name*/)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Where(songName => SongList.Any(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
-                .Select(songName =>
-                    SongList.First(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
         }
 
         private List<MaiMaiSong> ListSongs(string param)
@@ -236,46 +143,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             }
 
             return new List<MaiMaiSong>();
-        }
-
-        private static MessageChain GetSearchResult(IReadOnlyList<MaiMaiSong> songs)
-        {
-            if (songs == null)
-            {
-                return MessageChain.FromPlainText("啥？");
-            }
-
-            return songs.Count switch
-            {
-                >= 10 => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
-                0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => new MessageChain(new MessageData[]
-                {
-                    new PlainMessage(songs[0].Title),
-                    ImageMessage.FromBase64(songs[0].GetImage())
-                }),
-                _ => MessageChain.FromPlainText(string.Join('\n', songs.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
-            };
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="song"></param>
-        /// <returns>plain text</returns>
-        private static MessageChain GetSearchResultS(IReadOnlyList<MaiMaiSong> song)
-        {
-            if (song == null)
-            {
-                return MessageChain.FromPlainText("啥？");
-            }
-
-            return song.Count switch
-            {
-                >= 30 => MessageChain.FromPlainText($"过多的结果（{song.Count}个）"),
-                0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => MessageChain.FromPlainText($"Title: {song[0].Title}\nArtist: {song[0].Info.Artist}"),
-                _ => MessageChain.FromPlainText(string.Join('\n', song.Select(s => $"[T:{s.Type}, ID:{s.Id}] -> {s.Title}")))
-            };
         }
     }
 }
