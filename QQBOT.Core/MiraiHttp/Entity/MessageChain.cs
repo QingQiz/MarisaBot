@@ -16,6 +16,10 @@ namespace QQBOT.Core.MiraiHttp.Entity
             Messages = messages.ToList();
         }
 
+        public bool EnableReference = true;
+
+        public bool CanReference => EnableReference && Messages.All(m => m.Type != MessageType.Voice);
+
         public static MessageChain FromPlainText(string text)
         {
             return new MessageChain(new[]

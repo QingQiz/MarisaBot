@@ -149,26 +149,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             };
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="song"></param>
-        /// <returns>plain text</returns>
-        private static MessageChain GetSearchResultS(IReadOnlyList<MaiMaiSong> song)
-        {
-            if (song == null)
-            {
-                return MessageChain.FromPlainText("啥？");
-            }
-
-            return song.Count switch
-            {
-                >= 30 => MessageChain.FromPlainText($"过多的结果（{song.Count}个）"),
-                0 => MessageChain.FromPlainText("“查无此歌”"),
-                1 => MessageChain.FromPlainText($"Title: {song[0].Title}\nArtist: {song[0].Info.Artist}"),
-                _ => MessageChain.FromPlainText(string.Join('\n', song.Select(s => $"[T:{s.Type}, ID:{s.Id}] -> {s.Title}")))
-            };
-        }
-
         private MessageChain SongAliasHandler(string param)
         {
             string[] subCommand =

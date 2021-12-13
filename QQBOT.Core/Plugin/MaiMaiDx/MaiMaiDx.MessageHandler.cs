@@ -91,9 +91,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     }
                     case 8: // name
                     {
-                        var name   = msg.TrimStart(prefix).Trim();
-                        var search = SearchSongByAlias(name);
-                        yield return GetSearchResultS(search);
                         break;
                     }
                     case 9:
