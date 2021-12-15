@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using QQBOT.Core.Util;
 
@@ -6,14 +7,20 @@ namespace QQBOT.Core.Plugin.PluginEntity.Arcaea
 {
     public class ArcaeaSong
     {
-        public long Id;
-        public string Title;
-        public string Author;
-        public string Bpm;
-        public string Length;
-        public List<string> Level;
-        public string SongPack;
-        public string CoverFileName;
+        public readonly long Id;
+        public readonly string Title;
+        public readonly string Author;
+        public readonly string Bpm;
+        public readonly string Length;
+        public readonly List<string> Level;
+        public readonly string SongPack;
+        private readonly string _coverFileName;
+
+        public string CoverFileName => Level[^1] == "/"
+            ? _coverFileName
+            : new Random().Next(2) == 0
+                ? _coverFileName.Replace(".", "_byd.")
+                : _coverFileName;
 
         public ArcaeaSong(dynamic d)
         {
@@ -24,7 +31,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.Arcaea
             Length        = d.length;
             Level         = new List<string>();
             SongPack      = d.song_pack;
-            CoverFileName = d.cover_name;
+            _coverFileName = d.cover_name;
 
             foreach (var l in d.level)
             {
