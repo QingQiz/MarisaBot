@@ -16,25 +16,27 @@ namespace QQBOT.Core.Plugin
 
         public static bool AddHandler(long groupId, MessageHandler handler)
         {
-            if (Handlers.ContainsKey(groupId)) return false;
-            
-            Handlers[groupId] = handler;
-            return true;
+            lock (Handlers)
+            {
+                if (Handlers.ContainsKey(groupId)) return false;
+
+                Handlers[groupId] = handler;
+                return true;
+            }
         }
 
 #pragma warning disable 1998
         protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            if (Handlers.Count == 0) return PluginTaskState.NoResponse;
-
-            var groupId = message.GroupInfo!.Id;
-
-            if (!Handlers.ContainsKey(groupId)) return PluginTaskState.NoResponse;
-
-            var handler = Handlers[groupId];
-
-            lock (handler)
+            lock (Handlers)
             {
+                if (Handlers.Count == 0) return PluginTaskState.NoResponse;
+
+                var groupId = message.GroupInfo!.Id;
+
+                if (!Handlers.ContainsKey(groupId)) return PluginTaskState.NoResponse;
+
+                var handler = Handlers[groupId];
                 switch (handler(session, message).Result)
                 {
                     // 完成了，删除 handler
