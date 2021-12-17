@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using QQBOT.Core.MiraiHttp;
 using QQBOT.Core.MiraiHttp.Entity;
@@ -126,20 +127,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     return PluginTaskState.CompletedTask;
                 }
 
-                var search = SearchSongByAlias(m);
-
-                if (long.TryParse(m, out var id))
-                {
-                    search.AddRange(SongList.Where(s => s.Id == id));
-                }
-
-                if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (long.TryParse(m.TrimStart("id").Trim(), out var songId))
-                    {
-                        search = SongList.Where(s => s.Id == songId).ToList();
-                    }
-                }
+                var search = SearchSong(m);
 
                 var procResult =
                     new Func<MaiMaiSong, Task<PluginTaskState>>(s => ProcSongGuessResult(session, msg, song, s));
@@ -252,11 +240,20 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             }
         }
 
-        private MessageChain StartSongCoverGuess(Message message)
+        private MessageChain StartSongCoverGuess(Message message, Regex categoryFilter=null)
         {
             var groupId = message.GroupInfo!.Id;
 
-            var song = SongList.RandomTake();
+            var songs = SongList
+                .Where(s => categoryFilter?.IsMatch(s.Info.Genre) ?? true)
+                .ToList();
+
+            if (!songs.Any())
+            {
+                return MessageChain.FromPlainText("None");
+            }
+            
+            var song = songs.RandomTake();
             
             var cover = ResourceManager.GetCover(song.Id, false);
 
@@ -306,15 +303,23 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                             $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")));
                     break;
                 }
-                case "":
-                    yield return StartSongCoverGuess(message);
-                    break;
                 case "v2":
                 {
                     foreach (var res in StartSongSoundGuess(message))
                     {
                         yield return res;
                     }
+                    break;
+                }
+                default:
+                {
+                    var filter = param.StartsWith("c:", StringComparison.OrdinalIgnoreCase)
+                        ? param[2..].IsRegex()
+                            ? new Regex(param[2..], RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace)
+                            : null
+                        : null;
+
+                    yield return StartSongCoverGuess(message, filter);
                     break;
                 }
             }

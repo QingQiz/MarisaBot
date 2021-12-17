@@ -104,6 +104,31 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             }
         }
 
+        private List<MaiMaiSong> SearchSong(string m)
+        {
+            if (string.IsNullOrEmpty(m))
+            {
+                return new List<MaiMaiSong>();
+            }
+                
+            var search = SearchSongByAlias(m);
+
+            if (long.TryParse(m, out var id))
+            {
+                search.AddRange(SongList.Where(s => s.Id == id));
+            }
+
+            if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
+            {
+                if (long.TryParse(m.TrimStart("id").Trim(), out var songId))
+                {
+                    search = SongList.Where(s => s.Id == songId).ToList();
+                }
+            }
+
+            return search;
+        }
+
         private List<MaiMaiSong> SearchSongByAlias(string alias)
         {
             if (string.IsNullOrWhiteSpace(alias))

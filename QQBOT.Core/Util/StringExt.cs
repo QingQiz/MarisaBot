@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace QQBOT.Core.Util
 {
@@ -31,6 +32,19 @@ namespace QQBOT.Core.Util
         {
             return prefixes.Select((p, i) => (p, i))
                 .Where(x => msg.StartsWith(x.p, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool IsRegex(this string regex)
+        {
+            try
+            {
+                var _ = Regex.Match("", regex);
+                return true;
+            }
+            catch (RegexParseException)
+            {
+                return false;
+            }
         }
     }
 }
