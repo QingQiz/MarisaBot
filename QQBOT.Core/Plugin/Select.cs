@@ -31,18 +31,12 @@ namespace QQBOT.Core.Plugin
 
             var match = regex.Match(msg);
 
-            if (match.Groups.Count != 3)
-            {
-                return null;
-            }
+            if (match.Groups.Count != 3) return null;
 
             var a = p + match.Groups[1].Value;
             var b = match.Groups[2].Value;
 
-            if (b[0] == '不')
-            {
-                return (a, b);
-            }
+            if (b[0] == '不') return (a, b);
             return b.TrimStart(verb) == null ? (a, p + b) : (a, b);
         }
 

@@ -7,12 +7,12 @@ using QQBOT.Core.Plugin.PluginEntity;
 
 namespace QQBOT.Core.Plugin
 {
-    [MiraiPlugin(priority:1000)]
+    [MiraiPlugin(1000)]
     public class Dialog : PluginBase
     {
         public new delegate Task<PluginTaskState> MessageHandler(MiraiHttpSession session, Message message);
 
-        private static readonly Dictionary<long, MessageHandler> Handlers = new ();
+        private static readonly Dictionary<long, MessageHandler> Handlers = new();
 
         public static bool AddHandler(long groupId, MessageHandler handler)
         {

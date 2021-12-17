@@ -21,7 +21,7 @@ namespace QQBOT.Core.Plugin
     {
         protected virtual async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
-            var mc  = await MessageHandlerWrapper(session, message, MiraiMessageType.FriendMessage);
+            var mc = await MessageHandlerWrapper(session, message, MiraiMessageType.FriendMessage);
 
             if (mc == null) return PluginTaskState.NoResponse;
 
@@ -33,12 +33,13 @@ namespace QQBOT.Core.Plugin
                 proceed = true;
                 await session.SendFriendMessage(new Message(m), message.Sender!.Id);
             }
+
             return proceed ? PluginTaskState.CompletedTask : PluginTaskState.NoResponse;
         }
 
         protected virtual async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            var mc  = await MessageHandlerWrapper(session, message, MiraiMessageType.GroupMessage);
+            var mc = await MessageHandlerWrapper(session, message, MiraiMessageType.GroupMessage);
 
             if (mc == null) return PluginTaskState.NoResponse;
 
@@ -52,6 +53,7 @@ namespace QQBOT.Core.Plugin
                 proceed = true;
                 await session.SendGroupMessage(new Message(m), message.GroupInfo!.Id, m.CanReference ? source : null);
             }
+
             return proceed ? PluginTaskState.CompletedTask : PluginTaskState.NoResponse;
         }
 
@@ -82,10 +84,7 @@ namespace QQBOT.Core.Plugin
         public Task MessageHandlerWrapper(MiraiHttpSession session, Message message, MiraiMessageType type,
             ref PluginTaskState state)
         {
-            if (state == PluginTaskState.CompletedTask)
-            {
-                return Task.CompletedTask;
-            }
+            if (state == PluginTaskState.CompletedTask) return Task.CompletedTask;
 
             state = type switch
             {
@@ -101,13 +100,10 @@ namespace QQBOT.Core.Plugin
 
         public Task EventHandlerWrapper(MiraiHttpSession session, dynamic data, ref PluginTaskState state)
         {
-            if (state == PluginTaskState.CompletedTask)
-            {
-                return Task.CompletedTask;
-            }
+            if (state == PluginTaskState.CompletedTask) return Task.CompletedTask;
 
             state = EventHandler(session, data).Result;
-            
+
             return Task.CompletedTask;
         }
 
@@ -118,7 +114,8 @@ namespace QQBOT.Core.Plugin
         /// <param name="message"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        protected virtual async Task<IAsyncEnumerable<MessageChain>> MessageHandlerWrapper(MiraiHttpSession session, Message message, MiraiMessageType type)
+        protected virtual async Task<IAsyncEnumerable<MessageChain>> MessageHandlerWrapper(MiraiHttpSession session,
+            Message message, MiraiMessageType type)
         {
             try
             {
@@ -127,13 +124,11 @@ namespace QQBOT.Core.Plugin
             catch (Exception e)
             {
                 if (message.GroupInfo == null)
-                {
-                    await session.SendFriendMessage(new Message(MessageChain.FromPlainText(e.ToString())), message.Sender!.Id);
-                }
+                    await session.SendFriendMessage(new Message(MessageChain.FromPlainText(e.ToString())),
+                        message.Sender!.Id);
                 else
-                {
-                    await session.SendGroupMessage(new Message(MessageChain.FromPlainText(e.ToString())), message.GroupInfo!.Id);
-                }
+                    await session.SendGroupMessage(new Message(MessageChain.FromPlainText(e.ToString())),
+                        message.GroupInfo!.Id);
                 throw;
             }
         }

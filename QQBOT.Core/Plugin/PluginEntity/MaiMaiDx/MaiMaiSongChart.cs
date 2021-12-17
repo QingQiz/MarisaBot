@@ -10,10 +10,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
         public MaiMaiSongChart(dynamic data)
         {
             Charter = data.charter;
-            foreach (var n in data.notes)
-            {
-                Notes.Add(n);
-            }
+            foreach (var n in data.notes) Notes.Add(n);
         }
     }
 }

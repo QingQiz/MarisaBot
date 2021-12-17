@@ -23,26 +23,20 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             {
                 ImgCache[imgName] = (Bitmap)Image.FromFile($"{imgPath}/{imgName}");
 
-                if (width != 0 && height != 0)
-                {
-                    ImgCache[imgName] = ImgCache[imgName].Resize(width, height);
-                }
-
+                if (width != 0 && height != 0) ImgCache[imgName] = ImgCache[imgName].Resize(width, height);
             }
 
             var ret = ImgCache[imgName].Copy();
 
             if (width != 0 && height != 0)
                 if (ret.Width != width || ret.Height != height)
-                {
                     ret = ret.Resize(width, height);
-                }
 
             ImgCache[imgName] = ret;
             return ret.Copy();
         }
 
-        public static Bitmap GetCover(long songId, bool resize=true)
+        public static Bitmap GetCover(long songId, bool resize = true)
         {
             var coverPath = ResourcePath + "/cover";
 
@@ -50,19 +44,12 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             {
                 var cp = $"{coverPath}/{songId}.png";
 
-                if (!File.Exists(cp))
-                {
-                    cp = cp[..^3] + "jpg";
-                }
+                if (!File.Exists(cp)) cp = cp[..^3] + "jpg";
 
                 if (!File.Exists(cp))
-                {
                     CoverCache[songId] = GetCover(1000);
-                }
                 else
-                {
                     CoverCache[songId] = (Bitmap)Image.FromFile(cp);
-                }
             }
 
             return resize ? CoverCache[songId].Resize(200, 200) : CoverCache[songId];

@@ -5,31 +5,31 @@
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>QQBOT.Core</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+    </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Flurl.Http" Version="3.2.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.7">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.7" />
-      <PackageReference Include="NAudio.Core" Version="2.0.0" />
-      <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+        <PackageReference Include="Flurl.Http" Version="3.2.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.7">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.7"/>
+        <PackageReference Include="NAudio.Core" Version="2.0.0"/>
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj"/>
     </ItemGroup>
 
-<!--    <ItemGroup>-->
-<!--        <Content Include="Plugin\PluginResource\**\*">-->
-<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
-<!--        </Content>-->
-<!--    </ItemGroup>-->
+    <!--    <ItemGroup>-->
+    <!--        <Content Include="Plugin\PluginResource\**\*">-->
+    <!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
+    <!--        </Content>-->
+    <!--    </ItemGroup>-->
 
     <ItemGroup>
-      <Folder Include="Plugin\PluginResource\MaiMaiDx" />
+        <Folder Include="Plugin\PluginResource\MaiMaiDx"/>
     </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@ namespace QQBOT.Core.Util
 {
     public static class ListExt
     {
-        private static readonly Random Rand = new ();
+        private static readonly Random Rand = new();
 
         public static T RandomTake<T>(this List<T> list)
         {

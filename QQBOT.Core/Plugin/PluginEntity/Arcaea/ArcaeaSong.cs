@@ -24,23 +24,20 @@ namespace QQBOT.Core.Plugin.PluginEntity.Arcaea
 
         public ArcaeaSong(dynamic d)
         {
-            Id            = d.id;
-            Title         = d.title;
-            Author        = d.author;
-            Bpm           = d.bpm;
-            Length        = d.length;
-            Level         = new List<string>();
-            SongPack      = d.song_pack;
+            Id             = d.id;
+            Title          = d.title;
+            Author         = d.author;
+            Bpm            = d.bpm;
+            Length         = d.length;
+            Level          = new List<string>();
+            SongPack       = d.song_pack;
             _coverFileName = d.cover_name;
 
-            foreach (var l in d.level)
-            {
-                Level.Add(l);
-            }
+            foreach (var l in d.level) Level.Add(l);
         }
 
         #region Drawer
-        
+
         public string GetImage()
         {
             var       bgColor1 = Color.FromArgb(237, 237, 237);
@@ -54,13 +51,15 @@ namespace QQBOT.Core.Plugin.PluginEntity.Arcaea
 
             using (var g = Graphics.FromImage(background))
             {
-                void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth, bool center=true)
+                void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
+                    bool center = true)
                 {
                     g.DrawImage(
                         ImageDraw.GetStringCard(key, 21, Color.Black, bgColor1, keyWidth, height, center: true),
                         x, y);
                     g.DrawImage(
-                        ImageDraw.GetStringCard(value, 21, Color.Black, bgColor2, totalWidth - (x + keyWidth), height, center: center),
+                        ImageDraw.GetStringCard(value, 21, Color.Black, bgColor2, totalWidth - (x + keyWidth), height,
+                            center: center),
                         x + keyWidth, y);
                 }
 

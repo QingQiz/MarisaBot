@@ -8,15 +8,17 @@ namespace QQBOT.EntityFrameworkCore.Entity.Plugin.MaiMaiDx
     [Index(nameof(UId))]
     public class MaiMaiDxGuess
     {
-        [Key]
-        public long Id { get; set; }
+        [Key] public long Id { get; set; }
         public long UId { get; set; }
         public string Name { get; set; }
         public int TimesStart { get; set; }
         public int TimesCorrect { get; set; }
         public int TimesWrong { get; set; }
 
-        public MaiMaiDxGuess() {}
+        public MaiMaiDxGuess()
+        {
+        }
+
         public MaiMaiDxGuess(long uid, string name)
         {
             UId          = uid;

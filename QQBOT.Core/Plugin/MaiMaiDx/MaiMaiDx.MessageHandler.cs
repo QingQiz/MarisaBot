@@ -9,30 +9,29 @@ using QQBOT.Core.Util;
 
 namespace QQBOT.Core.Plugin.MaiMaiDx
 {
-    [MiraiPlugin(priority:1)]
+    [MiraiPlugin(1)]
     public partial class MaiMaiDx : PluginBase
     {
         protected override async IAsyncEnumerable<MessageChain> MessageHandler(Message message, MiraiMessageType type)
         {
             string[] commandPrefix = { "maimai", "mai", "舞萌" };
             string[] subCommand =
-                {
+            {
                 //    0       1        2      3       4      5       6      7      8        9       10      11     12
-                    "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list",
+                "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list",
                 //    13      14     15      16
-                    "rand", "猜歌", "猜曲", "alias"
-                };
+                "rand", "猜歌", "猜曲", "alias"
+            };
 
             var sender = message.Sender;
             var msg    = message.MessageChain!.PlainText.Trim().TrimStart(commandPrefix);
 
-            
+
             if (string.IsNullOrEmpty(msg)) yield return null;
 
             var prefixes = msg.CheckPrefix(subCommand);
 
             foreach (var (prefix, index) in prefixes)
-            {
                 switch (index)
                 {
                     case 0:
@@ -124,10 +123,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                                 .OrderBy(x => x.Id)
                                 .Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}"));
 
-                        if (list.Count > 15)
-                        {
-                            str += "\n" + $"太多了（{list.Count}），随机给出15个";
-                        }
+                        if (list.Count > 15) str += "\n" + $"太多了（{list.Count}），随机给出15个";
 
                         yield return MessageChain.FromPlainText(str);
                         break;
@@ -137,10 +133,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     {
                         var param = msg.TrimStart(prefix).Trim();
 
-                        foreach (var res in SongGuessMessageHandler(message, param))
-                        {
-                            yield return res;
-                        }
+                        foreach (var res in SongGuessMessageHandler(message, param)) yield return res;
                         break;
                     }
                     case 16: // alias
@@ -150,7 +143,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                         break;
                     }
                 }
-            }
 
             yield return null;
         }

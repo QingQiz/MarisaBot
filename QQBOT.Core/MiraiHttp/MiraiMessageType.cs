@@ -2,6 +2,9 @@
 {
     public enum MiraiMessageType
     {
-        GroupMessage, FriendMessage, TempMessage, StrangerMessage
+        GroupMessage,
+        FriendMessage,
+        TempMessage,
+        StrangerMessage
     }
 }

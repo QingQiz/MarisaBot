@@ -31,10 +31,7 @@ namespace QQBOT.Core.Plugin
                     var (time, t) = _cache[id];
                     if (DateTime.Now - time < TimeSpan.FromMinutes(5))
                     {
-                        if (t >= Times)
-                        {
-                            return true;
-                        }
+                        if (t >= Times) return true;
 
                         _cache[id] = (DateTime.Now, t + 1);
                         return false;
@@ -51,10 +48,7 @@ namespace QQBOT.Core.Plugin
 
         private string ChiSha(long id)
         {
-            if (Zuo(id))
-            {
-                return "生吃你妈 问这么多还不知道吃啥饿死你个臭傻逼";
-            }
+            if (Zuo(id)) return "生吃你妈 问这么多还不知道吃啥饿死你个臭傻逼";
 
             var f = F.Split(' ');
             var r = new Random().Next(0, f.Length);

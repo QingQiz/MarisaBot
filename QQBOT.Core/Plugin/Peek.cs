@@ -9,7 +9,8 @@ namespace QQBOT.Core.Plugin
     public class Peek : PluginBase
     {
         private bool _peekEnabled = true;
-        private string CaptureScreen(bool hide=true)
+
+        private string CaptureScreen(bool hide = true)
         {
             const int w = 1440;
             const int h = 810;
@@ -34,10 +35,7 @@ namespace QQBOT.Core.Plugin
             var msg      = message.MessageChain!.PlainText.Trim();
             var senderId = message.Sender!.Id;
 
-            if (!msg.StartsWith(":peek"))
-            {
-                yield return null;
-            }
+            if (!msg.StartsWith(":peek")) yield return null;
 
             switch (msg.TrimStart(":peek").Trim())
             {

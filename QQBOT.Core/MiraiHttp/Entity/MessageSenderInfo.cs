@@ -1,5 +1,4 @@
-﻿
-#nullable enable
+﻿#nullable enable
 namespace QQBOT.Core.MiraiHttp.Entity
 {
     public class MessageSenderInfo

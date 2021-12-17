@@ -77,24 +77,22 @@ namespace QQBOT.Core.Util
                 var p = (byte*)(void*)scan0;
 
                 for (var y = 0; y < height; y++)
+                for (var x = 0; x < width; x++)
                 {
-                    for (var x = 0; x < width; x++)
+                    var idx   = y * stride + x * bppModifier;
+                    int red   = p![idx + 2];
+                    int green = p[idx  + 1];
+                    int blue  = p[idx];
+                    if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
+                        Math.Abs(green - blue)  > minDiversion)
                     {
-                        var idx   = y * stride + x * bppModifier;
-                        int red   = p![idx + 2];
-                        int green = p[idx  + 1];
-                        int blue  = p[idx];
-                        if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
-                            Math.Abs(green - blue)  > minDiversion)
-                        {
-                            totals[2] += red;
-                            totals[1] += green;
-                            totals[0] += blue;
-                        }
-                        else
-                        {
-                            dropped++;
-                        }
+                        totals[2] += red;
+                        totals[1] += green;
+                        totals[0] += blue;
+                    }
+                    else
+                    {
+                        dropped++;
                     }
                 }
             }
@@ -182,10 +180,7 @@ namespace QQBOT.Core.Util
 
             g.DrawString(string.IsNullOrEmpty(text) ? "-" : text, font, new SolidBrush(fontColor), x, y);
 
-            if (underLine)
-            {
-                g.DrawLine(new Pen(Color.Gray, 2), 0, height, width, height);
-            }
+            if (underLine) g.DrawLine(new Pen(Color.Gray, 2), 0, height, width, height);
 
             return background;
         }
@@ -198,14 +193,16 @@ namespace QQBOT.Core.Util
             return Convert.ToBase64String(ms.ToArray());
         }
 
-        public static unsafe Bitmap Blur(this Bitmap image, Rectangle rectangle, Int32 blurSize)
+        public static unsafe Bitmap Blur(this Bitmap image, Rectangle rectangle, int blurSize)
         {
             var blurred = new Bitmap(image.Width, image.Height);
 
             // make an exact copy of the bitmap provided
             using (var graphics = Graphics.FromImage(blurred))
+            {
                 graphics.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height),
                     new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
+            }
 
             // Lock the bitmap's bits
             var blurredData = blurred.LockBits(new Rectangle(0, 0, image.Width, image.Height),
@@ -219,47 +216,41 @@ namespace QQBOT.Core.Util
 
             // look at every pixel in the blur rectangle
             for (var xx = rectangle.X; xx < rectangle.X + rectangle.Width; xx++)
+            for (var yy = rectangle.Y; yy < rectangle.Y + rectangle.Height; yy++)
             {
-                for (var yy = rectangle.Y; yy < rectangle.Y + rectangle.Height; yy++)
+                int avgR           = 0, avgG = 0, avgB = 0;
+                var blurPixelCount = 0;
+
+                // average the color of the red, green and blue for each pixel in the
+                // blur size while making sure you don't go outside the image bounds
+                for (var x = xx; x < xx + blurSize && x < image.Width; x++)
+                for (var y = yy; y < yy + blurSize && y < image.Height; y++)
                 {
-                    int avgR           = 0, avgG = 0, avgB = 0;
-                    var blurPixelCount = 0;
+                    // Get pointer to RGB
+                    var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
 
-                    // average the color of the red, green and blue for each pixel in the
-                    // blur size while making sure you don't go outside the image bounds
-                    for (var x = xx; (x < xx + blurSize && x < image.Width); x++)
-                    {
-                        for (var y = yy; (y < yy + blurSize && y < image.Height); y++)
-                        {
-                            // Get pointer to RGB
-                            var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
+                    avgB += data[0]; // Blue
+                    avgG += data[1]; // Green
+                    avgR += data[2]; // Red
 
-                            avgB += data[0]; // Blue
-                            avgG += data[1]; // Green
-                            avgR += data[2]; // Red
+                    blurPixelCount++;
+                }
 
-                            blurPixelCount++;
-                        }
-                    }
+                avgR /= blurPixelCount;
+                avgG /= blurPixelCount;
+                avgB /= blurPixelCount;
 
-                    avgR /= blurPixelCount;
-                    avgG /= blurPixelCount;
-                    avgB /= blurPixelCount;
+                // now that we know the average for the blur size, set each pixel to that color
+                for (var x = xx; x < xx + blurSize && x < image.Width && x < rectangle.Width; x++)
+                for (var y = yy; y < yy + blurSize && y < image.Height && y < rectangle.Height; y++)
+                {
+                    // Get pointer to RGB
+                    var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
 
-                    // now that we know the average for the blur size, set each pixel to that color
-                    for (var x = xx; x < xx + blurSize && x < image.Width && x < rectangle.Width; x++)
-                    {
-                        for (var y = yy; y < yy + blurSize && y < image.Height && y < rectangle.Height; y++)
-                        {
-                            // Get pointer to RGB
-                            var data = scan0 + y * blurredData.Stride + x * bitsPerPixel / 8;
-
-                            // Change values
-                            data[0] = (byte)avgB;
-                            data[1] = (byte)avgG;
-                            data[2] = (byte)avgR;
-                        }
-                    }
+                    // Change values
+                    data[0] = (byte)avgB;
+                    data[1] = (byte)avgG;
+                    data[2] = (byte)avgR;
                 }
             }
 

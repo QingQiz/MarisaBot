@@ -13,23 +13,17 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
         public readonly string Nickname;
         public long Rating;
         public string Username;
-        
+
 
         public DxRating(dynamic data)
         {
             Rating           = data.rating;
             AdditionalRating = data.additional_rating;
             Nickname         = data.nickname;
-            foreach (var d in data.charts.dx)
-            {
-                DxScores.Add(new SongScore(d));
-            }
+            foreach (var d in data.charts.dx) DxScores.Add(new SongScore(d));
 
-            foreach (var d in data.charts.sd)
-            {
-                SdScores.Add(new SongScore(d));
-            }
-            
+            foreach (var d in data.charts.sd) SdScores.Add(new SongScore(d));
+
             DxScores = DxScores.OrderByDescending(s => s.Rating).ToList();
             SdScores = SdScores.OrderByDescending(s => s.Rating).ToList();
         }
@@ -44,7 +38,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 Color.FromArgb(255, 168, 1),
                 Color.FromArgb(255, 90, 102),
                 Color.FromArgb(198, 79, 228),
-                Color.FromArgb(219, 170, 255),
+                Color.FromArgb(219, 170, 255)
             };
 
             var (coverBackground, coverBackgroundAvgColor) = ResourceManager.GetCoverBackground(score.Id);
@@ -54,15 +48,16 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             using (var g = Graphics.FromImage(card))
             {
                 // 歌曲类别：DX 和 标准
-                g.DrawImage(ResourceManager.GetImage(score.Type == "DX" ? "type_deluxe.png" : "type_standard.png"), 0, 0);
-                
+                g.DrawImage(ResourceManager.GetImage(score.Type == "DX" ? "type_deluxe.png" : "type_standard.png"), 0,
+                    0);
+
                 // FC 标志
                 var fcImg = ResourceManager.GetImage(string.IsNullOrEmpty(score.Fc)
                     ? "icon_blank.png"
                     : $"icon_{score.Fc.ToLower()}.png", 32, 32);
                 g.DrawImage(fcImg, 130, 0);
 
-                
+
                 // FS 标志
                 var fsImg = ResourceManager.GetImage(string.IsNullOrEmpty(score.Fs)
                     ? "icon_blank.png"
@@ -75,7 +70,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 PaddingLeft = 12,
                 PaddingTop  = 17,
                 Width       = 7,
-                Height      = 167,
+                Height      = 167
             };
 
             using (var g = Graphics.FromImage(coverBackground))
@@ -84,7 +79,8 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
                 // 难度指示
                 const int borderWidth = 1;
-                g.FillRectangle(new SolidBrush(Color.White), levelBar.PaddingLeft - borderWidth, levelBar.PaddingTop - borderWidth,
+                g.FillRectangle(new SolidBrush(Color.White), levelBar.PaddingLeft - borderWidth,
+                    levelBar.PaddingTop - borderWidth,
                     levelBar.Width + borderWidth * 2, levelBar.Height + borderWidth * 2);
                 g.FillRectangle(new SolidBrush(color[score.LevelIdx]), levelBar.PaddingLeft, levelBar.PaddingTop,
                     levelBar.Width, levelBar.Height);
@@ -92,16 +88,13 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 // 歌曲标题
                 using (var font = new Font("MotoyaLMaru", 27, FontStyle.Bold))
                 {
-                    var title = score.Title;
-                    while (g.MeasureString(title, font).Width > 400 - 25)
-                    {
-                        title = title[..^4] + "...";
-                    }
+                    var title                                                   = score.Title;
+                    while (g.MeasureString(title, font).Width > 400 - 25) title = title[..^4] + "...";
                     g.DrawString(title, font, fontColor, 25, 15);
                 }
 
                 var achievement = score.Achievement.ToString("F4").Split('.');
-                
+
                 // 达成率整数部分
                 using (var font = new Font("Consolas", 36))
                 {
@@ -115,7 +108,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 }
 
                 var rank = ResourceManager.GetImage($"rank_{score.Rank.ToLower()}.png");
-                
+
                 // rank 标志
                 g.DrawImage(rank.Resize(0.8), 25, 110);
 
@@ -132,7 +125,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                     g.DrawString(">", font, fontColor, 140, 110);
                     g.DrawString(score.Rating.ToString(), font, fontColor, 162, 110);
                 }
-                
+
                 // card
                 g.DrawImage(card, 25, 155);
             }
@@ -142,25 +135,25 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
         private Bitmap GetB40Card()
         {
-            const int column     = 5;
-            const int row        = 8;
+            const int column = 5;
+            const int row    = 8;
 
             const int cardWidth  = 400;
             const int cardHeight = 200;
 
-            const int paddingH    = 30;
-            const int paddingV    = 30;
+            const int paddingH = 30;
+            const int paddingV = 30;
 
             const int bgWidth  = cardWidth  * column + paddingH * (column + 1);
             const int bgHeight = cardHeight * row    + paddingV * (row    + 4);
 
 
             var background = new Bitmap(bgWidth, bgHeight);
-            
+
             using (var g = Graphics.FromImage(background))
             {
-                var pxInit  = paddingH;
-                var pyInit  = paddingV;
+                var pxInit = paddingH;
+                var pyInit = paddingV;
 
                 var px = pxInit;
                 var py = pyInit;
@@ -214,7 +207,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             var addRating = AdditionalRating;
             var name      = Nickname;
 
-            var r   = rating + addRating;
+            var r = rating + addRating;
 
             var num = r switch
             {
@@ -236,6 +229,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                     g.DrawImage(ResourceManager.GetImage($"num_{ra[i]}.png"), 170 + 29 * i, 20);
                 }
             }
+
             ratingCard = ratingCard.Resize(1.4);
 
             // 名字
@@ -264,8 +258,9 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 var dx = ResourceManager.GetImage("icon_dx.png");
                 g.DrawImage(dx.Resize(3.2), 500, 10);
             }
+
             nameCard = (Bitmap)nameCard.RoundCorners(20);
-            
+
             // 称号（显示底分和段位）
             var rainbowCard = ResourceManager.GetImage("rainbow.png");
             rainbowCard = rainbowCard.Resize((double)nameCard.Width / rainbowCard.Width + 0.05);
@@ -277,12 +272,13 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 }
             }
 
-            var userInfoCard = new Bitmap(nameCard.Width + 6, ratingCard.Height + nameCard.Height + rainbowCard.Height + 20);
+            var userInfoCard = new Bitmap(nameCard.Width + 6,
+                ratingCard.Height                        + nameCard.Height + rainbowCard.Height + 20);
 
             using (var g = Graphics.FromImage(userInfoCard))
             {
                 g.DrawImage(ratingCard, 0, 0);
-                g.DrawImage(nameCard, 3, ratingCard.Height + 10);
+                g.DrawImage(nameCard, 3, ratingCard.Height    + 10);
                 g.DrawImage(rainbowCard, 0, ratingCard.Height + nameCard.Height + 20);
             }
 
@@ -295,7 +291,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 g.DrawImage(dlx, 0, 20);
                 g.DrawImage(userInfoCard, userInfoCard.Height + 10, 20);
             }
-            
+
             return background;
         }
 
@@ -315,7 +311,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
             return background.ToB64();
         }
-        
+
         #endregion
     }
 }

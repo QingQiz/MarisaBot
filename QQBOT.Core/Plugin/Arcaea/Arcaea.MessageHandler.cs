@@ -7,27 +7,26 @@ using QQBOT.Core.Util;
 namespace QQBOT.Core.Plugin.Arcaea
 {
     [MiraiPlugin]
-    public partial class Arcaea: PluginBase
+    public partial class Arcaea : PluginBase
     {
         protected override async IAsyncEnumerable<MessageChain> MessageHandler(Message message, MiraiMessageType type)
         {
             string[] commandPrefix = { "arcaea", "arc", "阿卡伊" };
             string[] subCommand =
-                {
+            {
                 //    0      1       2        3      4      5
-                    "猜歌", "猜曲", "alias", "别名", "song", "id"
-                };
+                "猜歌", "猜曲", "alias", "别名", "song", "id"
+            };
 
             var sender = message.Sender;
             var msg    = message.MessageChain!.PlainText.Trim().TrimStart(commandPrefix);
 
-            
+
             if (string.IsNullOrEmpty(msg)) yield return null;
 
             var prefixes = msg.CheckPrefix(subCommand);
 
             foreach (var (prefix, index) in prefixes)
-            {
                 switch (index)
                 {
                     case 0:
@@ -71,7 +70,6 @@ namespace QQBOT.Core.Plugin.Arcaea
                         break;
                     }
                 }
-            }
 
             yield return null;
         }

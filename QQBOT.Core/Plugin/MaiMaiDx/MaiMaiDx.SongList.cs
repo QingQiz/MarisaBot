@@ -20,7 +20,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
             get
             {
                 if (_songList == null)
-                {
                     try
                     {
                         var data = "https://www.diving-fish.com/api/maimaidxprober/music_data"
@@ -28,10 +27,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                             .Result;
 
                         _songList = new List<MaiMaiSong>();
-                        foreach (var d in data)
-                        {
-                            _songList.Add(new MaiMaiSong(d));
-                        }
+                        foreach (var d in data) _songList.Add(new MaiMaiSong(d));
                     }
                     catch
                     {
@@ -39,12 +35,8 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                             File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
                         ) as dynamic[];
                         _songList = new List<MaiMaiSong>();
-                        foreach (var d in data)
-                        {
-                            _songList.Add(new MaiMaiSong(d));
-                        }
+                        foreach (var d in data) _songList.Add(new MaiMaiSong(d));
                     }
-                }
 
                 return _songList;
             }
@@ -54,10 +46,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
         {
             var searchResult = SongList.FirstOrDefault(song => song.Id == songId);
 
-            if (searchResult == null)
-            {
-                return MessageChain.FromPlainText($"“未找到 ID 为 {songId} 的歌曲”");
-            }
+            if (searchResult == null) return MessageChain.FromPlainText($"“未找到 ID 为 {songId} 的歌曲”");
 
             return new MessageChain(new MessageData[]
             {
@@ -68,14 +57,11 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
         private List<MaiMaiSong> ListSongs(string param)
         {
-            if (string.IsNullOrEmpty(param))
-            {
-                return SongList;
-            }
+            if (string.IsNullOrEmpty(param)) return SongList;
 
             string[] subCommand =
-            //      0       1          2        3      4
-                { "base", "level", "charter", "bpm", "lv"};
+                //      0       1          2        3      4
+                { "base", "level", "charter", "bpm", "lv" };
             var res = param.CheckPrefix(subCommand).ToList();
 
             if (!res.Any()) return new List<MaiMaiSong>();
@@ -92,17 +78,14 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     {
                         if (double.TryParse(param1.Split('-')[0], out var @base1) &&
                             double.TryParse(param1.Split('-')[1], out var @base2))
-                        {
                             return SongList.Where(s => s.Constants.Any(b => b >= base1 && b <= base2)).ToList();
-                        }
                     }
                     else
                     {
                         if (double.TryParse(param1, out var @base))
-                        {
                             return SongList.Where(s => s.Constants.Contains(@base)).ToList();
-                        }
                     }
+
                     return new List<MaiMaiSong>();
                 }
                 case 4:
@@ -127,17 +110,13 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     {
                         if (long.TryParse(param1.Split('-')[0], out var bpm1) &&
                             long.TryParse(param1.Split('-')[1], out var bpm2))
-                        {
                             return SongList.Where(s => s.Info.Bpm >= bpm1 && s.Info.Bpm <= bpm2).ToList();
-                        }
                     }
                     else
                     {
-                        if (long.TryParse(param1, out var bpm))
-                        {
-                            return SongList.Where(s => s.Info.Bpm == bpm).ToList();
-                        }
+                        if (long.TryParse(param1, out var bpm)) return SongList.Where(s => s.Info.Bpm == bpm).ToList();
                     }
+
                     return new List<MaiMaiSong>();
                 }
             }

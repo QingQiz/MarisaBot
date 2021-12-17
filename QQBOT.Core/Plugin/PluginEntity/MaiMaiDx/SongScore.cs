@@ -2,7 +2,6 @@
 {
     public class SongScore
     {
-        
         public double Achievement;
         public double Constant;
         public long DxScore;

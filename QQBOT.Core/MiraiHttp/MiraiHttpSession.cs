@@ -19,8 +19,10 @@ namespace QQBOT.Core.MiraiHttp
         private readonly string _authKey;
 
         private string _session;
-        
-        private delegate Task MessageHandler(MiraiHttpSession session, Message message, MiraiMessageType type, ref PluginTaskState state);
+
+        private delegate Task MessageHandler(MiraiHttpSession session, Message message, MiraiMessageType type,
+            ref PluginTaskState state);
+
         private delegate Task EventHandler(MiraiHttpSession session, dynamic message, ref PluginTaskState state);
 
         private event MessageHandler OnMessage;
@@ -28,10 +30,7 @@ namespace QQBOT.Core.MiraiHttp
 
         private void CheckResponse(dynamic response)
         {
-            if (response.code != 0)
-            {
-                throw new Exception($"[Code {response.code}] {response.msg}");
-            }
+            if (response.code != 0) throw new Exception($"[Code {response.code}] {response.msg}");
         }
 
         public long Id => _qq;
@@ -63,7 +62,7 @@ namespace QQBOT.Core.MiraiHttp
 
             CheckResponse(await
                 (await $"{_serverAddress}/bind".PostJsonAsync(new { sessionKey = _session, qq = _qq }))
-            .GetJsonAsync());
+                .GetJsonAsync());
         }
 
         public async Task Run()
@@ -84,7 +83,7 @@ namespace QQBOT.Core.MiraiHttp
                     .SetQueryParams(new
                     {
                         sessionKey = _session,
-                        count = msgCnt.data
+                        count      = msgCnt.data
                     }).GetJsonAsync();
                 CheckResponse(msg);
 
@@ -95,7 +94,7 @@ namespace QQBOT.Core.MiraiHttp
                         EventId   = Guid.NewGuid(),
                         EventType = m.type,
                         Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m.messageChain),
-                        Time      = DateTime.Now,
+                        Time      = DateTime.Now
                     };
 
                     var message = new Message
@@ -110,19 +109,19 @@ namespace QQBOT.Core.MiraiHttp
                     {
                         case "FriendMessage":
                             message.GroupInfo = null;
-                            message.Sender = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+                            message.Sender    = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
 
-                            log.UserId = message.Sender.Id.ToString();
-                            log.UserName = message.Sender.Name;
+                            log.UserId    = message.Sender.Id.ToString();
+                            log.UserName  = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
                             break;
                         case "StrangerMessage":
                             message.GroupInfo = null;
-                            message.Sender = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+                            message.Sender    = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
 
-                            log.UserId = message.Sender.Id.ToString();
-                            log.UserName = message.Sender.Name;
+                            log.UserId    = message.Sender.Id.ToString();
+                            log.UserName  = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
 
                             mType = MiraiMessageType.StrangerMessage;
@@ -133,12 +132,12 @@ namespace QQBOT.Core.MiraiHttp
                             message.Sender = new MessageSenderInfo(m.sender.id, m.sender.memberName,
                                 permission: m.sender.permission);
 
-                            log.UserId = message.Sender.Id.ToString();
-                            log.UserName = message.Sender.Name;
+                            log.UserId    = message.Sender.Id.ToString();
+                            log.UserName  = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
                             log.GroupName = message.GroupInfo?.Name;
-                            log.GroupId = message.GroupInfo?.Id.ToString();
-                            
+                            log.GroupId   = message.GroupInfo?.Id.ToString();
+
                             mType = MiraiMessageType.GroupMessage;
                             break;
                         case "TempMessage":
@@ -147,11 +146,11 @@ namespace QQBOT.Core.MiraiHttp
                             message.Sender = new MessageSenderInfo(m.sender.id, m.sender.memberName,
                                 permission: m.sender.permission);
 
-                            log.UserId = message.Sender.Id.ToString();
-                            log.UserName = message.Sender.Name;
+                            log.UserId    = message.Sender.Id.ToString();
+                            log.UserName  = message.Sender.Name;
                             log.UserAlias = message.Sender.Remark;
                             log.GroupName = message.GroupInfo?.Name;
-                            log.GroupId = message.GroupInfo?.Id.ToString();
+                            log.GroupId   = message.GroupInfo?.Id.ToString();
 
                             mType = MiraiMessageType.TempMessage;
                             break;
@@ -176,7 +175,7 @@ namespace QQBOT.Core.MiraiHttp
                         EventId   = Guid.NewGuid(),
                         EventType = m.type,
                         Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m),
-                        Time      = DateTime.Now,
+                        Time      = DateTime.Now
                     };
 
                     var tState = PluginTaskState.NoResponse;

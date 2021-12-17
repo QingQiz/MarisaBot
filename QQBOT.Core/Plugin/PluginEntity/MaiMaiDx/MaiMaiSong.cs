@@ -24,20 +24,11 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
             Info  = new MaiMaiSongInfo(data.basic_info);
 
             // 好像只能这样写。。。好丑。。。
-            foreach (var c in data.ds)
-            {
-                Constants.Add(c);
-            }
+            foreach (var c in data.ds) Constants.Add(c);
 
-            foreach (var l in data.level)
-            {
-                Levels.Add(l);
-            }
+            foreach (var l in data.level) Levels.Add(l);
 
-            foreach (var c in data.charts)
-            {
-                Charts.Add(new MaiMaiSongChart(c));
-            }
+            foreach (var c in data.charts) Charts.Add(new MaiMaiSongChart(c));
         }
 
         #region Drawer
@@ -55,13 +46,15 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
 
             using (var g = Graphics.FromImage(background))
             {
-                void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth, bool center=false)
+                void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
+                    bool center = false)
                 {
                     g.DrawImage(
                         ImageDraw.GetStringCard(key, 21, Color.Black, bgColor1, keyWidth, height, center: true),
                         x, y);
                     g.DrawImage(
-                        ImageDraw.GetStringCard(value, 21, Color.Black, bgColor2, totalWidth - (x + keyWidth), height, center: center),
+                        ImageDraw.GetStringCard(value, 21, Color.Black, bgColor2, totalWidth - (x + keyWidth), height,
+                            center: center),
                         x + keyWidth, y);
                 }
 
@@ -108,7 +101,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 Color.FromArgb(255, 168, 1),
                 Color.FromArgb(255, 90, 102),
                 Color.FromArgb(198, 79, 228),
-                Color.FromArgb(219, 170, 255),
+                Color.FromArgb(219, 170, 255)
             };
 
             var background = new Bitmap(Type == "DX" ? 1200 : 1000, h * (Levels.Count + 1));
@@ -158,7 +151,8 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                             w, h, center: true), x, y);
                     x += w;
                     g.DrawImage(
-                        ImageDraw.GetStringCard(Charts[i].Notes.Sum().ToString(), 21, Color.Black, bgColor2, w, h, center: true),
+                        ImageDraw.GetStringCard(Charts[i].Notes.Sum().ToString(), 21, Color.Black, bgColor2, w, h,
+                            center: true),
                         x,
                         y);
 
@@ -198,7 +192,7 @@ namespace QQBOT.Core.Plugin.PluginEntity.MaiMaiDx
                 g.DrawImage(cd1, padding, padding);
                 g.DrawImage(cd2, padding, 3 * padding + cd1.Height);
             }
-            
+
             return background.ToB64();
         }
 

@@ -10,8 +10,10 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public MessageSenderInfo? Sender;
 
         public MessageChain? MessageChain;
-        
-        public Message() {}
+
+        public Message()
+        {
+        }
 
         public Message(IEnumerable<MessageData> message)
         {
@@ -26,7 +28,9 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public SourceMessage Source =>
             (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageType.Source) as SourceMessage)!;
 
-        public bool At(long target) =>
-            MessageChain!.Messages.Any(m => m.Type == MessageType.At && (m as AtMessage)!.Target == target);
+        public bool At(long target)
+        {
+            return MessageChain!.Messages.Any(m => m.Type == MessageType.At && (m as AtMessage)!.Target == target);
+        }
     }
 }

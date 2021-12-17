@@ -16,8 +16,8 @@ namespace QQBOT.Core.Plugin
             var mc = message.MessageChain!.PlainText;
 
             await using var dbContext = new BotDbContext();
-            const string    command1 = ":ts";
-            const string    command2 = ":te";
+            const string    command1  = ":ts";
+            const string    command2  = ":te";
             var             uid       = message.Sender!.Id;
 
             switch (mc)
@@ -49,6 +49,7 @@ namespace QQBOT.Core.Plugin
                                 MessageChain.FromPlainText($"Timer `{last}` started: {time:yyyy-MM-dd hh:mm:ss fff}")),
                             uid);
                     }
+
                     return PluginTaskState.CompletedTask;
                 }
                 case command2:

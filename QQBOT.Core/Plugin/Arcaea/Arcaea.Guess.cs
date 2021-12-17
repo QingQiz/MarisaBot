@@ -11,7 +11,8 @@ namespace QQBOT.Core.Plugin.Arcaea
 {
     public partial class Arcaea
     {
-        private static async Task<PluginTaskState> ProcSongGuessResult(MiraiHttpSession session, Message msg, ArcaeaSong song,
+        private static async Task<PluginTaskState> ProcSongGuessResult(MiraiHttpSession session, Message msg,
+            ArcaeaSong song,
             ArcaeaSong guess)
         {
             // 未知的歌，不算
@@ -28,7 +29,7 @@ namespace QQBOT.Core.Plugin.Arcaea
                 await session.SendGroupMessage(new Message(new MessageData[]
                 {
                     new PlainMessage($"你猜对了！正确答案：{song.Title}"),
-                    ImageMessage.FromBase64(song.GetImage()),
+                    ImageMessage.FromBase64(song.GetImage())
                 }), msg.GroupInfo!.Id, msg.Source!.Id);
 
                 return PluginTaskState.CompletedTask;
@@ -40,7 +41,8 @@ namespace QQBOT.Core.Plugin.Arcaea
             return PluginTaskState.ToBeContinued;
         }
 
-        private Func<MiraiHttpSession, Message, Task<PluginTaskState>> GenGuessDialogHandler(ArcaeaSong song, long groupId, DateTime startTime)
+        private Func<MiraiHttpSession, Message, Task<PluginTaskState>> GenGuessDialogHandler(ArcaeaSong song,
+            long groupId, DateTime startTime)
         {
             return async (session, msg) =>
             {
@@ -55,7 +57,7 @@ namespace QQBOT.Core.Plugin.Arcaea
                             new PlainMessage($"猜曲结束，正确答案：{song.Title}"),
                             ImageMessage.FromBase64(song.GetImage()),
                             new PlainMessage(
-                                $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者"),
+                                $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
                         }), groupId);
                         return PluginTaskState.CompletedTask;
                     }
@@ -69,14 +71,13 @@ namespace QQBOT.Core.Plugin.Arcaea
                             case 1:
                             {
                                 var cover = ResourceManager.GetCover(song.CoverFileName);
-                                
+
                                 await session.SendGroupMessage(new Message(new MessageData[]
                                 {
                                     new PlainMessage("封面裁剪："),
                                     ImageMessage.FromBase64(cover.RandomCut(cover.Width / 3, cover.Height / 3).ToB64())
                                 }), groupId);
                                 return PluginTaskState.ToBeContinued;
-                                
                             }
                         }
 
@@ -95,18 +96,11 @@ namespace QQBOT.Core.Plugin.Arcaea
 
                 var search = SearchSongByAlias(m);
 
-                if (long.TryParse(m, out var id))
-                {
-                    search.AddRange(SongList.Where(s => s.Id == id));
-                }
+                if (long.TryParse(m, out var id)) search.AddRange(SongList.Where(s => s.Id == id));
 
                 if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
-                {
                     if (long.TryParse(m.TrimStart("id").Trim(), out var songId))
-                    {
                         search = SongList.Where(s => s.Id == songId).ToList();
-                    }
-                }
 
                 var procResult =
                     new Func<ArcaeaSong, Task<PluginTaskState>>(s => ProcSongGuessResult(session, msg, song, s));
@@ -127,7 +121,8 @@ namespace QQBOT.Core.Plugin.Arcaea
         private MessageChain StartGuess(long groupId, long senderId, string senderName, ArcaeaSong song)
         {
             var now = DateTime.Now;
-            var res = Dialog.AddHandler(groupId, (session, msg) => GenGuessDialogHandler(song, groupId, now)(session, msg));
+            var res = Dialog.AddHandler(groupId,
+                (session, msg) => GenGuessDialogHandler(song, groupId, now)(session, msg));
 
             return res ? null : MessageChain.FromPlainText("？");
         }
@@ -146,19 +141,15 @@ namespace QQBOT.Core.Plugin.Arcaea
             var mc = StartGuess(groupId, message.Sender!.Id, message.Sender!.Name, song);
 
             if (mc == null)
-            {
                 return new MessageChain(new MessageData[]
                 {
                     new PlainMessage("猜曲模式启动！"),
                     ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()),
-                    new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是 `歌曲名`、`歌曲id` 或 `id歌曲id`\n\n发送 ”结束猜曲“ 来退出猜曲模式"),
+                    new PlainMessage("艾特我+你的答案以参加猜曲\n答案可以是 `歌曲名`、`歌曲id` 或 `id歌曲id`\n\n发送 ”结束猜曲“ 来退出猜曲模式")
                 });
-            }
             else
-            {
                 // 你妈的，不能删这个 else，万一哪天改成 yield return 这就成了一个隐藏的大黑锅
                 return mc;
-            }
         }
     }
 }

@@ -20,16 +20,14 @@ namespace QQBOT.Core.Plugin
             if (msg == null) return null;
 
             if (string.IsNullOrEmpty(msg.Trim()))
-            {
                 return MessageChain.FromPlainText("帮助见 https://github.com/QingQiz/QQBOT#%E5%8A%9F%E8%83%BD");
-            }
 
             return null;
         }
 
         protected override async Task<PluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
         {
-            var mc  = Handler(message.MessageChain!.PlainText);
+            var mc = Handler(message.MessageChain!.PlainText);
 
             if (mc == null) return PluginTaskState.NoResponse;
 
@@ -40,7 +38,7 @@ namespace QQBOT.Core.Plugin
 
         protected override async Task<PluginTaskState> GroupMessageHandler(MiraiHttpSession session, Message message)
         {
-            var mc  = Handler(message.MessageChain!.PlainText);
+            var mc = Handler(message.MessageChain!.PlainText);
 
             if (mc == null) return PluginTaskState.NoResponse;
 
@@ -51,7 +49,6 @@ namespace QQBOT.Core.Plugin
             await session.SendGroupMessage(new Message(mc), message.GroupInfo!.Id, source);
 
             return PluginTaskState.CompletedTask;
-
         }
     }
 }

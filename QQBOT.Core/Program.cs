@@ -22,7 +22,7 @@ namespace QQBOT.Core
                 .SelectMany(t => t)
                 .OrderByDescending(t =>
                     ((MiraiPluginAttribute)t.GetCustomAttributes(typeof(MiraiPluginAttribute), true).First()).Priority);
-            
+
             // Log plugin info
             Console.WriteLine("---------------------------------------------------------------");
             Console.WriteLine("-- Adding Plugins");
@@ -31,10 +31,10 @@ namespace QQBOT.Core
                 Console.WriteLine($"Enabled plugin: `{plugin}`");
                 session.AddPlugin((PluginBase)Activator.CreateInstance(plugin));
             }
+
             Console.WriteLine("---------------------------------------------------------------");
 
             while (true)
-            {
                 try
                 {
                     Console.WriteLine("-- Init...");
@@ -46,7 +46,6 @@ namespace QQBOT.Core
                 {
                     Console.WriteLine(e.ToString());
                 }
-            }
             // ReSharper disable once FunctionNeverReturns
         }
     }

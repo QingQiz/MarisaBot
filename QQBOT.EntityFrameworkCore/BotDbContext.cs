@@ -12,11 +12,13 @@ namespace QQBOT.EntityFrameworkCore
     {
         public DbSet<AuditLog> Logs { get; set; }
         public DbSet<Timer> Timers { get; set; }
-        
+
         public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlServer(@"Server=localhost; Database=QQBOT_DB; Trusted_Connection=True");
+        {
+            options.UseSqlServer(@"Server=localhost; Database=QQBOT_DB; Trusted_Connection=True");
+        }
     }
 
     public static class DbContextExt
@@ -28,6 +30,7 @@ namespace QQBOT.EntityFrameworkCore
                 context.Add(value);
                 return;
             }
+
             context.Update(value);
         }
     }

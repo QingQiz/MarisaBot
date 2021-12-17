@@ -8,7 +8,6 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
     {
         private static async Task<DxRating> MaiB40(object sender)
         {
-
             var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(sender);
             var json     = await response.GetJsonAsync();
 

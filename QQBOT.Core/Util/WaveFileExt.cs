@@ -13,7 +13,7 @@ namespace QQBOT.Core.Util
 
         public WavFileExt(string filePth)
         {
-            _reader  = new WaveFileReader(filePth);
+            _reader              = new WaveFileReader(filePth);
             _bytesPerMillisecond = _reader.WaveFormat.AverageBytesPerSecond / 1000;
         }
 
@@ -44,10 +44,7 @@ namespace QQBOT.Core.Util
                 var bytesToRead = buffer.Length - buffer.Length % writer.WaveFormat.BlockAlign;
                 var bytesRead   = _reader.Read(buffer, 0, bytesToRead);
 
-                if (bytesRead > 0)
-                {
-                    writer.Write(buffer, 0, bytesRead);
-                }
+                if (bytesRead > 0) writer.Write(buffer, 0, bytesRead);
             }
         }
     }

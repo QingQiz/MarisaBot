@@ -8,7 +8,6 @@ namespace QQBOT.Core.MiraiHttp.Entity
 {
     public class MessageChain
     {
-
         public List<MessageData> Messages = new();
 
         public MessageChain(IEnumerable<MessageData> messages)
@@ -41,7 +40,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
             foreach (var m in data)
             {
                 Enum.TryParse(typeof(MessageType), m.type, true, out object t_);
-                
+
                 if (t_ == null) continue;
 
                 var t = (MessageType)t_;
@@ -104,7 +103,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
                         url     = d!.Url,
                         path    = d!.Path,
                         base64  = d!.Base64,
-                        type    = "Voice",
+                        type    = "Voice"
                     };
                 }
                 default:
@@ -141,7 +140,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
         public long Target;
         public string Display;
 
-        public AtMessage(long target, string display="")
+        public AtMessage(long target, string display = "")
         {
             Type    = MessageType.At;
             Target  = target;
@@ -162,6 +161,7 @@ namespace QQBOT.Core.MiraiHttp.Entity
             Type = MessageType.Plain;
             Text = text;
         }
+
         public string Text;
     }
 
@@ -208,6 +208,23 @@ namespace QQBOT.Core.MiraiHttp.Entity
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MessageType
     {
-        Source, Quote, At, AtAll, Face, Plain, Image, FlashImage, Voice, Xml, Json, App, Poke, Dice, MusicShare, Forward, File, MiraiCode
+        Source,
+        Quote,
+        At,
+        AtAll,
+        Face,
+        Plain,
+        Image,
+        FlashImage,
+        Voice,
+        Xml,
+        Json,
+        App,
+        Poke,
+        Dice,
+        MusicShare,
+        Forward,
+        File,
+        MiraiCode
     }
 }

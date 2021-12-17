@@ -20,14 +20,11 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
         private Dictionary<string, List<string>> GetSongAliases()
         {
-            var  songAlias = new Dictionary<string, List<string>>();
+            var songAlias = new Dictionary<string, List<string>>();
 
             foreach (var song in SongList)
             {
-                if (!songAlias.ContainsKey(song.Title))
-                {
-                    songAlias[song.Title] = new List<string>();
-                }
+                if (!songAlias.ContainsKey(song.Title)) songAlias[song.Title] = new List<string>();
 
                 songAlias[song.Title].Add(song.Title);
             }
@@ -55,10 +52,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
                 foreach (var title in titles)
                 {
-                    if (!songAlias.ContainsKey(title))
-                    {
-                        songAlias[title] = new List<string>();
-                    }
+                    if (!songAlias.ContainsKey(title)) songAlias[title] = new List<string>();
 
                     songAlias[title].Add(titles[0]);
                 }
@@ -77,9 +71,9 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
                     _songAliasChangedWatcher = new FileSystemWatcher
                     {
-                        Path = ResourceManager.ResourcePath,
+                        Path         = ResourceManager.ResourcePath,
                         NotifyFilter = NotifyFilters.LastWrite,
-                        Filter = "aliases.tsv"
+                        Filter       = "aliases.tsv"
                     };
 
                     var processing = false;
@@ -106,41 +100,29 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
         private List<MaiMaiSong> SearchSong(string m)
         {
-            if (string.IsNullOrEmpty(m))
-            {
-                return new List<MaiMaiSong>();
-            }
-                
+            if (string.IsNullOrEmpty(m)) return new List<MaiMaiSong>();
+
             var search = SearchSongByAlias(m);
 
-            if (long.TryParse(m, out var id))
-            {
-                search.AddRange(SongList.Where(s => s.Id == id));
-            }
+            if (long.TryParse(m, out var id)) search.AddRange(SongList.Where(s => s.Id == id));
 
             if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
-            {
                 if (long.TryParse(m.TrimStart("id").Trim(), out var songId))
-                {
                     search = SongList.Where(s => s.Id == songId).ToList();
-                }
-            }
 
             return search;
         }
 
         private List<MaiMaiSong> SearchSongByAlias(string alias)
         {
-            if (string.IsNullOrWhiteSpace(alias))
-            {
-                return null;
-            }
+            if (string.IsNullOrWhiteSpace(alias)) return null;
 
             return SongAlias.Keys
                 .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(songNameAlias => SongAlias[songNameAlias]/*song name*/)
+                .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Where(songName => SongList.Any(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
+                .Where(songName =>
+                    SongList.Any(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
                 .Select(songName =>
                     SongList.First(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
@@ -156,30 +138,28 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
 
         private static MessageChain GetSearchResult(IReadOnlyList<MaiMaiSong> songs)
         {
-            if (songs == null)
-            {
-                return MessageChain.FromPlainText("啥？");
-            }
+            if (songs == null) return MessageChain.FromPlainText("啥？");
 
             return songs.Count switch
             {
                 >= 10 => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
-                0 => MessageChain.FromPlainText("“查无此歌”"),
+                0     => MessageChain.FromPlainText("“查无此歌”"),
                 1 => new MessageChain(new MessageData[]
                 {
                     new PlainMessage(songs[0].Title),
                     ImageMessage.FromBase64(songs[0].GetImage())
                 }),
-                _ => MessageChain.FromPlainText(string.Join('\n', songs.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
+                _ => MessageChain.FromPlainText(string.Join('\n',
+                    songs.Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}")))
             };
         }
 
         private MessageChain SongAliasHandler(string param)
         {
             string[] subCommand =
-            //      0      1
-                { "get", "set", };
-            
+                //      0      1
+                { "get", "set" };
+
             var res = param.CheckPrefix(subCommand).ToList();
 
             var (prefix, index) = res.First();
@@ -190,29 +170,21 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                 {
                     var songName = param.TrimStart(prefix).Trim();
 
-                    if (string.IsNullOrEmpty(songName))
-                    {
-                        return MessageChain.FromPlainText("？");
-                    }
+                    if (string.IsNullOrEmpty(songName)) return MessageChain.FromPlainText("？");
 
                     var songList = SearchSongByAlias(songName);
 
                     if (songList.Count == 1)
-                    {
                         return MessageChain.FromPlainText(
                             $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}");
-                    }
                     return GetSearchResult(songList);
                 }
                 case 1:
                 {
                     var param2 = param.TrimStart(prefix).Trim();
-                    var names = param2.Split("$>");
+                    var names  = param2.Split("$>");
 
-                    if (names.Length != 2)
-                    {
-                        return MessageChain.FromPlainText("Failed");
-                    }
+                    if (names.Length != 2) return MessageChain.FromPlainText("Failed");
 
                     lock (SongAlias)
                     {
@@ -225,13 +197,9 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                                 ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt", $"{name}\t{alias}\n");
 
                             if (SongAlias.ContainsKey(alias))
-                            {
                                 SongAlias[alias].Add(name);
-                            }
                             else
-                            {
                                 SongAlias[alias] = new List<string> { name };
-                            }
 
                             return MessageChain.FromPlainText("Success");
                         }
@@ -240,7 +208,7 @@ namespace QQBOT.Core.Plugin.MaiMaiDx
                     }
                 }
             }
-            
+
             return null;
         }
     }

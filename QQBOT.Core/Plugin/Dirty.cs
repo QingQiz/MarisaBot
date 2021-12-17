@@ -36,22 +36,19 @@ namespace QQBOT.Core.Plugin
                         if (data.fromId == 642191352) word = "别戳啦！";
 
                         if (data.subject.kind == "Group")
-                        {
                             await session.SendGroupMessage(new Message(new MessageChain(new[]
                             {
                                 (MessageData)new AtMessage(data.fromId),
                                 (MessageData)new PlainMessage(" "),
-                                (MessageData)new PlainMessage(word),
+                                (MessageData)new PlainMessage(word)
                             })), data.subject.id);
-                        }
                         else
-                        {
                             await session.SendFriendMessage(
                                 new Message(MessageChain.FromPlainText(word)), data.subject.id);
-                        }
 
                         return PluginTaskState.CompletedTask;
                     }
+
                     break;
             }
 

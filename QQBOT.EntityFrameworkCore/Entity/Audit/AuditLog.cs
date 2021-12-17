@@ -16,7 +16,7 @@ namespace QQBOT.EntityFrameworkCore.Entity.Audit
         ///  群名
         /// </summary>
         public string GroupName { get; set; }
-        
+
         /// <summary>
         ///  对应用户在群里的权限
         /// </summary>
