@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using QQBOT.EntityFrameworkCore.Entity.Audit;
-using QQBOT.EntityFrameworkCore.Entity.Plugin;
-using QQBOT.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using QQBot.EntityFrameworkCore.Entity.Audit;
+using QQBot.EntityFrameworkCore.Entity.Plugin;
+using QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 
-namespace QQBOT.EntityFrameworkCore
+namespace QQBot.EntityFrameworkCore
 {
     public class BotDbContext : DbContext
     {

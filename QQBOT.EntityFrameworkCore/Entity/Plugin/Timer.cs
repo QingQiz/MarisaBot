@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace QQBOT.EntityFrameworkCore.Entity.Plugin
+namespace QQBot.EntityFrameworkCore.Entity.Plugin
 {
     [Table("Timer")]
     public class Timer

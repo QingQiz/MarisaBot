@@ -1,0 +1,77 @@
+﻿using QQBot.MiraiHttp;
+using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Plugin;
+using QQBOT.Plugin.Shared.Util;
+
+namespace QQBot.Plugin.Arcaea
+{
+    [MiraiPlugin]
+    public partial class Arcaea : MiraiPluginBase
+    {
+#pragma warning disable CS1998
+        protected override async IAsyncEnumerable<MessageChain?>? MessageHandler(Message message, MiraiMessageType type)
+#pragma warning restore CS1998
+        {
+            string[] commandPrefix = { "arcaea", "arc", "阿卡伊" };
+            string[] subCommand =
+            {
+                //    0      1       2        3      4      5
+                "猜歌", "猜曲", "alias", "别名", "song", "id"
+            };
+
+            var msg = message.MessageChain!.PlainText.Trim().TrimStart(commandPrefix)!;
+
+
+            if (string.IsNullOrEmpty(msg)) yield return null;
+
+            var prefixes = msg.CheckPrefix(subCommand);
+
+            foreach (var (prefix, index) in prefixes)
+                switch (index)
+                {
+                    case 0:
+                    case 1: // 猜歌
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+                        if (message.GroupInfo == null)
+                            yield return MessageChain.FromPlainText("仅群组中使用");
+
+                        switch (param)
+                        {
+                            case "":
+                                yield return StartSongCoverGuess(message);
+                                break;
+                        }
+
+                        yield return null;
+                        break;
+                    }
+                    case 2:
+                    case 3: // alias
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+                        yield return SongAliasHandler(param);
+                        break;
+                    }
+                    case 4: // search
+                    {
+                        var name   = msg.TrimStart(prefix)!.Trim();
+                        var search = SearchSongByAlias(name);
+                        yield return Arcaea.GetSearchResult(search);
+                        break;
+                    }
+                    case 5: // id
+                    {
+                        var last = msg.TrimStart(prefix)!.Trim();
+
+                        yield return long.TryParse(last, out var id)
+                            ? GetSongInfo(id)
+                            : MessageChain.FromPlainText("“你看你输的这个几把玩意儿像不像个ID”");
+                        break;
+                    }
+                }
+
+            yield return null;
+        }
+    }
+}

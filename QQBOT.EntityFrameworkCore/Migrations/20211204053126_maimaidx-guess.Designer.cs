@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using QQBOT.EntityFrameworkCore;
+using QQBot.EntityFrameworkCore;
 
-namespace QQBOT.EntityFrameworkCore.Migrations
+namespace QQBot.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(BotDbContext))]
     [Migration("20211204053126_maimaidx-guess")]

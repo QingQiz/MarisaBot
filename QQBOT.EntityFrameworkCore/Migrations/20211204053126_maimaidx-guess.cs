@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace QQBOT.EntityFrameworkCore.Migrations
+namespace QQBot.EntityFrameworkCore.Migrations
 {
     public partial class maimaidxguess : Migration
     {

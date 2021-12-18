@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace QQBOT.EntityFrameworkCore.Entity.Audit
+namespace QQBot.EntityFrameworkCore.Entity.Audit
 {
     public class AuditLogExternalInfo
     {

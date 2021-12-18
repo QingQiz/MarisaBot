@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using QQBOT.EntityFrameworkCore;
+using QQBot.EntityFrameworkCore;
 
-namespace QQBOT.EntityFrameworkCore.Migrations
+namespace QQBot.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(BotDbContext))]
     partial class BotDbContextModelSnapshot : ModelSnapshot

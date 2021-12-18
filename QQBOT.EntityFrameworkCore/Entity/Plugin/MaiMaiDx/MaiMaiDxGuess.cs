@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace QQBOT.EntityFrameworkCore.Entity.Plugin.MaiMaiDx
+namespace QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx
 {
     [Table("MaiMaiDx.Guess")]
     [Index(nameof(UId))]

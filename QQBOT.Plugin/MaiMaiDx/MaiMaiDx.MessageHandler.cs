@@ -1,0 +1,148 @@
+﻿using Flurl.Http;
+using QQBot.MiraiHttp;
+using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
+using QQBot.MiraiHttp.Plugin;
+using QQBOT.Plugin.Shared.Util;
+
+namespace QQBot.Plugin.MaiMaiDx
+{
+    [MiraiPlugin(1)]
+    public partial class MaiMaiDx : MiraiPluginBase
+    {
+        protected override async IAsyncEnumerable<MessageChain?>? MessageHandler(Message message, MiraiMessageType type)
+        {
+            string[] commandPrefix = { "maimai", "mai", "舞萌" };
+            string[] subCommand =
+            {
+                //    0       1        2      3       4      5       6      7      8        9       10      11     12
+                "b40", "search", "搜索", "查分", "搜歌", "song", "查歌", "id", "name", "random", "随机", "随歌", "list",
+                //    13      14     15      16
+                "rand", "猜歌", "猜曲", "alias"
+            };
+
+            var sender = message.Sender;
+            var msg    = message.MessageChain!.PlainText.Trim().TrimStart(commandPrefix)!;
+
+
+            if (string.IsNullOrEmpty(msg)) yield return null;
+
+            var prefixes = msg.CheckPrefix(subCommand);
+
+            foreach (var (prefix, index) in prefixes)
+                switch (index)
+                {
+                    case 0:
+                    case 3: // b40
+                        var username = msg.TrimStart(prefix)!.Trim();
+
+                        MessageChain ret;
+                        try
+                        {
+                            var rating = await MaiMaiDx.MaiB40(string.IsNullOrEmpty(username)
+                                ? new { qq = sender!.Id }
+                                : new { username });
+
+                            var imgB64 = rating.GetImage();
+
+
+                            ret = new MessageChain(new[]
+                            {
+                                ImageMessage.FromBase64(imgB64)
+                            });
+                        }
+                        catch (FlurlHttpException e) when (e.StatusCode == 400)
+                        {
+                            ret = MessageChain.FromPlainText("“查无此人”");
+                        }
+                        catch (FlurlHttpException e) when (e.StatusCode == 403)
+                        {
+                            ret = MessageChain.FromPlainText("“403 forbidden”");
+                        }
+                        catch (FlurlHttpException e)
+                        {
+                            ret = MessageChain.FromPlainText($"BOT在差你分的过程中炸了：\n{e}");
+                        }
+
+                        yield return ret;
+                        break;
+                    case 1:
+                    case 2:
+                    case 4:
+                    case 5:
+                    case 6: // search
+                    {
+                        var name   = msg.TrimStart(prefix)!.Trim();
+                        var search = SearchSong(name);
+                        yield return GetSearchResult(search);
+                        break;
+                    }
+                    case 7: // id
+                    {
+                        var last = msg.TrimStart(prefix)!.Trim();
+
+                        yield return long.TryParse(last, out var id)
+                            ? GetSongInfo(id)
+                            : MessageChain.FromPlainText("“你看你输的这个几把玩意儿像不像个ID”");
+                        break;
+                    }
+                    case 8: // name
+                    {
+                        break;
+                    }
+                    case 9:
+                    case 10:
+                    case 11:
+                    case 13: // random
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+                        var list  = ListSongs(param);
+
+                        yield return list.Count == 0
+                            ? MessageChain.FromPlainText("“NULL”")
+                            : MessageChain.FromBase64(list[new Random().Next(list.Count)].GetImage());
+                        break;
+                    }
+                    case 12: // list
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+                        var list  = ListSongs(param);
+                        var rand  = new Random();
+
+                        if (list.Count == 0)
+                        {
+                            yield return MessageChain.FromPlainText("“EMPTY”");
+                            break;
+                        }
+
+                        var str = string.Join('\n',
+                            list.OrderBy(_ => rand.Next())
+                                .Take(15)
+                                .OrderBy(x => x.Id)
+                                .Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}"));
+
+                        if (list.Count > 15) str += "\n" + $"太多了（{list.Count}），随机给出15个";
+
+                        yield return MessageChain.FromPlainText(str);
+                        break;
+                    }
+                    case 14:
+                    case 15: // 猜歌
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+
+                        foreach (var res in SongGuessMessageHandler(message, param)) yield return res;
+                        break;
+                    }
+                    case 16: // alias
+                    {
+                        var param = msg.TrimStart(prefix)!.Trim();
+                        yield return SongAliasHandler(param);
+                        break;
+                    }
+                }
+
+            yield return null;
+        }
+    }
+}
