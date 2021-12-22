@@ -89,73 +89,58 @@ namespace QQBot.MiraiHttp
                     }).GetJsonAsync();
                 CheckResponse(msg);
 
-                var tasks = ((List<dynamic>)msg.data).Where(m => m.type.Contains("Message")).Select(async m =>
+                var tasks = ((List<dynamic>)msg.data).Select(async m =>
                 {
                     var log = new AuditLog
                     {
                         EventId   = Guid.NewGuid(),
                         EventType = m.type,
-                        Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m.messageChain),
                         Time      = DateTime.Now
                     };
-
-                    var message = new Message
-                    {
-                        MessageChain = new MessageChain(m.messageChain)
-                    };
-
-                    var mType  = MiraiMessageType.FriendMessage;
                     var tState = MiraiPluginTaskState.NoResponse;
 
-                    switch (m.type)
+                    if (m.type.Contains("Message"))
                     {
-                        case "FriendMessage":
-                            message.GroupInfo = null;
-                            message.Sender    = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+                        log.Message = Newtonsoft.Json.JsonConvert.SerializeObject(m.messageChain);
 
-                            log.UserId    = message.Sender.Id.ToString();
-                            log.UserName  = message.Sender.Name;
-                            log.UserAlias = message.Sender.Remark;
+                        var message = new Message(new MessageChain(m.messageChain));
 
-                            break;
-                        case "StrangerMessage":
-                            message.GroupInfo = null;
-                            message.Sender    = new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+                        var mType = m.type switch
+                        {
+                            "StrangerMessage" => MiraiMessageType.StrangerMessage,
+                            "FriendMessage"   => MiraiMessageType.FriendMessage,
+                            "GroupMessage"    => MiraiMessageType.GroupMessage,
+                            "TempMessage"     => MiraiMessageType.TempMessage,
+                            _                 => throw new ArgumentOutOfRangeException()
+                        };
 
-                            log.UserId    = message.Sender.Id.ToString();
-                            log.UserName  = message.Sender.Name;
-                            log.UserAlias = message.Sender.Remark;
+                        if (mType is MiraiMessageType.FriendMessage or MiraiMessageType.StrangerMessage)
+                        {
+                            message.Sender =
+                                new MessageSenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+                        }
+                        else
+                        {
+                            message.Sender =
+                                new MessageSenderInfo(m.sender.id, m.sender.memberName, permission: m.sender.permission);
+                            message.GroupInfo =
+                                new GroupInfo(m.sender.group.id, m.sender.group.name, m.sender.group.permission);
 
-                            mType = MiraiMessageType.StrangerMessage;
-                            break;
-                        case "GroupMessage":
-                            message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
-                                m.sender.group.permission);
-                            message.Sender = new MessageSenderInfo(m.sender.id, m.sender.memberName,
-                                permission: m.sender.permission);
-
-                            log.UserId    = message.Sender.Id.ToString();
-                            log.UserName  = message.Sender.Name;
-                            log.UserAlias = message.Sender.Remark;
                             log.GroupName = message.GroupInfo?.Name;
                             log.GroupId   = message.GroupInfo?.Id.ToString();
+                        }
 
-                            mType = MiraiMessageType.GroupMessage;
-                            break;
-                        case "TempMessage":
-                            message.GroupInfo = new GroupInfo(m.sender.group.id, m.sender.group.name,
-                                m.sender.group.permission);
-                            message.Sender = new MessageSenderInfo(m.sender.id, m.sender.memberName,
-                                permission: m.sender.permission);
+                        log.UserId    = message.Sender.Id.ToString();
+                        log.UserName  = message.Sender.Name;
+                        log.UserAlias = message.Sender.Remark;
 
-                            log.UserId    = message.Sender.Id.ToString();
-                            log.UserName  = message.Sender.Name;
-                            log.UserAlias = message.Sender.Remark;
-                            log.GroupName = message.GroupInfo?.Name;
-                            log.GroupId   = message.GroupInfo?.Id.ToString();
+                        await OnMessage.Invoke(this, message, mType, ref tState);
+                    }
+                    else // Event
+                    {
+                        log.Message = Newtonsoft.Json.JsonConvert.SerializeObject(m);
 
-                            mType = MiraiMessageType.TempMessage;
-                            break;
+                        await OnEvent.Invoke(this, m, ref tState);
                     }
 
                     await using var dbContext = new BotDbContext();
@@ -165,34 +150,7 @@ namespace QQBot.MiraiHttp
                     Console.WriteLine(log.Message.Length < 120
                         ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
                         : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
-
-                    await OnMessage.Invoke(this, message, mType, ref tState);
                 });
-                await Task.WhenAll(tasks);
-
-                tasks = ((List<dynamic>)msg.data).Where(m => m.type.Contains("Event")).Select(async m =>
-                {
-                    var log = new AuditLog
-                    {
-                        EventId   = Guid.NewGuid(),
-                        EventType = m.type,
-                        Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m),
-                        Time      = DateTime.Now
-                    };
-
-                    var tState = MiraiPluginTaskState.NoResponse;
-
-                    await using var dbContext = new BotDbContext();
-                    await dbContext.Logs.AddAsync(log);
-                    await dbContext.SaveChangesAsync();
-
-                    Console.WriteLine(log.Message.Length < 120
-                        ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
-                        : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
-
-                    await OnEvent.Invoke(this, m, ref tState);
-                });
-
                 await Task.WhenAll(tasks);
             }
             // ReSharper disable once FunctionNeverReturns
