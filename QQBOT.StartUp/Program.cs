@@ -1,6 +1,6 @@
-﻿using QQBot.MiraiHttp;
+﻿using System.Reflection;
+using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.Plugin;
-using QQBot.Plugin;
 
 namespace QQBot.StartUp
 {
@@ -11,7 +11,11 @@ namespace QQBot.StartUp
             var session = new MiraiHttpSession(args[0], long.Parse(args[1]), args[2]);
 
             // add plugins to session
-            var plugins = PluginUtils.EnabledPlugins();
+            var plugins =
+                Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "QQBOT.Plugin.dll")).GetTypes()
+                    .Where(t => t.GetCustomAttribute<MiraiPlugin>(true) is not null)
+                    .Where(t => t.GetCustomAttribute<MiraiPluginDisabled>(false) is null)
+                    .OrderByDescending(t => t.GetCustomAttribute<MiraiPlugin>()!.Priority);
 
             // Log plugin info
             Console.WriteLine("---------------------------------------------------------------");
