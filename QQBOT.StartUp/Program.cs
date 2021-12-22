@@ -1,6 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using QQBot.MiraiHttp;
-using QQBot.MiraiHttp.Plugin;
 
 namespace QQBot.StartUp
 {
@@ -8,27 +7,14 @@ namespace QQBot.StartUp
     {
         private static async Task Main(string[] args)
         {
-            var session = new MiraiHttpSession(args[0], long.Parse(args[1]), args[2]);
+            var provider = new Configuration(args).Config();
 
-            // add plugins to session
-            var plugins =
-                Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "QQBOT.Plugin.dll")).GetTypes()
-                    .Where(t => t.GetCustomAttribute<MiraiPlugin>(true) is not null)
-                    .Where(t => t.GetCustomAttribute<MiraiPluginDisabled>(false) is null)
-                    .OrderByDescending(t => t.GetCustomAttribute<MiraiPlugin>()!.Priority);
-
-            // Log plugin info
-            Console.WriteLine("---------------------------------------------------------------");
-            Console.WriteLine("-- Adding Plugins");
-            foreach (var plugin in plugins)
-            {
-                Console.WriteLine($"Enabled plugin: `{plugin}`");
-                session.AddPlugin((MiraiPluginBase)Activator.CreateInstance(plugin)!);
-            }
+            var session = provider.GetService<MiraiHttpSession>()!;
 
             Console.WriteLine("---------------------------------------------------------------");
 
             while (true)
+            {
                 try
                 {
                     Console.WriteLine("-- Init...");
@@ -40,6 +26,7 @@ namespace QQBot.StartUp
                 {
                     Console.WriteLine(e.ToString());
                 }
+            }
             // ReSharper disable once FunctionNeverReturns
         }
     }

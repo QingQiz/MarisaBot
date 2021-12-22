@@ -2,6 +2,7 @@
 using Flurl.Http;
 using QQBot.EntityFrameworkCore;
 using QQBot.EntityFrameworkCore.Entity.Audit;
+using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
 
@@ -11,6 +12,20 @@ namespace QQBot.MiraiHttp
     {
         private readonly string _serverAddress;
         private readonly string _authKey;
+        private readonly IEnumerable<MiraiPluginBase> _plugins;
+        
+        public MiraiHttpSession(DictionaryProvider dict, IEnumerable<MiraiPluginBase> plugins)
+        {
+            _serverAddress = dict["ServerAddress"];
+            Id             = dict["QQ"];
+            _authKey       = dict["AuthKey"];
+            _plugins       = plugins;
+
+            foreach (var plugin in _plugins)
+            {
+                AddPlugin(plugin);
+            }
+        }
 
         private string _session = null!;
 
@@ -28,13 +43,6 @@ namespace QQBot.MiraiHttp
         }
 
         public long Id { get; }
-
-        public MiraiHttpSession(string serverAddress, long qq, string authKey)
-        {
-            _serverAddress = serverAddress;
-            Id             = qq;
-            _authKey       = authKey;
-        }
 
         public void AddPlugin(MiraiPluginBase miraiPlugin)
         {
