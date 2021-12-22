@@ -1,4 +1,4 @@
-﻿namespace QQBot.MiraiHttp
+﻿namespace QQBot.MiraiHttp.Plugin
 {
     public enum MiraiPluginTaskState
     {

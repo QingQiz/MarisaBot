@@ -6,6 +6,8 @@ using QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
+using QQBot.MiraiHttp.Plugin;
+using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
 using QQBot.Plugin.Shared.Util;
 using QQBOT.Plugin.Shared.Util;
@@ -297,13 +299,20 @@ namespace QQBot.Plugin.MaiMaiDx
                 }
                 default:
                 {
-                    var filter = param.StartsWith("c:", StringComparison.OrdinalIgnoreCase)
-                        ? param[2..].IsRegex()
-                            ? new Regex(param[2..], RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace)
-                            : null
-                        : null;
+                    if (param.StartsWith("c:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var reg = param[2..];
+                        if (!reg.IsRegex())
+                        {
+                            break;
+                        }
+                        yield return StartSongCoverGuess(message, new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace));
+                    }
+                    else if (param == "")
+                    {
+                        yield return StartSongCoverGuess(message);
+                    }
 
-                    yield return StartSongCoverGuess(message, filter);
                     break;
                 }
             }

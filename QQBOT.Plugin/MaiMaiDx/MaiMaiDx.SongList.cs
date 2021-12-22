@@ -3,8 +3,8 @@ using Flurl.Http;
 using Newtonsoft.Json;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
+using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
-using QQBOT.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.MaiMaiDx
 {

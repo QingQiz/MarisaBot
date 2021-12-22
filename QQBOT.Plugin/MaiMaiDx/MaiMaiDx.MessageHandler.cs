@@ -3,7 +3,7 @@ using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
-using QQBOT.Plugin.Shared.Util;
+using QQBot.MiraiHttp.Util;
 
 namespace QQBot.Plugin.MaiMaiDx
 {

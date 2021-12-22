@@ -2,8 +2,8 @@
 using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
+using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.Util;
-using QQBOT.Plugin.Shared.Util;
 
 namespace QQBot.Plugin
 {

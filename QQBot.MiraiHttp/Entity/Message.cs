@@ -1,6 +1,5 @@
 ﻿using QQBot.MiraiHttp.Entity.MessageData;
 
-#nullable enable
 namespace QQBot.MiraiHttp.Entity
 {
     public class Message
@@ -8,7 +7,7 @@ namespace QQBot.MiraiHttp.Entity
         public GroupInfo? GroupInfo;
         public MessageSenderInfo? Sender;
 
-        public MessageChain? MessageChain;
+        public readonly MessageChain? MessageChain;
 
         public Message()
         {

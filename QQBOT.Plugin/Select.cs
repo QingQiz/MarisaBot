@@ -2,7 +2,7 @@
 using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
-using QQBOT.Plugin.Shared.Util;
+using QQBot.MiraiHttp.Util;
 
 namespace QQBot.Plugin
 {
@@ -33,8 +33,7 @@ namespace QQBot.Plugin
             var a = p + match.Groups[1].Value;
             var b = match.Groups[2].Value;
 
-            if (b[0] == '不') return (a, b);
-            return b.TrimStart(verb) == null ? (a, p + b) : (a, b);
+            return (a, b);
         }
 
         protected override async Task<MiraiPluginTaskState> FriendMessageHandler(MiraiHttpSession session, Message message)
