@@ -12,22 +12,11 @@ namespace QQBot.StartUp
             var session = provider.GetService<MiraiHttpSession>()!;
 
             Console.WriteLine("---------------------------------------------------------------");
-
-            while (true)
-            {
-                try
-                {
-                    Console.WriteLine("-- Init...");
-                    await session.Init();
-                    Console.WriteLine("-- Running ");
-                    await session.Run();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            }
-            // ReSharper disable once FunctionNeverReturns
+            Console.WriteLine("-- Auth...");
+            await session.Auth();
+            Console.WriteLine("-- Running ");
+            // await session.Run();
+            await session.Invoke();
         }
     }
 }

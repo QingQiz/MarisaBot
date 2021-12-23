@@ -1,5 +1,8 @@
 ﻿namespace QQBot.MiraiHttp.DI;
 
+/// <summary>
+/// 提供一个字典，忽略大小写
+/// </summary>
 public class DictionaryProvider
 {
     private readonly Dictionary<string, dynamic> _dictionary = new();
@@ -8,16 +11,16 @@ public class DictionaryProvider
     {
     }
 
-    public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
+    public bool ContainsKey(string key) => _dictionary.ContainsKey(key.ToLower());
 
     public dynamic this[string key]
     {
-        get => _dictionary[key];
+        get => _dictionary[key.ToLower()];
         set
         {
             lock (_dictionary)
             {
-                _dictionary[key] = value;
+                _dictionary[key.ToLower()] = value;
             }
         }
     }
