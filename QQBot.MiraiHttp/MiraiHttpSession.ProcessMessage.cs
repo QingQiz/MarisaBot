@@ -31,20 +31,13 @@ public partial class MiraiHttpSession
                 return false;
             }
 
-            return false;
+            return true;
         }
 
         bool CheckMember(MemberInfo plugin, Message message)
         {
-            var commands = plugin
-                .GetCustomAttributes<MiraiPluginCommand>()
-                .Where(c => (c.Target & message.Type) != 0)
-                .ToList();
-
-            var triggers = plugin
-                .GetCustomAttributes<MiraiPluginTrigger>()
-                .Where(t => (t.Target & message.Type) != 0)
-                .ToList();
+            var commands = plugin.GetCustomAttributes<MiraiPluginCommand>().ToList();
+            var triggers = plugin.GetCustomAttributes<MiraiPluginTrigger>().ToList();
 
             return Check(message, commands, triggers);
         }
@@ -81,7 +74,17 @@ public partial class MiraiHttpSession
 
                 try
                 {
-                    return (Task<MiraiPluginTaskState>)method.Invoke(plugin, parameters.ToArray())!;
+                    if (method.ReturnType == typeof(Task<MiraiPluginTaskState>))
+                    {
+                        return (Task<MiraiPluginTaskState>)method.Invoke(plugin, parameters.ToArray())!;
+                    }
+
+                    if (method.ReturnType == typeof(MiraiPluginTaskState))
+                    {
+                        return Task.FromResult((MiraiPluginTaskState)method.Invoke(plugin, parameters.ToArray())!);
+                    }
+
+                    throw new Exception("插件方法返回类型无效");
                 }
                 catch (Exception e)
                 {
@@ -90,8 +93,7 @@ public partial class MiraiHttpSession
                     var target    = message.Location;
                     var exception = e.InnerException?.ToString() ?? e.ToString();
 
-                    _messageQueue.SendQueue.Post(
-                        (new Message(MessageChain.FromPlainText(exception)), message.Type, target, null));
+                    _messageQueue.SendQueue.Post((MessageChain.FromPlainText(exception), message.Type, target, null));
                 }
             }
 

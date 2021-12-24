@@ -11,6 +11,26 @@ public partial class MiraiHttpSession
 {
     private async Task RecvMessage()
     {
+        var retry = 0;
+        while (true)
+        {
+            try
+            {
+                await Auth();
+                retry = 0;
+                await RecvMessageInner();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+
+                if (retry++ > 10) return;
+            }
+        }
+    }
+
+    private async Task RecvMessageInner()
+    {
         async Task LogMessage(Message? message, dynamic m)
         {
             var log = new AuditLog

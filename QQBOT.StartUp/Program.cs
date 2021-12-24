@@ -12,8 +12,6 @@ namespace QQBot.StartUp
             var session = provider.GetService<MiraiHttpSession>()!;
 
             Console.WriteLine("---------------------------------------------------------------");
-            Console.WriteLine("-- Auth...");
-            await session.Auth();
             Console.WriteLine("-- Running ");
             // await session.Run();
             await session.Invoke();

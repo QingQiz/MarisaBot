@@ -16,13 +16,13 @@ namespace QQBot.MiraiHttp.Entity
         public Message(IEnumerable<MessageData.MessageData> message)
         {
             MessageChain = new MessageChain(message);
-            Command      = MessageChain.PlainText;
+            Command      = MessageChain.PlainText.Trim();
         }
 
         public Message(MessageChain chain)
         {
             MessageChain = chain;
-            Command      = MessageChain.PlainText;
+            Command      = MessageChain.PlainText.Trim();
         }
 
         public SourceMessage Source =>

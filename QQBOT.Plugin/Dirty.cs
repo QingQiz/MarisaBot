@@ -1,54 +1,58 @@
 ﻿using System.Configuration;
 using QQBot.MiraiHttp;
+using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 
-namespace QQBot.Plugin
+namespace QQBot.Plugin;
+
+public class Dirty : MiraiPluginBase
 {
-    public class Dirty : MiraiPluginBase
+    private readonly List<string> _dirtyWords;
+    private static readonly string ResourcePath = ConfigurationManager.AppSettings["Dirty.ResourcePath"]!;
+    private readonly MessageSenderProvider _sender;
+
+    public Dirty(MessageSenderProvider ms)
     {
-        private readonly List<string> _dirtyWords;
-        private static readonly string ResourcePath = ConfigurationManager.AppSettings["Dirty.ResourcePath"]!;
+        _dirtyWords = File.ReadAllText(ResourcePath + "/dirty.txt")
+            .Trim()
+            .Replace("\r\n", "\n")
+            .Split('\n')
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList();
+        _sender = ms;
+    }
 
-        public Dirty()
+    public override Task EventHandler(MiraiHttpSession session, dynamic data)
+    {
+        switch (data.type)
         {
-            _dirtyWords = File.ReadAllText(ResourcePath + "/dirty.txt")
-                .Trim()
-                .Replace("\r\n", "\n")
-                .Split('\n')
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToList();
-        }
+            case "NudgeEvent":
+                if (data.target == session.Id)
+                {
+                    var word = _dirtyWords[new Random().Next(_dirtyWords.Count)];
 
-        protected override async Task<MiraiPluginTaskState> EventHandler(MiraiHttpSession session, dynamic data)
-        {
-            switch (data.type)
-            {
-                case "NudgeEvent":
-                    if (data.target == session.Id)
+                    if (data.fromId == 642191352) word = "别戳啦！";
+
+                    if (data.subject.kind == "Group")
                     {
-                        var word = _dirtyWords[new Random().Next(_dirtyWords.Count)];
-                        if (data.fromId == 642191352) word = "别戳啦！";
-
-                        if (data.subject.kind == "Group")
-                            await session.SendGroupMessage(new Message(new MessageChain(new MessageData[]
-                            {
-                                new AtMessage(data.fromId),
-                                new PlainMessage(" "),
-                                new PlainMessage(word)
-                            })), data.subject.id);
-                        else
-                            await session.SendFriendMessage(
-                                new Message(MessageChain.FromPlainText(word)), data.subject.id);
-
-                        return MiraiPluginTaskState.CompletedTask;
+                        _sender.Send(new MessageChain(new MessageData[]
+                        {
+                            new AtMessage(data.fromId),
+                            new PlainMessage(" "),
+                            new PlainMessage(word)
+                        }), MiraiMessageType.GroupMessage, data.subject.id, null);
+                        
                     }
-
-                    break;
-            }
-
-            return MiraiPluginTaskState.NoResponse;
+                    else
+                    {
+                        _sender.Send(MessageChain.FromPlainText(word), MiraiMessageType.FriendMessage, data.subject.id, null); 
+                    }
+                }
+                break;
         }
+
+        return Task.CompletedTask;
     }
 }

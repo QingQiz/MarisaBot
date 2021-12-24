@@ -15,6 +15,11 @@
         /// <summary>
         /// 插件处理了一部分，但仍需后续处理
         /// </summary>
-        ToBeContinued
+        ToBeContinued,
+        
+        /// <summary>
+        /// 插件自闭了
+        /// </summary>
+        Canceled
     }
 }

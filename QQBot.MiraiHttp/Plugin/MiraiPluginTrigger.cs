@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 
 namespace QQBot.MiraiHttp.Plugin;
@@ -20,7 +21,44 @@ public class MiraiPluginTrigger: Attribute
     /// <param name="target">触发器面对的消息类型</param>
     public MiraiPluginTrigger(Type triggerType, string triggerName, MiraiMessageType target = (MiraiMessageType)0b11)
     {
-        Target  = target;
-        Trigger = (PluginTrigger)Delegate.CreateDelegate(typeof(PluginTrigger), triggerType, triggerName);
+        Target = target;
+
+        if (triggerType.GetField(triggerName) != null)
+        {
+            var field = triggerType.GetField(triggerName)!.GetValue(null)!;
+            var del   = field.GetType().GetMethod("Invoke")!;
+
+            Trigger = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
+        }
+        else if (triggerType.GetProperty(triggerName) != null)
+        {
+            var field = triggerType.GetProperty(triggerName)!.GetValue(null)!;
+            var del   = field.GetType().GetMethod("Invoke")!;
+
+            Trigger = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
+        }
+        else if (triggerType.GetMethod(triggerName) != null)
+        {
+            var del = triggerType.GetMethod(triggerName)!;
+
+            Trigger = (a, b) => (bool)del.Invoke(triggerType, new object[] { a, b })!;
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid trigger: {triggerType}.{triggerName}");
+        }
+
+        Trigger = (message, provider) => (message.Type & Target) != 0 && Trigger(message, provider);
     }
+
+    // 这里提供一些常用的 trigger
+    #region Triggers
+
+    /// <summary>
+    /// At bot
+    /// </summary>
+    public static PluginTrigger AtBotTrigger =>
+        (message, provider) => message.At(provider.GetService<DictionaryProvider>()!["QQ"]);
+
+    #endregion
 }

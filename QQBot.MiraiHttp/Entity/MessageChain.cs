@@ -4,7 +4,7 @@ namespace QQBot.MiraiHttp.Entity
 {
     public class MessageChain
     {
-        public List<MessageData.MessageData> Messages = new();
+        public readonly List<MessageData.MessageData> Messages = new();
 
         public MessageChain(IEnumerable<MessageData.MessageData> messages)
         {
@@ -23,11 +23,19 @@ namespace QQBot.MiraiHttp.Entity
             });
         }
 
-        public static MessageChain FromBase64(string b64)
+        public static MessageChain FromImageB64(string b64)
         {
             return new MessageChain(new[]
             {
                 ImageMessage.FromBase64(b64)
+            });
+        }
+
+        public static MessageChain FromVoiceB64(string b64)
+        {
+            return new MessageChain(new[]
+            {
+                VoiceMessage.FromBase64(b64),
             });
         }
 

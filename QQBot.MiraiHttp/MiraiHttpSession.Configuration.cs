@@ -14,6 +14,7 @@ public partial class MiraiHttpSession
             .AddScoped(p => (ServiceProvider)p)
             .AddScoped<DictionaryProvider>()
             .AddScoped<MessageQueueProvider>()
+            .AddScoped<MessageSenderProvider>()
             .AddScoped<MiraiHttpSession>();
 
         var plugins = pluginAssembly.GetTypes()

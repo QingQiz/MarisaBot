@@ -53,7 +53,7 @@ public partial class MiraiHttpSession
         OnEvent   += miraiPlugin.EventHandler;
     }
 
-    public async Task Auth()
+    private async Task Auth()
     {
         // get session
         var login = await (await $"{_serverAddress}/verify".PostJsonAsync(new { verifyKey = _authKey })).GetJsonAsync();
@@ -68,11 +68,10 @@ public partial class MiraiHttpSession
     public async Task Invoke()
     {
         var recv = RecvMessage();
-        var proc = ProcMessage();
         var send = SendMessage();
-        
+        await ProcMessage();
+
         await recv;
-        await proc;
         await send;
     }
 }
