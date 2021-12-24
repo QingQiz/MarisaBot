@@ -23,32 +23,34 @@ public class MiraiPluginTrigger: Attribute
     {
         Target = target;
 
+        PluginTrigger t;
+
         if (triggerType.GetField(triggerName) != null)
         {
             var field = triggerType.GetField(triggerName)!.GetValue(null)!;
             var del   = field.GetType().GetMethod("Invoke")!;
 
-            Trigger = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
+            t = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
         }
         else if (triggerType.GetProperty(triggerName) != null)
         {
             var field = triggerType.GetProperty(triggerName)!.GetValue(null)!;
             var del   = field.GetType().GetMethod("Invoke")!;
 
-            Trigger = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
+            t = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
         }
         else if (triggerType.GetMethod(triggerName) != null)
         {
             var del = triggerType.GetMethod(triggerName)!;
 
-            Trigger = (a, b) => (bool)del.Invoke(triggerType, new object[] { a, b })!;
+            t = (a, b) => (bool)del.Invoke(triggerType, new object[] { a, b })!;
         }
         else
         {
             throw new ArgumentException($"Invalid trigger: {triggerType}.{triggerName}");
         }
 
-        Trigger = (message, provider) => (message.Type & Target) != 0 && Trigger(message, provider);
+        Trigger = (message, provider) => (message.Type & Target) != 0 && t(message, provider);
     }
 
     // 这里提供一些常用的 trigger
