@@ -34,9 +34,6 @@ public partial class MiraiHttpSession
 
     private string _session = null!;
 
-    private delegate Task MessageHandler(MiraiHttpSession session, Message message, MiraiMessageType type,
-        ref MiraiPluginTaskState state);
-
     private delegate Task EventHandler(MiraiHttpSession session, dynamic message);
 
     private event EventHandler OnEvent = null!;
@@ -50,7 +47,7 @@ public partial class MiraiHttpSession
 
     private void AddPlugin(MiraiPluginBase miraiPlugin)
     {
-        OnEvent   += miraiPlugin.EventHandler;
+        OnEvent += miraiPlugin.EventHandler;
     }
 
     private async Task Auth()
