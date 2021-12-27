@@ -14,11 +14,13 @@ namespace QQBot.Plugin.MaiMaiDx;
 [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "maimai", "mai", "舞萌")]
 public partial class MaiMaiDx : MiraiPluginBase
 {
+    #region b40
+
     /// <summary>
     /// b40
     /// </summary>
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "b40", "查分")]
-    private async Task<MiraiPluginTaskState> MaiMaiDxB40(Message message, MessageSenderProvider ms)
+    private static async Task<MiraiPluginTaskState> MaiMaiDxB40(Message message, MessageSenderProvider ms)
     {
         var username = message.Command;
         var sender   = message.Sender!.Id;
@@ -42,10 +44,14 @@ public partial class MaiMaiDx : MiraiPluginBase
             ret = MessageChain.FromPlainText("“403 forbidden”");
         }
 
-        ms.SendByRecv(ret, message);
+        ms.Send(ret, message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
+
+    #endregion
+
+    #region search
 
     /// <summary>
     /// 搜歌
@@ -55,7 +61,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     {
         var search = SearchSong(message.Command);
 
-        ms.SendByRecv(GetSearchResult(search), message);
+        ms.Send(GetSearchResult(search), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
@@ -66,13 +72,16 @@ public partial class MaiMaiDx : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "id")]
     private MiraiPluginTaskState MaiMaiDxGetSongById(Message message, MessageSenderProvider ms)
     {
-        ms.SendByRecv(
-            long.TryParse(message.Command, out var id)
-                ? GetSongInfo(id)
-                : MessageChain.FromPlainText("“你看你输的这个几把玩意儿像不像个ID”"), message);
+        ms.Send(long.TryParse(message.Command, out var id)
+            ? GetSongInfo(id)
+            : MessageChain.FromPlainText("“你看你输的这个几把玩意儿像不像个ID”"), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
+
+    #endregion
+
+    #region random
 
     /// <summary>
     /// 随机给出一个歌
@@ -82,12 +91,16 @@ public partial class MaiMaiDx : MiraiPluginBase
     {
         var list = ListSongs(message.Command);
 
-        ms.SendByRecv(list.Count == 0
+        ms.Send(list.Count == 0
             ? MessageChain.FromPlainText("“NULL”")
             : MessageChain.FromImageB64(list[new Random().Next(list.Count)].GetImage()), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
+
+    #endregion
+
+    #region list
 
     /// <summary>
     /// 给出歌曲列表
@@ -95,29 +108,67 @@ public partial class MaiMaiDx : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "list")]
     private MiraiPluginTaskState MaiMaiDxListSong(Message message, MessageSenderProvider ms)
     {
-        var          list = ListSongs(message.Command);
-        MessageChain ret;
+        var    list = ListSongs(message.Command);
+        string ret;
 
         if (list.Count == 0)
         {
-            ret = MessageChain.FromPlainText("“EMPTY”");
+            ret = "“EMPTY”";
         }
         else
         {
             var rand = new Random();
-            var str = string.Join('\n',
+            ret = string.Join('\n',
                 list.OrderBy(_ => rand.Next())
                     .Take(15)
                     .OrderBy(x => x.Id)
                     .Select(song => $"[T:{song.Type}, ID:{song.Id}] -> {song.Title}"));
 
-            if (list.Count > 15) str += "\n" + $"太多了（{list.Count}），随机给出15个";
-
-            ret = MessageChain.FromPlainText(str);
+            if (list.Count > 15) ret += "\n" + $"太多了（{list.Count}），随机给出15个";
         }
 
-        ms.SendByRecv(ret, message);
+        ms.Send(ret, message);
 
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region guess
+
+    /// <summary>
+    /// 舞萌猜歌排名
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(MaiMaiDxGuess))]
+    [MiraiPluginCommand("排名")]
+    private MiraiPluginTaskState MaiMaiDxGuessRank(Message message, MessageSenderProvider ms)
+    {
+        using var dbContext = new BotDbContext();
+
+        var res = dbContext.MaiMaiDxGuesses
+            .OrderByDescending(g => g.TimesCorrect)
+            .ThenBy(g => g.TimesWrong)
+            .ThenBy(g => g.TimesStart)
+            .Take(10)
+            .ToList();
+
+        if (!res.Any()) ms.Send(MessageChain.FromPlainText("None"), message);
+
+        ms.Send(string.Join('\n', res.Select((guess, i) =>
+                $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")),
+            message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// 听歌猜曲
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(MaiMaiDxGuess))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "v2")]
+    private MiraiPluginTaskState MaiMaiDxGuessV2(Message message, MessageSenderProvider ms, long qq)
+    {
+        StartSongSoundGuess(message, ms, qq);
         return MiraiPluginTaskState.CompletedTask;
     }
 
@@ -127,67 +178,116 @@ public partial class MaiMaiDx : MiraiPluginBase
     [MiraiPluginCommand(MiraiMessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MiraiPluginTaskState MaiMaiDxGuess(Message message, MessageSenderProvider ms, long qq)
     {
-        switch (message.Command)
+        if (message.Command.StartsWith("c:", StringComparison.OrdinalIgnoreCase))
         {
-            case "排名":
+            var reg = message.Command[2..];
+
+            if (!reg.IsRegex())
             {
-                using var dbContext = new BotDbContext();
-
-                var res = dbContext.MaiMaiDxGuesses
-                    .OrderByDescending(g => g.TimesCorrect)
-                    .ThenBy(g => g.TimesWrong)
-                    .ThenBy(g => g.TimesStart)
-                    .Take(10)
-                    .ToList();
-
-                if (!res.Any()) ms.SendByRecv(MessageChain.FromPlainText("None"), message);
-
-                ms.SendByRecv(MessageChain.FromPlainText(
-                        string.Join('\n', res.Select((guess, i) =>
-                            $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})"))),
-                    message);
-                break;
+                ms.Send("错误的正则表达式：" + reg, message);
             }
-            case "v2":
+            else
             {
-                StartSongSoundGuess(message, ms, qq);
-                break;
+                StartSongCoverGuess(message, ms, qq,
+                    new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace));
             }
-            default:
-            {
-                if (message.Command.StartsWith("c:", StringComparison.OrdinalIgnoreCase))
-                {
-                    var reg = message.Command[2..];
-                    if (!reg.IsRegex())
-                    {
-                        break;
-                    }
+        }
+        else if (message.Command == "")
+        {
+            StartSongCoverGuess(message, ms, qq, null);
+        }
+        else
+        {
+            ms.Send("错误的命令格式", message);
+        }
 
-                    StartSongCoverGuess(message, ms, qq,
-                        new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace));
-                }
-                else if (message.Command == "")
-                {
-                    StartSongCoverGuess(message, ms, qq, null);
-                }
+        return MiraiPluginTaskState.CompletedTask;
+    }
 
-                break;
-            }
+    #endregion
+
+    #region Alias
+
+    /// <summary>
+    /// 别名处理
+    /// </summary>
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
+    private static MiraiPluginTaskState MaiMaiDxSongAlias(Message message, MessageSenderProvider ms)
+    {
+        ms.Send("错误的命令格式", message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// 获取别名
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(MaiMaiDxSongAlias))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "get")]
+    private MiraiPluginTaskState MaiMaiDxSongAliasGet(Message message, MessageSenderProvider ms)
+    {
+        var songName = message.Command;
+
+        if (string.IsNullOrEmpty(songName))
+        {
+            ms.Send("？", message);
+        }
+
+        var songList = SearchSongByAlias(songName);
+
+        if (songList.Count == 1)
+        {
+            ms.Send($"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}", message);
+        }
+        else
+        {
+            ms.Send(GetSearchResult(songList), message);
         }
 
         return MiraiPluginTaskState.CompletedTask;
     }
 
     /// <summary>
-    /// 别名处理
+    /// 设置别名
     /// </summary>
-    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
-    private MiraiPluginTaskState MaiMaiDxSongAlias(Message message, MessageSenderProvider ms)
+    [MiraiPluginSubCommand(nameof(MaiMaiDxSongAlias))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "set")]
+    private MiraiPluginTaskState MaiMaiDxSongAliasSet(Message message, MessageSenderProvider ms)
     {
-        var mc = SongAliasHandler(message.Command);
-        
-        if (mc != null) ms.SendByRecv(mc, message);
+        var param = message.Command;
+        var names = param.Split("$>");
+
+        if (names.Length != 2)
+        {
+            ms.Send("错误的命令格式", message);
+            return MiraiPluginTaskState.CompletedTask;
+        }
+
+        lock (SongAlias)
+        {
+            var name  = names[0].Trim();
+            var alias = names[1].Trim();
+
+            if (SongList.Any(song => song.Title == name))
+            {
+                File.AppendAllText(
+                    ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt", $"{name}\t{alias}\n");
+
+                if (SongAlias.ContainsKey(alias))
+                    SongAlias[alias].Add(name);
+                else
+                    SongAlias[alias] = new List<string> { name };
+
+                ms.Send("Success", message);
+            }
+            else
+            {
+                ms.Send($"不存在的歌曲：{name}", message);
+            }
+        }
 
         return MiraiPluginTaskState.CompletedTask;
     }
+
+    #endregion
 }

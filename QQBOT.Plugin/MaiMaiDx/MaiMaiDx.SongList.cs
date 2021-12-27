@@ -58,7 +58,7 @@ public partial class MaiMaiDx
         if (string.IsNullOrEmpty(param)) return SongList;
 
         string[] subCommand =
-            //      0       1          2        3      4     5      6       7
+        //      0       1          2        3      4     5      6       7
             { "base", "level", "charter", "bpm", "lv", "等级", "定数", "谱师" };
         var res = param.CheckPrefix(subCommand).ToList();
 

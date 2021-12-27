@@ -48,18 +48,59 @@ public partial class MiraiHttpSession
 
         var availableMethods = availablePlugins
             .Select(p => (p, p.GetType()
-                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(m =>
+                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                // 选择出含有这两个属性的方法
+                .Where(m =>
                     m.GetCustomAttributes<MiraiPluginTrigger>().Any() ||
-                    m.GetCustomAttributes<MiraiPluginCommand>().Any())))
+                    m.GetCustomAttributes<MiraiPluginCommand>().Any())
+                // 过滤 subcommand
+                .Where(m =>
+                    !m.GetCustomAttributes<MiraiPluginSubCommand>().Any())))
+            .ToDictionary(x => x.Item1, x => x.Item2.ToList());
+
+        var availableSubCommands = availablePlugins
+            .Select(p => (p, p.GetType()
+                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                // 选择出含有这两个属性的方法
+                .Where(m =>
+                    m.GetCustomAttributes<MiraiPluginTrigger>().Any() ||
+                    m.GetCustomAttributes<MiraiPluginCommand>().Any())
+                // 包含 subcommand
+                .Where(m =>
+                    m.GetCustomAttributes<MiraiPluginSubCommand>().Any())
+                .Select(m =>
+                    (parentName: m.GetCustomAttribute<MiraiPluginSubCommand>()!.Name, methodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
         Task<MiraiPluginTaskState> TrigPlugin(MiraiPluginBase plugin, Message message)
         {
             foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
             {
+                var m = method;
+
+                while (true)
+                {
+                    // 所有子命令
+                    var subCommands = availableSubCommands[plugin]
+                        .Where(n => n.parentName == method.Name)
+                        .Select(n => n.methodInfo)
+                        .ToList();
+                    // 没有子命令则执行当前
+                    if (!subCommands.Any()) break;
+                    // 检查子命令
+                    var sub = subCommands.FirstOrDefault(sub => CheckMember(sub, message));
+                    // 没有有成功的则执行当前
+                    if (sub is null)
+                    {
+                        break;
+                    }
+                    // 有成功的则继续找当前命令的子命令
+                    m = sub;
+                }
+
                 var parameters = new List<dynamic>();
 
-                foreach (var param in method.GetParameters())
+                foreach (var param in m.GetParameters())
                 {
                     if (param.ParameterType == message.GetType())
                     {
@@ -74,14 +115,14 @@ public partial class MiraiHttpSession
 
                 try
                 {
-                    if (method.ReturnType == typeof(Task<MiraiPluginTaskState>))
+                    if (m.ReturnType == typeof(Task<MiraiPluginTaskState>))
                     {
-                        return (Task<MiraiPluginTaskState>)method.Invoke(plugin, parameters.ToArray())!;
+                        return (Task<MiraiPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
                     }
 
-                    if (method.ReturnType == typeof(MiraiPluginTaskState))
+                    if (m.ReturnType == typeof(MiraiPluginTaskState))
                     {
-                        return Task.FromResult((MiraiPluginTaskState)method.Invoke(plugin, parameters.ToArray())!);
+                        return Task.FromResult((MiraiPluginTaskState)m.Invoke(plugin, parameters.ToArray())!);
                     }
 
                     throw new Exception("插件方法返回类型无效");
@@ -110,9 +151,13 @@ public partial class MiraiHttpSession
             {
                 foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
                 {
-                    var state = await TrigPlugin(plugin, message);
+                    var command = message.Command;
+
+                    var state   = await TrigPlugin(plugin, message);
 
                     if (state == MiraiPluginTaskState.CompletedTask) break;
+
+                    message.Command = command;
                 }
             }));
 
