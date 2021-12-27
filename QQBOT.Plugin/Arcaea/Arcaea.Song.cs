@@ -35,19 +35,6 @@ public partial class Arcaea
         }
     }
 
-    private MessageChain GetSongInfo(long songId)
-    {
-        var searchResult = SongList.FirstOrDefault(song => song.Id == songId);
-
-        if (searchResult == null) return MessageChain.FromPlainText($"“未找到 ID 为 {songId} 的歌曲”");
-
-        return new MessageChain(new MessageData[]
-        {
-            new PlainMessage(searchResult.Title),
-            ImageMessage.FromBase64(searchResult.GetImage())
-        });
-    }
-
     #endregion
 
     #region song alias
@@ -136,6 +123,26 @@ public partial class Arcaea
         }
     }
 
+    private List<ArcaeaSong> SearchSong(string m)
+    {
+        if (string.IsNullOrEmpty(m)) return new List<ArcaeaSong>();
+
+        m = m.Trim();
+
+        var search = SearchSongByAlias(m);
+
+        if (long.TryParse(m, out var id))
+        {
+            search.AddRange(SongList.Where(s => s.Id == id));
+        }
+
+        if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
+            if (long.TryParse(m.TrimStart("id")!.Trim(), out var songId))
+                search = SongList.Where(s => s.Id == songId).ToList();
+
+        return search;
+    }
+
     private List<ArcaeaSong> SearchSongByAlias(string alias)
     {
         if (string.IsNullOrWhiteSpace(alias)) return new List<ArcaeaSong>();
@@ -182,6 +189,8 @@ public partial class Arcaea
             { "get", "set" };
 
         var res = param.CheckPrefix(subCommand).ToList();
+
+        if (!res.Any()) return null;
 
         var (prefix, index) = res.First();
 

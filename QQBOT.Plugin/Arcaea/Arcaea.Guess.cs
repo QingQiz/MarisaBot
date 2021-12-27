@@ -91,7 +91,7 @@ public partial class Arcaea
                 return MiraiPluginTaskState.Canceled;
             }
 
-            var search = SearchSongByAlias(message.Command);
+            var search = SearchSong(message.Command);
 
             var procResult =
                 new Func<ArcaeaSong?, MiraiPluginTaskState>(s => ProcSongGuessResult(ms, message, song, s));
