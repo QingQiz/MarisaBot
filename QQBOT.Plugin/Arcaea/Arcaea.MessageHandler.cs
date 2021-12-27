@@ -2,6 +2,7 @@
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
+using QQBot.Plugin.Shared.Arcaea;
 
 namespace QQBot.Plugin.Arcaea;
 
@@ -32,12 +33,83 @@ public partial class Arcaea : MiraiPluginBase
         return MiraiPluginTaskState.CompletedTask;
     }
 
-    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, false, "alias")]
-    private MiraiPluginTaskState ArcaeaSongAlias(Message message, MessageSenderProvider ms)
+    /// <summary>
+    /// 别名处理
+    /// </summary>
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
+    private static MiraiPluginTaskState ArcaeaSongAlias(Message message, MessageSenderProvider ms)
     {
-        var mc = SongAliasHandler(message.Command);
-        
-        if (mc != null) ms.SendByRecv(mc, message);
+        ms.Send("错误的命令格式", message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// 获取别名
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(ArcaeaSongAlias))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "get")]
+    private MiraiPluginTaskState ArcaeaSongAliasGet(Message message, MessageSenderProvider ms)
+    {
+        var songName = message.Command;
+
+        if (string.IsNullOrEmpty(songName))
+        {
+            ms.Send("？", message);
+        }
+
+        var songList = SearchSongByAlias(songName);
+
+        if (songList.Count == 1)
+        {
+            ms.Send($"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}", message);
+        }
+        else
+        {
+            ms.Send(GetSearchResult(songList), message);
+        }
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// 设置别名
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(ArcaeaSongAlias))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "set")]
+    private MiraiPluginTaskState ArcaeaSongAliasSet(Message message, MessageSenderProvider ms)
+    {
+        var param = message.Command;
+        var names = param.Split("$>");
+
+        if (names.Length != 2)
+        {
+            ms.Send("错误的命令格式", message);
+            return MiraiPluginTaskState.CompletedTask;
+        }
+
+        lock (SongAlias)
+        {
+            var name  = names[0].Trim();
+            var alias = names[1].Trim();
+
+            if (SongList.Any(song => song.Title == name))
+            {
+                File.AppendAllText(
+                    ResourceManager.TempPath + "/ArcaeaSongAliasTemp.txt", $"{name}\t{alias}\n");
+
+                if (SongAlias.ContainsKey(alias))
+                    SongAlias[alias].Add(name);
+                else
+                    SongAlias[alias] = new List<string> { name };
+
+                ms.Send("Success", message);
+            }
+            else
+            {
+                ms.Send($"不存在的歌曲：{name}", message);
+            }
+        }
 
         return MiraiPluginTaskState.CompletedTask;
     }
