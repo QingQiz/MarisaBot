@@ -19,7 +19,7 @@ namespace QQBot.EntityFrameworkCore.Migrations
                 .HasAnnotation("ProductVersion", "5.0.7")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("QQBOT.EntityFrameworkCore.Entity.Audit.AuditLog", b =>
+            modelBuilder.Entity("QQBot.EntityFrameworkCore.Entity.Audit.AuditLog", b =>
                 {
                     b.Property<Guid>("EventId")
                         .ValueGeneratedOnAdd()
@@ -59,7 +59,36 @@ namespace QQBot.EntityFrameworkCore.Migrations
                     b.ToTable("AuditLog");
                 });
 
-            modelBuilder.Entity("QQBOT.EntityFrameworkCore.Entity.Plugin.MaiMaiDx.MaiMaiDxGuess", b =>
+            modelBuilder.Entity("QQBot.EntityFrameworkCore.Entity.Plugin.Arcaea.ArcaeaGuess", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TimesCorrect")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimesStart")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimesWrong")
+                        .HasColumnType("int");
+
+                    b.Property<long>("UId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UId");
+
+                    b.ToTable("Arcaea.Guess");
+                });
+
+            modelBuilder.Entity("QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx.MaiMaiDxGuess", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,7 +117,7 @@ namespace QQBot.EntityFrameworkCore.Migrations
                     b.ToTable("MaiMaiDx.Guess");
                 });
 
-            modelBuilder.Entity("QQBOT.EntityFrameworkCore.Entity.Plugin.Timer", b =>
+            modelBuilder.Entity("QQBot.EntityFrameworkCore.Entity.Plugin.Timer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

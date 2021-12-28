@@ -1,4 +1,5 @@
-﻿using QQBot.MiraiHttp;
+﻿using QQBot.EntityFrameworkCore;
+using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
@@ -24,9 +25,34 @@ public partial class Arcaea : MiraiPluginBase
     }
 
     /// <summary>
+    /// 猜歌排名
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(ArcaeaGuess))]
+    [MiraiPluginCommand(true, "排名")]
+    private MiraiPluginTaskState ArcaeaGuessRank(Message message, MessageSenderProvider ms)
+    {
+        using var dbContext = new BotDbContext();
+
+        var res = dbContext.ArcaeaGuesses
+            .OrderByDescending(g => g.TimesCorrect)
+            .ThenBy(g => g.TimesWrong)
+            .ThenBy(g => g.TimesStart)
+            .Take(10)
+            .ToList();
+
+        if (!res.Any()) ms.Send("None", message);
+
+        ms.Send(string.Join('\n', res.Select((guess, i) =>
+                $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")),
+            message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     /// 猜歌
     /// </summary>
-    [MiraiPluginCommand(MiraiMessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, true, "猜歌", "猜曲", "guess")]
+    [MiraiPluginCommand(MiraiMessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MiraiPluginTaskState ArcaeaGuess(Message message, MessageSenderProvider ms, long qq)
     {
         StartSongCoverGuess(message, ms, qq);

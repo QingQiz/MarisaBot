@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using QQBot.EntityFrameworkCore.Entity.Audit;
 using QQBot.EntityFrameworkCore.Entity.Plugin;
+using QQBot.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using QQBot.EntityFrameworkCore.Entity.Plugin.Shared;
 
 namespace QQBot.EntityFrameworkCore
 {
@@ -10,8 +12,8 @@ namespace QQBot.EntityFrameworkCore
     {
         public DbSet<AuditLog> Logs { get; set; }
         public DbSet<Timer> Timers { get; set; }
-
         public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
+        public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
@@ -21,7 +23,7 @@ namespace QQBot.EntityFrameworkCore
 
     public static class DbContextExt
     {
-        public static void InsertOrUpdate(this DbSet<MaiMaiDxGuess> context, MaiMaiDxGuess value)
+        public static void InsertOrUpdate<T>(this DbSet<T> context, T value) where T : SongGuess
         {
             if (!context.Any(t => t.UId == value.UId))
             {

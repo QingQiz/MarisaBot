@@ -140,7 +140,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     /// 舞萌猜歌排名
     /// </summary>
     [MiraiPluginSubCommand(nameof(MaiMaiDxGuess))]
-    [MiraiPluginCommand("排名")]
+    [MiraiPluginCommand(true, "排名")]
     private MiraiPluginTaskState MaiMaiDxGuessRank(Message message, MessageSenderProvider ms)
     {
         using var dbContext = new BotDbContext();
