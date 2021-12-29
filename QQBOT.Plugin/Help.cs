@@ -8,6 +8,7 @@ namespace QQBot.Plugin;
 [MiraiPluginCommand(MiraiMessageType.GroupMessage, true, "help", "帮助")]
 [MiraiPluginCommand(MiraiMessageType.FriendMessage, true, ":help", ":h", "帮助")]
 [MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.AtBotTrigger), MiraiMessageType.GroupMessage)]
+[MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.AlwaysTrueTrigger), MiraiMessageType.FriendMessage)]
 public class Help : MiraiPluginBase
 {
     [MiraiPluginCommand]

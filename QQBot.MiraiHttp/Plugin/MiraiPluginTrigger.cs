@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
 
 namespace QQBot.MiraiHttp.Plugin;
 
@@ -61,6 +62,17 @@ public class MiraiPluginTrigger: Attribute
     /// </summary>
     public static PluginTrigger AtBotTrigger =>
         (message, provider) => message.At(provider.GetService<DictionaryProvider>()!["QQ"]);
+
+    /// <summary>
+    /// Plain Text
+    /// </summary>
+    public static PluginTrigger PlainTextTrigger =>
+        (message, _) => message.MessageChain!.Messages.All(m => m.Type is MessageType.Plain or MessageType.Source);
+
+    /// <summary>
+    /// always return true
+    /// </summary>
+    public static PluginTrigger AlwaysTrueTrigger => (_, _) => true;
 
     #endregion
 }

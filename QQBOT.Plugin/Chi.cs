@@ -5,6 +5,7 @@ using QQBot.MiraiHttp.Plugin;
 namespace QQBot.Plugin;
 
 [MiraiPluginCommand(true, "吃啥", "吃什么")]
+[MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger))]
 public class Chi : MiraiPluginBase
 {
     private const string F =

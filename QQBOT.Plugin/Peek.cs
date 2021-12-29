@@ -7,6 +7,7 @@ using QQBot.Plugin.Shared.Util;
 namespace QQBot.Plugin;
 
 [MiraiPluginCommand(":peek")]
+[MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger))]
 public class Peek : MiraiPluginBase
 {
     private bool _peekEnabled = true;
