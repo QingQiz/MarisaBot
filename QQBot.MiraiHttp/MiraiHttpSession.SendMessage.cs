@@ -11,6 +11,7 @@ namespace QQBot.MiraiHttp
         {
             var sendFriendMessageAddress = $"{_serverAddress}/sendFriendMessage";
             var sendGroupMessageAddress  = $"{_serverAddress}/sendGroupMessage";
+            var sendTempMessageAddress   = $"{_serverAddress}/sendTempMessage";
 
             async Task SendFriendMessage(MessageChain message, long target, long? quote = null)
             {
@@ -36,11 +37,26 @@ namespace QQBot.MiraiHttp
                 await sendGroupMessageAddress.PostJsonAsync((object)toSend);
             }
 
+            async Task SendTempMessage(MessageChain message, long target, long? groupId, long? quote = null)
+            {
+                dynamic toSend = new
+                {
+                    sessionKey = _session,
+                    qq = target,
+                    group = groupId,
+                    quote,
+                    messageChain = message.Messages
+                        .Select(m => m.ConvertToObject()).ToList()
+                };
+
+                await sendTempMessageAddress.PostJsonAsync((object)toSend);
+            }
+
             var taskList = new List<Task>();
 
             while (await _messageQueue.SendQueue.OutputAvailableAsync())
             {
-                var (message, type, target, quote) = await _messageQueue.SendQueue.ReceiveAsync();
+                var (message, type, target, groupId, quote) = await _messageQueue.SendQueue.ReceiveAsync();
 
                 switch (type)
                 {
@@ -51,7 +67,8 @@ namespace QQBot.MiraiHttp
                         taskList.Add(SendFriendMessage(message, target, quote));
                         break;
                     case MiraiMessageType.TempMessage:
-                        throw new NotImplementedException();
+                        taskList.Add(SendTempMessage(message, target, groupId, quote));
+                        break;
                     case MiraiMessageType.StrangerMessage:
                         throw new NotImplementedException();
                     default:

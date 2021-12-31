@@ -26,7 +26,7 @@ public partial class Arcaea
         // 未知的歌，不算
         if (guess == null)
         {
-            sender.Send("没找到你说的这首歌", message);
+            sender.Reply("没找到你说的这首歌", message);
             return MiraiPluginTaskState.ToBeContinued;
         }
 
@@ -38,7 +38,7 @@ public partial class Arcaea
             dbContext.ArcaeaGuesses.InsertOrUpdate(u);
             await dbContext.SaveChangesAsync();
 
-            sender.Send(new MessageChain(new MessageData[]
+            sender.Reply(new MessageChain(new MessageData[]
             {
                 new PlainMessage($"你猜对了！正确答案：{song.Title}"),
                 ImageMessage.FromBase64(song.GetImage())
@@ -53,7 +53,7 @@ public partial class Arcaea
         dbContext.ArcaeaGuesses.InsertOrUpdate(u);
         await dbContext.SaveChangesAsync();
 
-        sender.Send("不对不对！", message);
+        sender.Reply("不对不对！", message);
         return MiraiPluginTaskState.ToBeContinued;
     }
 
@@ -66,7 +66,7 @@ public partial class Arcaea
             {
                 case "结束猜曲" or "答案":
                 {
-                    ms.Send(new MessageChain(new MessageData[]
+                    ms.Reply(new MessageChain(new MessageData[]
                     {
                         new PlainMessage($"猜曲结束，正确答案：{song.Title}"),
                         ImageMessage.FromBase64(song.GetImage()),
@@ -99,7 +99,7 @@ public partial class Arcaea
                         }
                     }
 
-                    ms.Send(hint!, message, false);
+                    ms.Reply(hint!, message, false);
 
                     return MiraiPluginTaskState.ToBeContinued;
                 }
@@ -111,7 +111,7 @@ public partial class Arcaea
                 if (DateTime.Now - startTime <= TimeSpan.FromMinutes(5)) return MiraiPluginTaskState.NoResponse;
 
                 // time out
-                ms.Send("猜曲已结束", message, false);
+                ms.Reply("猜曲已结束", message, false);
                 return MiraiPluginTaskState.Canceled;
             }
 
@@ -127,7 +127,7 @@ public partial class Arcaea
                 case 1:
                     return await procResult(search[0]);
                 default:
-                    ms.Send(GetSearchResult(search), message);
+                    ms.Reply(GetSearchResult(search), message);
                     return MiraiPluginTaskState.ToBeContinued;
             }
         };
@@ -144,7 +144,7 @@ public partial class Arcaea
 
         if (!res)
         {
-            ms.Send("？", message);
+            ms.Reply("？", message);
             return false;
         }
 
@@ -183,7 +183,7 @@ public partial class Arcaea
 
         if (StartGuess(song, ms, message, qq))
         {
-            ms.Send(new MessageChain(new MessageData[]
+            ms.Reply(new MessageChain(new MessageData[]
             {
                 new PlainMessage("猜曲模式启动！"),
                 ImageMessage.FromBase64(cover.RandomCut(cw, ch).ToB64()),

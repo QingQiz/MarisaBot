@@ -42,13 +42,15 @@ public partial class MiraiHttpSession
             return Check(message, commands, triggers);
         }
 
+        const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
+
         var availablePlugins = _plugins.Where(p =>
             p.GetType().GetCustomAttributes<MiraiPluginTrigger>().Any() ||
             p.GetType().GetCustomAttributes<MiraiPluginCommand>().Any()).ToList();
 
         var availableMethods = availablePlugins
             .Select(p => (p, p.GetType()
-                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                .GetMethods(bindingFlags)
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MiraiPluginTrigger>().Any() ||
@@ -60,7 +62,7 @@ public partial class MiraiHttpSession
 
         var availableSubCommands = availablePlugins
             .Select(p => (p, p.GetType()
-                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                .GetMethods(bindingFlags)
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MiraiPluginTrigger>().Any() ||
@@ -134,7 +136,7 @@ public partial class MiraiHttpSession
                     var target    = message.Location;
                     var exception = e.InnerException?.ToString() ?? e.ToString();
 
-                    _messageQueue.SendQueue.Post((MessageChain.FromPlainText(exception), message.Type, target, null));
+                    _messageQueue.SendQueue.Post((MessageChain.FromPlainText(exception), message.Type, target, null, null));
                 }
             }
 
@@ -149,10 +151,10 @@ public partial class MiraiHttpSession
             
             taskList.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
             {
+                var command = message.Command;
+
                 foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
                 {
-                    var command = message.Command;
-
                     var state   = await TrigPlugin(plugin, message);
 
                     if (state == MiraiPluginTaskState.CompletedTask) break;

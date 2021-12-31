@@ -58,10 +58,11 @@ public partial class MiraiHttpSession
         }
 
         var reportAddress = $"{_serverAddress}/countMessage";
+        var request       = reportAddress.SetQueryParam("sessionKey", _session);
 
         while (true)
         {
-            var msgCnt = await reportAddress.SetQueryParam("sessionKey", _session).GetJsonAsync();
+            var msgCnt = await request.GetJsonAsync();
             CheckResponse(msgCnt);
 
             if (msgCnt.data == 0)

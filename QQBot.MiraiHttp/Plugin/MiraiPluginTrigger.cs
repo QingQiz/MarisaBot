@@ -11,7 +11,6 @@ public class MiraiPluginTrigger: Attribute
     public delegate bool PluginTrigger(Message message, IServiceProvider provider);
 
     public readonly PluginTrigger Trigger;
-    public readonly MiraiMessageType Target;
 
 
     /// <summary>
@@ -22,8 +21,6 @@ public class MiraiPluginTrigger: Attribute
     /// <param name="target">触发器面对的消息类型</param>
     public MiraiPluginTrigger(Type triggerType, string triggerName, MiraiMessageType target = (MiraiMessageType)0b11)
     {
-        Target = target;
-
         PluginTrigger t;
 
         if (triggerType.GetField(triggerName) != null)
@@ -51,7 +48,7 @@ public class MiraiPluginTrigger: Attribute
             throw new ArgumentException($"Invalid trigger: {triggerType}.{triggerName}");
         }
 
-        Trigger = (message, provider) => (message.Type & Target) != 0 && t(message, provider);
+        Trigger = (message, provider) => (message.Type & target) != 0 && t(message, provider);
     }
 
     // 这里提供一些常用的 trigger

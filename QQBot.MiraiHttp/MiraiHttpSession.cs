@@ -1,6 +1,5 @@
 ﻿using Flurl.Http;
 using QQBot.MiraiHttp.DI;
-using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
 
 namespace QQBot.MiraiHttp;

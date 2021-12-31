@@ -40,9 +40,9 @@ public partial class Arcaea : MiraiPluginBase
             .Take(10)
             .ToList();
 
-        if (!res.Any()) ms.Send("None", message);
+        if (!res.Any()) ms.Reply("None", message);
 
-        ms.Send(string.Join('\n', res.Select((guess, i) =>
+        ms.Reply(string.Join('\n', res.Select((guess, i) =>
                 $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")),
             message);
 
@@ -65,7 +65,7 @@ public partial class Arcaea : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
     private static MiraiPluginTaskState ArcaeaSongAlias(Message message, MessageSenderProvider ms)
     {
-        ms.Send("错误的命令格式", message);
+        ms.Reply("错误的命令格式", message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
@@ -81,18 +81,18 @@ public partial class Arcaea : MiraiPluginBase
 
         if (string.IsNullOrEmpty(songName))
         {
-            ms.Send("？", message);
+            ms.Reply("？", message);
         }
 
         var songList = SearchSongByAlias(songName);
 
         if (songList.Count == 1)
         {
-            ms.Send($"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}", message);
+            ms.Reply($"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}", message);
         }
         else
         {
-            ms.Send(GetSearchResult(songList), message);
+            ms.Reply(GetSearchResult(songList), message);
         }
 
         return MiraiPluginTaskState.CompletedTask;
@@ -110,7 +110,7 @@ public partial class Arcaea : MiraiPluginBase
 
         if (names.Length != 2)
         {
-            ms.Send("错误的命令格式", message);
+            ms.Reply("错误的命令格式", message);
             return MiraiPluginTaskState.CompletedTask;
         }
 
@@ -129,11 +129,11 @@ public partial class Arcaea : MiraiPluginBase
                 else
                     SongAlias[alias] = new List<string> { name };
 
-                ms.Send("Success", message);
+                ms.Reply("Success", message);
             }
             else
             {
-                ms.Send($"不存在的歌曲：{name}", message);
+                ms.Reply($"不存在的歌曲：{name}", message);
             }
         }
 
