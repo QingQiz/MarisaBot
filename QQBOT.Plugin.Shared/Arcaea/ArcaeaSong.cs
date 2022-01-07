@@ -7,9 +7,9 @@ namespace QQBot.Plugin.Shared.Arcaea
     {
         public readonly long Id;
         public readonly string Title;
-        public readonly string Author;
+        public readonly string Artist;
         public readonly string Bpm;
-        public readonly string Length;
+        public readonly string Version;
         public readonly List<string> Level;
         public readonly string SongPack;
         private readonly string _coverFileName;
@@ -24,9 +24,9 @@ namespace QQBot.Plugin.Shared.Arcaea
         {
             Id             = d.id;
             Title          = d.title;
-            Author         = d.author;
+            Artist         = d.artist;
             Bpm            = d.bpm;
-            Length         = d.length;
+            Version        = d.version;
             Level          = new List<string>();
             SongPack       = d.song_pack;
             _coverFileName = d.cover_name;
@@ -70,16 +70,16 @@ namespace QQBot.Plugin.Shared.Arcaea
                 DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("演唱/作曲", Author, x, y, w, h, background.Width);
+                DrawKeyValuePair("演唱/作曲", Artist, x, y, w, h, background.Width);
 
                 y += h;
                 DrawKeyValuePair("BPM", Bpm, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("乐曲长度", Length, x, y, w, h, background.Width);
+                DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
+                DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
 
                 y += h;
                 DrawKeyValuePair("难度", string.Join(", ", Level), x, y, w, h, background.Width);

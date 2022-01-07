@@ -81,10 +81,8 @@ public partial class Arcaea
                     switch (new Random().Next(3))
                     {
                         case 0:
-                            hint = MessageChain.FromPlainText($"作曲家是：{song.Author}");
-                            break;
                         case 1:
-                            hint = MessageChain.FromPlainText($"是个{song.Level.Last()}");
+                            hint = MessageChain.FromPlainText($"是个{song.Level.Last(l => l != "/")}");
                             break;
                         case 2:
                         {
