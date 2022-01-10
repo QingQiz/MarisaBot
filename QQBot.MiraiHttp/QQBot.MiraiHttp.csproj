@@ -15,4 +15,7 @@
       <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\QQBot.MiraiHttp\</PathMap>
+    </PropertyGroup>
 </Project>

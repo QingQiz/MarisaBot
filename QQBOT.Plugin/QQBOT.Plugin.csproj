@@ -11,4 +11,7 @@
       <ProjectReference Include="..\QQBOT.Plugin.Shared\QQBOT.Plugin.Shared.csproj" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\QQBot.Plugin\</PathMap>
+    </PropertyGroup>
 </Project>

@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.EntityFrameworkCore", "QQBot.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.EntityFrameworkCore", "QQBot.EntityFrameworkCore\QQBot.EntityFrameworkCore.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.MiraiHttp", "QQBot.MiraiHttp\QQBot.MiraiHttp.csproj", "{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.Plugin.Shared", "QQBot.Plugin.Shared\QQBOT.Plugin.Shared.csproj", "{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.Plugin.Shared", "QQBot.Plugin.Shared\QQBot.Plugin.Shared.csproj", "{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.Plugin", "QQBot.Plugin\QQBot.Plugin.csproj", "{0A29E29D-15A4-4949-828D-D69AEDEC19D4}"
 EndProject
