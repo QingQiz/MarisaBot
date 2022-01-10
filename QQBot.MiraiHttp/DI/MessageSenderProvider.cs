@@ -38,7 +38,7 @@ public class MessageSenderProvider
     /// </summary>
     public void Reply(MessageChain message, Message recv, bool quote=true)
     {
-        Post(message, recv.Type, recv.Location, recv.GroupInfo!.Id, quote ? recv.Source.Id : null);
+        Post(message, recv.Type, recv.Location, recv.GroupInfo?.Id, quote ? recv.Source.Id : null);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class MessageSenderProvider
             throw new ArgumentException("临时消息只能从群消息发出");
         }
 
-        Post(message, MiraiMessageType.TempMessage, recv.Sender!.Id, recv.GroupInfo!.Id, quote ? recv.Source.Id : null);
+        Post(message, MiraiMessageType.TempMessage, recv.Sender!.Id, recv.GroupInfo?.Id, quote ? recv.Source.Id : null);
     }
 
     /// <summary>

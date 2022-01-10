@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using QQBot.EntityFrameworkCore;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Plugin;
 
@@ -15,7 +16,9 @@ public partial class MiraiHttpSession
             .AddScoped<DictionaryProvider>()
             .AddScoped<MessageQueueProvider>()
             .AddScoped<MessageSenderProvider>()
-            .AddScoped<MiraiHttpSession>();
+            .AddScoped<MiraiHttpSession>()
+            // db context
+            .AddScoped(_ => new BotDbContext());
 
         var plugins = pluginAssembly.GetTypes()
             .Where(t => t.GetCustomAttribute<MiraiPlugin>(true) is not null)

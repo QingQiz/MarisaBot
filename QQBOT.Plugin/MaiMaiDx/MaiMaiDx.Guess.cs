@@ -43,7 +43,7 @@ public partial class MaiMaiDx
             dbContext.MaiMaiDxGuesses.InsertOrUpdate(u);
             await dbContext.SaveChangesAsync();
 
-            sender.SendByRecv(new MessageChain(new MessageData[]
+            sender.Reply(new MessageChain(new MessageData[]
             {
                 new PlainMessage($"你猜对了！正确答案：{song.Title}"),
                 ImageMessage.FromBase64(song.GetImage())

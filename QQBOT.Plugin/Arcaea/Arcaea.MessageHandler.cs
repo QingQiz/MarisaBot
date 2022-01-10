@@ -55,7 +55,11 @@ public partial class Arcaea : MiraiPluginBase
     [MiraiPluginCommand(MiraiMessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MiraiPluginTaskState ArcaeaGuess(Message message, MessageSenderProvider ms, long qq)
     {
-        StartSongCoverGuess(message, ms, qq);
+        if (string.IsNullOrEmpty(message.Command))
+        {
+            StartSongCoverGuess(message, ms, qq);
+        }
+
         return MiraiPluginTaskState.CompletedTask;
     }
 

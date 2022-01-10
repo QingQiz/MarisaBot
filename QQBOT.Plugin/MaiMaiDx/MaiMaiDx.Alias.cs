@@ -1,4 +1,5 @@
-﻿using QQBot.MiraiHttp.Entity;
+﻿using Microsoft.VisualBasic;
+using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
@@ -118,15 +119,22 @@ public partial class MaiMaiDx
     {
         if (string.IsNullOrWhiteSpace(alias)) return new List<MaiMaiSong>();
 
+#pragma warning disable CA1416
+        alias = Strings.StrConv(alias, VbStrConv.SimplifiedChinese)!;
         return SongAlias.Keys
-            .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
+            // 找到别名匹配的
+            .Where(songNameAlias => Strings.StrConv(songNameAlias, VbStrConv.SimplifiedChinese)!
+                .Contains(alias, StringComparison.OrdinalIgnoreCase))
+            // 找到真实歌曲名
             .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Where(songName =>
-                SongList.Any(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
-            .Select(songName =>
-                SongList.First(song => string.Equals(song.Title, songName, StringComparison.OrdinalIgnoreCase)))
+            // 找到歌曲，这里必定能找到
+            // 放屁，这里不一定能找到，，某些曲目删了，但是别名还在，会导致空引用
+            .Select(songName => SongList.FirstOrDefault(song => song.Title == songName))
+            .Where(x => x is not null)
+            .Cast<MaiMaiSong>()
             .ToList();
+#pragma warning restore CA1416
     }
 
     private List<string> GetSongAliasesByName(string name)

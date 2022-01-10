@@ -9,7 +9,13 @@ namespace QQBot.Plugin;
 [MiraiPluginTrigger(typeof(Select), nameof(Trigger))]
 public class Select : MiraiPluginBase
 {
-    public static MiraiPluginTrigger.PluginTrigger Trigger => (message, _) => message.Command.Contains("还是");
+    public static MiraiPluginTrigger.PluginTrigger Trigger => (message, _) =>
+    {
+        if (message.Command.Any(char.IsPunctuation)) return false;
+        if (message.Command.Any(char.IsWhiteSpace)) return false;
+        if (message.Command.Contains("还是")) return true;
+        return false;
+    };
 
     private (string a, string b)? Parser(string msg)
     {

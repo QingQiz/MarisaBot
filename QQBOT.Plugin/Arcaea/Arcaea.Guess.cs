@@ -176,8 +176,8 @@ public partial class Arcaea
 
         var cover = ResourceManager.GetCover(song.CoverFileName);
 
-        var cw = cover.Width  / 3;
-        var ch = cover.Height / 3;
+        var cw = cover.Width  / 4;
+        var ch = cover.Height / 4;
 
         if (StartGuess(song, ms, message, qq))
         {
