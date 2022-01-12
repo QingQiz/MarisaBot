@@ -239,7 +239,11 @@ public partial class MaiMaiDx
         var songs = SongList.Where(s => categoryFilter?.IsMatch(s.Info.Genre) ?? true)
             .ToList();
 
-        if (!songs.Any()) ms.SendByRecv(MessageChain.FromPlainText("None"), message);
+        if (!songs.Any())
+        {
+            ms.SendByRecv(MessageChain.FromPlainText("None"), message);
+            return;
+        }
 
         var song = songs.RandomTake();
 
