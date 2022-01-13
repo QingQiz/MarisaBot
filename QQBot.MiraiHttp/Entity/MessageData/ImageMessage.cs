@@ -15,4 +15,13 @@ public class ImageMessage : MessageData
             Base64 = base64
         };
     }
+
+    public static ImageMessage FromUrl(string url)
+    {
+        return new ImageMessage
+        {
+            Type = MessageType.Image,
+            Url  = url
+        };
+    }
 }

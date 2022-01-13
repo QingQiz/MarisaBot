@@ -17,7 +17,7 @@ public class Select : MiraiPluginBase
         return false;
     };
 
-    private (string a, string b)? Parser(string msg)
+    private static (string a, string b)? Parser(string msg)
     {
         msg = msg.Trim().TrimEnd('?').TrimEnd('？').TrimEnd('呢');
 
@@ -46,7 +46,7 @@ public class Select : MiraiPluginBase
     }
 
     [MiraiPluginCommand]
-    protected MiraiPluginTaskState FriendMessageHandler(MessageSenderProvider ms, Message message)
+    private static MiraiPluginTaskState FriendMessageHandler(MessageSenderProvider ms, Message message)
     {
         var res = Parser(message.Command);
 

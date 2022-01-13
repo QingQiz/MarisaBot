@@ -25,7 +25,8 @@ public class MessageData
                 return new
                 {
                     type   = "Image",
-                    base64 = (this as ImageMessage)!.Base64
+                    base64 = (this as ImageMessage)?.Base64,
+                    url    = (this as ImageMessage)?.Url,
                 };
             case MessageType.Voice:
             {

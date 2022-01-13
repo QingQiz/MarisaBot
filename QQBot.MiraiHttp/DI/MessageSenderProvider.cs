@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks.Dataflow;
 using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
 
 namespace QQBot.MiraiHttp.DI;
 
@@ -39,6 +40,11 @@ public class MessageSenderProvider
     public void Reply(MessageChain message, Message recv, bool quote=true)
     {
         Post(message, recv.Type, recv.Location, recv.GroupInfo?.Id, quote ? recv.Source.Id : null);
+    }
+
+    public void Reply(MessageData message, Message recv, bool quote=true)
+    {
+        Reply(new MessageChain(new []{message}), recv, quote);
     }
 
     /// <summary>

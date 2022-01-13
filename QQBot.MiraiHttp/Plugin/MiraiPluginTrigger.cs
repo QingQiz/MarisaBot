@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
@@ -22,24 +23,26 @@ public class MiraiPluginTrigger: Attribute
     public MiraiPluginTrigger(Type triggerType, string triggerName, MiraiMessageType target = (MiraiMessageType)0b11)
     {
         PluginTrigger t;
+        const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
+                                          BindingFlags.Static  | BindingFlags.Public;
 
-        if (triggerType.GetField(triggerName) != null)
+        if (triggerType.GetField(triggerName, bindingFlags) != null)
         {
-            var field = triggerType.GetField(triggerName)!.GetValue(null)!;
-            var del   = field.GetType().GetMethod("Invoke")!;
-
-            t = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
-        }
-        else if (triggerType.GetProperty(triggerName) != null)
-        {
-            var field = triggerType.GetProperty(triggerName)!.GetValue(null)!;
-            var del   = field.GetType().GetMethod("Invoke")!;
+            var field = triggerType.GetField(triggerName, bindingFlags)!.GetValue(null)!;
+            var del   = field.GetType().GetMethod("Invoke", bindingFlags)!;
 
             t = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
         }
-        else if (triggerType.GetMethod(triggerName) != null)
+        else if (triggerType.GetProperty(triggerName, bindingFlags) != null)
         {
-            var del = triggerType.GetMethod(triggerName)!;
+            var field = triggerType.GetProperty(triggerName, bindingFlags)!.GetValue(null)!;
+            var del   = field.GetType().GetMethod("Invoke", bindingFlags)!;
+
+            t = (a, b) => (bool)del.Invoke(field, new object[] { a, b })!;
+        }
+        else if (triggerType.GetMethod(triggerName, bindingFlags) != null)
+        {
+            var del = triggerType.GetMethod(triggerName, bindingFlags)!;
 
             t = (a, b) => (bool)del.Invoke(triggerType, new object[] { a, b })!;
         }
