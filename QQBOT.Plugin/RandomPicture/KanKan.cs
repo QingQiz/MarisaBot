@@ -30,7 +30,9 @@ public class KanKan : MiraiPluginBase
         { "DDLC".ToLower(), "DDLC" },
         { "苍彼", "苍彼" },
         { "君彼女", "君彼女" },
-        { "巧克甜恋", "巧克甜恋" }
+        { "巧克甜恋", "巧克甜恋" },
+        { "银河龙", "银河龙" },
+        { "秋回", "秋回" },
     };
 
     private static List<string> GetImList(string name)
@@ -51,7 +53,7 @@ public class KanKan : MiraiPluginBase
             var pic = GetImList(m.Command.ToLower()).RandomTake();
 
             p.Reply(Path.GetFileName(pic), m);
-            p.Reply(ImageMessage.FromBase64((Image.FromFile(pic) as Bitmap)!.ToB64()), m, false);
+            p.Reply(ImageMessage.FromPath(pic), m, false);
         }
         else
         {

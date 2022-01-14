@@ -24,4 +24,13 @@ public class ImageMessage : MessageData
             Url  = url
         };
     }
+
+    public static ImageMessage FromPath(string path)
+    {
+        return new ImageMessage
+        {
+            Type = MessageType.Image,
+            Path =  path,
+        };
+    }
 }

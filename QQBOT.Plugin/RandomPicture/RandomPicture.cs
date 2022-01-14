@@ -48,7 +48,7 @@ public class RandomPicture : MiraiPluginBase
             var pic = ImageList.RandomTake();
 
             p.Reply(Path.GetFileName(pic), m);
-            p.Reply(ImageMessage.FromBase64((Image.FromFile(pic) as Bitmap)!.ToB64()), m, false);
+            p.Reply(ImageMessage.FromPath(pic), m, false);
 
             return MiraiPluginTaskState.CompletedTask;
         }
