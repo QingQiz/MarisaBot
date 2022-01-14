@@ -120,25 +120,13 @@ public class TodayFortune : MiraiPluginBase
     // 机位
     private static readonly string[] PList = { "P1", "P2", "P1", "P2", "P1", "P2", "P1", "P2", "维修位" };
 
-    private static readonly Dictionary<long, DateTime> Cache = new();
-    private static readonly DateTime BeginTime = new(2021, 1, 4, 5, 14, 0, 0);
-
     private static int GenRandomSeed(long id)
     {
         var now = DateTime.Now;
 
-        if (Cache.ContainsKey(id))
-        {
-            var t = Cache[id];
-
-            if (t.Day == now.Day && t.Month == now.Month)
-            {
-                return (int)((t - BeginTime).TotalSeconds * 10);
-            }
-        }
-
-        Cache[id] = now;
-        return (int)((now - BeginTime).TotalSeconds * 10);
+        // 四个常数分别是：Prime[114514]、Prime[1919810]、Prime[114514 ^ 1919810]、Prime[114514 + 1919810]
+        return (int)((((now.Year * now.Day * id) ^ 1504831) + ((now.Month * now.Day * id) ^ 31066753) +
+                      ((now.Day  * now.Day * id) ^ 30680207)) % 33046393);
     }
 
     [MiraiPluginCommand(true, "")]
@@ -179,24 +167,4 @@ public class TodayFortune : MiraiPluginBase
 
         return MiraiPluginTaskState.CompletedTask;
     }
-
-    [MiraiPluginCommand(true, "reset")]
-    private static MiraiPluginTaskState Reset(Message message, MessageSenderProvider ms)
-    {
-        const long authorId = 642191352L;
-        var        sender   = message.Sender!.Id;
-
-        if (sender == authorId)
-        {
-            Cache.Clear();
-            ms.Reply("Success", message);
-            return MiraiPluginTaskState.CompletedTask;
-        }
-        else
-        {
-            ms.Reply("Denied", message);
-            return MiraiPluginTaskState.CompletedTask;
-        }
-    }
-
 }
