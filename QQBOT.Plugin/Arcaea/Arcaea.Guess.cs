@@ -6,7 +6,6 @@ using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.Plugin.Shared.Arcaea;
 using QQBot.Plugin.Shared.Util;
-using QQBOT.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.Arcaea;
 

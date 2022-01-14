@@ -1,4 +1,4 @@
-﻿namespace QQBOT.Plugin.Shared.Util
+﻿namespace QQBot.Plugin.Shared.Util
 {
     public static class ListExt
     {

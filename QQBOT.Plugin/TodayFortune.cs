@@ -153,10 +153,15 @@ public class TodayFortune : MiraiPluginBase
         var d  = DList[rand.Next(DList.Length)];
         var p  = PList[rand.Next(PList.Length)];
 
+        while (ne[..2] == pe[..2])
+        {
+            ne = NEvent[rand.Next(NEvent.Length)];
+        }
+
         var now = DateTime.Now;
 
         var header =
-            $"📅 今天是 {now:yyyy 年 M 月 d 日}\n⛄ 农历 {ChinaDate.GetYear(now)}{ChinaDate.GetMonth(now)}{ChinaDate.GetDay(now)}";
+            $"📅 今天是 {now:yyyy 年 M 月 d 日}\n⛄ 农历{ChinaDate.GetYear(now)}{ChinaDate.GetMonth(now)}{ChinaDate.GetDay(now)}";
 
         if (!string.IsNullOrEmpty(ChinaDate.GetChinaHoliday(now)))
         {
@@ -193,4 +198,5 @@ public class TodayFortune : MiraiPluginBase
             return MiraiPluginTaskState.CompletedTask;
         }
     }
+
 }

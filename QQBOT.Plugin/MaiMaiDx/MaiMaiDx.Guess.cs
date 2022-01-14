@@ -9,7 +9,6 @@ using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.Plugin.Shared.MaiMaiDx;
 using QQBot.Plugin.Shared.Util;
-using QQBOT.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.MaiMaiDx;
 
