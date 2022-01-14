@@ -5,11 +5,27 @@ using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.Plugin.Shared.Util;
 
-namespace QQBot.Plugin;
+namespace QQBot.Plugin.RandomPicture;
 
 [MiraiPluginCommand("抽图", "ct")]
+[MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger))]
 public class RandomPicture : MiraiPluginBase
 {
+    private static readonly List<string> PicDbPath = new()
+    {
+        @"C:\Users\sofee\Desktop\pic"
+    };
+
+    private static readonly List<string> PicDbPathExclude = new()
+    {
+        "看看", "R18"
+    };
+
+    private static readonly List<string> AvailableFileExt= new()
+    {
+        "jpg", "png", "jpeg"
+    };
+
     private static readonly List<string> ImageList = new();
 
     [MiraiPluginCommand(true, "")]
@@ -19,12 +35,20 @@ public class RandomPicture : MiraiPluginBase
         {
             if (ImageList.Count == 0)
             {
-                ImageList.AddRange(Directory
-                    .GetFiles(@"C:\Users\sofee\Desktop\pic", "*.*", SearchOption.AllDirectories)
-                    .Where(fn => fn.EndsWith("jpg") || fn.EndsWith("jpeg") || fn.EndsWith("png")));
+                foreach (var path in PicDbPath)
+                {
+                    ImageList.AddRange(Directory
+                        .GetFiles(path, "*.*", SearchOption.AllDirectories)
+                        .Where(fn => PicDbPathExclude.All(ex => !fn.Contains(ex, StringComparison.OrdinalIgnoreCase)))
+                        .Where(fn =>
+                            AvailableFileExt.Any(ext => fn.EndsWith(ext, StringComparison.OrdinalIgnoreCase))));
+                }
             }
 
-            p.Reply(ImageMessage.FromBase64((Image.FromFile(ImageList.RandomTake()) as Bitmap)!.ToB64()), m, false);
+            var pic = ImageList.RandomTake();
+
+            p.Reply(Path.GetFileName(pic), m);
+            p.Reply(ImageMessage.FromBase64((Image.FromFile(pic) as Bitmap)!.ToB64()), m, false);
 
             return MiraiPluginTaskState.CompletedTask;
         }
