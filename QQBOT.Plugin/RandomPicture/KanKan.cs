@@ -20,7 +20,7 @@ public class KanKan : MiraiPluginBase
 
     private static readonly List<string> AvailableFileExt = new()
     {
-        "jpg", "png", "jpeg"
+        "jpg"//, "png", "jpeg"
     };
 
     private static readonly Dictionary<string, string> Alias = new()
@@ -33,6 +33,7 @@ public class KanKan : MiraiPluginBase
         { "巧克甜恋", "巧克甜恋" },
         { "银河龙", "银河龙" },
         { "秋回", "秋回" },
+        { "我", "我" },
     };
 
     private static List<string> GetImList(string name)
@@ -54,8 +55,12 @@ public class KanKan : MiraiPluginBase
 
             p.Reply(Path.GetFileName(pic), m);
             p.Reply(ImageMessage.FromPath(pic), m, false);
+
+            return MiraiPluginTaskState.CompletedTask;
         }
-        else
+
+        // ReSharper disable once InvertIf
+        if (string.IsNullOrWhiteSpace(m.Command))
         {
             if (new Random().Next(10) < 3)
             {
@@ -63,11 +68,14 @@ public class KanKan : MiraiPluginBase
             }
             else
             {
-                p.Reply($"现在能看的只有：{string.Join('、', Alias.Values.Distinct())}\n现在过滤了的有：{string.Join('、', PicDbPathExclude)}",
+                p.Reply(
+                    $"现在能看的只有：{string.Join('、', Alias.Values.Distinct())}\n现在过滤了的有：{string.Join('、', PicDbPathExclude)}",
                     m, false);
             }
+
+            return MiraiPluginTaskState.CompletedTask;
         }
 
-        return MiraiPluginTaskState.CompletedTask;
+        return MiraiPluginTaskState.NoResponse;
     }
 }
