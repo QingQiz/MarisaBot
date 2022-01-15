@@ -1,149 +1,34 @@
-﻿using Microsoft.VisualBasic;
+﻿using System.Dynamic;
+using Flurl.Http;
+using Newtonsoft.Json;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
-using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
+using QQBot.Plugin.Shared.Util.SongDb;
 
 namespace QQBot.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
-    private Dictionary<string, List<string>>? _songAlias;
-
-    /// <summary>
-    /// 监视 alias 文件变动并更新别名列表，至于为什么放在这里，见 https://stackoverflow.com/a/16279093/13442887
-    /// </summary>
-    private FileSystemWatcher _songAliasChangedWatcher = null!;
-
-    private Dictionary<string, List<string>> GetSongAliases()
-    {
-        var songAlias = new Dictionary<string, List<string>>();
-
-        foreach (var song in SongList)
+    private readonly SongDb<MaiMaiSong> _songDb = new(
+        ResourceManager.ResourcePath + "/aliases.tsv",
+        ResourceManager.TempPath     + "/MaiMaiSongAliasTemp.txt",
+        () =>
         {
-            if (!songAlias.ContainsKey(song.Title)) songAlias[song.Title] = new List<string>();
-
-            songAlias[song.Title].Add(song.Title);
-        }
-
-        // 读别名列表
-        var lines = File.ReadAllLines(ResourceManager.ResourcePath + "/aliases.tsv");
-
-        // 尝试读临时别名
-        try
-        {
-            lines = lines.Concat(File.ReadAllLines(ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt"))
-                .ToArray();
-        }
-        catch (FileNotFoundException)
-        {
-        }
-
-        foreach (var line in lines)
-        {
-            var titles = line
-                .Split('\t')
-                .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToList();
-
-            foreach (var title in titles)
+            try
             {
-                if (!songAlias.ContainsKey(title)) songAlias[title] = new List<string>();
+                var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
 
-                songAlias[title].Add(titles[0]);
+                return data.Select(d => new MaiMaiSong(d)).ToList();
             }
-        }
-
-        return songAlias;
-    }
-
-    private Dictionary<string, List<string>> SongAlias
-    {
-        get
-        {
-            if (_songAlias == null)
+            catch
             {
-                _songAlias = GetSongAliases();
-
-                _songAliasChangedWatcher = new FileSystemWatcher
-                {
-                    Path         = ResourceManager.ResourcePath,
-                    NotifyFilter = NotifyFilters.LastWrite,
-                    Filter       = "aliases.tsv"
-                };
-
-                var processing = false;
-
-                _songAliasChangedWatcher.Changed += (_, _) =>
-                {
-                    if (processing) return;
-
-                    lock (_songAlias)
-                    {
-                        processing = true;
-                        // 考虑到文件变化时，操作文件的程序可能还未释放文件，因此进行延迟操作
-                        Thread.Sleep(500);
-                        _songAlias = GetSongAliases();
-                        processing = false;
-                    }
-                };
-                _songAliasChangedWatcher.EnableRaisingEvents = true;
+                var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
+                    File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
+                ) as dynamic[];
+                return data.Select(d => new MaiMaiSong(d)).ToList();
             }
-
-            return _songAlias;
-        }
-    }
-
-    private List<MaiMaiSong> SearchSong(string m)
-    {
-        if (string.IsNullOrEmpty(m)) return new List<MaiMaiSong>();
-
-        m = m.Trim();
-
-        var search = SearchSongByAlias(m);
-
-        if (long.TryParse(m, out var id))
-        {
-            search.AddRange(SongList.Where(s => s.Id == id));
-        }
-
-        if (m.StartsWith("id", StringComparison.OrdinalIgnoreCase))
-            if (long.TryParse(m.TrimStart("id")!.Trim(), out var songId))
-                search = SongList.Where(s => s.Id == songId).ToList();
-
-        return search;
-    }
-
-    private List<MaiMaiSong> SearchSongByAlias(string alias)
-    {
-        if (string.IsNullOrWhiteSpace(alias)) return new List<MaiMaiSong>();
-
-#pragma warning disable CA1416
-        alias = Strings.StrConv(alias, VbStrConv.SimplifiedChinese)!;
-        return SongAlias.Keys
-            // 找到别名匹配的
-            .Where(songNameAlias => Strings.StrConv(songNameAlias, VbStrConv.SimplifiedChinese)!
-                .Contains(alias, StringComparison.OrdinalIgnoreCase))
-            // 找到真实歌曲名
-            .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            // 找到歌曲，这里必定能找到
-            // 放屁，这里不一定能找到，，某些曲目删了，但是别名还在，会导致空引用
-            .Select(songName => SongList.FirstOrDefault(song => song.Title == songName))
-            .Where(x => x is not null)
-            .Cast<MaiMaiSong>()
-            .ToList();
-#pragma warning restore CA1416
-    }
-
-    private List<string> GetSongAliasesByName(string name)
-    {
-        var aliases = SongAlias
-            .Where(k /* alias: [song title] */ => k.Value.Contains(name))
-            .Select(k => k.Key);
-        return aliases.ToList();
-    }
+        });
 
     private static MessageChain GetSearchResult(IReadOnlyList<MaiMaiSong> songs)
     {

@@ -70,7 +70,7 @@ public partial class Arcaea
                         new PlainMessage($"猜曲结束，正确答案：{song.Title}"),
                         ImageMessage.FromBase64(song.GetImage()),
                         new PlainMessage(
-                            $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
+                            $"当前歌在录的别名有：{string.Join(", ", _songDb.GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
                     }), message);
                     return MiraiPluginTaskState.CompletedTask;
                 }
@@ -112,7 +112,7 @@ public partial class Arcaea
                 return MiraiPluginTaskState.Canceled;
             }
 
-            var search = SearchSong(message.Command);
+            var search = _songDb.SearchSong(message.Command);
 
             var procResult =
                 new Func<ArcaeaSong?, Task<MiraiPluginTaskState>>(s => ProcSongGuessResult(ms, message, song, s));
@@ -169,7 +169,7 @@ public partial class Arcaea
 
     private void StartSongCoverGuess(Message message, MessageSenderProvider ms, long qq)
     {
-        var songs = SongList.ToList();
+        var songs = _songDb.SongList.ToList();
 
         var song = songs.RandomTake();
 

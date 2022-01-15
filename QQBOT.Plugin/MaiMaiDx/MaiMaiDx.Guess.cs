@@ -75,7 +75,7 @@ public partial class MaiMaiDx
                         new PlainMessage($"猜曲结束，正确答案：{song.Title}"),
                         ImageMessage.FromBase64(song.GetImage()),
                         new PlainMessage(
-                            $"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
+                            $"当前歌在录的别名有：{string.Join(", ", _songDb.GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
                     }), message);
                     return MiraiPluginTaskState.CompletedTask;
                 }
@@ -122,7 +122,7 @@ public partial class MaiMaiDx
                 return MiraiPluginTaskState.Canceled;
             }
 
-            var search = SearchSong(message.Command);
+            var search = _songDb.SearchSong(message.Command);
 
             var procResult =
                 new Func<MaiMaiSong?, Task<MiraiPluginTaskState>>(s => ProcSongGuessResult(ms, message, song, s));
@@ -191,7 +191,7 @@ public partial class MaiMaiDx
         var groupId = message.GroupInfo!.Id;
 
         // random cut song
-        var song = SongList.Where(s => _songIdWithWave.Contains(s.Id)).ToList().RandomTake();
+        var song = _songDb.SongList.Where(s => _songIdWithWave.Contains(s.Id)).ToList().RandomTake();
 
         // ReSharper disable once InvertIf
         if (StartGuess(song, ms, message, qq))
@@ -235,7 +235,7 @@ public partial class MaiMaiDx
 
     private void StartSongCoverGuess(Message message, MessageSenderProvider ms, long qq, Regex? categoryFilter)
     {
-        var songs = SongList.Where(s => categoryFilter?.IsMatch(s.Info.Genre) ?? true)
+        var songs = _songDb.SongList.Where(s => categoryFilter?.IsMatch(s.Info.Genre) ?? true)
             .ToList();
 
         if (!songs.Any())

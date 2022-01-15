@@ -3,7 +3,6 @@ using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
-using QQBot.Plugin.Shared.Arcaea;
 
 namespace QQBot.Plugin.Arcaea;
 
@@ -17,7 +16,7 @@ public partial class Arcaea : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "song", "search", "搜索")]
     private MiraiPluginTaskState ArcaeaSearchSong(Message message, MessageSenderProvider ms)
     {
-        var search = SearchSongByAlias(message.Command);
+        var search = _songDb.SearchSong(message.Command);
 
         ms.SendByRecv(GetSearchResult(search), message);
 
@@ -88,11 +87,11 @@ public partial class Arcaea : MiraiPluginBase
             ms.Reply("？", message);
         }
 
-        var songList = SearchSongByAlias(songName);
+        var songList = _songDb.SearchSong(songName);
 
         if (songList.Count == 1)
         {
-            ms.Reply($"当前歌在录的别名有：{string.Join(", ", GetSongAliasesByName(songList[0].Title))}", message);
+            ms.Reply($"当前歌在录的别名有：{string.Join('、', _songDb.GetSongAliasesByName(songList[0].Title))}", message);
         }
         else
         {
@@ -118,28 +117,10 @@ public partial class Arcaea : MiraiPluginBase
             return MiraiPluginTaskState.CompletedTask;
         }
 
-        lock (SongAlias)
-        {
-            var name  = names[0].Trim();
-            var alias = names[1].Trim();
+        var name  = names[0].Trim();
+        var alias = names[1].Trim();
 
-            if (SongList.Any(song => song.Title == name))
-            {
-                File.AppendAllText(
-                    ResourceManager.TempPath + "/ArcaeaSongAliasTemp.txt", $"{name}\t{alias}\n");
-
-                if (SongAlias.ContainsKey(alias))
-                    SongAlias[alias].Add(name);
-                else
-                    SongAlias[alias] = new List<string> { name };
-
-                ms.Reply("Success", message);
-            }
-            else
-            {
-                ms.Reply($"不存在的歌曲：{name}", message);
-            }
-        }
+        ms.Reply(_songDb.SetSongAlias(name, alias) ? "Success" : $"不存在的歌曲：{name}", message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
