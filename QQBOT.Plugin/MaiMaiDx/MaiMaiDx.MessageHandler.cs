@@ -61,7 +61,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     {
         var search = _songDb.SearchSong(message.Command);
 
-        ms.Reply(GetSearchResult(search), message);
+        ms.Reply(_songDb.GetSearchResult(search), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
@@ -175,13 +175,14 @@ public partial class MaiMaiDx : MiraiPluginBase
             }
             else
             {
-                StartSongCoverGuess(message, ms, qq,
-                    new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace));
+                _songDb.StartSongCoverGuess(message, ms, qq, 3, song =>
+                    new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace)
+                        .IsMatch(song.Info.Genre));
             }
         }
         else if (message.Command == "")
         {
-            StartSongCoverGuess(message, ms, qq, null);
+            _songDb.StartSongCoverGuess(message, ms, qq, 3, null);
         }
         else
         {
@@ -228,7 +229,7 @@ public partial class MaiMaiDx : MiraiPluginBase
         }
         else
         {
-            ms.Reply(GetSearchResult(songList), message);
+            ms.Reply(_songDb.GetSearchResult(songList), message);
         }
 
         return MiraiPluginTaskState.CompletedTask;

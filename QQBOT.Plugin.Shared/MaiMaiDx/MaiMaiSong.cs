@@ -6,11 +6,11 @@ namespace QQBot.Plugin.Shared.MaiMaiDx;
 
 public class MaiMaiSong : Song
 {
-    public string Type;
-    public List<double> Constants = new();
-    public List<string> Levels = new();
-    public List<MaiMaiSongChart> Charts = new();
-    public MaiMaiSongInfo Info;
+    public readonly string Type;
+    public readonly List<double> Constants = new();
+    public readonly List<string> Levels = new();
+    public readonly List<MaiMaiSongChart> Charts = new();
+    public readonly MaiMaiSongInfo Info;
 
     public MaiMaiSong(dynamic data)
     {
@@ -27,6 +27,16 @@ public class MaiMaiSong : Song
         foreach (var l in data.level) Levels.Add(l);
 
         foreach (var c in data.charts) Charts.Add(new MaiMaiSongChart(c));
+    }
+
+    public override string MaxLevel()
+    {
+        return Levels.Last();
+    }
+
+    public override Bitmap GetCover()
+    {
+        return ResourceManager.GetCover(Id, false);
     }
 
     #region Drawer
@@ -175,7 +185,7 @@ public class MaiMaiSong : Song
         return background;
     }
 
-    public string GetImage()
+    public override string GetImage()
     {
         var cd1 = GetSongInfoCard();
         var cd2 = GetChartInfoCard();

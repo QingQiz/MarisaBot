@@ -9,11 +9,9 @@ namespace QQBot.Plugin;
 [MiraiPluginCommand(MiraiMessageType.GroupMessage)]
 public class Dialog : MiraiPluginBase
 {
-    public delegate Task<MiraiPluginTaskState> MessageHandler(MessageSenderProvider ms, Message message);
+    private static readonly Dictionary<long, Shared.Dialog.Dialog.MessageHandler> Handlers = new();
 
-    private static readonly Dictionary<long, MessageHandler> Handlers = new();
-
-    public static bool AddHandler(long groupId, MessageHandler handler)
+    public static bool AddHandler(long groupId, Shared.Dialog.Dialog.MessageHandler handler)
     {
         lock (Handlers)
         {

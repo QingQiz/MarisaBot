@@ -18,6 +18,10 @@
       <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\QQBot.MiraiHttp\QQBot.MiraiHttp.csproj" />
+    </ItemGroup>
+
     <PropertyGroup>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\QQBot.Plugin.Shared\</PathMap>
     </PropertyGroup>

@@ -7,4 +7,15 @@ public class SongGuess
     public int TimesStart { get; set; }
     public int TimesCorrect { get; set; }
     public int TimesWrong { get; set; }
+
+    public SongGuess()
+    {
+    }
+
+    public SongGuess(long uid, string name)
+    {
+        UId        = uid;
+        Name       = name;
+        TimesStart = TimesCorrect = TimesWrong = 0;
+    }
 }

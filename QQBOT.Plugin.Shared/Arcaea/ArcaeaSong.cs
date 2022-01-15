@@ -4,7 +4,7 @@ using QQBot.Plugin.Shared.Util.SongDb;
 
 namespace QQBot.Plugin.Shared.Arcaea;
 
-public class ArcaeaSong: Song
+public class ArcaeaSong : Song
 {
     public readonly string Bpm;
     public readonly string Version;
@@ -32,9 +32,19 @@ public class ArcaeaSong: Song
         foreach (var l in d.level) Level.Add(l);
     }
 
+    public override string MaxLevel()
+    {
+        return Level.Last(l => l != "/");
+    }
+
+    public override Bitmap GetCover()
+    {
+        return ResourceManager.GetCover(CoverFileName);
+    }
+
     #region Drawer
 
-    public string GetImage()
+    public override string GetImage()
     {
         var       bgColor1 = Color.FromArgb(237, 237, 237);
         var       bgColor2 = Color.FromArgb(250, 250, 250);

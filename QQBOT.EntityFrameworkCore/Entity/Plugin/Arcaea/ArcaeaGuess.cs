@@ -15,12 +15,7 @@ public class ArcaeaGuess : SongGuess
     {
     }
 
-    public ArcaeaGuess(long uid, string name)
+    public ArcaeaGuess(long uid, string name) : base(uid, name)
     {
-        UId          = uid;
-        Name         = name;
-        TimesStart   = 0;
-        TimesCorrect = 0;
-        TimesWrong   = 0;
     }
 }

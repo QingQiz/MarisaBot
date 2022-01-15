@@ -18,7 +18,7 @@ public partial class Arcaea : MiraiPluginBase
     {
         var search = _songDb.SearchSong(message.Command);
 
-        ms.SendByRecv(GetSearchResult(search), message);
+        ms.Reply(_songDb.GetSearchResult(search), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
@@ -56,7 +56,7 @@ public partial class Arcaea : MiraiPluginBase
     {
         if (string.IsNullOrEmpty(message.Command))
         {
-            StartSongCoverGuess(message, ms, qq);
+            _songDb.StartSongCoverGuess(message, ms, qq, 4, null);
         }
 
         return MiraiPluginTaskState.CompletedTask;
@@ -95,7 +95,7 @@ public partial class Arcaea : MiraiPluginBase
         }
         else
         {
-            ms.Reply(GetSearchResult(songList), message);
+            ms.Reply(_songDb.GetSearchResult(songList), message);
         }
 
         return MiraiPluginTaskState.CompletedTask;
