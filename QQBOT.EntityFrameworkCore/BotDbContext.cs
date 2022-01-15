@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using QQBot.EntityFrameworkCore.Entity.Audit;
-using QQBot.EntityFrameworkCore.Entity.Plugin;
 using QQBot.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using QQBot.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using QQBot.EntityFrameworkCore.Entity.Plugin.Shared;
@@ -11,7 +10,6 @@ namespace QQBot.EntityFrameworkCore
     public class BotDbContext : DbContext
     {
         public DbSet<AuditLog> Logs { get; set; }
-        public DbSet<Timer> Timers { get; set; }
         public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
         public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
 
