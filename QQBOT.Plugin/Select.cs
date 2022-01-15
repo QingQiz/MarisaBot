@@ -54,7 +54,7 @@ public class Select : MiraiPluginBase
 
         var send = new Random().Next(0, 2) == 0 ? res.Value.a : res.Value.b;
 
-        ms.SendByRecv(MessageChain.FromPlainText("建议" + send), message);
+        ms.Reply(MessageChain.FromPlainText("建议" + send), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }

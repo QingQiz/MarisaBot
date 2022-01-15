@@ -60,7 +60,7 @@ public class Chi : MiraiPluginBase
         var sender = message.Sender!.Id;
         var toSend = MessageChain.FromPlainText(ChiSha(sender));
 
-        ms.SendByRecv(toSend, message);
+        ms.Reply(toSend, message);
 
         return MiraiPluginTaskState.CompletedTask;
     }

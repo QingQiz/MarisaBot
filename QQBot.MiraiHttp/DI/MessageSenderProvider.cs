@@ -53,8 +53,6 @@ public class MessageSenderProvider
     public void Reply(string text, Message recv, bool quote = true) =>
         Reply(MessageChain.FromPlainText(text), recv, quote);
 
-    public void SendByRecv(MessageChain message, Message recv, bool quote = true) => Reply(message, recv, quote);
-
     /// <summary>
     /// 指定目标的临时会话消息
     /// </summary>

@@ -55,7 +55,7 @@ public class Peek : MiraiPluginBase
                 break;
         }
             
-        ms.SendByRecv(chain, message);
+        ms.Reply(chain, message);
 
         return MiraiPluginTaskState.CompletedTask;
     }

@@ -10,7 +10,7 @@ public class Ping : MiraiPluginBase
     [MiraiPluginCommand]
     private MiraiPluginTaskState Handler(Message message, MessageSenderProvider sender)
     {
-        sender.SendByRecv(MessageChain.FromPlainText("ping"), message);
+        sender.Reply(MessageChain.FromPlainText("ping"), message);
 
         return MiraiPluginTaskState.CompletedTask;
     }
