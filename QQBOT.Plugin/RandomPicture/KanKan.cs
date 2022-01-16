@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using System.Configuration;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
@@ -15,31 +15,30 @@ public class KanKan : MiraiPluginBase
 
     private static readonly List<string> PicDbPathExclude = new()
     {
-        "R18"
+        "R18", "backup"
     };
 
     private static readonly List<string> AvailableFileExt = new()
     {
-        "jpg"//, "png", "jpeg"
+        "jpg", "png", "jpeg"
     };
+
+    private static IEnumerable<string?> Names =>
+        Directory.GetDirectories(PicDbPath, "*", SearchOption.TopDirectoryOnly)
+            .Where(d => PicDbPathExclude.All(e => !d.Contains(e)))
+            .Select(Path.GetFileName);
 
     private static readonly Dictionary<string, string> Alias = new()
     {
-        { "恋爱是甜蜜调味料", "Love Sweet Garnish 2" },
-        { "Love Sweet Garnish 2".ToLower(), "Love Sweet Garnish 2" },
-        { "DDLC".ToLower(), "DDLC" },
-        { "苍彼", "苍彼" },
-        { "君彼女", "君彼女" },
-        { "巧克甜恋", "巧克甜恋" },
-        { "银河龙", "银河龙" },
-        { "秋回", "秋回" },
-        { "我", "我" },
+        { "ml", "Making＊Lovers" },
+        { "DDLC", "Doki Doki Literature Club!" },
+        { "lsg", "Love's Sweet Garnish" }
     };
 
     private static List<string> GetImList(string name)
     {
         return Directory
-            .GetFiles(Path.Join(PicDbPath, Alias[name]), "*.*", SearchOption.AllDirectories)
+            .GetFiles(Path.Join(PicDbPath, name), "*.*", SearchOption.AllDirectories)
             .Where(fn => PicDbPathExclude.All(ex => !fn.Contains(ex, StringComparison.OrdinalIgnoreCase)))
             .Where(fn =>
                 AvailableFileExt.Any(ext => fn.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
@@ -49,9 +48,9 @@ public class KanKan : MiraiPluginBase
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider p)
     {
-        if (Alias.ContainsKey(m.Command.ToLower()))
+        if (Names.Contains(m.Command, StringComparer.OrdinalIgnoreCase))
         {
-            var pic = GetImList(m.Command.ToLower()).RandomTake();
+            var pic = GetImList(m.Command).RandomTake();
 
             p.Reply(Path.GetFileName(pic), m);
             p.Reply(ImageMessage.FromPath(pic), m, false);
@@ -68,9 +67,10 @@ public class KanKan : MiraiPluginBase
             }
             else
             {
-                p.Reply(
-                    $"现在能看的只有：{string.Join('、', Alias.Values.Distinct())}\n现在过滤了的有：{string.Join('、', PicDbPathExclude)}",
-                    m, false);
+                // var names   = string.Join('、', Names.Select(n => $"`{n}`"));
+                // var aliases = Alias.Select(k => $"- `{k.Key}` 是指 `{k.Value}`");
+                // p.Reply($"现在能看的只有：{names}\n\n这其中：\n{string.Join('\n', aliases)}", m);
+                p.Reply(ImageMessage.FromPath(Path.Join(ConfigurationManager.AppSettings["Help"]!, "kk.jpg")), m);
             }
 
             return MiraiPluginTaskState.CompletedTask;
