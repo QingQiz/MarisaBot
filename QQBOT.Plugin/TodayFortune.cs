@@ -107,7 +107,7 @@ public class TodayFortune : MiraiPluginBase
     // 游戏列表
     private static readonly string[] GList =
     {
-        "O.N.G.E.K.I.", "太鼓达人", "吉他英雄", "デレステ", "音灵", "D4DJ Groovy Mix", "Project DIVAFuture Tone", "节奏海拉鲁",
+        "O.N.G.E.K.I.", "太鼓达人", "吉他英雄", "デレステ", "音灵", "D4DJ Groovy Mix", "Project DIVA Future Tone", "节奏海拉鲁",
         "命运歌姬", "Dance Dance Revolution", "不可思议乐队", "Guitar Hero", "Project Sekai (プロセカ)", "节奏大师", "GROOVE COASTER",
         "Love Live", "osu!", "Deemo", "Malody", "Dynamix", "同步音律喵赛克", "OverRapid", "VOEZ", "Lanota", "Arcaea", "阳春白雪",
         "Cytus II", "Mush Dash", "Phigros", "Beatmania IIDX", "Orzmic", "WACCA", "Beat Saber", "BanG Dream! 少女乐团派对!",

@@ -238,7 +238,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         var senderId   = message.Sender!.Id;
         var senderName = message.Sender!.Name;
 
-        var db   = (DbSet<TSongGuess>)dbContext.GetType().GetField(_guessDbSetName)!.GetValue(dbContext)!;
+        var db   = (DbSet<TSongGuess>)dbContext.GetType().GetProperty(_guessDbSetName)!.GetValue(dbContext, null)!;
         var @new = db.Any(u => u.UId == senderId);
         var u = @new
             ? db.First(u => u.UId == senderId)
