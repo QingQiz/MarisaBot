@@ -12,7 +12,7 @@ public class Help : MiraiPluginBase
     [MiraiPluginCommand]
     private MiraiPluginTaskState Handler(Message message, MessageSenderProvider sender)
     {
-        sender.Reply(ImageMessage.FromPath(Path.Join(ConfigurationManager.AppSettings["Help"], "help.png")), message);
+        sender.Reply(ImageMessage.FromPath(Path.Join(ConfigurationManager.AppSettings["Help"], "help.png")), message, false);
 
         return MiraiPluginTaskState.CompletedTask;
     }

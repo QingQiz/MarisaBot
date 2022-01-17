@@ -24,6 +24,8 @@ public partial class MiraiHttpSession
             {
                 Console.WriteLine(e.ToString());
 
+                await Task.Delay(TimeSpan.FromSeconds(3));
+
                 if (retry++ > 10) return;
             }
         }
