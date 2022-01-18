@@ -67,7 +67,8 @@ public class MiraiPluginTrigger: Attribute
     /// Plain Text
     /// </summary>
     public static PluginTrigger PlainTextTrigger =>
-        (message, _) => message.MessageChain!.Messages.All(m => m.Type is MessageType.Plain or MessageType.Source);
+        (message, _) => message.MessageChain!.Messages.All(m => m.Type is MessageType.Plain or MessageType.Source) && // 确保所有消息都是纯文本
+                        message.MessageChain!.Messages.Count > 1; // 确保至少存在一条数据
 
     /// <summary>
     /// always return true

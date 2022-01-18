@@ -23,5 +23,6 @@ public enum MessageType
     MusicShare,
     Forward,
     File,
-    MiraiCode
+    MiraiCode,
+    NotImplemented
 }

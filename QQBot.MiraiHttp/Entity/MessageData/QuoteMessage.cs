@@ -15,5 +15,6 @@ public class QuoteMessage : MessageData
         SenderId = senderId;
         TargetId = targetId;
         Origin   = origin;
+        Type     = MessageType.Quote;
     }
 }

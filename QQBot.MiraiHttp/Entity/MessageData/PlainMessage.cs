@@ -8,5 +8,5 @@ public class PlainMessage : MessageData
         Text = text;
     }
 
-    public string Text;
+    public readonly string Text;
 }

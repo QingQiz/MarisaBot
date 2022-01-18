@@ -74,6 +74,7 @@ namespace QQBot.MiraiHttp.Entity
                     case MessageType.File:
                     case MessageType.MiraiCode:
                     default:
+                        Messages.Add(new NotImplementedMessage());
                         continue;
                 }
             }
