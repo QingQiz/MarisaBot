@@ -10,27 +10,37 @@ namespace QQBot.Plugin;
 [MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger), MiraiMessageType.GroupMessage)]
 public class Repeater: MiraiPluginBase
 {
-    private static (string m, int t) _repeaterStatus = (null, 0)!;
+    private static readonly Dictionary<long, (string m, int t)> RepeaterStatus = new();
     private static readonly (int fst, int snd) ThreshHold = (3, 9);
 
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider ms)
     {
-        if (m.Command == _repeaterStatus.m)
+        if (!RepeaterStatus.ContainsKey(m.Location))
         {
-            _repeaterStatus.t++;
+            RepeaterStatus[m.Location] = (m.Command, 1);
+            return MiraiPluginTaskState.NoResponse;
+        }
+
+        var s = RepeaterStatus[m.Location];
+
+        if (m.Command == s.m)
+        {
+            s.t += 1;
         }
         else
         {
-            _repeaterStatus= (m.Command, 1);
+            s = (m.Command, 1);
         }
 
-        if (_repeaterStatus.t == ThreshHold.fst)
+        RepeaterStatus[m.Location] = s;
+
+        if (s.t == ThreshHold.fst)
         {
             ms.Reply(m.Command, m, false);
         }
 
-        if (_repeaterStatus.t == ThreshHold.snd)
+        if (s.t == ThreshHold.snd)
         {
             ms.Reply("复读你🐴呢", m, false);
         }
