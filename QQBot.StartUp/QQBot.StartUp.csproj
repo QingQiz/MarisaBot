@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\QQBot.MiraiHttp\QQBot.MiraiHttp.csproj" />
-      <ProjectReference Include="..\QQBOT.Plugin\QQBOT.Plugin.csproj" />
+      <ProjectReference Include="..\QQBot.Plugin\QQBot.Plugin.csproj" />
     </ItemGroup>
 
     <ItemGroup>

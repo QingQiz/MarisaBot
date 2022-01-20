@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\QQBOT.EntityFrameworkCore\QQBOT.EntityFrameworkCore.csproj" />
+      <ProjectReference Include="..\QQBot.EntityFrameworkCore\QQBot.EntityFrameworkCore.csproj" />
     </ItemGroup>
 
     <PropertyGroup>
