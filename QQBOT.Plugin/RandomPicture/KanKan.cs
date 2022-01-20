@@ -11,7 +11,7 @@ namespace QQBot.Plugin.RandomPicture;
 [MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger))]
 public class KanKan : MiraiPluginBase
 {
-    private const string PicDbPath = @"C:\Users\sofee\Desktop\pic\看看";
+    private static readonly string PicDbPath = ConfigurationManager.AppSettings["PicDbPath_KanKan"]!;
 
     private static readonly List<string> PicDbPathExclude = new()
     {
