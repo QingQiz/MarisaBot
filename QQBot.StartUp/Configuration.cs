@@ -14,7 +14,7 @@ public class Configuration
     {
         _serviceCollection =
             MiraiHttpSession.Config(
-                Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "QQBOT.Plugin.dll")));
+                Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "QQBot.Plugin.dll")));
         _args = args;
     }
 
