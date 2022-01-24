@@ -1,13 +1,13 @@
 ﻿using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 
 namespace QQBot.Plugin;
 
 [MiraiPlugin(-20)]
 [MiraiPluginCommand(MiraiMessageType.GroupMessage)]
-[MiraiPluginTrigger(typeof(MiraiPluginTrigger), nameof(MiraiPluginTrigger.PlainTextTrigger), MiraiMessageType.GroupMessage)]
 public class Repeater: MiraiPluginBase
 {
     private static readonly Dictionary<long, (string m, int t)> RepeaterStatus = new();
@@ -16,6 +16,13 @@ public class Repeater: MiraiPluginBase
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider ms)
     {
+        if (!m.MessageChain!.Messages.All(msg => msg.Type is MessageType.Source or MessageType.Plain) ||
+            m.MessageChain.Messages.Count <= 1)
+        {
+            RepeaterStatus.Remove(m.Location);
+            return MiraiPluginTaskState.NoResponse;
+        }
+
         if (!RepeaterStatus.ContainsKey(m.Location))
         {
             RepeaterStatus[m.Location] = (m.Command, 1);
