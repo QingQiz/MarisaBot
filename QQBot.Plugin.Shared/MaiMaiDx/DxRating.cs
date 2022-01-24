@@ -9,15 +9,14 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
         public readonly List<SongScore> DxScores = new();
         public readonly List<SongScore> SdScores = new();
         public readonly string Nickname;
-        // public long Rating;
-        // public string Username;
+        public readonly bool B50;
 
-
-        public DxRating(dynamic data)
+        public DxRating(dynamic data, bool b50)
         {
             // Rating           = data.rating;
             AdditionalRating = data.additional_rating;
             Nickname         = data.nickname;
+            B50              = b50;
             foreach (var d in data.charts.dx) DxScores.Add(new SongScore(d));
 
             foreach (var d in data.charts.sd) SdScores.Add(new SongScore(d));
@@ -28,7 +27,7 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
 
         #region Drawer
 
-        private static Bitmap GetScoreCard(SongScore score)
+        private Bitmap GetScoreCard(SongScore score)
         {
             var color = new[]
             {
@@ -121,7 +120,8 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
                 using (var font = new Font("Consolas", 20))
                 {
                     g.DrawString(">", font, fontColor, 140, 110);
-                    g.DrawString(score.Rating.ToString(), font, fontColor, 162, 110);
+                    g.DrawString(
+                        B50 ? ComputeRa(score).ToString() : score.Rating.ToString(), font, fontColor, 162, 110);
                 }
 
                 // card
@@ -131,10 +131,35 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
             return coverBackground;
         }
 
+        /// <summary>
+        /// compute b50 ra
+        /// </summary>
+        private static int ComputeRa(SongScore score)
+        {
+            var baseRa = score.Achievement switch
+            {
+                < 50    => 7.0,
+                < 60    => 8.0,
+                < 70    => 9.6,
+                < 75    => 11.2,
+                < 80    => 12.0,
+                < 90    => 13.6,
+                < 94    => 15.2,
+                < 97    => 16.8,
+                < 98    => 20.0,
+                < 99    => 20.3,
+                < 99.5  => 20.8,
+                < 100   => 21.1,
+                < 100.5 => 21.6,
+                _       => 22.4
+            };
+            return (int)Math.Floor(score.Constant * (Math.Min(100.5, score.Achievement) / 100) * baseRa);
+        }
+
         private Bitmap GetB40Card()
         {
             const int column = 5;
-            const int row    = 8;
+            var       row    = B50 ? 10 : 8;
 
             const int cardWidth  = 400;
             const int cardHeight = 200;
@@ -142,8 +167,8 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
             const int paddingH = 30;
             const int paddingV = 30;
 
-            const int bgWidth  = cardWidth  * column + paddingH * (column + 1);
-            const int bgHeight = cardHeight * row    + paddingV * (row    + 4);
+            const int bgWidth  = cardWidth * column + paddingH * (column + 1);
+            var       bgHeight = cardHeight * row + paddingV * (row + 4);
 
 
             var background = new Bitmap(bgWidth, bgHeight);
@@ -171,8 +196,9 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
                     }
                 }
 
+                var sdn = B50 ? 7 : 5;
                 pxInit = paddingH;
-                pyInit = cardHeight * 5 + paddingV * (6 + 3);
+                pyInit = cardHeight * sdn + paddingV * (sdn + 1 + 3);
 
                 g.FillRectangle(new SolidBrush(Color.FromArgb(120, 136, 136)),
                     new Rectangle(paddingH, pyInit - 2 * paddingV, bgWidth - 2 * paddingH, paddingV / 2));
@@ -201,18 +227,34 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
 
         private Bitmap GetRatingCard()
         {
-            var rating    = DxScores.Sum(s => s.Rating) + SdScores.Sum(s => s.Rating);
-            var addRating = AdditionalRating;
+            (long dx, long sd) rating = B50
+                ? (DxScores.Sum(ComputeRa), SdScores.Sum(ComputeRa))
+                : (DxScores.Sum(s => s.Rating), SdScores.Sum(s => s.Rating));
+
+            var addRating = B50 ? 0 : AdditionalRating;
             var name      = Nickname;
 
-            var r = rating + addRating;
+            var r = rating.dx + rating.sd;
 
-            var num = r switch
-            {
-                < 8000 => r / 1000 + 1,
-                < 8500 => 9,
-                _      => 10L
-            };
+            var num = B50
+                ? r switch
+                {
+                    < 2000  => r / 1000 + 1,
+                    < 4000  => 3,
+                    < 7000  => 4,
+                    < 10000 => 5,
+                    < 12000 => 6,
+                    < 13000 => 7,
+                    < 14500 => 8,
+                    < 15000 => 9,
+                    _       => 10,
+                }
+                : r switch
+                {
+                    < 8000 => r / 1000 + 1,
+                    < 8500 => 9,
+                    _      => 10L
+                };
 
             // rating 部分
             var ratingCard = ResourceManager.GetImage($"rating_{num}.png");
@@ -266,12 +308,16 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
             {
                 using (var font = new Font("MotoyaLMaru", 30, FontStyle.Bold))
                 {
-                    g.DrawString($"底分 {rating} + 段位 {addRating}", font, new SolidBrush(Color.Black), 140, 12);
+                    g.DrawString(
+                        B50
+                            ? $"标准 {rating.sd} + 地插 {rating.dx}"
+                            : $"底分 {rating.sd + rating.dx} + 段位 {addRating}"
+                      , font, new SolidBrush(Color.Black), 140, 12);
                 }
             }
 
             var userInfoCard = new Bitmap(nameCard.Width + 6,
-                ratingCard.Height                        + nameCard.Height + rainbowCard.Height + 20);
+                ratingCard.Height + nameCard.Height + rainbowCard.Height + 20);
 
             using (var g = Graphics.FromImage(userInfoCard))
             {

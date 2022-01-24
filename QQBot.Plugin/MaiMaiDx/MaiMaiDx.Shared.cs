@@ -1,4 +1,6 @@
-﻿using QQBot.MiraiHttp.Util;
+﻿using Flurl.Http;
+using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
 
 namespace QQBot.Plugin.MaiMaiDx;
@@ -75,5 +77,32 @@ public partial class MaiMaiDx
         }
 
         return new List<MaiMaiSong>();
+    }
+
+    private static async Task<MessageChain> GetB40Card(string? username, long? qq, bool b50 = false)
+    {
+        MessageChain ret;
+        try
+        {
+            var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(b50
+                ? string.IsNullOrEmpty(username)
+                    ? new { qq, b50 }
+                    : new { username, b50 }
+                : string.IsNullOrEmpty(username)
+                    ? new { qq }
+                    : new { username });
+
+            ret = MessageChain.FromImageB64(new DxRating(await response.GetJsonAsync(), b50).GetImage());
+        }
+        catch (FlurlHttpException e) when (e.StatusCode == 400)
+        {
+            ret = MessageChain.FromPlainText("“查无此人”");
+        }
+        catch (FlurlHttpException e) when (e.StatusCode == 403)
+        {
+            ret = MessageChain.FromPlainText("“403 forbidden”");
+        }
+
+        return ret;
     }
 }

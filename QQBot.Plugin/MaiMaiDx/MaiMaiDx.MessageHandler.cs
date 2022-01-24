@@ -24,25 +24,22 @@ public partial class MaiMaiDx : MiraiPluginBase
     {
         var username = message.Command;
         var sender   = message.Sender!.Id;
+        var ret      = await GetB40Card(username, sender, false);
 
-        MessageChain ret;
-        try
-        {
-            var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
-                string.IsNullOrEmpty(username)
-                    ? new { qq = sender }
-                    : new { username });
+        ms.Reply(ret, message);
 
-            ret = MessageChain.FromImageB64(new DxRating(await response.GetJsonAsync()).GetImage());
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
-        {
-            ret = MessageChain.FromPlainText("“查无此人”");
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 403)
-        {
-            ret = MessageChain.FromPlainText("“403 forbidden”");
-        }
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// b50
+    /// </summary>
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "b50")]
+    private static async Task<MiraiPluginTaskState> MaiMaiDxB50(Message message, MessageSenderProvider ms)
+    {
+        var username = message.Command;
+        var sender   = message.Sender!.Id;
+        var ret      = await GetB40Card(username, sender, true);
 
         ms.Reply(ret, message);
 
