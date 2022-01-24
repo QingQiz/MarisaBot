@@ -52,7 +52,7 @@ public class KanKan : MiraiPluginBase
         {
             var pic = GetImList(m.Command).RandomTake();
 
-            p.Reply(Path.GetFileName(pic), m);
+            p.Reply(pic.Replace(PicDbPath, ""), m);
             p.Reply(ImageMessage.FromPath(pic), m, false);
 
             return MiraiPluginTaskState.CompletedTask;

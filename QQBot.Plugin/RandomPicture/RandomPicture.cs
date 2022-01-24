@@ -34,7 +34,7 @@ public class RandomPicture : MiraiPluginBase
 
         var pic = imageList.RandomTake();
 
-        p.Reply(Path.GetFileName(pic), m);
+        p.Reply(pic.Replace(PicDbPath, ""), m);
         p.Reply(ImageMessage.FromPath(pic), m, false);
 
         return MiraiPluginTaskState.CompletedTask;
