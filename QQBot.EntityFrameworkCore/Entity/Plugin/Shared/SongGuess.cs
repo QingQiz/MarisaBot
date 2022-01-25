@@ -18,4 +18,16 @@ public class SongGuess
         Name       = name;
         TimesStart = TimesCorrect = TimesWrong = 0;
     }
+
+    public T CastTo<T>() where T : SongGuess, new()
+    {
+        return new T
+        {
+            UId          = UId,
+            Name         = Name,
+            TimesStart   = TimesStart,
+            TimesCorrect = TimesCorrect,
+            TimesWrong   = TimesWrong,
+        };
+    }
 }

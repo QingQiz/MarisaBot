@@ -10,7 +10,7 @@ using static QQBot.Plugin.Shared.Dialog.Dialog;
 
 namespace QQBot.Plugin.Shared.Util.SongDb;
 
-public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess
+public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
 {
     private readonly string _aliasFilePath;
     private readonly string _tempAliasPath;
@@ -380,10 +380,10 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         }
         else
         {
-            db.Add((new SongGuess(senderId, senderName)
+            db.Add(new SongGuess(senderId, senderName)
             {
                 TimesStart = 1
-            } as TSongGuess)!);
+            }.CastTo<TSongGuess>());
         }
 
         dbContext.SaveChanges();
