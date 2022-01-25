@@ -48,7 +48,7 @@ public class KanKan : MiraiPluginBase
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider p)
     {
-        if (Names.Contains(m.Command, StringComparer.OrdinalIgnoreCase))
+        if (Names.Contains(m.Command))
         {
             var pic = GetImList(m.Command).RandomTake();
 
