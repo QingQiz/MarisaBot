@@ -235,7 +235,7 @@ namespace QQBot.Plugin.Shared.MaiMaiDx
 
             var addRating = B50 ? 0 : AdditionalRating;
 
-            var r = dxRating + sdRating;
+            var r = dxRating + sdRating + addRating;
 
             var num = B50
                 ? r switch
