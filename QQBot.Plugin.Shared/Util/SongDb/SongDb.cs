@@ -242,7 +242,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         var @new = db.Any(u => u.UId == senderId);
         var u = @new
             ? db.First(u => u.UId == senderId)
-            : (new SongGuess(senderId, senderName) as TSongGuess)!;
+            : new SongGuess(senderId, senderName).CastTo<TSongGuess>();
 
         // 未知的歌，不算
         if (guess == null)
