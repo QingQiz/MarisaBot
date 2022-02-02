@@ -16,42 +16,45 @@ public class Repeater: MiraiPluginBase
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider ms)
     {
-        if (!m.MessageChain!.Messages.All(msg => msg.Type is MessageType.Source or MessageType.Plain) ||
-            m.MessageChain.Messages.Count <= 1)
+        lock (RepeaterStatus)
         {
-            RepeaterStatus.Remove(m.Location);
+            if (!m.MessageChain!.Messages.All(msg => msg.Type is MessageType.Source or MessageType.Plain) ||
+                m.MessageChain.Messages.Count <= 1)
+            {
+                RepeaterStatus.Remove(m.Location);
+                return MiraiPluginTaskState.NoResponse;
+            }
+
+            if (!RepeaterStatus.ContainsKey(m.Location))
+            {
+                RepeaterStatus[m.Location] = (m.Command, 1);
+                return MiraiPluginTaskState.NoResponse;
+            }
+
+            var s = RepeaterStatus[m.Location];
+
+            if (m.Command == s.m)
+            {
+                s.t += 1;
+            }
+            else
+            {
+                s = (m.Command, 1);
+            }
+
+            RepeaterStatus[m.Location] = s;
+
+            if (s.t == ThreshHold.fst)
+            {
+                ms.Reply(m.Command, m, false);
+            }
+
+            if (s.t == ThreshHold.snd)
+            {
+                ms.Reply("复读你🐴呢", m, false);
+            }
+
             return MiraiPluginTaskState.NoResponse;
         }
-
-        if (!RepeaterStatus.ContainsKey(m.Location))
-        {
-            RepeaterStatus[m.Location] = (m.Command, 1);
-            return MiraiPluginTaskState.NoResponse;
-        }
-
-        var s = RepeaterStatus[m.Location];
-
-        if (m.Command == s.m)
-        {
-            s.t += 1;
-        }
-        else
-        {
-            s = (m.Command, 1);
-        }
-
-        RepeaterStatus[m.Location] = s;
-
-        if (s.t == ThreshHold.fst)
-        {
-            ms.Reply(m.Command, m, false);
-        }
-
-        if (s.t == ThreshHold.snd)
-        {
-            ms.Reply("复读你🐴呢", m, false);
-        }
-
-        return MiraiPluginTaskState.NoResponse;
     }
 }
