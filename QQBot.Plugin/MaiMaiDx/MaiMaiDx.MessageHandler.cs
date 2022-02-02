@@ -149,7 +149,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     /// 听歌猜曲
     /// </summary>
     [MiraiPluginSubCommand(nameof(MaiMaiDxGuess))]
-    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "v2")]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, true, "v2")]
     private MiraiPluginTaskState MaiMaiDxGuessV2(Message message, MessageSenderProvider ms, long qq)
     {
         StartSongSoundGuess(message, ms, qq);
