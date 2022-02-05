@@ -3795,6 +3795,21 @@
     "cover_name": "medusa.jpg"
   },
   {
+    "id": 253,
+    "title": "init()",
+    "artist": "kamome sano",
+    "bpm": "180",
+    "version": "3.11",
+    "level": [
+      "4",
+      "7",
+      "9+",
+      "/"
+    ],
+    "song_pack": "Memory Archive",
+    "cover_name": "init.jpg"
+  },
+  {
     "id": -1,
     "title": "Tutorial",
     "artist": "ak+q",
