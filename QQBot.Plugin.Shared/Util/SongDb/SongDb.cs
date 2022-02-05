@@ -160,7 +160,11 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         var names = SongAlias[key];
 
-        return names.Count != 1 ? null : SongList.FirstOrDefault(song => song.Title == names[0]);
+        if (names.Count != 1) return null;
+        
+        var songs = SongList.Where(song => song.Title == names[0]).ToList();
+
+        return songs.Count == 1 ? songs[0] : null;
     }
 
     private List<TSong> SearchSongByAlias(string alias)
@@ -182,9 +186,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
             .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             // 找到歌曲
-            .Select(songName => SongList.FirstOrDefault(song => song.Title == songName))
-            .Where(x => x is not null)
-            .Cast<TSong>()
+            .Select(songName => SongList.Where(s => s.Title == songName))
+            .SelectMany(s => s)
             .ToList();
 #pragma warning restore CA1416
     }
@@ -241,7 +244,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                 ImageMessage.FromBase64(songs[0].GetImage())
             }),
             _ => MessageChain.FromPlainText(string.Join('\n',
-                songs.Select(song => $"[ID:{song.Id}, D:{song.MaxLevel()}] -> {song.Title}")))
+                songs.Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}")))
         };
     }
 
@@ -352,7 +355,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                 return MiraiPluginTaskState.Canceled;
             }
 
-            var search = SearchSong(message.Command);
+            var search = SearchSong(message.Command).DistinctBy(s => s.Title).ToList();
 
             var procResult =
                 new Func<TSong?, Task<MiraiPluginTaskState>>(s => ProcSongGuessResult(ms, message, song, s));
