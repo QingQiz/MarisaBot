@@ -120,10 +120,7 @@ namespace QQBot.Plugin.Shared.Util
 
             var coverBackground = new Bitmap(width * 2, width);
 
-            var coverRect = new Rectangle(0, 0, width / 2, width);
-
-            var gradiantCoverColorBrush = new LinearGradientBrush(coverRect, coverAvgColor, Color.Transparent,
-                LinearGradientMode.Horizontal);
+            var rec = new Rectangle(width, 0, width / 2, width);
 
             using (var g = Graphics.FromImage(coverBackground))
             {
@@ -132,7 +129,11 @@ namespace QQBot.Plugin.Shared.Util
                 // 贴上曲绘
                 g.DrawImage(cover, width, 0);
                 // 贴上渐变的主题色
-                g.FillRectangle(gradiantCoverColorBrush, new Rectangle(width, 0, width / 2, width));
+                for (var i = rec.Left; i < rec.Right; i += 1)
+                {
+                    var c = new SolidBrush(Color.FromArgb(255 - 255 * (i - rec.Left) / rec.Width, coverAvgColor));
+                    g.DrawLine(new Pen(c, 1), i, 0 , i, rec.Height);
+                }
             }
 
             // 圆角
