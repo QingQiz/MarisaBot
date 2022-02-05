@@ -55,18 +55,18 @@ namespace QQBot.Plugin.Shared.Util
             }
         }
 
-        private static Color CalculateAverageColor(this Bitmap bm)
+        private static Color CalculateAverageColor(this Bitmap bm, Rectangle rec)
         {
             var       width        = bm.Width;
             var       height       = bm.Height;
-            const int minDiversion = 10;
+            const int minDiversion = -1;
             // keep track of dropped pixels
             var    dropped = 0;
             long[] totals  = { 0, 0, 0 };
             // cutting corners, will fail on anything else but 32 and 24 bit images
             var bppModifier = bm.PixelFormat == PixelFormat.Format24bppRgb ? 3 : 4;
 
-            var srcData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadOnly, bm.PixelFormat);
+            var srcData = bm.LockBits(rec, ImageLockMode.ReadOnly, bm.PixelFormat);
             var stride  = srcData.Stride;
             var scan0   = srcData.Scan0;
 
@@ -74,30 +74,32 @@ namespace QQBot.Plugin.Shared.Util
             {
                 var p = (byte*)(void*)scan0;
 
-                for (var y = 0; y < height; y++)
-                for (var x = 0; x < width; x++)
+                for (var y = rec.Top; y < rec.Bottom; y++)
                 {
-                    var idx   = y * stride + x * bppModifier;
-                    int red   = p[idx + 2];
-                    int green = p[idx + 1];
-                    int blue  = p[idx];
-                    if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
-                        Math.Abs(green - blue)  > minDiversion)
+                    for (var x = rec.Left; x < rec.Right; x++)
                     {
-                        totals[2] += red;
-                        totals[1] += green;
-                        totals[0] += blue;
-                    }
-                    else
-                    {
-                        dropped++;
+                        var idx   = y * stride + x * bppModifier;
+                        int red   = p[idx + 2];
+                        int green = p[idx + 1];
+                        int blue  = p[idx];
+                        if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
+                            Math.Abs(green - blue)  > minDiversion)
+                        {
+                            totals[2] += red;
+                            totals[1] += green;
+                            totals[0] += blue;
+                        }
+                        else
+                        {
+                            dropped++;
+                        }
                     }
                 }
             }
 
             bm.UnlockBits(srcData);
 
-            var count = width * height - dropped;
+            var count = rec.Width * rec.Height - dropped;
             count = count == 0 ? 1 : count;
             var avgR = (int)(totals[2] / count);
             var avgG = (int)(totals[1] / count);
@@ -114,11 +116,11 @@ namespace QQBot.Plugin.Shared.Util
             cover = Resize(cover, width, width);
 
             // 主题色
-            var coverAvgColor = CalculateAverageColor(cover);
+            var coverAvgColor = CalculateAverageColor(cover, new Rectangle(0, 0, 5, cover.Height));
 
             var coverBackground = new Bitmap(width * 2, width);
 
-            var coverRect = new Rectangle(0, 0, width, width);
+            var coverRect = new Rectangle(0, 0, width / 2, width);
 
             var gradiantCoverColorBrush = new LinearGradientBrush(coverRect, coverAvgColor, Color.Transparent,
                 LinearGradientMode.Horizontal);
@@ -130,7 +132,7 @@ namespace QQBot.Plugin.Shared.Util
                 // 贴上曲绘
                 g.DrawImage(cover, width, 0);
                 // 贴上渐变的主题色
-                g.FillRectangle(gradiantCoverColorBrush, new Rectangle(width, 0, width, width));
+                g.FillRectangle(gradiantCoverColorBrush, new Rectangle(width, 0, width / 2, width));
             }
 
             // 圆角
