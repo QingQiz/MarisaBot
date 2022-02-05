@@ -152,9 +152,25 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         return search;
     }
 
+    private TSong? SearchSongByAliasWholeWord(string alias)
+    {
+        var key = SongAlias.Keys.FirstOrDefault(a => a.Equals(alias, StringComparison.OrdinalIgnoreCase));
+
+        if (key is null) return null;
+
+        var names = SongAlias[key];
+
+        return names.Count != 1 ? null : SongList.FirstOrDefault(song => song.Title == names[0]);
+    }
+
     private List<TSong> SearchSongByAlias(string alias)
     {
         if (string.IsNullOrWhiteSpace(alias)) return new List<TSong>();
+
+        if (SearchSongByAliasWholeWord(alias) is { } song)
+        {
+            return new List<TSong> {song};
+        }
 
 #pragma warning disable CA1416
         alias = Strings.StrConv(alias, VbStrConv.SimplifiedChinese)!;
