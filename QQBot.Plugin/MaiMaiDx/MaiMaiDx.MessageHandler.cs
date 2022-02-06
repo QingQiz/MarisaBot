@@ -98,7 +98,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     /// mai什么推分
     /// </summary>
     [MiraiPluginSubCommand(nameof(MaiMaiDxPlayWhat))]
-    [MiraiPluginCommand("推分", "恰分", "上分", "加分")]
+    [MiraiPluginCommand(true, "推分", "恰分", "上分", "加分")]
     private async Task<MiraiPluginTaskState> MaiMaiDxPlayWhatToUp(Message message, MessageSenderProvider ms)
     {
         var sender   = message.Sender!.Id;
@@ -133,7 +133,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     /// <summary>
     /// 给出歌曲列表
     /// </summary>
-    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "list")]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "list", "ls")]
     private MiraiPluginTaskState MaiMaiDxListSong(Message message, MessageSenderProvider ms)
     {
         var    list = ListSongs(message.Command);
