@@ -79,20 +79,24 @@ public partial class MaiMaiDx
         return new List<MaiMaiSong>();
     }
 
+    private static async Task<DxRating> GetDxRating(string? username, long? qq, bool b50 = false)
+    {
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(b50
+            ? string.IsNullOrEmpty(username)
+                ? new { qq, b50 }
+                : new { username, b50 }
+            : string.IsNullOrEmpty(username)
+                ? new { qq }
+                : new { username });
+        return new DxRating(await response.GetJsonAsync(), b50);
+    }
+
     private static async Task<MessageChain> GetB40Card(string? username, long? qq, bool b50 = false)
     {
         MessageChain ret;
         try
         {
-            var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(b50
-                ? string.IsNullOrEmpty(username)
-                    ? new { qq, b50 }
-                    : new { username, b50 }
-                : string.IsNullOrEmpty(username)
-                    ? new { qq }
-                    : new { username });
-
-            ret = MessageChain.FromImageB64(new DxRating(await response.GetJsonAsync(), b50).GetImage());
+            ret = MessageChain.FromImageB64((await GetDxRating(username, qq, b50)).GetImage());
         }
         catch (FlurlHttpException e) when (e.StatusCode == 400)
         {

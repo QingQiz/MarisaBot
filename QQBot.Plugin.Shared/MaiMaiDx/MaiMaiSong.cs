@@ -41,6 +41,24 @@ public class MaiMaiSong : Song
 
     #region Drawer
 
+    public static readonly Color[] LevelColor =
+    {
+        Color.FromArgb(82, 231, 43),
+        Color.FromArgb(255, 168, 1),
+        Color.FromArgb(255, 90, 102),
+        Color.FromArgb(198, 79, 228),
+        Color.FromArgb(219, 170, 255)
+    };
+
+    public static readonly string[] LevelName =
+    {
+        "Basic",
+        "Advanced",
+        "Expert",
+        "Master",
+        "Re:Master"
+    };
+    
     private Bitmap GetSongInfoCard()
     {
         var       bgColor1 = Color.FromArgb(237, 237, 237);
@@ -103,15 +121,6 @@ public class MaiMaiSong : Song
         var       bgColor2 = Color.FromArgb(250, 250, 250);
         const int h        = 80;
 
-        var color = new[]
-        {
-            Color.FromArgb(82, 231, 43),
-            Color.FromArgb(255, 168, 1),
-            Color.FromArgb(255, 90, 102),
-            Color.FromArgb(198, 79, 228),
-            Color.FromArgb(219, 170, 255)
-        };
-
         var background = new Bitmap(Type == "DX" ? 1200 : 1000, h * (Levels.Count + 1));
 
         using (var g = Graphics.FromImage(background))
@@ -150,7 +159,7 @@ public class MaiMaiSong : Song
             x =  0;
             for (var i = 0; i < Levels.Count; i++)
             {
-                g.DrawImage(ImageDraw.GetStringCard(Levels[i], 21, Color.Black, color[i], w, h, center: true), x,
+                g.DrawImage(ImageDraw.GetStringCard(Levels[i], 21, Color.Black, LevelColor[i], w, h, center: true), x,
                     y);
                 x += w;
                 g.DrawImage(

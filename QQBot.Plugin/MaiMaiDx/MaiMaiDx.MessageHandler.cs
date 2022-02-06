@@ -4,9 +4,10 @@ using QQBot.EntityFrameworkCore;
 using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.MiraiHttp.Util;
-using QQBot.Plugin.Shared.MaiMaiDx;
+using QQBot.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.MaiMaiDx;
 
@@ -78,6 +79,49 @@ public partial class MaiMaiDx : MiraiPluginBase
         ms.Reply(list.Count == 0
             ? MessageChain.FromPlainText("“NULL”")
             : MessageChain.FromImageB64(list[new Random().Next(list.Count)].GetImage()), message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// mai什么
+    /// </summary>
+    [MiraiPluginCommand("打什么歌", "打什么", "什么")]
+    private MiraiPluginTaskState MaiMaiDxPlayWhat(Message message, MessageSenderProvider ms)
+    {
+        ms.Reply(MessageChain.FromImageB64(_songDb.SongList.RandomTake().GetImage()), message);
+
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    /// mai什么推分
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(MaiMaiDxPlayWhat))]
+    [MiraiPluginCommand("推分", "恰分", "上分", "加分")]
+    private async Task<MiraiPluginTaskState> MaiMaiDxPlayWhatToUp(Message message, MessageSenderProvider ms)
+    {
+        var sender   = message.Sender!.Id;
+
+        // 拿b40
+        try
+        {
+            var rating    = await GetDxRating(null, sender);
+            var recommend = rating.GetRecommendCards(_songDb.SongList);
+
+            if (recommend == null)
+            {
+                ms.Reply("您无分可恰", message);
+            }
+            else
+            {
+                ms.Reply(ImageMessage.FromBase64(recommend.ToB64()), message);
+            }
+        }
+        catch (FlurlHttpException e) when (e.StatusCode == 400)
+        {
+            ms.Reply(MessageChain.FromPlainText("你谁啊？"), message);
+        }
 
         return MiraiPluginTaskState.CompletedTask;
     }

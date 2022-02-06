@@ -74,7 +74,7 @@ public partial class MiraiHttpSession
                     (parentName: m.GetCustomAttribute<MiraiPluginSubCommand>()!.Name, methodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
-        Task<MiraiPluginTaskState> TrigPlugin(MiraiPluginBase plugin, Message message)
+        async Task<MiraiPluginTaskState> TrigPlugin(MiraiPluginBase plugin, Message message)
         {
             foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
             {
@@ -96,12 +96,14 @@ public partial class MiraiHttpSession
                     {
                         break;
                     }
+
                     // 有成功的则继续找当前命令的子命令
                     m = sub;
                 }
 
                 var parameters = new List<dynamic>();
 
+                // 构造参数列表
                 foreach (var param in m.GetParameters())
                 {
                     if (param.ParameterType == message.GetType())
@@ -115,16 +117,17 @@ public partial class MiraiHttpSession
                     }
                 }
 
+                // 调用处理函数并处理异常
                 try
                 {
                     if (m.ReturnType == typeof(Task<MiraiPluginTaskState>))
                     {
-                        return (Task<MiraiPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
+                        return await (Task<MiraiPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
                     }
 
                     if (m.ReturnType == typeof(MiraiPluginTaskState))
                     {
-                        return Task.FromResult((MiraiPluginTaskState)m.Invoke(plugin, parameters.ToArray())!);
+                        return (MiraiPluginTaskState)m.Invoke(plugin, parameters.ToArray())!;
                     }
 
                     throw new Exception("插件方法返回类型无效");
@@ -140,7 +143,7 @@ public partial class MiraiHttpSession
                 }
             }
 
-            return Task.FromResult(MiraiPluginTaskState.NoResponse);
+            return MiraiPluginTaskState.NoResponse;
         }
 
         var taskList = new List<Task>();
@@ -155,7 +158,7 @@ public partial class MiraiHttpSession
 
                 foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
                 {
-                    var state   = await TrigPlugin(plugin, message);
+                    var state = await TrigPlugin(plugin, message);
 
                     if (state == MiraiPluginTaskState.CompletedTask) break;
 
