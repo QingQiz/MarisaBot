@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks.Dataflow;
 using Flurl;
 using Flurl.Http;
-using QQBot.EntityFrameworkCore;
-using QQBot.EntityFrameworkCore.Entity.Audit;
 using QQBot.MiraiHttp.Entity;
 
 namespace QQBot.MiraiHttp;
@@ -33,32 +31,6 @@ public partial class MiraiHttpSession
 
     private async Task RecvMessageInner()
     {
-        async Task LogMessage(Message? message, dynamic m)
-        {
-            var log = new AuditLog
-            {
-                EventId   = Guid.NewGuid(),
-                EventType = m.type,
-                Time      = DateTime.Now,
-
-                GroupName = message?.GroupInfo?.Name,
-                GroupId   = message?.GroupInfo?.Id.ToString(),
-
-                UserId    = message?.Sender?.Id.ToString(),
-                UserName  = message?.Sender?.Name,
-                UserAlias = message?.Sender?.Remark,
-                Message   = Newtonsoft.Json.JsonConvert.SerializeObject(m.type.Contains("Message") ? m.messageChain : m)
-            };
-
-            await using var dbContext = new BotDbContext();
-            await dbContext.Logs.AddAsync(log);
-            await dbContext.SaveChangesAsync();
-
-            Console.WriteLine(log.Message.Length < 120
-                ? $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message}"
-                : $"[{DateTime.Now:yyyy-MM-dd hh:mm:ss}][{m.type.PadLeft(15)}] {log.Message[..120]}...");
-        }
-
         var reportAddress = $"{_serverAddress}/countMessage";
         var request       = reportAddress.SetQueryParam("sessionKey", _session);
 
@@ -119,8 +91,6 @@ public partial class MiraiHttpSession
                 {
                     OnEvent?.Invoke(this, m);
                 }
-
-                await LogMessage(message, m);
             }
         }
     }
