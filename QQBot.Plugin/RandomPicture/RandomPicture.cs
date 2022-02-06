@@ -15,7 +15,7 @@ public class RandomPicture : MiraiPluginBase
 
     private static readonly List<string> PicDbPathExclude = new()
     {
-        "R18", "backup"
+        "R18", "backup", "看看"
     };
 
     private static readonly List<string> AvailableFileExt = new()

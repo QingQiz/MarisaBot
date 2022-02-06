@@ -347,35 +347,43 @@ public class DxRating
         }
 
         // 找到不在b40里但定数不超过b40里最高定数的能推的旧谱
-        var minSdRating = SdScores.Min(s => s.Rating);
-
-        var playableSd = SdScores.Select(s => s.Constant).Distinct().Max();
-
-        var songListSd = songList
-            .Where(s => s.Info.IsNew == false)
-            .Where(s => SdScores.All(ss => ss.Id != s.Id))
-            .Where(s => s.Constants.Any(c => c <= playableSd && SongScore.Ra(100.5, c) > minSdRating))
-            .ToList();
-
-        if (songListSd.Any())
+        long minSdRating = 0;
+        if (SdScores.Any())
         {
-            song[0] = songListSd.RandomTake();
+            minSdRating = SdScores.Min(s => s.Rating);
+
+            var playableSd = SdScores.Select(s => s.Constant).Distinct().Max();
+
+            var songListSd = songList
+                .Where(s => s.Info.IsNew == false)
+                .Where(s => SdScores.All(ss => ss.Id != s.Id))
+                .Where(s => s.Constants.Any(c => c <= playableSd && SongScore.Ra(100.5, c) > minSdRating))
+                .ToList();
+
+            if (songListSd.Any())
+            {
+                song[0] = songListSd.RandomTake();
+            }
         }
 
         // 同上，但是新谱
-        var minDxRating = DxScores.Min(s => s.Rating);
-
-        var playableDx = DxScores.Select(s => s.Constant).Distinct().Max();
-
-        var songListDx = songList
-            .Where(s => s.Info.IsNew)
-            .Where(s => DxScores.All(ss => ss.Id != s.Id))
-            .Where(s => s.Constants.Any(c => c <= playableDx && SongScore.Ra(100.5, c) > minDxRating))
-            .ToList();
-
-        if (songListDx.Any())
+        long minDxRating = 0;
+        if (DxScores.Any())
         {
-            song[1] = songListDx.RandomTake();
+            minDxRating = DxScores.Min(s => s.Rating);
+
+            var playableDx = DxScores.Select(s => s.Constant).Distinct().Max();
+
+            var songListDx = songList
+                .Where(s => s.Info.IsNew)
+                .Where(s => DxScores.All(ss => ss.Id != s.Id))
+                .Where(s => s.Constants.Any(c => c <= playableDx && SongScore.Ra(100.5, c) > minDxRating))
+                .ToList();
+
+            if (songListDx.Any())
+            {
+                song[1] = songListDx.RandomTake();
+            }
         }
 
         Bitmap?[] card = { null, null, null, null };
