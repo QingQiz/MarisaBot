@@ -173,15 +173,12 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         if (SearchSongByAliasWholeWord(alias) is { } song)
         {
-            return new List<TSong> {song};
+            return new List<TSong> { song };
         }
 
-#pragma warning disable CA1416
-        alias = Strings.StrConv(alias, VbStrConv.SimplifiedChinese)!;
         return SongAlias.Keys
             // 找到别名匹配的
-            .Where(songNameAlias => Strings.StrConv(songNameAlias, VbStrConv.SimplifiedChinese)!
-                .Contains(alias, StringComparison.OrdinalIgnoreCase))
+            .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
             // 找到真实歌曲名
             .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -189,7 +186,6 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
             .Select(songName => SongList.Where(s => s.Title == songName))
             .SelectMany(s => s)
             .ToList();
-#pragma warning restore CA1416
     }
 
     /// <summary>
