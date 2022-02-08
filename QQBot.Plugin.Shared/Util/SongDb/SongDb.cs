@@ -158,7 +158,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         if (key is null) return null;
 
-        var names = SongAlias[key];
+        var names = SongAlias[key].Distinct().ToList();
 
         if (names.Count != 1) return null;
         
