@@ -38207,6 +38207,80 @@
     }
   },
   {
+    "id": "10188",
+    "title": "\u5929\u30ce\u5f31",
+    "type": "DX",
+    "ds": [
+      3.0,
+      7.2,
+      10.0,
+      12.8
+    ],
+    "level": [
+      "3",
+      "7",
+      "10",
+      "12+"
+    ],
+    "cids": [
+      5936,
+      5937,
+      5938,
+      5939
+    ],
+    "charts": [
+      {
+        "notes": [
+          97,
+          12,
+          4,
+          4,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          261,
+          22,
+          7,
+          29,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          374,
+          45,
+          41,
+          34,
+          23
+        ],
+        "charter": "\u5c0f\u9ce5\u904a\u3055\u3093"
+      },
+      {
+        "notes": [
+          444,
+          63,
+          118,
+          28,
+          22
+        ],
+        "charter": "\u30b7\u30c1\u30df\u30d8\u30eb\u30c4"
+      }
+    ],
+    "basic_info": {
+      "title": "\u5929\u30ce\u5f31",
+      "artist": "164",
+      "genre": "niconico\u30dc\u30fc\u30ab\u30ed\u30a4\u30c9",
+      "bpm": 200,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
     "id": "10191",
     "title": "\u8133\u6f3f\u70b8\u88c2\u30ac\u30fc\u30eb",
     "type": "DX",
@@ -49050,6 +49124,450 @@
     }
   },
   {
+    "id": "11161",
+    "title": "\u30aa\u30ea\u30d5\u30a3\u30b9",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.8,
+      10.4,
+      13.0
+    ],
+    "level": [
+      "4",
+      "7+",
+      "10",
+      "13"
+    ],
+    "cids": [
+      5928,
+      5929,
+      5930,
+      5931
+    ],
+    "charts": [
+      {
+        "notes": [
+          112,
+          14,
+          7,
+          6,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          257,
+          35,
+          16,
+          17,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          368,
+          66,
+          31,
+          34,
+          32
+        ],
+        "charter": "\u83ef\u706b\u8077\u4eba"
+      },
+      {
+        "notes": [
+          581,
+          64,
+          101,
+          36,
+          9
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30aa\u30ea\u30d5\u30a3\u30b9",
+      "artist": "40mP feat. \u30b7\u30e3\u30ce",
+      "genre": "maimai",
+      "bpm": 200,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11162",
+    "title": "\u30e6\u30e1\u30d2\u30d0\u30ca",
+    "type": "DX",
+    "ds": [
+      5.0,
+      7.0,
+      10.0,
+      13.3
+    ],
+    "level": [
+      "5",
+      "7",
+      "10",
+      "13"
+    ],
+    "cids": [
+      5899,
+      5900,
+      5901,
+      5902
+    ],
+    "charts": [
+      {
+        "notes": [
+          160,
+          4,
+          2,
+          10,
+          13
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          194,
+          24,
+          9,
+          29,
+          11
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          306,
+          45,
+          40,
+          34,
+          24
+        ],
+        "charter": "\u30b5\u30d5\u30a1\u592a"
+      },
+      {
+        "notes": [
+          474,
+          52,
+          71,
+          116,
+          18
+        ],
+        "charter": "\u3074\u3061\u30cd\u30b3"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30e6\u30e1\u30d2\u30d0\u30ca",
+      "artist": "RD-Sounds feat.\u4e2d\u6075\u5149\u57ce",
+      "genre": "maimai",
+      "bpm": 151,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11163",
+    "title": "REAL VOICE",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.7,
+      10.2,
+      12.8
+    ],
+    "level": [
+      "4",
+      "7+",
+      "10",
+      "12+"
+    ],
+    "cids": [
+      5891,
+      5892,
+      5893,
+      5894
+    ],
+    "charts": [
+      {
+        "notes": [
+          113,
+          22,
+          4,
+          9,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          278,
+          28,
+          17,
+          10,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          402,
+          80,
+          38,
+          17,
+          6
+        ],
+        "charter": "\u67d0S\u6c0f"
+      },
+      {
+        "notes": [
+          557,
+          43,
+          95,
+          103,
+          12
+        ],
+        "charter": "\u30a2\u30de\u30ea\u30ea\u30b9"
+      }
+    ],
+    "basic_info": {
+      "title": "REAL VOICE",
+      "artist": "\u9054\u898b \u6075 featured by \u4f50\u91ce \u5b8f\u6643",
+      "genre": "maimai",
+      "bpm": 183,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11164",
+    "title": "\u30d1\u30e9\u30dc\u30e9",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.0,
+      11.2,
+      13.9
+    ],
+    "level": [
+      "5",
+      "8",
+      "11",
+      "13+"
+    ],
+    "cids": [
+      5895,
+      5896,
+      5897,
+      5898
+    ],
+    "charts": [
+      {
+        "notes": [
+          157,
+          17,
+          2,
+          12,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          306,
+          41,
+          18,
+          19,
+          13
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          474,
+          84,
+          40,
+          13,
+          10
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      },
+      {
+        "notes": [
+          680,
+          63,
+          125,
+          48,
+          47
+        ],
+        "charter": "\u30b7\u30c1\u30df\u30d8\u30eb\u30c4"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30d1\u30e9\u30dc\u30e9",
+      "artist": "*Luna feat.NORISTRY",
+      "genre": "maimai",
+      "bpm": 192,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11168",
+    "title": "\u30b7\u30a2\u30c8\u30ea\u30ab\u30eb\u30fb\u30b1\u30fc\u30b9",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.7,
+      10.8,
+      12.7
+    ],
+    "level": [
+      "4",
+      "7+",
+      "10+",
+      "12+"
+    ],
+    "cids": [
+      5932,
+      5933,
+      5934,
+      5935
+    ],
+    "charts": [
+      {
+        "notes": [
+          182,
+          11,
+          4,
+          16,
+          11
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          339,
+          25,
+          4,
+          37,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          437,
+          90,
+          38,
+          27,
+          23
+        ],
+        "charter": "\u67d0S\u6c0f"
+      },
+      {
+        "notes": [
+          727,
+          74,
+          36,
+          73,
+          51
+        ],
+        "charter": "\u30b5\u30d5\u30a1\u592a"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30b7\u30a2\u30c8\u30ea\u30ab\u30eb\u30fb\u30b1\u30fc\u30b9",
+      "artist": "\u30e6\u30ea\u30a4\u30fb\u30ab\u30ce\u30f3 feat.\u30a6\u30a9\u30eb\u30d4\u30b9\u30ab\u30fc\u30bf\u30fc&\u307e\u3072\u308b",
+      "genre": "maimai",
+      "bpm": 150,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11171",
+    "title": "YURUSHITE",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.8,
+      12.5,
+      14.4
+    ],
+    "level": [
+      "5",
+      "8+",
+      "12",
+      "14"
+    ],
+    "cids": [
+      5907,
+      5908,
+      5909,
+      5910
+    ],
+    "charts": [
+      {
+        "notes": [
+          155,
+          18,
+          6,
+          14,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          458,
+          15,
+          17,
+          16,
+          14
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          574,
+          51,
+          90,
+          32,
+          26
+        ],
+        "charter": "\u30b7\u30c1\u30df\u30d8\u30eb\u30c4"
+      },
+      {
+        "notes": [
+          801,
+          86,
+          94,
+          38,
+          35
+        ],
+        "charter": "\u5c0f\u9ce5\u904a\u3055\u3093"
+      }
+    ],
+    "basic_info": {
+      "title": "YURUSHITE",
+      "artist": "t+pazolite",
+      "genre": "\u30aa\u30f3\u30b2\u30adCHUNITHM",
+      "bpm": 270,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
     "id": "11175",
     "title": "\u5b9b\u57ce\u3001\u708e\u4e0a\uff01\uff01",
     "type": "DX",
@@ -49118,6 +49636,80 @@
       "artist": "Cranky feat.\u304a\u3082\u3057\u308d\u4e09\u56fd\u5fd7",
       "genre": "\u30aa\u30f3\u30b2\u30adCHUNITHM",
       "bpm": 175,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11176",
+    "title": "Climax",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.5,
+      12.0,
+      14.3
+    ],
+    "level": [
+      "5",
+      "8",
+      "12",
+      "14"
+    ],
+    "cids": [
+      5911,
+      5912,
+      5913,
+      5914
+    ],
+    "charts": [
+      {
+        "notes": [
+          196,
+          15,
+          2,
+          4,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          415,
+          9,
+          22,
+          17,
+          15
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          588,
+          88,
+          60,
+          49,
+          22
+        ],
+        "charter": "\u9685\u7530\u5ddd\u661f\u4eba"
+      },
+      {
+        "notes": [
+          797,
+          85,
+          144,
+          43,
+          70
+        ],
+        "charter": "\u30b7\u30c1\u30df\u30d8\u30eb\u30c4"
+      }
+    ],
+    "basic_info": {
+      "title": "Climax",
+      "artist": "USAO",
+      "genre": "\u30aa\u30f3\u30b2\u30adCHUNITHM",
+      "bpm": 190,
       "release_date": "",
       "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
       "is_new": true
@@ -49427,6 +50019,93 @@
       "artist": "LiSA",
       "genre": "POPS\u30a2\u30cb\u30e1",
       "bpm": 135,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11184",
+    "title": "Virtual to LIVE",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.0,
+      8.7,
+      11.2,
+      12.7
+    ],
+    "level": [
+      "3",
+      "6",
+      "8+",
+      "11",
+      "12+"
+    ],
+    "cids": [
+      5915,
+      5916,
+      5917,
+      5918,
+      5919
+    ],
+    "charts": [
+      {
+        "notes": [
+          106,
+          7,
+          2,
+          10,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          207,
+          14,
+          8,
+          17,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          219,
+          25,
+          44,
+          53,
+          18
+        ],
+        "charter": "\u3082\u306e\u304f\u308d\u3063\u304f"
+      },
+      {
+        "notes": [
+          483,
+          36,
+          60,
+          48,
+          9
+        ],
+        "charter": "\u8b5c\u9762-100\u53f7"
+      },
+      {
+        "notes": [
+          498,
+          15,
+          116,
+          15,
+          23
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      }
+    ],
+    "basic_info": {
+      "title": "Virtual to LIVE",
+      "artist": "\u306b\u3058\u3055\u3093\u3058",
+      "genre": "POPS\u30a2\u30cb\u30e1",
+      "bpm": 156,
       "release_date": "",
       "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
       "is_new": true
@@ -50247,6 +50926,80 @@
     }
   },
   {
+    "id": "11198",
+    "title": "\u30a2\u30b9\u30ce\u30e8\u30be\u30e9\u54e8\u6212\u73ed",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.0,
+      9.0,
+      12.8
+    ],
+    "level": [
+      "4",
+      "7",
+      "9",
+      "12+"
+    ],
+    "cids": [
+      5903,
+      5904,
+      5905,
+      5906
+    ],
+    "charts": [
+      {
+        "notes": [
+          108,
+          8,
+          6,
+          16,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          250,
+          17,
+          8,
+          27,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          386,
+          17,
+          24,
+          67,
+          2
+        ],
+        "charter": "\u9685\u7530\u5ddd\u661f\u4eba"
+      },
+      {
+        "notes": [
+          511,
+          67,
+          102,
+          33,
+          16
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30a2\u30b9\u30ce\u30e8\u30be\u30e9\u54e8\u6212\u73ed",
+      "artist": "Orangestar feat.IA",
+      "genre": "niconico\u30dc\u30fc\u30ab\u30ed\u30a4\u30c9",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
     "id": "11199",
     "title": "\u60aa\u622f\u30bb\u30f3\u30bb\u30fc\u30b7\u30e7\u30f3",
     "type": "DX",
@@ -50463,6 +51216,302 @@
       "artist": "TANO*C Sound Team",
       "genre": "\u30b2\u30fc\u30e0\u30d0\u30e9\u30a8\u30c6\u30a3",
       "bpm": 200,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11210",
+    "title": "c.s.q.n.",
+    "type": "DX",
+    "ds": [
+      5.0,
+      7.8,
+      11.2,
+      13.8
+    ],
+    "level": [
+      "5",
+      "7+",
+      "11",
+      "13+"
+    ],
+    "cids": [
+      5920,
+      5921,
+      5922,
+      5923
+    ],
+    "charts": [
+      {
+        "notes": [
+          134,
+          26,
+          8,
+          6,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          223,
+          29,
+          11,
+          17,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          396,
+          30,
+          28,
+          32,
+          21
+        ],
+        "charter": "\u30b5\u30d5\u30a1\u592a"
+      },
+      {
+        "notes": [
+          500,
+          174,
+          71,
+          81,
+          26
+        ],
+        "charter": "\u4e03\u5473\u661f\u4eba"
+      }
+    ],
+    "basic_info": {
+      "title": "c.s.q.n.",
+      "artist": "Aoi",
+      "genre": "\u30b2\u30fc\u30e0\u30d0\u30e9\u30a8\u30c6\u30a3",
+      "bpm": 174,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11211",
+    "title": "\u30ab\u30e9\u30c3\u30dd\u30fb\u30ce\u30f3\u30d5\u30a3\u30af\u30b7\u30e7\u30f3",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.5,
+      10.0,
+      13.2
+    ],
+    "level": [
+      "4",
+      "7",
+      "10",
+      "13"
+    ],
+    "cids": [
+      5924,
+      5925,
+      5926,
+      5927
+    ],
+    "charts": [
+      {
+        "notes": [
+          102,
+          16,
+          10,
+          16,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          170,
+          34,
+          13,
+          21,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          236,
+          109,
+          27,
+          19,
+          11
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      },
+      {
+        "notes": [
+          631,
+          46,
+          96,
+          46,
+          8
+        ],
+        "charter": "Jack"
+      }
+    ],
+    "basic_info": {
+      "title": "\u30ab\u30e9\u30c3\u30dd\u30fb\u30ce\u30f3\u30d5\u30a3\u30af\u30b7\u30e7\u30f3",
+      "artist": "Ino(chronoize) feat. \u67f3\u702c\u30de\u30b5\u30ad",
+      "genre": "\u30b2\u30fc\u30e0\u30d0\u30e9\u30a8\u30c6\u30a3",
+      "bpm": 170,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11212",
+    "title": "emomomo",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.5,
+      10.7,
+      13.7
+    ],
+    "level": [
+      "4",
+      "7",
+      "10+",
+      "13+"
+    ],
+    "cids": [
+      5887,
+      5888,
+      5889,
+      5890
+    ],
+    "charts": [
+      {
+        "notes": [
+          138,
+          11,
+          10,
+          8,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          203,
+          38,
+          5,
+          18,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          348,
+          36,
+          64,
+          33,
+          16
+        ],
+        "charter": "\u5c0f\u9ce5\u904a\u3055\u3093"
+      },
+      {
+        "notes": [
+          631,
+          34,
+          61,
+          133,
+          11
+        ],
+        "charter": "\u306f\u3063\u3074\u30fc"
+      }
+    ],
+    "basic_info": {
+      "title": "emomomo",
+      "artist": "Ras",
+      "genre": "\u30b2\u30fc\u30e0\u30d0\u30e9\u30a8\u30c6\u30a3",
+      "bpm": 145,
+      "release_date": "",
+      "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11213",
+    "title": "Arty Party",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.0,
+      11.8,
+      13.9
+    ],
+    "level": [
+      "5",
+      "8",
+      "11+",
+      "13+"
+    ],
+    "cids": [
+      5883,
+      5884,
+      5885,
+      5886
+    ],
+    "charts": [
+      {
+        "notes": [
+          124,
+          16,
+          2,
+          12,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          288,
+          36,
+          10,
+          14,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          352,
+          59,
+          60,
+          20,
+          31
+        ],
+        "charter": "\u30b5\u30d5\u30a1\u592a"
+      },
+      {
+        "notes": [
+          654,
+          34,
+          57,
+          30,
+          39
+        ],
+        "charter": "\u3057\u3061\u307f\u308a\u3053\u308a\u3059"
+      }
+    ],
+    "basic_info": {
+      "title": "Arty Party",
+      "artist": "yaseta",
+      "genre": "\u30b2\u30fc\u30e0\u30d0\u30e9\u30a8\u30c6\u30a3",
+      "bpm": 180,
       "release_date": "",
       "from": "maimai \u3067\u3089\u3063\u304f\u3059 Splash",
       "is_new": true
