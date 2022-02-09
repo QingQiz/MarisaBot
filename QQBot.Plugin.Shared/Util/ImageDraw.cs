@@ -120,7 +120,7 @@ public static class ImageDraw
 
         var coverBackground = new Bitmap(width * 2, width);
 
-        var rec = new Rectangle(width, 0, width / 2, width);
+        var rec = new Rectangle(width, 0, width, width);
 
         using (var g = Graphics.FromImage(coverBackground))
         {

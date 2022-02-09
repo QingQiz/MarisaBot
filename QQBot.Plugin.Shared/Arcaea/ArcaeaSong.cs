@@ -9,6 +9,7 @@ public class ArcaeaSong : Song
     public readonly string Bpm;
     public readonly string Version;
     public readonly List<string> Level;
+    public readonly List<string> Constant;
     public readonly string SongPack;
     private readonly string _coverFileName;
 
@@ -26,10 +27,12 @@ public class ArcaeaSong : Song
         Bpm            = d.bpm;
         Version        = d.version;
         Level          = new List<string>();
+        Constant       = new List<string>();
         SongPack       = d.song_pack;
         _coverFileName = d.cover_name;
 
         foreach (var l in d.level) Level.Add(l);
+        foreach (var l in d.constant) Constant.Add(l);
     }
 
     public override string MaxLevel()
@@ -87,10 +90,10 @@ public class ArcaeaSong : Song
             DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
+            DrawKeyValuePair("难度", string.Join(", ", Level), x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("难度", string.Join(", ", Level), x, y, w, h, background.Width);
+            DrawKeyValuePair("定数", string.Join(", ", Constant), x, y, w, h, background.Width);
         }
 
         return background.ToB64();
