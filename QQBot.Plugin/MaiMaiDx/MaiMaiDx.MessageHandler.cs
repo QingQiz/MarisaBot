@@ -7,6 +7,7 @@ using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.MiraiHttp.Util;
+using QQBot.Plugin.Shared.MaiMaiDx;
 using QQBot.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.MaiMaiDx;
@@ -297,6 +298,39 @@ public partial class MaiMaiDx : MiraiPluginBase
 
         ms.Reply(_songDb.SetSongAlias(name, alias) ? "Success" : $"不存在的歌曲：{name}", message);
 
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region Line / 分数线
+
+    /// <summary>
+    /// 分数线，达到某个达成率rating会上升的线
+    /// </summary>
+    [MiraiPluginCommand("line", "分数线")]
+    private static MiraiPluginTaskState MaiMaiDxSongLine(Message message, MessageSenderProvider ms)
+    {
+        if (double.TryParse(message.Command, out var constant))
+        {
+            if (constant <= 15.0)
+            {
+                var a   = 96.9999;
+                var ret = "达成率 -> Rating";
+
+                while (a < 100.5)
+                {
+                    a = SongScore.NextRa(a, constant);
+                    var ra = SongScore.Ra(a, constant);
+                    ret = $"{ret}\n{a:000.0000} -> {ra}";
+                }
+
+                ms.Reply(ret, message);
+                return MiraiPluginTaskState.CompletedTask;
+            }
+        }
+
+        ms.Reply("参数应为“定数”", message);
         return MiraiPluginTaskState.CompletedTask;
     }
 
