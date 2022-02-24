@@ -5334,6 +5334,153 @@
     ]
   },
   {
+    "id": 254,
+    "title": "INTERNET OVERDOSE",
+    "artist": "Aiobahn feat. KOTOKO",
+    "bpm": "163",
+    "version": "3.12",
+    "level": [
+      "3",
+      "6",
+      "8",
+      "/"
+    ],
+    "song_pack": "Memory Archive",
+    "cover_name": "internetoverdose.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 255,
+    "title": "Sakura Fubuki",
+    "artist": "Street",
+    "bpm": "175",
+    "version": "3.12",
+    "level": [
+      "3",
+      "5",
+      "9",
+      "/"
+    ],
+    "song_pack": "Arcaea",
+    "cover_name": "sakurafubuki.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 256,
+    "title": "NULCTRL",
+    "artist": "Silentroom",
+    "bpm": "100",
+    "version": "3.12",
+    "level": [
+      "3",
+      "6",
+      "9",
+      "/"
+    ],
+    "song_pack": "Arcaea",
+    "cover_name": "nulctrl.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 257,
+    "title": "Macrocosmic Modulation",
+    "artist": "JAKAZiD",
+    "bpm": "170",
+    "version": "3.12",
+    "level": [
+      "4",
+      "7",
+      "9+",
+      "/"
+    ],
+    "song_pack": "Memory Archive",
+    "cover_name": "macromod.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 258,
+    "title": "NEO WINGS",
+    "artist": "SOUND HOLIC feat. Nana Takahashi",
+    "bpm": "168",
+    "version": "3.12",
+    "level": [
+      "4",
+      "7",
+      "10",
+      "/"
+    ],
+    "song_pack": "Memory Archive",
+    "cover_name": "neowings.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 259,
+    "title": "Kissing Lucifer",
+    "artist": "ETIA.",
+    "bpm": "170",
+    "version": "3.12",
+    "level": [
+      "4",
+      "7",
+      "10",
+      "/"
+    ],
+    "song_pack": "Memory Archive",
+    "cover_name": "kissinglucifer.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
+    "id": 260,
+    "title": "Ävril -Flicka i krans-",
+    "artist": "Rigël Theatre",
+    "bpm": "130",
+    "version": "3.12",
+    "level": [
+      "3",
+      "6",
+      "8",
+      "/"
+    ],
+    "song_pack": "Arcaea",
+    "cover_name": "avril.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "/"
+    ]
+  },
+  {
     "id": -1,
     "title": "Tutorial",
     "artist": "ak+q",
