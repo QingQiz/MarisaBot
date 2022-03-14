@@ -2,10 +2,11 @@
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
+using QQBot.Plugin.Shared;
 
 namespace QQBot.Plugin;
 
-[MiraiPlugin(1000)]
+[MiraiPlugin(PluginPriority.Dialog)]
 [MiraiPluginCommand(MiraiMessageType.GroupMessage)]
 public class Dialog : MiraiPluginBase
 {

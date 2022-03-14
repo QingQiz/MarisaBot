@@ -53,13 +53,11 @@ public partial class MiraiHttpSession
                 }).GetJsonAsync();
             CheckResponse(msg);
 
-            Message? message = null;
-
             foreach (var m in msg.data)
             {
                 if (m.type.Contains("Message"))
                 {
-                    message = new Message(new MessageChain(m.messageChain))
+                    var message = new Message(new MessageChain(m.messageChain))
                     {
                         Type = m.type switch
                         {
@@ -70,7 +68,6 @@ public partial class MiraiHttpSession
                             _                 => throw new ArgumentOutOfRangeException()
                         }
                     };
-
 
                     if (message.Type is MiraiMessageType.FriendMessage or MiraiMessageType.StrangerMessage)
                     {

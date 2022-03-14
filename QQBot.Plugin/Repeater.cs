@@ -3,10 +3,11 @@ using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
+using QQBot.Plugin.Shared;
 
 namespace QQBot.Plugin;
 
-[MiraiPlugin(-20)]
+[MiraiPlugin(PluginPriority.Repeater)]
 [MiraiPluginCommand(MiraiMessageType.GroupMessage)]
 public class Repeater: MiraiPluginBase
 {

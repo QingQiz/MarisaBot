@@ -3,10 +3,11 @@ using QQBot.MiraiHttp;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Plugin;
+using QQBot.Plugin.Shared;
 
 namespace QQBot.Plugin.Arcaea;
 
-[MiraiPlugin(19)]
+[MiraiPlugin(PluginPriority.Arcaea)]
 [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "arcaea", "arc", "阿卡伊")]
 public partial class Arcaea : MiraiPluginBase
 {

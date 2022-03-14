@@ -7,12 +7,13 @@ using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Plugin;
 using QQBot.MiraiHttp.Util;
+using QQBot.Plugin.Shared;
 using QQBot.Plugin.Shared.MaiMaiDx;
 using QQBot.Plugin.Shared.Util;
 
 namespace QQBot.Plugin.MaiMaiDx;
 
-[MiraiPlugin(20)]
+[MiraiPlugin(PluginPriority.MaiMaiDx)]
 [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "maimai", "mai", "舞萌")]
 public partial class MaiMaiDx : MiraiPluginBase
 {
