@@ -870,7 +870,7 @@
       "3",
       "6",
       "9",
-      "/"
+      "9+"
     ],
     "song_pack": "Arcaea",
     "cover_name": "ignotus.jpg",
@@ -878,7 +878,7 @@
       "3.5",
       "6.5",
       "9.3",
-      "/"
+      "9.9"
     ]
   },
   {
@@ -1227,7 +1227,7 @@
       "4",
       "7",
       "9",
-      "/"
+      "10"
     ],
     "song_pack": "Arcaea",
     "cover_name": "redandblue.jpg",
@@ -1235,7 +1235,7 @@
       "4.0",
       "7.5",
       "9.4",
-      "/"
+      "10.0"
     ]
   },
   {
@@ -1479,7 +1479,7 @@
       "4",
       "7",
       "10+",
-      "/"
+      "10"
     ],
     "song_pack": "Binary Enfold",
     "cover_name": "singularity.jpg",
@@ -1487,7 +1487,7 @@
       "4.5",
       "7.5",
       "10.7",
-      "/"
+      "10.3"
     ]
   },
   {
@@ -1920,7 +1920,7 @@
       "1",
       "9",
       "8",
-      "/"
+      "10"
     ],
     "song_pack": "Memory Archive",
     "cover_name": "dropdead.jpg",
@@ -1928,7 +1928,7 @@
       "1.5",
       "9.5",
       "9.1",
-      "/"
+      "10.5"
     ]
   },
   {
@@ -5117,9 +5117,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "summerfireworks.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.9",
       "/"
     ]
   },
@@ -5348,9 +5348,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "internetoverdose.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "8.4",
       "/"
     ]
   },
@@ -5369,9 +5369,9 @@
     "song_pack": "Arcaea",
     "cover_name": "sakurafubuki.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "9.3",
       "/"
     ]
   },
@@ -5390,9 +5390,9 @@
     "song_pack": "Arcaea",
     "cover_name": "nulctrl.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.5",
       "/"
     ]
   },
@@ -5411,9 +5411,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "macromod.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -5432,9 +5432,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "neowings.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -5453,9 +5453,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "kissinglucifer.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.3",
       "/"
     ]
   },
@@ -5474,9 +5474,9 @@
     "song_pack": "Arcaea",
     "cover_name": "avril.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
