@@ -1,4 +1,5 @@
-﻿using Flurl.Http;
+﻿using System.Text.RegularExpressions;
+using Flurl.Http;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
@@ -12,8 +13,8 @@ public partial class MaiMaiDx
         if (string.IsNullOrEmpty(param)) return _songDb.SongList;
 
         string[] subCommand =
-        //      0       1          2        3      4     5      6       7
-            { "base", "level", "charter", "bpm", "lv", "等级", "定数", "谱师" };
+        //      0       1          2        3      4     5      6       7     8    9     10      11
+            { "base", "level", "charter", "bpm", "lv", "等级", "定数", "谱师", "b", "c", "artist", "a" };
         var res = param.CheckPrefix(subCommand).ToList();
 
         if (!res.Any()) return new List<MaiMaiSong>();
@@ -23,6 +24,7 @@ public partial class MaiMaiDx
         switch (index)
         {
             case 6:
+            case 8:
             case 0: // base
             {
                 var param1 = param.TrimStart(prefix)!.Trim();
@@ -49,12 +51,13 @@ public partial class MaiMaiDx
                 return _songDb.SongList.Where(s => s.Levels.Contains(lv)).ToList();
             }
             case 7:
+            case 9:
             case 2: // charter
             {
                 var charter = param.TrimStart(prefix)!.Trim();
                 return _songDb.SongList
-                    .Where(s => s.Charts
-                        .Any(c => c.Charter.Contains(charter, StringComparison.OrdinalIgnoreCase)))
+                    .Where(s => s.Charters
+                        .Any(c => c.Contains(charter, StringComparison.OrdinalIgnoreCase)))
                     .ToList();
             }
             case 3: // bpm
@@ -73,6 +76,17 @@ public partial class MaiMaiDx
                 }
 
                 return new List<MaiMaiSong>();
+            }
+            case 10:
+            case 11: // artist
+            {
+                var param1 = param.TrimStart(prefix)!.Trim();
+                var regex  = new Regex($@"\b{param1}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                var ls1    = _songDb.SongList.Where(s => regex.IsMatch(s.Artist)).ToList();
+                return ls1.Any()
+                    ? ls1.ToList()
+                    : _songDb.SongList.Where(
+                        s => s.Info.Artist.Contains(param1, StringComparison.OrdinalIgnoreCase)).ToList();
             }
         }
 

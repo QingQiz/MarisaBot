@@ -7,26 +7,30 @@ namespace QQBot.Plugin.Shared.MaiMaiDx;
 public class MaiMaiSong : Song
 {
     public readonly string Type;
-    public readonly List<double> Constants = new();
-    public readonly List<string> Levels = new();
     public readonly List<MaiMaiSongChart> Charts = new();
     public readonly MaiMaiSongInfo Info;
 
     public MaiMaiSong(dynamic data)
     {
-        Id     = long.Parse(data.id);
-        Title  = data.title;
-        Title  = Title.Trim();
-        Type   = data.type;
-        Info   = new MaiMaiSongInfo(data.basic_info);
-        Artist = Info.Artist;
+        Id      = long.Parse(data.id);
+        Title   = data.title;
+        Title   = Title.Trim();
+        Type    = data.type;
+        Info    = new MaiMaiSongInfo(data.basic_info);
+        Artist  = Info.Artist;
+        Bpm     = Info.Bpm.ToString();
+        Version = Info.From;
 
         // 好像只能这样写。。。好丑。。。
         foreach (var c in data.ds) Constants.Add(c);
 
         foreach (var l in data.level) Levels.Add(l);
 
-        foreach (var c in data.charts) Charts.Add(new MaiMaiSongChart(c));
+        foreach (var c in data.charts)
+        {
+            Charts.Add(new MaiMaiSongChart(c));
+            Charters.Add(c.charter);
+        }
     }
 
     public override string MaxLevel()
@@ -182,7 +186,7 @@ public class MaiMaiSong : Song
 
                 x += w;
                 g.DrawImage(
-                    ImageDraw.GetStringCard(Charts[i].Charter, 21, Color.Black, bgColor2, background.Width - x, h,
+                    ImageDraw.GetStringCard(Charters[i], 21, Color.Black, bgColor2, background.Width - x, h,
                         center: true), x, y);
 
 

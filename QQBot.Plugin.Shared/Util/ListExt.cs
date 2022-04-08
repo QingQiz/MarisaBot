@@ -8,5 +8,10 @@
         {
             return list[Rand.Next(list.Count)];
         }
+
+        public static T RandomTake<T>(this T[] list)
+        {
+            return list[Rand.Next(list.Length)];
+        }
     }
 }

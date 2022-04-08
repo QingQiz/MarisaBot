@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+﻿using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using QQBot.EntityFrameworkCore;
 using QQBot.EntityFrameworkCore.Entity.Plugin.Shared;
 using QQBot.MiraiHttp.DI;
@@ -12,6 +12,8 @@ namespace QQBot.Plugin.Shared.Util.SongDb;
 
 public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
 {
+    private const int PageSize = 10;
+
     private readonly string _aliasFilePath;
     private readonly string _tempAliasPath;
 
@@ -152,19 +154,24 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         return search;
     }
 
-    private TSong? SearchSongByAliasWholeWord(string alias)
+    /// <summary>
+    /// 全字匹配歌曲别名
+    /// </summary>
+    /// <param name="alias"></param>
+    /// <returns></returns>
+    private List<TSong>? SearchSongByAliasWholeWord(string alias)
     {
-        var key = SongAlias.Keys.FirstOrDefault(a => a.Equals(alias, StringComparison.OrdinalIgnoreCase));
+        var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        if (key is null) return null;
-
-        var names = SongAlias[key].Distinct().ToList();
-
-        if (names.Count != 1) return null;
+        var key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
         
-        var songs = SongList.Where(song => song.Title == names[0]).ToList();
+        if (!key.Any()) return null;
 
-        return songs.Count == 1 ? songs[0] : null;
+        var names = key.Select(k => SongAlias[k]).SelectMany(n => n).Distinct().ToHashSet();
+
+        var songs = SongList.Where(song => names.Contains(song.Title)).ToList();
+
+        return songs;
     }
 
     private List<TSong> SearchSongByAlias(string alias)
@@ -173,7 +180,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         if (SearchSongByAliasWholeWord(alias) is { } song)
         {
-            return new List<TSong> { song };
+            return song;
         }
 
         return SongAlias.Keys
@@ -232,8 +239,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     {
         return songs.Count switch
         {
-            >= 10 => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
-            0     => MessageChain.FromPlainText("“查无此歌”"),
+            >= PageSize => MessageChain.FromPlainText($"过多的结果（{songs.Count}个）"),
+            0           => MessageChain.FromPlainText("“查无此歌”"),
             1 => new MessageChain(new MessageData[]
             {
                 new PlainMessage(songs[0].Title),

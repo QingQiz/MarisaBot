@@ -6,14 +6,10 @@ namespace QQBot.Plugin.Shared.Arcaea;
 
 public class ArcaeaSong : Song
 {
-    public readonly string Bpm;
-    public readonly string Version;
-    public readonly List<string> Level;
-    public readonly List<string> Constant;
     public readonly string SongPack;
     private readonly string _coverFileName;
 
-    public string CoverFileName => Level[^1] == "/"
+    private string CoverFileName => Levels[^1] == "/"
         ? _coverFileName
         : new Random().Next(2) == 0
             ? _coverFileName.Replace(".", "_byd.")
@@ -26,18 +22,26 @@ public class ArcaeaSong : Song
         Artist         = d.artist;
         Bpm            = d.bpm;
         Version        = d.version;
-        Level          = new List<string>();
-        Constant       = new List<string>();
         SongPack       = d.song_pack;
         _coverFileName = d.cover_name;
 
-        foreach (var l in d.level) Level.Add(l);
-        foreach (var l in d.constant) Constant.Add(l);
+        foreach (var l in d.level) Levels.Add(l);
+        foreach (var l in d.constant)
+        {
+            if (double.TryParse((string)l, out var constant))
+            {
+                Constants.Add(constant);
+            }
+            else
+            {
+                Constants.Add(-1);
+            }
+        }
     }
 
     public override string MaxLevel()
     {
-        return Level.Last(l => l != "/");
+        return Levels.Last(l => l != "/");
     }
 
     public override Bitmap GetCover()
@@ -90,10 +94,12 @@ public class ArcaeaSong : Song
             DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("难度", string.Join(", ", Level), x, y, w, h, background.Width);
+            DrawKeyValuePair("难度", string.Join(", ", Levels), x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("定数", string.Join(", ", Constant), x, y, w, h, background.Width);
+            DrawKeyValuePair("定数", 
+                string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
+                x, y, w, h, background.Width);
         }
 
         return background.ToB64();
