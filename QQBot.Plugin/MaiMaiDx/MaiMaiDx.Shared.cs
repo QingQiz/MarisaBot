@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Flurl.Http;
 using QQBot.MiraiHttp.Entity;
+using QQBot.MiraiHttp.Entity.MessageData;
 using QQBot.MiraiHttp.Util;
 using QQBot.Plugin.Shared.MaiMaiDx;
 
@@ -105,8 +106,20 @@ public partial class MaiMaiDx
         return new DxRating(await response.GetJsonAsync(), b50);
     }
 
-    private static async Task<MessageChain> GetB40Card(string? username, long? qq, bool b50 = false)
+    private static async Task<MessageChain> GetB40Card(Message message, bool b50 = false)
     {
+        var username = message.Command;
+        var qq       = message.Sender!.Id;
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageType.At);
+            if (at != null)
+            {
+                qq = (at as AtMessage)?.Target ?? qq;
+            }
+        }
+
         MessageChain ret;
         try
         {

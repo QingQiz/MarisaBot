@@ -25,9 +25,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "b40", "查分")]
     private static async Task<MiraiPluginTaskState> MaiMaiDxB40(Message message, MessageSenderProvider ms)
     {
-        var username = message.Command;
-        var sender   = message.Sender!.Id;
-        var ret      = await GetB40Card(username, sender, false);
+        var ret = await GetB40Card(message, false);
 
         ms.Reply(ret, message);
 
@@ -40,9 +38,7 @@ public partial class MaiMaiDx : MiraiPluginBase
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "b50")]
     private static async Task<MiraiPluginTaskState> MaiMaiDxB50(Message message, MessageSenderProvider ms)
     {
-        var username = message.Command;
-        var sender   = message.Sender!.Id;
-        var ret      = await GetB40Card(username, sender, true);
+        var ret = await GetB40Card(message, true);
 
         ms.Reply(ret, message);
 
