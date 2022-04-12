@@ -7,39 +7,44 @@ using QQBot.Plugin.Shared;
 namespace QQBot.Plugin;
 
 [MiraiPlugin(PluginPriority.Dialog)]
-[MiraiPluginCommand(MiraiMessageType.GroupMessage)]
+[MiraiPluginCommand(MiraiMessageType.GroupMessage | MiraiMessageType.FriendMessage)]
 public class Dialog : MiraiPluginBase
 {
-    private static readonly Dictionary<long, Shared.Dialog.Dialog.MessageHandler> Handlers = new();
+    // map (group id, user id) to handler
+    private static readonly Dictionary<(long?, long?), Shared.Dialog.Dialog.MessageHandler> Handlers = new();
 
-    public static bool AddHandler(long groupId, Shared.Dialog.Dialog.MessageHandler handler)
+    public static bool AddHandler(long? groupId, long? senderId, Shared.Dialog.Dialog.MessageHandler handler)
     {
         lock (Handlers)
         {
-            if (Handlers.ContainsKey(groupId)) return false;
+            if (Handlers.ContainsKey((groupId, senderId))) return false;
 
-            Handlers[groupId] = handler;
+            Handlers[(groupId, senderId)] = handler;
             return true;
         }
     }
 
     [MiraiPluginCommand]
-    protected MiraiPluginTaskState GroupMessageHandler(MessageSenderProvider sender, Message message)
+    private static MiraiPluginTaskState MessageHandler(MessageSenderProvider sender, Message message)
     {
+        var groupId  = message.GroupInfo?.Id;
+        var senderId = message.Sender!.Id;
         lock (Handlers)
         {
             if (Handlers.Count == 0) return MiraiPluginTaskState.NoResponse;
 
-            var groupId = message.GroupInfo!.Id;
+            (long?, long?) key = (groupId, senderId);
 
-            if (!Handlers.ContainsKey(groupId)) return MiraiPluginTaskState.NoResponse;
+            if (!Handlers.ContainsKey(key)) key = (groupId, null);
+            if (!Handlers.ContainsKey(key)) return MiraiPluginTaskState.NoResponse;
 
-            var handler = Handlers[groupId];
+            var handler = Handlers[key];
+
             switch (handler(sender, message).Result)
             {
                 // 完成了，删除 handler
                 case MiraiPluginTaskState.CompletedTask:
-                    Handlers.Remove(groupId);
+                    Handlers.Remove(key);
                     return MiraiPluginTaskState.CompletedTask;
                 // 处理了一部分，但没有完成，不删除，但是终止 event 传播
                 case MiraiPluginTaskState.ToBeContinued:
@@ -49,11 +54,11 @@ public class Dialog : MiraiPluginBase
                     return MiraiPluginTaskState.NoResponse;
                 // 插件自闭了，请求删除自己
                 case MiraiPluginTaskState.Canceled:
-                    Handlers.Remove(groupId);
+                    Handlers.Remove(key);
                     return MiraiPluginTaskState.NoResponse;
                 // 错误的状态，删除这个异常的 handler（虽然不太可能发生）
                 default:
-                    Handlers.Remove(groupId);
+                    Handlers.Remove((groupId, senderId));
                     return MiraiPluginTaskState.NoResponse;
             }
         }

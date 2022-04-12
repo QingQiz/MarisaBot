@@ -21,6 +21,6 @@ public partial class Arcaea
             return data.Select(d => new ArcaeaSong(d)).ToList();
         },
         nameof(BotDbContext.ArcaeaGuesses),
-        Dialog.AddHandler
+        (id, handler) => Dialog.AddHandler(id, null, handler)
     );
 }

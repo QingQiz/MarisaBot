@@ -30,6 +30,6 @@ public partial class MaiMaiDx
             }
         },
         nameof(BotDbContext.MaiMaiDxGuesses),
-        Dialog.AddHandler
+        (id, handler) => Dialog.AddHandler(id, null, handler)
     );
 }
