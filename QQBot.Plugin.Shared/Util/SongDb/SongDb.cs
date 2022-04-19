@@ -59,12 +59,13 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         // 尝试读临时别名
         try
         {
-            lines = lines.Concat(File.ReadAllLines(_tempAliasPath))
-                .ToArray();
+            lines = lines.Concat(File.ReadAllLines(_tempAliasPath)).ToArray();
         }
         catch (FileNotFoundException)
         {
         }
+
+        var songNameAll = SongList.Select(s => s.Title).Distinct().ToHashSet();
 
         foreach (var line in lines)
         {
@@ -73,6 +74,12 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                 .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
+
+            // 跳过被删除了的歌
+            if (!songNameAll.Contains(titles[0]))
+            {
+                continue;
+            }
 
             foreach (var title in titles)
             {
@@ -161,13 +168,22 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     /// <returns></returns>
     private List<TSong>? SearchSongByAliasWholeWord(string alias)
     {
-        var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        var key = SongAlias.Keys
+            .Where(a => string.Equals(a, alias, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        var key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
-        
+        if (!key.Any())
+        {
+            var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
+        }
+
         if (!key.Any()) return null;
 
-        var names = key.Select(k => SongAlias[k]).SelectMany(n => n).Distinct().ToHashSet();
+        // 获取完整的标题列表
+        var names = key
+            .Select(k => SongAlias[k])
+            .SelectMany(n => n)
+            .Distinct().ToHashSet();
 
         var songs = SongList.Where(song => names.Contains(song.Title)).ToList();
 

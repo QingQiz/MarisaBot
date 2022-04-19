@@ -91,7 +91,7 @@ public class Command : MiraiPluginBase
     /// <param name="m"></param>
     /// <param name="ms"></param>
     /// <returns></returns>
-    [MiraiPluginCommand("reboot")]
+    [MiraiPluginCommand("reboot", "restart")]
     private static MiraiPluginTaskState Reboot(Message m, MessageSenderProvider ms)
     {
         if (!Commander.Contains(m.Sender!.Id))
