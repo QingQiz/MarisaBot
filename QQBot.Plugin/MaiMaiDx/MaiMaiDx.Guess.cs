@@ -10,46 +10,27 @@ namespace QQBot.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
-    private static List<MaiMaiSong>? _songWithFile;
-
-    private static readonly Dictionary<string, (string Path, TimeSpan Duration)> SongPath = new();
-
     private void StartSongSoundGuess(Message message, MessageSenderProvider ms, long qq)
     {
-        lock ("SongDb")
-        {
-            if (!SongPath.Any())
-            {
-                var path = ConfigurationManager.AppSettings["MaiMaiDx.SongPath"] ?? string.Empty;
-
-                var files = Directory.GetFiles(path, "*.mp3", SearchOption.AllDirectories);
-
-                Parallel.ForEach(files, f =>
-                {
-                    var tag   = TagLib.File.Create(f);
-                    var title = tag.Tag.Title;
-                    var d     = tag.Properties.Duration;
-
-                    lock ("SongPath") SongPath[title] = (f, d);
-                });
-            }
-        }
-
         const int duration = 15;
-
-        // init song list if needed
-        _songWithFile ??= _songDb.SongList.Where(s => SongPath.ContainsKey(s.Title)).ToList();
 
         var groupId = message.GroupInfo!.Id;
 
         // select a song
-        var song = _songWithFile.RandomTake();
+        var song = _songDb.SongList.RandomTake();
 
         // ReSharper disable once InvertIf
         if (_songDb.StartGuess(song, ms, message, qq))
         {
-            var sp    = SongPath[song.Title];
-            var start = new Random().Next((int)sp.Duration.TotalSeconds - duration);
+            var songPath =
+                Directory.GetDirectories(ConfigurationManager.AppSettings["MaiMaiDx.BeatMap"] ?? string.Empty,
+                    $"{song.Id}_*", SearchOption.AllDirectories).First();
+            songPath = Path.Join(songPath, "track.mp3");
+            
+            var tag = TagLib.File.Create(songPath);
+            var d   = tag.Properties.Duration;
+            var start = new Random().Next((int)d.TotalSeconds - duration);
+            
 
             var cutVidPath = ResourceManager.TempPath + $@"/song_guess_cut_{groupId}";
 
@@ -62,7 +43,7 @@ public partial class MaiMaiDx
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.FileName               = ConfigurationManager.AppSettings["FFMPEG.Path"] ?? string.Empty;
                 p.StartInfo.Arguments =
-                    $"-i \"{sp.Path}\" -ss {start} -t {duration} -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
+                    $"-i \"{songPath}\" -ss {start} -t {duration} -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
                 p.Start();
                 p.WaitForExit();
             }
