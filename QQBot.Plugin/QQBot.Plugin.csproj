@@ -11,6 +11,10 @@
       <ProjectReference Include="..\QQBot.Plugin.Shared\QQBot.Plugin.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="TagLibSharp" Version="2.2.0" />
+    </ItemGroup>
+
     <PropertyGroup>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\QQBot.Plugin\</PathMap>
     </PropertyGroup>

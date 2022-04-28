@@ -76,7 +76,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                 .ToList();
 
             // 跳过被删除了的歌
-            if (!songNameAll.Contains(titles[0]))
+            if (titles.Any() && !songNameAll.Contains(titles[0]))
             {
                 continue;
             }

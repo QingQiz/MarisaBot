@@ -10,38 +10,50 @@ namespace QQBot.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
-    private static HashSet<long>? _songIdWithWave;
+    private static List<MaiMaiSong>? _songWithFile;
+
+    private static readonly Dictionary<string, (string Path, TimeSpan Duration)> SongPath = new();
 
     private void StartSongSoundGuess(Message message, MessageSenderProvider ms, long qq)
     {
-        var songPath = ConfigurationManager.AppSettings["MaiMaiDx.WaveFilePath"] ?? string.Empty;
+        lock ("SongDb")
+        {
+            if (!SongPath.Any())
+            {
+                var path = ConfigurationManager.AppSettings["MaiMaiDx.SongPath"] ?? string.Empty;
+
+                var files = Directory.GetFiles(path, "*.mp3", SearchOption.AllDirectories);
+
+                Parallel.ForEach(files, f =>
+                {
+                    var tag   = TagLib.File.Create(f);
+                    var title = tag.Tag.Title;
+                    var d     = tag.Properties.Duration;
+
+                    lock ("SongPath") SongPath[title] = (f, d);
+                });
+            }
+        }
+
+        const int duration = 15;
 
         // init song list if needed
-        _songIdWithWave ??= Directory.GetFiles(songPath, "*.wav")
-            .Select(Path.GetFileName)
-            .Select(fn => long.Parse(fn?.TrimStart('0')[..^4] ?? "-1"))
-            .Where(x => x != -1)
-            .ToHashSet();
+        _songWithFile ??= _songDb.SongList.Where(s => SongPath.ContainsKey(s.Title)).ToList();
 
         var groupId = message.GroupInfo!.Id;
 
-        // random cut song
-        var song = _songDb.SongList.Where(s => _songIdWithWave.Contains(s.Id)).ToList().RandomTake();
+        // select a song
+        var song = _songWithFile.RandomTake();
 
         // ReSharper disable once InvertIf
         if (_songDb.StartGuess(song, ms, message, qq))
         {
-            var wav = new WavFileExt(Path.Join(songPath, song.Id.ToString("000") + ".wav"));
-            var sec = (int)wav.TotalSecond.TotalSeconds;
+            var sp    = SongPath[song.Title];
+            var start = new Random().Next((int)sp.Duration.TotalSeconds - duration);
 
-            var start = new Random().Next(sec - 12);
+            var cutVidPath = ResourceManager.TempPath + $@"/song_guess_cut_{groupId}";
 
-            var cutVidPath = ResourceManager.TempPath + $@"/song_guess_cut_{groupId}.wav";
-            var outStream  = new FileStream(cutVidPath, FileMode.Create);
-
-            wav.TrimWav(outStream, TimeSpan.FromSeconds(start), TimeSpan.FromSeconds(15));
-
-            // convert WAV to AMR
+            // random cut and convert to .amr
             // 我他妈服了，傻逼QQ用的这个AMR编码，这质量tm烂成啥样了。。。
             using (var p = new Process())
             {
@@ -50,7 +62,7 @@ public partial class MaiMaiDx
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.FileName               = ConfigurationManager.AppSettings["FFMPEG.Path"] ?? string.Empty;
                 p.StartInfo.Arguments =
-                    $"-i {cutVidPath} -loglevel quiet -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
+                    $"-i \"{sp.Path}\" -ss {start} -t {duration} -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
                 p.Start();
                 p.WaitForExit();
             }

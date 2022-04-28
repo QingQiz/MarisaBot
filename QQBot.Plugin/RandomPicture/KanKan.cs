@@ -24,21 +24,21 @@ public class KanKan : MiraiPluginBase
     };
 
     private static IEnumerable<string?> Names =>
-        Directory.GetDirectories(PicDbPath, "*", SearchOption.TopDirectoryOnly)
+        Directory.GetDirectories(PicDbPath, "*", SearchOption.AllDirectories)
             .Where(d => PicDbPathExclude.All(e => !d.Contains(e)))
-            .Select(Path.GetFileName);
+            .Select(d => d.TrimEnd('\\').TrimEnd('/'));
 
-    private static readonly Dictionary<string, string> Alias = new()
+    private static readonly string[][] Alias =
     {
-        { "ml", "Making＊Lovers" },
-        { "DDLC", "Doki Doki Literature Club!" },
-        { "lsg", "Love's Sweet Garnish" }
+        new [] { "古明地恋", "恋" },
+        new [] { "陈睿", "cr", "叔叔" },
+        new [] { "初音未来", "miku" }
     };
 
     private static List<string> GetImList(string name)
     {
         return Directory
-            .GetFiles(Path.Join(PicDbPath, name), "*.*", SearchOption.AllDirectories)
+            .GetFiles(name, "*.*", SearchOption.AllDirectories)
             .Where(fn => PicDbPathExclude.All(ex => !fn.Contains(ex, StringComparison.OrdinalIgnoreCase)))
             .Where(fn =>
                 AvailableFileExt.Any(ext => fn.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
@@ -48,18 +48,9 @@ public class KanKan : MiraiPluginBase
     [MiraiPluginCommand]
     private static MiraiPluginTaskState Handler(Message m, MessageSenderProvider p)
     {
-        if (Names.Contains(m.Command))
-        {
-            var pic = GetImList(m.Command).RandomTake();
+        var n = m.Command;
 
-            p.Reply(pic.Replace(PicDbPath, ""), m);
-            p.Reply(ImageMessage.FromPath(pic), m, false);
-
-            return MiraiPluginTaskState.CompletedTask;
-        }
-
-        // ReSharper disable once InvertIf
-        if (string.IsNullOrWhiteSpace(m.Command))
+        if (string.IsNullOrWhiteSpace(n))
         {
             if (new Random().Next(10) < 3)
             {
@@ -67,15 +58,26 @@ public class KanKan : MiraiPluginBase
             }
             else
             {
-                // var names   = string.Join('、', Names.Select(n => $"`{n}`"));
-                // var aliases = Alias.Select(k => $"- `{k.Key}` 是指 `{k.Value}`");
-                // p.Reply($"现在能看的只有：{names}\n\n这其中：\n{string.Join('\n', aliases)}", m);
                 p.Reply(ImageMessage.FromPath(Path.Join(ConfigurationManager.AppSettings["Help"]!, "kk.jpg")), m);
             }
 
             return MiraiPluginTaskState.CompletedTask;
         }
 
-        return MiraiPluginTaskState.NoResponse;
+        n = Alias.FirstOrDefault(@as => @as.Any(a => a.Equals(n, StringComparison.OrdinalIgnoreCase)))?.First() ?? n;
+
+        var d = Names.FirstOrDefault(d => Path.GetFileName(d)!.Equals(n, StringComparison.OrdinalIgnoreCase));
+
+        if (d == null)
+        {
+            return MiraiPluginTaskState.NoResponse;
+        }
+        
+        var pic = GetImList(d).RandomTake();
+
+        p.Reply(pic.Replace(PicDbPath, ""), m);
+        p.Reply(ImageMessage.FromPath(pic), m, false);
+
+        return MiraiPluginTaskState.CompletedTask;
     }
 }
