@@ -3,15 +3,12 @@ using System.Diagnostics;
 using QQBot.MiraiHttp.DI;
 using QQBot.MiraiHttp.Entity;
 using QQBot.MiraiHttp.Entity.MessageData;
-using QQBot.Plugin.Shared.MaiMaiDx;
 using QQBot.Plugin.Shared.Util;
 
-namespace QQBot.Plugin.MaiMaiDx;
+namespace QQBot.Plugin.Arcaea;
 
-public partial class MaiMaiDx
+public partial class Arcaea
 {
-    private static readonly Dictionary<long, string> SongPath = new();
-
     private void StartSongSoundGuess(Message message, MessageSenderProvider ms, long qq)
     {
         const int duration = 15;
@@ -19,32 +16,25 @@ public partial class MaiMaiDx
         var groupId = message.GroupInfo!.Id;
 
         // select a song
-        var song = _songDb.SongList.RandomTake();
+        var song = _songDb.SongList
+            .Where(s => string.Compare(s.Version, "3.6.1.1", StringComparison.Ordinal) <= 0)
+            .ToList()
+            .RandomTake();
 
         // ReSharper disable once InvertIf
         if (_songDb.StartGuess(song, ms, message, qq))
         {
-            string songPath;
-
-            if (SongPath.ContainsKey(song.Id))
-            {
-                songPath = SongPath[song.Id];
-            }
-            else
-            {
-                songPath =
-                    Directory.GetDirectories(ConfigurationManager.AppSettings["MaiMaiDx.BeatMap"] ?? string.Empty,
-                        $"{song.Id}_*", SearchOption.AllDirectories).First();
-                songPath          = Path.Join(songPath, "track.mp3");
-                SongPath[song.Id] = songPath;
-            }
+            var songPath = ConfigurationManager.AppSettings["Arcaea.Assets"] ?? string.Empty;
+            var songId   = song.CoverFileName.Replace("_byd", "").Replace(".jpg", "").Replace(".png", "");
+           
+            songPath = Path.Join(songPath, "songs", songId, "base.ogg");
             
             var tag = TagLib.File.Create(songPath);
             var d   = tag.Properties.Duration;
             var start = new Random().Next((int)d.TotalSeconds - duration);
             
-
-            var cutVidPath = ResourceManager.TempPath + $@"/song_guess_cut_{groupId}";
+            var cutVidPath = ConfigurationManager.AppSettings["Arcaea.TempPath"] ?? string.Empty;
+            cutVidPath = Path.Join(cutVidPath, $"/song_guess_cut_{groupId}");
 
             // random cut and convert to .amr
             // 我他妈服了，傻逼QQ用的这个AMR编码，这质量tm烂成啥样了。。。
@@ -72,4 +62,5 @@ public partial class MaiMaiDx
             ms.Reply(MessageChain.FromVoiceB64(toSend), message, false);
         }
     }
+    
 }

@@ -9,7 +9,7 @@ public class ArcaeaSong : Song
     public readonly string SongPack;
     private readonly string _coverFileName;
 
-    private string CoverFileName => Levels[^1] == "/"
+    public string CoverFileName => Levels[^1] == "/"
         ? _coverFileName
         : new Random().Next(2) == 0
             ? _coverFileName.Replace(".", "_byd.")

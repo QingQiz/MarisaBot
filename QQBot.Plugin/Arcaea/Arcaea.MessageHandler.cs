@@ -64,6 +64,17 @@ public partial class Arcaea : MiraiPluginBase
     }
 
     /// <summary>
+    /// 听歌猜曲
+    /// </summary>
+    [MiraiPluginSubCommand(nameof(ArcaeaGuess))]
+    [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, true, "v2")]
+    private MiraiPluginTaskState ArcaeaGuessV2(Message message, MessageSenderProvider ms, long qq)
+    {
+        StartSongSoundGuess(message, ms, qq);
+        return MiraiPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     /// 别名处理
     /// </summary>
     [MiraiPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
