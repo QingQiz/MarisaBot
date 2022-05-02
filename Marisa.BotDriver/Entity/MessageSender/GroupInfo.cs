@@ -1,4 +1,4 @@
-﻿namespace Marisa.BotDriver.Entity.Sender;
+﻿namespace Marisa.BotDriver.Entity.MessageSender;
 
 public class GroupInfo
 {

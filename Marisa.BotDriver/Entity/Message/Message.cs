@@ -1,6 +1,6 @@
 ﻿using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Entity.Sender;
+using Marisa.BotDriver.Entity.MessageSender;
 
 namespace Marisa.BotDriver.Entity.Message;
 

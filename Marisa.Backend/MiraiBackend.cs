@@ -7,7 +7,7 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Entity.Sender;
+using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.BotDriver.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 
