@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Marisa.StartUp": {
+      "commandName": "Project",
+      "commandLineArgs": "http://127.0.0.1:18080 2096937554 SCHW_KEY_SCHWBOT"
+    }
+  }
+}

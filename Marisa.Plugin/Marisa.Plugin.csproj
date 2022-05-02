@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Marisa.Plugin</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj" />
+      <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Flurl" Version="3.0.2" />
+      <PackageReference Include="Flurl.Http" Version="3.2.0" />
+      <PackageReference Include="TagLibSharp" Version="2.2.0" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\Marisa.Plugin\</PathMap>
+    </PropertyGroup>
+</Project>

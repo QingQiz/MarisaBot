@@ -1,14 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.EntityFrameworkCore", "QQBot.EntityFrameworkCore\QQBot.EntityFrameworkCore.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.EntityFrameworkCore", "Marisa.EntityFrameworkCore\Marisa.EntityFrameworkCore.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.MiraiHttp", "QQBot.MiraiHttp\QQBot.MiraiHttp.csproj", "{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Plugin.Shared", "Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj", "{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.Plugin.Shared", "QQBot.Plugin.Shared\QQBot.Plugin.Shared.csproj", "{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Plugin", "Marisa.Plugin\Marisa.Plugin.csproj", "{0A29E29D-15A4-4949-828D-D69AEDEC19D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.Plugin", "QQBot.Plugin\QQBot.Plugin.csproj", "{0A29E29D-15A4-4949-828D-D69AEDEC19D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.StartUp", "Marisa.StartUp\Marisa.StartUp.csproj", "{CD467B36-69B0-4501-8E10-214846321FA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQBot.StartUp", "QQBot.StartUp\QQBot.StartUp.csproj", "{CD467B36-69B0-4501-8E10-214846321FA9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.BotDriver", "Marisa.BotDriver\Marisa.BotDriver.csproj", "{A4E8A960-2E80-4D6E-BF98-9EE11A0BCCF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Utils", "Marisa.Utils\Marisa.Utils.csproj", "{DF58656A-A9E7-4602-8A26-DE2705E50279}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Backend", "Marisa.Backend\Marisa.Backend.csproj", "{E1B7A528-686E-496D-9E54-BCA3027C94B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +24,6 @@ Global
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BBD1F38-844F-40E7-ADE6-CF217ECE45C1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -36,5 +36,17 @@ Global
 		{CD467B36-69B0-4501-8E10-214846321FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD467B36-69B0-4501-8E10-214846321FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD467B36-69B0-4501-8E10-214846321FA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4E8A960-2E80-4D6E-BF98-9EE11A0BCCF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4E8A960-2E80-4D6E-BF98-9EE11A0BCCF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4E8A960-2E80-4D6E-BF98-9EE11A0BCCF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4E8A960-2E80-4D6E-BF98-9EE11A0BCCF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF58656A-A9E7-4602-8A26-DE2705E50279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF58656A-A9E7-4602-8A26-DE2705E50279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF58656A-A9E7-4602-8A26-DE2705E50279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF58656A-A9E7-4602-8A26-DE2705E50279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1B7A528-686E-496D-9E54-BCA3027C94B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1B7A528-686E-496D-9E54-BCA3027C94B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1B7A528-686E-496D-9E54-BCA3027C94B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1B7A528-686E-496D-9E54-BCA3027C94B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
