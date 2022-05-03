@@ -131,7 +131,7 @@ public abstract class BotDriver
                     (parentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, methodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
-        async Task<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
+        async IAsyncEnumerable<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
         {
             foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
             {
@@ -175,19 +175,21 @@ public abstract class BotDriver
                 }
 
                 // 调用处理函数并处理异常
+                MarisaPluginTaskState? ret = null;
                 try
                 {
                     if (m.ReturnType == typeof(Task<MarisaPluginTaskState>))
                     {
-                        return await (Task<MarisaPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
+                        ret = await (Task<MarisaPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
                     }
-
-                    if (m.ReturnType == typeof(MarisaPluginTaskState))
+                    else if (m.ReturnType == typeof(MarisaPluginTaskState))
                     {
-                        return (MarisaPluginTaskState)m.Invoke(plugin, parameters.ToArray())!;
+                        ret = (MarisaPluginTaskState)m.Invoke(plugin, parameters.ToArray())!;
                     }
-
-                    throw new Exception("插件方法返回类型无效");
+                    else
+                    {
+                        throw new Exception("插件方法返回类型无效");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -198,9 +200,18 @@ public abstract class BotDriver
 
                     MessageSenderProvider.Send(exception, message.Type, target, null);
                 }
-            }
 
-            return MarisaPluginTaskState.NoResponse;
+                if (ret != null)
+                {
+                    // NOTE 当一个插件中有多个指令会被触发时，分为以下情况：
+                    // 1. 使用 Command 同时触发了 A 和 B，此时A、B会存在相同的触发前缀，
+                    //    这样的情况下需设计成子命令的形式以保证正确运行（因为A触发后消息会被修改）
+                    //    若是 A 的触发前缀是空字符串，则没有影响
+                    // 2. 同上，但是有 Trigger 的参与，此时没什么影响，还是应当设计成子命令的形式
+                    // 3. 只有 Trigger 作用，没什么要注意的
+                    yield return (MarisaPluginTaskState) ret;
+                }
+            }
         }
 
         var taskList = new List<Task>();
@@ -215,11 +226,16 @@ public abstract class BotDriver
 
                 foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
                 {
-                    var state = await TrigPlugin(plugin, message);
+                    var shouldBreak = false;
 
-                    if (state == MarisaPluginTaskState.CompletedTask) break;
+                    await foreach (var state in TrigPlugin(plugin, message))
+                    {
+                        if (state == MarisaPluginTaskState.CompletedTask) shouldBreak = true;
+                    }
 
                     message.Command = command;
+                    
+                    if (shouldBreak) break;
                 }
             }));
 

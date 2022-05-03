@@ -8,14 +8,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Marisa.Utils\Marisa.Utils.csproj" />
-      <ProjectReference Include="..\Marisa.EntityFrameworkCore\Marisa.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\Marisa.Utils\Marisa.Utils.csproj"/>
+        <ProjectReference Include="..\Marisa.EntityFrameworkCore\Marisa.EntityFrameworkCore.csproj"/>
     </ItemGroup>
+   
+    <PropertyGroup>
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\Marisa.BotDriver\</PathMap>
+    </PropertyGroup>
 
 </Project>
