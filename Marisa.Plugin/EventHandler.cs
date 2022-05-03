@@ -8,11 +8,16 @@ using Marisa.BotDriver.Plugin.Trigger;
 namespace Marisa.Plugin;
 
 [MarisaPlugin]
-[MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
+[MarisaPluginTrigger(typeof(EventHandler), nameof(Trigger))]
 public class EventHandler : MarisaPluginBase
 {
     private readonly List<string> _dirtyWords;
     private static readonly string ResourcePath = ConfigurationManager.AppSettings["Dirty.ResourcePath"]!;
+
+    public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
+    {
+        return message.MessageChain!.Messages.Any(m => m.Type == MessageDataType.Nudge);
+    };
 
     public EventHandler()
     {
@@ -24,12 +29,14 @@ public class EventHandler : MarisaPluginBase
             .ToList();
     }
 
+    [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
     private MarisaPluginTaskState Handler(Message message, long qq)
     {
         var msg = message.MessageChain!.Messages.First(m => m.Type != MessageDataType.Id);
 
         switch (msg.Type)
         {
+            // 戳一戳
             case MessageDataType.Nudge:
             {
                 var m = (msg as MessageDataNudge)!;
