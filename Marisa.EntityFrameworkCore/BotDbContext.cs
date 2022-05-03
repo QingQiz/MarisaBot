@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Marisa.EntityFrameworkCore.Entity.Audit;
+using Marisa.EntityFrameworkCore.Entity;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
@@ -9,9 +9,9 @@ namespace Marisa.EntityFrameworkCore;
 
 public class BotDbContext : DbContext
 {
-    public DbSet<AuditLog> Logs { get; set; }
     public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
+    public DbSet<BlackList> BlackLists { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {

@@ -2,6 +2,7 @@
 
 public static class PluginPriority
 {
+    public const int BlackList = 11;
     public const int Dialog = 10;
     public const int Command = 9;
     public const int MaiMaiDx = 2;
