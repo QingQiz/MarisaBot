@@ -55,6 +55,18 @@ public class MessageChain
         }
     }
 
+    public override string ToString()
+    {
+        return string.Join(' ', Messages.Select(m =>
+        {
+            return m.Type switch
+            {
+                MessageDataType.Text => (m as MessageDataText)!.Text,
+                _                    => $"[:{m.Type.ToString()}:]"
+            };
+        }));
+    }
+
     public string Text => string.Join(' ',
         Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text));
 }

@@ -1,30 +1,46 @@
 ﻿using System.ComponentModel;
+using System.Dynamic;
 using System.Reflection;
 using System.Threading.Tasks.Dataflow;
 using Flurl;
-using Flurl.Http;
+using log4net;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.BotDriver.Plugin;
+using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Websocket.Client;
 
 namespace Marisa.Backend;
 
 public class MiraiBackend : BotDriver.BotDriver
 {
-    private readonly string _serverAddress;
-    private string _session = null!;
-    private readonly string _authKey;
-    public long Id { get; }
+    private readonly WebsocketClient _wsClient;
+    private readonly ILog _logger;
 
-    public MiraiBackend(IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins, DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
+    public MiraiBackend(IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
+        DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
+        ILog logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
     {
-        _serverAddress      = dict["ServerAddress"];
-        Id                  = dict["QQ"];
-        _authKey            = dict["AuthKey"];
+        _logger = logger;
+        string serverAddress = dict["ServerAddress"];
+        long   id            = dict["QQ"];
+        string authKey       = dict["AuthKey"];
+
+        Websocket.Client.Logging.LogProvider.IsDisabled = true;
+        _wsClient = new WebsocketClient(new Uri(
+            $"{serverAddress}/all"
+                .SetQueryParam("verifyKey", authKey)
+                .SetQueryParam("qq", id)))
+        {
+            ReconnectTimeout = TimeSpan.MaxValue,
+        };
+
+        _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnection happened"); });
     }
 
     public new static IServiceCollection Config(Assembly pluginAssembly)
@@ -34,175 +50,196 @@ public class MiraiBackend : BotDriver.BotDriver
         return sc;
     }
 
-    private async Task Auth()
+    #region MessageCoverter
+
+    private Message MessageToMessage(dynamic m)
     {
-        // get session
-        var login = await (await $"{_serverAddress}/verify".PostJsonAsync(new { verifyKey = _authKey })).GetJsonAsync();
-        CheckResponse(login);
+        var message = new Message(new MessageChain(m.messageChain), MessageSenderProvider)
+        {
+            Type = m.type switch
+            {
+                "StrangerMessage" => MessageType.StrangerMessage,
+                "FriendMessage"   => MessageType.FriendMessage,
+                "GroupMessage"    => MessageType.GroupMessage,
+                "TempMessage"     => MessageType.TempMessage,
+                _                 => throw new ArgumentOutOfRangeException()
+            }
+        };
 
-        _session = login.session;
+        if (message.Type is MessageType.FriendMessage or MessageType.StrangerMessage)
+        {
+            message.Sender =
+                new SenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
+        }
+        else
+        {
+            message.Sender =
+                new SenderInfo(m.sender.id, m.sender.memberName, permission: m.sender.permission);
+            message.GroupInfo =
+                new GroupInfo(m.sender.group.id, m.sender.group.name, m.sender.group.permission);
+        }
 
-        CheckResponse(await
-            (await $"{_serverAddress}/bind".PostJsonAsync(new { sessionKey = _session, qq = Id })).GetJsonAsync());
+        return message;
     }
 
-    private static void CheckResponse(dynamic response)
+    private Message? EventToMessage(dynamic m)
     {
-        if (response.code != 0) throw new Exception($"[Code {response.code}] {response.msg}");
+        switch (m.type)
+        {
+            case "NudgeEvent":
+            {
+                var message =
+                    new Message(
+                        new MessageChain(new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix)),
+                        MessageSenderProvider)
+                    {
+                        Type = m.subject.kind switch
+                        {
+                            "Group"  => MessageType.GroupMessage,
+                            "Friend" => MessageType.FriendMessage,
+                            _        => throw new ArgumentOutOfRangeException()
+                        },
+                        Sender = new SenderInfo(m.fromId, null, null, null),
+                    };
+
+                if (message.Type == MessageType.GroupMessage)
+                {
+                    message.GroupInfo = new GroupInfo(m.subject.id, null, null);
+                }
+
+                return message;
+            }
+        }
+
+        return null;
     }
 
-    protected override async Task RecvMessage()
+    private Message? MessageConverter(ResponseMessage msgIn)
     {
-        var retry = 0;
-        while (true)
+        var mExpando = JsonConvert.DeserializeObject<ExpandoObject>(msgIn.Text);
+
+        var m = (mExpando as dynamic).data;
+
+        var mDict = (m as IDictionary<string, object>)!;
+
+        if (mDict.ContainsKey("code"))
+        {
+            var code = mDict["code"].ToString();
+            if (code != "0")
+            {
+                _logger.Warn(mDict["msg"]);
+            }
+
+            return null;
+        }
+
+        if (m.type.Contains("Message"))
+        {
+            if (MessageToMessage(m) is Message message)
+            {
+                return message;
+            }
+            else
+            {
+                _logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
+            }
+        }
+        else if (m.type.Contains("Event")) // Event
+        {
+            if (EventToMessage(m) is Message message)
+            {
+                return message;
+            }
+            else
+            {
+                _logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
+            }
+        }
+        else
+        {
+            _logger.Warn($"Unknown message {msgIn.Text}");
+        }
+
+        return null;
+    }
+
+    #endregion
+    
+    protected override Task RecvMessage()
+    {
+        async void OnMessage(ResponseMessage msg) => await Task.Run(() =>
         {
             try
             {
-                await Auth();
-                retry = 0;
-                await RecvMessageInner();
+                var message = MessageConverter(msg);
+
+                if (message == null) return;
+                _logger.Info(message.GroupInfo == null
+                    ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
+                    : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
+                MessageQueueProvider.RecvQueue.Post(message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
-
-                await Task.Delay(TimeSpan.FromSeconds(3));
-
-                if (retry++ > 10) return;
+                _logger.Error(e.ToString());
+                _logger.Error($"Unknown data: {msg.Text}");
             }
-        }
-    }
+        });
 
-    private async Task RecvMessageInner()
-    {
-        var reportAddress = $"{_serverAddress}/countMessage";
-        var request       = reportAddress.SetQueryParam("sessionKey", _session);
-
-        while (true)
-        {
-            var msgCnt = await request.GetJsonAsync();
-            CheckResponse(msgCnt);
-
-            if (msgCnt.data == 0)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-                continue;
-            }
-
-            var msg = await $"{_serverAddress}/fetchMessage"
-                .SetQueryParams(new
-                {
-                    sessionKey = _session,
-                    count      = msgCnt.data
-                }).GetJsonAsync();
-            CheckResponse(msg);
-
-            foreach (var m in msg.data)
-            {
-                if (m.type.Contains("Message"))
-                {
-                    var message = new Message(new MessageChain(m.messageChain), MessageSenderProvider)
-                    {
-                        Type = m.type switch
-                        {
-                            "StrangerMessage" => MessageType.StrangerMessage,
-                            "FriendMessage"   => MessageType.FriendMessage,
-                            "GroupMessage"    => MessageType.GroupMessage,
-                            "TempMessage"     => MessageType.TempMessage,
-                            _                 => throw new ArgumentOutOfRangeException()
-                        }
-                    };
-
-                    if (message.Type is MessageType.FriendMessage or MessageType.StrangerMessage)
-                    {
-                        message.Sender =
-                            new SenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
-                    }
-                    else
-                    {
-                        message.Sender =
-                            new SenderInfo(m.sender.id, m.sender.memberName, permission: m.sender.permission);
-                        message.GroupInfo =
-                            new GroupInfo(m.sender.group.id, m.sender.group.name, m.sender.group.permission);
-                    }
-
-                    MessageQueueProvider.RecvQueue.Post(message);
-                }
-                else // Event
-                {
-                    switch (m.type)
-                    {
-                        case "NudgeEvent":
-                        {
-                            var message = new Message(
-                                new MessageChain(new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix)),
-                                MessageSenderProvider)
-                            {
-                                Type = m.subject.kind switch
-                                {
-                                    "Group"  => MessageType.GroupMessage,
-                                    "Friend" => MessageType.FriendMessage,
-                                    _        => throw new ArgumentOutOfRangeException()
-                                },
-                                Sender = new SenderInfo(m.fromId, null, null, null),
-                            };
-
-                            if (message.Type == MessageType.GroupMessage)
-                            {
-                                message.GroupInfo = new GroupInfo(m.subject.id, null, null);
-                            }
-                            MessageQueueProvider.RecvQueue.Post(message);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        _wsClient.MessageReceived.Subscribe(OnMessage);
+        return Task.CompletedTask;
     }
 
     protected override async Task SendMessage()
     {
-        var sendFriendMessageAddress = $"{_serverAddress}/sendFriendMessage";
-        var sendGroupMessageAddress  = $"{_serverAddress}/sendGroupMessage";
-        var sendTempMessageAddress   = $"{_serverAddress}/sendTempMessage";
-
-        async Task SendFriendMessage(MessageChain message, long target, long? quote = null)
+        void SendFriendMessage(MessageChain message, long target, long? quote = null)
         {
-            dynamic toSend = new
+            var toSend = new
             {
-                sessionKey = _session, target, quote,
-                messageChain = message.Messages
-                    .Select(m => m.ToObject()).ToList()
+                syncId  = -1,
+                command = "sendFriendMessage",
+                content = new
+                {
+                    target, quote,
+                    messageChain = message.Messages.Select(m => m.ToObject()).ToList()
+                }
             };
-
-            await sendFriendMessageAddress.PostJsonAsync((object)toSend);
+            _logger.Info($"({target,11}) <- {message}".Escape());
+            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
         }
 
-        async Task SendGroupMessage(MessageChain message, long target, long? quote = null)
+        void SendGroupMessage(MessageChain message, long target, long? quote = null)
         {
-            dynamic toSend = new
+            var toSend = new
             {
-                sessionKey = _session, target, quote,
-                messageChain = message.Messages
-                    .Select(m => m.ToObject()).ToList()
+                syncId  = -1,
+                command = "sendGroupMessage",
+                content = new
+                {
+                    target, quote,
+                    messageChain = message.Messages.Select(m => m.ToObject()).ToList()
+                }
             };
-
-            await sendGroupMessageAddress.PostJsonAsync((object)toSend);
+            _logger.Info($"({target,11}) <= {message}".Escape());
+            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
         }
 
-        async Task SendTempMessage(MessageChain message, long target, long? groupId, long? quote = null)
+        void SendTempMessage(MessageChain message, long target, long? groupId, long? quote = null)
         {
-            dynamic toSend = new
+            var toSend = new
             {
-                sessionKey = _session,
-                qq         = target,
-                group      = groupId,
-                quote,
-                messageChain = message.Messages
-                    .Select(m => m.ToObject()).ToList()
+                syncId  = -1,
+                command = "sendTempMessage",
+                content = new
+                {
+                    qq    = target,
+                    group = groupId,
+                    quote,
+                    messageChain = message.Messages.Select(m => m.ToObject()).ToList()
+                }
             };
-
-            await sendTempMessageAddress.PostJsonAsync((object)toSend);
+            _logger.Info($"({target,11}) <* {message}".Escape());
+            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
         }
 
         var taskList = new List<Task>();
@@ -214,13 +251,13 @@ public class MiraiBackend : BotDriver.BotDriver
             switch (s.Type)
             {
                 case MessageType.GroupMessage:
-                    taskList.Add(SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId));
+                    taskList.Add(Task.Run(() => SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId)));
                     break;
                 case MessageType.FriendMessage:
-                    taskList.Add(SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId));
+                    taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId)));
                     break;
                 case MessageType.TempMessage:
-                    taskList.Add(SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId));
+                    taskList.Add(Task.Run(() => SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId)));
                     break;
                 case MessageType.StrangerMessage:
                     throw new NotImplementedException();
@@ -235,5 +272,11 @@ public class MiraiBackend : BotDriver.BotDriver
         }
 
         await Task.WhenAll(taskList);
+    }
+
+    public override async Task Invoke()
+    {
+        await _wsClient.Start();
+        await Task.WhenAll(RecvMessage(), SendMessage(), ProcMessage());
     }
 }
