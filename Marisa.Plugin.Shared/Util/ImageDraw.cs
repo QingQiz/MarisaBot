@@ -55,7 +55,7 @@ public static class ImageDraw
         }
     }
 
-    private static Color CalculateAverageColor(this Bitmap bm, Rectangle rec)
+    public static Color CalculateAverageColor(this Bitmap bm, Rectangle rec)
     {
         var       width        = bm.Width;
         var       height       = bm.Height;

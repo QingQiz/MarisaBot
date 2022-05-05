@@ -33,6 +33,24 @@ public class SongScore
         Type        = data.type;
     }
 
+    public SongScore(double achievement, double constant, long dxScore, string fc, string fs, string level,
+        long levelIdx, string levelLabel, long rating, string rank, long id, string title, string type)
+    {
+        Achievement = achievement;
+        Constant    = constant;
+        DxScore     = dxScore;
+        Fc          = fc;
+        Fs          = fs;
+        Level       = level;
+        LevelIdx    = levelIdx;
+        LevelLabel  = levelLabel;
+        Rating      = rating;
+        Rank        = rank;
+        Id          = id;
+        Title       = title;
+        Type        = type;
+    }
+
     public int B50Ra()
     {
         var baseRa = Achievement switch
@@ -80,6 +98,27 @@ public class SongScore
             _       => 14.0
         };
         return (int)Math.Floor(constant * (Math.Min(100.5, achievement) / 100) * baseRa);
+    }
+
+    public static string CalcRank(double achievement)
+    {
+        return (achievement switch
+        {
+            >= 100.5 => "SSS+",
+            >= 100   => "SSS",
+            >= 99.5  => "SS+",
+            >= 99    => "SS",
+            >= 98    => "S+",
+            >= 97    => "S",
+            >= 94    => "AAA",
+            >= 90    => "AA",
+            >= 80    => "A",
+            >= 75    => "BBB",
+            >= 70    => "BB",
+            >= 60    => "B",
+            >= 50    => "C",
+            _        => "D"
+        }).ToLower().Replace('+', 'p');
     }
 
     /// <summary>

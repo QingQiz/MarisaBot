@@ -99,6 +99,20 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
     public List<TSong> SongList => _songList ??= _songListGen();
 
+    private Dictionary<long, TSong>? _songIndexer;
+
+    /// <summary>
+    /// 使用歌曲 id 建立索引
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public TSong FindSong(long id)
+    {
+        _songIndexer ??= SongList.ToDictionary(s => s.Id);
+
+        return _songIndexer[id];
+    }
+
     private Dictionary<string, List<string>> SongAlias
     {
         get
