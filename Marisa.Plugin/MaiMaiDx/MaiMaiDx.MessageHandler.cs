@@ -281,7 +281,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     private MarisaPluginTaskState MaiMaiDxSongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split("$>");
+        var names = param.Split(":=");
 
         if (names.Length != 2)
         {

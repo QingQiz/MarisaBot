@@ -77,7 +77,7 @@ public class Configuration
             File         = "Log.log",
             AppendToFile = true,
             RollingStyle = RollingFileAppender.RollingMode.Date,
-            DatePattern  = "yyyyMMdd-HHmm",
+            DatePattern  = "yyyyMMdd",
             Layout       = patternLayout
         };
         

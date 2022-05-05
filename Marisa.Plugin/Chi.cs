@@ -46,7 +46,7 @@ public class Chi : MarisaPluginBase
         return f[r];
     }
 
-    [MarisaPluginCommand]
+    [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private MarisaPluginTaskState Proc(Message message)
     {
         var sender = message.Sender!.Id;

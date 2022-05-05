@@ -120,7 +120,7 @@ public partial class Arcaea : MarisaPluginBase
     private MarisaPluginTaskState ArcaeaSongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split("$>");
+        var names = param.Split(":=");
 
         if (names.Length != 2)
         {
