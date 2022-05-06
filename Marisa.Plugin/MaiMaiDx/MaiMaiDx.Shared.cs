@@ -172,7 +172,8 @@ public partial class MaiMaiDx
         "maimai でらっくす Splash"
     };
 
-    private async Task<Dictionary<(long Id, long LevelIdx), SongScore>?> GetAllSongScores(Message message, string[]? versions = null)
+    private async Task<Dictionary<(long Id, long LevelIdx), SongScore>?> GetAllSongScores(Message message,
+        string[]? versions = null)
     {
         var qq = message.Sender!.Id;
 
@@ -197,7 +198,6 @@ public partial class MaiMaiDx
                 return new SongScore(ach, constant, -1, d.fc, d.fs, d.level, idx, MaiMaiSong.LevelName[idx],
                     SongScore.Ra(ach, constant), SongScore.CalcRank(ach), song.Id, song.Title, song.Type);
             }).ToDictionary(ss => (ss.Id, ss.LevelIdx));
-
         }
         catch (FlurlHttpException e) when (e.StatusCode == 400)
         {
@@ -282,8 +282,9 @@ public partial class MaiMaiDx
                         var fontColor = score.Fc switch
                         {
                             "fc"  => Brushes.LimeGreen,
-                            "fc+" => Brushes.LawnGreen,
-                            "ap"  => Brushes.Gold,
+                            "fcp" => Brushes.LawnGreen,
+                            "ap"  => Brushes.Goldenrod,
+                            "app" => Brushes.Gold,
                             _     => Brushes.White
                         };
                         // 达成率 整数部分
