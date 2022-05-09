@@ -5,6 +5,7 @@ using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin;
 
@@ -13,26 +14,24 @@ namespace Marisa.Plugin;
 public class BlackList : MarisaPluginBase
 {
     private static readonly HashSet<long> Cache = new();
+    private static bool _cacheInitialized = false;
 
     [MarisaPluginCommand]
-    private static MarisaPluginTaskState Handler(Message message)
+    private static async Task<MarisaPluginTaskState> Handler(Message message)
     {
         var u = message.Sender!.Id;
 
-        var db = new BotDbContext();
-
-        if (!db.BlackLists.Any(b => b.UId == u)) return MarisaPluginTaskState.NoResponse;
-
-        if (Cache.Contains(u))
+        if (!_cacheInitialized)
         {
-        }
-        else
-        {
-            message.Reply("这。。", false);
-            Cache.Add(u);
+            _cacheInitialized = true;
+           
+            var db = new BotDbContext();
+            await db.BlackLists.ForEachAsync(b => Cache.Add(b.UId));
         }
 
-        return MarisaPluginTaskState.CompletedTask;
+        return Cache.Contains(u)
+            ? MarisaPluginTaskState.CompletedTask // 插件处理了这条消息，并阻断了消息传播，等于ban了
+            : MarisaPluginTaskState.NoResponse;   // 插件不处理这条消息，等于不ban
     }
 
     [MarisaPluginCommand(":ban")]
@@ -58,6 +57,7 @@ public class BlackList : MarisaPluginBase
             {
                 var db = new BotDbContext();
                 var qq = (at as MessageDataAt)!.Target;
+                Cache.Add(qq);
                 db.BlackLists.Add(new EntityFrameworkCore.Entity.BlackList(qq));
                 db.SaveChanges();
                 message.Reply("好了");
