@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.BotDriver.Entity.Message;
@@ -152,26 +151,6 @@ public partial class MaiMaiDx
 
     #region summary
 
-    private static readonly string[] MaimaiPlates =
-    {
-        "maimai",
-        "maimai PLUS",
-        "maimai GreeN",
-        "maimai GreeN PLUS",
-        "maimai ORANGE",
-        "maimai ORANGE PLUS",
-        "maimai PiNK",
-        "maimai PiNK PLUS",
-        "maimai MURASAKi",
-        "maimai MURASAKi PLUS",
-        "maimai MiLK",
-        "MiLK PLUS",
-        "maimai FiNALE",
-        "maimai でらっくす",
-        "maimai でらっくす PLUS",
-        "maimai でらっくす Splash"
-    };
-
     private async Task<Dictionary<(long Id, long LevelIdx), SongScore>?> GetAllSongScores(Message message,
         string[]? versions = null)
     {
@@ -181,7 +160,7 @@ public partial class MaiMaiDx
         {
             var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
             {
-                qq, version = versions ?? MaimaiPlates
+                qq, version = versions ?? MaiMaiSong.Plates
             });
 
             var verList = ((await response.GetJsonAsync())!.verlist as List<object>)!;

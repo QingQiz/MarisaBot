@@ -54,6 +54,37 @@ public class MaiMaiSong : Song
         Color.FromArgb(219, 170, 255)
     };
 
+    public static readonly string[] Genres =
+    {
+        "maimai",
+        "POPSアニメ",
+        "ゲームバラエティ",
+        "niconicoボーカロイド",
+        "東方Project",
+        "オンゲキCHUNITHM"
+    };
+
+    public static readonly string[] Plates =
+    {
+        "maimai",
+        "maimai PLUS",
+        "maimai GreeN",
+        "maimai GreeN PLUS",
+        "maimai ORANGE",
+        "maimai ORANGE PLUS",
+        "maimai PiNK",
+        "maimai PiNK PLUS",
+        "maimai MURASAKi",
+        "maimai MURASAKi PLUS",
+        "maimai MiLK",
+        "MiLK PLUS",
+        "maimai FiNALE",
+        "maimai でらっくす",
+        "maimai でらっくす PLUS",
+        "maimai でらっくす Splash"
+    };
+
+
     public static readonly string[] LevelName =
     {
         "Basic",

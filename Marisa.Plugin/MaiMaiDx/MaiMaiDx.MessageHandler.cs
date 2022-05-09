@@ -80,15 +80,52 @@ public partial class MaiMaiDx : MarisaPluginBase
     }
 
     [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "genre", "type")]
+    private async Task<MarisaPluginTaskState> MaiMaiSummaryGenre(Message message)
+    {
+        var genre = MaiMaiSong.Genres.FirstOrDefault(p =>
+            string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (genre == null)
+        {
+            message.Reply("可用的类别有：\n" + string.Join('\n', MaiMaiSong.Genres));
+        }
+        else
+        {
+            var scores = await GetAllSongScores(message);
+            if (scores == null)
+            {
+                return MarisaPluginTaskState.NoResponse;
+            }
+
+            var groupedSong = _songDb.SongList
+                .Where(song => song.Info.Genre == genre)
+                .Select(song => song.Constants
+                    .Select((constant, i) => (constant, i, song)))
+                .SelectMany(s => s)
+                .Where(data => data.i >= 2)
+                .OrderByDescending(x => x.constant)
+                .GroupBy(x => x.song.Levels[x.i]);
+
+            var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+
+            // 不可能是 null
+            message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "version", "ver")]
     private async Task<MarisaPluginTaskState> MaiMaiSummaryVersion(Message message)
     {
-        var version = MaimaiPlates.FirstOrDefault(p =>
+        var version = MaiMaiSong.Plates.FirstOrDefault(p =>
             string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (version == null)
         {
-            message.Reply("可用的版本号有：\n" + string.Join('\n', MaimaiPlates));
+            message.Reply("可用的版本号有：\n" + string.Join('\n', MaiMaiSong.Plates));
         }
         else
         {
