@@ -1,5 +1,5 @@
-helpPath:                C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Help
-ffmpegPath:              C:\bin\ffmpeg.exe
+helpPath:       C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Help
+ffmpegPath:     C:\bin\ffmpeg.exe
 
 arcaea:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
