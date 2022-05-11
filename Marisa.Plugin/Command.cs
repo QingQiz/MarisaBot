@@ -6,10 +6,7 @@ namespace Marisa.Plugin;
 [MarisaPluginCommand(":cmd")]
 public class Command : MarisaPluginBase
 {
-    private static readonly long[] Commander =
-    {
-        642191352L,
-    };
+    private static IEnumerable<long> Commander => ConfigurationManager.Configuration.Commander;
 
     /// <summary>
     /// start an interactive shell

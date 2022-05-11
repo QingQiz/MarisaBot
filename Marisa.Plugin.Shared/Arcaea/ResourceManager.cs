@@ -1,12 +1,12 @@
-﻿using System.Configuration;
-using System.Drawing;
+﻿using System.Drawing;
+using Marisa.Plugin.Shared.Configuration;
 
 namespace Marisa.Plugin.Shared.Arcaea
 {
     public static class ResourceManager
     {
-        public static readonly string ResourcePath = ConfigurationManager.AppSettings["Arcaea.ResourcePath"]!;
-        public static readonly string TempPath = ConfigurationManager.AppSettings["Arcaea.TempPath"]!;
+        public static readonly string ResourcePath = ConfigurationManager.Configuration.Arcaea.ResourcePath;
+        public static readonly string TempPath = ConfigurationManager.Configuration.Arcaea.TempPath;
 
         public static Bitmap GetCover(string coverName)
         {

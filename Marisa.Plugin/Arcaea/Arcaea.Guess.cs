@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Marisa.Plugin.Arcaea;
 
@@ -20,7 +19,7 @@ public partial class Arcaea
         // ReSharper disable once InvertIf
         if (_songDb.StartGuess(song, message, qq))
         {
-            var songPath = ConfigurationManager.AppSettings["Arcaea.Assets"] ?? string.Empty;
+            var songPath = ConfigurationManager.Configuration.Arcaea.AssetsPath;
             var songId   = song.CoverFileName.Replace("_byd", "").Replace(".jpg", "").Replace(".png", "");
 
             songPath = Path.Join(songPath, "songs", songId, "base.ogg");
@@ -29,7 +28,7 @@ public partial class Arcaea
             var d     = tag.Properties.Duration;
             var start = new Random().Next((int)d.TotalSeconds - duration);
 
-            var cutVidPath = ConfigurationManager.AppSettings["Arcaea.TempPath"] ?? string.Empty;
+            var cutVidPath = ConfigurationManager.Configuration.Arcaea.TempPath;
             cutVidPath = Path.Join(cutVidPath, $"/song_guess_cut_{groupId}");
 
             // random cut and convert to .amr
@@ -39,7 +38,7 @@ public partial class Arcaea
                 p.StartInfo.UseShellExecute        = false;
                 p.StartInfo.CreateNoWindow         = true;
                 p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.FileName               = ConfigurationManager.AppSettings["FFMPEG.Path"] ?? string.Empty;
+                p.StartInfo.FileName               = ConfigurationManager.Configuration.FfmpegPath;
                 p.StartInfo.Arguments =
                     $"-i \"{songPath}\" -ss {start} -t {duration} -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
                 p.Start();

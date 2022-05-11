@@ -1,13 +1,13 @@
-﻿using System.Configuration;
-using System.Drawing;
+﻿using System.Drawing;
+using Marisa.Plugin.Shared.Configuration;
 using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx
 {
     public class ResourceManager
     {
-        public static readonly string ResourcePath = ConfigurationManager.AppSettings["MaiMaiDx.ResourcePath"]!;
-        public static readonly string TempPath = ConfigurationManager.AppSettings["MaiMaiDx.TempPath"]!;
+        public static readonly string ResourcePath = ConfigurationManager.Configuration.MaiMai.ResourcePath;
+        public static readonly string TempPath = ConfigurationManager.Configuration.MaiMai.TempPath;
 
         public static Bitmap GetImage(string imgName, int width = 0, int height = 0)
         {

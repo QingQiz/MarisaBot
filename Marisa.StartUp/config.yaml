@@ -1,0 +1,327 @@
+imageDatabasePath:       C:\Users\sofee\Desktop\pic
+imageDatabaseKanKanPath: C:\Users\sofee\Desktop\pic\看看
+helpPath:                C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Help
+ffmpegPath:              C:\bin\ffmpeg.exe
+
+arcaea:
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
+  tempPath:     C:\Users\sofee\Desktop\temp\arcaea
+  assetsPath:   D:\arcaea_song_assets
+
+maimai:
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\MaiMaiDx
+  tempPath:     C:\Users\sofee\Desktop\temp\maimai
+  beatMapPath:  D:\maimai_beatmap_without_bga
+
+commander:
+  - 642191352
+
+chi:
+  # 下馆子类
+  - 下苍蝇馆子 
+  - 下豪华馆子
+  - 绿茶餐厅
+  - 食堂随便吃点
+  # 汉堡披萨
+  - 必胜客
+  - 麦当劳
+  - 汉堡王
+  # 面，粉
+  - 老碗面
+  - 拉面
+  - 刀削面
+  - 油泼面
+  - 炸酱面
+  - 炒面
+  - 重庆小面
+  - 兰州拉面
+  - 米线
+  - 酸辣粉
+  - 土豆粉
+  - 凉皮儿
+  # 饭
+  - 炒饭
+  - 盖浇饭
+  - 烤肉饭
+  - 黄焖鸡米饭
+  # 杂食
+  - 火锅
+  - 生煎
+  - 烤肉
+  - 烤串
+  - 馄饨
+  - 麻辣烫
+  - 麻辣香锅
+  - 屎
+
+dirty:
+  - 仔细看看我这个巴掌还真适合你这张脸
+  - 你脖子上那东西是用来凑身高的吗？
+  - 你这是拿棺材板当滑雪板，准备上天了呗。
+  - 傻逼
+  - 别你妈戳了，当面骂你你要是听不清，我还能刻你碑上。
+  - 大家都是贵族，为什么就你有病？
+  - 天冷了，多盖点土吧，冻着你了我会心疼。
+  - 儿子，今儿是怎样了？出门儿吃错药了？还是忘吃药了
+  - 思想有多远，你就滚多远；光速有多快，你就滚多快
+  - 戳你妈，傻逼给我滚
+  - 戳你妈，傻逼给我滚!
+  - 戳你妈，傻逼给我滚~!
+  - 戳你妈，我不是草船，你的贱别往我这发
+  - 戳你妈，滚
+  - 戳你妈，狗儿子
+  - 戳你妈，给你一点脸你就不知道自我是个什么东西了？
+  - 戳你妈，请你卷成一团圆润的离开
+  - 戳你爹，钥匙三块钱一把，你配几把？你配吗？
+  - 戳你马，一脚踹不出你屎来，算你拉的干净
+  - 戳你马，你丫的属黄瓜的欠拍属陀螺的欠抽属足球的欠踹是
+  - 戳你马，你别逼我在我和你全家之间加动词或者是名词啊
+  - 戳你马，你妈没拦着你说我是你亲爹吗
+  - 戳你马，你要是真的这么闲的话，找个厂吧。
+  - 戳你马，谁不知道你有病，没必要用你的言行来提醒咱们
+  - 戳你🐴，一脸兴冲冲的，跟喝了尿糖似的
+  - 戳我？这么嚣张？认了二郎神当主人了？
+  - 有病你治病，你别找我啊，我又不是兽医
+  - 真想立马把我码的鞋bia到你码的脸上
+  - 真是乌龟掉盐缸里给你这小王八闲完了。
+  - 真是面子给多了，你都以为自己像个人了。
+  - >
+    什么弱智新型杂交鱼种麻烦离我远点，你脸部分辨率太高影响老子视觉感受，
+    你妈生你时是不是把人扔了把胎盘养大的，还是普天之下皆你爸，一人一条染色体凑出来组装组成了你?
+    
+fortune:
+  # 朝向
+  direction:
+    - 东
+    - 南
+    - 西
+    - 北
+    - 东南
+    - 西南
+    - 东北
+    - 西北
+  # 机位
+  position:
+    - P1
+    - P2
+    - P1
+    - P2
+    - P1
+    - P2
+    - P1
+    - P2
+    - P1
+    - P2
+    - 维修位
+  rhythmGames:
+    - Arcaea
+    - BanG Dream! 少女乐团派对!
+    - Beat Saber
+    - Beatmania IIDX
+    - CHUNITHM
+    - Cytus II
+    - D4DJ Groovy Mix
+    - DJMAX
+    - Dance Dance Revolution
+    - Deemo
+    - Dynamix
+    - GROOVE COASTER
+    - Guitar Hero
+    - Lanota
+    - Love Live
+    - Malody
+    - Mush Dash
+    - O.N.G.E.K.I.
+    - Orzmic
+    - OverRapid
+    - Phigros
+    - Project DIVA Future Tone
+    - Project Sekai (プロセカ)
+    - SOUND VOLTEX
+    - VOEZ
+    - WACCA
+    - jubeat
+    - maimaiDX
+    - osu!
+    - デレステ
+    - 不可思议乐队
+    - 东方弹幕神乐
+    - 冰与火之舞
+    - 吉他英雄
+    - 同步音律喵赛克
+    - 命运歌姬
+    - 太鼓达人
+    - 节奏大师
+    - 节奏海拉鲁
+    - 阳春白雪
+    - 音击
+    - 音灵
+  events:
+    - event: 收歌
+      positive:
+        - 又有资本可以炫耀了。
+        - 排行榜第一就在下一次！
+        - 攻克卡住多时的难点。
+        - 手感爆棚，曲曲理论值。
+      negative:
+        - 快要收歌的时候会来一通无关紧要的电话。
+        - 会在最后关头卡帧掉 note。
+        - 延迟漂移个个 Good，曲曲延迟各不同。
+        - 看见这个 note 了吗？你 接 不 住。
+    - event: 炫耀成绩
+      positive:
+        - 获得万众敬仰，收割万人膝盖。
+        - 一曲成名，万人膜拜。
+        - 本群都是你的小弟啦！
+      negative:
+        - 警察叔叔，对，就是这个杀人犯。
+        - 容易被群友拉黑或报复。
+    - event: 复读
+      positive:
+        - 有时候，人云亦云也是一种生存方式。
+      negative:
+        - 你的对手是鸽子。
+    - event: 爆肝
+      positive:
+        - 说不定下一盘就创纪录了呢。
+        - 大力出奇迹。
+        - 努力使人进步，肝爆让人快乐。
+        - 限时梯子爬完了吗？
+      negative:
+        - 会因为腱鞘炎而进医院。
+        - 屏幕会碎掉的。
+        - 醒醒，限时活动没了。
+    - event: 课金
+      positive:
+        - 早买早享受，晚买哭着求。
+        - 看到这个新曲子了吗？我有了！
+      negative:
+        - 第二天就 50% off。
+        - 银行卡余额不足，支付失败。
+        - 接下来的一个月只能吃土。
+    - event: 出勤
+      positive:
+        - 有机会与大佬切磋交流，获得音游经验值双倍加成。
+        - 今日的机厅无人打扰，获得霸机机会。
+        - 会忽然成为机厅中的焦点人物。
+      negative:
+        - 会不小心把机器拍坏。
+        - 今天商场停电的概率比较高。
+        - 音游街机前全是众众众众众众众众。
+        - 会被大佬碾压。
+    - event: 卖弱
+      positive:
+        - 楚楚动人更容易打动群友。
+      negative:
+        - Boy♂︎next♂︎door。
+    - event: 唱脑力
+      positive:
+        - 唱一次提升醒脑，唱两次精神百倍。
+      negative:
+        - 会与复读机一起，对群聊造成不可逆的毁灭打击。
+    - event: 刷剧情
+      positive:
+        - 会度过充实的一天。
+      negative:
+        - 会被虐到。
+    - event: 爬梯子
+      positive:
+        - 今天就可以到顶哦。
+      negative:
+        - 会不小心把所有碎片全用来爬梯子。
+    - event: 看手元
+      positive:
+        - 从手元中获得一点音游经验。
+      negative:
+        - 会被大佬闪瞎。
+    - event: 录手元
+      positive:
+        - 音游届的未来新星 up 主就是你。
+      negative:
+        - 打完歌才发现忘记开录像。
+    - event: 开浴霸
+      positive:
+        - 不如跳舞，玩音游不如跳舞。
+      negative:
+        - 会把家/宿舍点着的。
+    - event: 研究魔王曲谱面
+      positive:
+        - 发现收歌的秘诀。
+      negative:
+        - 你个凡人还想收魔王？Naive！
+    - event: 挑战魔王曲
+      positive:
+        - 一上来就是一个新纪录。
+      negative:
+        - 有这点时间还不如干点别的。
+    - event: 咕咕咕
+      positive:
+        - 一时咕一时爽。
+      negative:
+        - 会被抓起来，被群友唾沫淹死。
+    - event: 与群友水聊
+      positive:
+        - 扶我起来我还能打字。
+      negative:
+        - 一不小心就被大佬闪瞎。
+    - event: 考段
+      positive:
+        - 底力飞升，什么都能糊过去，考段稳过。
+      negative:
+        - 眼花缭乱，各种看不清，怎么考都会在最后crash。
+    - event: 吃萨利亚
+      positive:
+        - 毕竟是音游狗餐厅。
+      negative:
+        - 真的不选对面那个吉野家吗？
+    - event: 打课题
+      positive:
+        - 突然就获得最高积分。
+      negative:
+        - 别人成绩都比你高，于是自闭。
+    - event: 面基
+      positive:
+        - 两个大佬一起，给魔王曲带来意想不到的灾难。
+      negative:
+        - 会连烤全鸽都吃不到。
+    - event: 制谱
+      positive:
+        - 文思泉涌、脑洞大开，一不小心制作出十分优良的谱面。
+      negative:
+        - 绞尽脑汁却想不出做出什么谱面，只能加入钟国谱面大军。
+    - event: 吃葡萄
+      positive:
+        - 音游狗水果，好吃的水果。
+      negative:
+        - 白内障看不清，杀铺 Ice 滴眼睛。
+    - event: 催更
+      positive:
+        - 明天音游厂家就更新。
+      negative:
+        - 就知道催，老谱没收催什么催？
+    - event: 迫害大佬
+      positive:
+        - 迫害是大佬进步的阶梯。
+        - 迫害语录 +1。
+      negative:
+        - 亲爱的，你号没了。
+        - 管理清一下？
+        - 喝茶警告。
+    - event: 唱打
+      positive:
+        - 大家快看，这个唱歌好听的小哥哥（小姐姐）手速怎么这么快？
+        - 唱歌又好听，手速又超快，超喜欢在里面 der。
+      negative:
+        - 唱，跳，rap，再来个篮球，你就是音游区最蔡的仔。
+    - event: 算命
+      positive:
+        - 不遵守你的 IM 帐户待会就被封。
+        - 算啥都准。
+      negative:
+        - 魔理沙因为算太多刷屏被群管理封号。
+        - 诸事不宜。
+    - event: 挑战单手过关
+      positive:
+        - 一只更比两只强。
+      negative:
+        - 不需要的手可以捐给有需要的人。

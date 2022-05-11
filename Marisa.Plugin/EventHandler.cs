@@ -1,28 +1,13 @@
-﻿using System.Configuration;
-
-namespace Marisa.Plugin;
+﻿namespace Marisa.Plugin;
 
 [MarisaPlugin]
 [MarisaPluginTrigger(typeof(EventHandler), nameof(Trigger))]
 public class EventHandler : MarisaPluginBase
 {
-    private readonly List<string> _dirtyWords;
-    private static readonly string ResourcePath = ConfigurationManager.AppSettings["Dirty.ResourcePath"]!;
-
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
         return message.MessageChain!.Messages.Any(m => m.Type == MessageDataType.Nudge);
     };
-
-    public EventHandler()
-    {
-        _dirtyWords = File.ReadAllText(ResourcePath + "/dirty.txt")
-            .Trim()
-            .Replace("\r\n", "\n")
-            .Split('\n')
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToList();
-    }
 
     [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
     private MarisaPluginTaskState Handler(Message message, long qq)
@@ -38,9 +23,9 @@ public class EventHandler : MarisaPluginBase
 
                 if (m.Target != qq) break;
 
-                var word = _dirtyWords[new Random().Next(_dirtyWords.Count)];
+                var word = ConfigurationManager.Configuration.Dirty.RandomTake();
 
-                if (m.FromId == 642191352) word = "别戳啦！";
+                if (ConfigurationManager.Configuration.Commander.Contains(m.FromId)) word = "别戳啦！";
 
                 if (message.GroupInfo != null)
                 {

@@ -1,12 +1,10 @@
-﻿using System.Configuration;
-
-namespace Marisa.Plugin.RandomPicture;
+﻿namespace Marisa.Plugin.RandomPicture;
 
 [MarisaPluginCommand("看看", "kk")]
 [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
 public class KanKan : MarisaPluginBase
 {
-    private static readonly string PicDbPath = ConfigurationManager.AppSettings["PicDbPath_KanKan"]!;
+    private static string PicDbPath => ConfigurationManager.Configuration.ImageDatabaseKanKanPath;
 
     private static readonly List<string> PicDbPathExclude = new()
     {
@@ -123,7 +121,8 @@ public class KanKan : MarisaPluginBase
             }
             else
             {
-                m.Reply(MessageDataImage.FromPath(Path.Join(ConfigurationManager.AppSettings["Help"]!, "kk.jpg")), false);
+                m.Reply(MessageDataImage.FromPath(
+                    Path.Join(ConfigurationManager.Configuration.HelpPath, "kk.jpg")), false);
             }
 
             return MarisaPluginTaskState.CompletedTask;

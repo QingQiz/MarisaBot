@@ -13,4 +13,14 @@ public static class ListExt
     {
         return list[Rand.Next(list.Length)];
     }
+
+    public static T RandomTake<T>(this List<T> list, Random rand)
+    {
+        return list[rand.Next(list.Count)];
+    }
+    
+    public static T RandomTake<T>(this T[] list, Random rand)
+    {
+        return list[rand.Next(list.Length)];
+    }
 }

@@ -31,9 +31,7 @@ public class BlackList : MarisaPluginBase
     [MarisaPluginCommand(":ban")]
     private static MarisaPluginTaskState Ban(Message message)
     {
-        const long admin = 642191352L;
-
-        if (message.Sender!.Id != admin)
+        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender!.Id))
         {
             message.Reply("你没有资格。");
             return MarisaPluginTaskState.CompletedTask;

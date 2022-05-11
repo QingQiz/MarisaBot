@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Marisa.Plugin.Shared.MaiMaiDx;
 
 namespace Marisa.Plugin.MaiMaiDx;
@@ -29,9 +28,10 @@ public partial class MaiMaiDx
             else
             {
                 songPath =
-                    Directory.GetDirectories(ConfigurationManager.AppSettings["MaiMaiDx.BeatMap"] ?? string.Empty,
-                        $"{song.Id}_*", SearchOption.AllDirectories).First();
-                songPath          = Path.Join(songPath, "track.mp3");
+                    Directory.GetDirectories(ConfigurationManager.Configuration.MaiMai.BeatMapPath, $"{song.Id}_*",
+                        SearchOption.AllDirectories).First();
+                songPath = Path.Join(songPath, "track.mp3");
+
                 SongPath[song.Id] = songPath;
             }
 
@@ -49,7 +49,7 @@ public partial class MaiMaiDx
                 p.StartInfo.UseShellExecute        = false;
                 p.StartInfo.CreateNoWindow         = true;
                 p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.FileName               = ConfigurationManager.AppSettings["FFMPEG.Path"] ?? string.Empty;
+                p.StartInfo.FileName               = ConfigurationManager.Configuration.FfmpegPath;
                 p.StartInfo.Arguments =
                     $"-i \"{songPath}\" -ss {start} -t {duration} -y -ar 8000 -ac 1 -ab 12.2k {cutVidPath}.amr";
                 p.Start();

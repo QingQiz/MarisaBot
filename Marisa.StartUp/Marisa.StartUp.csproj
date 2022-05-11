@@ -18,6 +18,12 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="config.yaml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
     <PropertyGroup>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\Marisa.StartUp\</PathMap>
     </PropertyGroup>

@@ -1,12 +1,10 @@
-﻿using System.Configuration;
-
-namespace Marisa.Plugin.RandomPicture;
+﻿namespace Marisa.Plugin.RandomPicture;
 
 [MarisaPluginCommand("抽图", "ct")]
 [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
 public class RandomPicture : MarisaPluginBase
 {
-    private static readonly string PicDbPath = ConfigurationManager.AppSettings["PicDbPath"]!;
+    private static string PicDbPath => ConfigurationManager.Configuration.ImageDatabasePath;
 
     private static readonly List<string> PicDbPathExclude = new()
     {
