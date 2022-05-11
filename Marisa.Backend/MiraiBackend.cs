@@ -14,6 +14,7 @@ using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Websocket.Client;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Marisa.Backend;
 
@@ -31,7 +32,6 @@ public class MiraiBackend : BotDriver.BotDriver
         long   id            = dict["QQ"];
         string authKey       = dict["AuthKey"];
 
-        Websocket.Client.Logging.LogProvider.IsDisabled = true;
         _wsClient = new WebsocketClient(new Uri(
             $"{serverAddress}/all"
                 .SetQueryParam("verifyKey", authKey)
@@ -164,7 +164,7 @@ public class MiraiBackend : BotDriver.BotDriver
     }
 
     #endregion
-    
+
     protected override Task RecvMessage()
     {
         async void OnMessage(ResponseMessage msg) => await Task.Run(() =>
@@ -205,7 +205,7 @@ public class MiraiBackend : BotDriver.BotDriver
                 }
             };
             _logger.Info($"({target,11}) <- {message}".Escape());
-            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
+            _wsClient.Send(JsonSerializer.Serialize(toSend));
         }
 
         void SendGroupMessage(MessageChain message, long target, long? quote = null)
@@ -221,7 +221,7 @@ public class MiraiBackend : BotDriver.BotDriver
                 }
             };
             _logger.Info($"({target,11}) <= {message}".Escape());
-            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
+            _wsClient.Send(JsonSerializer.Serialize(toSend));
         }
 
         void SendTempMessage(MessageChain message, long target, long? groupId, long? quote = null)
@@ -239,7 +239,7 @@ public class MiraiBackend : BotDriver.BotDriver
                 }
             };
             _logger.Info($"({target,11}) <* {message}".Escape());
-            _wsClient.Send(JsonConvert.SerializeObject(toSend, Formatting.None));
+            _wsClient.Send(JsonSerializer.Serialize(toSend));
         }
 
         var taskList = new List<Task>();

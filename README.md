@@ -165,11 +165,10 @@
 
 1. 部署 mcl
 2. 在 mcl 里登陆 bot
-3. 改 App.config
-4. 修改图库插件的路径
-5. 配置数据库 (entity framework标准操作)
-6. 运行，命令行参数如下（顺序敏感）：
-   1. [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `http://127.0.0.1:8080`
+3. 改 config.yaml
+4. 配置数据库 (entity framework标准操作)
+5. 运行，命令行参数如下（顺序敏感）：
+   1. [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:8080`
    2. bot 的账号，如 `123456789`
    3. Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
 
