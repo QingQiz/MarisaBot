@@ -1,10 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.Plugin.Shared.Util;
-
-namespace Marisa.Plugin;
+﻿namespace Marisa.Plugin;
 
 [MarisaPluginCommand("今日运势", "jrys")]
 public class TodayFortune : MarisaPluginBase

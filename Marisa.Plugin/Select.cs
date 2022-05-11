@@ -1,9 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.Utils;
-
-namespace Marisa.Plugin;
+﻿namespace Marisa.Plugin;
 
 [MarisaPluginCommand("请问")]
 [MarisaPluginTrigger(typeof(Select), nameof(Trigger))]

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Globalization;
 
-namespace Marisa.Plugin.Shared.Util;
+namespace Marisa.Utils;
 
 /// <summary>
 /// from https://gist.github.com/greatcodeeer/2d2cbe5b5c6e9a7c102d

@@ -1,10 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.EntityFrameworkCore;
-using Marisa.Plugin.Shared;
+﻿using Marisa.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin;

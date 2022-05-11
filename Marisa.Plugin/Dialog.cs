@@ -1,10 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.Plugin.Shared;
-
-namespace Marisa.Plugin;
+﻿namespace Marisa.Plugin;
 
 [MarisaPlugin(PluginPriority.Dialog)]
 [MarisaPluginCommand(MessageType.GroupMessage | MessageType.FriendMessage)]

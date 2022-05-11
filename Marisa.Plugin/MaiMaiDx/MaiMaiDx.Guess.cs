@@ -1,9 +1,6 @@
 ﻿using System.Configuration;
 using System.Diagnostics;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.Plugin.Shared.MaiMaiDx;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.MaiMaiDx;
 

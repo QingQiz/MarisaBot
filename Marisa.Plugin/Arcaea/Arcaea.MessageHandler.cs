@@ -1,9 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.EntityFrameworkCore;
-using Marisa.Plugin.Shared;
+﻿using Marisa.EntityFrameworkCore;
 
 namespace Marisa.Plugin.Arcaea;
 

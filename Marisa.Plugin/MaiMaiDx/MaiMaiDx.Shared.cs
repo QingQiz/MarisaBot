@@ -2,11 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
 using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.Plugin.Shared.MaiMaiDx;
-using Marisa.Plugin.Shared.Util;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.MaiMaiDx;
 

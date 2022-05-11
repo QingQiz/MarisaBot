@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 using System.Drawing;
-using Marisa.Plugin.Shared.Util;
+using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx
 {

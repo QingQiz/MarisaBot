@@ -1,8 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Trigger;
-
-namespace Marisa.Plugin;
+﻿namespace Marisa.Plugin;
 
 [MarisaPluginCommand(true, "吃啥", "吃什么")]
 public class Chi : MarisaPluginBase

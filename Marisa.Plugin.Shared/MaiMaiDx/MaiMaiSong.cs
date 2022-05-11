@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 

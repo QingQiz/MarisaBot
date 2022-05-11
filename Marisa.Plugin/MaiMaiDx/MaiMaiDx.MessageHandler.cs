@@ -1,15 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.EntityFrameworkCore;
-using Marisa.Plugin.Shared;
 using Marisa.Plugin.Shared.MaiMaiDx;
-using Marisa.Plugin.Shared.Util;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.MaiMaiDx;
 

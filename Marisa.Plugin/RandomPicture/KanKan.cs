@@ -1,9 +1,4 @@
 ﻿using System.Configuration;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.RandomPicture;
 

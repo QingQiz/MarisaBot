@@ -1,8 +1,4 @@
 ﻿using System.Drawing;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-using Marisa.BotDriver.Plugin.Trigger;
-using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin;
 

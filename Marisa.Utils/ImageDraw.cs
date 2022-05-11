@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace Marisa.Plugin.Shared.Util;
+namespace Marisa.Utils;
 
 public static class ImageDraw
 {
