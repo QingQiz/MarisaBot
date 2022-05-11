@@ -4,17 +4,13 @@
 [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
 public class RandomPicture : MarisaPluginBase
 {
-    private static string PicDbPath => ConfigurationManager.Configuration.ImageDatabasePath;
+    private static string PicDbPath => ConfigurationManager.Configuration.RandomPicture.ImageDatabasePath;
 
-    private static readonly List<string> PicDbPathExclude = new()
-    {
-        "R18", "backup", "看看"
-    };
+    private static IEnumerable<string> PicDbPathExclude =>
+        ConfigurationManager.Configuration.RandomPicture.FileNameExclude;
 
-    private static readonly List<string> AvailableFileExt = new()
-    {
-        "jpg", "png", "jpeg"
-    };
+    private static IEnumerable<string> AvailableFileExt =>
+        ConfigurationManager.Configuration.RandomPicture.AvailableFileExt;
 
     [MarisaPluginCommand(true, "")]
     private static MarisaPluginTaskState Handler(Message m)

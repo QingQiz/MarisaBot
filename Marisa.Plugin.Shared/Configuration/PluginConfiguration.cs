@@ -19,10 +19,8 @@ public class PluginConfiguration
     
     public ArcaeaConfiguration Arcaea { get; set; }
     
-    public string ImageDatabasePath { get; set; }
-
-    public string ImageDatabaseKanKanPath { get; set; }
-
+    public RandomPictureConfiguration RandomPicture { get; set; }
+    
     public string HelpPath { get; set; }
 
     public string FfmpegPath { get; set; }
