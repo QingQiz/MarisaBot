@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
-using Marisa.Plugin.Shared.Util;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -43,6 +44,10 @@ public class DxRating
 
         using (var g = Graphics.FromImage(card))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
             // 歌曲类别：DX 和 标准
             g.DrawImage(ResourceManager.GetImage(score.Type == "DX" ? "type_deluxe.png" : "type_standard.png"), 0,
                 0);
@@ -71,6 +76,11 @@ public class DxRating
 
         using (var g = Graphics.FromImage(coverBackground))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+
             var fontColor = new SolidBrush(coverBackgroundAvgColor.SelectFontColor());
 
             // 难度指示
@@ -148,6 +158,11 @@ public class DxRating
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+
             var pxInit = paddingH;
             var pyInit = paddingV;
 
@@ -231,6 +246,10 @@ public class DxRating
         ratingCard = ratingCard.Resize(2);
         using (var g = Graphics.FromImage(ratingCard))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
             var ra = r.ToString().PadLeft(5, ' ');
 
             for (var i = ra.Length - 1; i >= 0; i--)
@@ -246,6 +265,10 @@ public class DxRating
         var nameCard = new Bitmap(690, 140);
         using (var g = Graphics.FromImage(nameCard))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
             g.Clear(Color.White);
 
             var fontSize = 57;
@@ -276,6 +299,10 @@ public class DxRating
         rainbowCard = rainbowCard.Resize((double)nameCard.Width / rainbowCard.Width + 0.05);
         using (var g = Graphics.FromImage(rainbowCard))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
             using (var font = new Font("MotoyaLMaru", 30, FontStyle.Bold))
             {
                 g.DrawString(
@@ -291,6 +318,9 @@ public class DxRating
 
         using (var g = Graphics.FromImage(userInfoCard))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
             g.DrawImage(ratingCard, 0, 0);
             g.DrawImage(nameCard, 3, ratingCard.Height    + 10);
             g.DrawImage(rainbowCard, 0, ratingCard.Height + nameCard.Height + 20);
@@ -302,6 +332,9 @@ public class DxRating
         dlx = dlx.Resize(userInfoCard.Height, userInfoCard.Height);
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
             g.DrawImage(dlx, 0, 20);
             g.DrawImage(userInfoCard, userInfoCard.Height + 10, 20);
         }
@@ -318,6 +351,9 @@ public class DxRating
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
             g.Clear(Color.FromArgb(75, 181, 181));
             g.DrawImage(ratCard, 0, 0);
             g.DrawImage(b40, 0, ratCard.Height);
@@ -409,6 +445,9 @@ public class DxRating
         var bg = new Bitmap(cardWidth, cnt * cardHeight);
 
         using var g = Graphics.FromImage(bg);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
 
         var y = 0;
 
@@ -436,6 +475,11 @@ public class DxRating
         var song  = songList.First(s => s.Id == score.Id);
 
         using var g = Graphics.FromImage(bg);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
+        g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+        
         using var titleFont = new Font("Consolas", 27, FontStyle.Bold);
         using var font      = new Font("Consolas", 18);
         using var fontS     = new Font("Consolas", 14, FontStyle.Italic | FontStyle.Bold);
@@ -481,7 +525,11 @@ public class DxRating
         var cover = ResourceManager.GetCover(song.Id);
         var bg    = new Bitmap(800, cover.Height + padding * 2);
 
-        using var g         = Graphics.FromImage(bg);
+        using var g = Graphics.FromImage(bg);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
+
         using var titleFont = new Font("Consolas", 27, FontStyle.Bold);
         using var font      = new Font("Consolas", 18);
         using var fontS     = new Font("Consolas", 14, FontStyle.Italic | FontStyle.Bold);

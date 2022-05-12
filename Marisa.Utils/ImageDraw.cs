@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 
 namespace Marisa.Utils;
 
@@ -11,20 +12,26 @@ public static class ImageDraw
         var result = new Bitmap(width, height);
 
         using var g = Graphics.FromImage(result);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
 
         g.DrawImage(img, 0, 0, width, height);
 
         return result;
     }
 
-    public static Bitmap Resize(this Bitmap img, double times)
+    public static Bitmap Resize(this Image img, double times)
     {
-        var width  = img.Width  * times;
+        var width  = img.Width * times;
         var height = img.Height * times;
 
         var result = new Bitmap((int)width, (int)height);
 
         using var g = Graphics.FromImage(result);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
 
         g.DrawImage(img, 0, 0, (int)width, (int)height);
 
@@ -39,7 +46,9 @@ public static class ImageDraw
 
         using (var g = Graphics.FromImage(roundedImage))
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
 
             Brush brush = new TextureBrush(startImage);
             var   gp    = new GraphicsPath();
@@ -82,8 +91,8 @@ public static class ImageDraw
                     int red   = p[idx + 2];
                     int green = p[idx + 1];
                     int blue  = p[idx];
-                    if (Math.Abs(red   - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
-                        Math.Abs(green - blue)  > minDiversion)
+                    if (Math.Abs(red - green) > minDiversion || Math.Abs(red - blue) > minDiversion ||
+                        Math.Abs(green - blue) > minDiversion)
                     {
                         totals[2] += red;
                         totals[1] += green;
@@ -124,6 +133,10 @@ public static class ImageDraw
 
         using (var g = Graphics.FromImage(coverBackground))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+
             // 设置背景色
             g.Clear(coverAvgColor);
             // 贴上曲绘
@@ -132,7 +145,7 @@ public static class ImageDraw
             for (var i = rec.Left; i < rec.Right; i += 1)
             {
                 var c = new SolidBrush(Color.FromArgb(255 - 255 * (i - rec.Left) / rec.Width, coverAvgColor));
-                g.DrawLine(new Pen(c, 1), i, 0 , i, rec.Height);
+                g.DrawLine(new Pen(c, 1), i, 0, i, rec.Height);
             }
         }
 
@@ -155,12 +168,14 @@ public static class ImageDraw
         return (Bitmap)c.Clone();
     }
 
-    public static Bitmap GetStringCard(string text, int fontSize, Color fontColor, Color bgColor, int width,
+    public static Bitmap GetStringCard(
+        string text, int fontSize, Color fontColor, Color bgColor, int width,
         int height, int pl = 30, bool center = false, bool underLine = true)
     {
         var background = new Bitmap(width, height);
 
         using var g = Graphics.FromImage(background);
+        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
         // 调整字体大小
         var font = new Font("Consolas", fontSize);
@@ -261,10 +276,18 @@ public static class ImageDraw
         return blurred;
     }
 
+    public static Bitmap Crop(this Bitmap img, int x, int y, int width, int height)
+    {
+        return img.Crop(new Rectangle(x, y, width, height));
+    }
+
     public static Bitmap Crop(this Bitmap img, Rectangle cropArea)
     {
         var m = new Bitmap(cropArea.Width, cropArea.Height);
         var g = Graphics.FromImage(m);
+        g.CompositingQuality = CompositingQuality.HighQuality;
+        g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+        g.SmoothingMode      = SmoothingMode.HighQuality;
 
         g.DrawImage(img, new Rectangle(0, 0, m.Width, m.Height), cropArea, GraphicsUnit.Pixel);
 
@@ -275,14 +298,17 @@ public static class ImageDraw
     {
         var rand = new Random();
 
-        var x = rand.Next(0, img.Width  - w);
+        var x = rand.Next(0, img.Width - w);
         var y = rand.Next(0, img.Height - h);
 
         return img.Crop(new Rectangle(x, y, w, h));
     }
 
-    public static void DrawStrings(this Graphics g, IEnumerable<(string, Font, Brush)> toDraw, float initX, float initY, float extraPadding=0)
+    public static void DrawStrings(
+        this Graphics g, IEnumerable<(string, Font, Brush)> toDraw, float initX, float initY, float extraPadding = 0)
     {
+        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
         var x = initX;
         var y = initY;
 
@@ -295,7 +321,7 @@ public static class ImageDraw
             {
                 foreach (var s in str.Split('\n'))
                 {
-                    height = g.MeasureString(s, font).Height;
+                    height    = g.MeasureString(s, font).Height;
                     maxHeight = maxHeight == 0 ? height : maxHeight;
 
                     g.DrawString(s, font, color, x, y + maxHeight - height);
@@ -319,5 +345,17 @@ public static class ImageDraw
                 x         += g.MeasureString(str, font).Width;
             }
         }
+    }
+
+    public static Bitmap ResizeX(this Image im, int width)
+    {
+        var scale = (double)width / im.Width;
+        return im.Resize(scale);
+    }
+
+    public static Bitmap ResizeY(this Image im, int height)
+    {
+        var scale = (double)height / im.Height;
+        return im.Resize(scale);
     }
 }

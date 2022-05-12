@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils;
 
@@ -107,6 +109,10 @@ public class MaiMaiSong : Song
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
                 bool center = false)
             {
@@ -160,6 +166,10 @@ public class MaiMaiSong : Song
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+
             var x = 0;
             var y = 0;
             var w = 110;
@@ -240,6 +250,9 @@ public class MaiMaiSong : Song
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
             g.Clear(Color.FromArgb(250, 250, 250));
             g.DrawImage(cd1, padding, padding);
             g.DrawImage(cd2, padding, 3 * padding + cd1.Height);

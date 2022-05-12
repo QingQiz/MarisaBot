@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils;
 
@@ -64,6 +66,10 @@ public class ArcaeaSong : Song
 
         using (var g = Graphics.FromImage(background))
         {
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
             void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
                 bool center = true)
             {
