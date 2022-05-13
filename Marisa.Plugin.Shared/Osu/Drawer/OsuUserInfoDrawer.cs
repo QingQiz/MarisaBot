@@ -253,29 +253,36 @@ public static class OsuUserInfoDrawer
             g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
 
             var history = info.RankHistory.Data.Reverse().ToArray();
-            var min     = history.Min() - 1;
-            var max     = history.Max() + 1;
+            var min     = history.Min();
+            var max     = history.Max();
 
             var pen = new Pen(Color.FromArgb(255, 204, 34), 2);
 
-            var x = -1.0f;
-            var y = -1.0f;
-            for (var i = 0; i < history.Length; i++)
+            if (max != min)
             {
-                var xNew = (float)i / history.Length * chart.Width;
-                var yNew = chart.Height - (float)(history[i] - min) / (max - min) * chart.Height;
+                var x = -1.0f;
+                var y = -1.0f;
+                for (var i = 0; i < history.Length; i++)
+                {
+                    var xNew = (float)i / history.Length * chart.Width;
+                    var yNew = chart.Height - (float)(history[i] - min) / (max - min) * (chart.Height - 4) - 2;
 
-                if (x < 0 || y < 0)
-                {
-                    x = xNew;
-                    y = yNew;
+                    if (x < 0 || y < 0)
+                    {
+                        x = xNew;
+                        y = yNew;
+                    }
+                    else
+                    {
+                        g.DrawLine(pen, x, y, xNew, yNew);
+                        x = xNew;
+                        y = yNew;
+                    }
                 }
-                else
-                {
-                    g.DrawLine(pen, x, y, xNew, yNew);
-                    x = xNew;
-                    y = yNew;
-                }
+            }
+            else
+            {
+                g.DrawLine(pen, 0, chart.Height / 2, chart.Width, chart.Height / 2);
             }
         }
 

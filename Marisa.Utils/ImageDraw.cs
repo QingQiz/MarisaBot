@@ -201,13 +201,26 @@ public static class ImageDraw
         return background;
     }
 
-    public static string ToB64(this Bitmap bmp)
+    public static string ToB64(this Bitmap bmp, long quality=90)
     {
         var ms = new MemoryStream();
-        bmp.Save(ms, ImageFormat.Jpeg);
+        
+        var encoder = Encoder.Quality;  
+  
+        var encoderParameters = new EncoderParameters(1);  
+        var parameter = new EncoderParameter(encoder, quality);  
+        encoderParameters.Param[0] = parameter;  
+  
+        bmp.Save(ms, GetEncoder(ImageFormat.Jpeg), encoderParameters);
 
         return Convert.ToBase64String(ms.ToArray());
     }
+    
+    private static ImageCodecInfo GetEncoder(ImageFormat format)  
+    {  
+        var codecs = ImageCodecInfo.GetImageEncoders();
+        return codecs.First(codec => codec.FormatID == format.Guid);
+    }  
 
     public static unsafe Bitmap Blur(this Bitmap image, Rectangle rectangle, int blurSize)
     {

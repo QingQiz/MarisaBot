@@ -12,5 +12,5 @@ public class Cover
     public Uri Url { get; set; }
 
     [JsonProperty("id")]
-    public long Id { get; set; }
+    public long? Id { get; set; }
 }

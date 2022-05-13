@@ -2,6 +2,7 @@
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,7 +52,18 @@ public static class OsuApi
         _tokenExpire = DateTime.Now + TimeSpan.FromSeconds(res.expires_in);
     }
 
-    public static async Task<OsuUserInfo?> UserInfo(long uid)
+    public static async Task<OsuUserInfo> GetUserInfoByName(string username)
+    {
+        var json = await $"{UserInfoUri}/{username}/"
+            .SetQueryParam("key", "facere")
+            .WithHeader("Accept", "application/json")
+            .WithOAuthBearerToken(Token)
+            .GetStringAsync();
+
+        return OsuUserInfo.FromJson(json);
+    }
+
+    public static async Task<OsuUserInfo?> GetUserInfo(long uid)
     {
         var db = new BotDbContext().OsuBinds;
 
@@ -62,7 +74,7 @@ public static class OsuApi
             return null;
         }
 
-        var json = await $"{UserInfoUri}/{bind.OsuUserName}/{bind.GameMode ?? ""}"
+        var json = await $"{UserInfoUri}/{bind.OsuUserId}/{bind.GameMode ?? ""}"
             .SetQueryParam("key", "facere")
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
@@ -71,7 +83,7 @@ public static class OsuApi
         return OsuUserInfo.FromJson(json);
     }
 
-    public static async Task<string> RecentScore(long uid, int skip=0, int take=1)
+    public static async Task<OsuScore[]?> RecentScores(long uid, int skip=0, int take=1)
     {
         var db = new BotDbContext().OsuBinds;
 
@@ -89,6 +101,7 @@ public static class OsuApi
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
-        return json;
+
+        return OsuScore.FromJson(json);
     }
 }

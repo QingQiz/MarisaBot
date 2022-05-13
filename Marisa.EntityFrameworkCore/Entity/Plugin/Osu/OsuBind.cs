@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 
 [Table("Osu.Bind")]
+[Index(nameof(UserId))]
+[Index(nameof(OsuUserId))]
 public class OsuBind
 {
     [Key]
