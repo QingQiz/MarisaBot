@@ -96,6 +96,30 @@ namespace QQBot.EntityFrameworkCore.Migrations
 
                     b.ToTable("MaiMaiDx.Guess");
                 });
+
+            modelBuilder.Entity("Marisa.EntityFrameworkCore.Entity.Plugin.Osu.OsuBind", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("GameMode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("OsuUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OsuUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Osu.Bind");
+                });
 #pragma warning restore 612, 618
         }
     }

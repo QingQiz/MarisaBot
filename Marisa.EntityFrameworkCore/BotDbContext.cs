@@ -2,6 +2,7 @@
 using Marisa.EntityFrameworkCore.Entity;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ public class BotDbContext : DbContext
     public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
     public DbSet<BlackList> BlackLists { get; set; }
+    public DbSet<OsuBind> OsuBinds { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
