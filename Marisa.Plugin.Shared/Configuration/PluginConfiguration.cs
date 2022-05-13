@@ -24,4 +24,6 @@ public class PluginConfiguration
     public string HelpPath { get; set; }
 
     public string FfmpegPath { get; set; }
+    
+    public OsuConfiguration Osu { get; set; }
 }
