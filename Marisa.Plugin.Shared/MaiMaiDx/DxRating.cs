@@ -455,7 +455,7 @@ public class DxRating
         {
             if (c == null) continue;
 
-            g.DrawImage(c!, 0, y);
+            g.DrawImage(c, 0, y);
             y += cardHeight;
             g.DrawLine(new Pen(Color.DarkGray, 2), 0, y - 1, cardWidth, y - 1);
         }
@@ -495,7 +495,7 @@ public class DxRating
         var nextA = score.NextRa();
         var nextR = SongScore.Ra(nextA, score.Constant);
 
-        var lvStr   = $"{MaiMaiSong.LevelName[score.LevelIdx]}: {score.Constant}";
+        var lvStr   = $"{MaiMaiSong.LevelName[(int)score.LevelIdx]}: {score.Constant}";
         var measure = g.MeasureString(lvStr, fontS);
         g.DrawString(lvStr, fontS, new SolidBrush(MaiMaiSong.LevelColor[score.LevelIdx]),
             bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);

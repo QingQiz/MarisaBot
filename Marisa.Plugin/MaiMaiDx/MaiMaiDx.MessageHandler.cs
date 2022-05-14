@@ -2,6 +2,7 @@
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.MaiMaiDx;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -203,7 +204,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     #endregion
 
-    #region b40
+    #region 查分
 
     /// <summary>
     /// b40
@@ -233,7 +234,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     #endregion
 
-    #region search
+    #region 搜歌
 
     /// <summary>
     /// 搜歌
@@ -245,12 +246,34 @@ public partial class MaiMaiDx : MarisaPluginBase
 
         message.Reply(_songDb.GetSearchResult(search));
 
+        if (search.Count is > 1 and < SongDbConfig.PageSize)
+        {
+            Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, hMessage =>
+            {
+                // 不是 id
+                if (!long.TryParse(hMessage.Command.Trim(), out var songId))
+                {
+                    return Task.FromResult(MarisaPluginTaskState.Canceled);
+                }
+
+                var song = _songDb.GetSongById(songId);
+                // 没找到歌
+                if (song == null)
+                {
+                    return Task.FromResult(MarisaPluginTaskState.Canceled);
+                }
+
+                message.Reply(_songDb.GetSearchResult(new [] { song }));
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            });
+        }
+
         return MarisaPluginTaskState.CompletedTask;
     }
 
     #endregion
 
-    #region random
+    #region 打什么歌
 
     /// <summary>
     /// 随机给出一个歌
@@ -346,7 +369,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     #endregion
 
-    #region guess
+    #region 猜曲
 
     /// <summary>
     /// 舞萌猜歌排名
@@ -418,7 +441,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     #endregion
 
-    #region Alias
+    #region 歌曲别名相关
 
     /// <summary>
     /// 别名处理
@@ -485,7 +508,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     #endregion
 
-    #region Line / 分数线
+    #region 分数线 / 容错率
 
     /// <summary>
     /// 分数线，达到某个达成率rating会上升的线

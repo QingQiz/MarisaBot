@@ -12,8 +12,6 @@ namespace Marisa.Plugin.Shared.Util.SongDb;
 
 public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
 {
-    private const int PageSize = 10;
-
     private readonly string _aliasFilePath;
     private readonly string _tempAliasPath;
 
@@ -30,7 +28,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     /// <param name="songListGen">读取歌曲列表的函数</param>
     /// <param name="guessGuessDbSetName">猜歌DbSet名称</param>
     /// <param name="songGuessHandlerAdder">添加猜曲结果处理器的函数</param>
-    public SongDb(string aliasFilePath, string tempAliasPath, Func<List<TSong>> songListGen,
+    public SongDb(
+        string aliasFilePath, string tempAliasPath, Func<List<TSong>> songListGen,
         string guessGuessDbSetName, MessageHandlerAdder songGuessHandlerAdder)
     {
         _aliasFilePath = aliasFilePath;
@@ -150,6 +149,13 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         }
     }
 
+    #region Search
+
+    public TSong? GetSongById(long id)
+    {
+        return SongList.FirstOrDefault(song => song.Id == id);
+    }
+
     public List<TSong> SearchSong(string m)
     {
         if (string.IsNullOrEmpty(m)) return new List<TSong>();
@@ -225,6 +231,26 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
             .ToList();
     }
 
+    public MessageChain GetSearchResult(IReadOnlyList<TSong> songs)
+    {
+        return songs.Count switch
+        {
+            >= SongDbConfig.PageSize => MessageChain.FromText($"过多的结果（{songs.Count}个）"),
+
+            0 => MessageChain.FromText("“查无此歌”"),
+            1 => new MessageChain(
+                new MessageDataText(songs[0].Title),
+                MessageDataImage.FromBase64(songs[0].GetImage())
+            ),
+            _ => MessageChain.FromText(string.Join('\n',
+                songs.Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}")))
+        };
+    }
+
+    #endregion
+
+    #region Alias
+
     /// <summary>
     /// 获取歌曲的别名列表
     /// </summary>
@@ -265,20 +291,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         }
     }
 
-    public MessageChain GetSearchResult(IReadOnlyList<TSong> songs)
-    {
-        return songs.Count switch
-        {
-            >= PageSize => MessageChain.FromText($"过多的结果（{songs.Count}个）"),
-            0           => MessageChain.FromText("“查无此歌”"),
-            1 => new MessageChain(
-                new MessageDataText(songs[0].Title),
-                MessageDataImage.FromBase64(songs[0].GetImage())
-            ),
-            _ => MessageChain.FromText(string.Join('\n',
-                songs.Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}")))
-        };
-    }
+    #endregion
 
     #region Guess
 
@@ -437,7 +450,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         return true;
     }
 
-    public void StartSongCoverGuess(Message message, long qq, int widthDiv,
+    public void StartSongCoverGuess(
+        Message message, long qq, int widthDiv,
         Func<TSong, bool>? filter)
     {
         var songs = SongList.Where(s => filter?.Invoke(s) ?? true).ToList();
@@ -452,7 +466,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         var cover = song.GetCover();
 
-        var cw = cover.Width  / widthDiv;
+        var cw = cover.Width / widthDiv;
         var ch = cover.Height / widthDiv;
 
         if (StartGuess(song, message, qq))
