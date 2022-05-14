@@ -12,11 +12,11 @@ public class Variant
     public string VariantVariant { get; set; }
 
     [JsonProperty("country_rank")]
-    public long RegionRank { get; set; }
+    public long? RegionRank { get; set; }
 
     [JsonProperty("global_rank")]
-    public long GlobalRank { get; set; }
+    public long? GlobalRank { get; set; }
 
     [JsonProperty("pp")]
-    public double Pp { get; set; }
+    public double? Pp { get; set; }
 }

@@ -252,7 +252,7 @@ public static class OsuUserInfoDrawer
             g.SmoothingMode      = SmoothingMode.HighQuality;
             g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
 
-            var history = info.RankHistory.Data.Reverse().ToArray();
+            var history = info.RankHistory.Data.ToArray();
             var min     = history.Min();
             var max     = history.Max();
 
@@ -265,7 +265,7 @@ public static class OsuUserInfoDrawer
                 for (var i = 0; i < history.Length; i++)
                 {
                     var xNew = (float)i / history.Length * chart.Width;
-                    var yNew = chart.Height - (float)(history[i] - min) / (max - min) * (chart.Height - 4) - 2;
+                    var yNew = (float)(history[i] - min) / (max - min) * (chart.Height - 4) + 2;
 
                     if (x < 0 || y < 0)
                     {
