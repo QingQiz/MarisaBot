@@ -14,7 +14,7 @@ public class MarisaPluginCommand: Attribute
     public MarisaPluginCommand(params string[] prefixes)
     {
         _target     = (MessageType)0b11;
-        _comparison = StringComparison.Ordinal;
+        _comparison = StringComparison.OrdinalIgnoreCase;
         _prefixes   = prefixes;
         _strict     = false;
     }
@@ -22,7 +22,7 @@ public class MarisaPluginCommand: Attribute
     public MarisaPluginCommand(bool strict = false, params string[] prefixes)
     {
         _target     = (MessageType)0b11;
-        _comparison = StringComparison.Ordinal;
+        _comparison = StringComparison.OrdinalIgnoreCase;
         _prefixes   = prefixes;
         _strict     = strict;
     }
@@ -30,7 +30,7 @@ public class MarisaPluginCommand: Attribute
     public MarisaPluginCommand(MessageType target, bool strict = false, params string[] prefixes)
     {
         _target     = target;
-        _comparison = StringComparison.Ordinal;
+        _comparison = StringComparison.OrdinalIgnoreCase;
         _prefixes   = prefixes;
         _strict     = strict;
     }
