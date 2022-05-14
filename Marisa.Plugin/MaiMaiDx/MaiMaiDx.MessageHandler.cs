@@ -263,7 +263,7 @@ public partial class MaiMaiDx : MarisaPluginBase
                     return Task.FromResult(MarisaPluginTaskState.Canceled);
                 }
 
-                message.Reply(_songDb.GetSearchResult(new [] { song }));
+                message.Reply(_songDb.GetSearchResult(new[] { song }));
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             });
         }
@@ -536,6 +536,65 @@ public partial class MaiMaiDx : MarisaPluginBase
         }
 
         message.Reply("参数应为“定数”");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginCommand("tolerance", "容错率")]
+    private MarisaPluginTaskState MaiMaiFaultTolerance(Message message)
+    {
+        var songName     = message.Command.Trim();
+        var searchResult = _songDb.SearchSong(songName);
+
+        if (searchResult.Count != 1)
+        {
+            message.Reply(_songDb.GetSearchResult(searchResult));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply("难度和预期达成率？");
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        {
+            var command = next.Command.Trim();
+
+            var levelName = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
+            var level     = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+
+            if (level == null)
+            {
+                next.Reply("错误的难度格式，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var parseSuccess = double.TryParse(command.TrimStart(level), out var achievement);
+
+            if (!parseSuccess)
+            {
+                next.Reply("错误的达成率格式，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            if (achievement is > 101 or < 0)
+            {
+                next.Reply("你查🐴呢");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var song = searchResult.First();
+
+            var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelName.Count;
+            var (x, y) = song.NoteScore(levelIdx);
+
+            var tolerance = (int)((101 - achievement) / (0.2 * x));
+            next.Reply(
+                new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
+                new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
+                new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
+                MessageDataImage.FromBase64(GetFaultTable(x, y).ToB64())
+            );
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+
         return MarisaPluginTaskState.CompletedTask;
     }
 

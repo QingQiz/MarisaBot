@@ -40,13 +40,6 @@ public class MaiMaiSong : Song
         return Levels.Last();
     }
 
-    public override Bitmap GetCover()
-    {
-        return ResourceManager.GetCover(Id, false);
-    }
-
-    #region Drawer
-
     public static readonly Color[] LevelColor =
     {
         Color.FromArgb(82, 231, 43),
@@ -86,8 +79,7 @@ public class MaiMaiSong : Song
         "maimai でらっくす Splash"
     };
 
-
-    public static readonly string[] LevelName =
+    public static readonly List<string> LevelName = new()
     {
         "Basic",
         "Advanced",
@@ -95,7 +87,38 @@ public class MaiMaiSong : Song
         "Master",
         "Re:Master"
     };
-    
+
+    public static readonly List<string> LevelNameZh = new()
+    {
+        "绿",
+        "黄",
+        "红",
+        "紫",
+        "白"
+    };
+
+    public (double TapScore, double BonusScore) NoteScore(int levelIdx)
+    {
+        var notes = Charts[levelIdx].Notes;
+
+        var tap    = notes[0];
+        var hold   = notes[1];
+        var slide  = notes[2];
+        var touch  = Type == "DX" ? notes[3] : 0;
+        var @break = notes.Last();
+
+        var x = 100.0 / (tap + 2 * hold + 3 * slide + 5 * @break + touch);
+        var y = 1.0 / @break;
+        return (x, y);
+    }
+
+    #region Drawer
+
+    public override Bitmap GetCover()
+    {
+        return ResourceManager.GetCover(Id, false);
+    }
+
     private Bitmap GetSongInfoCard()
     {
         var       bgColor1 = Color.FromArgb(237, 237, 237);
@@ -112,8 +135,10 @@ public class MaiMaiSong : Song
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
-            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-            void DrawKeyValuePair(string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+
+            void DrawKeyValuePair(
+                string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
                 bool center = false)
             {
                 g.DrawImage(

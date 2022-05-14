@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.Plugin.Shared.MaiMaiDx;
@@ -147,7 +148,8 @@ public partial class MaiMaiDx
 
     #region summary
 
-    private async Task<Dictionary<(long Id, long LevelIdx), SongScore>?> GetAllSongScores(Message message,
+    private async Task<Dictionary<(long Id, long LevelIdx), SongScore>?> GetAllSongScores(
+        Message message,
         string[]? versions = null)
     {
         var qq = message.Sender!.Id;
@@ -233,7 +235,7 @@ public partial class MaiMaiDx
                         path.AddLines(new[]
                         {
                             new Point(x, y),
-                            new Point(x    + 30, y),
+                            new Point(x + 30, y),
                             new Point(x, y + 30)
                         });
                         path.CloseFigure();
@@ -311,6 +313,51 @@ public partial class MaiMaiDx
         }
 
         return res;
+    }
+
+    private static Bitmap GetFaultTable(double tap, double bonus)
+    {
+        var bm = ResourceManager.GetImage("fault-table.png");
+
+        const int hW = 133, cW = 223;
+        const int hH = 75,  cH = 75;
+
+        using (var g = Graphics.FromImage(bm))
+        {
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+            void DrawString(string s, Font f, int x, int y)
+            {
+                var m        = g.MeasureString(s, f);
+                var paddingX = (cW * (x == 3 ? 2 : 1) - m.Width) / 2;
+                var paddingY = (cH - m.Height) / 2;
+                
+                g.DrawString(s, f, Brushes.Black, hW + x * cW + paddingX, hH + y * cH + paddingY);
+            }
+
+            var fontS = new Font("Consolas", 30, FontStyle.Regular, GraphicsUnit.Pixel);
+            var fontL = new Font("Consolas", 32, FontStyle.Regular, GraphicsUnit.Pixel);
+
+            // perfect
+            DrawString($"{0.25 * bonus:F4} / {0.5 * bonus:F4}", fontL, 3, 0);
+            // great
+            DrawString($"{0.2 * tap:F4}", fontL, 0, 1);
+            DrawString($"{0.4 * tap:F4}", fontL, 1, 1);
+            DrawString($"{0.6 * tap:F4}", fontL, 2, 1);
+            DrawString($"{1.0 * tap + 0.6 * bonus:F4} / {2 * tap + 0.6 * bonus:F4} / {2.5 * tap + 0.6 * bonus:F4}", fontS, 3, 1);
+            // good
+            DrawString($"{0.5 * tap:F4}", fontL, 0, 2);
+            DrawString($"{1.0 * tap:F4}", fontL, 1, 2);
+            DrawString($"{1.5 * tap:F4}", fontL, 2, 2);
+            DrawString($"{3.0 * tap + 0.7 * bonus:F4}", fontL, 3, 2);
+            // miss
+            DrawString($"{1.0 * tap:F4}", fontL, 0, 3);
+            DrawString($"{2.0 * tap:F4}", fontL, 1, 3);
+            DrawString($"{3.0 * tap:F4}", fontL, 2, 3);
+            DrawString($"{5.0 * tap + 1.0 * bonus:F4}", fontL, 3, 3);
+        }
+
+        return bm;
     }
 
     #endregion
