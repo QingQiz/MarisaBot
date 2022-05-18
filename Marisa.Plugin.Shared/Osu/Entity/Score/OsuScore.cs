@@ -72,10 +72,12 @@ public partial class OsuScore
 {
     internal static class Converter
     {
-        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+        public static readonly JsonSerializerSettings Settings = new()
         {
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             DateParseHandling        = DateParseHandling.None,
+            NullValueHandling        = NullValueHandling.Ignore,
+            DefaultValueHandling     = DefaultValueHandling.Populate,
             Converters =
             {
                 new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }

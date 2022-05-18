@@ -202,6 +202,8 @@ public partial class OsuUserInfo
         {
             MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
             DateParseHandling        = DateParseHandling.None,
+            NullValueHandling        = NullValueHandling.Ignore,
+            DefaultValueHandling     = DefaultValueHandling.Populate,
             Converters =
             {
                 new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
