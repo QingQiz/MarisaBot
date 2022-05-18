@@ -176,12 +176,24 @@ public partial class MaiMaiDx
                     SongScore.Ra(ach, constant), SongScore.CalcRank(ach), song.Id, song.Title, song.Type);
             }).ToDictionary(ss => (ss.Id, ss.LevelIdx));
         }
+        catch (FlurlHttpException e) when (e.StatusCode == 404)
+        {
+            message.Reply("NotFound");
+            return null;
+        }
         catch (FlurlHttpException e) when (e.StatusCode == 400)
         {
+            message.Reply("400");
             return null;
         }
         catch (FlurlHttpException e) when (e.StatusCode == 403)
         {
+            message.Reply("Forbidden");
+            return null;
+        }
+        catch (FlurlHttpTimeoutException e)
+        {
+            message.Reply("Timeout");
             return null;
         }
     }
@@ -331,7 +343,7 @@ public partial class MaiMaiDx
                 var m        = g.MeasureString(s, f);
                 var paddingX = (cW * (x == 3 ? 2 : 1) - m.Width) / 2;
                 var paddingY = (cH - m.Height) / 2;
-                
+
                 g.DrawString(s, f, Brushes.Black, hW + x * cW + paddingX, hH + y * cH + paddingY);
             }
 
@@ -344,7 +356,8 @@ public partial class MaiMaiDx
             DrawString($"{0.2 * tap:F4}", fontL, 0, 1);
             DrawString($"{0.4 * tap:F4}", fontL, 1, 1);
             DrawString($"{0.6 * tap:F4}", fontL, 2, 1);
-            DrawString($"{1.0 * tap + 0.6 * bonus:F4} / {2 * tap + 0.6 * bonus:F4} / {2.5 * tap + 0.6 * bonus:F4}", fontS, 3, 1);
+            DrawString($"{1.0 * tap + 0.6 * bonus:F4} / {2 * tap + 0.6 * bonus:F4} / {2.5 * tap + 0.6 * bonus:F4}",
+                fontS, 3, 1);
             // good
             DrawString($"{0.5 * tap:F4}", fontL, 0, 2);
             DrawString($"{1.0 * tap:F4}", fontL, 1, 2);
