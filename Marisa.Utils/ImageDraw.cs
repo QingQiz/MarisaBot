@@ -204,14 +204,21 @@ public static class ImageDraw
     public static string ToB64(this Bitmap bmp, long quality=90)
     {
         var ms = new MemoryStream();
-        
-        var encoder = Encoder.Quality;  
-  
-        var encoderParameters = new EncoderParameters(1);  
-        var parameter = new EncoderParameter(encoder, quality);  
-        encoderParameters.Param[0] = parameter;  
-  
-        bmp.Save(ms, GetEncoder(ImageFormat.Jpeg), encoderParameters);
+
+        if (quality < 100)
+        {
+            var encoder = Encoder.Quality;  
+      
+            var encoderParameters = new EncoderParameters(1);  
+            var parameter = new EncoderParameter(encoder, quality);  
+            encoderParameters.Param[0] = parameter;  
+      
+            bmp.Save(ms, GetEncoder(ImageFormat.Jpeg), encoderParameters);
+        }
+        else
+        {
+            bmp.Save(ms, ImageFormat.Png);
+        }
 
         return Convert.ToBase64String(ms.ToArray());
     }

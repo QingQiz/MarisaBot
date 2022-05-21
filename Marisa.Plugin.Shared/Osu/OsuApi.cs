@@ -29,6 +29,11 @@ public static class OsuApi
     private const string TokenUri = "https://osu.ppy.sh/oauth/token";
     private const string UserInfoUri = "https://osu.ppy.sh/api/v2/users";
 
+    public static readonly List<string> ModeList = new()
+    {
+        "osu", "taiko", "catch", "mania"
+    };
+
     /// <summary>
     /// 更新 token
     /// </summary>

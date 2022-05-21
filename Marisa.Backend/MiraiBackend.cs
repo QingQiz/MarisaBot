@@ -277,6 +277,6 @@ public class MiraiBackend : BotDriver.BotDriver
     public override async Task Invoke()
     {
         await _wsClient.Start();
-        await Task.WhenAll(RecvMessage(), SendMessage(), ProcMessage());
+        await base.Invoke();
     }
 }

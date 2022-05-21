@@ -1,15 +1,121 @@
-﻿using Flurl.Http;
+﻿using System.Net.WebSockets;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks.Dataflow;
+using Flurl.Http;
+using log4net;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
-using Marisa.Plugin.Shared.Osu.Drawer;
 using Microsoft.EntityFrameworkCore;
+using Websocket.Client;
 
 namespace Marisa.Plugin;
 
-[MarisaPluginCommand("osu")]
+[MarisaPluginCommand("osu!", "osu", "!", "！")]
 public class Osu : MarisaPluginBase
 {
+    private readonly WebsocketClient _wsClient;
+    private readonly ILog _logger;
+    private readonly BufferBlock<(long Id, string Recv)> _recvQueue = new();
+
+    public Osu(ILog logger)
+    {
+        _logger = logger;
+        var factory = new Func<ClientWebSocket>(() =>
+        {
+            var client = new ClientWebSocket
+            {
+                Options =
+                {
+                    KeepAliveInterval = TimeSpan.FromSeconds(5),
+                }
+            };
+            client.Options.SetRequestHeader("X-Self-ID", "2096937554");
+            client.Options.SetRequestHeader("X-Client-Role", "Universal");
+            return client;
+        });
+
+        _wsClient = new WebsocketClient(new Uri("ws://botws.desu.life:65000"), factory);
+    }
+
+    public override async Task BackgroundService()
+    {
+        var regex = new Regex(@"""user_id"":(\d*)");
+
+        _wsClient.ReconnectionHappened.Subscribe(msg => { _logger.Warn("Reconnect to 猫猫"); });
+
+        _wsClient.MessageReceived.Subscribe(next =>
+        {
+            var t  = next.Text;
+            var id = regex.Match(t).Groups[1].Value;
+            _recvQueue.Post((long.Parse(id), t));
+        });
+
+        await _wsClient.Start();
+    }
+
+    private async Task<string> GetReplyByUserId(long userId)
+    {
+        var regex    = new Regex(@"""message"":""(.*?)""");
+        var recvList = new List<(long, string)>();
+        var res      = "";
+
+        while (await _recvQueue.OutputAvailableAsync())
+        {
+            var recv = await _recvQueue.ReceiveAsync();
+            if (recv.Id == userId)
+            {
+                res = regex.Match(recv.Recv).Groups[1].Value;
+                break;
+            }
+            else
+            {
+                recvList.Add(recv);
+            }
+        }
+
+        recvList.ForEach(recv => _recvQueue.Post(recv));
+
+        return res;
+    }
+
+    private async Task ReplyMessageByCommand(Message message, string command)
+    {
+        var cmd = BuildCommand(command, message.Sender!.Id);
+        _wsClient.Send(cmd);
+
+        var reply = await GetReplyByUserId(message.Sender!.Id);
+
+        if (string.IsNullOrEmpty(reply))
+        {
+            message.Reply("猫猫不理魔理沙！");
+            return;
+        }
+
+        if (reply.StartsWith("[CQ:image"))
+        {
+            var regex = new Regex(@"\[CQ:image,file=base64://(.*?)\]");
+            message.Reply(MessageDataImage.FromBase64(regex.Match(reply).Groups[1].Value));
+        }
+        else
+        {
+            message.Reply(reply.Replace("猫猫", "魔理沙问猫猫，她说她").Replace("该用户", "您"));
+        }
+    }
+
+    /// <summary>
+    /// 模拟 go-cqhttp 的消息
+    /// </summary>
+    /// <param name="command">猫猫 bot 需要的命令</param>
+    /// <param name="userId">qq</param>
+    /// <returns>go-cqhttp 生成的消息（json字符串）</returns>
+    private static string BuildCommand(string command, long userId)
+    {
+        return
+            @$"{{""font"":0,""message"":""!{command}"",""message_id"":0,""message_type"":""private"",""post_type"":""message"",""self_id"":0,""sender"":{{""age"":0,""nickname"":"""",""sex"":"""",""user_id"":0}},""sub_type"":""friend"",""target_id"":0,""time"":0,""user_id"":{userId}}}";
+    }
+
+
     [MarisaPluginCommand("bind")]
     private static async Task<MarisaPluginTaskState> Bind(Message message, BotDbContext dbContext)
     {
@@ -67,14 +173,9 @@ public class Osu : MarisaPluginBase
         var sender = message.Sender!.Id;
         var mode   = message.Command.Trim();
 
-        var modeList = new[]
+        if (!OsuApi.ModeList.Contains(mode))
         {
-            "osu", "taiko", "catch", "mania"
-        };
-
-        if (!modeList.Contains(mode))
-        {
-            message.Reply("可选的模式：" + string.Join(", ", modeList));
+            message.Reply("可选的模式：" + string.Join(", ", OsuApi.ModeList));
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -94,17 +195,73 @@ public class Osu : MarisaPluginBase
     }
 
     [MarisaPluginCommand("info")]
-    private static async Task<MarisaPluginTaskState> Info(Message message)
+    private async Task<MarisaPluginTaskState> Info(Message message, BotDbContext db)
     {
-        var info = await OsuApi.GetUserInfo(message.Sender!.Id)!;
-        if (info == null)
+        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+        if (o == null)
         {
             message.Reply("您是？");
         }
         else
         {
-            var im = await info.GetImage();
-            message.Reply(MessageDataImage.FromBase64(im.ToB64(100)));
+            var cmd =
+                $"info {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
+
+            await ReplyMessageByCommand(message, cmd);
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginCommand("pr")]
+    private async Task<MarisaPluginTaskState> Present(Message message, BotDbContext db)
+    {
+        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+        if (o == null)
+        {
+            message.Reply("您是？");
+        }
+        else
+        {
+            var cmd =
+                $"pr {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
+            await ReplyMessageByCommand(message, cmd);
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginCommand("bp")]
+    private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
+    {
+        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+        if (o == null)
+        {
+            message.Reply("您是？");
+        }
+        else
+        {
+            var cmd =
+                $"bp {o.OsuUserName}#{message.Command.TrimStart('#')}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
+            await ReplyMessageByCommand(message, cmd);
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginCommand("todaybp")]
+    private async Task<MarisaPluginTaskState> TodayBp(Message message, BotDbContext db)
+    {
+        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+        if (o == null)
+        {
+            message.Reply("您是？");
+        }
+        else
+        {
+            var cmd =
+                $"todaybp {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
+            await ReplyMessageByCommand(message, cmd);
         }
 
         return MarisaPluginTaskState.CompletedTask;

@@ -19,7 +19,8 @@ public abstract class BotDriver
     protected readonly MessageSenderProvider MessageSenderProvider;
     protected readonly MessageQueueProvider MessageQueueProvider;
 
-    protected BotDriver(IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
+    protected BotDriver(
+        IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
         DictionaryProvider dict, MessageSenderProvider messageSenderProvider,
         MessageQueueProvider messageQueueProvider)
     {
@@ -66,7 +67,9 @@ public abstract class BotDriver
     /// <exception cref="Exception"></exception>
     protected virtual async Task ProcMessage()
     {
-        bool Check(Message message, IReadOnlyCollection<MarisaPluginCommand> commands, IReadOnlyCollection<MarisaPluginTrigger> triggers)
+        bool Check(
+            Message message, IReadOnlyCollection<MarisaPluginCommand> commands,
+            IReadOnlyCollection<MarisaPluginTrigger> triggers)
         {
             if (triggers.Any())
             {
@@ -99,7 +102,8 @@ public abstract class BotDriver
             return Check(message, commands, triggers);
         }
 
-        const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
+        const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
+            BindingFlags.Static | BindingFlags.Public;
 
         var availablePlugins = Plugins.Where(p =>
             p.GetType().GetCustomAttributes<MarisaPluginTrigger>().Any() ||
@@ -209,7 +213,7 @@ public abstract class BotDriver
                     //    若是 A 的触发前缀是空字符串，则没有影响
                     // 2. 同上，但是有 Trigger 的参与，此时没什么影响，还是应当设计成子命令的形式
                     // 3. 只有 Trigger 作用，没什么要注意的
-                    yield return (MarisaPluginTaskState) ret;
+                    yield return (MarisaPluginTaskState)ret;
                 }
             }
         }
@@ -219,7 +223,7 @@ public abstract class BotDriver
         while (await MessageQueueProvider.RecvQueue.OutputAvailableAsync())
         {
             var messageRecv = MessageQueueProvider.RecvQueue.ReceiveAllAsync();
-            
+
             taskList.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
             {
                 var command = message.Command;
@@ -234,7 +238,7 @@ public abstract class BotDriver
                     }
 
                     message.Command = command;
-                    
+
                     if (shouldBreak) break;
                 }
             }));
@@ -252,7 +256,7 @@ public abstract class BotDriver
     /// 从服务器拉取消息并更新接收队列
     /// </summary>
     protected abstract Task RecvMessage();
-    
+
     /// <summary>
     /// 从接收队列接收消息并发送到服务器
     /// </summary>
@@ -263,6 +267,7 @@ public abstract class BotDriver
     /// </summary>
     public virtual async Task Invoke()
     {
-        await Task.WhenAll(RecvMessage(), SendMessage(), ProcMessage());
+        await Task.WhenAll(Parallel.ForEachAsync(Plugins, async (p, _) => await p.BackgroundService()),
+            RecvMessage(), SendMessage(), ProcMessage());
     }
 }
