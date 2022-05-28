@@ -12,6 +12,7 @@ namespace Marisa.Plugin.Osu;
 [MarisaPluginCommand("osu!", "osu", "!", "！")]
 public partial class Osu : MarisaPluginBase
 {
+    private readonly SemaphoreSlim _recvQueueReaderLock = new(1, 1);
     private readonly WebsocketClient _wsClient;
     private readonly ILog _logger;
     private readonly Channel<(long Id, string Recv)> _recvQueue = Channel.CreateUnbounded<(long, string)>();
@@ -70,6 +71,8 @@ public partial class Osu : MarisaPluginBase
         var recvList = new List<(long, string)>();
         var res      = "";
 
+        await _recvQueueReaderLock.WaitAsync();
+
         while (await _recvQueue.Reader.WaitToReadAsync())
         {
             var recv = await _recvQueue.Reader.ReadAsync();
@@ -81,6 +84,8 @@ public partial class Osu : MarisaPluginBase
 
             recvList.Add(recv);
         }
+
+        _recvQueueReaderLock.Release();
 
         foreach (var recv in recvList)
         {
