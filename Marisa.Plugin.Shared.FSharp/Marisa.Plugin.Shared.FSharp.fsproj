@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Parser\Monad.fs" />
+        <Compile Include="Parser\Parser.fs" />
+        <Compile Include="Osu\OsuCommandParser.fs" />
+    </ItemGroup>
+
+</Project>

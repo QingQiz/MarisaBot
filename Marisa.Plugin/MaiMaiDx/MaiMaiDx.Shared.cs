@@ -191,7 +191,7 @@ public partial class MaiMaiDx
             message.Reply("Forbidden");
             return null;
         }
-        catch (FlurlHttpTimeoutException e)
+        catch (FlurlHttpTimeoutException)
         {
             message.Reply("Timeout");
             return null;

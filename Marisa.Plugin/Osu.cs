@@ -5,6 +5,7 @@ using Flurl.Http;
 using log4net;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
+using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Microsoft.EntityFrameworkCore;
 using Websocket.Client;
@@ -35,14 +36,15 @@ public class Osu : MarisaPluginBase
             return client;
         });
 
-        _wsClient = new WebsocketClient(new Uri("ws://botws.desu.life:65000"), factory);
+        _wsClient                  = new WebsocketClient(new Uri("ws://botws.desu.life:65000"), factory);
+        _wsClient.ReconnectTimeout = TimeSpan.MaxValue;
     }
 
     public override async Task BackgroundService()
     {
         var regex = new Regex(@"""user_id"":(\d*)");
 
-        _wsClient.ReconnectionHappened.Subscribe(msg => { _logger.Warn("Reconnect to 猫猫"); });
+        _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnect to 猫猫"); });
 
         _wsClient.MessageReceived.Subscribe(next =>
         {
@@ -52,6 +54,15 @@ public class Osu : MarisaPluginBase
         });
 
         await _wsClient.Start();
+
+        var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+
+        var s = BuildCommand("heartbeat", 114514);
+
+        while (await timer.WaitForNextTickAsync())
+        {
+            _wsClient.Send(s);
+        }
     }
 
     private async Task<string> GetReplyByUserId(long userId)
@@ -68,10 +79,8 @@ public class Osu : MarisaPluginBase
                 res = regex.Match(recv.Recv).Groups[1].Value;
                 break;
             }
-            else
-            {
-                recvList.Add(recv);
-            }
+
+            recvList.Add(recv);
         }
 
         recvList.ForEach(recv => _recvQueue.Post(recv));
@@ -99,7 +108,7 @@ public class Osu : MarisaPluginBase
         }
         else
         {
-            message.Reply(reply.Replace("猫猫", "魔理沙问猫猫，她说她").Replace("该用户", "您"));
+            message.Reply(reply.Replace("猫猫", "魔理沙问猫猫，她说她"));
         }
     }
 
@@ -113,6 +122,44 @@ public class Osu : MarisaPluginBase
     {
         return
             @$"{{""font"":0,""message"":""!{command}"",""message_id"":0,""message_type"":""private"",""post_type"":""message"",""self_id"":0,""sender"":{{""age"":0,""nickname"":"""",""sex"":"""",""user_id"":0}},""sub_type"":""friend"",""target_id"":0,""time"":0,""user_id"":{userId}}}";
+    }
+
+    private async Task RunCommand(Message message, string prefix, bool withBpRank=false)
+    {
+        var command = OsuCommandParser.parser(message.Command)?.Value;
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return;
+        }
+
+        if (command.BpRank != null && !withBpRank)
+        {
+            message.Reply("错误的命令格式");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            var db = new BotDbContext();
+            var at = message.MessageChain?.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) as MessageDataAt;
+            var o = at == null
+                ? db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id)
+                : db.OsuBinds.FirstOrDefault(o => o.UserId == at.Target);
+
+            if (o != null)
+            {
+                command = new OsuCommandParser.OsuCommand(
+                    o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(o.GameMode));
+            }
+            else
+            {
+                if (at != null)
+                    command = new OsuCommandParser.OsuCommand($"[CQ:at,qq={at.Target}]", command.BpRank, command.Mode);
+            }
+        }
+        await ReplyMessageByCommand(message, $"{prefix} {command}");
     }
 
 
@@ -195,75 +242,44 @@ public class Osu : MarisaPluginBase
     }
 
     [MarisaPluginCommand("info")]
-    private async Task<MarisaPluginTaskState> Info(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
-        if (o == null)
-        {
-            message.Reply("您是？");
-        }
-        else
-        {
-            var cmd =
-                $"info {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
-
-            await ReplyMessageByCommand(message, cmd);
-        }
-
+        await RunCommand(message, "info");
         return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginCommand("pr")]
-    private async Task<MarisaPluginTaskState> Present(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> RecentPass(Message message, BotDbContext db)
     {
-        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
-        if (o == null)
-        {
-            message.Reply("您是？");
-        }
-        else
-        {
-            var cmd =
-                $"pr {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
-            await ReplyMessageByCommand(message, cmd);
-        }
+        await RunCommand(message, "pr");
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
+    [MarisaPluginCommand("recent")]
+    private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
+    {
+        await RunCommand(message, "recent");
         return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
-        if (o == null)
-        {
-            message.Reply("您是？");
-        }
-        else
-        {
-            var cmd =
-                $"bp {o.OsuUserName}#{message.Command.TrimStart('#')}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
-            await ReplyMessageByCommand(message, cmd);
-        }
-
+        await RunCommand(message, "bp", true);
         return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginCommand("todaybp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message, BotDbContext db)
     {
-        var o = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
-        if (o == null)
-        {
-            message.Reply("您是？");
-        }
-        else
-        {
-            var cmd =
-                $"todaybp {o.OsuUserName}:{OsuApi.ModeList.IndexOf(string.IsNullOrEmpty(o.GameMode) ? "mania" : o.GameMode)}";
-            await ReplyMessageByCommand(message, cmd);
-        }
+        await RunCommand(message, "todaybp");
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
+    [MarisaPluginCommand("score")]
+    private async Task<MarisaPluginTaskState> Score(Message message)
+    {
+        await ReplyMessageByCommand(message, message.Command);
         return MarisaPluginTaskState.CompletedTask;
     }
 }

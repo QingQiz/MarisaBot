@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj" />
+      <ProjectReference Include="..\Marisa.Plugin.Shared.FSharp\Marisa.Plugin.Shared.FSharp.fsproj" />
       <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj" />
     </ItemGroup>
 
