@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks.Dataflow;
+using System.Threading.Channels;
 using log4net;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.FSharp.Osu;
@@ -14,7 +14,7 @@ public partial class Osu : MarisaPluginBase
 {
     private readonly WebsocketClient _wsClient;
     private readonly ILog _logger;
-    private readonly BufferBlock<(long Id, string Recv)> _recvQueue = new();
+    private readonly Channel<(long Id, string Recv)> _recvQueue = Channel.CreateUnbounded<(long, string)>();
 
     public Osu(ILog logger)
     {
@@ -43,12 +43,14 @@ public partial class Osu : MarisaPluginBase
 
         _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnect to 猫猫"); });
 
-        _wsClient.MessageReceived.Subscribe(next =>
+        async void OnNext(ResponseMessage next)
         {
             var t  = next.Text;
             var id = regex.Match(t).Groups[1].Value;
-            _recvQueue.Post((long.Parse(id), t));
-        });
+            await _recvQueue.Writer.WriteAsync((long.Parse(id), t));
+        }
+
+        _wsClient.MessageReceived.Subscribe(OnNext);
 
         await _wsClient.Start();
 
@@ -68,9 +70,9 @@ public partial class Osu : MarisaPluginBase
         var recvList = new List<(long, string)>();
         var res      = "";
 
-        while (await _recvQueue.OutputAvailableAsync())
+        while (await _recvQueue.Reader.WaitToReadAsync())
         {
-            var recv = await _recvQueue.ReceiveAsync();
+            var recv = await _recvQueue.Reader.ReadAsync();
             if (recv.Id == userId)
             {
                 res = regex.Match(recv.Recv).Groups[1].Value;
@@ -80,7 +82,10 @@ public partial class Osu : MarisaPluginBase
             recvList.Add(recv);
         }
 
-        recvList.ForEach(recv => _recvQueue.Post(recv));
+        foreach (var recv in recvList)
+        {
+            await _recvQueue.Writer.WriteAsync(recv);
+        }
 
         return res;
     }

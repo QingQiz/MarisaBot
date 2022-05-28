@@ -73,17 +73,17 @@ public class Message
     /// </summary>
     public void Reply(MessageChain message, bool quote = true)
     {
-        _sender.Reply(message, this, quote && MessageChain!.CanBeReferenced);
+        _sender.Reply(message, this, quote && MessageChain!.CanBeReferenced).Wait();
     }
 
     public void Reply(MessageData.MessageData message, bool quote = true)
     {
-        _sender.Reply(message, this, quote && MessageChain!.CanBeReferenced);
+        _sender.Reply(message, this, quote && MessageChain!.CanBeReferenced).Wait();
     }
 
     public void Reply(params MessageData.MessageData[] messages)
     {
-        _sender.Reply(new MessageChain(messages), this, MessageChain!.CanBeReferenced);
+        _sender.Reply(new MessageChain(messages), this, MessageChain!.CanBeReferenced).Wait();
     }
 
     /// <summary>

@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using System.Threading.Channels;
+using Msg = Marisa.BotDriver.Entity.Message.Message;
 
 namespace Marisa.BotDriver.DI.Message;
 
+
 public class MessageQueueProvider
 {
-    public readonly BufferBlock<Entity.Message.Message> RecvQueue = new();
-    public readonly BufferBlock<MessageToSend> SendQueue = new();
+    public readonly Channel<Msg> RecvQueue = Channel.CreateUnbounded<Msg>();
+    public readonly Channel<MessageToSend> SendQueue = Channel.CreateUnbounded<MessageToSend>();
 }

@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Dynamic;
 using System.Reflection;
-using System.Threading.Tasks.Dataflow;
 using Flurl;
 using log4net;
 using Marisa.BotDriver.DI;
@@ -23,7 +22,8 @@ public class MiraiBackend : BotDriver.BotDriver
     private readonly WebsocketClient _wsClient;
     private readonly ILog _logger;
 
-    public MiraiBackend(IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
+    public MiraiBackend(
+        IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
         DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
         ILog logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
     {
@@ -167,7 +167,7 @@ public class MiraiBackend : BotDriver.BotDriver
 
     protected override Task RecvMessage()
     {
-        async void OnMessage(ResponseMessage msg) => await Task.Run(() =>
+        async void OnMessage(ResponseMessage msg)
         {
             try
             {
@@ -177,14 +177,14 @@ public class MiraiBackend : BotDriver.BotDriver
                 _logger.Info(message.GroupInfo == null
                     ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
                     : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
-                MessageQueueProvider.RecvQueue.Post(message);
+                await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
             }
             catch (Exception e)
             {
                 _logger.Error(e.ToString());
                 _logger.Error($"Unknown data: {msg.Text}");
             }
-        });
+        }
 
         _wsClient.MessageReceived.Subscribe(OnMessage);
         return Task.CompletedTask;
@@ -244,9 +244,9 @@ public class MiraiBackend : BotDriver.BotDriver
 
         var taskList = new List<Task>();
 
-        while (await MessageQueueProvider.SendQueue.OutputAvailableAsync())
+        while (await MessageQueueProvider.SendQueue.Reader.WaitToReadAsync())
         {
-            var s = await MessageQueueProvider.SendQueue.ReceiveAsync();
+            var s = await MessageQueueProvider.SendQueue.Reader.ReadAsync();
 
             switch (s.Type)
             {

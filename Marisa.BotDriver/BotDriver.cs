@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Threading.Tasks.Dataflow;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
@@ -202,7 +201,7 @@ public abstract class BotDriver
                     var target    = message.Location;
                     var exception = e.InnerException?.ToString() ?? e.ToString();
 
-                    MessageSenderProvider.Send(exception, message.Type, target, null);
+                    await MessageSenderProvider.Send(exception, message.Type, target, null);
                 }
 
                 if (ret != null)
@@ -220,9 +219,9 @@ public abstract class BotDriver
 
         var taskList = new List<Task>();
 
-        while (await MessageQueueProvider.RecvQueue.OutputAvailableAsync())
+        while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
         {
-            var messageRecv = MessageQueueProvider.RecvQueue.ReceiveAllAsync();
+            var messageRecv = MessageQueueProvider.RecvQueue.Reader.ReadAllAsync();
 
             taskList.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
             {
