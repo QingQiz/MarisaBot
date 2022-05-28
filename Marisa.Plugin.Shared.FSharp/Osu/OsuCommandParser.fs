@@ -46,8 +46,8 @@ module OsuCommandParser =
         let constructor a b c = { Name = a; BpRank = b; Mode = c }
 
         ((fun r -> constructor "" r None) <&> (rank <* many space <* eos)) // 只有一个1-100的数字，认为是 rank
-        <|> (constructor <&> name <*> rank <*> mode )  // 名字#rank:mode
-        <|> (constructor "" <&> rank <*> mode )        // #rank:mode
+        <|> (constructor <&> name <*> rank <*> mode )                      // 名字#rank:mode
+        <|> (constructor "" <&> rank <*> mode )                            // #rank:mode
         <|> (many space *> eos *> (constructor "" None None |> ret))       // 什么都没有
 
     let parser s = parse osuCommandParser s 0 |> fst
