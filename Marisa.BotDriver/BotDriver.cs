@@ -234,10 +234,13 @@ public abstract class BotDriver
 
                     await foreach (var state in TrigPlugin(plugin, message))
                     {
-                        if (state == MarisaPluginTaskState.CompletedTask) shouldBreak = true;
-                    }
+                        message.Command = command;
 
-                    message.Command = command;
+                        if (state != MarisaPluginTaskState.CompletedTask) continue;
+
+                        shouldBreak = true;
+                        break;
+                    }
 
                     if (shouldBreak) break;
                 }
