@@ -8,8 +8,8 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 public class DxRating
 {
     public readonly long AdditionalRating;
-    public readonly List<SongScore> DxScores = new();
-    public readonly List<SongScore> SdScores = new();
+    public readonly List<SongScore> NewScores = new();
+    public readonly List<SongScore> OldScores = new();
     public readonly string Nickname;
     public readonly bool B50;
 
@@ -18,18 +18,18 @@ public class DxRating
         AdditionalRating = data.additional_rating;
         Nickname         = data.nickname;
         B50              = b50;
-        foreach (var d in data.charts.dx) DxScores.Add(new SongScore(d));
+        foreach (var d in data.charts.dx) NewScores.Add(new SongScore(d));
 
-        foreach (var d in data.charts.sd) SdScores.Add(new SongScore(d));
+        foreach (var d in data.charts.sd) OldScores.Add(new SongScore(d));
 
         if (B50)
         {
-            DxScores.ForEach(s => s.Rating = s.B50Ra());
-            SdScores.ForEach(s => s.Rating = s.B50Ra());
+            NewScores.ForEach(s => s.Rating = s.B50Ra());
+            OldScores.ForEach(s => s.Rating = s.B50Ra());
         }
 
-        DxScores = DxScores.OrderByDescending(s => s.Rating).ToList();
-        SdScores = SdScores.OrderByDescending(s => s.Rating).ToList();
+        NewScores = NewScores.OrderByDescending(s => s.Rating).ToList();
+        OldScores = OldScores.OrderByDescending(s => s.Rating).ToList();
     }
 
     #region Drawer
@@ -142,7 +142,7 @@ public class DxRating
     private Bitmap GetB40Card()
     {
         const int column = 5;
-        var       row    = (SdScores.Count + column - 1) / column + (DxScores.Count + column - 1) / column;
+        var       row    = (OldScores.Count + column - 1) / column + (NewScores.Count + column - 1) / column;
 
         const int cardWidth  = 400;
         const int cardHeight = 200;
@@ -169,9 +169,9 @@ public class DxRating
             var px = pxInit;
             var py = pyInit;
 
-            for (var i = 0; i < SdScores.Count; i++)
+            for (var i = 0; i < OldScores.Count; i++)
             {
-                g.DrawImage(GetScoreCard(SdScores[i]), px, py);
+                g.DrawImage(GetScoreCard(OldScores[i]), px, py);
 
                 if ((i + 1) % 5 == 0)
                 {
@@ -184,7 +184,7 @@ public class DxRating
                 }
             }
 
-            var sdRowCount = (SdScores.Count + column - 1) / column;
+            var sdRowCount = (OldScores.Count + column - 1) / column;
             pxInit = paddingH;
             pyInit = cardHeight * sdRowCount + paddingV * (sdRowCount + 1 + 3);
 
@@ -194,9 +194,9 @@ public class DxRating
             px = pxInit;
             py = pyInit;
 
-            for (var i = 0; i < DxScores.Count; i++)
+            for (var i = 0; i < NewScores.Count; i++)
             {
-                g.DrawImage(GetScoreCard(DxScores[i]), px, py);
+                g.DrawImage(GetScoreCard(NewScores[i]), px, py);
 
                 if ((i + 1) % 5 == 0)
                 {
@@ -215,7 +215,7 @@ public class DxRating
 
     private Bitmap GetRatingCard()
     {
-        var (dxRating, sdRating) = (DxScores.Sum(s => s.Rating), SdScores.Sum(s => s.Rating));
+        var (dxRating, sdRating) = (NewScores.Sum(s => s.Rating), OldScores.Sum(s => s.Rating));
 
         var addRating = B50 ? 0 : AdditionalRating;
 
@@ -307,7 +307,7 @@ public class DxRating
             {
                 g.DrawString(
                     B50
-                        ? $"标准 {sdRating} + 地插 {dxRating}"
+                        ? $"旧谱 {sdRating} + 新谱 {dxRating}"
                         : $"底分 {sdRating + dxRating} + 段位 {addRating}"
                   , font, new SolidBrush(Color.Black), 140, 12);
             }
@@ -368,32 +368,32 @@ public class DxRating
         MaiMaiSong?[] song  = { null, null };
 
         // 计算rating
-        DxScores.ForEach(s => s.Rating = s.Ra());
-        SdScores.ForEach(s => s.Rating = s.Ra());
+        NewScores.ForEach(s => s.Rating = s.Ra());
+        OldScores.ForEach(s => s.Rating = s.Ra());
 
         // 找到旧谱里能推的
-        if (SdScores.Any(s => s.Achievement < 100.5))
+        if (OldScores.Any(s => s.Achievement < 100.5))
         {
-            score[0] = SdScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
+            score[0] = OldScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
         }
 
         // 找到新谱里能推的
-        if (DxScores.Any(s => s.Achievement < 100.5))
+        if (NewScores.Any(s => s.Achievement < 100.5))
         {
-            score[1] = DxScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
+            score[1] = NewScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
         }
 
         // 找到不在b40里但定数不超过b40里最高定数的能推的旧谱
         long minSdRating = 0;
-        if (SdScores.Any())
+        if (OldScores.Any())
         {
-            minSdRating = SdScores.Min(s => s.Rating);
+            minSdRating = OldScores.Min(s => s.Rating);
 
-            var playableSd = SdScores.Select(s => s.Constant).Distinct().Max();
+            var playableSd = OldScores.Select(s => s.Constant).Distinct().Max();
 
             var songListSd = songList
                 .Where(s => s.Info.IsNew == false)
-                .Where(s => SdScores.All(ss => ss.Id != s.Id))
+                .Where(s => OldScores.All(ss => ss.Id != s.Id))
                 .Where(s => s.Constants.Any(c => c <= playableSd && SongScore.Ra(100.5, c) > minSdRating))
                 .ToList();
 
@@ -405,15 +405,15 @@ public class DxRating
 
         // 同上，但是新谱
         long minDxRating = 0;
-        if (DxScores.Any())
+        if (NewScores.Any())
         {
-            minDxRating = DxScores.Min(s => s.Rating);
+            minDxRating = NewScores.Min(s => s.Rating);
 
-            var playableDx = DxScores.Select(s => s.Constant).Distinct().Max();
+            var playableDx = NewScores.Select(s => s.Constant).Distinct().Max();
 
             var songListDx = songList
                 .Where(s => s.Info.IsNew)
-                .Where(s => DxScores.All(ss => ss.Id != s.Id))
+                .Where(s => NewScores.All(ss => ss.Id != s.Id))
                 .Where(s => s.Constants.Any(c => c <= playableDx && SongScore.Ra(100.5, c) > minDxRating))
                 .ToList();
 
