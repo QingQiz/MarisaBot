@@ -157,8 +157,10 @@ public partial class Osu : MarisaPluginBase
 
             if (o != null)
             {
+                var mode = string.IsNullOrEmpty(o.GameMode) ? OsuApi.ModeList[0] : o.GameMode;
+                
                 command = new OsuCommandParser.OsuCommand(
-                    o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(o.GameMode));
+                    o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(mode));
             }
             else
             {

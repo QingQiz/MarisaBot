@@ -36,7 +36,7 @@ public partial class Osu
 
                 bind.OsuUserId   = info.Id;
                 bind.OsuUserName = info.Username;
-                bind.GameMode    = "";
+                bind.GameMode    = OsuApi.ModeList[0];
                 await dbContext.SaveChangesAsync();
                 message.Reply("好了");
             }
@@ -45,7 +45,7 @@ public partial class Osu
                 await dbContext.OsuBinds.AddAsync(new OsuBind
                 {
                     UserId      = sender,
-                    GameMode    = "",
+                    GameMode    = OsuApi.ModeList[0],
                     OsuUserId   = info.Id,
                     OsuUserName = info.Username
                 });
@@ -130,7 +130,7 @@ public partial class Osu
     [MarisaPluginCommand("score")]
     private async Task<MarisaPluginTaskState> Score(Message message)
     {
-        await ReplyMessageByCommand(message, message.Command);
+        await ReplyMessageByCommand(message, $"score {message.Command}");
         return MarisaPluginTaskState.CompletedTask;
     }
 
