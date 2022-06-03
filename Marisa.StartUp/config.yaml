@@ -5,6 +5,12 @@ arcaea:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
   tempPath:     C:\Users\sofee\Desktop\temp\arcaea
   assetsPath:   D:\arcaea_song_assets
+  
+osu:
+  clientId:
+  clientSecret:
+  tempPath:     C:\Users\sofee\Desktop\temp\osu
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Osu
 
 maimai:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\MaiMaiDx
@@ -261,6 +267,9 @@ randomPicture:
     初音未来:
       - miku
       - 39
+    原神:
+      - o
+      - 原
 
 chi:
   # 下馆子类

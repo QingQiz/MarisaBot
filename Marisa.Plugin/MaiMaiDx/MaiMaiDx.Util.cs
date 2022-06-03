@@ -152,7 +152,13 @@ public partial class MaiMaiDx
         Message message,
         string[]? versions = null)
     {
-        var qq = message.Sender!.Id;
+        var qq  = message.Sender!.Id;
+        var ats = message.At().ToList();
+
+        if (ats.Any())
+        {
+            qq = ats.First();
+        }
 
         try
         {
@@ -194,6 +200,11 @@ public partial class MaiMaiDx
         catch (FlurlHttpTimeoutException)
         {
             message.Reply("Timeout");
+            return null;
+        }
+        catch (HttpRequestException e)
+        {
+            message.Reply(e.Message);
             return null;
         }
     }

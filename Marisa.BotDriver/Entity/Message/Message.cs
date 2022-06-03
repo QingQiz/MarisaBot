@@ -44,6 +44,13 @@ public class Message
         return MessageChain!.Messages.Any(m => m.Type == MessageDataType.At && (m as MessageDataAt)!.Target == target);
     }
 
+    public IEnumerable<long> At()
+    {
+        return MessageChain!.Messages
+            .Where(m => m.Type == MessageDataType.At)
+            .Select(m => (m as MessageDataAt)!.Target);
+    }
+
     /// <summary>
     /// 判断是否是纯文本消息
     /// </summary>
