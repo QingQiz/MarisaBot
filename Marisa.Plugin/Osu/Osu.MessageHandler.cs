@@ -106,7 +106,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginCommand("recent")]
+    [MarisaPluginCommand("recent", "rec")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
         await RunCommand(message, "recent");
@@ -131,6 +131,13 @@ public partial class Osu
     private async Task<MarisaPluginTaskState> Score(Message message)
     {
         await ReplyMessageByCommand(message, $"score {message.Command}");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginCommand("bonusPP")]
+    private async Task<MarisaPluginTaskState> BonusPp(Message message)
+    {
+        await RunCommand(message, "bonuspp");
         return MarisaPluginTaskState.CompletedTask;
     }
 
