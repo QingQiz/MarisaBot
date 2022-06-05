@@ -14,7 +14,7 @@ public class MessageChain
     public bool EnableReference = true;
 
     public bool CanBeReferenced => EnableReference && Messages.All(m =>
-        m.Type is not (MessageDataType.Voice or MessageDataType.Nudge));
+        m.Type is not (MessageDataType.Voice or MessageDataType.Nudge or MessageDataType.NewMember));
 
     public static MessageChain FromText(string text)
     {

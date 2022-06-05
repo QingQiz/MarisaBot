@@ -31,6 +31,13 @@ public class Message
         Command      = MessageChain.Text.Trim();
     }
 
+    public Message(MessageSenderProvider sender, params MessageData.MessageData[] md)
+    {
+        MessageChain = new MessageChain(md);
+        _sender      = sender;
+        Command      = MessageChain.Text.Trim();
+    }
+
     public MessageDataId MessageId =>
         (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.Id) as MessageDataId)!;
 

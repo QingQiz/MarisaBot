@@ -40,7 +40,7 @@ public static class MessageDataConverter
             case MessageDataType.Image:
             {
                 var m = data as MessageDataImage;
-                
+
                 return new
                 {
                     type   = "Image",
@@ -134,9 +134,7 @@ public static class MessageDataConverter
             case "NudgeEvent":
             {
                 var message =
-                    new Message(
-                        new MessageChain(new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix)),
-                        ms)
+                    new Message(ms, new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix))
                     {
                         Type = m.subject.kind switch
                         {
@@ -151,6 +149,18 @@ public static class MessageDataConverter
                 {
                     message.GroupInfo = new GroupInfo(m.subject.id, null, null);
                 }
+
+                return message;
+            }
+            case "MemberJoinEvent":
+            {
+                var md = new MessageDataNewMember(m.member.id, m.member.group.id, m.invitor?.id);
+                var message = new Message(ms, md)
+                {
+                    Type = MessageType.GroupMessage,
+                    Sender = new SenderInfo(md.Id, m.member.memberName, null, null),
+                    GroupInfo = new GroupInfo(md.GroupId, "", "")
+                };
 
                 return message;
             }

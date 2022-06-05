@@ -6,7 +6,8 @@ public class EventHandler : MarisaPluginBase
 {
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
-        return message.MessageChain!.Messages.Any(m => m.Type is MessageDataType.Nudge);
+        return message.MessageChain!.Messages.Any(m =>
+            m.Type is MessageDataType.Nudge or MessageDataType.NewMember);
     };
 
     [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
@@ -38,6 +39,26 @@ public class EventHandler : MarisaPluginBase
                 else
                 {
                     message.Reply(word);
+                }
+
+                break;
+            }
+            // 新成员
+            case MessageDataType.NewMember:
+            {
+                var m = (msg as MessageDataNewMember)!;
+
+                // 被人邀请
+                if (m.InvitorId != null)
+                {
+                    message.Reply(new MessageDataAt((long)m.InvitorId),
+                        new MessageDataText("邀请"),
+                        new MessageDataAt(m.Id),
+                        new MessageDataText("加入本群！欢迎！"));
+                }
+                else
+                {
+                    message.Reply(new MessageDataAt(m.Id), new MessageDataText("加入本群！欢迎！"));
                 }
 
                 break;

@@ -24,5 +24,6 @@ public enum MessageDataType
     Forward,
     File,
     MiraiCode,
+    NewMember,
     Unknown
 }
