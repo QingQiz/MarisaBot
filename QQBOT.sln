@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.BotDriver", "Marisa.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Utils", "Marisa.Utils\Marisa.Utils.csproj", "{DF58656A-A9E7-4602-8A26-DE2705E50279}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Backend", "Marisa.Backend\Marisa.Backend.csproj", "{E1B7A528-686E-496D-9E54-BCA3027C94B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.Backend.Mirai", "Marisa.Backend.Mirai\Marisa.Backend.Mirai.csproj", "{E1B7A528-686E-496D-9E54-BCA3027C94B7}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Marisa.Plugin.Shared.FSharp", "Marisa.Plugin.Shared.FSharp\Marisa.Plugin.Shared.FSharp.fsproj", "{531D0858-6720-4415-BFEF-5420D3B7A587}"
 EndProject

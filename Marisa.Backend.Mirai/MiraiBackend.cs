@@ -1,21 +1,18 @@
 ﻿using System.ComponentModel;
-using System.Dynamic;
 using System.Reflection;
+using System.Text.Json;
 using Flurl;
 using log4net;
+using Marisa.Backend.Mirai.MessageDataExt;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.BotDriver.Plugin;
 using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Websocket.Client;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace Marisa.Backend;
+namespace Marisa.Backend.Mirai;
 
 public class MiraiBackend : BotDriver.BotDriver
 {
@@ -50,128 +47,13 @@ public class MiraiBackend : BotDriver.BotDriver
         return sc;
     }
 
-    #region MessageCoverter
-
-    private Message MessageToMessage(dynamic m)
-    {
-        var message = new Message(new MessageChain(m.messageChain), MessageSenderProvider)
-        {
-            Type = m.type switch
-            {
-                "StrangerMessage" => MessageType.StrangerMessage,
-                "FriendMessage"   => MessageType.FriendMessage,
-                "GroupMessage"    => MessageType.GroupMessage,
-                "TempMessage"     => MessageType.TempMessage,
-                _                 => throw new ArgumentOutOfRangeException()
-            }
-        };
-
-        if (message.Type is MessageType.FriendMessage or MessageType.StrangerMessage)
-        {
-            message.Sender =
-                new SenderInfo(m.sender.id, m.sender.nickname, m.sender.remark);
-        }
-        else
-        {
-            message.Sender =
-                new SenderInfo(m.sender.id, m.sender.memberName, permission: m.sender.permission);
-            message.GroupInfo =
-                new GroupInfo(m.sender.group.id, m.sender.group.name, m.sender.group.permission);
-        }
-
-        return message;
-    }
-
-    private Message? EventToMessage(dynamic m)
-    {
-        switch (m.type)
-        {
-            case "NudgeEvent":
-            {
-                var message =
-                    new Message(
-                        new MessageChain(new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix)),
-                        MessageSenderProvider)
-                    {
-                        Type = m.subject.kind switch
-                        {
-                            "Group"  => MessageType.GroupMessage,
-                            "Friend" => MessageType.FriendMessage,
-                            _        => throw new ArgumentOutOfRangeException()
-                        },
-                        Sender = new SenderInfo(m.fromId, null, null, null),
-                    };
-
-                if (message.Type == MessageType.GroupMessage)
-                {
-                    message.GroupInfo = new GroupInfo(m.subject.id, null, null);
-                }
-
-                return message;
-            }
-        }
-
-        return null;
-    }
-
-    private Message? MessageConverter(ResponseMessage msgIn)
-    {
-        var mExpando = JsonConvert.DeserializeObject<ExpandoObject>(msgIn.Text);
-
-        var m = (mExpando as dynamic).data;
-
-        var mDict = (m as IDictionary<string, object>)!;
-
-        if (mDict.ContainsKey("code"))
-        {
-            var code = mDict["code"].ToString();
-            if (code != "0")
-            {
-                _logger.Warn(mDict["msg"]);
-            }
-
-            return null;
-        }
-
-        if (m.type.Contains("Message"))
-        {
-            if (MessageToMessage(m) is Message message)
-            {
-                return message;
-            }
-            else
-            {
-                _logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
-            }
-        }
-        else if (m.type.Contains("Event")) // Event
-        {
-            if (EventToMessage(m) is Message message)
-            {
-                return message;
-            }
-            else
-            {
-                _logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
-            }
-        }
-        else
-        {
-            _logger.Warn($"Unknown message {msgIn.Text}");
-        }
-
-        return null;
-    }
-
-    #endregion
-
     protected override Task RecvMessage()
     {
         async void OnMessage(ResponseMessage msg)
         {
             try
             {
-                var message = MessageConverter(msg);
+                var message = msg.ToMessage(_logger, MessageSenderProvider);
 
                 if (message == null) return;
                 _logger.Info(message.GroupInfo == null

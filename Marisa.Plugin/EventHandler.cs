@@ -6,7 +6,7 @@ public class EventHandler : MarisaPluginBase
 {
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
-        return message.MessageChain!.Messages.Any(m => m.Type == MessageDataType.Nudge);
+        return message.MessageChain!.Messages.Any(m => m.Type is MessageDataType.Nudge);
     };
 
     [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]

@@ -1,4 +1,4 @@
-﻿using Marisa.Backend;
+﻿using Marisa.Backend.Mirai;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marisa.StartUp;
