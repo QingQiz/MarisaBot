@@ -140,6 +140,14 @@ public partial class MaiMaiDx
         {
             ret = MessageChain.FromText("“403 forbidden”");
         }
+        catch (FlurlHttpTimeoutException)
+        {
+            ret = MessageChain.FromText("Timeout");
+        }
+        catch (FlurlHttpException e)
+        {
+            ret = MessageChain.FromText(e.Message);
+        }
 
         return ret;
     }
@@ -202,7 +210,7 @@ public partial class MaiMaiDx
             message.Reply("Timeout");
             return null;
         }
-        catch (HttpRequestException e)
+        catch (FlurlHttpException e)
         {
             message.Reply(e.Message);
             return null;
