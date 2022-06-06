@@ -1,6 +1,7 @@
 ﻿namespace Marisa.Plugin;
 
 [MarisaPlugin]
+[MarisaPluginNoDoc]
 [MarisaPluginTrigger(typeof(EventHandler), nameof(Trigger))]
 public class EventHandler : MarisaPluginBase
 {

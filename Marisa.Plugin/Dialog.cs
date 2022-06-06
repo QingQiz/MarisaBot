@@ -1,5 +1,6 @@
 ﻿namespace Marisa.Plugin;
 
+[MarisaPluginNoDoc]
 [MarisaPlugin(PluginPriority.Dialog)]
 [MarisaPluginCommand(MessageType.GroupMessage | MessageType.FriendMessage)]
 public class Dialog : MarisaPluginBase

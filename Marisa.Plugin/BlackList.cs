@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin;
 
+[MarisaPluginNoDoc]
 [MarisaPluginCommand]
 [MarisaPlugin(PluginPriority.BlackList)]
 public class BlackList : MarisaPluginBase

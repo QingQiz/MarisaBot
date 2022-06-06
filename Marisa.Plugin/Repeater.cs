@@ -1,5 +1,6 @@
 ﻿namespace Marisa.Plugin;
 
+[MarisaPluginNoDoc]
 [MarisaPlugin(PluginPriority.Repeater)]
 [MarisaPluginCommand(MessageType.GroupMessage)]
 public class Repeater: MarisaPluginBase
