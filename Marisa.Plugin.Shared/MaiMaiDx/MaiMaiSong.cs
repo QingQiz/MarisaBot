@@ -194,6 +194,7 @@ public class MaiMaiSong : Song
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
+            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
 
             var x = 0;
             var y = 0;

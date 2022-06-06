@@ -324,49 +324,6 @@ public static class ImageDraw
         return img.Crop(new Rectangle(x, y, w, h));
     }
 
-    public static void DrawStrings(
-        this Graphics g, IEnumerable<(string, Font, Brush)> toDraw, float initX, float initY, float extraPadding = 0)
-    {
-        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-        var x = initX;
-        var y = initY;
-
-        float maxHeight = 0;
-        float height    = 0;
-
-        foreach (var (str, font, color) in toDraw)
-        {
-            if (str.Contains('\n'))
-            {
-                foreach (var s in str.Split('\n'))
-                {
-                    height    = g.MeasureString(s, font).Height;
-                    maxHeight = maxHeight == 0 ? height : maxHeight;
-
-                    g.DrawString(s, font, color, x, y + maxHeight - height);
-
-                    maxHeight =  Math.Max(height, maxHeight);
-                    x         =  initX;
-                    y         += maxHeight + extraPadding;
-                    maxHeight =  0;
-                }
-
-                y         -= height;
-                maxHeight =  height;
-            }
-            else
-            {
-                height    = g.MeasureString(str, font).Height;
-                maxHeight = maxHeight == 0 ? height : maxHeight;
-
-                g.DrawString(str, font, color, x, y + maxHeight - height);
-                maxHeight =  Math.Max(maxHeight, height);
-                x         += g.MeasureString(str, font).Width;
-            }
-        }
-    }
-
     public static Bitmap ResizeX(this Image im, int width)
     {
         var scale = (double)width / im.Width;

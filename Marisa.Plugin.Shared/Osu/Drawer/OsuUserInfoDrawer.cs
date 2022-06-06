@@ -64,7 +64,7 @@ public static class OsuUserInfoDrawer
         // 头
         using (var g = Graphics.FromImage(header))
         {
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
@@ -98,7 +98,7 @@ public static class OsuUserInfoDrawer
         var nameBanner = new Bitmap(imageWidth, 85 + cover.Height);
         using (var g = Graphics.FromImage(nameBanner))
         {
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
@@ -118,7 +118,7 @@ public static class OsuUserInfoDrawer
                 gName.CompositingQuality = CompositingQuality.HighQuality;
                 gName.InterpolationMode  = InterpolationMode.HighQualityBicubic;
                 gName.SmoothingMode      = SmoothingMode.HighQuality;
-                gName.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+                gName.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
 
                 var font = new Font(fontFamilyBold, 24, FontStyle.Bold, GraphicsUnit.Pixel);
 
@@ -222,7 +222,7 @@ public static class OsuUserInfoDrawer
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
 
             const string rankText1 = "全球排名";
             const string rankText2 = "国内/区内排名";
@@ -250,7 +250,7 @@ public static class OsuUserInfoDrawer
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
 
             var history = info.RankHistory.Data.ToArray();
             var min     = history.Min();
@@ -293,7 +293,7 @@ public static class OsuUserInfoDrawer
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint  = TextRenderingHint.AntiAliasGridFit;
 
             var font1 = new Font(fontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
             var font2 = new Font(fontFamily, 16, FontStyle.Bold, GraphicsUnit.Pixel);
@@ -349,7 +349,7 @@ public static class OsuUserInfoDrawer
         var summary = new Bitmap(210, 130);
         using (var g = Graphics.FromImage(summary))
         {
-            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
             var font = new Font(fontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
 

@@ -322,7 +322,7 @@ public class DxRating
             g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode      = SmoothingMode.HighQuality;
             g.DrawImage(ratingCard, 0, 0);
-            g.DrawImage(nameCard, 3, ratingCard.Height    + 10);
+            g.DrawImage(nameCard, 3, ratingCard.Height + 10);
             g.DrawImage(rainbowCard, 0, ratingCard.Height + nameCard.Height + 20);
         }
 
@@ -427,9 +427,9 @@ public class DxRating
 
         // 获取推荐卡片
         card[0] = score[0] == null ? null : GetRecommendCards(score[0]!, songList);
-        card[1] = song[0]  == null ? null : GetRecommendCards(song[0]!, minSdRating);
+        card[1] = song[0] == null ? null : GetRecommendCards(song[0]!, minSdRating);
         card[2] = score[1] == null ? null : GetRecommendCards(score[1]!, songList);
-        card[3] = song[1]  == null ? null : GetRecommendCards(song[1]!, minDxRating);
+        card[3] = song[1] == null ? null : GetRecommendCards(song[1]!, minDxRating);
 
         const int cardHeight = 240;
         const int cardWidth  = 800;
@@ -472,14 +472,14 @@ public class DxRating
         var cover = ResourceManager.GetCover(score.Id);
         var bg    = new Bitmap(800, cover.Height + padding * 2);
 
-        var song  = songList.First(s => s.Id == score.Id);
+        var song = songList.First(s => s.Id == score.Id);
 
         using var g = Graphics.FromImage(bg);
         g.CompositingQuality = CompositingQuality.HighQuality;
         g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
         g.SmoothingMode      = SmoothingMode.HighQuality;
         g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
-        
+
         using var titleFont = new Font("Consolas", 27, FontStyle.Bold);
         using var font      = new Font("Consolas", 18);
         using var fontS     = new Font("Consolas", 14, FontStyle.Italic | FontStyle.Bold);
@@ -500,8 +500,9 @@ public class DxRating
         g.DrawString(lvStr, fontS, new SolidBrush(MaiMaiSong.LevelColor[score.LevelIdx]),
             bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
 
-        g.DrawStrings(new List<(string, Font, Brush)>
-        {
+        var sd = new StringDrawer();
+
+        sd.Add(
             (song.Title, titleFont, Brushes.Black),
             ($"\n当前达成率为: {score.Achievement:F4}\n", font, Brushes.Black),
             ($"    Rating为: {score.Rating}\n", font, Brushes.Black),
@@ -510,10 +511,12 @@ public class DxRating
             ($"    Rating为: {nextR}", font, Brushes.Black),
             ($"(+{nextR - score.Rating})\n", font, Brushes.SpringGreen),
             ("可推", fontH, Brushes.Black),
-            ($"{nextR - score.Rating}", fontH, Brushes.Red),
+            ($" {nextR - score.Rating} ", fontH, Brushes.Red),
             ("分", fontH, Brushes.Black),
-            ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontM, Brushes.Gray),
-        }, x, y);
+            ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontM, Brushes.Gray)
+        );
+
+        sd.Draw(g, x, y);
 
         return bg;
     }
@@ -529,6 +532,7 @@ public class DxRating
         g.CompositingQuality = CompositingQuality.HighQuality;
         g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
         g.SmoothingMode      = SmoothingMode.HighQuality;
+        g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
 
         using var titleFont = new Font("Consolas", 27, FontStyle.Bold);
         using var font      = new Font("Consolas", 18);
@@ -554,18 +558,20 @@ public class DxRating
         g.DrawString(lvStr, fontS, new SolidBrush(MaiMaiSong.LevelColor[constantIndex]),
             bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
 
-        g.DrawStrings(new List<(string, Font, Brush)>
-        {
+        var sd = new StringDrawer(4);
+
+        sd.Add(
             (song.Title, titleFont, Brushes.Black),
             ($"\n歌曲不在你的B40里,地板: {minRating}\n ", font, Brushes.Peru),
             ($"推分到达成率: {nextA:F4}\n", font, Brushes.Black),
             ($"    Rating为: {nextR}", font, Brushes.Black),
             ($"(+{nextR - minRating})\n", font, Brushes.SpringGreen),
             ("可推", fontH, Brushes.Black),
-            ($"{nextR - minRating}", fontH, Brushes.Red),
+            ($" {nextR - minRating} ", fontH, Brushes.Red),
             ("分", fontH, Brushes.Black),
-            ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontM, Brushes.Gray),
-        }, x, y, 4);
+            ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontM, Brushes.Gray)
+        );
+        sd.Draw(g, x, y);
 
         return bg;
     }
