@@ -6,10 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin.Osu;
 
-public partial class Osu
+[MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
+[MarisaPluginCommand("osu!", "osu", "!", "！")]
+public partial class Osu : MarisaPluginBase
 {
     #region 绑定相关
 
+    [MarisaPluginDoc("绑定一个 osu 账号，参数为：osu 的用户名")]
     [MarisaPluginCommand("bind")]
     private static async Task<MarisaPluginTaskState> Bind(Message message, BotDbContext dbContext)
     {
@@ -61,6 +64,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc($"设置当前绑定的账户的默认模式，参数为：osu、taiko、catch 和 mania")]
     [MarisaPluginCommand("setMode", "set mode", "mode")]
     private static async Task<MarisaPluginTaskState> SetMode(Message message, BotDbContext db)
     {
@@ -92,6 +96,7 @@ public partial class Osu
 
     #region 查询相关（继承了猫猫的命令）
 
+    [MarisaPluginDoc("查询某人的个人信息")]
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
@@ -99,6 +104,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询某人最近通过的图")]
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message, BotDbContext db)
     {
@@ -106,6 +112,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询某人最近打的图")]
     [MarisaPluginCommand("recent", "rec")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
@@ -113,6 +120,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询某人 pp 最高的成绩图（bp）")]
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
@@ -120,6 +128,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询某人今天恰到的 pp")]
     [MarisaPluginCommand("todaybp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message, BotDbContext db)
     {
@@ -127,6 +136,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询 *自己* 在某张图上的成绩")]
     [MarisaPluginCommand("score")]
     private async Task<MarisaPluginTaskState> Score(Message message)
     {
@@ -134,6 +144,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
     [MarisaPluginCommand("bonusPP")]
     private async Task<MarisaPluginTaskState> BonusPp(Message message)
     {

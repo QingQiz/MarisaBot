@@ -1,5 +1,6 @@
 ﻿namespace Marisa.Plugin;
 
+[MarisaPluginDoc("魔理沙对你进行恶臭算命，得到你今天的音游运势")]
 [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.Ordinal, "今日运势", "jrys")]
 public class TodayFortune : MarisaPluginBase
 {

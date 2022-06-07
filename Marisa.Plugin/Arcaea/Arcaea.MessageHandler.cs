@@ -10,7 +10,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 搜歌
     /// </summary>
-    [MarisaPluginDoc("搜歌，参数为歌名")]
+    [MarisaPluginDoc("搜歌，参数为：歌名")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "song", "search", "搜索")]
     private MarisaPluginTaskState ArcaeaSearchSong(Message message)
     {
@@ -24,7 +24,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 猜歌排名
     /// </summary>
-    [MarisaPluginDoc("猜歌排名")]
+    [MarisaPluginDoc("Arcaea 猜歌的排名，给出的结果中s,c,w分别是启动猜歌的次数，猜对的次数和猜错的次数")]
     [MarisaPluginSubCommand(nameof(ArcaeaGuess))]
     [MarisaPluginCommand(true, "排名")]
     private MarisaPluginTaskState ArcaeaGuessRank(Message message)
@@ -49,7 +49,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 猜歌
     /// </summary>
-    [MarisaPluginDoc("猜歌")]
+    [MarisaPluginDoc("Arcaea 猜歌，看封面猜曲")]
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState ArcaeaGuess(Message message, long qq)
     {
@@ -64,7 +64,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 听歌猜曲
     /// </summary>
-    [MarisaPluginDoc("听歌猜曲")]
+    [MarisaPluginDoc("Arcaea 猜歌，听歌猜曲")]
     [MarisaPluginSubCommand(nameof(ArcaeaGuess))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, true, "v2")]
     private MarisaPluginTaskState ArcaeaGuessV2(Message message, long qq)
@@ -88,7 +88,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 获取别名
     /// </summary>
-    [MarisaPluginDoc("获取别名，参数为歌名/别名")]
+    [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
     [MarisaPluginSubCommand(nameof(ArcaeaSongAlias))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "get")]
     private MarisaPluginTaskState ArcaeaSongAliasGet(Message message)
@@ -117,7 +117,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 设置别名
     /// </summary>
-    [MarisaPluginDoc("设置别名，参数为歌曲原名 := 歌曲别名")]
+    [MarisaPluginDoc("设置别名，参数为：歌曲原名 := 歌曲别名")]
     [MarisaPluginSubCommand(nameof(ArcaeaSongAlias))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "set")]
     private MarisaPluginTaskState ArcaeaSongAliasSet(Message message)

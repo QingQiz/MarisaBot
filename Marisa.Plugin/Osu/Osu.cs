@@ -9,8 +9,7 @@ using Websocket.Client;
 
 namespace Marisa.Plugin.Osu;
 
-[MarisaPluginCommand("osu!", "osu", "!", "！")]
-public partial class Osu : MarisaPluginBase
+public partial class Osu
 {
     private readonly SemaphoreSlim _recvQueueReaderLock = new(1, 1);
     private readonly WebsocketClient _wsClient;
@@ -131,7 +130,7 @@ public partial class Osu : MarisaPluginBase
             @$"{{""font"":0,""message"":""!{command}"",""message_id"":0,""message_type"":""private"",""post_type"":""message"",""self_id"":0,""sender"":{{""age"":0,""nickname"":"""",""sex"":"""",""user_id"":0}},""sub_type"":""friend"",""target_id"":0,""time"":0,""user_id"":{userId}}}";
     }
 
-    private async Task RunCommand(Message message, string prefix, bool withBpRank=false)
+    private async Task RunCommand(Message message, string prefix, bool withBpRank = false)
     {
         var command = OsuCommandParser.parser(message.Command)?.Value;
 
@@ -158,7 +157,7 @@ public partial class Osu : MarisaPluginBase
             if (o != null)
             {
                 var mode = string.IsNullOrEmpty(o.GameMode) ? OsuApi.ModeList[0] : o.GameMode;
-                
+
                 command = new OsuCommandParser.OsuCommand(
                     o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(mode));
             }
@@ -168,6 +167,7 @@ public partial class Osu : MarisaPluginBase
                     command = new OsuCommandParser.OsuCommand($"[CQ:at,qq={at.Target}]", command.BpRank, command.Mode);
             }
         }
+
         await ReplyMessageByCommand(message, $"{prefix} {command}");
     }
 }
