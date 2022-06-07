@@ -505,7 +505,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     /// 舞萌猜歌
     /// </summary>
     [MarisaPluginDoc("舞萌猜歌，看封面猜曲")]
-    [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜曲", "guess")]
+    [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState MaiMaiDxGuess(Message message, long qq)
     {
         if (message.Command.StartsWith("c:", StringComparison.OrdinalIgnoreCase))
