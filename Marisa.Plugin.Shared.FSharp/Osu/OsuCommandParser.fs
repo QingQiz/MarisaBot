@@ -34,14 +34,22 @@ module OsuCommandParser =
                      else
                          ret <| Some n)
             <|> ret None
+        
+        let modeIdx =
+             let idx = number >>= fun num ->
+                 match num with
+                 | x when x >= 0 && x <= 3 -> ret <| Some x
+                 | _ -> ret None
+
+             let modeName = (string "osu"   *> (Some 0 |> ret)) <|>
+                            (string "taiko" *> (Some 1 |> ret)) <|>
+                            (string "catch" *> (Some 2 |> ret)) <|>
+                            (string "mania" *> (Some 3 |> ret))
+
+             idx <|> modeName 
 
         let mode: Parser<OsuMode option> =
-            (many space *> (char ':' <|> char '：') *> many space *> number
-             >>= fun num ->
-                     match num with
-                     | x when x >= 0 && x <= 3 -> ret <| Some x
-                     | _ -> ret None)
-            <|> ret None
+            (many space *> (char ':' <|> char '：') *> many space *> modeIdx) <|> ret None
 
         let constructor a b c = { Name = a; BpRank = b; Mode = c }
 
