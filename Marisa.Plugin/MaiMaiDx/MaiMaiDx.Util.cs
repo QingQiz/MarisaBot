@@ -156,6 +156,7 @@ public partial class MaiMaiDx
 
             using (var g = Graphics.FromImage(im))
             {
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 for (var j = 0; j < rows; j++)
                 {
                     for (var i = 0; i < cols; i++)
@@ -225,6 +226,7 @@ public partial class MaiMaiDx
             var bg = new Bitmap(im.Width, im.Height + 50);
             using (var g = Graphics.FromImage(bg))
             {
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 using var font = new Font("Consolas", 30, FontStyle.Bold | FontStyle.Italic);
                 g.DrawString(key, font, Brushes.Black, padding, padding);
                 g.DrawImage(im, 0, 50);

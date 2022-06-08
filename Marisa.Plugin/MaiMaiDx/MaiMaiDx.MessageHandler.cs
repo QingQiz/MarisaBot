@@ -14,7 +14,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     #region Summary
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
-    [MarisaPluginCommand("summary")]
+    [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> MaiMaiSummary(Message message)
     {
         message.Reply("错误的命令格式");
