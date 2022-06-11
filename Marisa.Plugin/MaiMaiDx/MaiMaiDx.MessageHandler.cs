@@ -22,7 +22,63 @@ public partial class MaiMaiDx : MarisaPluginBase
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2")]
+    [MarisaPluginDoc("旧谱的成绩汇总，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginCommand("old", "旧谱")]
+    private async Task<MarisaPluginTaskState> MaiMaiSummaryOld(Message message)
+    {
+        // 旧谱的操作和新谱的一样，所以直接复制了，为这两个抽象一层有点不值
+        var groupedSong = _songDb.SongList
+            .Where(song => !song.Info.IsNew)
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.i >= 2)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.song.Levels[x.i]);
+
+        var scores = await GetAllSongScores(message);
+        if (scores == null)
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
+        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        // 一定不是空的
+        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("新谱的成绩汇总，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginCommand("new", "新谱")]
+    private async Task<MarisaPluginTaskState> MaiMaiSummaryNew(Message message)
+    {
+        // 旧谱的操作和新谱的一样，所以直接复制了，为这两个抽象一层有点不值
+        var groupedSong = _songDb.SongList
+            .Where(song => song.Info.IsNew)
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.i >= 2)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.song.Levels[x.i]);
+
+        var scores = await GetAllSongScores(message);
+        if (scores == null)
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
+        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        // 一定不是空的
+        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数 或 定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> MaiMaiSummaryBase(Message message)
@@ -328,15 +384,93 @@ public partial class MaiMaiDx : MarisaPluginBase
 
         return MarisaPluginTaskState.CompletedTask;
     }
+    
+    #endregion
+
+    #region 随机
+
+    /// <summary>
+    /// 随机
+    /// </summary>
+    [MarisaPluginDoc("随机给出一个符合条件的歌曲")]
+    [MarisaPluginCommand("random", "rand", "随机")]
+    private async Task<MarisaPluginTaskState> MaiMaiDxRandomSong(Message message)
+    {
+        message.Reply("错误的命令格式");
+        return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand("base", "b", "定数")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongBase(Message message)
+    {
+        RandomSelectResult(SelectSongByBaseRange(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出符合指定谱师约束的歌，参数为：谱师")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand("charter", "谱师")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongCharter(Message message)
+    {
+        RandomSelectResult(SelectSongByCharter(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出符合指定等级约束的歌，参数为：等级")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand("level", "lv", "等级")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongLevel(Message message)
+    {
+        RandomSelectResult(SelectSongByLevel(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand("bpm")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongBpm(Message message)
+    {
+        RandomSelectResult(SelectSongByBpmRange(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出符合指定曲师约束的歌，参数为：曲师")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand("artist", "a")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongArtist(Message message)
+    {
+        RandomSelectResult(SelectSongByArtist(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出一个新歌，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand(true, "new", "新谱")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongNew(Message message)
+    {
+        RandomSelectResult(SelectSongWhenNew(), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("随机给出一个老歌，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
+    [MarisaPluginCommand(true, "old", "旧谱")]
+    private Task<MarisaPluginTaskState> MaiMaiDxRandomSongOld(Message message)
+    {
+        RandomSelectResult(SelectSongWhenOld(), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
 
     #endregion
 
-    #region list
+    #region 筛选
 
     /// <summary>
     /// 给出歌曲列表
     /// </summary>
-    [MarisaPluginDoc("给出符合条件的歌曲")]
+    [MarisaPluginDoc("给出符合条件的歌曲，结果过多时回复 p1、p2 等获取额外的信息")]
     [MarisaPluginCommand("list", "ls")]
     private async Task<MarisaPluginTaskState> MaiMaiDxListSong(Message message)
     {
@@ -349,33 +483,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("base", "b", "定数")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongBase(Message message)
     {
-        var param1 = message.Command;
-
-        if (param1.Contains('-'))
-        {
-            if (double.TryParse(param1.Split('-')[0], out var base1) &&
-                double.TryParse(param1.Split('-')[1], out var base2))
-            {
-                message.Reply(_songDb.GetSearchResultWithRandomTake(
-                    _songDb.SongList.Where(s => s.Constants.Any(b => b >= base1 && b <= base2)).ToList()
-                ));
-
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-        }
-        else
-        {
-            if (double.TryParse(param1, out var @base))
-            {
-                message.Reply(_songDb.GetSearchResultWithRandomTake(
-                    _songDb.SongList.Where(s => s.Constants.Contains(@base)).ToList()
-                ));
-
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-        }
-
-        message.Reply("错误的命令格式");
+        MultiPageSelectResult(SelectSongByBaseRange(message.Command), message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -384,12 +492,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("charter", "谱师")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongCharter(Message message)
     {
-        var charter = message.Command;
-        message.Reply(_songDb.GetSearchResultWithRandomTake(
-            _songDb.SongList.Where(s => s.Charters
-                .Any(c => c.Contains(charter, StringComparison.OrdinalIgnoreCase))
-            ).ToList()
-        ));
+        MultiPageSelectResult(SelectSongByCharter(message.Command), message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -398,10 +501,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("level", "lv", "等级")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongLevel(Message message)
     {
-        var lv = message.Command;
-        message.Reply(_songDb.GetSearchResultWithRandomTake(
-            _songDb.SongList.Where(s => s.Levels.Contains(lv)).ToList()
-        ));
+        MultiPageSelectResult(SelectSongByLevel(message.Command), message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -410,33 +510,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("bpm")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongBpm(Message message)
     {
-        var param1 = message.Command;
-
-        if (param1.Contains('-'))
-        {
-            if (long.TryParse(param1.Split('-')[0], out var bpm1) &&
-                long.TryParse(param1.Split('-')[1], out var bpm2))
-            {
-                message.Reply(_songDb.GetSearchResultWithRandomTake(
-                    _songDb.SongList.Where(s => s.Info.Bpm >= bpm1 && s.Info.Bpm <= bpm2).ToList()
-                ));
-
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-        }
-        else
-        {
-            if (long.TryParse(param1, out var bpm))
-            {
-                message.Reply(_songDb.GetSearchResultWithRandomTake(
-                    _songDb.SongList.Where(s => s.Info.Bpm == bpm).ToList()
-                ));
-
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-        }
-
-        message.Reply("错误的命令格式");
+        MultiPageSelectResult(SelectSongByBpmRange(message.Command), message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -445,18 +519,25 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("artist", "a")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongArtist(Message message)
     {
-        var param1 = message.Command;
+        MultiPageSelectResult(SelectSongByArtist(message.Command), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
 
-        var regex = new Regex($@"\b{param1}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [MarisaPluginDoc("给出新谱面，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxListSong))]
+    [MarisaPluginCommand(true, "new", "新谱")]
+    private Task<MarisaPluginTaskState> MaiMaiDxListSongNew(Message message)
+    {
+        MultiPageSelectResult(SelectSongWhenNew(), message);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
 
-        var ls1 = _songDb.SongList.Where(s => regex.IsMatch(s.Artist)).ToList();
-
-        message.Reply(_songDb.GetSearchResultWithRandomTake(
-            ls1.Any()
-                ? ls1.ToList()
-                : _songDb.SongList.Where(
-                    s => s.Info.Artist.Contains(param1, StringComparison.OrdinalIgnoreCase)).ToList()
-        ));
+    [MarisaPluginDoc("给出旧谱面，无参数")]
+    [MarisaPluginSubCommand(nameof(MaiMaiDxListSong))]
+    [MarisaPluginCommand(true, "old", "旧谱")]
+    private Task<MarisaPluginTaskState> MaiMaiDxListSongOld(Message message)
+    {
+        MultiPageSelectResult(SelectSongWhenOld(), message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 

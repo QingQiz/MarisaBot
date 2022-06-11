@@ -247,35 +247,6 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         };
     }
 
-    public MessageChain GetSearchResultWithRandomTake(IReadOnlyList<TSong> songs)
-    {
-        switch (songs.Count)
-        {
-            case 0:
-                return MessageChain.FromText("“查无此歌”");
-            case 1:
-                return new MessageChain(
-                    new MessageDataText(songs[0].Title),
-                    MessageDataImage.FromBase64(songs[0].GetImage())
-                );
-        }
-
-        var rand = new Random();
-
-        var ret = string.Join('\n',
-            songs.OrderBy(_ => rand.Next())
-                .Take(SongDbConfig.PageSize)
-                .OrderBy(x => x.Id)
-                .Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}"));
-
-        if (songs.Count > SongDbConfig.PageSize)
-        {
-            ret += "\n" + $"太多了（{songs.Count}），随机给出{SongDbConfig.PageSize}个";
-        }
-
-        return MessageChain.FromText(ret);
-    }
-
     #endregion
 
     #region Alias
