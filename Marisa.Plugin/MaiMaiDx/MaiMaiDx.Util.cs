@@ -351,10 +351,10 @@ public partial class MaiMaiDx
         {
             case 0:
                 message.Reply("“查无此歌”");
-                break;
+                return;
             case 1:
                 message.Reply(new MessageDataText(songs[0].Title), MessageDataImage.FromBase64(songs[0].GetImage()));
-                break;
+                return;
         }
 
         message.Reply(DisplaySong(0));
