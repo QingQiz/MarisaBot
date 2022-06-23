@@ -21,8 +21,8 @@ commander:
   - 642191352
 
 randomPicture:
-  imageDatabasePath:       C:\Users\sofee\Desktop\pic
-  imageDatabaseKanKanPath: C:\Users\sofee\Desktop\pic\看看
+  imageDatabasePath:       E:\pic
+  imageDatabaseKanKanPath: E:\看看
   availableFileExt:
     - jpg
     - png
@@ -31,6 +31,8 @@ randomPicture:
     - R18
     - backup
   alias:
+    赛马娘:
+      - 马
     古明地恋:
       - 恋
       - 小石头
@@ -294,7 +296,7 @@ chi:
   - 那家汉堡很厚的汉堡店
   - 喷射战士（不想吃可以再抽一次）
   - 八嘎King
-  # 面，粉
+  # 面，粉，米饭
   - 老碗面
   - 清真兰州拉面
   - 牛阿达喊你来吃面了，先喝汤，后面爷忘了
@@ -305,6 +307,8 @@ chi:
   - 宽窄巷
   - 哥妹俩土豆粉
   - 魏儿家儿凉儿皮儿
+  - 黄焖鸡米饭
+  - 池奈（吃奶？
   # 小摊
   - 西门小摊的炒面
   - 孜然夹馍
@@ -322,10 +326,9 @@ chi:
   - 三汁儿闷锅
   - 老板 娘的烤肉店
   - 要不试试踩个雷？踩完记得回来加到列表里
-  - 带超买个泡面得了
+  - 买个泡面得了
   - 韩国拌饭
-  - 带唐西市饺子
-  - 黄焖鸡米饭
+  - 饺满天下！
   - 西北风
   - 狗屎
   - 油炸臭鞋垫

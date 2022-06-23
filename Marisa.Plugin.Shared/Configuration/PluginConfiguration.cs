@@ -21,8 +21,6 @@ public class PluginConfiguration
     
     public RandomPictureConfiguration RandomPicture { get; set; }
     
-    public string HelpPath { get; set; }
-
     public string FfmpegPath { get; set; }
     
     public OsuConfiguration Osu { get; set; }
