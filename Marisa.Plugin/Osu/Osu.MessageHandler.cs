@@ -113,7 +113,7 @@ public partial class Osu : MarisaPluginBase
     }
 
     [MarisaPluginDoc("查询某人最近打的图")]
-    [MarisaPluginCommand("recent", "rec")]
+    [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
         await RunCommand(message, "recent");

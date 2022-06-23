@@ -78,7 +78,7 @@ public partial class MaiMaiDx : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数 或 定数1-定数2")]
+    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> MaiMaiSummaryBase(Message message)
@@ -402,7 +402,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     [MarisaPluginDoc("随机给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
-    [MarisaPluginCommand("base", "b", "定数")]
+    [MarisaPluginCommand("base", "定数")]
     private Task<MarisaPluginTaskState> MaiMaiDxRandomSongBase(Message message)
     {
         RandomSelectResult(SelectSongByBaseRange(message.Command), message);
@@ -480,7 +480,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     [MarisaPluginDoc("给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxListSong))]
-    [MarisaPluginCommand("base", "b", "定数")]
+    [MarisaPluginCommand("base", "定数")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongBase(Message message)
     {
         MultiPageSelectResult(SelectSongByBaseRange(message.Command), message);
