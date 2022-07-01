@@ -315,6 +315,12 @@ public partial class MaiMaiDx : MarisaPluginBase
         {
             Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, hMessage =>
             {
+                // 不是纯文本
+                if (!hMessage.IsPlainText())
+                {
+                    return Task.FromResult(MarisaPluginTaskState.Canceled);
+                }
+
                 // 不是 id
                 if (!long.TryParse(hMessage.Command.Trim(), out var songId))
                 {
