@@ -76,7 +76,8 @@ public class MaiMaiSong : Song
         "maimai FiNALE",
         "maimai でらっくす",
         "maimai でらっくす PLUS",
-        "maimai でらっくす Splash"
+        "maimai でらっくす Splash",
+        "maimai でらっくす Splash PLUS",
     };
 
     public static readonly List<string> LevelName = new()

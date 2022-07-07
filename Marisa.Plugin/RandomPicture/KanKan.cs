@@ -33,7 +33,7 @@ public class KanKan : MarisaPluginBase
     {
         if (string.IsNullOrWhiteSpace(m.Command))
         {
-            m.Reply("看你妈，没有，爬！");
+            // m.Reply("看你妈，没有，爬！");
 
             return MarisaPluginTaskState.CompletedTask;
         }
