@@ -6,6 +6,7 @@ using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Websocket.Client;
+using Websocket.Client.Models;
 
 namespace Marisa.Plugin.Osu;
 
@@ -15,6 +16,7 @@ public partial class Osu
     private readonly WebsocketClient _wsClient;
     private readonly ILog _logger;
     private readonly Channel<(long Id, string Recv)> _recvQueue = Channel.CreateUnbounded<(long, string)>();
+    private long? _wait = null;
 
     public Osu(ILog logger)
     {
@@ -41,8 +43,6 @@ public partial class Osu
     {
         var regex = new Regex(@"""user_id"":(\d*)");
 
-        _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnect to 猫猫"); });
-
         async void OnNext(ResponseMessage next)
         {
             var t  = next.Text;
@@ -50,18 +50,30 @@ public partial class Osu
             await _recvQueue.Writer.WriteAsync((long.Parse(id), t));
         }
 
+        async void OnReconnect(ReconnectionInfo info)
+        {
+            _logger.Warn("Reconnect to 猫猫");
+
+            if (_wait != null)
+            {
+                await _recvQueue.Writer.WriteAsync(((long)_wait, @"{""message"":""失败了！""}"));
+            }
+        }
+
         _wsClient.MessageReceived.Subscribe(OnNext);
+        _wsClient.ReconnectionHappened.Subscribe(OnReconnect);
 
         await _wsClient.Start();
 
-        var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
-
-        var s = BuildCommand("heartbeat", 114514);
-
-        while (await timer.WaitForNextTickAsync())
-        {
-            _wsClient.Send(s);
-        }
+        // heart beat
+        // var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+        //
+        // var s = BuildCommand("heartbeat", 114514);
+        //
+        // while (await timer.WaitForNextTickAsync())
+        // {
+        //     _wsClient.Send(s);
+        // }
     }
 
     private async Task<string> GetReplyByUserId(long userId)
@@ -71,6 +83,7 @@ public partial class Osu
         var res      = "";
 
         await _recvQueueReaderLock.WaitAsync();
+        _wait = userId;
 
         while (await _recvQueue.Reader.WaitToReadAsync())
         {
@@ -84,6 +97,7 @@ public partial class Osu
             recvList.Add(recv);
         }
 
+        _wait = null;
         _recvQueueReaderLock.Release();
 
         foreach (var recv in recvList)
