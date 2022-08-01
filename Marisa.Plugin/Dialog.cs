@@ -46,15 +46,18 @@ public class Dialog : MarisaPluginBase
                     return MarisaPluginTaskState.CompletedTask;
                 // handler 没处理，交给其它插件处理
                 case MarisaPluginTaskState.NoResponse:
-                    return MarisaPluginTaskState.NoResponse;
+                    Handlers.Remove(key);
+                    var rep = MessageHandler(message);
+                    Handlers.Add(key, handler);
+                    return rep;
                 // 插件自闭了，请求删除自己
                 case MarisaPluginTaskState.Canceled:
                     Handlers.Remove(key);
-                    return MarisaPluginTaskState.NoResponse;
+                    return MessageHandler(message);
                 // 错误的状态，删除这个异常的 handler（虽然不太可能发生）
                 default:
                     Handlers.Remove((groupId, senderId));
-                    return MarisaPluginTaskState.NoResponse;
+                    return MessageHandler(message);
             }
         }
     }
