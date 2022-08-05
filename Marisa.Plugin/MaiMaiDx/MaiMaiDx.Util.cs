@@ -332,17 +332,18 @@ public partial class MaiMaiDx
     {
         string DisplaySong(int page)
         {
+            var p = Math.Max(0, page - 1);
             var ret = string.Join('\n',
                 songs
-                    .Skip(page * SongDbConfig.PageSize)
+                    .Skip(p * SongDbConfig.PageSize)
                     .Take(SongDbConfig.PageSize)
                     .OrderBy(x => x.Id)
                     .Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}"));
 
             if (songs.Count <= SongDbConfig.PageSize) return ret;
 
-            var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize - 1;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {page}/{pageAll}";
+            var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
+            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {page + 1}/{pageAll}";
 
             return ret;
         }
