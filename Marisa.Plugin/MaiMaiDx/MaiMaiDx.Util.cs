@@ -343,7 +343,7 @@ public partial class MaiMaiDx
             if (songs.Count <= SongDbConfig.PageSize) return ret;
 
             var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {page + 1}/{pageAll}";
+            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}";
 
             return ret;
         }
