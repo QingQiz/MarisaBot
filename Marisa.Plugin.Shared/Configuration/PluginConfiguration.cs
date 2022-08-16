@@ -10,7 +10,7 @@ public class PluginConfiguration
 
     public long[] Commander { get; set; }
 
-    public string[] Dirty { get; set; }
+    public List<string> Dirty { get; set; }
     
     public TodayFortune Fortune { get; set; }
     

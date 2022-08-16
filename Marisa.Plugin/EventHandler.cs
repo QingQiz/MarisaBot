@@ -25,7 +25,7 @@ public class EventHandler : MarisaPluginBase
 
                 if (m.Target != qq) break;
 
-                var word = ConfigurationManager.Configuration.Dirty.RandomTake();
+                var word = ConfigurationManager.Configuration.Dirty.Take(31).ToList().RandomTake();
 
                 if (ConfigurationManager.Configuration.Commander.Contains(m.FromId)) word = "别戳啦！";
 
