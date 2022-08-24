@@ -2,7 +2,7 @@
 
 namespace Marisa.Plugin;
 
-[MarisaPluginDoc("执行一些命令")]
+[MarisaPluginNoDoc]
 [MarisaPlugin(PluginPriority.Command)]
 [MarisaPluginCommand(":cmd")]
 public class Command : MarisaPluginBase
@@ -14,7 +14,6 @@ public class Command : MarisaPluginBase
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
-    [MarisaPluginDoc("启动一个 SHELL")]
     [MarisaPluginCommand("shell")]
     private static MarisaPluginTaskState Shell(Message m)
     {
@@ -84,7 +83,6 @@ public class Command : MarisaPluginBase
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
-    [MarisaPluginDoc("重启bot")]
     [MarisaPluginCommand("reboot", "restart")]
     private static MarisaPluginTaskState Reboot(Message m)
     {
