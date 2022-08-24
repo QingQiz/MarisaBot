@@ -132,11 +132,16 @@ public partial class MaiMaiDx
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, MaiMaiSong Song)>> groupedSong,
         IReadOnlyDictionary<(long SongId, long LevelIdx), SongScore> scores)
     {
-        const int column  = 8;
-        const int height  = 120;
-        const int padding = 20;
+        const int column      = 8;
+        const int height      = 120;
+        const int padding     = 40;
+        const int borderWidth = 10;
 
         var imList = new List<Bitmap>();
+
+        var borderSss = ResourceManager.GetImage("border_SSS.png");
+        var borderSs  = ResourceManager.GetImage("border_SS.png");
+        var borderS   = ResourceManager.GetImage("border_S.png");
 
         foreach (var group in groupedSong)
         {
@@ -171,6 +176,7 @@ public partial class MaiMaiDx
                         var x     = (i + 1) * padding + height * i;
                         var y     = (j + 1) * padding + height * j;
                         var cover = ResourceManager.GetCover(song.Id).Resize(height, height);
+
                         g.DrawImage(cover, x, y);
 
                         // 难度指示器（小三角）
@@ -178,8 +184,8 @@ public partial class MaiMaiDx
                         path.AddLines(new[]
                         {
                             new Point(x, y),
-                            new Point(x + 30, y),
-                            new Point(x, y + 30)
+                            new Point(x + 12, y),
+                            new Point(x, y + 12)
                         });
                         path.CloseFigure();
                         g.FillPath(new SolidBrush(MaiMaiSong.LevelColor[levelIdx]), path);
@@ -190,6 +196,20 @@ public partial class MaiMaiDx
                         if (!scores.ContainsKey((song.Id, levelIdx))) continue;
 
                         var score = scores[(song.Id, levelIdx)];
+
+                        // 边框
+                        if (score.Achievement >= 100)
+                        {
+                            g.DrawImage(borderSss, x - borderWidth, y - borderWidth);
+                        }
+                        else if (score.Achievement >= 99)
+                        {
+                            g.DrawImage(borderSs, x - borderWidth, y - borderWidth);
+                        }
+                        else if (score.Achievement >= 97)
+                        {
+                            g.DrawImage(borderS, x - borderWidth, y - borderWidth);
+                        }
 
                         var achievement = score.Achievement.ToString("F4").Split('.');
 
@@ -225,13 +245,60 @@ public partial class MaiMaiDx
 
             _break: ;
 
-            var bg = new Bitmap(im.Width, im.Height + 50);
+            var bg = new Bitmap(im.Width, im.Height + 70);
             using (var g = Graphics.FromImage(bg))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                using var font = new Font("Consolas", 30, FontStyle.Bold | FontStyle.Italic);
-                g.DrawString(key, font, Brushes.Black, padding, padding);
-                g.DrawImage(im, 0, 50);
+                using var font = new Font("Consolas", 35, FontStyle.Bold | FontStyle.Italic);
+
+                var groupScores = group
+                    .Select(tuple => scores.ContainsKey((tuple.Song.Id, tuple.LevelIdx)) ? scores[(tuple.Song.Id, tuple.LevelIdx)] : null)
+                    .ToList();
+
+                // 根据 ap 和 fc 的状态确定 Key 的颜色
+                var minFc = groupScores.Select(s => (s?.Fc ?? "") switch
+                {
+                    "fc"  => 1,
+                    "fcp" => 2,
+                    "ap"  => 3,
+                    "app" => 4,
+                    _     => 0
+                }).Min();
+
+                var fontColor = minFc switch
+                {
+                    1 => Brushes.LimeGreen,
+                    2 => Brushes.LawnGreen,
+                    3 => Brushes.Goldenrod,
+                    4 => Brushes.Gold,
+                    _ => Brushes.Black
+                };
+
+                g.DrawString(key, font, fontColor, padding - borderWidth, padding);
+
+                var measure = g.MeasureString(key, font);
+
+                // 如果全 sss/ss/s 则标记出来
+                var minAch = groupScores.Min(x => x?.Achievement ?? 0);
+
+                var imgRank = minAch switch
+                {
+                    >= 100.5 => ResourceManager.GetImage("rank_sssp.png"),
+                    >= 100   => ResourceManager.GetImage("rank_sss.png"),
+                    >= 99.5  => ResourceManager.GetImage("rank_ssp.png"),
+                    >= 99    => ResourceManager.GetImage("rank_ss.png"),
+                    >= 98    => ResourceManager.GetImage("rank_sp.png"),
+                    >= 97    => ResourceManager.GetImage("rank_s.png"),
+                    _        => null
+                };
+
+                if (imgRank != null)
+                {
+                    imgRank = imgRank.Resize(0.8);
+                    g.DrawImage(imgRank, padding - borderWidth + measure.Width, padding + (measure.Height - imgRank.Height) / 2);
+                }
+
+                g.DrawImage(im, 0, 70);
             }
 
             imList.Add(bg);
@@ -320,6 +387,7 @@ public partial class MaiMaiDx
         {
             message.Reply("EMPTY");
         }
+
         message.Reply(MessageDataImage.FromBase64(songs.RandomTake().GetImage()));
     }
 
@@ -375,6 +443,7 @@ public partial class MaiMaiDx
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 }
             }
+
             return Task.FromResult(MarisaPluginTaskState.Canceled);
         });
     }

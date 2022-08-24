@@ -11,7 +11,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
 public partial class MaiMaiDx : MarisaPluginBase
 {
-    #region Summary
+    #region 汇总 / summary
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
     [MarisaPluginCommand("summary", "sum")]
@@ -179,30 +179,41 @@ public partial class MaiMaiDx : MarisaPluginBase
 
         if (version == null)
         {
-            message.Reply("可用的版本号有：\n" + string.Join('\n', MaiMaiSong.Plates));
-        }
-        else
-        {
-            var scores = await GetAllSongScores(message, new[] { version });
-            if (scores == null)
+            var v = ConfigurationManager.Configuration.MaiMai.Version
+                .Where(x => x.Value
+                    .Contains(message.Command.Trim(), StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!v.Any())
             {
-                return MarisaPluginTaskState.NoResponse;
+                message.Reply("可用的版本号有：\n" + string.Join('\n', MaiMaiSong.Plates) + "\n（或者你也可以用一些别名）");
+                return MarisaPluginTaskState.CompletedTask;
             }
 
-            var groupedSong = _songDb.SongList
-                .Where(song => song.Version == version)
-                .Select(song => song.Constants
-                    .Select((constant, i) => (constant, i, song)))
-                .SelectMany(s => s)
-                .Where(data => data.i >= 2)
-                .OrderByDescending(x => x.constant)
-                .GroupBy(x => x.song.Levels[x.i]);
-
-            var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
-
-            // 不可能是 null
-            message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+            version = v.First().Key;
         }
+
+        var versions = version.Split(',');
+        var scores   = await GetAllSongScores(message, versions);
+
+        if (scores == null)
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
+        var groupedSong = _songDb.SongList
+            .Where(song => versions.Contains(song.Version, StringComparer.OrdinalIgnoreCase))
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.i >= 3)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.song.Levels[x.i]);
+
+        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+
+        // 不可能是 null
+        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -390,7 +401,7 @@ public partial class MaiMaiDx : MarisaPluginBase
 
         return MarisaPluginTaskState.CompletedTask;
     }
-    
+
     #endregion
 
     #region 随机
