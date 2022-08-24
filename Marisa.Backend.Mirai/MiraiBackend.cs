@@ -53,7 +53,7 @@ public class MiraiBackend : BotDriver.BotDriver
         {
             try
             {
-                var message = msg.ToMessage(_logger, MessageSenderProvider);
+                var message = msg.ToMessage(MessageSenderProvider);
 
                 if (message == null) return;
                 _logger.Info(message.GroupInfo == null

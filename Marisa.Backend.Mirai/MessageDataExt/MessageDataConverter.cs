@@ -157,8 +157,8 @@ public static class MessageDataConverter
                 var md = new MessageDataNewMember(m.member.id, m.member.group.id, m.invitor?.id);
                 var message = new Message(ms, md)
                 {
-                    Type = MessageType.GroupMessage,
-                    Sender = new SenderInfo(md.Id, m.member.memberName, null, null),
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
                     GroupInfo = new GroupInfo(md.GroupId, "", "")
                 };
 
@@ -173,16 +173,15 @@ public static class MessageDataConverter
     /// 将 websocket 的接收消息转化为 <see cref="Message"/>
     /// </summary>
     /// <param name="msgIn"></param>
-    /// <param name="logger"></param>
     /// <param name="ms"></param>
     /// <returns></returns>
-    public static Message? ToMessage(this ResponseMessage msgIn, ILog logger, MessageSenderProvider ms)
+    public static Message? ToMessage(this ResponseMessage msgIn, MessageSenderProvider ms)
     {
         var mExpando = JsonConvert.DeserializeObject<ExpandoObject>(msgIn.Text);
+        var m        = (mExpando as dynamic).data;
+        var mDict    = (m as IDictionary<string, object>)!;
 
-        var m = (mExpando as dynamic).data;
-
-        var mDict = (m as IDictionary<string, object>)!;
+        var logger = LogManager.GetLogger(nameof(MessageDataConverter));
 
         if (mDict.ContainsKey("code"))
         {
