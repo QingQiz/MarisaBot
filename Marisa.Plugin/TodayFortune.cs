@@ -10,7 +10,7 @@ public class TodayFortune : MarisaPluginBase
 
         // 四个常数分别是：Prime[114514]、Prime[1919810]、Prime[114514 ^ 1919810]、Prime[114514 + 1919810]
         return (int)((((now.Year * now.Day * id) ^ 1504831) + ((now.Month * now.Day * id) ^ 31066753) +
-                      ((now.Day  * now.Day * id) ^ 30680207)) % 33046393);
+            ((now.Day * now.Day * id) ^ 30680207)) % 33046393);
     }
 
     [MarisaPluginCommand(true, "")]
@@ -33,12 +33,21 @@ public class TodayFortune : MarisaPluginBase
         var ne = e2.Negative.RandomTake(rand);
         var g  = config.RhythmGames.RandomTake(rand);
         var d  = config.Direction.RandomTake(rand);
-        var p = config.Position.RandomTake(rand);
+        var p  = config.Position.RandomTake(rand);
 
         var now = DateTime.Now;
 
+        var emoji = now.Month switch
+        {
+            >= 12 => "⛄",
+            >= 9  => "🍂",
+            >= 6  => "☀️",
+            >= 3  => "🌸",
+            _     => "⛄",
+        };
+
         var header =
-            $"📅 今天是 {now:yyyy 年 M 月 d 日}\n⛄ 农历{ChinaDate.GetYear(now)}{ChinaDate.GetMonth(now)}{ChinaDate.GetDay(now)}";
+            $"📅 今天是 {now:yyyy 年 M 月 d 日}\n{emoji} 农历{ChinaDate.GetYear(now)}{ChinaDate.GetMonth(now)}{ChinaDate.GetDay(now)}";
 
         if (!string.IsNullOrEmpty(ChinaDate.GetChinaHoliday(now)))
         {
