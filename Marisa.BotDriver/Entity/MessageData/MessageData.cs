@@ -1,6 +1,6 @@
 ﻿namespace Marisa.BotDriver.Entity.MessageData;
 
-public class MessageData
+public abstract class MessageData
 {
-    public MessageDataType Type;
+    public abstract MessageDataType Type { get; }
 }

@@ -1,9 +1,10 @@
-﻿namespace Marisa.BotDriver.Entity.MessageData;
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Marisa.BotDriver.Entity.MessageData;
 
 public class MessageDataNudge : MessageData
 {
-    public long Target;
-    public long FromId;
+    public readonly long Target;
+    public readonly long FromId;
     public long SubjectId;
     public string Action;
     public string Suffix;
@@ -15,6 +16,7 @@ public class MessageDataNudge : MessageData
         SubjectId = subjectId;
         Action    = action;
         Suffix    = suffix;
-        Type      = MessageDataType.Nudge;
     }
+
+    public override MessageDataType Type => MessageDataType.Nudge;
 }

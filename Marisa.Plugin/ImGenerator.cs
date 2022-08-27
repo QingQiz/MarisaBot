@@ -2,6 +2,7 @@
 
 namespace Marisa.Plugin;
 
+[MarisaPluginDisabled]
 [MarisaPluginDoc("生成无兆亿元风格的图片，参数为：A/B")]
 [MarisaPluginCommand("生成")]
 public class ImGenerator : MarisaPluginBase

@@ -2,13 +2,15 @@
 
 public class MessageDataId : MessageData
 {
-    public long Id;
-    public long Time;
+    public readonly long Id;
+    // ReSharper disable once MemberCanBePrivate.Global
+    public readonly long Time;
 
     public MessageDataId(long id, long time)
     {
         Id   = id;
         Time = time;
-        Type = MessageDataType.Id;
     }
+
+    public override MessageDataType Type => MessageDataType.Id;
 }

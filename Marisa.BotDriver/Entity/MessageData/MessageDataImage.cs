@@ -11,7 +11,6 @@ public class MessageDataImage : MessageData
     {
         return new MessageDataImage
         {
-            Type   = MessageDataType.Image,
             Base64 = base64
         };
     }
@@ -20,7 +19,6 @@ public class MessageDataImage : MessageData
     {
         return new MessageDataImage
         {
-            Type = MessageDataType.Image,
             Url  = url
         };
     }
@@ -29,8 +27,9 @@ public class MessageDataImage : MessageData
     {
         return new MessageDataImage
         {
-            Type = MessageDataType.Image,
             Path =  path,
         };
     }
+
+    public override MessageDataType Type => MessageDataType.Image;
 }

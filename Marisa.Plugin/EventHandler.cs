@@ -7,8 +7,11 @@ public class EventHandler : MarisaPluginBase
 {
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
-        return message.MessageChain!.Messages.Any(m =>
-            m.Type is MessageDataType.Nudge or MessageDataType.NewMember);
+        return message.MessageChain!.Messages.Any(m => m.Type is
+            MessageDataType.Nudge or
+            MessageDataType.NewMember or 
+            MessageDataType.MemberLeave
+        );
     };
 
     [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
@@ -16,6 +19,7 @@ public class EventHandler : MarisaPluginBase
     {
         var msg = message.MessageChain!.Messages.First(m => m.Type != MessageDataType.Id);
 
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (msg.Type)
         {
             // 戳一戳
@@ -64,26 +68,24 @@ public class EventHandler : MarisaPluginBase
 
                 break;
             }
-            case MessageDataType.Quote:
-            case MessageDataType.At:
-            case MessageDataType.AtAll:
-            case MessageDataType.Face:
-            case MessageDataType.Text:
-            case MessageDataType.Image:
-            case MessageDataType.FlashImage:
-            case MessageDataType.Voice:
-            case MessageDataType.Xml:
-            case MessageDataType.Json:
-            case MessageDataType.App:
-            case MessageDataType.Dice:
-            case MessageDataType.MusicShare:
-            case MessageDataType.Forward:
-            case MessageDataType.File:
-            case MessageDataType.MiraiCode:
-            case MessageDataType.Id:
-            case MessageDataType.Unknown:
-            default:
-                throw new ArgumentOutOfRangeException();
+            case MessageDataType.MemberLeave:
+            {
+                var m = (msg as MessageDataMemberLeave)!;
+
+                if (m.Kicker == null)
+                {
+                    message.Reply($"{m.Name} ({m.Id}) 退群了");
+                }
+                else
+                {
+                    message.Reply(new MessageDataText($"{m.Name} ({m.Id}) 被"),
+                        new MessageDataAt((long)m.Kicker),
+                        new MessageDataText("踢了")
+                    );
+                }
+
+                break;
+            }
         }
 
         return MarisaPluginTaskState.CompletedTask;

@@ -11,6 +11,7 @@ public class MessageDataNewMember : MessageData
         Id        = id;
         GroupId   = groupId;
         InvitorId = invitorId;
-        Type      = MessageDataType.NewMember;
     }
+
+    public override MessageDataType Type => MessageDataType.NewMember;
 }

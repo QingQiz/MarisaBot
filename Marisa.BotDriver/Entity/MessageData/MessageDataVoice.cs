@@ -2,9 +2,9 @@
 
 public class MessageDataVoice : MessageData
 {
-    public string? VoiceId = null;
-    public string? Url = null;
-    public string? Path = null;
+    public readonly string? VoiceId = null;
+    public readonly string? Url = null;
+    public readonly string? Path = null;
     public string? Base64;
     public long Length;
 
@@ -13,7 +13,8 @@ public class MessageDataVoice : MessageData
         return new MessageDataVoice
         {
             Base64 = b64,
-            Type   = MessageDataType.Voice
         };
     }
+
+    public override MessageDataType Type => MessageDataType.Voice;
 }

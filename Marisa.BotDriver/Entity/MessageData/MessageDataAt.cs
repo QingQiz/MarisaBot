@@ -2,13 +2,14 @@
 
 public class MessageDataAt : MessageData
 {
-    public long Target;
-    public string Display;
+    public readonly long Target;
+    public readonly string Display;
 
     public MessageDataAt(long target, string display = "")
     {
-        Type    = MessageDataType.At;
         Target  = target;
         Display = display;
     }
+
+    public override MessageDataType Type => MessageDataType.At;
 }

@@ -2,8 +2,5 @@
 
 public class MessageDataUnknown : MessageData
 {
-    public MessageDataUnknown()
-    {
-        Type = MessageDataType.Unknown;
-    }
+    public override MessageDataType Type => MessageDataType.Unknown;
 }

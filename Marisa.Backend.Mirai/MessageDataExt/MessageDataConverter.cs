@@ -164,6 +164,28 @@ public static class MessageDataConverter
 
                 return message;
             }
+            case "MemberLeaveEventKick":
+            {
+                var md = new MessageDataMemberLeave(m.member.id, m.member.memberName, m.@operator.id);
+                var message = new Message(ms, md)
+                {
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
+                    GroupInfo = new GroupInfo(m.member.group.id, "", "")
+                };
+                return message;
+            }
+            case "MemberLeaveEventQuit":
+            {
+                var md = new MessageDataMemberLeave(m.member.id, m.member.memberName);
+                var message = new Message(ms, md)
+                {
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
+                    GroupInfo = new GroupInfo(m.member.group.id, "", "")
+                };
+                return message;
+            }
         }
 
         return null;
