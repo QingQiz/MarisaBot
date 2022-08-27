@@ -28,5 +28,8 @@ public enum MessageDataType
     // Event
     NewMember,
     MemberLeave,
+    BotMute,
+    BotUnmute,
+    // others
     Unknown
 }

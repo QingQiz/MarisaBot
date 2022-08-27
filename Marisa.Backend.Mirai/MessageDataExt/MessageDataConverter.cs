@@ -159,7 +159,7 @@ public static class MessageDataConverter
                 {
                     Type      = MessageType.GroupMessage,
                     Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
-                    GroupInfo = new GroupInfo(md.GroupId, "", "")
+                    GroupInfo = new GroupInfo(md.GroupId, m.member.group.name, null)
                 };
 
                 return message;
@@ -171,7 +171,7 @@ public static class MessageDataConverter
                 {
                     Type      = MessageType.GroupMessage,
                     Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
-                    GroupInfo = new GroupInfo(m.member.group.id, "", "")
+                    GroupInfo = new GroupInfo(m.member.group.id, m.member.group.name, null)
                 };
                 return message;
             }
@@ -182,9 +182,51 @@ public static class MessageDataConverter
                 {
                     Type      = MessageType.GroupMessage,
                     Sender    = new SenderInfo(md.Id, m.member.memberName, null, null),
-                    GroupInfo = new GroupInfo(m.member.group.id, "", "")
+                    GroupInfo = new GroupInfo(m.member.group.id, m.member.group.name, null)
                 };
                 return message;
+            }
+            case "GroupMuteAllEvent":
+            {
+                MessageData md;
+
+                if (m.current)
+                {
+                    md = new MessageDataBotMute(m.group.id);
+                }
+                else
+                {
+                    md = new MessageDataBotUnmute(m.group.id);
+                }
+
+                return new Message(ms, md)
+                {
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(m.@operator.id, m.@operator.memberName, null, null),
+                    GroupInfo = new GroupInfo(m.group.id, m.group.name, null)
+                };
+            }
+            case "BotMuteEvent":
+            {
+                var md = new MessageDataBotMute(m.@operator.group.id, m.durationSeconds);
+
+                return new Message(ms, md)
+                {
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(m.@operator.id, m.@operator.memberName, null, null),
+                    GroupInfo = new GroupInfo(m.@operator.group.id, m.@operator.group.name, null)
+                };
+            }
+            case "BotUnmuteEvent":
+            {
+                var md = new MessageDataBotUnmute(m.@operator.group.id);
+
+                return new Message(ms, md)
+                {
+                    Type      = MessageType.GroupMessage,
+                    Sender    = new SenderInfo(m.@operator.id, m.@operator.memberName, null, null),
+                    GroupInfo = new GroupInfo(m.@operator.group.id, m.@operator.group.name, null)
+                };
             }
         }
 
