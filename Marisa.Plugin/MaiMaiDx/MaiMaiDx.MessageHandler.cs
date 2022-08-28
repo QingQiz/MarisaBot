@@ -206,7 +206,7 @@ public partial class MaiMaiDx : MarisaPluginBase
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
-            .Where(data => data.i >= 3)
+            .Where(data => data.i == 3)
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.song.Levels[x.i]);
 
