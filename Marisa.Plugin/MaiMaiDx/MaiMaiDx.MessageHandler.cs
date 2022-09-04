@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.MaiMaiDx;
@@ -9,6 +10,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPluginDoc("音游 maimai DX 的相关功能")]
 [MarisaPlugin(PluginPriority.MaiMaiDx)]
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class MaiMaiDx : MarisaPluginBase
 {
     #region 汇总 / summary
@@ -286,7 +288,7 @@ public partial class MaiMaiDx : MarisaPluginBase
     [MarisaPluginCommand("b40", "查分")]
     private static async Task<MarisaPluginTaskState> MaiMaiDxB40(Message message)
     {
-        var ret = await GetB40Card(message, false);
+        var ret = await GetB40Card(message);
 
         message.Reply(ret);
 
@@ -419,7 +421,8 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     [MarisaPluginDoc("随机给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxRandomSong))]
-    [MarisaPluginCommand("base", "定数")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(ListBaseTrigger))]
+    [MarisaPluginCommand("base", "b", "定数")]
     private Task<MarisaPluginTaskState> MaiMaiDxRandomSongBase(Message message)
     {
         RandomSelectResult(SelectSongByBaseRange(message.Command), message);
@@ -497,7 +500,8 @@ public partial class MaiMaiDx : MarisaPluginBase
 
     [MarisaPluginDoc("给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxListSong))]
-    [MarisaPluginCommand("base", "定数")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(ListBaseTrigger))]
+    [MarisaPluginCommand("base", "b", "定数")]
     private Task<MarisaPluginTaskState> MaiMaiDxListSongBase(Message message)
     {
         MultiPageSelectResult(SelectSongByBaseRange(message.Command), message);

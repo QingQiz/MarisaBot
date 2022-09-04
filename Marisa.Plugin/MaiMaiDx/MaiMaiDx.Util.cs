@@ -10,6 +10,20 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    #region triggers
+
+    private static MarisaPluginTrigger.PluginTrigger ListBaseTrigger => (message, _) =>
+    {
+        if (message.Command.StartsWith("b", StringComparison.OrdinalIgnoreCase))
+        {
+            return !message.Command.StartsWith("bpm", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return true;
+    };
+
+    #endregion
+    
     #region rating
 
     private static async Task<DxRating> GetDxRating(string? username, long? qq, bool b50 = false)
