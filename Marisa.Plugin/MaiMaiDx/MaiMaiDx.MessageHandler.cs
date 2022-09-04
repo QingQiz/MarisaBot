@@ -80,7 +80,7 @@ public partial class MaiMaiDx : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2")]
+    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2 或 定数")]
     [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> MaiMaiSummaryBase(Message message)
@@ -91,12 +91,17 @@ public partial class MaiMaiDx : MarisaPluginBase
             return res ? c : -1;
         }).ToList();
 
-        if (constants.Count != 2 || constants.Any(c => c < 0))
+        if (constants.Count is > 2 or < 1 || constants.Any(c => c < 1) || constants.Any(c => c > 15))
         {
             message.Reply("错误的命令格式");
         }
         else
         {
+            if (constants.Count == 1)
+            {
+                constants.Add(constants[0]);
+            }
+
             // 太大的话画图会失败，所以给判断一下
             if (constants[1] - constants[0] > 3)
             {
