@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marisa.BotDriver.Plugin.Trigger;
@@ -13,6 +12,10 @@ public class MarisaPluginTrigger: Attribute
 
     public readonly PluginTrigger Trigger;
 
+
+    public MarisaPluginTrigger(string triggerName, MessageType target = (MessageType)0b11) : this(typeof(MarisaPluginTrigger), triggerName, target)
+    {
+    }
 
     /// <summary>
     /// 使用触发器的形式触发插件，当传入的触发器返回 true 时，插件被触发

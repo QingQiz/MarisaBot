@@ -2,7 +2,7 @@
 
 [MarisaPluginDoc("从作者图库里取出某人的图，例如：看看魔理沙")]
 [MarisaPluginCommand("看看", "kk")]
-[MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
+[MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
 public class KanKan : MarisaPluginBase
 {
     private static string PicDbPath => ConfigurationManager.Configuration.RandomPicture.ImageDatabaseKanKanPath;

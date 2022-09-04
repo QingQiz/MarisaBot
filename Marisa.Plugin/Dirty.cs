@@ -4,7 +4,7 @@
 [MarisaPluginCommand("魔理沙骂我")]
 public class Dirty : MarisaPluginBase
 {
-    [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private MarisaPluginTaskState Handler(Message message)
     {
         var word = ConfigurationManager.Configuration.Dirty.RandomTake();

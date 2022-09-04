@@ -36,7 +36,7 @@ public class Chi : MarisaPluginBase
         return Zuo(id) ? "生吃你妈 问这么多还不知道吃啥饿死你个臭傻逼" : ConfigurationManager.Configuration.Chi.RandomTake();
     }
 
-    [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private MarisaPluginTaskState Proc(Message message)
     {
         var sender = message.Sender!.Id;

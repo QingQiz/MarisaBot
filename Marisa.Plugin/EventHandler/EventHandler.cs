@@ -14,7 +14,7 @@ public partial class EventHandler : MarisaPluginBase
         );
     };
 
-    [MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
     private MarisaPluginTaskState Handler(Message message, long qq)
     {
         var msg = message.MessageChain!.Messages.First(m => m.Type != MessageDataType.Id);

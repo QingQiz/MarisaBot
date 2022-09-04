@@ -4,7 +4,7 @@ namespace Marisa.Plugin;
 
 [MarisaPluginDoc("偷窥作者屏幕（？）")]
 [MarisaPluginCommand(":peek")]
-[MarisaPluginTrigger(typeof(MarisaPluginTrigger), nameof(MarisaPluginTrigger.PlainTextTrigger))]
+[MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
 public class Peek : MarisaPluginBase
 {
     private bool _peekEnabled = true;
