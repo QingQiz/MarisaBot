@@ -719,13 +719,13 @@ public partial class MaiMaiDx : MarisaPluginBase
     /// <summary>
     /// 分数线，达到某个达成率rating会上升的线
     /// </summary>
-    [MarisaPluginDoc("给出某定数歌曲在达到什么成绩时可以使得到的 rating 变化，参数为：歌曲定数")]
+    [MarisaPluginDoc("给出定数对应的所有 rating 或 rating 对应的所有定数，参数为：歌曲定数 或 预期rating")]
     [MarisaPluginCommand("line", "分数线")]
-    private static MarisaPluginTaskState MaiMaiDxSongLine(Message message)
+    private static MarisaPluginTaskState MaiMaiDxRatingLine(Message message)
     {
         if (double.TryParse(message.Command, out var constant))
         {
-            if (constant <= 15.0)
+            if (constant is <= 15.0 and >= 1)
             {
                 var a   = 96.9999;
                 var ret = "达成率 -> Rating";
@@ -736,6 +736,36 @@ public partial class MaiMaiDx : MarisaPluginBase
                     var ra = SongScore.Ra(a, constant);
                     ret = $"{ret}\n{a:000.0000} -> {ra}";
                 }
+
+                message.Reply(ret);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            if (constant > 15)
+            {
+                var result = new List<(double Constant, double Achievement)>();
+                var ret    = "定数 -> 达成率 -> rating\n";
+
+                Enumerable.Range(1, 150)
+                    .Where(rat => SongScore.Ra(100.5, rat / 10.0) >= constant && SongScore.Ra(50, rat / 10.0) <= constant)
+                    .ToList()
+                    .ForEach(rat =>
+                    {
+                        var a = 49.0;
+                        while (a < 100.5)
+                        {
+                            a = SongScore.NextRa(a, rat / 10.0);
+                            var ra = SongScore.Ra(a, rat / 10.0);
+
+                            if (ra == (int)constant)
+                            {
+                                result.Add((rat / 10.0, a));
+                                break;
+                            }
+                        }
+                    });
+
+                ret += string.Join('\n', result.Select(x => $"{x.Constant:00.0} -> {x.Achievement:000.0000} -> {(int)constant}"));
 
                 message.Reply(ret);
                 return MarisaPluginTaskState.CompletedTask;
