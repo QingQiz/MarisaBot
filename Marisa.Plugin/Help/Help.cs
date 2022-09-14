@@ -1,5 +1,8 @@
-﻿using System.Drawing;
-using Marisa.Plugin.Shared.Help;
+﻿using Marisa.Plugin.Shared.Help;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Help;
 
@@ -7,26 +10,24 @@ namespace Marisa.Plugin.Help;
 [MarisaPluginCommand(true, "help", "帮助")]
 public partial class Help : MarisaPluginBase
 {
-    private Bitmap? _bitmap;
+    private Image<Rgba32>? _image;
 
     [MarisaPluginCommand]
     private MarisaPluginTaskState Handler(Message message, IEnumerable<MarisaPluginBase> plugins)
     {
-        if (_bitmap == null)
+        if (_image == null)
         {
             var helpDocs = GetHelp(plugins);
 
             var bm    = HelpDoc.DrawHelpList(helpDocs)!;
-            var bmRes = new Bitmap(bm.Width + 30, bm.Height + 30);
-            var g     = Graphics.FromImage(bmRes);
+            var bmRes = new Image<Rgba32>(bm.Width + 30, bm.Height + 30);
 
-            g.Clear(Color.White);
-            g.DrawImage(bm, 15, 15);
+            bmRes.Mutate(i => i.Fill(Color.White).DrawImage(bm, 15, 15));
 
-            _bitmap = bmRes;
+            _image = bmRes;
         }
 
-        message.Reply(MessageDataImage.FromBase64(_bitmap.ToB64()));
+        message.Reply(MessageDataImage.FromBase64(_image.ToB64()));
 
         return MarisaPluginTaskState.CompletedTask;
     }

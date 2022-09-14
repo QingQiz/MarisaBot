@@ -1,21 +1,20 @@
-﻿using System.Drawing;
+﻿using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Utils;
 
 public class StringDrawer
 {
-    private readonly Graphics _g;
     private readonly float _linePadding;
 
     public StringDrawer(float linePadding = 0)
     {
-        var bm = new Bitmap(1, 1);
-        _g           = Graphics.FromImage(bm);
         _linePadding = linePadding;
     }
 
-    private readonly List<List<(string Text, Font Font, Brush Brush)>> _textCache = new();
-    private List<List<SizeF>>? _textMeasure;
+    private readonly List<List<(string Text, Font Font, Color Color )>> _textCache = new();
+    private List<List<FontRectangle>>? _textMeasure;
     private readonly List<(float X, float Y)> _position = new();
 
     private bool _newLine = true;
@@ -24,7 +23,7 @@ public class StringDrawer
     /// 添加一堆各不相同的字符串
     /// </summary>
     /// <param name="strings"></param>
-    public void Add(params (string, Font, Brush)[] strings)
+    public void Add(params (string, Font, Color)[] strings)
     {
         foreach (var valueTuple in strings)
         {
@@ -38,7 +37,7 @@ public class StringDrawer
     /// <param name="f"></param>
     /// <param name="b"></param>
     /// <param name="text"></param>
-    public void Add(Font f, Brush b, params string[] text)
+    public void Add(Font f, Color b, params string[] text)
     {
         foreach (var t in text)
         {
@@ -51,7 +50,7 @@ public class StringDrawer
     /// </summary>
     /// <param name="f"></param>
     /// <param name="strings"></param>
-    public void Add(Font f, params (string, Brush)[] strings)
+    public void Add(Font f, params (string, Color)[] strings)
     {
         foreach (var s in strings)
         {
@@ -64,7 +63,7 @@ public class StringDrawer
     /// </summary>
     /// <param name="b"></param>
     /// <param name="strings"></param>
-    public void Add(Brush b, params (string, Font)[] strings)
+    public void Add(Color b, params (string, Font)[] strings)
     {
         foreach (var s in strings)
         {
@@ -78,13 +77,13 @@ public class StringDrawer
     /// <param name="t"></param>
     /// <param name="f"></param>
     /// <param name="b"></param>
-    public void Add(string t, Font f, Brush b)
+    public void Add(string t, Font f, Color b)
     {
         _textMeasure = null;
         // 新创建一行
         if (_newLine)
         {
-            _textCache.Add(new List<(string Text, Font Font, Brush Brush)>());
+            _textCache.Add(new List<(string Text, Font Font, Color Color)>());
             _newLine = false;
         }
 
@@ -109,11 +108,11 @@ public class StringDrawer
         _newLine = false;
     }
 
-    private List<List<SizeF>> MeasureText()
+    private List<List<FontRectangle>> MeasureText()
     {
         return _textCache.Select(
             tc => tc.Select(
-                t => _g.MeasureString(t.Text, t.Font, 0, StringFormat.GenericTypographic)).ToList()).ToList();
+                t => t.Text.Measure(t.Font)).ToList()).ToList();
     }
 
     public SizeF Measure()
@@ -138,7 +137,7 @@ public class StringDrawer
         return new SizeF(noneEmptyLineWidth, h);
     }
 
-    public void Draw(Graphics g, float posX = 0, float posY = 0)
+    public void Draw(Image image, float posX = 0, float posY = 0)
     {
         _textMeasure ??= MeasureText();
 
@@ -171,8 +170,11 @@ public class StringDrawer
                 var c = _textCache[i][j];
                 // text measure
                 var m = _textMeasure[i][j];
-                g.DrawString(c.Text, c.Font, c.Brush, posX + x, posY + y + (lineH - m.Height),
-                    StringFormat.GenericTypographic);
+
+                var x1 = x;
+                var y1 = y;
+                image.Mutate(im => im.DrawText(c.Text, c.Font, c.Color, posX + x1, posY + y1 - (lineH - m.Height)));
+
                 // update x to next point
                 x += m.Width;
             }

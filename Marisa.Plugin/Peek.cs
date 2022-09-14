@@ -1,4 +1,7 @@
 ﻿using System.Drawing;
+using System.Runtime.InteropServices;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin;
 
@@ -11,9 +14,6 @@ public class Peek : MarisaPluginBase
 
     private static string CaptureScreen(bool hide = true)
     {
-        const int w = 1440;
-        const int h = 810;
-
         var bitmap = new Bitmap(2560, 1440);
 
         using (var g = Graphics.FromImage(bitmap))
@@ -21,14 +21,25 @@ public class Peek : MarisaPluginBase
             g.CopyFromScreen(0, 0, 0, 0, bitmap.Size, CopyPixelOperation.SourceCopy);
         }
 
-        return hide
-            ? bitmap.Resize(w, h).Blur(new Rectangle(0, 0, w, h), 4).ToB64()
-            : bitmap.ToB64();
+        var im = bitmap.ToImageSharpImage<Rgba32>();
+
+        if (hide)
+        {
+            im.Mutate(i => i.Resize(0.5).GaussianBlur(3));
+        }
+
+        return im.ToB64();
     }
 
     [MarisaPluginCommand]
     private MarisaPluginTaskState Handler(Message message)
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            message.Reply("暂时停用的功能");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         const long authorId = 642191352L;
         var        senderId = message.Sender!.Id;
 
@@ -48,7 +59,7 @@ public class Peek : MarisaPluginBase
                 chain = MessageChain.FromImageB64(CaptureScreen(senderId != authorId));
                 break;
             default:
-                chain = MessageChain.FromText("Denied");
+                chain = MessageChain.FromText("哒咩哒哟～");
                 break;
         }
             

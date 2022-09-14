@@ -1,10 +1,24 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using SixLabors.Fonts;
 
 namespace Marisa.Utils;
 
 public static class StringExt
 {
+    /// <summary>
+    /// 测量文本大小
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="font"></param>
+    /// <returns></returns>
+    public static FontRectangle Measure(this string text, Font font)
+    {
+        var option = ImageDraw.GetTextOptions(font);
+
+        return TextMeasurer.Measure(text, option);
+    }
+
     /// <summary>
     /// 和原始的 string.StartWith 类似，只不过同时检查多个
     /// </summary>

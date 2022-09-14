@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
@@ -17,5 +17,5 @@ public abstract class Song
     public abstract string MaxLevel();
     public abstract string GetImage();
 
-    public abstract Bitmap GetCover();
+    public abstract Image GetCover();
 }

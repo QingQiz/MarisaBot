@@ -6,6 +6,7 @@ using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
 using Marisa.Utils;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.Processing;
 using static Marisa.Plugin.Shared.Dialog.Dialog;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
@@ -370,10 +371,11 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                         case 2:
                         {
                             var cover = song.GetCover();
+                            cover.Mutate(i => i.RandomCut(cover.Width / 3, cover.Height / 3));
 
                             hint = new MessageChain(
                                 new MessageDataText("封面裁剪："),
-                                MessageDataImage.FromBase64(cover.RandomCut(cover.Width / 3, cover.Height / 3).ToB64())
+                                MessageDataImage.FromBase64(cover.ToB64())
                             );
                             break;
                         }
@@ -469,11 +471,13 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         var cw = cover.Width / widthDiv;
         var ch = cover.Height / widthDiv;
 
+        cover.Mutate(i => i.RandomCut(cw, ch));
+
         if (StartGuess(song, message, qq))
         {
             message.Reply(
                 new MessageDataText("猜曲模式启动！"),
-                MessageDataImage.FromBase64(cover.RandomCut(cw, ch).ToB64()),
+                MessageDataImage.FromBase64(cover.ToB64()),
                 new MessageDataText("艾特我+你的答案以参加猜曲\n答案可以是 `歌曲名`、`歌曲id` 或 `id歌曲id`\n\n发送 ”结束猜曲“ 来退出猜曲模式")
             );
         }

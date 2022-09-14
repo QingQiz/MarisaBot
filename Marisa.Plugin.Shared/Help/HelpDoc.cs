@@ -1,7 +1,7 @@
-﻿using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
-using Marisa.Utils;
+﻿using Marisa.Utils;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Marisa.Plugin.Shared.Help;
 
@@ -17,9 +17,9 @@ public class HelpDoc
         Commands = commands.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
     }
 
-    public Bitmap GetImage(int depth = 1)
+    public Image GetImage(int depth = 1)
     {
-        var font1 = new Font("Microsoft YaHei", 22, FontStyle.Regular, GraphicsUnit.Pixel);
+        var font1 = new Font(SystemFonts.Get("Microsoft YaHei"), 22, FontStyle.Regular);
 
         const int subCmdMarginX = 30;
         const int subCmdMarginY = 15;
@@ -28,17 +28,17 @@ public class HelpDoc
 
         for (var i = 0; i < Commands.Count - 1; i++)
         {
-            sd.Add(Commands[i], font1, Brushes.DeepPink);
-            sd.Add("、", font1, Brushes.Black);
+            sd.Add(Commands[i], font1, Color.DeepPink);
+            sd.Add("、", font1, Color.Black);
         }
 
         if (Commands.Any())
         {
-            sd.Add(Commands.Last(), font1, Brushes.DeepPink);
-            sd.Add(font1, Brushes.Black, "：");
+            sd.Add(Commands.Last(), font1, Color.DeepPink);
+            sd.Add(font1, Color.Black, "：");
         }
 
-        sd.Add(Help, font1, Brushes.Black);
+        sd.Add(Help, font1, Color.Black);
 
         var subHelp = DrawHelpList(SubHelp);
 
@@ -47,25 +47,21 @@ public class HelpDoc
         var bmW = Math.Max((int)measure.Width, (subHelp?.Width ?? -subCmdMarginX) + subCmdMarginX);
         var bmH = (int)measure.Height + (subHelp?.Height ?? -subCmdMarginY) + subCmdMarginY;
 
-        var bm = new Bitmap(bmW, bmH);
-        var g  = Graphics.FromImage(bm);
+        var bm = new Image<Rgba32>(bmW, bmH);
 
-        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-        g.SmoothingMode     = SmoothingMode.HighQuality;
+        bm.Clear(Color.White);
 
-        g.Clear(Color.White);
-
-        sd.Draw(g);
+        sd.Draw(bm);
         
         if (subHelp != null)
         {
-            g.DrawImage(subHelp, subCmdMarginX, measure.Height + subCmdMarginY);
+            bm.DrawImage(subHelp, subCmdMarginX, (int)(measure.Height + subCmdMarginY));
         }
 
         return bm;
     }
 
-    public static Bitmap? DrawHelpList(IEnumerable<HelpDoc> docs)
+    public static Image? DrawHelpList(IEnumerable<HelpDoc> docs)
     {
         const int padding = 15;
 
@@ -76,22 +72,19 @@ public class HelpDoc
             return null;
         }
 
-        var bm = new Bitmap(ims.Max(im => im.Width),
+        var bm = new Image<Rgba32>(ims.Max(im => im.Width),
             ims.Sum(im => im.Height) + padding * (ims.Count - 1));
 
-        var g = Graphics.FromImage(bm);
-        g.SmoothingMode = SmoothingMode.HighQuality;
-
-        g.Clear(Color.White);
+        bm.Clear(Color.White);
 
         var y = 0;
         foreach (var im in ims.Take(ims.Count - 1))
         {
-            g.DrawImage(im, 0, y);
+            bm.DrawImage(im, 0, y);
             y += im.Height + padding;
         }
 
-        g.DrawImage(ims.Last(), 0, y);
+        bm.DrawImage(ims.Last(), 0, y);
 
         return bm;
     }
