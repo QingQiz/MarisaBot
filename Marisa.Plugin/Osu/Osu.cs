@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
 using log4net;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.FSharp.Osu;
@@ -12,11 +11,9 @@ namespace Marisa.Plugin.Osu;
 
 public partial class Osu
 {
-    private readonly SemaphoreSlim _recvQueueReaderLock = new(1, 1);
     private readonly WebsocketClient _wsClient;
     private readonly ILog _logger;
-    private readonly Channel<(long Id, string Recv)> _recvQueue = Channel.CreateUnbounded<(long, string)>();
-    private long? _wait = null;
+    private readonly Dictionary<long, (Message Message, DateTime Time)> _waiting = new();
 
     public Osu(ILog logger)
     {
@@ -41,94 +38,77 @@ public partial class Osu
 
     public override async Task BackgroundService()
     {
-        var regex = new Regex(@"""user_id"":(\d*)");
-
-        async void OnNext(ResponseMessage next)
+        void OnNext(ResponseMessage next)
         {
-            var t  = next.Text;
-            var id = regex.Match(t).Groups[1].Value;
-            await _recvQueue.Writer.WriteAsync((long.Parse(id), t));
+            var t  = new Regex(@"""message"":""(.*?)""").Match(next.Text).Groups[1].Value;
+            var id = long.Parse(new Regex(@"""user_id"":(\d*)").Match(next.Text).Groups[1].Value);
+
+            Message message;
+
+            lock (_waiting)
+            {
+                if (!_waiting.ContainsKey(id)) return;
+
+                message = _waiting[id].Message;
+            }
+
+            if (string.IsNullOrEmpty(t))
+            {
+                message.Reply("猫猫不理魔理沙！");
+            }
+            else
+            {
+                if (t.StartsWith("[CQ:image"))
+                {
+                    var regex1 = new Regex(@"\[CQ:image,file=base64://(.*?)\]");
+                    message.Reply(MessageDataImage.FromBase64(regex1.Match(t).Groups[1].Value));
+                }
+                else
+                {
+                    message.Reply(t.Replace("猫猫", "魔理沙问猫猫，她说她"));
+                }
+            }
+
+            lock (_waiting) _waiting.Remove(id);
         }
 
-        async void OnReconnect(ReconnectionInfo info)
+        void OnReconnect(ReconnectionInfo info)
         {
             _logger.Warn("Reconnect to 猫猫");
-
-            if (_wait != null)
-            {
-                await _recvQueue.Writer.WriteAsync(((long)_wait, @"{""message"":""失败了！""}"));
-            }
         }
 
         _wsClient.MessageReceived.Subscribe(OnNext);
         _wsClient.ReconnectionHappened.Subscribe(OnReconnect);
 
         await _wsClient.Start();
-
-        // heart beat
-        // var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
-        //
-        // var s = BuildCommand("heartbeat", 114514);
-        //
-        // while (await timer.WaitForNextTickAsync())
-        // {
-        //     _wsClient.Send(s);
-        // }
     }
 
-    private async Task<string> GetReplyByUserId(long userId)
+    private void AddCommandToQueue(Message message, string command)
     {
-        var regex    = new Regex(@"""message"":""(.*?)""");
-        var recvList = new List<(long, string)>();
-        var res      = "";
+        var userId = message.Sender!.Id;
+        var cmd    = BuildCommand(command, userId);
 
-        await _recvQueueReaderLock.WaitAsync();
-        _wait = userId;
-
-        while (await _recvQueue.Reader.WaitToReadAsync())
-        {
-            var recv = await _recvQueue.Reader.ReadAsync();
-            if (recv.Id == userId)
-            {
-                res = regex.Match(recv.Recv).Groups[1].Value;
-                break;
-            }
-
-            recvList.Add(recv);
-        }
-
-        _wait = null;
-        _recvQueueReaderLock.Release();
-
-        foreach (var recv in recvList)
-        {
-            await _recvQueue.Writer.WriteAsync(recv);
-        }
-
-        return res;
-    }
-
-    private async Task ReplyMessageByCommand(Message message, string command)
-    {
-        var cmd = BuildCommand(command, message.Sender!.Id);
         _wsClient.Send(cmd);
 
-        var reply = await GetReplyByUserId(message.Sender!.Id);
+        lock (_waiting)
+        {
+            if (_waiting.ContainsKey(userId))
+            {
+                var wait = _waiting[userId];
 
-        if (string.IsNullOrEmpty(reply))
-        {
-            message.Reply("猫猫不理魔理沙！");
-            return;
-        }
-
-        if (reply.StartsWith("[CQ:image"))
-        {
-            var regex = new Regex(@"\[CQ:image,file=base64://(.*?)\]");
-            message.Reply(MessageDataImage.FromBase64(regex.Match(reply).Groups[1].Value));
-        }
-        else
-        {
-            message.Reply(reply.Replace("猫猫", "魔理沙问猫猫，她说她"));
+                if (DateTime.Now - wait.Time > TimeSpan.FromMinutes(1))
+                {
+                    _waiting[userId] = (message, DateTime.Now);
+                }
+                else
+                {
+                    message.Reply(new[] { "你先别急", "别急", "有点急", "急你妈" }.RandomTake());
+                }
+            }
+            else
+            {
+                _waiting.Add(userId, (message, DateTime.Now));
+            }
         }
     }
 
@@ -144,20 +124,20 @@ public partial class Osu
             @$"{{""font"":0,""message"":""!{command}"",""message_id"":0,""message_type"":""private"",""post_type"":""message"",""self_id"":0,""sender"":{{""age"":0,""nickname"":"""",""sex"":"""",""user_id"":0}},""sub_type"":""friend"",""target_id"":0,""time"":0,""user_id"":{userId}}}";
     }
 
-    private async Task RunCommand(Message message, string prefix, bool withBpRank = false)
+    private Task RunCommand(Message message, string prefix, bool withBpRank = false)
     {
         var command = OsuCommandParser.parser(message.Command)?.Value;
 
         if (command == null)
         {
             message.Reply("错误的命令格式");
-            return;
+            return Task.CompletedTask;
         }
 
         if (command.BpRank != null && !withBpRank)
         {
             message.Reply("错误的命令格式");
-            return;
+            return Task.CompletedTask;
         }
 
         if (string.IsNullOrWhiteSpace(command.Name))
@@ -177,11 +157,11 @@ public partial class Osu
             }
             else
             {
-                if (at != null)
-                    command = new OsuCommandParser.OsuCommand($"[CQ:at,qq={at.Target}]", command.BpRank, command.Mode);
+                if (at != null) command = new OsuCommandParser.OsuCommand($"[CQ:at,qq={at.Target}]", command.BpRank, command.Mode);
             }
         }
 
-        await ReplyMessageByCommand(message, $"{prefix} {command}");
+        AddCommandToQueue(message, $"{prefix} {command}");
+        return Task.CompletedTask;
     }
 }

@@ -138,10 +138,10 @@ public partial class Osu : MarisaPluginBase
 
     [MarisaPluginDoc("查询 *自己* 在某张图上的成绩")]
     [MarisaPluginCommand("score")]
-    private async Task<MarisaPluginTaskState> Score(Message message)
+    private Task<MarisaPluginTaskState> Score(Message message)
     {
-        await ReplyMessageByCommand(message, $"score {message.Command}");
-        return MarisaPluginTaskState.CompletedTask;
+        AddCommandToQueue(message, $"score {message.Command}");
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
     [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
