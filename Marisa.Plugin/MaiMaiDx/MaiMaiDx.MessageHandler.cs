@@ -827,7 +827,7 @@ public partial class MaiMaiDx : MarisaPluginBase
                 new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
                 new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
                 new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
-                MessageDataImage.FromBase64(GetFaultTable(x, y).ToB64())
+                MessageDataImage.FromBase64(MaiMaiDraw.DrawFaultTable(x, y).ToB64())
             );
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         });
