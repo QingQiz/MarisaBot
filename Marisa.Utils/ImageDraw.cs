@@ -44,13 +44,7 @@ public static class ImageDraw
             AlphaCompositionMode = PixelAlphaCompositionMode.DestOut
         });
 
-        var graphicsOptions = new GraphicsOptions
-        {
-            AlphaCompositionMode = PixelAlphaCompositionMode.Src,
-            ColorBlendingMode    = PixelColorBlendingMode.Normal
-        };
-
-        return ctx.Fill(new DrawingOptions { GraphicsOptions = graphicsOptions }, Color.Transparent, corners);
+        return ctx.Fill(Color.Red, corners);
     }
 
     public static Color DominantColor(this Image image, Rectangle rectangle)

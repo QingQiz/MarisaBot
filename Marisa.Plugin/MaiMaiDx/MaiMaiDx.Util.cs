@@ -52,7 +52,9 @@ public partial class MaiMaiDx
         MessageChain ret;
         try
         {
-            ret = MessageChain.FromImageB64((await GetDxRating(username, qq, b50)).GetImage());
+            ret = MessageChain.FromImageB64(
+                MaiMaiDraw.DrawB40Card(await GetDxRating(username, qq, b50)).ToB64()
+            );
         }
         catch (FlurlHttpException e) when (e.StatusCode == 400)
         {
@@ -138,7 +140,6 @@ public partial class MaiMaiDx
             return null;
         }
     }
-
 
     #endregion
 
