@@ -406,4 +406,205 @@ public static class MaiMaiDraw
 
         return bm;
     }
+
+    public static Image? DrawRecommendCard(this DxRating rating, List<MaiMaiSong> songList)
+    {
+        SongScore?[]  songScores  = { null, null };
+        MaiMaiSong?[] maiMaiSongs = { null, null };
+
+        // 计算rating
+        rating.NewScores.ForEach(s => s.Rating = s.Ra());
+        rating.OldScores.ForEach(s => s.Rating = s.Ra());
+
+        // 找到旧谱里能推的
+        if (rating.OldScores.Any(s => s.Achievement < 100.5))
+        {
+            songScores[0] = rating.OldScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
+        }
+
+        // 找到新谱里能推的
+        if (rating.NewScores.Any(s => s.Achievement < 100.5))
+        {
+            songScores[1] = rating.NewScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
+        }
+
+        // 找到不在b40里但定数不超过b40里最高定数的能推的旧谱
+        long minSdRating = 0;
+        if (rating.OldScores.Any())
+        {
+            minSdRating = rating.OldScores.Min(s => s.Rating);
+
+            var playableSd = rating.OldScores.Select(s => s.Constant).Distinct().Max();
+
+            var songListSd = songList
+                .Where(s => s.Info.IsNew == false)
+                .Where(s => rating.OldScores.All(ss => ss.Id != s.Id))
+                .Where(s => s.Constants.Any(c => c <= playableSd && SongScore.Ra(100.5, c) > minSdRating))
+                .ToList();
+
+            if (songListSd.Any())
+            {
+                maiMaiSongs[0] = songListSd.RandomTake();
+            }
+        }
+
+        // 同上，但是新谱
+        long minDxRating = 0;
+        if (rating.NewScores.Any())
+        {
+            minDxRating = rating.NewScores.Min(s => s.Rating);
+
+            var playableDx = rating.NewScores.Select(s => s.Constant).Distinct().Max();
+
+            var songListDx = songList
+                .Where(s => s.Info.IsNew)
+                .Where(s => rating.NewScores.All(ss => ss.Id != s.Id))
+                .Where(s => s.Constants.Any(c => c <= playableDx && SongScore.Ra(100.5, c) > minDxRating))
+                .ToList();
+
+            if (songListDx.Any())
+            {
+                maiMaiSongs[1] = songListDx.RandomTake();
+            }
+        }
+
+        Image GetRecommendCard1(SongScore score)
+        {
+            const int padding = 20;
+
+            var consolas = SystemFonts.Get("Consolas");
+
+            var cover = ResourceManager.GetCover(score.Id);
+            var bg    = new Image<Rgba32>(800, cover.Height + padding * 2);
+
+            var song = songList.First(s => s.Id == score.Id);
+
+            var titleFont = new Font(consolas, 37, FontStyle.Bold);
+            var font      = new Font(consolas, 22);
+            var fontS     = new Font(consolas, 14, FontStyle.Italic | FontStyle.Bold);
+            var fontB     = new Font(consolas, 22, FontStyle.Bold);
+
+            var y = (bg.Height - cover.Height) / 2;
+            var x = padding + cover.Width + padding;
+
+            bg.Mutate(i => i.Fill(Color.White).DrawImage(cover, padding, y));
+
+            var nextA = score.NextRa();
+            var nextR = SongScore.Ra(nextA, score.Constant);
+
+            var lvStr   = $"{MaiMaiSong.LevelName[(int)score.LevelIdx]}: {score.Constant}";
+            var measure = lvStr.Measure(fontS);
+            bg.DrawText(lvStr, fontS, MaiMaiSong.LevelColor[score.LevelIdx], bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
+
+            var sd = new StringDrawer(5);
+
+            sd.Add(
+                (song.Title, titleFont, Color.Black),
+                ($"\n当前达成率为: {score.Achievement:F4}\n", font, Color.Black),
+                ($"   Rating为: {score.Rating}\n", font, Color.Black),
+                ($"推分到达成率: {nextA:F4}", font, Color.Black),
+                ($"(+{nextA - score.Achievement:F4})\n", font, Color.SpringGreen),
+                ($"   Rating为: {nextR}", font, Color.Black),
+                ($"(+{nextR - score.Rating})\n", font, Color.SpringGreen),
+                ("可推", fontB, Color.Black),
+                ($" {nextR - score.Rating} ", fontB, Color.Red),
+                ("分", fontB, Color.Black),
+                ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontB, Color.Gray)
+            );
+
+            sd.Draw(bg, x, y);
+
+            return bg;
+        }
+
+        Image GetRecommendCard2(MaiMaiSong song, long minRating)
+        {
+            const int padding = 20;
+
+            var consolas = SystemFonts.Get("Consolas");
+
+            var cover = ResourceManager.GetCover(song.Id);
+            var bg    = new Image<Rgba32>(800, cover.Height + padding * 2);
+
+            var titleFont = new Font(consolas, 37, FontStyle.Bold);
+            var font      = new Font(consolas, 22);
+            var fontS     = new Font(consolas, 14, FontStyle.Italic | FontStyle.Bold);
+            var fontB     = new Font(consolas, 22, FontStyle.Bold);
+
+            var y = (bg.Height - cover.Height) / 2;
+            var x = padding + cover.Width + padding;
+
+            bg.Mutate(i => i.Fill(Color.White).DrawImage(cover, padding, y));
+
+            var constantIndex = song.Constants.FindIndex(c => SongScore.NextRa(c, minRating) > 0);
+            var constant      = song.Constants[constantIndex];
+
+            var nextA = SongScore.NextRa(constant, minRating);
+            var nextR = SongScore.Ra(nextA, constant);
+
+            var lvStr   = $"{MaiMaiSong.LevelName[constantIndex]}: {constant}";
+            var measure = lvStr.Measure(fontS);
+
+            bg.DrawText(lvStr, fontS, MaiMaiSong.LevelColor[constantIndex], bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
+
+            var sd = new StringDrawer(9);
+
+            sd.Add(
+                (song.Title, titleFont, Color.Black),
+                ($"\n歌曲不在你的B40里,地板: {minRating}\n", font, Color.Peru),
+                ($"推分到达成率: {nextA:F4}\n", font, Color.Black),
+                ($"   Rating为: {nextR}", font, Color.Black),
+                ($"(+{nextR - minRating})\n", font, Color.SpringGreen),
+                ("可推", fontB, Color.Black),
+                ($" {nextR - minRating} ", fontB, Color.Red),
+                ("分", fontB, Color.Black),
+                ($"({(song.Info.IsNew ? "新谱" : "旧谱")})", fontB, Color.Gray)
+            );
+            sd.Draw(bg, x, y);
+
+            return bg;
+        }
+
+        Image?[] card = { null, null, null, null };
+
+        // 获取推荐卡片
+        card[0] = songScores[0] == null ? null : GetRecommendCard1(songScores[0]!);
+        card[1] = maiMaiSongs[0] == null ? null : GetRecommendCard2(maiMaiSongs[0]!, minSdRating);
+        card[2] = songScores[1] == null ? null : GetRecommendCard1(songScores[1]!);
+        card[3] = maiMaiSongs[1] == null ? null : GetRecommendCard2(maiMaiSongs[1]!, minDxRating);
+
+        const int cardHeight = 240;
+        const int cardWidth  = 800;
+
+        var cnt = card.Count(x => x != null);
+
+        if (cnt == 0)
+        {
+            return null;
+        }
+
+        // 把推荐卡片拼起来
+        var bg = new Image<Rgba32>(cardWidth, cnt * cardHeight);
+
+        var y = 0;
+
+        foreach (var c in card)
+        {
+            if (c == null) continue;
+
+            bg.DrawImage(c, 0, y);
+            y += cardHeight;
+
+            var y1 = y;
+            bg.Mutate(i => i
+                .DrawLines(new Pen(Color.DarkGray, 2), new Point(0, y1 - 1), new Point(cardWidth, y1 - 1))
+            );
+        }
+
+        bg.Mutate(i => i
+            .DrawLines(new Pen(Color.DarkGray, 2), new Point(0, 0), new Point(cardWidth, 0))
+        );
+
+        return bg;
+    }
 }

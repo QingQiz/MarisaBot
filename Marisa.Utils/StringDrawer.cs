@@ -6,11 +6,11 @@ namespace Marisa.Utils;
 
 public class StringDrawer
 {
-    private readonly float _linePadding;
+    private readonly float _lineSpace;
 
-    public StringDrawer(float linePadding = 0)
+    public StringDrawer(float lineSpace = 0)
     {
-        _linePadding = linePadding;
+        _lineSpace = lineSpace;
     }
 
     private readonly List<List<(string Text, Font Font, Color Color )>> _textCache = new();
@@ -110,9 +110,11 @@ public class StringDrawer
 
     private List<List<FontRectangle>> MeasureText()
     {
-        return _textCache.Select(
-            tc => tc.Select(
-                t => t.Text.Measure(t.Font)).ToList()).ToList();
+        return _textCache
+            .Select(tc => tc
+                .Select(t => t.Text.MeasureWithSpace(t.Font))
+                .ToList())
+            .ToList();
     }
 
     public SizeF Measure()
@@ -132,7 +134,7 @@ public class StringDrawer
         var emptyLineCount = _textMeasure.Count(ms => !ms.Any());
 
         var avgH = noneEmptyLineHeights.Average();
-        var h    = noneEmptyLineHeights.Sum() + emptyLineCount * avgH + _linePadding * (_textCache.Count - 1);
+        var h    = noneEmptyLineHeights.Sum() + emptyLineCount * avgH + _lineSpace * (_textCache.Count - 1);
 
         return new SizeF(noneEmptyLineWidth, h);
     }
@@ -157,7 +159,7 @@ public class StringDrawer
             float x = 0;
             if (!line.Any())
             {
-                y += avgH + _linePadding;
+                y += avgH + _lineSpace;
                 continue;
             }
 
@@ -180,7 +182,7 @@ public class StringDrawer
             }
 
             // update y to next line
-            y += lineH + _linePadding;
+            y += lineH + _lineSpace;
         }
     }
 }

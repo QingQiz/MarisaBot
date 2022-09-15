@@ -19,6 +19,13 @@ public static class StringExt
         return TextMeasurer.MeasureBounds(text, option);
     }
 
+    public static FontRectangle MeasureWithSpace(this string text, Font font)
+    {
+        var option = ImageDraw.GetTextOptions(font);
+
+        return TextMeasurer.Measure(text, option);
+    }
+
     /// <summary>
     /// 和原始的 string.StartWith 类似，只不过同时检查多个
     /// </summary>

@@ -390,7 +390,7 @@ public partial class MaiMaiDx : MarisaPluginBase
         try
         {
             var rating    = await GetDxRating(null, sender);
-            var recommend = rating.GetRecommendCards(_songDb.SongList);
+            var recommend = rating.DrawRecommendCard(_songDb.SongList);
 
             if (recommend == null)
             {
