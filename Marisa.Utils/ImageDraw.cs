@@ -131,6 +131,8 @@ public static class ImageDraw
 
         var font = new Font(fontFamily, fontSize);
 
+        text = string.IsNullOrWhiteSpace(text) ? "N/A" : text;
+
         while (text.Measure(font).Width >= width - paddingLeft)
         {
             fontSize -= 2;
@@ -144,7 +146,7 @@ public static class ImageDraw
 
         background.Mutate(i => i
             .Fill(bgColor)
-            .DrawText(string.IsNullOrEmpty(text) ? "-" : text, font, fontColor, x, y)
+            .DrawText(text, font, fontColor, x, y)
         );
 
         if (underLine)
@@ -195,17 +197,23 @@ public static class ImageDraw
     {
         return new TextOptions(font)
         {
-            FallbackFontFamilies = new[] { SystemFonts.Get("FangSong") },
+            FallbackFontFamilies = new[]
+            {
+                SystemFonts.Get("FangSong"),
+                SystemFonts.Get("NSimSun"),
+                SystemFonts.Get("SimSun"),
+                SystemFonts.Get("Microsoft JhengHei"),
+            },
         };
     }
 
     public static TextOptions GetTextOptions(Font font, PointF location)
     {
-        return new TextOptions(font)
-        {
-            FallbackFontFamilies = new[] { SystemFonts.Get("FangSong") },
-            Origin = location
-        };
+        var option = GetTextOptions(font);
+
+        option.Origin = location;
+
+        return option;
     }
 
     public static IImageProcessingContext DrawText(this IImageProcessingContext ctx, string text, Font font, Color color, float x, float y)
@@ -214,6 +222,8 @@ public static class ImageDraw
     }
 
     #endregion
+
+    #region Image Cut
 
     public static IImageProcessingContext RandomCut(this IImageProcessingContext ctx, int w, int h)
     {
@@ -232,6 +242,8 @@ public static class ImageDraw
         image.Mutate(i => i.Crop(new Rectangle(x, y, w, h)));
         return image;
     }
+
+    #endregion
 
     #region Resize
 

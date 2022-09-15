@@ -16,7 +16,7 @@ public static class StringExt
     {
         var option = ImageDraw.GetTextOptions(font);
 
-        return TextMeasurer.Measure(text, option);
+        return TextMeasurer.MeasureBounds(text, option);
     }
 
     /// <summary>
