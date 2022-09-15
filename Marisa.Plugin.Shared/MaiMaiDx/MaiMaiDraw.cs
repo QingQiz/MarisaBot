@@ -10,6 +10,11 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 public static class MaiMaiDraw
 {
+    /// <summary>
+    /// 画歌曲信息
+    /// </summary>
+    /// <param name="song"></param>
+    /// <returns></returns>
     public static Image Draw(this MaiMaiSong song)
     {
         const int cardFontSize = 31;
@@ -158,6 +163,9 @@ public static class MaiMaiDraw
         return background;
     }
 
+    /// <summary>
+    /// 画汇总表
+    /// </summary>
     public static Image? DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, MaiMaiSong Song)>> groupedSong,
         IReadOnlyDictionary<(long SongId, long LevelIdx), SongScore> scores)
@@ -239,7 +247,7 @@ public static class MaiMaiDraw
 
                     var achievement = score.Achievement.ToString("F4").Split('.');
 
-                    var font = new Font(consolas, 24, FontStyle.Bold | FontStyle.Italic);
+                    var font = new Font(consolas, 35, FontStyle.Bold | FontStyle.Italic);
 
                     im.Mutate(ctx => ctx
                         .DrawLines(new Pen(Color.Black, 40), new PointF(x, y + height - 20), new PointF(x + height, y + height - 20))
@@ -256,12 +264,12 @@ public static class MaiMaiDraw
                         _     => Color.White
                     };
                     // 达成率 整数部分
-                    im.DrawText(ach1, font, fontColor, x, y + height - 40);
+                    im.DrawText(ach1, font, fontColor, x + 2, y + height - 35);
 
-                    font = new Font(consolas, 14, FontStyle.Bold | FontStyle.Italic);
+                    font = new Font(consolas, 22, FontStyle.Bold | FontStyle.Italic);
 
                     // 达成率 小数部分 
-                    im.DrawText("." + achievement[1], font, fontColor, x + 55, y + height - 28);
+                    im.DrawText("." + achievement[1], font, fontColor, x + 57, y + height - 26);
 
                     // rank 标志 (SSS+, SSS,...)
                     var rank = ResourceManager.GetImage($"rank_{score.Rank.ToLower()}.png");
@@ -275,7 +283,7 @@ public static class MaiMaiDraw
             {
                 var bg = new Image<Rgba32>(im.Width, im.Height + 70);
 
-                var font = new Font(consolas, 35, FontStyle.Bold | FontStyle.Italic);
+                var font = new Font(consolas, 45, FontStyle.Bold | FontStyle.Italic);
 
                 var groupScores = group
                     .Select(tuple => scores.ContainsKey((tuple.Song.Id, tuple.LevelIdx)) ? scores[(tuple.Song.Id, tuple.LevelIdx)] : null)
@@ -321,7 +329,7 @@ public static class MaiMaiDraw
                 if (imgRank != null)
                 {
                     imgRank = imgRank.Resize(0.8);
-                    bg.DrawImage(imgRank, (int)(padding - borderWidth + measure.Width), (int)(padding + (measure.Height - imgRank.Height) / 2));
+                    bg.DrawImage(imgRank, (int)(padding - borderWidth + measure.Width + 10), padding);
                 }
 
                 bg.DrawImage(im, 0, 70);
@@ -351,6 +359,12 @@ public static class MaiMaiDraw
         }
     }
 
+    /// <summary>
+    /// 画容错率表
+    /// </summary>
+    /// <param name="tap">单tap分</param>
+    /// <param name="bonus">单绝赞bonus总分</param>
+    /// <returns></returns>
     public static Image DrawFaultTable(double tap, double bonus)
     {
         var bm = ResourceManager.GetImage("fault-table.png");

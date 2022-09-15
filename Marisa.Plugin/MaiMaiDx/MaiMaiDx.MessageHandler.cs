@@ -45,7 +45,7 @@ public partial class MaiMaiDx : MarisaPluginBase
             return MarisaPluginTaskState.NoResponse;
         }
 
-        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
         // 一定不是空的
         message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
 
@@ -73,7 +73,7 @@ public partial class MaiMaiDx : MarisaPluginBase
             return MarisaPluginTaskState.NoResponse;
         }
 
-        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
         // 一定不是空的
         message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
 
@@ -123,7 +123,7 @@ public partial class MaiMaiDx : MarisaPluginBase
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.constant.ToString("F1"));
 
-            var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
 
             if (im == null)
             {
@@ -167,7 +167,7 @@ public partial class MaiMaiDx : MarisaPluginBase
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
 
             // 不可能是 null
             message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
@@ -217,7 +217,7 @@ public partial class MaiMaiDx : MarisaPluginBase
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.song.Levels[x.i]);
 
-        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
 
         // 不可能是 null
         message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
@@ -268,7 +268,7 @@ public partial class MaiMaiDx : MarisaPluginBase
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await Task.Run(() => DrawGroupedSong(groupedSong, scores));
+        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
 
         // 不可能是 null
         message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
