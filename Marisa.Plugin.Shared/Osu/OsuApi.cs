@@ -12,7 +12,7 @@ public static class OsuApi
 {
     private static string? _token;
     private static DateTime? _tokenExpire;
-    
+
     private static string Token
     {
         get
@@ -57,13 +57,29 @@ public static class OsuApi
         _tokenExpire = DateTime.Now + TimeSpan.FromSeconds(res.expires_in);
     }
 
-    public static async Task<OsuUserInfo> GetUserInfoByName(string username)
+    public static async Task<string> GetPPlusJsonById(long uid)
     {
-        var json = await $"{UserInfoUri}/{username}/"
+        return await $"https://syrin.me/pp+/api/user/{uid}/".GetStringAsync();
+    }
+
+    public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
+    {
+        var m = mode switch
+        {
+            0 => "osu",
+            1 => "taiko",
+            2 => "fruits",
+            3 => "mania",
+            _ => ""
+        };
+        
+        var json = await $"{UserInfoUri}/{username}/{m}"
             .SetQueryParam("key", "facere")
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
+        
+        await File.WriteAllTextAsync(@"C:\users\sofee\desktop\a.json", json);
 
         return OsuUserInfo.FromJson(json);
     }
@@ -88,7 +104,7 @@ public static class OsuApi
         return OsuUserInfo.FromJson(json);
     }
 
-    public static async Task<OsuScore[]?> RecentScores(long uid, int skip=0, int take=1)
+    public static async Task<OsuScore[]?> RecentScores(long uid, int skip = 0, int take = 1)
     {
         var db = new BotDbContext().OsuBinds;
 

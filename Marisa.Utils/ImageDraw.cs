@@ -194,9 +194,11 @@ public static class ImageDraw
             FallbackFontFamilies = new[]
             {
                 SystemFonts.Get("FangSong"),
-                SystemFonts.Get("NSimSun"),
-                SystemFonts.Get("SimSun"),
                 SystemFonts.Get("Microsoft JhengHei"),
+                SystemFonts.Get("Segoe Fluent Icons"),
+                SystemFonts.Get("Segoe UI Emoji"),
+                SystemFonts.Get("Segoe UI Historic"),
+                SystemFonts.Get("Segoe UI Symbol"),
             },
         };
     }

@@ -89,7 +89,7 @@ public partial class OsuUserInfo
     public string[] ProfileOrder { get; set; }
 
     [JsonProperty("title")]
-    public object Title { get; set; }
+    public string Title { get; set; }
 
     [JsonProperty("title_url")]
     public object TitleUrl { get; set; }
@@ -113,7 +113,7 @@ public partial class OsuUserInfo
     public object ActiveTournamentBanner { get; set; }
 
     [JsonProperty("badges")]
-    public object[] Badges { get; set; }
+    public Badge[] Badges { get; set; }
 
     [JsonProperty("beatmap_playcounts_count")]
     public long BeatmapPlayCountsCount { get; set; }
@@ -181,11 +181,8 @@ public partial class OsuUserInfo
     [JsonProperty("user_achievements")]
     public UserAchievement[] UserAchievements { get; set; }
 
-    [JsonProperty("rankHistory")]
-    public RankHistory RankHistory { get; set; }
-
     [JsonProperty("rank_history")]
-    public RankHistory WelcomeRankHistory { get; set; }
+    public RankHistory? RankHistory { get; set; }
 
     [JsonProperty("ranked_and_approved_beatmapset_count")]
     public long RankedAndApprovedBeatmapsetCount { get; set; }

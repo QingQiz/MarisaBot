@@ -2,6 +2,7 @@
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
+using Marisa.Plugin.Shared.Osu.Drawer;
 using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin.Osu;
@@ -64,7 +65,7 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc($"设置当前绑定的账户的默认模式，参数为：osu、taiko、catch 和 mania")]
+    [MarisaPluginDoc("设置当前绑定的账户的默认模式，参数为：osu、taiko、catch 和 mania")]
     [MarisaPluginCommand("setMode", "set mode", "mode")]
     private static async Task<MarisaPluginTaskState> SetMode(Message message, BotDbContext db)
     {
@@ -100,7 +101,45 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        await RunCommand(message, "info");
+        if (DebounceCheck(message))
+        {
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        try
+        {
+            var command = ParseCommand(message);
+
+            if (command == null)
+            {
+                message.Reply("错误的命令格式");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            if (string.IsNullOrWhiteSpace(command.Name))
+            {
+                message.Reply("您是？");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var uInfo = await OsuApi.GetUserInfoByName(command.Name, command.Mode?.Value ?? -1);
+
+            if (uInfo.RankHistory == null)
+            {
+                message.Reply("该玩家没有玩过该模式");
+            }
+            else
+            {
+                var img = await uInfo.GetImage();
+
+                message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
+            }
+        }
+        finally
+        {
+            DebounceCancel(message.Sender!.Id);
+        }
+
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -108,7 +147,8 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message, BotDbContext db)
     {
-        await RunCommand(message, "pr");
+        message.Reply("服务暂时不可用！");
+        // await ParseCommand(message, "pr");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -116,7 +156,8 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
-        await RunCommand(message, "recent");
+        message.Reply("服务暂时不可用！");
+        // await ParseCommand(message, "recent");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -124,7 +165,8 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        await RunCommand(message, "bp", true);
+        message.Reply("服务暂时不可用！");
+        // await ParseCommand(message, "bp", true);
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -132,7 +174,8 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("todaybp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message, BotDbContext db)
     {
-        await RunCommand(message, "todaybp");
+        message.Reply("服务暂时不可用！");
+        // await ParseCommand(message, "todaybp");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -140,7 +183,7 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("score")]
     private Task<MarisaPluginTaskState> Score(Message message)
     {
-        AddCommandToQueue(message, $"score {message.Command}");
+        AddCommandToQueue(message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -148,7 +191,8 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("bonusPP")]
     private async Task<MarisaPluginTaskState> BonusPp(Message message)
     {
-        await RunCommand(message, "bonuspp");
+        message.Reply("服务暂时不可用！");
+        // await ParseCommand(message, "bonuspp");
         return MarisaPluginTaskState.CompletedTask;
     }
 
