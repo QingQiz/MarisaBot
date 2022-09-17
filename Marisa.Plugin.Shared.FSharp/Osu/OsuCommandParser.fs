@@ -29,12 +29,12 @@ module OsuCommandParser =
         let rank =
             (many space *> ignorableChar '#' *> many space *> number
              >>= fun n ->
-                     if n > 100 || n <= 0 then
+                     if n <= 0 then
                          ret None
                      else
                          ret <| Some n)
             <|> ret None
-        
+
         let modeIdx =
              let idx = number >>= fun num ->
                  match num with

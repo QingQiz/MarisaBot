@@ -11,6 +11,8 @@ namespace Marisa.Utils;
 
 public static class ImageDraw
 {
+    #region Round Corner
+
     public static Image RoundCorners(this Image image, int cornerRadius)
     {
         image.Mutate(i => i.RoundCorners(cornerRadius));
@@ -47,6 +49,10 @@ public static class ImageDraw
         return ctx.Fill(Color.Red, corners);
     }
 
+    #endregion
+
+    #region Dominant Color
+
     public static Color DominantColor(this Image image, Rectangle rectangle)
     {
         var rgba32 = image.Clone(i => i
@@ -59,6 +65,21 @@ public static class ImageDraw
 
         return Color.FromRgba(rgba32.R, rgba32.G, rgba32.B, rgba32.A);
     }
+
+    public static Color SelectFontColor(this Color c)
+    {
+        var color = c.ToPixel<Rgba32>();
+
+        var brightness = (int)Math.Sqrt(
+            color.R * color.R * .241 +
+            color.G * color.G * .691 +
+            color.B * color.B * .068);
+        return brightness > 130 ? Color.Black : Color.White;
+    }
+
+    #endregion
+
+    #region 不知道怎么分类的
 
     public static (Image CoverBackground, Color CoverDominantColor) GetCoverBackground(this Image cover)
     {
@@ -97,16 +118,6 @@ public static class ImageDraw
         return (coverBackground, coverDominantColor);
     }
 
-    public static Color SelectFontColor(this Color c)
-    {
-        var color = c.ToPixel<Rgba32>();
-
-        var brightness = (int)Math.Sqrt(
-            color.R * color.R * .241 +
-            color.G * color.G * .691 +
-            color.B * color.B * .068);
-        return brightness > 130 ? Color.Black : Color.White;
-    }
 
     public static Image Clear(this Image image, Color color)
     {
@@ -152,16 +163,45 @@ public static class ImageDraw
         return background;
     }
 
+    #endregion
+
     #region Draw Image
+
+    public static Image DrawImageCenter(this Image image, Image toDraw, double opacity = 1)
+    {
+        var x = (image.Width - toDraw.Width) / 2;
+        var y = (image.Height - toDraw.Height) / 2;
+
+        return image.DrawImage(toDraw, x, y, opacity);
+    }
+
+    public static Image DrawImageHCenter(this Image image, Image toDraw, int y, double opacity = 1)
+    {
+        var x = (image.Width - toDraw.Width) / 2;
+
+        return image.DrawImage(toDraw, x, y, opacity);
+    }
+
+    public static IImageProcessingContext DrawImageVCenter(this IImageProcessingContext ctx, Image image, int x, float opacity = 1)
+    {
+        var y = (ctx.GetCurrentSize().Height - image.Height) / 2;
+        return ctx.DrawImage(image, new Point(x, y), opacity);
+    }
+
+    public static Image DrawImageVCenter(this Image image, Image toDraw, int x, double opacity = 1)
+    {
+        image.Mutate(i => i.DrawImageVCenter(toDraw, x, (float)opacity));
+        return image;
+    }
 
     public static IImageProcessingContext DrawImage(this IImageProcessingContext ctx, Image image, int x, int y, float opacity = 1)
     {
         return ctx.DrawImage(image, new Point(x, y), opacity);
     }
 
-    public static Image DrawImage(this Image image, Image toDraw, int x, int y, float opacity = 1)
+    public static Image DrawImage(this Image image, Image toDraw, int x, int y, double opacity = 1)
     {
-        image.Mutate(i => i.DrawImage(toDraw, x, y, opacity));
+        image.Mutate(i => i.DrawImage(toDraw, x, y, (float)opacity));
         return image;
     }
 
@@ -173,6 +213,34 @@ public static class ImageDraw
     {
         img.Mutate(i => i.DrawText(text, fontFamily, fontSize, color, x, y));
         return img;
+    }
+
+    public static Image DrawTextHCenter(this Image img, string text, Font font, Color color, int y)
+    {
+        var measure = text.MeasureWithSpace(font);
+
+        var x = (img.Width - measure.Width) / 2;
+
+        return img.DrawText(text, font, color, x, y);
+    }
+
+    public static Image DrawTextVCenter(this Image img, string text, Font font, Color color, int x)
+    {
+        var measure = text.MeasureWithSpace(font);
+
+        var y = (img.Height - measure.Height) / 2;
+
+        return img.DrawText(text, font, color, x, y);
+    }
+
+    public static Image DrawTextCenter(this Image img, string text, Font font, Color color, int offsetX = 0, int offsetY = 0, bool withSpace = true)
+    {
+        var measure = withSpace ? text.MeasureWithSpace(font) : text.Measure(font);
+
+        var x = (img.Width - measure.Width) / 2;
+        var y = (img.Height - measure.Height) / 2;
+
+        return img.DrawText(text, font, color, x + offsetX, y + offsetY);
     }
 
     public static Image DrawText(this Image img, string text, Font font, Color color, float x, float y)
@@ -194,7 +262,7 @@ public static class ImageDraw
             FallbackFontFamilies = new[]
             {
                 SystemFonts.Get("FangSong"),
-                SystemFonts.Get("Microsoft JhengHei"),
+                SystemFonts.Get("Microsoft JHengHei"),
                 SystemFonts.Get("Segoe Fluent Icons"),
                 SystemFonts.Get("Segoe UI Emoji"),
                 SystemFonts.Get("Segoe UI Historic"),
@@ -236,6 +304,26 @@ public static class ImageDraw
     public static Image Crop(this Image image, int x, int y, int w, int h)
     {
         image.Mutate(i => i.Crop(new Rectangle(x, y, w, h)));
+        return image;
+    }
+
+    public static Image Fit(this Image image, int width, int height)
+    {
+        image.ResizeX(width);
+
+        if (image.Height < height)
+        {
+            image.ResizeY(height);
+        }
+
+        // ReSharper disable once InvertIf
+        if (image.Height > height)
+        {
+            var y = (image.Height - height) / 2;
+
+            image.Crop(0, y, width, height);
+        }
+
         return image;
     }
 

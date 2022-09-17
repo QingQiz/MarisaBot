@@ -145,10 +145,49 @@ public partial class Osu : MarisaPluginBase
 
     [MarisaPluginDoc("查询某人最近通过的图")]
     [MarisaPluginCommand("pr")]
-    private async Task<MarisaPluginTaskState> RecentPass(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> RecentPass(Message message)
     {
-        message.Reply("服务暂时不可用！");
-        // await ParseCommand(message, "pr");
+        var command = ParseCommand(message, true);
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            message.Reply("您是？");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var mode = command.Mode?.Value ?? 0;
+
+        if (mode != 3)
+        {
+            message.Reply("目前未实现");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var bpRank = command.BpRank?.Value ?? 1;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
+
+        var recentScores = await OsuApi.GetScores(userInfo.Id, "recent", OsuApi.GetModeName(mode), bpRank - 1, 1, false);
+
+        if (!recentScores!.Any())
+        {
+            message.Reply("无");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var img = await recentScores![0].GetImage(userInfo);
+
+        message.Reply(
+            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            MessageDataImage.FromBase64(img.ToB64(100))
+        );
+
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -156,8 +195,47 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
-        message.Reply("服务暂时不可用！");
-        // await ParseCommand(message, "recent");
+        var command = ParseCommand(message, true);
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            message.Reply("您是？");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var mode = command.Mode?.Value ?? 0;
+
+        if (mode != 3)
+        {
+            message.Reply("目前未实现");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var bpRank = command.BpRank?.Value ?? 1;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
+
+        var recentScores = await OsuApi.GetScores(userInfo.Id, "recent", OsuApi.GetModeName(mode), bpRank - 1, 1, true);
+
+        if (!recentScores!.Any())
+        {
+            message.Reply("无");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var img = await recentScores![0].GetImage(userInfo);
+
+        message.Reply(
+            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            MessageDataImage.FromBase64(img.ToB64(100))
+        );
+
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -165,8 +243,47 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        message.Reply("服务暂时不可用！");
-        // await ParseCommand(message, "bp", true);
+        var command = ParseCommand(message, true);
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            message.Reply("您是？");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var mode = command.Mode?.Value ?? 0;
+
+        if (mode != 3)
+        {
+            message.Reply("目前未实现");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var bpRank = command.BpRank?.Value ?? 1;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
+
+        var recentScores = await OsuApi.GetScores(userInfo.Id, "best", OsuApi.GetModeName(mode), bpRank - 1, 1);
+
+        if (!recentScores!.Any())
+        {
+            message.Reply("无");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var img = await recentScores![0].GetImage(userInfo);
+
+        message.Reply(
+            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            MessageDataImage.FromBase64(img.ToB64(100))
+        );
+
         return MarisaPluginTaskState.CompletedTask;
     }
 

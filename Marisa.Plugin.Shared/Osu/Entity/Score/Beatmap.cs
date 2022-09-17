@@ -9,7 +9,7 @@ public class Beatmap
     public long BeatmapsetId { get; set; }
 
     [JsonProperty("difficulty_rating", Required = Required.Always)]
-    public double DifficultyRating { get; set; }
+    public double StarRating { get; set; }
 
     [JsonProperty("id", Required = Required.Always)]
     public long Id { get; set; }

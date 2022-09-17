@@ -31,7 +31,7 @@ public static class OsuApi
 
     public static readonly List<string> ModeList = new()
     {
-        "osu", "taiko", "catch", "mania"
+        "osu", "taiko", "fruit", "mania"
     };
 
     /// <summary>
@@ -62,33 +62,37 @@ public static class OsuApi
         return await $"https://syrin.me/pp+/api/user/{uid}/".GetStringAsync();
     }
 
-    public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
+    public static string GetModeName(int i)
     {
-        var m = mode switch
+        return i switch
         {
             0 => "osu",
             1 => "taiko",
             2 => "fruits",
             3 => "mania",
-            _ => ""
+            _ => "osu"
         };
-        
-        var json = await $"{UserInfoUri}/{username}/{m}"
+    }
+
+    public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
+    {
+        var json = await $"{UserInfoUri}/{username}/{GetModeName(mode)}"
             .SetQueryParam("key", "facere")
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
         
         await File.WriteAllTextAsync(@"C:\users\sofee\desktop\a.json", json);
+        // var json =  await File.ReadAllTextAsync(@"C:\users\sofee\desktop\a.json");
 
         return OsuUserInfo.FromJson(json);
     }
 
-    public static async Task<OsuUserInfo?> GetUserInfo(long uid)
+    public static async Task<OsuUserInfo?> GetUserInfo(long qq)
     {
         var db = new BotDbContext().OsuBinds;
 
-        var bind = await db.FirstOrDefaultAsync(u => u.UserId == uid);
+        var bind = await db.FirstOrDefaultAsync(u => u.UserId == qq);
 
         if (bind == null)
         {
@@ -104,25 +108,28 @@ public static class OsuApi
         return OsuUserInfo.FromJson(json);
     }
 
-    public static async Task<OsuScore[]?> RecentScores(long uid, int skip = 0, int take = 1)
+    public static async Task<OsuScore[]?> GetScores(long osuId, string type, string gameMode, int skip, int take, bool includeFails = false)
     {
-        var db = new BotDbContext().OsuBinds;
-
-        var bind = await db.FirstOrDefaultAsync(u => u.UserId == uid);
-
-        if (bind == null)
-        {
-            return null;
-        }
-
-        var json = await $"{UserInfoUri}/{bind.OsuUserId}/scores/recent"
-            .SetQueryParam("mode", bind.GameMode)
+        var json = await $"{UserInfoUri}/{osuId}/scores/{type}"
+            .SetQueryParam("include_fails", includeFails ? 1 : 0)
+            .SetQueryParam("mode", gameMode)
             .SetQueryParam("limit", take)
             .SetQueryParam("offset", skip)
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
 
+        // await File.WriteAllTextAsync(@"c:\users\sofee\desktop\b.json", json);
+        // var json  = await File.ReadAllTextAsync(@"c:\users\sofee\desktop\b.json");
+
         return OsuScore.FromJson(json);
     }
+
+    // public static async Task<OsuScore[]?> RecentScores(long osuId, int skip = 0, int take = 1)
+    // {
+    //
+    //     // TODO change to recent
+    //     // TODO select game mode
+    //     return await GetScores(osuId, "recent", bind.GameMode, skip, take);
+    // }
 }

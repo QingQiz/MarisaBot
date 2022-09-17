@@ -26,7 +26,7 @@ public partial class OsuScore
     public string Mode { get; set; }
 
     [JsonProperty("mode_int", Required = Required.Always)]
-    public long ModeInt { get; set; }
+    public int ModeInt { get; set; }
 
     [JsonProperty("mods", Required = Required.Always)]
     public object[] Mods { get; set; }
@@ -38,7 +38,7 @@ public partial class OsuScore
     public bool Perfect { get; set; }
 
     [JsonProperty("pp", Required = Required.AllowNull)]
-    public object Pp { get; set; }
+    public double? Pp { get; set; }
 
     [JsonProperty("rank", Required = Required.Always)]
     public string Rank { get; set; }
