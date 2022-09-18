@@ -22,6 +22,7 @@ public static class OsuScoreDrawer
 
     private static FontFamily _fontExo2 = SystemFonts.Get("Exo 2");
     private static FontFamily _fontYaHei = SystemFonts.Get("Microsoft YaHei");
+    private static FontFamily _fontIcon = SystemFonts.Get("Segoe UI Symbol");
     private static readonly Color BgColor = Color.FromRgb(46, 53, 56);
 
 
@@ -127,6 +128,48 @@ public static class OsuScoreDrawer
         return image;
     }
 
+    public static Image GetStatusIcon(string status)
+    {
+        status = status.ToLower();
+
+        var im = new Image<Rgba32>(60, 60);
+
+        switch (status)
+        {
+            case "ranked":
+            {
+                var font = _fontExo2.CreateFont(60);
+
+                im.DrawTextCenter("❰❰", font, Color.ParseHex("#64c6f5"), withSpace: false);
+                im.Mutate(i => i.Rotate(90));
+                break;
+            }
+            case "loved":
+            {
+                var font = _fontIcon.CreateFont(70, FontStyle.Regular);
+
+                im.DrawTextCenter("♥", font, Color.FromRgb(255, 102, 171), withSpace: false);
+                break;
+            }
+            case "approved" or "qualified":
+            {
+                var font = _fontYaHei.CreateFont(50);
+
+                im.DrawTextCenter("✔", font, Color.Black, withSpace: false);
+                break;
+            }
+            default:
+            {
+                var font = _fontYaHei.CreateFont(45);
+
+                im.DrawTextCenter("❔", font, Color.Black, withSpace: false);
+                break;
+            }
+        }
+
+        return im;
+    }
+
     private static Image<Rgba32> GetGradeDetail(long grade, DateTimeOffset time)
     {
         var gradeText = grade.ToString("N0");
@@ -197,26 +240,29 @@ public static class OsuScoreDrawer
         var songInfoDrawY = songNameMarginTop;
 
         // song name
-        var songNameFont = _fontExo2.CreateFont(60);
-        // TODO 这里应该画图
+        var songNameFont    = _fontExo2.CreateFont(60);
         var songName        = $"{beatmapset.TitleUnicode} by {beatmapset.ArtistUnicode}";
         var songNameMeasure = songName.MeasureWithSpace(songNameFont);
 
-        while (songNameMeasure.Width > ImageWidth - MarginX * 2)
+        var statusMark = GetStatusIcon(beatmap.Status);
+
+        while (songNameMeasure.Width > ImageWidth - MarginX * 2 - statusMark.Width - elementGap)
         {
             songName        = songName[..^5] + "...";
             songNameMeasure = songName.MeasureWithSpace(songNameFont);
         }
 
-        songName = songName + $"({beatmap.Status})";
-
         songInfo.Clear(BgColor);
+
+        songInfo.DrawImage(statusMark, songInfoDrawX, songInfoDrawY + 10);
+        songInfoDrawX += statusMark.Width + elementGap;
         songInfo.DrawText(songName, songNameFont, Color.White, songInfoDrawX, songInfoDrawY);
 
         // game mode icon
         const int songTypeSize      = 60;
         const int songTypeMarginTop = 20;
 
+        songInfoDrawX = MarginX;
         songInfoDrawY = (int)songNameMeasure.Height + songNameMarginTop + songTypeMarginTop;
 
         var songTypeIcon = OsuDrawerCommon.GetIcon(beatmap.Mode).ResizeX(songTypeSize);

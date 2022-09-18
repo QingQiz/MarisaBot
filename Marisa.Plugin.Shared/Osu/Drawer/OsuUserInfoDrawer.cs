@@ -549,7 +549,10 @@ public static class OsuUserInfoDrawer
             var       multi   = new[] { 122.25, 113.35, 106.03, 120.09, 115.45, 116.31 };
 
             // 让数据差距不至于太大，Log[data] * multi
-            var convertedData = data.Zip(multi).Select(d => d.Second * Math.Log(d.First)).ToList();
+            var convertedData = data.Zip(multi)
+                .Select(d => d.Second * Math.Log(d.First))
+                .Select(d => d < 0 ? 0 : d)
+                .ToList();
 
             var deg        = 0.0;
             var dataPoints = new List<PointF>();

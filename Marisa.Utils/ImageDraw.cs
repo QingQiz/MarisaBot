@@ -240,7 +240,9 @@ public static class ImageDraw
         var x = (img.Width - measure.Width) / 2;
         var y = (img.Height - measure.Height) / 2;
 
-        return img.DrawText(text, font, color, x + offsetX, y + offsetY);
+        return withSpace
+            ? img.DrawText(text, font, color, x + offsetX, y + offsetY)
+            : img.DrawText(text, font, color, x + offsetX - measure.X, y + offsetY - measure.Y);
     }
 
     public static Image DrawText(this Image img, string text, Font font, Color color, float x, float y)
