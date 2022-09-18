@@ -10,8 +10,8 @@ public partial class OsuScore
     [JsonProperty("accuracy", Required = Required.Always)]
     public double Accuracy { get; set; }
 
-    [JsonProperty("best_id", Required = Required.Always)]
-    public long BestId { get; set; }
+    [JsonProperty("best_id", Required = Required.AllowNull)]
+    public long? BestId { get; set; }
 
     [JsonProperty("created_at", Required = Required.Always)]
     public DateTimeOffset CreatedAt { get; set; }
@@ -29,7 +29,7 @@ public partial class OsuScore
     public int ModeInt { get; set; }
 
     [JsonProperty("mods", Required = Required.Always)]
-    public object[] Mods { get; set; }
+    public string[] Mods { get; set; }
 
     [JsonProperty("passed", Required = Required.Always)]
     public bool Passed { get; set; }

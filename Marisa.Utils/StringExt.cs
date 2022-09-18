@@ -7,6 +7,18 @@ namespace Marisa.Utils;
 
 public static class StringExt
 {
+    public static string GetMd5Hash(this string text)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        using var sha = MD5.Create();
+
+        var textData = Encoding.UTF8.GetBytes(text);
+        var hash     = sha.ComputeHash(textData);
+
+        return BitConverter.ToString(hash).Replace("-", string.Empty);
+    }
+
     public static string GetSha256Hash(this string text)
     {
         if (string.IsNullOrEmpty(text)) return string.Empty;

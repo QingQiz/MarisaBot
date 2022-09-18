@@ -125,11 +125,5 @@ public static class OsuApi
         return OsuScore.FromJson(json);
     }
 
-    // public static async Task<OsuScore[]?> RecentScores(long osuId, int skip = 0, int take = 1)
-    // {
-    //
-    //     // TODO change to recent
-    //     // TODO select game mode
-    //     return await GetScores(osuId, "recent", bind.GameMode, skip, take);
-    // }
+
 }

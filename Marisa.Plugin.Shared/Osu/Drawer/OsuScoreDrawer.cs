@@ -52,7 +52,7 @@ public static class OsuScoreDrawer
         // 玩家卡片
         var userCard = (await info.GetMiniCard()).ResizeX((int)((ImageWidth - MarginX * 2) * 0.4));
 
-        var sta = GetScoreSta(score).ResizeX(ImageWidth - MarginX * 2 - userCard.Width - MarginX);
+        var sta = (await GetScoreSta(score)).ResizeX(ImageWidth - MarginX * 2 - userCard.Width - MarginX);
 
         // 拼起来
         const int userCardVGap = 40;
@@ -70,15 +70,19 @@ public static class OsuScoreDrawer
         return res;
     }
 
-    private static Image GetScoreSta(OsuScore score)
+    private static async Task<Image> GetScoreSta(OsuScore score)
     {
         const int staCardGap  = 2;
         const int staCardVGap = 60;
 
+        var pp = score.Pp?.ToString("F2") ??
+            (await PerformanceCalculator.GetPerformance(score)).ToString("F2");
+
         var c1 = GetKeyValuePair("准确率", $"{score.Accuracy * 100:F2}%", (ImageWidth - staCardGap * 2) / 3);
         var c2 = GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", (ImageWidth - staCardGap * 2) / 3);
-        var c3 = GetKeyValuePair("PP", $"{score.Pp?.ToString("F2") ?? "-"}", (ImageWidth - staCardGap * 2) / 3);
+        var c3 = GetKeyValuePair("PP", pp, (ImageWidth - staCardGap * 2) / 3);
 
+        // TODO std taiko catch
         var c4 = GetKeyValuePair("MAX", $"{score.Statistics.CountGeki:N0}", (ImageWidth - staCardGap * 5) / 6);
         var c5 = GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", (ImageWidth - staCardGap * 5) / 6);
         var c6 = GetKeyValuePair("200", $"{score.Statistics.CountKatu:N0}", (ImageWidth - staCardGap * 5) / 6);
@@ -133,6 +137,7 @@ public static class OsuScoreDrawer
         var font1 = _fontExo2.CreateFont(160);
         var font3 = _fontExo2.CreateFont(40);
 
+        // TODO draw mods
         card.DrawText(gradeText, font1, Color.White, 0, 100);
         card.DrawText(timeText, font3, Color.White, 10, 300);
 
@@ -193,8 +198,17 @@ public static class OsuScoreDrawer
 
         // song name
         var songNameFont    = _fontExo2.CreateFont(60);
+        // TODO 这里应该画图
         var songName        = $"{beatmapset.TitleUnicode} by {beatmapset.ArtistUnicode}";
         var songNameMeasure = songName.MeasureWithSpace(songNameFont);
+
+        while (songNameMeasure.Width > ImageWidth - MarginX * 2)
+        {
+            songName        = songName[..^5] + "...";
+            songNameMeasure = songName.MeasureWithSpace(songNameFont);
+        }
+
+        songName = songName + $"({beatmap.Status})";
 
         songInfo.Clear(BgColor);
         songInfo.DrawText(songName, songNameFont, Color.White, songInfoDrawX, songInfoDrawY);
@@ -220,6 +234,7 @@ public static class OsuScoreDrawer
 
         var starRating = new Image<Rgba32>((int)starRatingMeasure.Width + starRatingPaddingX * 2, songTypeSize);
 
+        //  TODO 颜色
         starRating.Clear(Color.Aqua).DrawTextCenter(starRatingText, starRatingFont, Color.Black).RoundCorners(starRating.Height / 2);
         songInfo.DrawImage(starRating, songInfoDrawX, songInfoDrawY);
 
