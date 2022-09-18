@@ -197,7 +197,7 @@ public static class OsuScoreDrawer
         var songInfoDrawY = songNameMarginTop;
 
         // song name
-        var songNameFont    = _fontExo2.CreateFont(60);
+        var songNameFont = _fontExo2.CreateFont(60);
         // TODO 这里应该画图
         var songName        = $"{beatmapset.TitleUnicode} by {beatmapset.ArtistUnicode}";
         var songNameMeasure = songName.MeasureWithSpace(songNameFont);
@@ -234,8 +234,11 @@ public static class OsuScoreDrawer
 
         var starRating = new Image<Rgba32>((int)starRatingMeasure.Width + starRatingPaddingX * 2, songTypeSize);
 
-        //  TODO 颜色
-        starRating.Clear(Color.Aqua).DrawTextCenter(starRatingText, starRatingFont, Color.Black).RoundCorners(starRating.Height / 2);
+        starRating
+            .Clear(GetStarRatingColor(beatmap.StarRating))
+            .DrawTextCenter(starRatingText, starRatingFont, beatmap.StarRating < 9 ? Color.Black : Color.White)
+            .RoundCorners(starRating.Height / 2);
+
         songInfo.DrawImage(starRating, songInfoDrawX, songInfoDrawY);
 
         // level name
@@ -316,5 +319,39 @@ public static class OsuScoreDrawer
         accRing.DrawImageCenter(im);
 
         return accRing;
+    }
+
+    private static Image<Rgba32>? _starRatingColorGradiant;
+
+    private static Color GetStarRatingColor(double starRating)
+    {
+        if (starRating > 10) starRating = 10;
+        if (starRating < 0) starRating  = 0;
+
+        if (_starRatingColorGradiant == null)
+        {
+            var brush = new LinearGradientBrush(
+                new PointF(0, 0), new PointF(2000, 0),
+                GradientRepetitionMode.None,
+                new ColorStop(0, Color.ParseHex("#4290ff")),
+                new ColorStop(0.20f, Color.ParseHex("#4fc0ff")),
+                new ColorStop(0.27f, Color.ParseHex("#7cff4f")),
+                new ColorStop(0.35f, Color.ParseHex("#f6f05c")),
+                new ColorStop(0.50f, Color.ParseHex("#ff4e6f")),
+                new ColorStop(0.65f, Color.ParseHex("#c645b8")),
+                new ColorStop(0.75f, Color.ParseHex("#6563de")),
+                new ColorStop(0.90f, Color.ParseHex("#12106d")),
+                new ColorStop(1.00f, Color.ParseHex("#000000"))
+            );
+
+            _starRatingColorGradiant = new Image<Rgba32>(2000, 50);
+            _starRatingColorGradiant.Mutate(i => i.Fill(brush));
+        }
+
+        var x = (int)(starRating / 10.0 * _starRatingColorGradiant.Width);
+
+        if (x == _starRatingColorGradiant.Width) x--;
+
+        return _starRatingColorGradiant[x, _starRatingColorGradiant.Height / 2];
     }
 }

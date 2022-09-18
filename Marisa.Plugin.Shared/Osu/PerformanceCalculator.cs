@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
@@ -60,7 +59,7 @@ public static class PerformanceCalculator
         var argument = score.ModeInt switch
         {
             3 => $"simulate mania \"{path}\" -s {score.Score} -j",
-            _ => throw new NetworkInformationException()
+            _ => throw new NotImplementedException()
         };
 
         argument += string.Join("", score.Mods.Select(m => $" -m {m}"));
