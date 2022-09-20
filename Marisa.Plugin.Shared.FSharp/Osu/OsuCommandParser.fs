@@ -29,7 +29,7 @@ module OsuCommandParser =
         let rank =
             (many space *> ignorableChar '#' *> many space *> number
              >>= fun n ->
-                     if n <= 0 then
+                     if n <= 0 || n > 100 then
                          ret None
                      else
                          ret <| Some n)
