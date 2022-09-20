@@ -167,12 +167,12 @@ public static class ImageDraw
 
     #region Draw Image
 
-    public static Image DrawImageCenter(this Image image, Image toDraw, double opacity = 1)
+    public static Image DrawImageCenter(this Image image, Image toDraw, double opacity = 1, int offsetX = 0, int offsetY = 0)
     {
         var x = (image.Width - toDraw.Width) / 2;
         var y = (image.Height - toDraw.Height) / 2;
 
-        return image.DrawImage(toDraw, x, y, opacity);
+        return image.DrawImage(toDraw, x + offsetX, y + offsetY, opacity);
     }
 
     public static Image DrawImageHCenter(this Image image, Image toDraw, int y, double opacity = 1)

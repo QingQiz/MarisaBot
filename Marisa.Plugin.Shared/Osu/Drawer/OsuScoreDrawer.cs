@@ -48,7 +48,12 @@ public static class OsuScoreDrawer
         // 成绩数值
         const int gradeCardMarginLeft = 50;
 
-        grade.DrawImageVCenter(GetGradeDetail(score.Score, score.CreatedAt), MarginX + iconBar.Width + ringMarginLeft + ring.Width + gradeCardMarginLeft);
+        var maxWidth = ImageWidth - MarginX - iconBar.Width - ringMarginLeft - ring.Width - gradeCardMarginLeft - MarginX;
+
+        grade.DrawImageVCenter(GetGradeDetail(maxWidth, score.Score, score.Mods, score.CreatedAt),
+            MarginX + iconBar.Width + ringMarginLeft + ring.Width + gradeCardMarginLeft);
+
+        // TODO 歌曲详情
 
         // 玩家卡片
         var userCard = (await info.GetMiniCard()).ResizeX((int)((ImageWidth - MarginX * 2) * 0.4));
@@ -128,7 +133,7 @@ public static class OsuScoreDrawer
         return image;
     }
 
-    public static Image GetStatusIcon(string status)
+    private static Image GetStatusIcon(string status)
     {
         status = status.ToLower();
 
@@ -170,19 +175,48 @@ public static class OsuScoreDrawer
         return im;
     }
 
-    private static Image<Rgba32> GetGradeDetail(long grade, DateTimeOffset time)
+    private static Image<Rgba32> GetGradeDetail(int maxWidth, long grade, string[] mods, DateTimeOffset time)
     {
         var gradeText = grade.ToString("N0");
         var timeText  = (time + TimeSpan.FromHours(8)).ToString("// yyyy-MM-dd hh:mm:ss");
 
-        var card = new Image<Rgba32>(700, 500);
+        var card = new Image<Rgba32>(maxWidth, 500);
 
         var font1 = _fontExo2.CreateFont(160);
         var font3 = _fontExo2.CreateFont(40);
 
-        // TODO draw mods
-        card.DrawText(gradeText, font1, Color.White, 0, 100);
-        card.DrawText(timeText, font3, Color.White, 10, 300);
+        var icons = mods.Select(GetModIcon);
+
+        int y1, y2, y3;
+
+        if (mods.Any())
+        {
+            y1 = 70;
+            y2 = 130;
+            y3 = 330;
+        }
+        else
+        {
+            y1 = 0;
+            y2 = 100;
+            y3 = 300;
+        }
+
+        const int modIconWidth = 110;
+
+        var gap = Math.Min(10, (float)(card.Width - mods.Length * modIconWidth) / (mods.Length - 1));
+
+        var x = 0.0;
+        foreach (var i in icons)
+        {
+            var draw = i.ResizeX(modIconWidth);
+
+            card.DrawImage(draw, (int)x, y1);
+            x += draw.Width + gap;
+        }
+
+        card.DrawText(gradeText, font1, Color.White, 0, y2);
+        card.DrawText(timeText, font3, Color.White, 10, y3);
 
         return card;
     }
@@ -399,5 +433,65 @@ public static class OsuScoreDrawer
         if (x == _starRatingColorGradiant.Width) x--;
 
         return _starRatingColorGradiant[x, _starRatingColorGradiant.Height / 2];
+    }
+
+    private static readonly Dictionary<string, Image> ModIconCache = new();
+
+    private static Image GetModIcon(string mod)
+    {
+        mod = mod.ToUpper();
+
+        lock (ModIconCache)
+        {
+            if (ModIconCache.ContainsKey(mod)) return ModIconCache[mod].CloneAs<Rgba32>();
+        }
+
+        var (iconId, type) = OsuFont.GetModeCharacter(mod);
+        var color = OsuFont.GetColorByModeType(type);
+
+        var border = OsuFont.GetCharacter(OsuFont.BorderChar);
+        border.Mutate(i =>
+        {
+            i.SetGraphicsOptions(new GraphicsOptions
+            {
+                AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+            });
+            i.Fill(color.Item1);
+        });
+
+        if (iconId == 0)
+        {
+            var f = _fontExo2.CreateFont(40);
+            border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
+        }
+        else
+        {
+            var icon = OsuFont.GetCharacter(iconId).ResizeY(26);
+            icon.Mutate(i =>
+            {
+                i.SetGraphicsOptions(new GraphicsOptions
+                {
+                    AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+                });
+                i.Fill(color.Item2);
+            });
+
+            border.DrawImageCenter(icon, offsetY: -10);
+
+            var font = _fontExo2.CreateFont(15);
+
+            var m = mod.Measure(font);
+
+            var imgText = new Image<Rgba32>((int)(m.Width + 15), (int)(m.Height + 10)).Clear(color.Item2);
+            imgText.DrawTextCenter(mod.ToUpper(), font, color.Item1, withSpace: false);
+
+            border.DrawImageCenter(imgText.RoundCorners(imgText.Height / 2 + 1), offsetY: 17);
+        }
+
+        lock (ModIconCache)
+        {
+            ModIconCache[mod] = border;
+            return border.CloneAs<Rgba32>();
+        }
     }
 }

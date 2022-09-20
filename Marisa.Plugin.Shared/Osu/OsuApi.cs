@@ -82,7 +82,7 @@ public static class OsuApi
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
         
-        await File.WriteAllTextAsync(@"C:\users\sofee\desktop\a.json", json);
+        // await File.WriteAllTextAsync(@"C:\users\sofee\desktop\a.json", json);
         // var json =  await File.ReadAllTextAsync(@"C:\users\sofee\desktop\a.json");
 
         return OsuUserInfo.FromJson(json);

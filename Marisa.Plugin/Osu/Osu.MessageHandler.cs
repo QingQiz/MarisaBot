@@ -184,7 +184,7 @@ public partial class Osu : MarisaPluginBase
         var img = await recentScores![0].GetImage(userInfo);
 
         message.Reply(
-            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            new MessageDataText("歌曲详情还没画，先不要急"),
             MessageDataImage.FromBase64(img.ToB64(100))
         );
 
@@ -232,7 +232,7 @@ public partial class Osu : MarisaPluginBase
         var img = await recentScores![0].GetImage(userInfo);
 
         message.Reply(
-            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            new MessageDataText("歌曲详情还没画，先不要急"),
             MessageDataImage.FromBase64(img.ToB64(100))
         );
 
@@ -280,7 +280,7 @@ public partial class Osu : MarisaPluginBase
         var img = await recentScores![0].GetImage(userInfo);
 
         message.Reply(
-            new MessageDataText("mod还没画，pp计算器也没写，总之别急"),
+            new MessageDataText("歌曲详情还没画，先不要急"),
             MessageDataImage.FromBase64(img.ToB64(100))
         );
 
