@@ -5,7 +5,7 @@ namespace Marisa.Plugin.Shared.Configuration;
 
 public static class ConfigurationManager
 {
-    private static PluginConfiguration? _config = null;
+    private static PluginConfiguration? _config;
 
     public static PluginConfiguration Configuration => _config ??= ReadConfiguration();
 
@@ -17,6 +17,25 @@ public static class ConfigurationManager
 
         var input = File.ReadAllText(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "config.yaml"));
 
-        return deserializer.Deserialize<PluginConfiguration>(input);
+        var config = deserializer.Deserialize<PluginConfiguration>(input);
+
+        if (!Directory.Exists(config.MaiMai.TempPath))
+        {
+            Directory.CreateDirectory(config.MaiMai.TempPath);
+        }
+        if (!Directory.Exists(config.Chunithm.TempPath))
+        {
+            Directory.CreateDirectory(config.Chunithm.TempPath);
+        }
+        if (!Directory.Exists(config.Osu.TempPath))
+        {
+            Directory.CreateDirectory(config.Osu.TempPath);
+        }
+        if (!Directory.Exists(config.Arcaea.TempPath))
+        {
+            Directory.CreateDirectory(config.Arcaea.TempPath);
+        }
+
+        return config;
     }
 }

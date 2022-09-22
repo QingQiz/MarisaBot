@@ -10,7 +10,7 @@ public abstract class Song
     public readonly List<double> Constants = new();
     public readonly List<string> Levels = new();
     public readonly List<string> Charters = new();
-    public string Bpm = "";
+    public double Bpm;
     public string Version = "";
 
 

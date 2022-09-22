@@ -6,5 +6,5 @@ namespace Marisa.Plugin.Shared.Dialog;
 public static class Dialog
 {
     public delegate Task<MarisaPluginTaskState> MessageHandler(Message message);
-    public delegate bool MessageHandlerAdder(long id, MessageHandler handler);
+    public delegate bool MessageHandlerAdder(long? group, long? id, MessageHandler handler);
 }

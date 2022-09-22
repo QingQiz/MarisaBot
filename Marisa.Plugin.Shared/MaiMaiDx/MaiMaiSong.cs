@@ -18,7 +18,7 @@ public class MaiMaiSong : Song
         Type    = data.type;
         Info    = new MaiMaiSongInfo(data.basic_info);
         Artist  = Info.Artist;
-        Bpm     = Info.Bpm.ToString();
+        Bpm     = Info.Bpm;
         Version = Info.From;
 
         // 好像只能这样写。。。好丑。。。

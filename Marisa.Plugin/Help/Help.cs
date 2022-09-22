@@ -1,5 +1,4 @@
-﻿using Marisa.Plugin.Shared.Help;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -10,19 +9,33 @@ namespace Marisa.Plugin.Help;
 [MarisaPluginCommand(true, "help", "帮助")]
 public partial class Help : MarisaPluginBase
 {
-    private Image<Rgba32>? _image;
+    private Image? _image;
 
     [MarisaPluginCommand]
     private MarisaPluginTaskState Handler(Message message, IEnumerable<MarisaPluginBase> plugins)
     {
         if (_image == null)
         {
+            const int gap = 15;
+
             var helpDocs = GetHelp(plugins);
 
-            var bm    = HelpDoc.DrawHelpList(helpDocs)!;
-            var bmRes = new Image<Rgba32>(bm.Width + 30, bm.Height + 30);
+            var ims = helpDocs.Select(d => d.GetImage()).ToList();
 
-            bmRes.Mutate(i => i.Fill(Color.White).DrawImage(bm, 15, 15));
+            var bmRes = new Image<Rgba32>(
+                    ims.Max(i => i.Width) + gap * 2,
+                    ims.Sum(i => i.Height) + gap * 2 + 2 * gap * (ims.Count - 1)
+                ).Clear(Color.White);
+
+            var y = gap;
+            foreach (var im in ims)
+            {
+                bmRes.DrawImage(im, gap, y);
+                y += im.Height + gap - 1;
+                var y1 = y;
+                bmRes.Mutate(i => i.DrawLines(new Pen(Color.Pink, 2), new PointF(gap, y1), new PointF(bmRes.Width - gap, y1)));
+                y += gap + 1;
+            }
 
             _image = bmRes;
         }

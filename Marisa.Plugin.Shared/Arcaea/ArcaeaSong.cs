@@ -9,6 +9,7 @@ public class ArcaeaSong : Song
 {
     public readonly string SongPack;
     private readonly string _coverFileName;
+    public new readonly string Bpm;
 
     public string CoverFileName => Levels[^1] == "/"
         ? _coverFileName

@@ -22,16 +22,16 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     private readonly Func<List<TSong>> _songListGen;
     private readonly string _guessDbSetName;
 
-    private readonly MessageHandlerAdder _songGuessHandlerAdder;
+    public readonly MessageHandlerAdder MessageHandlerAdder;
 
     /// <param name="aliasFilePath">歌曲的别名文件路径，格式是tsv</param>
     /// <param name="tempAliasPath">歌曲临时别名的存放路径</param>
     /// <param name="songListGen">读取歌曲列表的函数</param>
     /// <param name="guessGuessDbSetName">猜歌DbSet名称</param>
-    /// <param name="songGuessHandlerAdder">添加猜曲结果处理器的函数</param>
+    /// <param name="messageHandlerAdder">添加猜曲结果处理器的函数</param>
     public SongDb(
         string aliasFilePath, string tempAliasPath, Func<List<TSong>> songListGen,
-        string guessGuessDbSetName, MessageHandlerAdder songGuessHandlerAdder)
+        string guessGuessDbSetName, MessageHandlerAdder messageHandlerAdder)
     {
         _aliasFilePath = aliasFilePath;
         _tempAliasPath = tempAliasPath;
@@ -39,7 +39,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         _songListGen = songListGen;
 
         _guessDbSetName        = guessGuessDbSetName;
-        _songGuessHandlerAdder = songGuessHandlerAdder;
+        MessageHandlerAdder = messageHandlerAdder;
     }
 
     private Dictionary<string, List<string>> GetSongAliases()
@@ -421,7 +421,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         var senderName = message.Sender!.Name;
         var groupId    = message.GroupInfo!.Id;
         var now        = DateTime.Now;
-        var res        = _songGuessHandlerAdder(groupId, msg => GenGuessDialogHandler(song, now, qq)(msg));
+        var res        = MessageHandlerAdder(groupId, null, msg => GenGuessDialogHandler(song, now, qq)(msg));
 
         if (!res)
         {
