@@ -41,7 +41,7 @@ public partial class Osu : MarisaPluginBase
 
                 bind.OsuUserId   = info.Id;
                 bind.OsuUserName = info.Username;
-                bind.GameMode    = OsuApi.ModeList[0];
+                bind.GameMode    = OsuApi.ModeList.Last();
                 await dbContext.SaveChangesAsync();
                 message.Reply("好了");
             }
@@ -102,27 +102,27 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        if (DebounceCheck(message))
+        var command = ParseCommand(message);
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            message.Reply("您是？");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (DebounceCheck(message, command.Name))
         {
             return MarisaPluginTaskState.CompletedTask;
         }
 
         try
         {
-            var command = ParseCommand(message);
-
-            if (command == null)
-            {
-                message.Reply("错误的命令格式");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
-            if (string.IsNullOrWhiteSpace(command.Name))
-            {
-                message.Reply("您是？");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
             var uInfo = await OsuApi.GetUserInfoByName(command.Name, command.Mode?.Value ?? -1);
 
             if (uInfo.RankHistory == null)
@@ -138,7 +138,7 @@ public partial class Osu : MarisaPluginBase
         }
         finally
         {
-            DebounceCancel(message.Sender!.Id);
+            DebounceCancel(command.Name);
         }
 
         return MarisaPluginTaskState.CompletedTask;

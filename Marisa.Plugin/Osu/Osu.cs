@@ -6,27 +6,27 @@ namespace Marisa.Plugin.Osu;
 
 public partial class Osu
 {
-    private static readonly HashSet<long> Debounce = new();
+    private static readonly HashSet<string> Debounce = new();
 
-    private static void DebounceCancel(long uid)
+    private static void DebounceCancel(string name)
     {
         lock (Debounce)
         {
-            Debounce.Remove(uid);
+            Debounce.Remove(name);
         }
     }
 
-    private static bool DebounceCheck(Message message)
+    private static bool DebounceCheck(Message message, string name)
     {
         lock (Debounce)
         {
-            if (Debounce.Contains(message.Sender!.Id))
+            if (Debounce.Contains(name))
             {
                 message.Reply(new [] {"别急", "你先别急", "急你妈", "有点急", "你急也没用"}.RandomTake());
                 return true;
             }
 
-            Debounce.Add(message.Sender!.Id);
+            Debounce.Add(name);
             return false;
         }
     }

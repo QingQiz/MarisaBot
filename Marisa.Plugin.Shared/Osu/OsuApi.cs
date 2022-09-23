@@ -70,7 +70,7 @@ public static class OsuApi
             1 => "taiko",
             2 => "fruits",
             3 => "mania",
-            _ => "osu"
+            _ => "mania"
         };
     }
 
