@@ -117,7 +117,7 @@ public partial class Arcaea : MarisaPluginBase
     /// <summary>
     /// 设置别名
     /// </summary>
-    [MarisaPluginDoc("设置别名，参数为：歌曲原名 := 歌曲别名")]
+    [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
     [MarisaPluginSubCommand(nameof(ArcaeaSongAlias))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "set")]
     private MarisaPluginTaskState ArcaeaSongAliasSet(Message message)

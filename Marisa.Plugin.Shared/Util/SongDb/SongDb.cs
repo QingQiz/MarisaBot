@@ -38,7 +38,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         _songListGen = songListGen;
 
-        _guessDbSetName        = guessGuessDbSetName;
+        _guessDbSetName     = guessGuessDbSetName;
         MessageHandlerAdder = messageHandlerAdder;
     }
 
@@ -273,19 +273,31 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     /// <returns>成功与否</returns>
     public bool SetSongAlias(string name, string alias)
     {
-        if (SongList.All(song => song.Title != name)) return false;
-
         lock (SongAlias)
         {
-            File.AppendAllText(_tempAliasPath, $"{name}\t{alias}\n");
-
-            if (SongAlias.ContainsKey(alias))
+            string title;
+            if (long.TryParse(name, out var id))
             {
-                SongAlias[alias].Add(name);
+                var song = GetSongById(id);
+                if (song == null) return false;
+
+                title = song.Title;
             }
             else
             {
-                SongAlias[alias] = new List<string> { name };
+                if (SongList.All(song => song.Title != name)) return false;
+                title = name;
+            }
+
+            File.AppendAllText(_tempAliasPath, $"{title}\t{alias}\n");
+
+            if (SongAlias.ContainsKey(alias))
+            {
+                SongAlias[alias].Add(title);
+            }
+            else
+            {
+                SongAlias[alias] = new List<string> { title };
             }
 
             return true;
