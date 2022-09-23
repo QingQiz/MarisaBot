@@ -9,7 +9,7 @@ public class Variant
     public string Mode { get; set; }
 
     [JsonProperty("variant")]
-    public string VariantVariant { get; set; }
+    public string Name { get; set; }
 
     [JsonProperty("country_rank")]
     public long? RegionRank { get; set; }

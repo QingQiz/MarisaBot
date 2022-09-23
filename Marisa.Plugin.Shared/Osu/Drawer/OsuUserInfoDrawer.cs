@@ -57,7 +57,7 @@ public static class OsuUserInfoDrawer
         const int detailWidth = ImageWidth / 2 - 150;
 
         // rank
-        var rank = GetRank(detailWidth, info.Statistics.GlobalRank, info.Statistics.RegionRank);
+        var rank = GetRankAndPerformance(detailWidth, info.Statistics);
 
         // rank history
         var chart = GetRankHistoryChart(detailWidth, info.RankHistory!.Data);
@@ -265,23 +265,18 @@ public static class OsuUserInfoDrawer
         var font3 = new Font(FontExo2, 24, FontStyle.Bold);
 
         const string text1 = "奖章";
-        const string text2 = "pp";
         const string text3 = "游戏时间";
 
         // 奖章
-        var text1H = text1.MeasureWithSpace(font1).Height;
+        var text1M = text1.MeasureWithSpace(font1);
         counter.DrawText(text1, font1, Color.White, 0, 5);
-        counter.DrawText($"{achievementCount:N0}", font2, FontColor, 0, text1H);
-
-        // pp
-        counter.DrawText(text2, font1, Color.White, 70, 0);
-        counter.DrawText($"{statistics.Pp:N0}", font2, FontColor, 70, text1H);
+        counter.DrawText($"{achievementCount:N0}", font2, FontColor, 0, text1M.Height);
 
         // 游戏时间
-        var text3X = 70 + statistics.Pp.ToString("N0").MeasureWithSpace(font2).Width + 20;
+        var text3X = Math.Max(text1M.Width, achievementCount.ToString("N0").MeasureWithSpace(font2).Width) + 30;
         counter.DrawText(text3, font1, Color.White, text3X, 5);
         var t = TimeSpan.FromSeconds(statistics.PlayTime);
-        counter.DrawText($"{t.Days:N0}d {t.Hours:N0}h {t.Minutes:N0}m", font2, FontColor, text3X, text1H);
+        counter.DrawText($"{t.Days:N0}d {t.Hours:N0}h {t.Minutes:N0}m", font2, FontColor, text3X, text1M.Height);
 
         // ss个数、s个数等
         const int iconHeight = 44;
@@ -302,7 +297,7 @@ public static class OsuUserInfoDrawer
         return counter;
     }
 
-    private static Image<Rgba32> GetRank(int detailWidth, long globalRank, long regionRank)
+    private static Image<Rgba32> GetRankAndPerformance(int detailWidth, Statistics statistics)
     {
         var rank = new Image<Rgba32>(detailWidth, 100);
 
@@ -313,14 +308,33 @@ public static class OsuUserInfoDrawer
         var font2 = new Font(FontExo2, 60, FontStyle.Bold);
 
         var text1H = rankText1.MeasureWithSpace(font1).Height - 8;
-        rank.DrawText(rankText1, font1, Color.White, 2, 0);
 
-        var rank1  = $"#{globalRank:N0}";
+        var x = 0;
+
+        var rank1  = $"#{statistics.GlobalRank:N0}";
         var text1W = Math.Max(rankText1.MeasureWithSpace(font1).Width, rank1.MeasureWithSpace(font2).Width);
-        rank.DrawText(rank1, font2, FontColor, 0, text1H);
+        rank.DrawText(rankText1, font1, Color.White, x, 0);
+        rank.DrawText(rank1, font2, FontColor, x, text1H);
 
-        rank.DrawText(rankText2, font1, Color.White, text1W + MarginX, 0);
-        rank.DrawText($"#{regionRank:N0}", font2, FontColor, text1W + MarginX, text1H);
+        x += (int)text1W + MarginX;
+
+        var rank2  = $"#{statistics.RegionRank:N0}";
+        var text2W = Math.Max(rankText2.MeasureWithSpace(font1).Width, rank2.MeasureWithSpace(font2).Width);
+        rank.DrawText(rankText2, font1, Color.White, x, 0);
+        rank.DrawText(rank2, font2, FontColor, x, text1H);
+
+        x += (int)text2W + MarginX;
+
+        var ppText = "PP";
+
+        if (statistics.Variants.Any())
+        {
+            ppText = $"{ppText} ({string.Join(", ", statistics.Variants.Select(v => $"{v.Name}: {v.Pp}"))})";
+        }
+
+        var pp = $"{statistics.Pp:F2}";
+        rank.DrawText(ppText, font1, Color.White, x, 0);
+        rank.DrawText(pp, font2, FontColor, x, text1H);
         return rank;
     }
 
@@ -384,11 +398,11 @@ public static class OsuUserInfoDrawer
         // supporter
         if (info.IsSupporter)
         {
-            var fontSupporter = new Font(FontIcon, 36, FontStyle.Regular);
+            var fontSupporter = new Font(FontIcon, 46, FontStyle.Regular);
             var supporterChar = new string('♥', info.SupportLevel);
 
             var supportColor = Color.FromRgb(255, 102, 171);
-            nameCard.DrawText(supporterChar, fontSupporter, supportColor, nameWidth, 10);
+            nameCard.DrawText(supporterChar, fontSupporter, supportColor, nameWidth + 10, 0);
         }
 
         // region flag
