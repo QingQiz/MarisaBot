@@ -32,14 +32,14 @@ public class User
     [JsonProperty("is_supporter", Required = Required.Always)]
     public bool IsSupporter { get; set; }
 
-    [JsonProperty("last_visit", Required = Required.Always)]
-    public DateTimeOffset LastVisit { get; set; }
+    [JsonProperty("last_visit")]
+    public DateTimeOffset? LastVisit { get; set; }
 
     [JsonProperty("pm_friends_only", Required = Required.Always)]
     public bool PmFriendsOnly { get; set; }
 
-    [JsonProperty("profile_colour", Required = Required.AllowNull)]
-    public object ProfileColour { get; set; }
+    [JsonProperty("profile_colour")]
+    public object? ProfileColour { get; set; }
 
     [JsonProperty("username", Required = Required.Always)]
     public string Username { get; set; }

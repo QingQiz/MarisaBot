@@ -53,8 +53,8 @@ public class Beatmap
     [JsonProperty("cs", Required = Required.Always)]
     public long Cs { get; set; }
 
-    [JsonProperty("deleted_at", Required = Required.AllowNull)]
-    public object DeletedAt { get; set; }
+    [JsonProperty("deleted_at")]
+    public object? DeletedAt { get; set; }
 
     [JsonProperty("drain", Required = Required.Always)]
     public long Drain { get; set; }

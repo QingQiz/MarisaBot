@@ -20,8 +20,8 @@ public class Beatmapset
     [JsonProperty("favourite_count", Required = Required.Always)]
     public long FavouriteCount { get; set; }
 
-    [JsonProperty("hype", Required = Required.AllowNull)]
-    public object Hype { get; set; }
+    [JsonProperty("hype")]
+    public object? Hype { get; set; }
 
     [JsonProperty("id", Required = Required.Always)]
     public long Id { get; set; }
@@ -53,8 +53,8 @@ public class Beatmapset
     [JsonProperty("title_unicode", Required = Required.Always)]
     public string TitleUnicode { get; set; }
 
-    [JsonProperty("track_id", Required = Required.AllowNull)]
-    public object TrackId { get; set; }
+    [JsonProperty("track_id")]
+    public object? TrackId { get; set; }
 
     [JsonProperty("user_id", Required = Required.Always)]
     public long UserId { get; set; }

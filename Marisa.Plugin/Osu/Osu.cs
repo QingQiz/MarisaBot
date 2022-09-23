@@ -22,7 +22,7 @@ public partial class Osu
         {
             if (Debounce.Contains(name))
             {
-                message.Reply(new [] {"别急", "你先别急", "急你妈", "有点急", "你急也没用"}.RandomTake());
+                message.Reply(new[] { "别急", "你先别急", "急你妈", "有点急", "你急也没用" }.RandomTake());
                 return true;
             }
 
@@ -34,6 +34,32 @@ public partial class Osu
     private static void AddCommandToQueue(Message message)
     {
         message.Reply("服务暂时不可用！");
+    }
+
+    private static bool TryParseCommand(Message message, bool withBpRank, out OsuCommandParser.OsuCommand? command)
+    {
+        command = ParseCommand(message, true);
+
+        if (command == null)
+        {
+            message.Reply("错误的命令格式");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            message.Reply("您是？");
+            return false;
+        }
+
+        if (command.BpRank == null)
+        {
+            command = command.Mode == null
+                ? new OsuCommandParser.OsuCommand(command.Name, 1, 3)
+                : new OsuCommandParser.OsuCommand(command.Name, 1, command.Mode);
+        }
+
+        return true;
     }
 
     private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank = false)

@@ -88,26 +88,76 @@ public static class OsuScoreDrawer
         var c2 = GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", (ImageWidth - staCardGap * 2) / 3);
         var c3 = GetKeyValuePair("PP", pp, (ImageWidth - staCardGap * 2) / 3);
 
-        // TODO std taiko catch
-        var c4 = GetKeyValuePair("MAX", $"{score.Statistics.CountGeki:N0}", (ImageWidth - staCardGap * 5) / 6);
-        var c5 = GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", (ImageWidth - staCardGap * 5) / 6);
-        var c6 = GetKeyValuePair("200", $"{score.Statistics.CountKatu:N0}", (ImageWidth - staCardGap * 5) / 6);
-        var c7 = GetKeyValuePair("100", $"{score.Statistics.Count100:N0}", (ImageWidth - staCardGap * 5) / 6);
-        var c8 = GetKeyValuePair("50", $"{score.Statistics.Count50:N0}", (ImageWidth - staCardGap * 5) / 6);
-        var c9 = GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", (ImageWidth - staCardGap * 5) / 6);
+        var cards = new List<Image>();
 
-        var sta = new Image<Rgba32>(ImageWidth, c1.Height + c4.Height + staCardVGap).Clear(BgColor);
+        switch (score.ModeInt)
+        {
+            case 3:
+            {
+                const int width = (ImageWidth - staCardGap * 5) / 6;
+
+                cards.AddRange(new[]
+                {
+                    GetKeyValuePair("MAX", $"{score.Statistics.CountGeki:N0}", width),
+                    GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", width),
+                    GetKeyValuePair("200", $"{score.Statistics.CountKatu:N0}", width),
+                    GetKeyValuePair("100", $"{score.Statistics.Count100:N0}", width),
+                    GetKeyValuePair("50", $"{score.Statistics.Count50:N0}", width),
+                    GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
+                });
+                break;
+            }
+            case 0:
+            {
+                const int width = (ImageWidth - staCardGap * 3) / 4;
+
+                cards.AddRange(new[]
+                {
+                    GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", width),
+                    GetKeyValuePair("100", $"{score.Statistics.Count100:N0}", width),
+                    GetKeyValuePair("50", $"{score.Statistics.Count50:N0}", width),
+                    GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
+                });
+                break;
+            }
+            case 1:
+            {
+                const int width = (ImageWidth - staCardGap * 2) / 3;
+
+                cards.AddRange(new[]
+                {
+                    GetKeyValuePair("GREAT", $"{score.Statistics.Count300:N0}", width),
+                    GetKeyValuePair("GOOD", $"{score.Statistics.Count100:N0}", width),
+                    GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
+                });
+                break;
+            }
+            case 2:
+            {
+                const int width = (ImageWidth - staCardGap * 3) / 4;
+
+                cards.AddRange(new[]
+                {
+                    GetKeyValuePair("FRUITS", $"{score.Statistics.Count300:N0}", width),
+                    GetKeyValuePair("TICKS", $"{score.Statistics.Count100:N0}", width),
+                    GetKeyValuePair("DRP MISS", $"{score.Statistics.CountKatu:N0}", width),
+                    GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
+                });
+                break;
+            }
+        }
+
+        var sta = new Image<Rgba32>(ImageWidth, c1.Height + cards[0].Height + staCardVGap).Clear(BgColor);
 
         sta.DrawImage(c1, 0, 0);
         sta.DrawImage(c2, c1.Width + staCardGap, 0);
         sta.DrawImage(c3, (c1.Width + staCardGap) * 2, 0);
 
-        sta.DrawImage(c4, 0, c1.Height + staCardVGap);
-        sta.DrawImage(c5, (c4.Width + staCardGap) * 1, c1.Height + staCardVGap);
-        sta.DrawImage(c6, (c4.Width + staCardGap) * 2, c1.Height + staCardVGap);
-        sta.DrawImage(c7, (c4.Width + staCardGap) * 3, c1.Height + staCardVGap);
-        sta.DrawImage(c8, (c4.Width + staCardGap) * 4, c1.Height + staCardVGap);
-        sta.DrawImage(c9, (c4.Width + staCardGap) * 5, c1.Height + staCardVGap);
+        for (var i = 0; i < cards.Count; i++)
+        {
+            sta.DrawImage(cards[i], (cards[0].Width + staCardGap) * i, c1.Height + staCardVGap);
+        }
+
         return sta;
     }
 

@@ -56,6 +56,8 @@ public static class PerformanceCalculator
         var path = await GetBeatmapPath(score.Beatmap);
 
         // TODO std taiko catch
+        if (score.ModeInt != 3) return 0;
+
         var argument = score.ModeInt switch
         {
             3 => $"simulate mania \"{path}\" -s {score.Score} -j",

@@ -158,7 +158,7 @@ public static class OsuUserInfoDrawer
 
             option.VerticalAlignment = VerticalAlignment.Bottom;
 
-            var lastActivate = info.LastVisit;
+            var lastActivate = info.LastVisit ?? DateTime.MaxValue;
 
             var text = "最后活跃：";
 

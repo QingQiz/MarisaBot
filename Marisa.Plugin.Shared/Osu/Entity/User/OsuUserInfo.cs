@@ -35,7 +35,7 @@ public partial class OsuUserInfo
     public bool IsSupporter { get; set; }
 
     [JsonProperty("last_visit")]
-    public DateTimeOffset LastVisit { get; set; }
+    public DateTimeOffset? LastVisit { get; set; }
 
     [JsonProperty("pm_friends_only")]
     public bool PmFriendsOnly { get; set; }

@@ -108,9 +108,16 @@ public static class OsuApi
         return OsuUserInfo.FromJson(json);
     }
 
-    public static async Task<OsuScore[]?> GetScores(long osuId, string type, string gameMode, int skip, int take, bool includeFails = false)
+    public static async Task<OsuScore[]?> GetScores(long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false)
     {
-        var json = await $"{UserInfoUri}/{osuId}/scores/{type}"
+        var t = type switch
+        {
+            OsuScoreType.Best   => "best",
+            OsuScoreType.Recent => "recent",
+            _                   => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+
+        var json = await $"{UserInfoUri}/{osuId}/scores/{t}"
             .SetQueryParam("include_fails", includeFails ? 1 : 0)
             .SetQueryParam("mode", gameMode)
             .SetQueryParam("limit", take)
@@ -124,6 +131,10 @@ public static class OsuApi
 
         return OsuScore.FromJson(json);
     }
+}
 
-
+public enum OsuScoreType
+{
+    Recent,
+    Best
 }

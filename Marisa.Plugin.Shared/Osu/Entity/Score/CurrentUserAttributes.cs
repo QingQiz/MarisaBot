@@ -5,6 +5,6 @@ namespace Marisa.Plugin.Shared.Osu.Entity.Score;
 
 public class CurrentUserAttributes
 {
-    [JsonProperty("pin", Required = Required.AllowNull)]
-    public object Pin { get; set; }
+    [JsonProperty("pin")]
+    public object? Pin { get; set; }
 }

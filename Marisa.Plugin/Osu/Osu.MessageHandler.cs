@@ -102,21 +102,9 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        var command = ParseCommand(message);
+        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command == null)
-        {
-            message.Reply("错误的命令格式");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            message.Reply("您是？");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        if (DebounceCheck(message, command.Name))
+        if (DebounceCheck(message, command!.Name))
         {
             return MarisaPluginTaskState.CompletedTask;
         }
@@ -148,33 +136,11 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message)
     {
-        var command = ParseCommand(message, true);
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command == null)
-        {
-            message.Reply("错误的命令格式");
-            return MarisaPluginTaskState.CompletedTask;
-        }
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            message.Reply("您是？");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var mode = command.Mode?.Value ?? 0;
-
-        if (mode != 3)
-        {
-            message.Reply("目前未实现");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var bpRank = command.BpRank?.Value ?? 1;
-
-        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, "recent", OsuApi.GetModeName(mode), bpRank - 1, 1, false);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
         if (!recentScores!.Any())
         {
@@ -196,33 +162,11 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
     {
-        var command = ParseCommand(message, true);
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command == null)
-        {
-            message.Reply("错误的命令格式");
-            return MarisaPluginTaskState.CompletedTask;
-        }
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            message.Reply("您是？");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var mode = command.Mode?.Value ?? 0;
-
-        if (mode != 3)
-        {
-            message.Reply("目前未实现");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var bpRank = command.BpRank?.Value ?? 1;
-
-        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, "recent", OsuApi.GetModeName(mode), bpRank - 1, 1, true);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1, true);
 
         if (!recentScores!.Any())
         {
@@ -244,33 +188,11 @@ public partial class Osu : MarisaPluginBase
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        var command = ParseCommand(message, true);
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command == null)
-        {
-            message.Reply("错误的命令格式");
-            return MarisaPluginTaskState.CompletedTask;
-        }
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            message.Reply("您是？");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var mode = command.Mode?.Value ?? 0;
-
-        if (mode != 3)
-        {
-            message.Reply("目前未实现");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var bpRank = command.BpRank?.Value ?? 1;
-
-        var userInfo = await OsuApi.GetUserInfoByName(command.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, "best", OsuApi.GetModeName(mode), bpRank - 1, 1);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
         if (!recentScores!.Any())
         {
