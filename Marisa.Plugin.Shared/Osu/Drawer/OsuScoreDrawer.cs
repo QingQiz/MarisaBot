@@ -49,7 +49,7 @@ public static class OsuScoreDrawer
 
     public static async Task<Image> GetImage(this OsuScore score, OsuUserInfo info)
     {
-        var scoreHeader = GetScoreHeader(score.Beatmap, score.Beatmapset);
+        var scoreHeader = GetScoreHeader(score);
 
         // 封面
         var cover = (await score.GetCover()).ResizeX(ImageWidth);
@@ -79,7 +79,7 @@ public static class OsuScoreDrawer
         // 玩家卡片
         var userCard = (await info.GetMiniCard()).ResizeX((int)((ImageWidth - MarginX * 2) * 0.4));
 
-        var sta = (await GetScoreSta(score)).ResizeX(ImageWidth - MarginX * 2 - userCard.Width - MarginX);
+        var sta = GetScoreSta(score).ResizeX(ImageWidth - MarginX * 2 - userCard.Width - MarginX);
 
         // 拼起来
         const int userCardVGap = 40;
@@ -97,13 +97,12 @@ public static class OsuScoreDrawer
         return res;
     }
 
-    private static async Task<Image> GetScoreSta(OsuScore score)
+    private static Image GetScoreSta(OsuScore score)
     {
         const int staCardGap  = 2;
         const int staCardVGap = 60;
 
-        var pp = score.Pp?.ToString("F2") ??
-            (await PerformanceCalculator.GetPerformance(score)).ToString("F2");
+        var pp = score.Pp?.ToString("F2") ?? PerformanceCalculator.GetPerformance(score).ToString("F2");
 
         var c1 = GetKeyValuePair("准确率", $"{score.Accuracy * 100:F2}%", (ImageWidth - staCardGap * 2) / 3);
         var c2 = GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", (ImageWidth - staCardGap * 2) / 3);
@@ -333,9 +332,12 @@ public static class OsuScoreDrawer
         return iconBar;
     }
 
-    private static Image GetScoreHeader(Beatmap beatmap, Beatmapset beatmapset)
+    private static Image GetScoreHeader(OsuScore score)
     {
-        var songInfo = new Image<Rgba32>(ImageWidth, 200);
+        var beatmap    = score.Beatmap;
+        var beatmapset = score.Beatmapset;
+
+        var songInfo = new Image<Rgba32>(ImageWidth, 200).Clear(BgColor);
 
         const int elementGap = 20;
 
@@ -344,23 +346,25 @@ public static class OsuScoreDrawer
         var songInfoDrawX = MarginX;
         var songInfoDrawY = songNameMarginTop;
 
+        // 歌曲状态，ranked、loved 等
+        var statusMark = GetStatusIcon(beatmap.Status);
+
+        songInfo.DrawImage(statusMark, songInfoDrawX, songInfoDrawY + 10);
+        
         // song name
         var songNameFont    = _fontExo2.CreateFont(60);
         var songName        = $"{beatmapset.TitleUnicode} by {beatmapset.ArtistUnicode}";
         var songNameMeasure = songName.MeasureWithSpace(songNameFont);
 
-        var statusMark = GetStatusIcon(beatmap.Status);
+        songInfoDrawX += statusMark.Width + elementGap;
 
-        while (songNameMeasure.Width > ImageWidth - MarginX * 2 - statusMark.Width - elementGap)
+        // 调整歌名，让他不要超过图片宽度
+        while (songNameMeasure.Width + songInfoDrawX + elementGap > ImageWidth - MarginX)
         {
             songName        = songName[..^5] + "...";
             songNameMeasure = songName.MeasureWithSpace(songNameFont);
         }
 
-        songInfo.Clear(BgColor);
-
-        songInfo.DrawImage(statusMark, songInfoDrawX, songInfoDrawY + 10);
-        songInfoDrawX += statusMark.Width + elementGap;
         songInfo.DrawText(songName, songNameFont, Color.White, songInfoDrawX, songInfoDrawY);
 
         // game mode icon
@@ -375,38 +379,47 @@ public static class OsuScoreDrawer
         songInfo.DrawImage(songTypeIcon, songInfoDrawX, songInfoDrawY);
 
         // star rating
-        // TODO 当有 mod 时重新计算 star rating
         const int starRatingPaddingX = 15;
 
         songInfoDrawX += songTypeIcon.Width + elementGap;
 
-        var starRatingText    = $"★ {beatmap.StarRating:F2}";
+        var starRating        = score.GetStarRating();
+        var starRatingText    = $"★ {starRating:F2}";
         var starRatingFont    = _fontExo2.CreateFont(35, FontStyle.Bold);
         var starRatingMeasure = starRatingText.MeasureWithSpace(starRatingFont);
 
-        var starRating = new Image<Rgba32>((int)starRatingMeasure.Width + starRatingPaddingX * 2, songTypeSize);
+        var starRatingImg = new Image<Rgba32>((int)starRatingMeasure.Width + starRatingPaddingX * 2, songTypeSize);
 
-        starRating
-            .Clear(GetStarRatingColor(beatmap.StarRating))
-            .DrawTextCenter(starRatingText, starRatingFont, beatmap.StarRating < 9 ? Color.Black : Color.White)
-            .RoundCorners(starRating.Height / 2);
+        starRatingImg
+            .Clear(GetStarRatingColor(starRating))
+            .DrawTextCenter(starRatingText, starRatingFont, starRating < 9 ? Color.Black : Color.White)
+            .RoundCorners(starRatingImg.Height / 2);
 
-        songInfo.DrawImage(starRating, songInfoDrawX, songInfoDrawY);
+        songInfo.DrawImage(starRatingImg, songInfoDrawX, songInfoDrawY);
 
         // level name
-        songInfoDrawX += starRating.Width + elementGap;
+        var mapperName = $"谱师：{beatmapset.Creator}";
+        var mapperFont = _fontExo2.CreateFont(45, FontStyle.Bold);
+
+        var mapperWidth = mapperName.MeasureWithSpace(mapperFont).Width;
+
+        songInfoDrawX += starRatingImg.Width + elementGap;
 
         var levelName    = beatmap.Version;
         var levelFont    = _fontExo2.CreateFont(45);
+
+        // 调整 levelName 字符串，让他不要超出宽度
+        while (levelName.MeasureWithSpace(levelFont).Width + mapperWidth + songInfoDrawX + elementGap > ImageWidth - MarginX)
+        {
+            levelName = levelName[..^5] + "...";
+        }
+
         var levelMeasure = levelName.MeasureWithSpace(levelFont);
 
         songInfo.DrawText(levelName, levelFont, Color.White, songInfoDrawX, songInfoDrawY);
 
         // mapper
         songInfoDrawX += (int)levelMeasure.Width + elementGap;
-
-        var mapperName = $"谱师：{beatmapset.Creator}";
-        var mapperFont = _fontExo2.CreateFont(45, FontStyle.Bold);
 
         songInfo.DrawText(mapperName, mapperFont, Color.ParseHex("#7296a3"), songInfoDrawX, songInfoDrawY);
 

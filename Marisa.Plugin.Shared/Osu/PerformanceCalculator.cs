@@ -105,7 +105,36 @@ public static class PerformanceCalculator
         return res;
     }
 
-    public static async Task<double> GetPerformance(OsuScore score)
+    public static double GetStarRating(this OsuScore score)
+    {
+        var path = GetBeatmapPath(score.Beatmap);
+
+        if (!new[] { "dt", "ht", "nc" }.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        {
+            return score.Beatmap.StarRating;
+        }
+
+        var argument = $"difficulty \"{path}\" -j" + string.Join("", score.Mods.Select(m => $" -m {m}"));
+
+        using var p = new Process();
+
+        p.StartInfo.UseShellExecute        = false;
+        p.StartInfo.CreateNoWindow         = true;
+        p.StartInfo.FileName               = PpCalculator;
+        p.StartInfo.Arguments              = argument;
+        p.StartInfo.RedirectStandardOutput = true;
+
+        p.Start();
+        p.WaitForExit();
+
+        var json = p.StandardOutput.ReadToEnd();
+
+        var regex = new Regex(@"""star_rating"":(.*?),");
+
+        return double.Parse(regex.Match(json).Groups[1].Value);
+    }
+
+    public static double GetPerformance(OsuScore score)
     {
         var path = GetBeatmapPath(score.Beatmap);
 
@@ -129,9 +158,9 @@ public static class PerformanceCalculator
         p.StartInfo.RedirectStandardOutput = true;
 
         p.Start();
-        await p.WaitForExitAsync();
+        p.WaitForExit();
 
-        var json = await p.StandardOutput.ReadToEndAsync();
+        var json = p.StandardOutput.ReadToEnd();
 
         var regex = new Regex(@"""pp"":(.*?)}");
 
