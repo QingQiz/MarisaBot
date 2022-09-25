@@ -1,6 +1,7 @@
 ﻿using Marisa.Plugin.Shared.Configuration;
 using Marisa.Utils;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -59,6 +60,22 @@ public static class ResourceManager
 
     public static (Image, Color) GetCoverBackground(long songId)
     {
-        return GetCover(songId).GetCoverBackground();
+        const string prefix = "CoverBackground-";
+
+        var x = Directory.GetFiles(TempPath, $"{prefix}*.png", SearchOption.TopDirectoryOnly).FirstOrDefault(x => x.StartsWith(prefix) && x.EndsWith($"-{songId}.png"));
+
+        if (x == null)
+        {
+            var (bg, color) = GetCover(songId).GetCoverBackground();
+
+            Task.Run(() => { bg.SaveAsPng(Path.Join(TempPath, prefix) + "-#" + color.ToHex() + $"-{songId}.png"); });
+
+            return (bg.CloneAs<Rgba32>(), color);
+        }
+        else
+        {
+            var color = Color.ParseHex(x.Split("-")[1]);
+            return (Image.Load(x), color);
+        }
     }
 }

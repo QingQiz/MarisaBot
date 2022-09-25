@@ -65,6 +65,7 @@ public static class OsuScoreDrawer
         var ring = GetAccRing(score.Rank, score.Accuracy, score.ModeInt).Resize(1.2);
         grade.DrawImageVCenter(ring, MarginX + iconBar.Width + ringMarginLeft);
 
+        // 谱面详情
         var beatmapDetail = GetBeatmapDetail(score.Beatmap);
         grade.DrawImageVCenter(beatmapDetail, ImageWidth - MarginX - beatmapDetail.Width);
 

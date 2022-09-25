@@ -6,10 +6,6 @@
 
 > **注意**，本bot使用反射实时生成文档，该模块可能过时。具体文档请使用 `help` 指令获取
 
-目前的文档（放张图）
-
-[![000000000-000000000-EBD8-D27-BC0-C44-AEBFA1-F6-E70-D172-C887.jpg](https://i.postimg.cc/V6sHjfkH/000000000-000000000-EBD8-D27-BC0-C44-AEBFA1-F6-E70-D172-C887.jpg)](https://postimg.cc/5HG3JMvw)
-
 **来个人和我一块维护啊（震声**
 
 <details>

@@ -614,7 +614,6 @@ public static class MaiMaiDraw
         {
             var (coverBackground, coverDominantColor) = ResourceManager.GetCoverBackground(score.Id);
 
-
             var card = new Image<Rgba32>(210, 40);
             var fcImg = ResourceManager.GetImage(string.IsNullOrEmpty(score.Fc)
                 ? "icon_blank.png"

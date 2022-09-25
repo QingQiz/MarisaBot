@@ -389,17 +389,6 @@ public static class ImageDraw
 
     #region Converter
 
-    public static Image<TPixel> ToImageSharpImage<TPixel>(this System.Drawing.Bitmap bitmap) where TPixel : unmanaged, IPixel<TPixel>
-    {
-        using var memoryStream = new MemoryStream();
-
-        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-
-        memoryStream.Seek(0, SeekOrigin.Begin);
-
-        return Image.Load<TPixel>(memoryStream);
-    }
-
     public static string ToB64(this Image image, int quality = 90)
     {
         var ms = new MemoryStream();
