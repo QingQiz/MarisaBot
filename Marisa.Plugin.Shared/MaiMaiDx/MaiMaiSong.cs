@@ -120,6 +120,13 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        return this.Draw().ToB64();
+        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".png";
+
+        if (File.Exists(path)) return Image.Load(path).ToB64();
+
+        var im = this.Draw();
+        im.SaveAsPng(path);
+
+        return im.ToB64();
     }
 }

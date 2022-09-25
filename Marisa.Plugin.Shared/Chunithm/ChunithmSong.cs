@@ -43,6 +43,10 @@ public class ChunithmSong : Song
 
     public override string GetImage()
     {
+        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".png";
+
+        if (File.Exists(path)) return Image.Load(path).ToB64();
+
         const int cardFontSize = 31;
         const int padding      = 10;
 
@@ -178,6 +182,7 @@ public class ChunithmSong : Song
             .DrawImage(cd2, padding, 3 * padding + cd1.Height)
         );
 
+        background.SaveAsPng(path);
         return background.ToB64();
     }
 }

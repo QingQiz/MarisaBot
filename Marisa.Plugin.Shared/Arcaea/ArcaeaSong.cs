@@ -55,6 +55,10 @@ public class ArcaeaSong : Song
 
     public override string GetImage()
     {
+        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".png";
+
+        if (File.Exists(path)) return Image.Load(path).ToB64();
+
         var       bgColor1 = Color.FromRgb(237, 237, 237);
         var       bgColor2 = Color.FromRgb(250, 250, 250);
         const int padding  = 0;
@@ -102,6 +106,7 @@ public class ArcaeaSong : Song
             string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
             x, y, w, h, background.Width);
 
+        background.SaveAsPng(path);
         return background.ToB64();
     }
 
