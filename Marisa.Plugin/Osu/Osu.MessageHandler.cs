@@ -41,7 +41,7 @@ public partial class Osu : MarisaPluginBase
 
                 bind.OsuUserId   = info.Id;
                 bind.OsuUserName = info.Username;
-                bind.GameMode    = OsuApi.ModeList.Last();
+                bind.GameMode    = info.Playmode.ToLower();
                 await dbContext.SaveChangesAsync();
                 message.Reply("好了");
             }
@@ -50,7 +50,7 @@ public partial class Osu : MarisaPluginBase
                 await dbContext.OsuBinds.AddAsync(new OsuBind
                 {
                     UserId      = sender,
-                    GameMode    = OsuApi.ModeList[0],
+                    GameMode    = info.Playmode.ToLower(),
                     OsuUserId   = info.Id,
                     OsuUserName = info.Username
                 });
