@@ -109,7 +109,7 @@ public static class PerformanceCalculator
     {
         var path = GetBeatmapPath(score.Beatmap);
 
-        if (!new[] { "dt", "ht", "nc" }.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        if (!new[] { "ez", "hr", "fl", "dt", "ht", "nc" }.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
             return score.Beatmap.StarRating;
         }

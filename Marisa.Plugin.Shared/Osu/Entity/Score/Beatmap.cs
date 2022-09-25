@@ -30,10 +30,10 @@ public class Beatmap
     public string Version { get; set; }
 
     [JsonProperty("accuracy", Required = Required.Always)]
-    public long Accuracy { get; set; }
+    public double Accuracy { get; set; }
 
     [JsonProperty("ar", Required = Required.Always)]
-    public long Ar { get; set; }
+    public double Ar { get; set; }
 
     [JsonProperty("bpm", Required = Required.Always)]
     public long Bpm { get; set; }
@@ -51,16 +51,16 @@ public class Beatmap
     public long CountSpinners { get; set; }
 
     [JsonProperty("cs", Required = Required.Always)]
-    public long Cs { get; set; }
+    public double Cs { get; set; }
 
     [JsonProperty("deleted_at")]
     public object? DeletedAt { get; set; }
 
     [JsonProperty("drain", Required = Required.Always)]
-    public long Drain { get; set; }
+    public double Drain { get; set; }
 
     [JsonProperty("hit_length", Required = Required.Always)]
-    public long HitLength { get; set; }
+    public double HitLength { get; set; }
 
     [JsonProperty("is_scoreable", Required = Required.Always)]
     public bool IsScoreable { get; set; }

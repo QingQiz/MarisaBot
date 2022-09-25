@@ -150,10 +150,7 @@ public partial class Osu : MarisaPluginBase
 
         var img = await recentScores![0].GetImage(userInfo);
 
-        message.Reply(
-            new MessageDataText("歌曲详情还没画，先不要急"),
-            MessageDataImage.FromBase64(img.ToB64(100))
-        );
+        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -176,10 +173,7 @@ public partial class Osu : MarisaPluginBase
 
         var img = await recentScores![0].GetImage(userInfo);
 
-        message.Reply(
-            new MessageDataText("歌曲详情还没画，先不要急"),
-            MessageDataImage.FromBase64(img.ToB64(100))
-        );
+        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -202,10 +196,7 @@ public partial class Osu : MarisaPluginBase
 
         var img = await recentScores![0].GetImage(userInfo);
 
-        message.Reply(
-            new MessageDataText("歌曲详情还没画，先不要急"),
-            MessageDataImage.FromBase64(img.ToB64(100))
-        );
+        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
 
         return MarisaPluginTaskState.CompletedTask;
     }

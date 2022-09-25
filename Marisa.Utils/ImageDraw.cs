@@ -311,22 +311,23 @@ public static class ImageDraw
 
     public static Image Fit(this Image image, int width, int height)
     {
-        image.ResizeX(width);
+        var aspectRatio  = (double)width / height;
+        var aspectRatio2 = (double)image.Width / image.Height;
 
-        if (image.Height < height)
+        double w, h;
+
+        if (aspectRatio2 > aspectRatio)
         {
-            image.ResizeY(height);
+            w = image.Height * aspectRatio;
+            h = image.Height;
+        }
+        else
+        {
+            w = image.Width;
+            h = image.Width / aspectRatio;
         }
 
-        // ReSharper disable once InvertIf
-        if (image.Height > height)
-        {
-            var y = (image.Height - height) / 2;
-
-            image.Crop(0, y, width, height);
-        }
-
-        return image;
+        return image.Crop((int)((image.Width - w) / 2), (int)((image.Height - h) / 2), (int)w, (int)h).ResizeX(width);
     }
 
     #endregion
