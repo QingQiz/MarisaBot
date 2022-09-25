@@ -136,6 +136,8 @@ public abstract class BotDriver
 
         async IAsyncEnumerable<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
         {
+            // 每次进入循环都会将 command 的头去掉，因此记录一下原始的 command，在每次循环结束后还原头
+            var command = message.Command;
             foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
             {
                 var m = method;
@@ -214,7 +216,11 @@ public abstract class BotDriver
                     // 3. 只有 Trigger 作用，没什么要注意的
                     yield return (MarisaPluginTaskState)ret;
                 }
+
+                message.Command = command;
             }
+
+            message.Command = command;
         }
 
         var taskList = new List<Task>();
@@ -225,21 +231,23 @@ public abstract class BotDriver
 
             taskList.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
             {
+                // 这种写法非常的丑陋，并且很容易出 BUG，应该让 CheckMember 没有副作用
                 var command = message.Command;
 
                 foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
                 {
                     var shouldBreak = false;
 
+                    // TrigPlugin 虽然会修改 command，但是最后我把它还原了，这里可能出 BUG
                     await foreach (var state in TrigPlugin(plugin, message))
                     {
-                        message.Command = command;
-
                         if (state != MarisaPluginTaskState.CompletedTask) continue;
 
                         shouldBreak = true;
                         break;
                     }
+
+                    message.Command = command;
 
                     if (shouldBreak) break;
                 }
