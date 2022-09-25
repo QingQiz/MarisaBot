@@ -13,13 +13,15 @@ public static class PerformanceCalculator
 {
     private static string PpCalculator => ConfigurationManager.Configuration.Osu.PpCalculator;
 
+    private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
+
     private static Func<long, string> BeatmapsetPath => beatmapsetId => Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
 
     private static string GetBeatmapPath(long beatmapsetId, string checksum)
     {
         var path = BeatmapsetPath(beatmapsetId);
 
-        foreach (var f in Directory.GetFiles(path, "*.osu"))
+        foreach (var f in Directory.GetFiles(path, "*.osu", SearchOption.AllDirectories))
         {
             var hash = File.ReadAllText(f).GetMd5Hash();
 
@@ -32,28 +34,80 @@ public static class PerformanceCalculator
         throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
     }
 
-    private static async Task<string> GetBeatmapPath(Beatmap beatmap)
+    private static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
     {
         var path = BeatmapsetPath(beatmap.BeatmapsetId);
 
-        if (Directory.Exists(path))
+        object l;
+        string res;
+
+        // 获取特定 beatmap set 的锁（没有的话创建一个）
+        lock (BeatmapDownloaderLocker)
         {
-            return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
+            if (BeatmapDownloaderLocker.ContainsKey(beatmap.BeatmapsetId))
+            {
+                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId];
+            }
+            else
+            {
+                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId] = new object();
+            }
         }
 
-        var download = await $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmap.BeatmapsetId}"
-            .WithHeader("Referer", "https://github.com/QingQiz/MarisaBot")
-            .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
-            .DownloadFileAsync(Path.GetDirectoryName(path));
+        // 套上这个锁，如果同时有两个下载，则会分别走 if 的两个分支
+        lock (l)
+        {
+            if (Directory.Exists(path))
+            {
+                // 如果谱面更新了，这里会抛异常
+                try
+                {
+                    res = GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
+                }
+                catch (FileNotFoundException)
+                {
+                    Directory.Delete(path, true);
 
-        ZipFile.ExtractToDirectory(download, path);
+                    // 重新下载一次，如果还找不到，那就不重试了
+                    if (retry)
+                    {
+                        return GetBeatmapPath(beatmap, false);
+                    }
 
-        return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
+                    throw;
+                }
+            }
+            else
+            {
+                var download = $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmap.BeatmapsetId}"
+                    .WithHeader("Referer", "https://github.com/QingQiz/MarisaBot")
+                    .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
+                    .DownloadFileAsync(Path.GetDirectoryName(path)).Result;
+
+                ZipFile.ExtractToDirectory(download, path);
+
+                File.Delete(download);
+
+                // 删除除了谱面文件（.osu）以外的所有文件，从而减小体积
+                Parallel.ForEach(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories), f =>
+                {
+                    if (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)) return;
+
+                    File.Delete(f);
+                });
+
+                res = GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
+            }
+        }
+
+        // 我们不需要删除字典里的锁，因为下载的谱面总数不会特别巨大
+
+        return res;
     }
 
     public static async Task<double> GetPerformance(OsuScore score)
     {
-        var path = await GetBeatmapPath(score.Beatmap);
+        var path = GetBeatmapPath(score.Beatmap);
 
         // TODO std taiko catch
         if (score.ModeInt != 3) return 0;

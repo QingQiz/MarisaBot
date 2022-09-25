@@ -81,9 +81,6 @@ public static class OsuApi
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
-        
-        // await File.WriteAllTextAsync(@"C:\users\sofee\desktop\a.json", json);
-        // var json =  await File.ReadAllTextAsync(@"C:\users\sofee\desktop\a.json");
 
         return OsuUserInfo.FromJson(json);
     }
@@ -125,9 +122,6 @@ public static class OsuApi
             .WithHeader("Accept", "application/json")
             .WithOAuthBearerToken(Token)
             .GetStringAsync();
-
-        // await File.WriteAllTextAsync(@"c:\users\sofee\desktop\b.json", json);
-        // var json  = await File.ReadAllTextAsync(@"c:\users\sofee\desktop\b.json");
 
         return OsuScore.FromJson(json);
     }
