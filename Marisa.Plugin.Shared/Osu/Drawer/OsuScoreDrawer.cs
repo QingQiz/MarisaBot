@@ -1,4 +1,5 @@
-﻿using Marisa.Plugin.Shared.Osu.Entity.Score;
+﻿using Flurl.Http;
+using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
 using SixLabors.Fonts;
@@ -13,8 +14,28 @@ public static class OsuScoreDrawer
 {
     private static async Task<Image> GetCover(this OsuScore score)
     {
-        var uri = score.Beatmapset.Covers.Cover2X;
-        return await OsuDrawerCommon.GetCacheOrDownload(uri, "jpg");
+        var coverList = new[]
+        {
+            score.Beatmapset.Covers.Cover2X,
+            score.Beatmapset.Covers.Cover,
+            score.Beatmapset.Covers.Card2X,
+            score.Beatmapset.Covers.Card,
+            score.Beatmapset.Covers.Slimcover2X,
+            score.Beatmapset.Covers.Slimcover,
+        };
+
+        foreach (var uri in coverList)
+        {
+            try
+            {
+                return await OsuDrawerCommon.GetCacheOrDownload(uri, "jpg");
+            }
+            catch (FlurlHttpException e) when (e.StatusCode == 404)
+            {
+            }
+        }
+
+        return new Image<Rgba32>(ImageWidth, 500).Clear(Color.Black);
     }
 
     private const int ImageWidth = 2000;
@@ -31,7 +52,7 @@ public static class OsuScoreDrawer
         var scoreHeader = GetScoreHeader(score.Beatmap, score.Beatmapset);
 
         // 封面
-        var cover = (await score.GetCover()).ResizeX(2000);
+        var cover = (await score.GetCover()).ResizeX(ImageWidth);
         var grade = new Image<Rgba32>(ImageWidth, Math.Max(cover.Height, 500));
         grade.DrawImage(cover, 0, 0).Clear(Color.FromRgba(0, 0, 0, 175));
 
@@ -354,6 +375,7 @@ public static class OsuScoreDrawer
         songInfo.DrawImage(songTypeIcon, songInfoDrawX, songInfoDrawY);
 
         // star rating
+        // TODO 当有 mod 时重新计算 star rating
         const int starRatingPaddingX = 15;
 
         songInfoDrawX += songTypeIcon.Width + elementGap;
