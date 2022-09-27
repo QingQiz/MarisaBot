@@ -203,10 +203,25 @@ public partial class Osu : MarisaPluginBase
 
     [MarisaPluginDoc("查询某人今天恰到的 pp")]
     [MarisaPluginCommand("todaybp")]
-    private async Task<MarisaPluginTaskState> TodayBp(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> TodayBp(Message message)
     {
-        message.Reply("服务暂时不可用！");
-        // await ParseCommand(message, "todaybp");
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+        var recentScores = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))!
+            .Select((x, i) => (x, i))
+            .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < 24)
+            .ToList();
+
+        if (!recentScores.Any())
+        {
+            message.Reply("无！");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(recentScores.GetMiniCards().ToB64(100)));
+        }
+
         return MarisaPluginTaskState.CompletedTask;
     }
 

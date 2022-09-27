@@ -1,12 +1,15 @@
-﻿using Flurl.Http;
+﻿using System.Numerics;
+using Flurl.Http;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Path = System.IO.Path;
 
 namespace Marisa.Plugin.Shared.Osu.Drawer;
 
@@ -45,6 +48,155 @@ public static class OsuScoreDrawer
     private static FontFamily _fontYaHei = SystemFonts.Get("Microsoft YaHei");
     private static FontFamily _fontIcon = SystemFonts.Get("Segoe UI Symbol");
     private static readonly Color BgColor = Color.FromRgb(46, 53, 56);
+
+    public static Image GetMiniCards(this List<(OsuScore, int)> score)
+    {
+        const int gap    = 5;
+        const int margin = 20;
+
+        var ims = score.Select(x  => GetMiniCard(x.Item1)).ToList();
+
+        var image = new Image<Rgba32>(margin * 2 + ims[0].Width, margin * 2 + ims.Count * ims[0].Height + (ims.Count - 1) * gap).Clear(Color.ParseHex("#382e32"));
+
+        var drawY = margin;
+
+        var font = _fontExo2.CreateFont(16);
+
+        for (var i = 0; i < ims.Count; i++)
+        {
+            image.DrawImage(ims[i], margin, drawY);
+            image.DrawText($"#{score[i].Item2}", font, Color.White, margin + 10, drawY + 5);
+            drawY += ims[i].Height + gap;
+        }
+
+        return image;
+    }
+
+    public static Image GetMiniCard(this OsuScore score)
+    {
+        const int width   = 2000;
+        const int height  = 100;
+        const int marginX = 40;
+        const int marginY = 10;
+        const int gap     = 20;
+
+        var im = new Image<Rgba32>(width, height).Clear(Color.FromRgb(84, 69, 76));
+
+        var rankIcon = OsuDrawerCommon.GetRankIcon(score.Rank).ResizeY(50);
+        {
+            im.DrawImageVCenter(rankIcon, marginX);
+        }
+
+        {
+            var font = _fontExo2.CreateFont(28);
+
+            var opt = ImageDraw.GetTextOptions(font);
+
+            opt.VerticalAlignment = VerticalAlignment.Bottom;
+            opt.Origin            = new Vector2(marginX + rankIcon.Width + gap, height - marginY);
+
+            im.DrawText(opt, score.Beatmap.Version, Color.FromRgb(238, 170, 0));
+
+            var ago = score.CreatedAt.TimeAgo();
+
+            opt.Origin = new Vector2(opt.Origin.X + score.Beatmap.Version.MeasureWithSpace(font).Width + gap, opt.Origin.Y + 5);
+
+            im.DrawText(opt, ago, Color.FromRgb(163, 143, 152));
+        }
+
+        var rec = new Image<Rgba32>(200, height);
+        {
+            var pb = new PathBuilder();
+
+            pb.AddLines(new PointF(0, 0), new PointF(rec.Width, 0), new PointF(rec.Width, rec.Height), new PointF(0, rec.Height),
+                new PointF(20, (float)(rec.Height / 2.0))
+            );
+
+            rec.Mutate(i => i.Fill(Color.FromRgb(70, 57, 63), pb.Build()));
+
+            var text1 = $"{score.Pp:N0}";
+            var text2 = "pp";
+            var font1 = _fontExo2.CreateFont(40, FontStyle.Bold);
+            var font2 = _fontExo2.CreateFont(30);
+
+            var w1 = text1.MeasureWithSpace(font1).Width;
+            var w2 = text2.MeasureWithSpace(font2).Width;
+
+            var x1 = 20 + (rec.Width - 20 - w1 - w2) / 2;
+            var x2 = x1 + w1;
+
+            rec.DrawTextVCenter(text1, font1, Color.FromRgb(255, 102, 171), (int)x1);
+            rec.DrawTextVCenter(text2, font2, Color.FromRgb(209, 148, 175), (int)x2);
+
+            im.DrawImage(rec, im.Width - rec.Width, 0);
+        }
+
+        {
+            var truePp = $"{score.Weight?.Pp ?? 0:N0}pp";
+
+            var font = _fontExo2.CreateFont(40, FontStyle.Bold);
+
+            var opt = ImageDraw.GetTextOptions(font);
+
+            opt.HorizontalAlignment = HorizontalAlignment.Right;
+            opt.Origin              = new Vector2(width - rec.Width - gap, (height - truePp.MeasureWithSpace(font).Height) / 2);
+
+            im.DrawText(opt, truePp, Color.White);
+        }
+
+        {
+            var acc    = $"{score.Accuracy * 100:F2}%";
+            var weight = $"权重：{score.Weight?.Percentage ?? 0:F0}%";
+
+            var font1 = _fontExo2.CreateFont(33, FontStyle.Bold);
+            var font2 = _fontYaHei.CreateFont(28);
+
+            var opt = ImageDraw.GetTextOptions(font1);
+
+            opt.Origin = new Vector2(1460, marginY);
+
+            im.DrawText(opt, acc, Color.ParseHex("#FFCC22"));
+
+            opt.Font              = font2;
+            opt.Origin            = opt.Origin with { Y = height - marginY };
+            opt.VerticalAlignment = VerticalAlignment.Bottom;
+
+            im.DrawText(opt, weight, Color.White);
+        }
+
+        var modIconDrawX = 1430;
+        {
+            const int modIconWidth = 80;
+            const int iconGap      = 10;
+
+            var icons = score.Mods.Select(GetModIconWithoutText);
+
+            foreach (var i in icons)
+            {
+                var draw = i.ResizeX(modIconWidth);
+                modIconDrawX -= draw.Width;
+
+                im.DrawImageVCenter(draw, modIconDrawX);
+                modIconDrawX -= iconGap;
+            }
+        }
+
+        {
+            var font = _fontExo2.CreateFont(35);
+
+            var text = score.Beatmapset.TitleUnicode + " by " + score.Beatmapset.ArtistUnicode;
+
+            while (text.MeasureWithSpace(font).Width + marginX + rankIcon.Width + gap > modIconDrawX)
+            {
+                text = text[..^4] + "...";
+            }
+
+            im.DrawText(text, font, Color.White, marginX + rankIcon.Width + gap, marginY);
+        }
+
+
+        return im.RoundCorners(15);
+    }
 
     public static async Task<Image> GetImage(this OsuScore score, OsuUserInfo info)
     {
@@ -522,6 +674,56 @@ public static class OsuScoreDrawer
     }
 
     private static readonly Dictionary<string, Image> ModIconCache = new();
+    private static readonly Dictionary<string, Image> ModIconCacheWithoutText = new();
+
+    private static Image GetModIconWithoutText(string mod)
+    {
+        mod = mod.ToUpper();
+
+        lock (ModIconCacheWithoutText)
+        {
+            if (ModIconCacheWithoutText.ContainsKey(mod)) return ModIconCacheWithoutText[mod].CloneAs<Rgba32>();
+        }
+
+        var (iconId, type) = OsuFont.GetModeCharacter(mod);
+        var color = OsuFont.GetColorByModeType(type);
+
+        var border = OsuFont.GetCharacter(OsuFont.BorderChar);
+        border.Mutate(i =>
+        {
+            i.SetGraphicsOptions(new GraphicsOptions
+            {
+                AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+            });
+            i.Fill(color.Item1);
+        });
+
+        if (iconId == 0)
+        {
+            var f = _fontExo2.CreateFont(40);
+            border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
+        }
+        else
+        {
+            var icon = OsuFont.GetCharacter(iconId).ResizeY(border.Height - 10);
+            icon.Mutate(i =>
+            {
+                i.SetGraphicsOptions(new GraphicsOptions
+                {
+                    AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+                });
+                i.Fill(color.Item2);
+            });
+
+            border.DrawImageCenter(icon);
+        }
+
+        lock (ModIconCacheWithoutText)
+        {
+            ModIconCacheWithoutText[mod] = border;
+            return border.CloneAs<Rgba32>();
+        }
+    }
 
     private static Image GetModIcon(string mod)
     {
@@ -722,7 +924,7 @@ public static class OsuScoreDrawer
         var im = new Image<Rgba32>(imageWidth, im1.Height + 3 + im2.Height);
         im.DrawImage(im1, 0, 0);
         im.DrawImage(im2, 0, im1.Height + 3);
-        
+
         im.SaveAsPng(path);
 
         return im;

@@ -282,6 +282,12 @@ public static class ImageDraw
         return option;
     }
 
+    public static Image DrawText(this Image image, TextOptions options, string text, Color color)
+    {
+        image.Mutate(i => i.DrawText(options, text, color));
+        return image;
+    }
+
     public static IImageProcessingContext DrawText(this IImageProcessingContext ctx, string text, Font font, Color color, float x, float y)
     {
         return ctx.DrawText(GetTextOptions(font, new PointF(x, y)), text, color);

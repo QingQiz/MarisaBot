@@ -7,6 +7,9 @@ namespace Marisa.Plugin.Shared.Osu.Entity.Score;
 
 public partial class OsuScore
 {
+    [JsonProperty("weight")]
+    public BpWeight? Weight { get; set; }
+
     [JsonProperty("accuracy", Required = Required.Always)]
     public double Accuracy { get; set; }
 
