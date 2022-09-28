@@ -107,7 +107,16 @@ public static class PerformanceCalculator
 
     public static double GetStarRating(this OsuScore score)
     {
-        var path = GetBeatmapPath(score.Beatmap);
+        string path;
+
+        try
+        {
+            path = GetBeatmapPath(score.Beatmap);
+        }
+        catch (FileNotFoundException)
+        {
+            return score.Beatmap.StarRating;
+        }
 
         if (!new[] { "ez", "hr", "fl", "dt", "ht", "nc" }.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
@@ -136,7 +145,16 @@ public static class PerformanceCalculator
 
     public static double GetPerformance(OsuScore score)
     {
-        var path = GetBeatmapPath(score.Beatmap);
+        string path;
+
+        try
+        {
+            path = GetBeatmapPath(score.Beatmap);
+        }
+        catch (FileNotFoundException)
+        {
+            return 0;
+        }
 
         // TODO std taiko catch
         if (score.ModeInt != 3) return 0;
