@@ -65,7 +65,7 @@ public static class OsuScoreDrawer
         for (var i = 0; i < ims.Count; i++)
         {
             image.DrawImage(ims[i], margin, drawY);
-            image.DrawText($"#{score[i].Item2}", font, Color.White, margin + 10, drawY + 5);
+            image.DrawText($"#{score[i].Item2 + 1}", font, Color.White, margin + 10, drawY + 5);
             drawY += ims[i].Height + gap;
         }
 
@@ -222,6 +222,7 @@ public static class OsuScoreDrawer
         grade.DrawImageVCenter(beatmapDetail, ImageWidth - MarginX - beatmapDetail.Width);
 
         // 成绩数值
+        // BUG std 成绩太长了，显示会出问题
         const int gradeCardMarginLeft = 50;
 
         var maxWidth = ImageWidth - MarginX - iconBar.Width - ringMarginLeft - ring.Width - gradeCardMarginLeft - MarginX - beatmapDetail.Width;

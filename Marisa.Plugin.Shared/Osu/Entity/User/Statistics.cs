@@ -51,5 +51,5 @@ public class Statistics
     public Rank Rank { get; set; }
 
     [JsonProperty("variants")]
-    public Variant[] Variants { get; set; }
+    public Variant[]? Variants { get; set; }
 }

@@ -327,9 +327,13 @@ public static class OsuUserInfoDrawer
 
         var ppText = "PP";
 
-        if (statistics.Variants.Any())
+        if (statistics.Variants?.Any() ?? false)
         {
-            ppText = $"{ppText} ({string.Join(", ", statistics.Variants.Select(v => $"{v.Name}: {v.Pp}"))})";
+            var vFiltered = statistics.Variants.Where(v => v.Pp > 100).ToList();
+            if (vFiltered.Count > 1)
+            {
+                ppText = $"{ppText} ({string.Join(", ", statistics.Variants.Select(v => $"{v.Name}: {v.Pp}"))})";
+            }
         }
 
         var pp = $"{statistics.Pp:F2}";
