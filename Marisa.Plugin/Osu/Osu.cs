@@ -33,7 +33,7 @@ public partial class Osu
 
     private static void AddCommandToQueue(Message message)
     {
-        message.Reply("服务暂时不可用！");
+        message.Reply("暂不可用！");
     }
 
     private static bool TryParseCommand(Message message, bool withBpRank, out OsuCommandParser.OsuCommand? command)
@@ -48,7 +48,7 @@ public partial class Osu
 
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            message.Reply("您是？");
+            message.Reply("您未绑定，请使用 osu! bind <用户名> 绑定");
             return false;
         }
 

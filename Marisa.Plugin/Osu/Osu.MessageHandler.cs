@@ -23,7 +23,7 @@ public partial class Osu : MarisaPluginBase
 
         if (string.IsNullOrEmpty(name))
         {
-            message.Reply("？");
+            message.Reply("请给出 osu! 的用户名");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -81,7 +81,7 @@ public partial class Osu : MarisaPluginBase
 
         if (!db.OsuBinds.Any(o => o.UserId == sender))
         {
-            message.Reply("您是？");
+            message.Reply("您未绑定！");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -144,7 +144,7 @@ public partial class Osu : MarisaPluginBase
 
         if (!recentScores!.Any())
         {
-            message.Reply("无");
+            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -167,13 +167,36 @@ public partial class Osu : MarisaPluginBase
 
         if (!recentScores!.Any())
         {
-            message.Reply("无");
+            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
             return MarisaPluginTaskState.CompletedTask;
         }
 
         var img = await recentScores![0].GetImage(userInfo);
 
         message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("查询某人的 bp")]
+    [MarisaPluginCommand("bplist")]
+    private async Task<MarisaPluginTaskState> BpList(Message message)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))!
+            .Select((x, i) => (x, i))
+            .ToList();
+
+        if (!best.Any())
+        {
+            message.Reply("无");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
+        }
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -215,7 +238,7 @@ public partial class Osu : MarisaPluginBase
 
         if (!recentScores.Any())
         {
-            message.Reply("无！");
+            message.Reply($"最近24小时内在 {OsuApi.GetModeName(command.Mode.Value)} 上未恰到分");
         }
         else
         {
