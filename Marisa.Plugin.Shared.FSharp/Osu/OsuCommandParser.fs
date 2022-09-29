@@ -43,7 +43,7 @@ module OsuCommandParser =
 
              let modeName = (string "osu"   *> (Some 0 |> ret)) <|>
                             (string "taiko" *> (Some 1 |> ret)) <|>
-                            (string "catch" *> (Some 2 |> ret)) <|>
+                            (string "fruit" *> (Some 2 |> ret)) <|>
                             (string "mania" *> (Some 3 |> ret))
 
              idx <|> modeName 

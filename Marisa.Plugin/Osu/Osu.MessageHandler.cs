@@ -142,7 +142,7 @@ public partial class Osu : MarisaPluginBase
 
         var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
-        if (!recentScores!.Any())
+        if (!(recentScores?.Any() ?? false))
         {
             message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
             return MarisaPluginTaskState.CompletedTask;
@@ -165,7 +165,7 @@ public partial class Osu : MarisaPluginBase
 
         var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1, true);
 
-        if (!recentScores!.Any())
+        if (!(recentScores?.Any() ?? false))
         {
             message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
             return MarisaPluginTaskState.CompletedTask;
@@ -185,11 +185,11 @@ public partial class Osu : MarisaPluginBase
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))!
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))?
             .Select((x, i) => (x, i))
             .ToList();
 
-        if (!best.Any())
+        if (!(best?.Any() ?? false))
         {
             message.Reply("无");
         }
@@ -211,7 +211,7 @@ public partial class Osu : MarisaPluginBase
 
         var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
-        if (!recentScores!.Any())
+        if (!(recentScores?.Any() ?? false))
         {
             message.Reply("无");
             return MarisaPluginTaskState.CompletedTask;
@@ -231,18 +231,18 @@ public partial class Osu : MarisaPluginBase
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var recentScores = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))!
+        var recentScores = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
             .Select((x, i) => (x, i))
             .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < 24)
             .ToList();
 
-        if (!recentScores.Any())
+        if (!(recentScores?.Any() ?? false))
         {
             message.Reply($"最近24小时内在 {OsuApi.GetModeName(command.Mode.Value)} 上未恰到分");
         }
         else
         {
-            message.Reply(MessageDataImage.FromBase64(recentScores.GetMiniCards().ToB64(100)));
+            message.Reply(MessageDataImage.FromBase64(recentScores!.GetMiniCards().ToB64(100)));
         }
 
         return MarisaPluginTaskState.CompletedTask;

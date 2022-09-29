@@ -58,7 +58,9 @@ public static class OsuDrawerCommon
             "s"   => GetIcon("rank-s"),
             "sh"  => GetIcon("rank-s-s"),
             "ss"  => GetIcon("rank-ss"),
-            "ssh" => GetIcon("rank-ss-s"),
+            "ssh"  => GetIcon("rank-ss-s"),
+            "x"  => GetIcon("rank-ss"),
+            "xh" => GetIcon("rank-ss-s"),
             _     => throw new ArgumentOutOfRangeException()
         };
     }
