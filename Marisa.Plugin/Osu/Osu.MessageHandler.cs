@@ -178,29 +178,6 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("查询某人的 bp")]
-    [MarisaPluginCommand("bplist")]
-    private async Task<MarisaPluginTaskState> BpList(Message message)
-    {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))?
-            .Select((x, i) => (x, i))
-            .ToList();
-
-        if (!(best?.Any() ?? false))
-        {
-            message.Reply("无");
-        }
-        else
-        {
-            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
-        }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     [MarisaPluginDoc("查询某人 pp 最高的成绩图（bp）")]
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
@@ -223,6 +200,57 @@ public partial class Osu : MarisaPluginBase
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
+    [MarisaPluginDoc("列出某人前20的bp")]
+    [MarisaPluginSubCommand(nameof(BestPerformance))]
+    [MarisaPluginCommand("top", "list")]
+    private async Task<MarisaPluginTaskState> BpTop(Message message)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))?
+            .Select((x, i) => (x, i))
+            .ToList();
+
+        if (!(best?.Any() ?? false))
+        {
+            message.Reply("无");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("列出某人后20的bp")]
+    [MarisaPluginSubCommand(nameof(BestPerformance))]
+    [MarisaPluginCommand("tail")]
+    private async Task<MarisaPluginTaskState> BpTail(Message message)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
+            .Select((x, i) => (x, i))
+            .TakeLast(20)
+            .ToList();
+
+        if (!(best?.Any() ?? false))
+        {
+            message.Reply("无");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+
 
     [MarisaPluginDoc("查询某人今天恰到的 pp")]
     [MarisaPluginCommand("todaybp")]
