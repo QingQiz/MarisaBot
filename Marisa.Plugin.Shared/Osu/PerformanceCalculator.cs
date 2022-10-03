@@ -109,6 +109,9 @@ public static class PerformanceCalculator
     {
         string path;
 
+        var starRatingChangeMode = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
+        var ruleSetChangeMode    = Enumerable.Range(1, 10).Select(i => $"{i}k").ToArray();
+
         try
         {
             path = GetBeatmapPath(score.Beatmap);
@@ -118,12 +121,22 @@ public static class PerformanceCalculator
             return score.Beatmap.StarRating;
         }
 
-        if (!new[] { "ez", "hr", "fl", "dt", "ht", "nc" }.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        if (!starRatingChangeMode.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
             return score.Beatmap.StarRating;
         }
 
-        var argument = $"difficulty \"{path}\" -j" + string.Join("", score.Mods.Select(m => $" -m {m}"));
+        var argument = "difficulty ";
+
+        if (ruleSetChangeMode.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        {
+            argument += "-r:3 ";
+        }
+
+        argument += $"\"{path}\" -j" + string.Join("", score.Mods
+            // .Where(m => ruleSetChangeMode
+            //     .All(m2 => !m2.Equals(m, StringComparison.OrdinalIgnoreCase)))
+            .Select(m => $" -m {m}"));
 
         using var p = new Process();
 
