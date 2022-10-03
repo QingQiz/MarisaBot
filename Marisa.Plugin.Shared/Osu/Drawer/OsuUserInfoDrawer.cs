@@ -346,16 +346,24 @@ public static class OsuUserInfoDrawer
     {
         var chart = new Image<Rgba32>(detailWidth, 120);
 
-        var history = historyData.ToArray();
-        var min     = history.Any() ? history.Min() : 0;
-        var max     = history.Any() ? history.Max() : 0;
+        var history = historyData.Where(r => r > 0).ToArray();
+
+        if (history.Length < 2)
+        {
+            history = history.Length == 0
+                ? history.Append(0).Append(0).ToArray()
+                : history.Append(history[0]).ToArray();
+        }
+
+        var min = history.Min();
+        var max = history.Max();
 
         var points         = new List<PointF>();
         var rankHistoryPen = new Pen(Color.FromRgb(255, 204, 34), 4);
 
         for (var i = 0; i < history.Length; i++)
         {
-            var xNew = (float)i / history.Length * chart.Width;
+            var xNew = i * (float)chart.Width / (history.Length - 1);
             var yNew = (float)(history[i] - min) / (max - min) * (chart.Height - 8) + 4;
 
             points.Add(new PointF(xNew, yNew));
