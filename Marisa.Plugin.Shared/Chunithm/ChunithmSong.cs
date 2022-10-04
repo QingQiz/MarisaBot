@@ -1,6 +1,7 @@
 ﻿using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils;
+using Microsoft.CSharp.RuntimeBinder;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -10,8 +11,10 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public class ChunithmSong : Song
 {
-    public string Genre;
+    public readonly string Genre;
+    public readonly string ReleaseDate;
     public readonly List<string> LevelName = new();
+    public readonly List<long> MaxCombo = new();
 
     public ChunithmSong(dynamic o)
     {
@@ -22,12 +25,30 @@ public class ChunithmSong : Song
         Version = o.Version;
         Bpm     = o.Beatmaps[0].Bpm;
 
+        try
+        {
+            ReleaseDate = o.ReleaseDate;
+        }
+        catch (RuntimeBinderException)
+        {
+            ReleaseDate = "N/A";
+        }
+
         foreach (var i in o.Beatmaps)
         {
             Constants.Add(i.Constant);
             Charters.Add(i.Charter);
             Levels.Add($"{(int)i.Constant}{(i.Constant - (int)i.Constant >= 0.5 ? "+" : "")}");
             LevelName.Add(i.LevelName);
+
+            try
+            {
+                MaxCombo.Add(i.MaxCombo);
+            }
+            catch (RuntimeBinderException)
+            {
+                MaxCombo.Add(0);
+            }
         }
     }
 
@@ -96,7 +117,7 @@ public class ChunithmSong : Song
             DrawKeyValuePair("类别", Genre, x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("追加日期", "N/A", x, y, w, h, background.Width);
+            DrawKeyValuePair("追加日期", ReleaseDate, x, y, w, h, background.Width);
 
             y += h;
             DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
@@ -116,10 +137,8 @@ public class ChunithmSong : Song
             var bgColor1 = Color.FromRgb(237, 237, 237);
             var bgColor2 = Color.FromRgb(250, 250, 250);
 
-            const int h = 80;
+            const int h  = 80;
             const int w1 = 100;
-            const int w2 = 230;
-            const int w3 = 100;
 
             var background = new Image<Rgba32>(1000, h * (Levels.Count + 1));
 
@@ -133,10 +152,10 @@ public class ChunithmSong : Song
 
             DrawCard("难度", cardFontSize, Color.Black, bgColor1, w1, h, true);
             x += w1;
-            DrawCard("等级", cardFontSize, Color.Black, bgColor1, w2, h, true);
-            x += w2;
-            DrawCard("定数", cardFontSize, Color.Black, bgColor1, w3, h, true);
-            x += w3;
+            DrawCard("定数", cardFontSize, Color.Black, bgColor1, w1, h, true);
+            x += w1;
+            DrawCard("Combo", cardFontSize, Color.Black, bgColor1, w1, h, true);
+            x += w1;
             DrawCard("谱师", cardFontSize, Color.Black, bgColor1, background.Width - x, h, true);
 
             y += h;
@@ -158,10 +177,10 @@ public class ChunithmSong : Song
 
                 DrawCard(Levels[i], cardFontSize, c.SelectFontColor(), c, w1, h, true);
                 x += w1;
-                DrawCard(LevelName[i], cardFontSize, Color.Black, bgColor2, w2, h, true);
-                x += w2;
-                DrawCard(Constants[i].ToString("F1"), cardFontSize, Color.Black, bgColor2, w3, h, true);
-                x += w3;
+                DrawCard(Constants[i].ToString("F1"), cardFontSize, Color.Black, bgColor2, w1, h, true);
+                x += w1;
+                DrawCard(MaxCombo[i].ToString(), cardFontSize, Color.Black, bgColor2, w1, h, true);
+                x += w1;
                 DrawCard(Charters[i], cardFontSize, Color.Black, bgColor2, background.Width - x, h, true);
 
                 y += h;
