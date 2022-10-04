@@ -16,6 +16,11 @@ public class RandomPicture : MarisaPluginBase
     [MarisaPluginCommand(true, "")]
     private static MarisaPluginTaskState Handler(Message m)
     {
+        if (!Directory.Exists(PicDbPath))
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
         var imageList = Directory
             .GetFiles(PicDbPath, "*.*", SearchOption.AllDirectories)
             .Where(fn => PicDbPathExclude.All(ex => !fn.Contains(ex, StringComparison.OrdinalIgnoreCase)))

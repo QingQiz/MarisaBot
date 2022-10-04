@@ -13,10 +13,20 @@ public class KanKan : MarisaPluginBase
     private static IEnumerable<string> AvailableFileExt =>
         ConfigurationManager.Configuration.RandomPicture.AvailableFileExt;
 
-    private static IEnumerable<string> Names =>
-        Directory.GetDirectories(PicDbPath, "*", SearchOption.AllDirectories)
-            .Where(d => PicDbPathExclude.All(e => !d.Contains(e)))
-            .Select(d => d.TrimEnd('\\').TrimEnd('/'));
+    private static IEnumerable<string> Names
+    {
+        get
+        {
+            if (!Directory.Exists(PicDbPath))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            return Directory.GetDirectories(PicDbPath, "*", SearchOption.AllDirectories)
+                .Where(d => PicDbPathExclude.All(e => !d.Contains(e)))
+                .Select(d => d.TrimEnd('\\').TrimEnd('/'));
+        }
+    }
 
     private static List<string> GetImList(string name)
     {
