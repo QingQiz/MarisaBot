@@ -109,8 +109,8 @@ public static class PerformanceCalculator
     {
         string path;
 
-        var starRatingChangeMode = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
-        var ruleSetChangeMode    = Enumerable.Range(1, 10).Select(i => $"{i}k").ToArray();
+        var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
+        var ruleSetChangeMods    = Enumerable.Range(1, 12).Select(i => $"{i}k").ToArray();
 
         try
         {
@@ -121,14 +121,14 @@ public static class PerformanceCalculator
             return score.Beatmap.StarRating;
         }
 
-        if (!starRatingChangeMode.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        if (!starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
             return score.Beatmap.StarRating;
         }
 
         var argument = "difficulty ";
 
-        if (ruleSetChangeMode.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        if (ruleSetChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
             argument += "-r:3 ";
         }
