@@ -84,7 +84,14 @@ public static class PerformanceCalculator
                     .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
                     .DownloadFileAsync(Path.GetDirectoryName(path)).Result;
 
+                if (download.Equals(path, StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Move(download, download + ".osz");
+                    download += ".osz";
+                }
+
                 ZipFile.ExtractToDirectory(download, path);
+
 
                 File.Delete(download);
 
