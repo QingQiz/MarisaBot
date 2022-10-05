@@ -52,6 +52,79 @@ public class ChunithmSong : Song
         }
     }
 
+    public static double Ra(int achievement, double constant)
+    {
+        var maxRa = constant + 2.15;
+
+        var res = achievement switch
+        {
+            >= 100_9000 => constant + 2.15,
+            >= 100_7500 => constant + 2.0 + 0.1 / 1000 * (achievement - 100_7500),
+            >= 100_5000 => constant + 1.5 + 0.1 / 500 * (achievement - 100_5000),
+            >= 100_0000 => constant + 1.0 + 0.1 / 1000 * (achievement - 100_0000),
+            >= 97_5000  => constant + 0.0 + 0.1 / 2500 * (achievement - 97_5000),
+            >= 92_5000  => constant - 3.0 + 0.1 / 2500 * (achievement - 92_5000),
+            >= 90_0000  => constant - 5.0 + 0.1 / 1250 * (achievement - 90_0000),
+            >= 80_0000  => (constant - 5.0) / 2 + (achievement - 80_0000) * (constant - 5.0) / 2 / 10_0000,
+            >= 50_0000  => (achievement - 50_0000) * (constant - 5.0) / 2 / 30_0000,
+            _           => 0
+        };
+        return Math.Round(res, 2, MidpointRounding.ToZero);
+    }
+
+    /// <summary>
+    /// 二分找下一个可以提高rating的达成率
+    /// </summary>
+    /// <param name="achievement">当前的达成率</param>
+    /// <param name="constant">定数</param>
+    /// <returns>达成率</returns>
+    public static int NextRa(int achievement, double constant)
+    {
+        var l = achievement;
+        var r = 100_9000;
+
+        var          currentRa = Ra(l, constant);
+        const double eps       = 0.01;
+
+        while (l <= r)
+        {
+            var a = (l + r) / 2;
+            if (Ra(a, constant) > currentRa)
+            {
+                r = a - 1;
+            }
+            else
+            {
+                l = a + 1;
+            }
+        }
+
+        return Ra(l - 1, constant) > currentRa ? l - 1 : r + 1;
+    }
+
+    /// <summary>
+    /// 获取最小的达成率使得rating大于<paramref name="minRa"/>
+    /// </summary>
+    /// <param name="constant">定数</param>
+    /// <param name="minRa">最小的Ra</param>
+    /// <returns>达成率</returns>
+    public static int NextRa(double constant, double minRa)
+    {
+        var a = 0;
+
+        while (a < 100_9000)
+        {
+            a = NextRa(a, constant);
+
+            if (Ra(a, constant) > minRa)
+            {
+                return a;
+            }
+        }
+
+        return -1;
+    }
+
     public override string MaxLevel()
     {
         return Levels[Constants.Select((c, i) => (c, i)).MaxBy(x => x.c).i];

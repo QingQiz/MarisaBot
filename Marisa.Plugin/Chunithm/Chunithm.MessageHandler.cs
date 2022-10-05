@@ -1,11 +1,11 @@
 ﻿using Marisa.EntityFrameworkCore;
+using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-    
     #region 搜歌
 
     /// <summary>
@@ -90,7 +90,6 @@ public partial class Chunithm
 
     #endregion
 
-
     #region 筛选
 
     /// <summary>
@@ -151,7 +150,6 @@ public partial class Chunithm
     }
 
     #endregion
-
 
     #region 随机
 
@@ -214,7 +212,6 @@ public partial class Chunithm
 
     #endregion
 
-
     #region 猜曲
 
     /// <summary>
@@ -263,4 +260,111 @@ public partial class Chunithm
 
     #endregion
 
+    #region 分数线 / 容错率
+
+    /// <summary>
+    /// 分数线，达到某个达成率rating会上升的线
+    /// </summary>
+    [MarisaPluginDoc("给出定数对应的一些 rating，参数为：歌曲定数 或 预期rating")]
+    [MarisaPluginCommand("line", "分数线")]
+    private static MarisaPluginTaskState RatingLine(Message message)
+    {
+        if (double.TryParse(message.Command, out var constant))
+        {
+            if (constant is <= 16 and >= 1)
+            {
+                var a      = 97_4999;
+                var lastRa = 0.0;
+
+                var ret = "达成率 -> Rating（每0.1分输出一次）";
+
+                while (a < 100_9000)
+                {
+                    a = ChunithmSong.NextRa(a, constant);
+                    var ra = ChunithmSong.Ra(a, constant);
+
+                    if (ra - lastRa < 0.1 && a != 100_9000) continue;
+
+                    lastRa = ra;
+                    ret    = $"{ret}\n{a:0000000} -> {ra:00.00}";
+                }
+
+                message.Reply(ret);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+        }
+
+        message.Reply("参数应为“定数”");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
+    [MarisaPluginCommand("tolerance", "容错率")]
+    private MarisaPluginTaskState FaultTolerance(Message message)
+    {
+        var songName     = message.Command.Trim();
+        var searchResult = _songDb.SearchSong(songName);
+
+        if (searchResult.Count != 1)
+        {
+            message.Reply(_songDb.GetSearchResult(searchResult));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply("难度和预期达成率？");
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        {
+            var command = next.Command.Trim();
+            var song    = searchResult.First();
+
+
+            var levelName = song.LevelName;
+            var level     = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+
+            if (level == null)
+            {
+                next.Reply("错误的难度名，会话已关闭。可用的难度名：" + string.Join("、", levelName));
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var levelIdx = levelName.IndexOf(level);
+
+            if (song.MaxCombo[levelIdx] == 0)
+            {
+                next.Reply("暂无该难度的数据");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var parseSuccess = int.TryParse(command.TrimStart(level), out var achievement);
+
+            if (!parseSuccess)
+            {
+                next.Reply("错误的达成率格式，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            if (achievement is > 101_0000 or < 0)
+            {
+                next.Reply("你查🐴呢");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var maxCombo  = song.MaxCombo[levelIdx];
+            var tolerance = 101_0000 - achievement;
+            var noteScore = 101_0000.0 / maxCombo;
+
+            next.Reply(
+                new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
+                new MessageDataText($"至多绿 {tolerance / (0.51 * noteScore):F2} 个，每个减 {0.51 * noteScore:F2}\n"),
+                new MessageDataText($"至多灰 {tolerance / (1.01 * noteScore):F2} 个，每个减 {1.01 * noteScore:F2}\n"),
+                new MessageDataText($"51小相当于一个绿，每小减 {0.01 * noteScore:F2}\n")
+            );
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
 }
