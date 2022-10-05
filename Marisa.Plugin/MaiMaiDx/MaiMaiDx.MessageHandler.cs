@@ -804,20 +804,5 @@ public partial class MaiMaiDx : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginNoDoc]
-    [MarisaPluginCommand("无封面", "没有封面的歌")]
-    private MarisaPluginTaskState MaiMaiNoCover(Message message)
-    {
-        var x = _songDb.SongList.Where(s =>
-        {
-            var p = Path.Join(ResourceManager.ResourcePath, "cover", s.Id.ToString());
-            return !(File.Exists(p + ".jpg") || File.Exists(p + ".png") || File.Exists(p + ".jpeg"));
-        });
-
-        _songDb.MultiPageSelectResult(x.ToList(), message);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     #endregion
 }
