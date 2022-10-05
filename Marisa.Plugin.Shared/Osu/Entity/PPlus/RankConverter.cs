@@ -15,6 +15,7 @@ internal class RankConverter : JsonConverter
             "A"  => Rank.A,
             "B"  => Rank.B,
             "C"  => Rank.C,
+            "D"  => Rank.D,
             "S"  => Rank.S,
             "SH" => Rank.Sh,
             "X"  => Rank.X,
