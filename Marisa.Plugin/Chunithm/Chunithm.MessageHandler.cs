@@ -265,7 +265,7 @@ public partial class Chunithm
     /// <summary>
     /// 分数线，达到某个达成率rating会上升的线
     /// </summary>
-    [MarisaPluginDoc("给出定数对应的一些 rating，参数为：歌曲定数 或 预期rating")]
+    [MarisaPluginDoc("给出定数对应的一些 rating，参数为：歌曲定数")]
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState RatingLine(Message message)
     {
