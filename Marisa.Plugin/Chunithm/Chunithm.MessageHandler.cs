@@ -353,11 +353,16 @@ public partial class Chunithm
             var tolerance = 101_0000 - achievement;
             var noteScore = 101_0000.0 / maxCombo;
 
+            var greenScore  = 50.0 / 101 * noteScore;
+
+            var greenTolerance = tolerance / (noteScore - greenScore);
+            var grayTolerance  = tolerance / noteScore;
+
             next.Reply(
                 new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
-                new MessageDataText($"至多绿 {tolerance / (0.51 * noteScore):F2} 个，每个减 {0.51 * noteScore:F2}\n"),
-                new MessageDataText($"至多灰 {tolerance / (1.01 * noteScore):F2} 个，每个减 {1.01 * noteScore:F2}\n"),
-                new MessageDataText($"51小相当于一个绿，每小减 {0.01 * noteScore:F2}\n")
+                new MessageDataText($"至多绿 {(int)greenTolerance} 个 + {Math.Ceiling((greenTolerance - (int)greenTolerance) * 51):F0} 小\n"),
+                new MessageDataText($"至多灰 {(int)grayTolerance} 个 + {Math.Ceiling((grayTolerance - (int)grayTolerance) * 101):F0} 小\n"),
+                new MessageDataText($"每个绿减 {noteScore - greenScore:F2}，每个灰减 {noteScore:F2}，每小减 {1.0 / 101 * noteScore:F2}")
             );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
