@@ -6,10 +6,15 @@ arcaea:
   assetsPath:   D:\arcaea_song_assets
   
 osu:
-  clientId:
-  clientSecret:
+  clientId:     
+  clientSecret: 
   tempPath:     C:\Users\sofee\Desktop\temp\osu
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Osu
+  ppCalculator: C:\Users\sofee\Desktop\workspace\osu-tools\PerformanceCalculator\bin\Release\net6.0\win-x64\publish\PerformanceCalculator.exe
+
+chunithm:
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Chunithm
+  tempPath:     C:\Users\sofee\Desktop\temp\chunithm
 
 maimai:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\MaiMaiDx
@@ -2464,7 +2469,6 @@ dirty:
   - 你怎么不在了啊是专门装哑巴上街卖艺了吗可惜你无才无艺二胡捧你手机就断线建议没异能还是不要哑巴恰烂钱
   - 我送你马一个不侧漏的骨灰盒
   - 我怀疑你是傻逼，这是有依据的，因为你脑子被智障踢了，所以你成了脑残
-  - wdnmd
   - 知道为什么你感觉身体很轻但量起来很重吗，你考虑你脑袋里的水了吗？
   - 看到了你我赶紧叫老八
   - 去看猪圈都不用跑趟农村，去你家里就行了。

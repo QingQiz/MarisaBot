@@ -23,9 +23,9 @@ public partial class Help : MarisaPluginBase
             var ims = helpDocs.Select(d => d.GetImage()).ToList();
 
             var bmRes = new Image<Rgba32>(
-                    ims.Max(i => i.Width) + gap * 2,
-                    ims.Sum(i => i.Height) + gap * 2 + 2 * gap * (ims.Count - 1)
-                ).Clear(Color.White);
+                ims.Max(i => i.Width) + gap * 2,
+                ims.Sum(i => i.Height) + gap * 2 + 2 * gap * (ims.Count - 1)
+            ).Clear(Color.White);
 
             var y = gap;
             foreach (var im in ims)
@@ -40,7 +40,10 @@ public partial class Help : MarisaPluginBase
             _image = bmRes;
         }
 
-        message.Reply(MessageDataImage.FromBase64(_image.ToB64()));
+        message.Reply(
+            new MessageDataText("本bot为开源bot\n仙人指路：QingQiz/MarisaBot"),
+            MessageDataImage.FromBase64(_image.ToB64())
+        );
 
         return MarisaPluginTaskState.CompletedTask;
     }
