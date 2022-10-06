@@ -140,7 +140,7 @@ public partial class Osu : MarisaPluginBase
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
         if (!(recentScores?.Any() ?? false))
         {
@@ -163,7 +163,7 @@ public partial class Osu : MarisaPluginBase
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1, true);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1, true);
 
         if (!(recentScores?.Any() ?? false))
         {
@@ -186,7 +186,7 @@ public partial class Osu : MarisaPluginBase
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
 
         if (!(recentScores?.Any() ?? false))
         {
@@ -209,7 +209,7 @@ public partial class Osu : MarisaPluginBase
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))?
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 20))?
             .Select((x, i) => (x, i))
             .ToList();
 
@@ -233,7 +233,7 @@ public partial class Osu : MarisaPluginBase
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var best = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
+        var best = (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
             .Select((x, i) => (x, i))
             .TakeLast(20)
             .ToList();
@@ -250,8 +250,6 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-
-
     [MarisaPluginDoc("查询某人今天恰到的 pp")]
     [MarisaPluginCommand("todaybp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message)
@@ -259,7 +257,7 @@ public partial class Osu : MarisaPluginBase
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-        var recentScores = (await OsuApi.GetScores(userInfo.Id, OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
+        var recentScores = (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
             .Select((x, i) => (x, i))
             .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < 24)
             .ToList();
@@ -276,22 +274,22 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("查询 *自己* 在某张图上的成绩")]
-    [MarisaPluginCommand("score")]
-    private Task<MarisaPluginTaskState> Score(Message message)
-    {
-        AddCommandToQueue(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
-    [MarisaPluginCommand("bonusPP")]
-    private async Task<MarisaPluginTaskState> BonusPp(Message message)
-    {
-        message.Reply("服务暂时不可用！");
-        // await ParseCommand(message, "bonuspp");
-        return MarisaPluginTaskState.CompletedTask;
-    }
+    // [MarisaPluginDoc("查询 *自己* 在某张图上的成绩")]
+    // [MarisaPluginCommand("score")]
+    // private Task<MarisaPluginTaskState> Score(Message message)
+    // {
+    //     AddCommandToQueue(message);
+    //     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    // }
+    //
+    // [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
+    // [MarisaPluginCommand("bonusPP")]
+    // private async Task<MarisaPluginTaskState> BonusPp(Message message)
+    // {
+    //     message.Reply("服务暂时不可用！");
+    //     // await ParseCommand(message, "bonuspp");
+    //     return MarisaPluginTaskState.CompletedTask;
+    // }
 
     #endregion
 }

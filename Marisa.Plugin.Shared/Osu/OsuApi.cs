@@ -2,11 +2,9 @@
 using System.Web;
 using Flurl;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -78,33 +76,19 @@ public static class OsuApi
 
     public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
     {
-        var json = await $"{UserInfoUri}/{username}/{GetModeName(mode)}"
-            .SetQueryParam("key", "facere")
-            .WithHeader("Accept", "application/json")
-            .WithOAuthBearerToken(Token)
-            .GetStringAsync();
-
-        return OsuUserInfo.FromJson(json);
-    }
-
-    public static async Task<OsuUserInfo?> GetUserInfo(long qq)
-    {
-        var db = new BotDbContext().OsuBinds;
-
-        var bind = await db.FirstOrDefaultAsync(u => u.UserId == qq);
-
-        if (bind == null)
+        try
         {
-            return null;
+            var json = await $"{UserInfoUri}/{username}/{GetModeName(mode)}"
+                .SetQueryParam("key", "facere")
+                .WithHeader("Accept", "application/json")
+                .WithOAuthBearerToken(Token)
+                .GetStringAsync();
+            return OsuUserInfo.FromJson(json);
         }
-
-        var json = await $"{UserInfoUri}/{bind.OsuUserId}/{bind.GameMode ?? ""}"
-            .SetQueryParam("key", "facere")
-            .WithHeader("Accept", "application/json")
-            .WithOAuthBearerToken(Token)
-            .GetStringAsync();
-
-        return OsuUserInfo.FromJson(json);
+        catch (FlurlHttpException e)
+        {
+            throw new Exception($"Network Error: {e.Message}");
+        }
     }
 
     public static async Task<OsuScore[]?> GetScores(long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false)
@@ -132,7 +116,7 @@ public static class OsuApi
 
     public static async Task<string> DownloadBeatmap(long beatmapId, string path)
     {
-        using var request    = new HttpRequestMessage(new HttpMethod("GET"), "https://dl.sayobot.cn/beatmaps/download/mini/1794551");
+        using var request = new HttpRequestMessage(new HttpMethod("GET"), "https://dl.sayobot.cn/beatmaps/download/mini/1794551");
         request.Headers.TryAddWithoutValidation("authority", "dl.sayobot.cn");
         request.Headers.TryAddWithoutValidation("accept",
             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
@@ -158,10 +142,10 @@ public static class OsuApi
 
         return beatmapPath;
     }
-}
 
-public enum OsuScoreType
-{
-    Recent,
-    Best
+    public enum OsuScoreType
+    {
+        Recent,
+        Best
+    }
 }
