@@ -151,8 +151,13 @@ public static class PerformanceCalculator
         return double.Parse(regex.Match(json).Groups[1].Value);
     }
 
-    public static double GetPerformance(OsuScore score)
+    public static double GetPerformance(this OsuScore score)
     {
+        if (score.Pp != null)
+        {
+            return (double)score.Pp;
+        }
+
         string path;
 
         try

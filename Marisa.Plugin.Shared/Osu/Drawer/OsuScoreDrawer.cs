@@ -256,7 +256,7 @@ public static class OsuScoreDrawer
         const int staCardGap  = 2;
         const int staCardVGap = 60;
 
-        var pp = score.Pp?.ToString("F2") ?? PerformanceCalculator.GetPerformance(score).ToString("F2");
+        var pp = score.GetPerformance().ToString("F2");
 
         var c1 = GetKeyValuePair("准确率", $"{score.Accuracy * 100:F2}%", (ImageWidth - staCardGap * 2) / 3);
         var c2 = GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", (ImageWidth - staCardGap * 2) / 3);
