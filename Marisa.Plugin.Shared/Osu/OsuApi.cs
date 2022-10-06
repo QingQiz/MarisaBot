@@ -138,7 +138,13 @@ public static class OsuApi
 
         var beatmapPath = Path.Join(path, filename);
 
-        await (await response.Content.ReadAsStreamAsync()).CopyToAsync(File.OpenWrite(beatmapPath));
+        var s  = await response.Content.ReadAsStreamAsync();
+        var fs = File.OpenWrite(beatmapPath);
+
+        await s.CopyToAsync(fs);
+
+        s.Close();
+        fs.Close();
 
         return beatmapPath;
     }

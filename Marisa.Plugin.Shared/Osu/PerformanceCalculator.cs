@@ -116,7 +116,7 @@ public static class PerformanceCalculator
         {
             path = GetBeatmapPath(score.Beatmap);
         }
-        catch (FileNotFoundException)
+        catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
         {
             return score.Beatmap.StarRating;
         }
@@ -164,7 +164,7 @@ public static class PerformanceCalculator
         {
             path = GetBeatmapPath(score.Beatmap);
         }
-        catch (FileNotFoundException)
+        catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
         {
             return 0;
         }
