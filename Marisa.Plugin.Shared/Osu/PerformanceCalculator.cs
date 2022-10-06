@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
-using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
@@ -79,20 +78,9 @@ public static class PerformanceCalculator
             }
             else
             {
-                var download = $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmap.BeatmapsetId}"
-                    .WithHeader("Referer", "https://github.com/QingQiz/MarisaBot")
-                    .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
-                    .DownloadFileAsync(Path.GetDirectoryName(path)).Result;
-
-                if (download.Equals(path, StringComparison.OrdinalIgnoreCase))
-                {
-                    File.Move(download, download + ".osz");
-                    download += ".osz";
-                }
+                var download = OsuApi.DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
 
                 ZipFile.ExtractToDirectory(download, path);
-
-
                 File.Delete(download);
 
                 // 删除除了谱面文件（.osu）以外的所有文件，从而减小体积
@@ -119,16 +107,16 @@ public static class PerformanceCalculator
         var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
         var ruleSetChangeMods    = Enumerable.Range(1, 12).Select(i => $"{i}k").ToArray();
 
+        if (!starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        {
+            return score.Beatmap.StarRating;
+        }
+
         try
         {
             path = GetBeatmapPath(score.Beatmap);
         }
         catch (FileNotFoundException)
-        {
-            return score.Beatmap.StarRating;
-        }
-
-        if (!starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
         {
             return score.Beatmap.StarRating;
         }
