@@ -4,13 +4,17 @@ using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
 using Marisa.Utils.Cacheable;
+using ScottPlot;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment;
 using Path = System.IO.Path;
+using SDColor = System.Drawing.Color;
+using VerticalAlignment = SixLabors.Fonts.VerticalAlignment;
 
 namespace Marisa.Plugin.Shared.Osu.Drawer;
 
@@ -50,14 +54,189 @@ public static class OsuScoreDrawer
     private static FontFamily _fontIcon = SystemFonts.Get("Segoe UI Symbol");
     private static readonly Color BgColor = Color.FromRgb(46, 53, 56);
 
+    public static Image Distribution(this OsuScore[] scores)
+    {
+        const int pieSize = 400;
+
+        Image GeneratePie(IEnumerable<double> values, IEnumerable<string> labels, string title)
+        {
+            var plt = new ScottPlot.Plot(pieSize, pieSize);
+
+            var pie = plt.AddPie(values.ToArray());
+            pie.DonutLabel  = title;
+            pie.DonutSize   = 0.5;
+            pie.SliceLabels = labels.ToArray();
+            plt.Legend();
+
+            return plt.GetBitmap().ToImageSharpImage<Rgba32>();
+        }
+
+        var modeInt = scores.GroupBy(s => s.ModeInt).MaxBy(x => x.Count())!.Key;
+
+        var pies = new List<Image>();
+
+        switch (modeInt)
+        {
+            case 3:
+            {
+                // keys
+                {
+                    var g      = scores.GroupBy(x => (int)x.Beatmap.Cs).OrderBy(x => x.Key).ToList();
+                    var values = g.Select(x => x.Count());
+                    var labels = g.Select(x => $"{x.Key}K");
+                    pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Keys"));
+                }
+                break;
+            }
+            case 0:
+            {
+                // ar
+                {
+                    var g      = scores.GroupBy(x => (int)x.Beatmap.Ar).OrderBy(x => x.Key).ToList();
+                    var values = g.Select(x => x.Count());
+                    var labels = g.Select(x => $"{x.Key}.X");
+                    pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Ar"));
+                }
+                break;
+            }
+            default:
+            {
+                // od
+                {
+                    var g      = scores.GroupBy(x => (int)x.Beatmap.Accuracy).OrderBy(x => x.Key).ToList();
+                    var values = g.Select(x => x.Count());
+                    var labels = g.Select(x => $"{x.Key}.X");
+                    pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Od"));
+                }
+                break;
+            }
+        }
+
+        // acc
+        {
+            var acc = scores.Select(x => (int)(x.Accuracy * 100)).OrderByDescending(x => x).ToList();
+
+            var g = new List<IGrouping<int, int>>();
+
+            var conv = 1;
+
+            while (!g.Any() || g.Count > 10)
+            {
+                g    =  acc.GroupBy(x => x / conv).ToList();
+                conv *= 2;
+            }
+
+            var values = g.Select(x => x.Count());
+            var labels = g.Select(x => $"> {x.Key * conv / 2}%");
+            pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Acc"));
+        }
+
+        // stars
+        {
+            var starRating = scores.AsParallel().Select(x => x.GetStarRating() * 10).OrderByDescending(x => x).ToList();
+
+            var g = new List<IGrouping<int, double>>();
+
+            var conv = 1;
+
+            while (!g.Any() || g.Count > 6)
+            {
+                g    =  starRating.GroupBy(x => (int)x / conv).ToList();
+                conv *= 2;
+            }
+
+            var values = g.Select(x => x.Count());
+            var labels = g.Select(x => $"> {x.Key * conv / 10.0 / 2:F2}★");
+            pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Star"));
+        }
+
+        // mods
+        {
+            var mods = scores
+                .Select(x => x.Mods).SelectMany(x => x).OrderBy(x => x)
+                .GroupBy(x => x).ToList();
+
+            var values = mods.Select(x => x.Count());
+            var labels = mods.Select(x => x.Key);
+
+            pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Mod"));
+        }
+
+        var img = new Image<Rgba32>(pieSize * pies.Count, pieSize * 3);
+
+        for (var i = 0; i < pies.Count; i++)
+        {
+            img.DrawImage(pies[i], i * pieSize, pieSize * 2);
+        }
+
+        // 分布
+        {
+            var plt = new Plot(pieSize * pies.Count, pieSize * 2);
+
+            var values = scores.Select(x => x.Pp ?? 0).ToArray(); // ScottPlot.DataGen.RandomNormal(rand, pointCount: 1234, mean: 178.4, stdDev: 7.6);
+
+            // create a histogram
+            var (counts, binEdges) = ScottPlot.Statistics.Common.Histogram(values, min: values.Min() - 20, max: values.Max() + 20, binSize: 3);
+            var leftEdges = binEdges.Take(binEdges.Length - 1).ToArray();
+
+            // display histogram probability as a bar plot
+            var bar = plt.AddBar(values: counts, positions: leftEdges);
+            bar.BarWidth        = 3;
+            bar.BorderLineWidth = 1;
+            bar.FillColor       = System.Drawing.ColorTranslator.FromHtml("#9bc3eb");
+
+            // display histogram distribution curve as a line plot on a secondary Y axis
+            var smoothEdges     = DataGen.Range(start: binEdges.First(), stop: binEdges.Last(), step: 0.1, includeStop: true);
+            var smoothDensities = ScottPlot.Statistics.Common.ProbabilityDensity(values, smoothEdges, percent: true);
+            var probPlot = plt.AddScatterLines(
+                xs: smoothEdges,
+                ys: smoothDensities,
+                lineWidth: 2,
+                label: "probability");
+            probPlot.YAxisIndex = 1;
+            plt.YAxis2.Ticks(true);
+
+            // display vertical lines at points of interest
+            var stats = new ScottPlot.Statistics.BasicStats(values);
+
+            plt.AddVerticalLine(stats.Mean, SDColor.Black, 2, LineStyle.Solid, "mean");
+
+            plt.AddVerticalLine(stats.Mean - stats.StDev, SDColor.Black, 2, LineStyle.Dash, "1 SD");
+            plt.AddVerticalLine(stats.Mean + stats.StDev, SDColor.Black, 2, LineStyle.Dash);
+
+            plt.AddVerticalLine(stats.Mean - stats.StDev * 2, SDColor.Black, 2, LineStyle.Dot, "2 SD");
+            plt.AddVerticalLine(stats.Mean + stats.StDev * 2, SDColor.Black, 2, LineStyle.Dot);
+
+            plt.AddVerticalLine(stats.Min, SDColor.Gray, 1, LineStyle.Dash, "min/max");
+            plt.AddVerticalLine(stats.Max, SDColor.Gray, 1, LineStyle.Dash);
+
+            plt.Legend(location: Alignment.UpperRight);
+
+            // customize the plot style
+            plt.Title("Best Performance Distribution", size: 40);
+            plt.YAxis.Label("Count (#)");
+            plt.YAxis2.Label("Probability (%)");
+            plt.XAxis.Label("PP");
+            plt.SetAxisLimits(yMin: 0);
+            plt.SetAxisLimits(yMin: 0, yAxisIndex: 1);
+
+            img.DrawImage(plt.GetBitmap().ToImageSharpImage<Rgba32>(), 0, 0);
+        }
+
+        img.DrawText("Generate By QingQiz/MarisaBot", _fontExo2.CreateFont(18), Color.Gray, 10, 10);
+
+        return img;
+    }
+
     public static Image GetMiniCards(this List<(OsuScore, int)> score)
     {
         const int gap    = 5;
         const int margin = 20;
 
-        var ims = score.Select(x  => GetMiniCard(x.Item1)).ToList();
+        var ims = score.Select(x => GetMiniCard(x.Item1)).ToList();
 
-        var image = new Image<Rgba32>(margin * 2 + ims[0].Width, margin * 2 + ims.Count * ims[0].Height + (ims.Count - 1) * gap).Clear(Color.ParseHex("#382e32"));
+        var image =
+            new Image<Rgba32>(margin * 2 + ims[0].Width, margin * 2 + ims.Count * ims[0].Height + (ims.Count - 1) * gap).Clear(Color.ParseHex("#382e32"));
 
         var drawY = margin;
 
@@ -641,14 +820,12 @@ public static class OsuScoreDrawer
         return accRing;
     }
 
-    private static Image<Rgba32>? _starRatingColorGradiant;
-
     private static Color GetStarRatingColor(double starRating)
     {
         if (starRating > 10) starRating = 10;
         if (starRating < 0) starRating  = 0;
 
-        if (_starRatingColorGradiant == null)
+        var starRatingColorGradiant = new CacheableImage(Path.Join(OsuDrawerCommon.ResourcePath, "StarRatingColorGradiant.png"), () =>
         {
             var brush = new LinearGradientBrush(
                 new PointF(0, 0), new PointF(2000, 0),
@@ -664,125 +841,112 @@ public static class OsuScoreDrawer
                 new ColorStop(1.00f, Color.ParseHex("#000000"))
             );
 
-            _starRatingColorGradiant = new Image<Rgba32>(2000, 50);
-            _starRatingColorGradiant.Mutate(i => i.Fill(brush));
-        }
+            var res = new Image<Rgba32>(2000, 50);
+            res.Mutate(i => i.Fill(brush));
 
-        var x = (int)(starRating / 10.0 * _starRatingColorGradiant.Width);
+            return res;
+        }).Value.CloneAs<Rgba32>();
 
-        if (x == _starRatingColorGradiant.Width) x--;
+        var x = (int)(starRating / 10.0 * starRatingColorGradiant.Width);
 
-        return _starRatingColorGradiant[x, _starRatingColorGradiant.Height / 2];
+        if (x == starRatingColorGradiant.Width) x--;
+
+        return starRatingColorGradiant[x, starRatingColorGradiant.Height / 2];
     }
-
-    private static readonly Dictionary<string, Image> ModIconCache = new();
-    private static readonly Dictionary<string, Image> ModIconCacheWithoutText = new();
 
     private static Image GetModIconWithoutText(string mod)
     {
         mod = mod.ToUpper();
 
-        lock (ModIconCacheWithoutText)
+        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, $"mod-{mod}-NoText.png"), () =>
         {
-            if (ModIconCacheWithoutText.ContainsKey(mod)) return ModIconCacheWithoutText[mod].CloneAs<Rgba32>();
-        }
+            var (iconId, type) = OsuFont.GetModeCharacter(mod);
+            var color = OsuFont.GetColorByModeType(type);
 
-        var (iconId, type) = OsuFont.GetModeCharacter(mod);
-        var color = OsuFont.GetColorByModeType(type);
-
-        var border = OsuFont.GetCharacter(OsuFont.BorderChar);
-        border.Mutate(i =>
-        {
-            i.SetGraphicsOptions(new GraphicsOptions
-            {
-                AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-            });
-            i.Fill(color.Item1);
-        });
-
-        if (iconId == 0)
-        {
-            var f = _fontExo2.CreateFont(40);
-            border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
-        }
-        else
-        {
-            var icon = OsuFont.GetCharacter(iconId).ResizeY(border.Height - 10);
-            icon.Mutate(i =>
+            var border = OsuFont.GetCharacter(OsuFont.BorderChar);
+            border.Mutate(i =>
             {
                 i.SetGraphicsOptions(new GraphicsOptions
                 {
                     AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
                 });
-                i.Fill(color.Item2);
+                i.Fill(color.Item1);
             });
 
-            border.DrawImageCenter(icon);
-        }
+            if (iconId == 0)
+            {
+                var f = _fontExo2.CreateFont(40);
+                border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
+            }
+            else
+            {
+                var icon = OsuFont.GetCharacter(iconId).ResizeY(border.Height - 10);
+                icon.Mutate(i =>
+                {
+                    i.SetGraphicsOptions(new GraphicsOptions
+                    {
+                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+                    });
+                    i.Fill(color.Item2);
+                });
 
-        lock (ModIconCacheWithoutText)
-        {
-            ModIconCacheWithoutText[mod] = border;
-            return border.CloneAs<Rgba32>();
-        }
+                border.DrawImageCenter(icon);
+            }
+
+            return border;
+        }).Value;
     }
 
     private static Image GetModIcon(string mod)
     {
         mod = mod.ToUpper();
 
-        lock (ModIconCache)
+        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, $"mod-{mod}.png"), () =>
         {
-            if (ModIconCache.ContainsKey(mod)) return ModIconCache[mod].CloneAs<Rgba32>();
-        }
+            var (iconId, type) = OsuFont.GetModeCharacter(mod);
+            var color = OsuFont.GetColorByModeType(type);
 
-        var (iconId, type) = OsuFont.GetModeCharacter(mod);
-        var color = OsuFont.GetColorByModeType(type);
-
-        var border = OsuFont.GetCharacter(OsuFont.BorderChar);
-        border.Mutate(i =>
-        {
-            i.SetGraphicsOptions(new GraphicsOptions
-            {
-                AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-            });
-            i.Fill(color.Item1);
-        });
-
-        if (iconId == 0)
-        {
-            var f = _fontExo2.CreateFont(40);
-            border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
-        }
-        else
-        {
-            var icon = OsuFont.GetCharacter(iconId).ResizeY(26);
-            icon.Mutate(i =>
+            var border = OsuFont.GetCharacter(OsuFont.BorderChar);
+            border.Mutate(i =>
             {
                 i.SetGraphicsOptions(new GraphicsOptions
                 {
                     AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
                 });
-                i.Fill(color.Item2);
+                i.Fill(color.Item1);
             });
 
-            border.DrawImageCenter(icon, offsetY: -10);
+            if (iconId == 0)
+            {
+                var f = _fontExo2.CreateFont(40);
+                border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
+            }
+            else
+            {
+                var icon = OsuFont.GetCharacter(iconId).ResizeY(26);
+                icon.Mutate(i =>
+                {
+                    i.SetGraphicsOptions(new GraphicsOptions
+                    {
+                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
+                    });
+                    i.Fill(color.Item2);
+                });
 
-            var font = _fontExo2.CreateFont(15);
+                border.DrawImageCenter(icon, offsetY: -10);
 
-            var m = mod.Measure(font);
+                var font = _fontExo2.CreateFont(15);
 
-            var imgText = new Image<Rgba32>((int)(m.Width + 15), (int)(m.Height + 10)).Clear(color.Item2);
-            imgText.DrawTextCenter(mod.ToUpper(), font, color.Item1, withSpace: false);
+                var m = mod.Measure(font);
 
-            border.DrawImageCenter(imgText.RoundCorners(imgText.Height / 2 + 1), offsetY: 17);
-        }
+                var imgText = new Image<Rgba32>((int)(m.Width + 15), (int)(m.Height + 10)).Clear(color.Item2);
+                imgText.DrawTextCenter(mod.ToUpper(), font, color.Item1, withSpace: false);
 
-        lock (ModIconCache)
-        {
-            ModIconCache[mod] = border;
-            return border.CloneAs<Rgba32>();
-        }
+                border.DrawImageCenter(imgText.RoundCorners(imgText.Height / 2 + 1), offsetY: 17);
+            }
+
+            return border;
+        }).Value;
     }
 
     private static Image GetBeatmapDetail(Beatmap beatmap)

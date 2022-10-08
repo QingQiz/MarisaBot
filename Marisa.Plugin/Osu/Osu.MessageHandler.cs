@@ -250,6 +250,29 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("统计某人的 bp 分布")]
+    [MarisaPluginSubCommand(nameof(BestPerformance))]
+    [MarisaPluginCommand("distribution", "dist")]
+    private async Task<MarisaPluginTaskState> BpDistribution(Message message)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+
+        var best = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100)!;
+
+        if (!(best?.Any() ?? false))
+        {
+            message.Reply("您无 bp");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(best.Distribution().ToB64(100)));
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("查询某人今天恰到的 pp")]
     [MarisaPluginCommand("todaybp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message)

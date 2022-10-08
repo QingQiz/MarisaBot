@@ -1,8 +1,10 @@
 ﻿using SixLabors.Fonts;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
@@ -394,6 +396,29 @@ public static class ImageDraw
     #endregion
 
     #region Converter
+
+    public static System.Drawing.Bitmap ToBitmap<TPixel>(this Image<TPixel> image) where TPixel : unmanaged, IPixel<TPixel>
+    {
+        using var memoryStream = new MemoryStream();
+
+        var imageEncoder = image.GetConfiguration().ImageFormatsManager.FindEncoder(PngFormat.Instance);
+        image.Save(memoryStream, imageEncoder);
+
+        memoryStream.Seek(0, SeekOrigin.Begin);
+
+        return new System.Drawing.Bitmap(memoryStream);
+    }
+
+    public static Image<TPixel> ToImageSharpImage<TPixel>(this System.Drawing.Bitmap bitmap) where TPixel : unmanaged, IPixel<TPixel>
+    {
+        using var memoryStream = new MemoryStream();
+
+        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+
+        memoryStream.Seek(0, SeekOrigin.Begin);
+
+        return Image.Load<TPixel>(memoryStream);
+    }
 
     public static string ToB64(this Image image, int quality = 90)
     {

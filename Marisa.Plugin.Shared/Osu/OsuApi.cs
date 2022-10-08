@@ -116,7 +116,7 @@ public static class OsuApi
 
     public static async Task<string> DownloadBeatmap(long beatmapId, string path)
     {
-        using var request = new HttpRequestMessage(new HttpMethod("GET"), "https://dl.sayobot.cn/beatmaps/download/mini/1794551");
+        using var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapId}");
         request.Headers.TryAddWithoutValidation("authority", "dl.sayobot.cn");
         request.Headers.TryAddWithoutValidation("accept",
             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");

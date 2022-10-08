@@ -5,6 +5,7 @@ using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -102,53 +103,61 @@ public static class PerformanceCalculator
 
     public static double GetStarRating(this OsuScore score)
     {
-        string path;
-
         var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
         var ruleSetChangeMods    = Enumerable.Range(1, 12).Select(i => $"{i}k").ToArray();
 
-        if (!starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
+        var starRatingChanged = starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase)));
+        var ruleSetChanged    = ruleSetChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase)));
+
+        if (!starRatingChanged && !ruleSetChanged)
         {
             return score.Beatmap.StarRating;
         }
 
-        try
+        var cachePath = Path.Join(OsuDrawerCommon.TempPath, $"StarRating-{score.Beatmap.Checksum}-{string.Join(",", score.Mods.OrderBy(x => x))}.txt");
+
+        var starRating = new CacheableText(cachePath, () =>
         {
-            path = GetBeatmapPath(score.Beatmap);
-        }
-        catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
-        {
-            return score.Beatmap.StarRating;
-        }
+            string path;
+            try
+            {
+                path = GetBeatmapPath(score.Beatmap);
+            }
+            catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
+            {
+                return score.Beatmap.StarRating.ToString("F2");
+            }
 
-        var argument = "difficulty ";
+            var argument = "difficulty ";
 
-        if (ruleSetChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase))))
-        {
-            argument += "-r:3 ";
-        }
+            if (ruleSetChanged)
+            {
+                argument += "-r:3 ";
+            }
 
-        argument += $"\"{path}\" -j" + string.Join("", score.Mods
-            // .Where(m => ruleSetChangeMode
-            //     .All(m2 => !m2.Equals(m, StringComparison.OrdinalIgnoreCase)))
-            .Select(m => $" -m {m}"));
+            argument += $"\"{path}\" -j" + string.Join("", score.Mods
+                // .Where(m => ruleSetChangeMode
+                //     .All(m2 => !m2.Equals(m, StringComparison.OrdinalIgnoreCase)))
+                .Select(m => $" -m {m}"));
 
-        using var p = new Process();
+            using var p = new Process();
 
-        p.StartInfo.UseShellExecute        = false;
-        p.StartInfo.CreateNoWindow         = true;
-        p.StartInfo.FileName               = PpCalculator;
-        p.StartInfo.Arguments              = argument;
-        p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.UseShellExecute        = false;
+            p.StartInfo.CreateNoWindow         = true;
+            p.StartInfo.FileName               = PpCalculator;
+            p.StartInfo.Arguments              = argument;
+            p.StartInfo.RedirectStandardOutput = true;
 
-        p.Start();
-        p.WaitForExit();
+            p.Start();
+            p.WaitForExit();
 
-        var json = p.StandardOutput.ReadToEnd();
+            var json = p.StandardOutput.ReadToEnd();
 
-        var regex = new Regex(@"""star_rating"":(.*?),");
+            var regex = new Regex(@"""star_rating"":(.*?),");
+            return regex.Match(json).Groups[1].Value;
+        }).Value;
 
-        return double.Parse(regex.Match(json).Groups[1].Value);
+        return Convert.ToDouble(starRating);
     }
 
     public static double GetPerformance(this OsuScore score)
