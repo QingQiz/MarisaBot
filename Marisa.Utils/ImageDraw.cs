@@ -81,7 +81,7 @@ public static class ImageDraw
 
     #region 不知道怎么分类的
 
-    public static (Image CoverBackground, Color CoverDominantColor) GetCoverBackground(this Image cover)
+    public static Image GetCoverBackground(this Image cover)
     {
         var       width        = cover.Width;
         const int cornerRadius = 20;
@@ -115,7 +115,7 @@ public static class ImageDraw
         // 圆角
         coverBackground.Mutate(i => i.RoundCorners(cornerRadius));
 
-        return (coverBackground, coverDominantColor);
+        return coverBackground;
     }
 
 

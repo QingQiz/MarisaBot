@@ -1,7 +1,7 @@
 ﻿using Marisa.Plugin.Shared.Configuration;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -60,22 +60,18 @@ public static class ResourceManager
 
     public static (Image, Color) GetCoverBackground(long songId)
     {
-        const string prefix = "CoverBackground-";
+        var prefix = $"CoverBackground-{songId}-";
 
-        var x = Directory.GetFiles(TempPath, $"{prefix}*.png", SearchOption.TopDirectoryOnly).FirstOrDefault(x => x.StartsWith(prefix) && x.EndsWith($"-{songId}.png"));
+        // var coverDominantColor = cover.DominantColor(new Rectangle(0, 0, 5, cover.Height));
 
-        if (x == null)
-        {
-            var (bg, color) = GetCover(songId).GetCoverBackground();
+        var image = new CacheableImage(TempPath,
+            f => f.StartsWith(prefix) && f.EndsWith(".png"),
+            cover => $"{prefix}#{cover.DominantColor(new Rectangle(0, 0, 5, cover.Height)).ToHex()}.png",
+            () => GetCover(songId).GetCoverBackground()
+        );
 
-            Task.Run(() => { bg.SaveAsPng(Path.Join(TempPath, prefix) + "-#" + color.ToHex() + $"-{songId}.png"); });
-
-            return (bg.CloneAs<Rgba32>(), color);
-        }
-        else
-        {
-            var color = Color.ParseHex(x.Split("-")[1]);
-            return (Image.Load(x), color);
-        }
+        var ret = image.Value;
+        var color = Color.ParseHex(Path.GetFileNameWithoutExtension(image.CacheFilePath)!.Split('-').Last());
+        return (ret, color);
     }
 }

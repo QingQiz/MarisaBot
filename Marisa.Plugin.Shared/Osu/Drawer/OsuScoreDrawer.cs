@@ -3,6 +3,7 @@ using Flurl.Http;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -786,148 +787,142 @@ public static class OsuScoreDrawer
 
     private static Image GetBeatmapDetail(Beatmap beatmap)
     {
-        var path = Path.Join(OsuDrawerCommon.TempPath, "BeatmapDetail-") + beatmap.Checksum + ".png";
-
-        if (File.Exists(path))
+        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, "BeatmapDetail-") + beatmap.Checksum + ".png", () =>
         {
-            return Image.Load(path);
-        }
+            const int imageWidth = 500, margin = 20, padding = 10;
 
-        const int imageWidth = 500, margin = 20, padding = 10;
+            // same to BgColor, but with transparent
+            var bgColor     = Color.FromRgba(46, 53, 56, (byte)(0.2 * 255));
+            var colorYellow = Color.ParseHex("#ffdd55");
 
-        // same to BgColor, but with transparent
-        var bgColor     = Color.FromRgba(46, 53, 56, (byte)(0.2 * 255));
-        var colorYellow = Color.ParseHex("#ffdd55");
-
-        Image BeatmapCounter()
-        {
-            const int iconWidth = 40;
-
-            var length  = TimeSpan.FromSeconds(beatmap.HitLength).ToString("m':'s");
-            var bpm     = beatmap.Bpm.ToString();
-            var circles = beatmap.CountCircles.ToString("N0");
-            var sliders = beatmap.CountSliders.ToString("N0");
-
-            var font = _fontExo2.CreateFont(20, FontStyle.Bold);
-
-            var img = new Image<Rgba32>(imageWidth, iconWidth + margin * 2).Clear(bgColor);
-
-            var step = (int)((imageWidth - margin * 2 - sliders.MeasureWithSpace(font).Width - padding - iconWidth) / 3);
-
-            var x = margin;
-            img.DrawImageVCenter(OsuDrawerCommon.GetIcon("total_length").ResizeX(iconWidth), x);
-            img.DrawTextVCenter(length, font, colorYellow, x + iconWidth + padding);
-            x += step;
-            img.DrawImageVCenter(OsuDrawerCommon.GetIcon("bpm").ResizeX(iconWidth), x);
-            img.DrawTextVCenter(bpm, font, colorYellow, x + iconWidth + padding);
-            x += step;
-            img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_circles").ResizeX(iconWidth), x);
-            img.DrawTextVCenter(circles, font, colorYellow, x + iconWidth + padding);
-            x += step;
-            img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_sliders").ResizeX(iconWidth), x);
-            img.DrawTextVCenter(sliders, font, colorYellow, x + iconWidth + padding);
-
-            return img;
-        }
-
-        Image BeatmapConfig()
-        {
-            const int barHeight      = 40;
-            const int barHeightInner = 10;
-
-            List<(string, double)> kv = new();
-
-            switch (beatmap.ModeInt)
+            Image BeatmapCounter()
             {
-                case 3:
-                {
-                    kv.AddRange(new[]
-                    {
-                        ("键位数量", beatmap.Cs),
-                        ("掉血速度", beatmap.Drain),
-                        ("准度要求", beatmap.Accuracy),
-                        ("难度星级", beatmap.StarRating)
-                    });
-                    break;
-                }
-                case 0:
-                {
-                    kv.AddRange(new[]
-                    {
-                        ("圆圈大小", beatmap.Cs),
-                        ("掉血速度", beatmap.Drain),
-                        ("准度要求", beatmap.Accuracy),
-                        ("缩圈速度", beatmap.Ar),
-                        ("难度星级", beatmap.StarRating)
-                    });
-                    break;
-                }
-                case 1:
-                {
-                    kv.AddRange(new[]
-                    {
-                        ("掉血速度", beatmap.Drain),
-                        ("准度要求", beatmap.Accuracy),
-                        ("难度星级", beatmap.StarRating)
-                    });
-                    break;
-                }
-                case 2:
-                {
-                    kv.AddRange(new[]
-                    {
-                        ("圆圈大小", beatmap.Cs),
-                        ("掉血速度", beatmap.Drain),
-                        ("准度要求", beatmap.Accuracy),
-                        ("缩圈速度", beatmap.Ar),
-                        ("难度星级", beatmap.StarRating)
-                    });
-                    break;
-                }
+                const int iconWidth = 40;
+
+                var length  = TimeSpan.FromSeconds(beatmap.HitLength).ToString("m':'s");
+                var bpm     = beatmap.Bpm.ToString();
+                var circles = beatmap.CountCircles.ToString("N0");
+                var sliders = beatmap.CountSliders.ToString("N0");
+
+                var font = _fontExo2.CreateFont(20, FontStyle.Bold);
+
+                var img = new Image<Rgba32>(imageWidth, iconWidth + margin * 2).Clear(bgColor);
+
+                var step = (int)((imageWidth - margin * 2 - sliders.MeasureWithSpace(font).Width - padding - iconWidth) / 3);
+
+                var x = margin;
+                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("total_length").ResizeX(iconWidth), x);
+                img.DrawTextVCenter(length, font, colorYellow, x + iconWidth + padding);
+                x += step;
+                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("bpm").ResizeX(iconWidth), x);
+                img.DrawTextVCenter(bpm, font, colorYellow, x + iconWidth + padding);
+                x += step;
+                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_circles").ResizeX(iconWidth), x);
+                img.DrawTextVCenter(circles, font, colorYellow, x + iconWidth + padding);
+                x += step;
+                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_sliders").ResizeX(iconWidth), x);
+                img.DrawTextVCenter(sliders, font, colorYellow, x + iconWidth + padding);
+
+                return img;
             }
 
-            var img = new Image<Rgba32>(imageWidth, barHeight * kv.Count + margin * 2 + padding * (kv.Count - 1)).Clear(bgColor);
-
-            var font = _fontYaHei.CreateFont(20);
-
-            var (_, _, kWidth, kHeight) = kv[0].Item1.MeasureWithSpace(font);
-
-            var vWidth   = kv.Max(x => x.Item2.ToString("0.##").MeasureWithSpace(font).Width);
-            var barWidth = (int)(imageWidth - margin * 2 - padding * 2 - kWidth - vWidth);
-
-            for (var i = 0; i < kv.Count; i++)
+            Image BeatmapConfig()
             {
-                var color = i == kv.Count - 1 ? colorYellow : Color.White;
+                const int barHeight      = 40;
+                const int barHeightInner = 10;
 
-                var v  = kv[i].Item2.ToString("0.##");
-                var vM = v.MeasureWithSpace(font).Width;
+                List<(string, double)> kv = new();
 
-                var x2 = (int)(margin + kWidth + padding);
-                var x3 = (int)(imageWidth + kWidth + padding + barWidth + padding - vM) / 2;
-                var y1 = (int)(margin + i * (barHeight + padding) + (barHeight - kHeight) / 2);
-                var y2 = margin + i * (barHeight + padding) + (barHeight - barHeightInner) / 2;
+                switch (beatmap.ModeInt)
+                {
+                    case 3:
+                    {
+                        kv.AddRange(new[]
+                        {
+                            ("键位数量", beatmap.Cs),
+                            ("掉血速度", beatmap.Drain),
+                            ("准度要求", beatmap.Accuracy),
+                            ("难度星级", beatmap.StarRating)
+                        });
+                        break;
+                    }
+                    case 0:
+                    {
+                        kv.AddRange(new[]
+                        {
+                            ("圆圈大小", beatmap.Cs),
+                            ("掉血速度", beatmap.Drain),
+                            ("准度要求", beatmap.Accuracy),
+                            ("缩圈速度", beatmap.Ar),
+                            ("难度星级", beatmap.StarRating)
+                        });
+                        break;
+                    }
+                    case 1:
+                    {
+                        kv.AddRange(new[]
+                        {
+                            ("掉血速度", beatmap.Drain),
+                            ("准度要求", beatmap.Accuracy),
+                            ("难度星级", beatmap.StarRating)
+                        });
+                        break;
+                    }
+                    case 2:
+                    {
+                        kv.AddRange(new[]
+                        {
+                            ("圆圈大小", beatmap.Cs),
+                            ("掉血速度", beatmap.Drain),
+                            ("准度要求", beatmap.Accuracy),
+                            ("缩圈速度", beatmap.Ar),
+                            ("难度星级", beatmap.StarRating)
+                        });
+                        break;
+                    }
+                }
 
-                img.DrawText(kv[i].Item1, font, Color.White, margin, y1);
+                var img = new Image<Rgba32>(imageWidth, barHeight * kv.Count + margin * 2 + padding * (kv.Count - 1)).Clear(bgColor);
 
-                var rect1 = new Rectangle(x2, y2, barWidth, barHeightInner);
-                var rect2 = new Rectangle(x2, y2, (int)(barWidth * (Math.Min(kv[i].Item2, 10.0) / 10)), barHeightInner);
+                var font = _fontYaHei.CreateFont(20);
 
-                img.Mutate(x => x.Fill(Color.Black, rect1).Fill(color, rect2));
-                img.DrawText(v, font, Color.White, x3, y1);
+                var (_, _, kWidth, kHeight) = kv[0].Item1.MeasureWithSpace(font);
+
+                var vWidth   = kv.Max(x => x.Item2.ToString("0.##").MeasureWithSpace(font).Width);
+                var barWidth = (int)(imageWidth - margin * 2 - padding * 2 - kWidth - vWidth);
+
+                for (var i = 0; i < kv.Count; i++)
+                {
+                    var color = i == kv.Count - 1 ? colorYellow : Color.White;
+
+                    var v  = kv[i].Item2.ToString("0.##");
+                    var vM = v.MeasureWithSpace(font).Width;
+
+                    var x2 = (int)(margin + kWidth + padding);
+                    var x3 = (int)(imageWidth + kWidth + padding + barWidth + padding - vM) / 2;
+                    var y1 = (int)(margin + i * (barHeight + padding) + (barHeight - kHeight) / 2);
+                    var y2 = margin + i * (barHeight + padding) + (barHeight - barHeightInner) / 2;
+
+                    img.DrawText(kv[i].Item1, font, Color.White, margin, y1);
+
+                    var rect1 = new Rectangle(x2, y2, barWidth, barHeightInner);
+                    var rect2 = new Rectangle(x2, y2, (int)(barWidth * (Math.Min(kv[i].Item2, 10.0) / 10)), barHeightInner);
+
+                    img.Mutate(x => x.Fill(Color.Black, rect1).Fill(color, rect2));
+                    img.DrawText(v, font, Color.White, x3, y1);
+                }
+
+                return img;
             }
 
-            return img;
-        }
+            var im1 = BeatmapCounter();
+            var im2 = BeatmapConfig();
 
-        var im1 = BeatmapCounter();
-        var im2 = BeatmapConfig();
+            var im = new Image<Rgba32>(imageWidth, im1.Height + 3 + im2.Height);
+            im.DrawImage(im1, 0, 0);
+            im.DrawImage(im2, 0, im1.Height + 3);
 
-        var im = new Image<Rgba32>(imageWidth, im1.Height + 3 + im2.Height);
-        im.DrawImage(im1, 0, 0);
-        im.DrawImage(im2, 0, im1.Height + 3);
-
-        im.SaveAsPng(path);
-
-        return im;
+            return im;
+        }).Value;
     }
 }

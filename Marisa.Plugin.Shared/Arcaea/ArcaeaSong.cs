@@ -1,5 +1,6 @@
 ﻿using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -55,59 +56,53 @@ public class ArcaeaSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".png";
-
-        if (File.Exists(path)) return Image.Load(path).ToB64();
-
-        var       bgColor1 = Color.FromRgb(237, 237, 237);
-        var       bgColor2 = Color.FromRgb(250, 250, 250);
-        const int padding  = 0;
-        const int h        = 80;
-
-        var cover = ResourceManager.GetCover(CoverFileName).Resize(h * 6, h * 6);
-
-        var background = new Image<Rgba32>(1300, h * 6 + padding * 2);
-
-        void DrawKeyValuePair(
-            string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
-            bool center = true)
+        return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
         {
-            background.DrawImage(
-                ImageDraw.GetStringCard(key, 31, Color.Black, bgColor1, keyWidth, height, center: true),
-                x, y);
-            background.DrawImage(
-                ImageDraw.GetStringCard(value, 31, Color.Black, bgColor2, totalWidth - (x + keyWidth), height,
-                    center: center),
-                x + keyWidth, y);
-        }
+            var       bgColor1 = Color.FromRgb(237, 237, 237);
+            var       bgColor2 = Color.FromRgb(250, 250, 250);
+            const int padding  = 0;
+            const int h        = 80;
 
-        background.DrawImage(cover, padding, padding);
+            var cover = ResourceManager.GetCover(CoverFileName).Resize(h * 6, h * 6);
 
-        var x = 3 * padding + h * 6;
-        var y = 0;
-        var w = 200;
+            var background = new Image<Rgba32>(1300, h * 6 + padding * 2);
 
-        DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
+            void DrawKeyValuePair(
+                string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
+                bool center = true)
+            {
+                background.DrawImage(
+                    ImageDraw.GetStringCard(key, 31, Color.Black, bgColor1, keyWidth, height, center: true),
+                    x, y);
+                background.DrawImage(
+                    ImageDraw.GetStringCard(value, 31, Color.Black, bgColor2, totalWidth - (x + keyWidth), height,
+                        center: center),
+                    x + keyWidth, y);
+            }
 
-        y += h;
-        DrawKeyValuePair("演唱/作曲", Artist, x, y, w, h, background.Width);
+            background.DrawImage(cover, padding, padding);
 
-        y += h;
-        DrawKeyValuePair("BPM", Bpm, x, y, w, h, background.Width);
+            const int x = 3 * padding + h * 6;
+            const int w = 200;
 
-        y += h;
-        DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
+            var y = 0;
 
-        y += h;
-        DrawKeyValuePair("难度", string.Join(", ", Levels), x, y, w, h, background.Width);
+            DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("演唱/作曲", Artist, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("BPM", Bpm, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("难度", string.Join(", ", Levels), x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("定数",
+                string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
+                x, y, w, h, background.Width);
 
-        y += h;
-        DrawKeyValuePair("定数",
-            string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
-            x, y, w, h, background.Width);
-
-        background.SaveAsPng(path);
-        return background.ToB64();
+            return background.ToB64();
+        }).Value;
     }
 
     #endregion

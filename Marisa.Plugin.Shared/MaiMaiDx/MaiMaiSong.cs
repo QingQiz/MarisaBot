@@ -1,5 +1,6 @@
 ﻿using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -120,13 +121,8 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".png";
+        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64";
 
-        if (File.Exists(path)) return Image.Load(path).ToB64();
-
-        var im = this.Draw();
-        im.SaveAsPng(path);
-
-        return im.ToB64();
+        return new CacheableText(path, () => this.Draw().ToB64()).Value;
     }
 }

@@ -2,6 +2,7 @@
 using Marisa.Plugin.Shared.Osu.Entity.PPlus;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using Marisa.Utils.Cacheable;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -15,28 +16,6 @@ namespace Marisa.Plugin.Shared.Osu.Drawer;
 [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
 public static class OsuUserInfoDrawer
 {
-    private static async Task<PPlus> GetPPlus(long uid)
-    {
-        var filename = $"pp+cache-{uid}-{DateTime.Now:yyyy-MM}.json";
-        var path     = Path.Join(OsuDrawerCommon.TempPath, filename);
-
-        if (File.Exists(path))
-        {
-            return PPlus.FromJson(await File.ReadAllTextAsync(path));
-        }
-
-        var pPlus = await OsuApi.GetPPlusJsonById(uid);
-
-        await File.WriteAllTextAsync(path, pPlus);
-
-        return PPlus.FromJson(pPlus);
-    }
-
-    private static Image GetMode(string mode)
-    {
-        return Image.Load(Path.Join(OsuDrawerCommon.ResourcePath, $"mode-{mode}.png")).CloneAs<Rgba32>();
-    }
-
     private const int ImageWidth = 2000;
     private const int MarginX = 50;
 
@@ -45,6 +24,8 @@ public static class OsuUserInfoDrawer
     private static readonly FontFamily FontIcon = SystemFonts.Get("Segoe UI Symbol");
 
     private static readonly Color FontColor = Color.FromRgb(240, 219, 228);
+
+    private static readonly TimeSpan PPlusUpdateInterval = TimeSpan.FromHours(24 * 30);
 
     public static async Task<Image> GetImage(this OsuUserInfo info)
     {
@@ -69,7 +50,7 @@ public static class OsuUserInfoDrawer
         var summary = GetUserSummary(info.Statistics, rank.Height + chart.Height + counter.Height + 40);
 
         // PP+
-        var pPlusChart = await GetPPlusChart(info.RankHistory!.Mode, info.Id);
+        var pPlusChart = GetPPlusChart(info.RankHistory!.Mode, info.Id);
 
         // 把上面几个小卡片拼接起来
         var userDetail = CombineUserDetailCard(summary, rank, chart, counter, pPlusChart);
@@ -532,125 +513,175 @@ public static class OsuUserInfoDrawer
         return badges;
     }
 
-    private static async Task<Image<Rgba32>> GetPPlusChart(string mode, long osuId)
+    private static Image GetPPlusChart(string mode, long osuId)
     {
-        Font font;
-        var  pPlusBorderPen = new Pen(Color.Gray, 2);
-        var  penColor       = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
-        var  pPlusChartPen  = new Pen(penColor, 4);
+        var isOsu = mode == "osu";
 
-        var pPlusChart       = new Image<Rgba32>(ImageWidth / 3, (int)Math.Ceiling(Math.Sqrt(3) / 2 * ImageWidth / 3) + (int)pPlusBorderPen.StrokeWidth);
-        var pPlusChartCenter = new PointF(pPlusChart.Width / 2, pPlusChart.Height / 2);
+        var prefix   = isOsu ? $"pp+cache-{osuId}-" : "pp+cache-disabled";
+        var filename = isOsu ? $"{prefix}{DateTime.Now:yyyy-MM-dd}.png" : $"{prefix}.png";
 
-        var hexagon1 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 6);
-        var hexagon2 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 3);
-        var hexagon3 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 2);
-
-        pPlusChart.Mutate(i => i
-            .DrawLines(pPlusBorderPen, hexagon3.ToArray())
-            .DrawLines(pPlusBorderPen, hexagon2.ToArray())
-            .DrawLines(pPlusBorderPen, hexagon1.ToArray())
-        );
-
-        foreach (var i in hexagon1.Zip(hexagon3))
+        var image = new CacheableImage(OsuDrawerCommon.TempPath, f =>
         {
-            pPlusChart.Mutate(im => im.DrawLines(pPlusBorderPen, i.First, i.Second));
-        }
-
-        if (mode == "osu")
-        {
-            var ppData = (await GetPPlus(osuId)).UserData;
-            var ppType = new[] { "acc", "flow", "jump", "pre", "speed", "sta" };
-            var data = new List<double>
+            // 当不是 osu 模式时 文件名是确定的，直接比较就完事了
+            if (!isOsu)
             {
-                ppData.AccuracyTotal,
-                ppData.FlowAimTotal,
-                ppData.JumpAimTotal,
-                ppData.PrecisionTotal,
-                ppData.SpeedTotal,
-                ppData.StaminaTotal
-            };
-
-            const int maxData = 1100;
-            var       multi   = new[] { 122.25, 113.35, 106.03, 120.09, 115.45, 116.31 };
-
-            // 让数据差距不至于太大，Log[data] * multi
-            var convertedData = data.Zip(multi)
-                .Select(d => d.Second * Math.Log(d.First))
-                .Select(d => d < 0 ? 0 : d)
-                .ToList();
-
-            var deg        = 0.0;
-            var dataPoints = new List<PointF>();
-            foreach (var length in convertedData.Select(d => d / maxData * (pPlusChart.Width / 2)))
-            {
-                dataPoints.Add(new PointF((float)(length * Math.Cos(deg) + pPlusChartCenter.X), (float)(length * Math.Sin(deg) + pPlusChartCenter.Y)));
-                deg += Math.PI / 3;
+                return Path.GetFileName(f) == filename;
             }
 
-            dataPoints.Add(dataPoints[0]);
+            // 是 osu 模式时，需要确定前缀和日期
+            if (!f.EndsWith(".png")) return false;
 
-            // 填充雷达图的折线内部
-            var polygon = new Polygon(new LinearLineSegment(dataPoints.ToArray()));
+            var fn = Path.GetFileNameWithoutExtension(f);
+            if (!fn.StartsWith(prefix)) return false;
+
+            var date = Convert.ToDateTime(fn[prefix.Length..]);
+            return DateTime.Now - date <= PPlusUpdateInterval;
+        }, filename, () =>
+        {
+            Font font;
+            var  pPlusBorderPen = new Pen(Color.Gray, 2);
+            var  penColor       = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
+            var  pPlusChartPen  = new Pen(penColor, 4);
+
+            var pPlusChart       = new Image<Rgba32>(ImageWidth / 3, (int)Math.Ceiling(Math.Sqrt(3) / 2 * ImageWidth / 3) + (int)pPlusBorderPen.StrokeWidth);
+            var pPlusChartCenter = new PointF(pPlusChart.Width / 2, pPlusChart.Height / 2);
+
+            var hexagon1 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 6);
+            var hexagon2 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 3);
+            var hexagon3 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 2);
+
             pPlusChart.Mutate(i => i
-                .DrawLines(pPlusChartPen, dataPoints.ToArray())
-                .Fill(Color.FromRgba(penColor.R, penColor.G, penColor.B, 50), polygon)
+                .DrawLines(pPlusBorderPen, hexagon3.ToArray())
+                .DrawLines(pPlusBorderPen, hexagon2.ToArray())
+                .DrawLines(pPlusBorderPen, hexagon1.ToArray())
             );
 
-            // 画顶点、画 pp+ 的类型和值
-            var idx = 0;
-            font = new Font(FontExo2, 50);
-
-            //扩展一下图片，防止文本画出边界
-            pPlusChart = new Image<Rgba32>(pPlusChart.Width * 2, pPlusChart.Height + 40)
-                .DrawImage(pPlusChart, pPlusChart.Width / 2, 20)
-                .CloneAs<Rgba32>();
-
-            foreach (var d in data.Zip(ppType))
+            foreach (var i in hexagon1.Zip(hexagon3))
             {
-                var location = new PointF(
-                    20 * (float)Math.Cos(Math.PI * idx / 3) + dataPoints[idx].X + pPlusChart.Width / 4,
-                    20 * (float)Math.Sin(Math.PI * idx / 3) + dataPoints[idx].Y + 20);
+                pPlusChart.Mutate(im => im.DrawLines(pPlusBorderPen, i.First, i.Second));
+            }
 
-                var option = ImageDraw.GetTextOptions(font, location);
-
-                if (idx is 2 or 3 or 4)
+            if (isOsu)
+            {
+                var ppData = GetPPlus(osuId).UserData;
+                var ppType = new[] { "acc", "flow", "jump", "pre", "speed", "sta" };
+                var data = new List<double>
                 {
-                    option.HorizontalAlignment = HorizontalAlignment.Right;
-                }
-
-                option.VerticalAlignment = idx switch
-                {
-                    1 or 2 => VerticalAlignment.Top,
-                    0 or 3 => VerticalAlignment.Center,
-                    4 or 5 => VerticalAlignment.Bottom,
-                    _      => option.VerticalAlignment
+                    ppData.AccuracyTotal,
+                    ppData.FlowAimTotal,
+                    ppData.JumpAimTotal,
+                    ppData.PrecisionTotal,
+                    ppData.SpeedTotal,
+                    ppData.StaminaTotal
                 };
 
-                var ellipsePolygon = new EllipsePolygon(new PointF(dataPoints[idx].X + pPlusChart.Width / 4, dataPoints[idx].Y + 20), 6);
+                const int maxData = 1100;
+                var       multi   = new[] { 122.25, 113.35, 106.03, 120.09, 115.45, 116.31 };
 
+                // 让数据差距不至于太大，Log[data] * multi
+                var convertedData = data.Zip(multi)
+                    .Select(d => d.Second * Math.Log(d.First))
+                    .Select(d => d < 0 ? 0 : d)
+                    .ToList();
+
+                var deg        = 0.0;
+                var dataPoints = new List<PointF>();
+                foreach (var length in convertedData.Select(d => d / maxData * (pPlusChart.Width / 2)))
+                {
+                    dataPoints.Add(new PointF((float)(length * Math.Cos(deg) + pPlusChartCenter.X), (float)(length * Math.Sin(deg) + pPlusChartCenter.Y)));
+                    deg += Math.PI / 3;
+                }
+
+                dataPoints.Add(dataPoints[0]);
+
+                // 填充雷达图的折线内部
+                var polygon = new Polygon(new LinearLineSegment(dataPoints.ToArray()));
                 pPlusChart.Mutate(i => i
-                    .DrawText(option, $"{d.Second}: {d.First:F0}", pPlusChartPen.StrokeFill)
-                    .Fill(penColor, ellipsePolygon)
+                    .DrawLines(pPlusChartPen, dataPoints.ToArray())
+                    .Fill(Color.FromRgba(penColor.R, penColor.G, penColor.B, 50), polygon)
                 );
 
-                idx += 1;
+                // 画顶点、画 pp+ 的类型和值
+                var idx = 0;
+                font = new Font(FontExo2, 50);
+
+                //扩展一下图片，防止文本画出边界
+                pPlusChart = new Image<Rgba32>(pPlusChart.Width * 2, pPlusChart.Height + 40)
+                    .DrawImage(pPlusChart, pPlusChart.Width / 2, 20)
+                    .CloneAs<Rgba32>();
+
+                foreach (var d in data.Zip(ppType))
+                {
+                    var location = new PointF(
+                        20 * (float)Math.Cos(Math.PI * idx / 3) + dataPoints[idx].X + pPlusChart.Width / 4,
+                        20 * (float)Math.Sin(Math.PI * idx / 3) + dataPoints[idx].Y + 20);
+
+                    var option = ImageDraw.GetTextOptions(font, location);
+
+                    if (idx is 2 or 3 or 4)
+                    {
+                        option.HorizontalAlignment = HorizontalAlignment.Right;
+                    }
+
+                    option.VerticalAlignment = idx switch
+                    {
+                        1 or 2 => VerticalAlignment.Top,
+                        0 or 3 => VerticalAlignment.Center,
+                        4 or 5 => VerticalAlignment.Bottom,
+                        _      => option.VerticalAlignment
+                    };
+
+                    var ellipsePolygon = new EllipsePolygon(new PointF(dataPoints[idx].X + pPlusChart.Width / 4, dataPoints[idx].Y + 20), 6);
+
+                    pPlusChart.Mutate(i => i
+                        .DrawText(option, $"{d.Second}: {d.First:F0}", pPlusChartPen.StrokeFill)
+                        .Fill(penColor, ellipsePolygon)
+                    );
+
+                    idx += 1;
+                }
             }
-        }
-        else
+            else
+            {
+                var pPlusDisabled = new Image<Rgba32>(pPlusChart.Width * 3 / 4, 150)
+                    .Clear(Color.FromRgba(0, 0, 0, 200))
+                    .RoundCorners(40);
+
+                const string text = "PP+数据不可用";
+                font = new Font(FontYaHei, 60);
+
+                pPlusDisabled.DrawTextCenter(text, font, Color.White);
+
+                pPlusChart.DrawImageCenter(pPlusDisabled);
+            }
+
+            return pPlusChart;
+        });
+
+        return image.Value;
+    }
+
+    private static PPlus GetPPlus(long uid)
+    {
+        var prefix   = $"pp+cache-{uid}-";
+        var filename = $"{prefix}{DateTime.Now:yyyy-MM-dd}.json";
+
+        var json = new CacheableText(OsuDrawerCommon.TempPath, f =>
         {
-            var pPlusDisabled = new Image<Rgba32>(pPlusChart.Width * 3 / 4, 150)
-                .Clear(Color.FromRgba(0, 0, 0, 200))
-                .RoundCorners(40);
+            if (!f.EndsWith(".json")) return false;
 
-            const string text = "PP+数据不可用";
-            font = new Font(FontYaHei, 60);
+            var fn = Path.GetFileNameWithoutExtension(f);
+            if (!fn.StartsWith(prefix)) return false;
 
-            pPlusDisabled.DrawTextCenter(text, font, Color.White);
+            var date = Convert.ToDateTime(fn[prefix.Length..]);
+            return DateTime.Now - date <= PPlusUpdateInterval;
+        }, filename, () => OsuApi.GetPPlusJsonById(uid).Result);
 
-            pPlusChart.DrawImageCenter(pPlusDisabled);
-        }
+        return PPlus.FromJson(json.Value);
+    }
 
-        return pPlusChart;
+    private static Image GetMode(string mode)
+    {
+        return Image.Load(Path.Join(OsuDrawerCommon.ResourcePath, $"mode-{mode}.png")).CloneAs<Rgba32>();
     }
 }
