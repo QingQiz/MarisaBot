@@ -84,8 +84,7 @@ public class ChunithmSong : Song
         var l = achievement;
         var r = 100_9000;
 
-        var          currentRa = Ra(l, constant);
-        const double eps       = 0.01;
+        var currentRa = Ra(l, constant);
 
         while (l <= r)
         {

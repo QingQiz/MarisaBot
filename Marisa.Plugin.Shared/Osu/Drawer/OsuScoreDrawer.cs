@@ -825,7 +825,7 @@ public static class OsuScoreDrawer
         if (starRating > 10) starRating = 10;
         if (starRating < 0) starRating  = 0;
 
-        var starRatingColorGradiant = new CacheableImage(Path.Join(OsuDrawerCommon.ResourcePath, "StarRatingColorGradiant.png"), () =>
+        var starRatingColorGradiant = new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, "StarRatingColorGradiant.png"), () =>
         {
             var brush = new LinearGradientBrush(
                 new PointF(0, 0), new PointF(2000, 0),
