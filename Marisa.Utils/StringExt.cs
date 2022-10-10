@@ -163,4 +163,19 @@ public static class StringExt
 
         return literal.ToString();
     }
+
+    public static string RandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        var stringChars = new char[length];
+        var random      = new Random();
+
+        for (var i = 0; i < stringChars.Length; i++)
+        {
+            stringChars[i] = chars[random.Next(chars.Length)];
+        }
+
+        return new string(stringChars);
+    }
 }

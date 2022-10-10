@@ -53,6 +53,9 @@ public class MessageChain
                 case "At":
                     Messages.Add(new MessageDataAt(m.target, m.display));
                     break;
+                case "Image":
+                    Messages.Add(MessageDataImage.FromUrl(m.url));
+                    break;
                 default:
                     Messages.Add(new MessageDataUnknown());
                     break;

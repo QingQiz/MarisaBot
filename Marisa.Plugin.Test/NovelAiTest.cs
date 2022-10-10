@@ -1,0 +1,25 @@
+﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
+
+namespace Marisa.Plugin.Test;
+
+public class NovelAiTest
+{
+    [Test]
+    [TestCase("miku, small, snow", "green")]
+    public async Task Text2Image(string s1, string s2)
+    {
+        var x = await NovelAi.Txt2Img(s1, s2);
+        Console.WriteLine("data:image/png;base64," + x);
+    }
+
+    [Test]
+    [TestCase("marisa", "green")]
+    public async Task Image2Image(string s1, string s2)
+    {
+        var x = await NovelAi.Txt2Img(s1, s2);
+        var y = await NovelAi.Img2Img(s1, s2, x);
+        Console.WriteLine("data:image/png;base64," + y);
+    }
+}
