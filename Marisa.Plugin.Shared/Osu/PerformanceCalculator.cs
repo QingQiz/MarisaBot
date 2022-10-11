@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
+using log4net;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
@@ -79,9 +80,27 @@ public static class PerformanceCalculator
             }
             else
             {
-                var download = OsuApi.DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
+                string download;
+                try
+                {
+                    download = OsuApi.DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                    throw new Exception($"Network Error While Downloading Beatmap: {e.Message}");
+                }
 
-                ZipFile.ExtractToDirectory(download, path);
+                try
+                {
+                    ZipFile.ExtractToDirectory(download, path);
+                }
+                catch (Exception e)
+                {
+                    LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                    throw new Exception($"A Error Occurred While Extracting Beatmap: {e.Message}");
+                }
+
                 File.Delete(download);
 
                 // 删除除了谱面文件（.osu）以外的所有文件，从而减小体积

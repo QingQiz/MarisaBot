@@ -2,9 +2,11 @@
 using System.Web;
 using Flurl;
 using Flurl.Http;
+using log4net;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
+using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -87,29 +89,40 @@ public static class OsuApi
         }
         catch (FlurlHttpException e)
         {
-            throw new Exception($"Network Error: {e.Message}");
+            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+
+            throw new Exception($"Network Error While Getting User: {e.Message}");
         }
     }
 
     public static async Task<OsuScore[]?> GetScores(long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false)
     {
-        var t = type switch
+        try
         {
-            OsuScoreType.Best   => "best",
-            OsuScoreType.Recent => "recent",
-            _                   => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+            var t = type switch
+            {
+                OsuScoreType.Best   => "best",
+                OsuScoreType.Recent => "recent",
+                _                   => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
 
-        var json = await $"{UserInfoUri}/{osuId}/scores/{t}"
-            .SetQueryParam("include_fails", includeFails ? 1 : 0)
-            .SetQueryParam("mode", gameMode)
-            .SetQueryParam("limit", take)
-            .SetQueryParam("offset", skip)
-            .WithHeader("Accept", "application/json")
-            .WithOAuthBearerToken(Token)
-            .GetStringAsync();
+            var json = await $"{UserInfoUri}/{osuId}/scores/{t}"
+                .SetQueryParam("include_fails", includeFails ? 1 : 0)
+                .SetQueryParam("mode", gameMode)
+                .SetQueryParam("limit", take)
+                .SetQueryParam("offset", skip)
+                .WithHeader("Accept", "application/json")
+                .WithOAuthBearerToken(Token)
+                .GetStringAsync();
 
-        return OsuScore.FromJson(json);
+            return OsuScore.FromJson(json);
+        }
+        catch (FlurlHttpException e)
+        {
+            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+
+            throw new Exception($"Network Error While Retrieving Scores: {e.Message}");
+        }
     }
 
     private static readonly HttpClient HttpClient = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
@@ -147,6 +160,68 @@ public static class OsuApi
         fs.Close();
 
         return beatmapPath;
+    }
+
+    // https://github.com/Monodesu/KanonBot/blob/f0f6bb1edcc4e460da6550a5626c5796441bf007/src/functions/osu/get.cs#L119
+    public static (double scorePp, double bonusPp, long rankedScores) BonusPp(OsuUserInfo info, OsuScore[] scores)
+    {
+        double scorePp = 0.0, bonusPp = 0.0, pp = 0.0, sumOxy = 0.0, sumOx2 = 0.0, avgX = 0.0, avgY = 0.0, sumX = 0.0;
+
+        List<double> ys = new();
+
+        for (var i = 0; i < scores.Length; ++i)
+        {
+            var tmp = scores[i].Pp * Math.Pow(0.95, i) ?? 0;
+            scorePp += tmp;
+            ys.Add(Math.Log10(tmp) / Math.Log10(100));
+        }
+
+        // calculateLinearRegression
+        for (var i = 1; i <= ys.Count; ++i)
+        {
+            var weight = MathExt.Log1P(i + 1.0);
+            sumX += weight;
+            avgX += i * weight;
+            avgY += ys[i - 1] * weight;
+        }
+
+        avgX /= sumX;
+        avgY /= sumX;
+        for (var i = 1; i <= ys.Count; ++i)
+        {
+            sumOxy += (i - avgX) * (ys[i - 1] - avgY) * MathExt.Log1P(i + 1.0);
+            sumOx2 += Math.Pow(i - avgX, 2.0) * MathExt.Log1P(i + 1.0);
+        }
+
+        var oxy = sumOxy / sumX;
+        var ox2 = sumOx2 / sumX;
+        // end
+        var b = new double[] { avgY - (oxy / ox2) * avgX, oxy / ox2 };
+        for (double i = 100; i <= info.Statistics.PlayCount; ++i)
+        {
+            var val = Math.Pow(100.0, b[0] + b[1] * i);
+            if (val <= 0.0)
+            {
+                break;
+            }
+
+            pp += val;
+        }
+
+        scorePp += pp;
+        bonusPp =  info.Statistics.Pp - scorePp;
+        var totalScores = info.Statistics.GradeCounts["a"] + info.Statistics.GradeCounts["s"] + info.Statistics.GradeCounts["sh"] +
+            info.Statistics.GradeCounts["ss"] + info.Statistics.GradeCounts["ssh"];
+        bool max;
+        if (totalScores >= 25397 || bonusPp >= 416.6667)
+            max = true;
+        else
+            max = false;
+        var rankedScores = max ? Math.Max(totalScores, 25397) : (int)Math.Round(Math.Log10(-(bonusPp / 416.6667) + 1.0) / Math.Log10(0.9994));
+
+        if (!double.IsNaN(scorePp) && !double.IsNaN(bonusPp)) return (scorePp, bonusPp, rankedScores);
+
+        return (0, 0, 0);
     }
 
     public enum OsuScoreType

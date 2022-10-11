@@ -60,7 +60,7 @@ public static class OsuScoreDrawer
 
         Image GeneratePie(IEnumerable<double> values, IEnumerable<string> labels, string title)
         {
-            var plt = new ScottPlot.Plot(pieSize, pieSize);
+            var plt = new Plot(pieSize, pieSize);
 
             var pie = plt.AddPie(values.ToArray());
             pie.DonutLabel  = title;

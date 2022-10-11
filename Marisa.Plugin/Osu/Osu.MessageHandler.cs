@@ -163,7 +163,8 @@ public partial class Osu : MarisaPluginBase
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
 
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1, true);
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1,
+            true);
 
         if (!(recentScores?.Any() ?? false))
         {
@@ -203,7 +204,7 @@ public partial class Osu : MarisaPluginBase
 
     [MarisaPluginDoc("列出某人前20的bp")]
     [MarisaPluginSubCommand(nameof(BestPerformance))]
-    [MarisaPluginCommand("top", "list")]
+    [MarisaPluginCommand("top", "list", "head")]
     private async Task<MarisaPluginTaskState> BpTop(Message message)
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
@@ -304,15 +305,33 @@ public partial class Osu : MarisaPluginBase
     //     AddCommandToQueue(message);
     //     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     // }
-    //
-    // [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
-    // [MarisaPluginCommand("bonusPP")]
-    // private async Task<MarisaPluginTaskState> BonusPp(Message message)
-    // {
-    //     message.Reply("服务暂时不可用！");
-    //     // await ParseCommand(message, "bonuspp");
-    //     return MarisaPluginTaskState.CompletedTask;
-    // }
+
+    [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
+    [MarisaPluginCommand("bns")]
+    private async Task<MarisaPluginTaskState> BonusPp(Message message)
+    {
+        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+
+        var scores = (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?.ToArray();
+
+        if (scores == null || !scores.Any())
+        {
+            message.Reply("无");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var bns = OsuApi.BonusPp(userInfo, scores);
+
+        var img = OsuUserInfoDrawer.BonusPp(bns.bonusPp, bns.scorePp);
+
+        message.Reply(new MessageDataText($"总pp：{bns.scorePp + bns.bonusPp:F2}，原始pp：{bns.scorePp:F2}，bonus pp：{bns.bonusPp:F2}，成绩总数：{bns.rankedScores}\n"),
+            MessageDataImage.FromBase64(img.ToB64(100))
+        );
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
     #endregion
 }

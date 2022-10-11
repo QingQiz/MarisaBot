@@ -3,13 +3,16 @@ using Marisa.Plugin.Shared.Osu.Entity.PPlus;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
 using Marisa.Utils.Cacheable;
+using ScottPlot;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment;
 using Path = System.IO.Path;
+using VerticalAlignment = SixLabors.Fonts.VerticalAlignment;
 
 namespace Marisa.Plugin.Shared.Osu.Drawer;
 
@@ -26,6 +29,22 @@ public static class OsuUserInfoDrawer
     private static readonly Color FontColor = Color.FromRgb(240, 219, 228);
 
     private static readonly TimeSpan PPlusUpdateInterval = TimeSpan.FromHours(24 * 30);
+
+    public static Image BonusPp(double bonus, double origin)
+    {
+        const int pieSize = 400;
+
+        var plt = new Plot(pieSize, pieSize);
+
+        var pie = plt.AddPie(new[] { bonus, origin });
+        pie.SliceLabels     = new [] { "bonus", "origin" };
+        pie.ShowLabels      = true;
+        pie.ShowPercentages = true;
+
+        plt.Legend();
+
+        return plt.GetBitmap().ToImageSharpImage<Rgba32>();
+    }
 
     public static async Task<Image> GetImage(this OsuUserInfo info)
     {

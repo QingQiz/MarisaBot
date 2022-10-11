@@ -38,7 +38,7 @@ public partial class Osu
 
     private static bool TryParseCommand(Message message, bool withBpRank, out OsuCommandParser.OsuCommand? command)
     {
-        command = ParseCommand(message, true);
+        command = ParseCommand(message, withBpRank);
 
         if (command == null)
         {
