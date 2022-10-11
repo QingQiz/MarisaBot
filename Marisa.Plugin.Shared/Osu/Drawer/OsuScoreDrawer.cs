@@ -438,11 +438,23 @@ public static class OsuScoreDrawer
 
         var pp = score.GetPerformance().ToString("F2");
 
-        var c1 = GetKeyValuePair("准确率", $"{score.Accuracy * 100:F2}%", (ImageWidth - staCardGap * 2) / 3);
-        var c2 = GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", (ImageWidth - staCardGap * 2) / 3);
-        var c3 = GetKeyValuePair("PP", pp, (ImageWidth - staCardGap * 2) / 3);
+        var cards1 = new List<Image>();
 
-        var cards = new List<Image>();
+        {
+            var w = score.ModeInt != 3 ? (ImageWidth - staCardGap * 2) / 3 : (ImageWidth - staCardGap * 3) / 4;
+
+            cards1.Add(GetKeyValuePair("准确率", $"{score.Accuracy * 100:F2}%", w));
+
+            if (score.ModeInt == 3)
+            {
+                cards1.Add(GetKeyValuePair("PP Acc.", $"{score.PpAccuracy * 100:F2}%", w));
+            }
+
+            cards1.Add(GetKeyValuePair("最大连击", $"{score.MaxCombo:N0}x", w));
+            cards1.Add(GetKeyValuePair("PP", pp, w));
+        }
+
+        var cards2 = new List<Image>();
 
         switch (score.ModeInt)
         {
@@ -450,7 +462,7 @@ public static class OsuScoreDrawer
             {
                 const int width = (ImageWidth - staCardGap * 5) / 6;
 
-                cards.AddRange(new[]
+                cards2.AddRange(new[]
                 {
                     GetKeyValuePair("MAX", $"{score.Statistics.CountGeki:N0}", width),
                     GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", width),
@@ -465,7 +477,7 @@ public static class OsuScoreDrawer
             {
                 const int width = (ImageWidth - staCardGap * 3) / 4;
 
-                cards.AddRange(new[]
+                cards2.AddRange(new[]
                 {
                     GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", width),
                     GetKeyValuePair("100", $"{score.Statistics.Count100:N0}", width),
@@ -478,7 +490,7 @@ public static class OsuScoreDrawer
             {
                 const int width = (ImageWidth - staCardGap * 2) / 3;
 
-                cards.AddRange(new[]
+                cards2.AddRange(new[]
                 {
                     GetKeyValuePair("GREAT", $"{score.Statistics.Count300:N0}", width),
                     GetKeyValuePair("GOOD", $"{score.Statistics.Count100:N0}", width),
@@ -490,7 +502,7 @@ public static class OsuScoreDrawer
             {
                 const int width = (ImageWidth - staCardGap * 3) / 4;
 
-                cards.AddRange(new[]
+                cards2.AddRange(new[]
                 {
                     GetKeyValuePair("FRUITS", $"{score.Statistics.Count300:N0}", width),
                     GetKeyValuePair("TICKS", $"{score.Statistics.Count100:N0}", width),
@@ -501,15 +513,16 @@ public static class OsuScoreDrawer
             }
         }
 
-        var sta = new Image<Rgba32>(ImageWidth, c1.Height + cards[0].Height + staCardVGap).Clear(BgColor);
+        var sta = new Image<Rgba32>(ImageWidth, cards1[0].Height + cards2[0].Height + staCardVGap).Clear(BgColor);
 
-        sta.DrawImage(c1, 0, 0);
-        sta.DrawImage(c2, c1.Width + staCardGap, 0);
-        sta.DrawImage(c3, (c1.Width + staCardGap) * 2, 0);
-
-        for (var i = 0; i < cards.Count; i++)
+        for (var i = 0; i < cards1.Count; i++)
         {
-            sta.DrawImage(cards[i], (cards[0].Width + staCardGap) * i, c1.Height + staCardVGap);
+            sta.DrawImage(cards1[i], (cards1[0].Width + staCardGap) * i, 0);
+        }
+
+        for (var i = 0; i < cards2.Count; i++)
+        {
+            sta.DrawImage(cards2[i], (cards2[0].Width + staCardGap) * i, cards1[0].Height + staCardVGap);
         }
 
         return sta;

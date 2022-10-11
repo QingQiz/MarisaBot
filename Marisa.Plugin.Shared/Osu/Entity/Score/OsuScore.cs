@@ -92,4 +92,9 @@ public partial class OsuScore
         JsonConvert.DeserializeObject<OsuScore[]>(json, Converter.Settings);
 
     public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
+
+    public double PpAccuracy => ModeInt == 3
+        ? (320 * Statistics.CountGeki + 300 * Statistics.Count300 + 200 * Statistics.CountKatu + 100 * Statistics.Count100 + 50 * Statistics.Count50) /
+          (double)(320 * (Statistics.CountGeki + Statistics.Count300 + Statistics.CountKatu + Statistics.Count100 + Statistics.Count50 + Statistics.CountMiss))
+        : throw new NotSupportedException("Only MANIA is supported");
 }
