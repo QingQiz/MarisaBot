@@ -3,7 +3,6 @@ using log4net;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Utils;
-using Marisa.Utils.Cacheable;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
@@ -176,30 +175,23 @@ public static class PerformanceCalculator
             return score.Beatmap.StarRating;
         }
 
-        var cachePath = Path.Join(OsuDrawerCommon.TempPath, $"StarRating-{score.Beatmap.Checksum}-{string.Join(",", score.Mods.OrderBy(x => x))}.txt");
-
-        var starRating = new CacheableText(cachePath, () =>
+        string path;
+        try
         {
-            string path;
-            try
-            {
-                path = GetBeatmapPath(score.Beatmap);
-            }
-            catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
-            {
-                return score.Beatmap.StarRating.ToString("F2");
-            }
+            path = GetBeatmapPath(score.Beatmap);
+        }
+        catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
+        {
+            return score.Beatmap.StarRating;
+        }
 
-            var ruleset = GetRuleset(score.ModeInt);
+        var ruleset = GetRuleset(score.ModeInt);
 
-            var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
-            var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-            var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
+        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
+        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
+        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
-            return beatmap.BeatmapInfo.StarRating.ToString("F2");
-        }).Value;
-
-        return Convert.ToDouble(starRating);
+        return beatmap.BeatmapInfo.StarRating;
     }
 
     public static double GetPerformance(this OsuScore score)
