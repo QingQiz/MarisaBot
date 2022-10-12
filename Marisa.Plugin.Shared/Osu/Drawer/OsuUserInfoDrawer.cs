@@ -36,8 +36,8 @@ public static class OsuUserInfoDrawer
 
         var plt = new Plot(pieSize, pieSize);
 
-        var pie = plt.AddPie(new[] { bonus, origin });
-        pie.SliceLabels     = new [] { "bonus", "origin" };
+        var pie = plt.AddPie(new[] { origin, bonus });
+        pie.SliceLabels     = new[] { "origin", "bonus" };
         pie.ShowLabels      = true;
         pie.ShowPercentages = true;
 

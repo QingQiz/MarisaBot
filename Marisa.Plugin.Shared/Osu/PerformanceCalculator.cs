@@ -1,19 +1,30 @@
-﻿using System.Diagnostics;
-using System.IO.Compression;
-using System.Text.RegularExpressions;
+﻿using System.IO.Compression;
 using log4net;
-using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Utils;
 using Marisa.Utils.Cacheable;
+using osu.Framework.Audio.Track;
+using osu.Framework.Graphics.Textures;
+using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Formats;
+using osu.Game.IO;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.Taiko;
+using osu.Game.Scoring;
+using osu.Game.Skinning;
+using osu.Game.Utils;
+using Beatmap = osu.Game.Beatmaps.Beatmap;
 
 namespace Marisa.Plugin.Shared.Osu;
 
 public static class PerformanceCalculator
 {
-    private static string PpCalculator => ConfigurationManager.Configuration.Osu.PpCalculator;
-
     private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
 
     private static Func<long, string> BeatmapsetPath => beatmapsetId => Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
@@ -35,7 +46,7 @@ public static class PerformanceCalculator
         throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
     }
 
-    private static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
+    private static string GetBeatmapPath(Entity.Score.Beatmap beatmap, bool retry = true)
     {
         var path = BeatmapsetPath(beatmap.BeatmapsetId);
 
@@ -120,6 +131,38 @@ public static class PerformanceCalculator
         return res;
     }
 
+    private static Mod[] GetMods(Ruleset ruleset, string[]? modsIn)
+    {
+        if (modsIn == null) return Array.Empty<Mod>();
+
+        var availableMods = ruleset.CreateAllMods().ToList();
+        var mods          = new List<Mod>();
+
+        foreach (var modString in modsIn)
+        {
+            var newMod = availableMods
+                .FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
+
+            if (newMod == null) throw new ArgumentException($"Invalid mod provided: {modString}");
+
+            mods.Add(newMod);
+        }
+
+        return mods.ToArray();
+    }
+
+    private static Ruleset GetRuleset(int modeInt)
+    {
+        return modeInt switch
+        {
+            0 => new OsuRuleset(),
+            1 => new TaikoRuleset(),
+            2 => new CatchRuleset(),
+            3 => new ManiaRuleset(),
+            _ => throw new ArgumentOutOfRangeException(nameof(modeInt), modeInt, null)
+        };
+    }
+
     public static double GetStarRating(this OsuScore score)
     {
         var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
@@ -147,33 +190,13 @@ public static class PerformanceCalculator
                 return score.Beatmap.StarRating.ToString("F2");
             }
 
-            var argument = "difficulty ";
+            var ruleset = GetRuleset(score.ModeInt);
 
-            if (ruleSetChanged)
-            {
-                argument += "-r:3 ";
-            }
+            var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
+            var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
+            var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
 
-            argument += $"\"{path}\" -j" + string.Join("", score.Mods
-                // .Where(m => ruleSetChangeMode
-                //     .All(m2 => !m2.Equals(m, StringComparison.OrdinalIgnoreCase)))
-                .Select(m => $" -m {m}"));
-
-            using var p = new Process();
-
-            p.StartInfo.UseShellExecute        = false;
-            p.StartInfo.CreateNoWindow         = true;
-            p.StartInfo.FileName               = PpCalculator;
-            p.StartInfo.Arguments              = argument;
-            p.StartInfo.RedirectStandardOutput = true;
-
-            p.Start();
-            p.WaitForExit();
-
-            var json = p.StandardOutput.ReadToEnd();
-
-            var regex = new Regex(@"""star_rating"":(.*?),");
-            return regex.Match(json).Groups[1].Value;
+            return beatmap.BeatmapInfo.StarRating.ToString("F2");
         }).Value;
 
         return Convert.ToDouble(starRating);
@@ -197,32 +220,162 @@ public static class PerformanceCalculator
             return 0;
         }
 
-        // TODO std taiko catch
-        if (score.ModeInt != 3) return 0;
+        var ruleset = GetRuleset(score.ModeInt);
 
-        var argument = score.ModeInt switch
+        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
+        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
+        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
+
+        var difficultyCalculator  = ruleset.CreateDifficultyCalculator(workingBeatmap);
+        var difficultyAttributes  = difficultyCalculator.Calculate(mods);
+        var performanceCalculator = ruleset.CreatePerformanceCalculator();
+
+        var ppAttributes = performanceCalculator!.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
         {
-            3 => $"simulate mania \"{path}\" -s {score.Score} -j",
-            _ => throw new NotImplementedException()
+            Accuracy = score.Accuracy,
+            MaxCombo = score.MaxCombo,
+            Statistics = new Dictionary<HitResult, int>
+            {
+                { HitResult.Perfect, score.Statistics.CountGeki },
+                { HitResult.Great, score.Statistics.Count300 },
+                { HitResult.Good, score.Statistics.CountKatu },
+                { HitResult.Ok, score.Statistics.Count100 },
+                { HitResult.Meh, score.Statistics.Count50 },
+                { HitResult.Miss, score.Statistics.CountMiss }
+            },
+            Mods       = mods,
+            TotalScore = score.Score,
+        }, difficultyAttributes);
+
+        return ppAttributes!.Total;
+    }
+}
+
+internal class ProcessorWorkingBeatmap : WorkingBeatmap
+{
+    private readonly Beatmap _beatmap;
+
+    /// <summary>
+    /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
+    /// </summary>
+    /// <param name="file">The .osu file.</param>
+    /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
+    private ProcessorWorkingBeatmap(string file, int? beatmapId = null)
+        : this(ReadFromFile(file), beatmapId)
+    {
+    }
+
+    private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null)
+        : base(beatmap.BeatmapInfo, null)
+    {
+        _beatmap                    = beatmap;
+        beatmap.BeatmapInfo.Ruleset = LegacyHelper.GetRulesetFromLegacyId(beatmap.BeatmapInfo.Ruleset.OnlineID).RulesetInfo;
+
+        if (beatmapId.HasValue) beatmap.BeatmapInfo.OnlineID = beatmapId.Value;
+    }
+
+    private static Beatmap ReadFromFile(string filename)
+    {
+        using var stream = File.OpenRead(filename);
+        using var reader = new LineBufferedReader(stream);
+        return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
+    }
+
+    public static ProcessorWorkingBeatmap FromFile(string file)
+    {
+        if (!File.Exists(file)) throw new ArgumentException($"Beatmap file {file} does not exist.");
+
+        return new ProcessorWorkingBeatmap(file);
+    }
+
+    protected override IBeatmap GetBeatmap() => _beatmap;
+
+    protected override Texture GetBackground()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Track GetBeatmapTrack()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override ISkin GetSkin()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Stream GetStream(string storagePath)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal static class LegacyHelper
+{
+    public static Ruleset GetRulesetFromLegacyId(int id)
+    {
+        return id switch
+        {
+            0 => new OsuRuleset(),
+            1 => new TaikoRuleset(),
+            2 => new CatchRuleset(),
+            3 => new ManiaRuleset(),
+            _ => throw new ArgumentException("Invalid ruleset ID provided.")
+        };
+    }
+
+    /// <summary>
+    /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
+    /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
+    /// </summary>
+    public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+    {
+        var beatmap = new EmptyWorkingBeatmap
+        {
+            BeatmapInfo =
+            {
+                Ruleset    = ruleset.RulesetInfo,
+                Difficulty = new BeatmapDifficulty()
+            }
         };
 
-        argument += string.Join("", score.Mods.Select(m => $" -m {m}"));
+        var allMods = ruleset.CreateAllMods().ToArray();
 
-        using var p = new Process();
+        var allowedMods = ModUtils.FlattenMods(
+                ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
+            .Select(m => m.GetType())
+            .Distinct()
+            .ToHashSet();
 
-        p.StartInfo.UseShellExecute        = false;
-        p.StartInfo.CreateNoWindow         = true;
-        p.StartInfo.FileName               = PpCalculator;
-        p.StartInfo.Arguments              = argument;
-        p.StartInfo.RedirectStandardOutput = true;
+        // Special case to allow either DT or NC.
+        if (mods.Any(m => m is ModDoubleTime)) allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
 
-        p.Start();
-        p.WaitForExit();
+        var result = new List<Mod>();
 
-        var json = p.StandardOutput.ReadToEnd();
+        var classicMod = allMods.SingleOrDefault(m => m is ModClassic);
+        if (classicMod != null) result.Add(classicMod);
 
-        var regex = new Regex(@"""pp"":(.*?)}");
+        result.AddRange(mods.Where(m => allowedMods.Contains(m.GetType())));
 
-        return double.Parse(regex.Match(json).Groups[1].Value);
+        return result.ToArray();
+    }
+
+    private class EmptyWorkingBeatmap : WorkingBeatmap
+    {
+        public EmptyWorkingBeatmap()
+            : base(new BeatmapInfo(), null)
+        {
+        }
+
+        protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
+
+        protected override Texture GetBackground() => throw new NotImplementedException();
+
+        protected override Track GetBeatmapTrack() => throw new NotImplementedException();
+
+        protected override ISkin GetSkin() => throw new NotImplementedException();
+
+        public override Stream GetStream(string storagePath) => throw new NotImplementedException();
     }
 }

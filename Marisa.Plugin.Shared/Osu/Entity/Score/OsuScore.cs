@@ -23,7 +23,7 @@ public partial class OsuScore
     public long Id { get; set; }
 
     [JsonProperty("max_combo", Required = Required.Always)]
-    public long MaxCombo { get; set; }
+    public int MaxCombo { get; set; }
 
     [JsonProperty("mode", Required = Required.Always)]
     public string Mode { get; set; }
