@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Marisa.EntityFrameworkCore.Entity;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Ai;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
@@ -16,6 +17,7 @@ public class BotDbContext : DbContext
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
     public DbSet<BlackList> BlackLists { get; set; }
     public DbSet<OsuBind> OsuBinds { get; set; }
+    public DbSet<AiDrawLimit> AiDrawLimits { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
@@ -28,6 +30,17 @@ public static class DbContextExt
     public static void InsertOrUpdate<T>(this DbSet<T> context, T value) where T : SongGuess
     {
         if (!context.Any(t => t.UId == value.UId))
+        {
+            context.Add(value);
+            return;
+        }
+
+        context.Update(value);
+    }
+
+    public static void InsertOrUpdate(this DbSet<AiDrawLimit> context, AiDrawLimit value)
+    {
+        if (!context.Any(t => t.Id == value.Id))
         {
             context.Add(value);
             return;
