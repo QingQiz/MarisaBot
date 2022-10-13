@@ -29,5 +29,5 @@ public class PPlus
 
     public static string ToJson() => JsonConvert.SerializeObject(Converter.Settings);
 
-    public static PPlus FromJson(string json) => JsonConvert.DeserializeObject<PPlus>(json, Converter.Settings);
+    public static PPlus FromJson(string json) => JsonConvert.DeserializeObject<PPlus>(json, Converter.Settings)!;
 }

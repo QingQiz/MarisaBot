@@ -271,6 +271,7 @@ public static class ImageDraw
                 SystemFonts.Get("Segoe UI Emoji"),
                 SystemFonts.Get("Segoe UI Historic"),
                 SystemFonts.Get("Segoe UI Symbol"),
+                SystemFonts.Get("Arial Unicode MS"),
             },
         };
     }

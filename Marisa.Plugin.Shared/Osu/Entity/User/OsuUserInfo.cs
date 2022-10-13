@@ -210,7 +210,7 @@ public partial class OsuUserInfo
 
     public static OsuUserInfo FromJson(string json)
     {
-        return JsonConvert.DeserializeObject<OsuUserInfo>(json, Converter.Settings);
+        return JsonConvert.DeserializeObject<OsuUserInfo>(json, Converter.Settings)!;
     }
 
     public string ToJson()

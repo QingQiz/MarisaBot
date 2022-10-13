@@ -189,9 +189,9 @@ public static class PerformanceCalculator
 
         var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
         var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
+        var attributes     = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(mods);
 
-        return beatmap.BeatmapInfo.StarRating;
+        return attributes.StarRating;
     }
 
     public static double GetPerformance(this OsuScore score)

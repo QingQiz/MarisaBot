@@ -22,7 +22,7 @@ public partial class Chunithm : MarisaPluginBase
             var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
                 File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
             ) as dynamic[];
-            return data.Select(d => new ChunithmSong(d)).ToList();
+            return data!.Select(d => new ChunithmSong(d)).ToList();
         },
         nameof(BotDbContext.ChunithmGuesses),
         Dialog.AddHandler

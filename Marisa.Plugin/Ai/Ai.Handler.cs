@@ -25,6 +25,8 @@ public partial class Ai : MarisaPluginBase
     [MarisaPluginCommand("draw")]
     private static async Task<MarisaPluginTaskState> Handler(Message message)
     {
+        message.Reply("已停用的功能");
+        return MarisaPluginTaskState.CompletedTask;
         await Lock.WaitAsync();
 
         try

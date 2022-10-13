@@ -26,7 +26,7 @@ public partial class MaiMaiDx
                 var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
                     File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
                 ) as dynamic[];
-                return data.Select(d => new MaiMaiSong(d)).ToList();
+                return data!.Select(d => new MaiMaiSong(d)).ToList();
             }
         },
         nameof(BotDbContext.MaiMaiDxGuesses),
