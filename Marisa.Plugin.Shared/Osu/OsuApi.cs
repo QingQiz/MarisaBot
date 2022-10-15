@@ -125,7 +125,11 @@ public static class OsuApi
         }
     }
 
-    private static readonly HttpClient HttpClient = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
+    private static readonly HttpClient HttpClient = new(new HttpClientHandler
+    {
+        AutomaticDecompression = DecompressionMethods.All,
+        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+    });
 
     public static async Task<string> DownloadBeatmap(long beatmapId, string path)
     {

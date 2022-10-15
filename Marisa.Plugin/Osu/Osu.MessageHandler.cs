@@ -179,6 +179,34 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("分析某人最近打的图")]
+    [MarisaPluginSubCommand(nameof(Recent))]
+    [MarisaPluginCommand("distribution", "dist")]
+    private async Task<MarisaPluginTaskState> RecentDistribution(Message message, BotDbContext db)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+
+        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0, 1000, true);
+
+        if (!(recentScores?.Any() ?? false))
+        {
+            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (recentScores.Length < 10)
+        {
+            message.Reply("你打的太少了，多打点吧！");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(MessageDataImage.FromBase64(recentScores.Distribution().ToB64(100)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("查询某人 pp 最高的成绩图（bp）")]
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)

@@ -86,6 +86,24 @@ public static class OsuScoreDrawer
                     var labels = g.Select(x => $"{x.Key}K");
                     pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Keys"));
                 }
+                // pp acc
+                {
+                    var acc = scores.Select(x => (int)(x.PpAccuracy * 100)).OrderByDescending(x => x).ToList();
+
+                    var g = new List<IGrouping<int, int>>();
+
+                    var conv = 1;
+
+                    while (!g.Any() || g.Count > 10)
+                    {
+                        g    =  acc.GroupBy(x => x / conv).ToList();
+                        conv *= 2;
+                    }
+
+                    var values = g.Select(x => x.Count());
+                    var labels = g.Select(x => $"> {x.Key * conv / 2}%");
+                    pies.Add(GeneratePie(values.Select(x => (double)x), labels, "PP Acc"));
+                }
                 break;
             }
             case 0:
@@ -156,10 +174,16 @@ public static class OsuScoreDrawer
                 .Select(x => x.Mods).SelectMany(x => x).OrderBy(x => x)
                 .GroupBy(x => x).ToList();
 
-            var values = mods.Select(x => x.Count());
-            var labels = mods.Select(x => x.Key);
+            var values = mods.Select(x => x.Count()).ToList();
+            var labels = mods.Select(x => x.Key).ToList();
+            
+            values.Add(scores.Count(x => !x.Mods.Any()));
+            labels.Add("NoMod");
 
-            pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Mod"));
+            if (values.Any())
+            {
+                pies.Add(GeneratePie(values.Select(x => (double)x), labels, "Mod"));
+            }
         }
 
         var img = new Image<Rgba32>(pieSize * pies.Count, pieSize * 3);
@@ -173,7 +197,7 @@ public static class OsuScoreDrawer
         {
             var plt = new Plot(pieSize * pies.Count, pieSize * 2);
 
-            var values = scores.Select(x => x.Pp ?? 0).ToArray(); // ScottPlot.DataGen.RandomNormal(rand, pointCount: 1234, mean: 178.4, stdDev: 7.6);
+            var values = scores.AsParallel().Select(x => x.GetPerformance()).ToArray();
 
             // create a histogram
             var (counts, binEdges) = ScottPlot.Statistics.Common.Histogram(values, min: values.Min() - 20, max: values.Max() + 20, binSize: 3);
