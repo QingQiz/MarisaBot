@@ -176,7 +176,7 @@ public static class OsuScoreDrawer
 
             var values = mods.Select(x => x.Count()).ToList();
             var labels = mods.Select(x => x.Key).ToList();
-            
+
             values.Add(scores.Count(x => !x.Mods.Any()));
             labels.Add("NoMod");
 
@@ -186,11 +186,39 @@ public static class OsuScoreDrawer
             }
         }
 
-        var img = new Image<Rgba32>(pieSize * pies.Count, pieSize * 3);
+        var img = new Image<Rgba32>(pieSize * pies.Count, pieSize * 4);
 
         for (var i = 0; i < pies.Count; i++)
         {
-            img.DrawImage(pies[i], i * pieSize, pieSize * 2);
+            img.DrawImage(pies[i], i * pieSize, pieSize * 3);
+        }
+
+        {
+            var plt = new Plot(pieSize * pies.Count, pieSize);
+
+            var s2 = scores.Where(s => s.Passed).OrderBy(x => x.CreatedAt).ToList();
+
+            var ys = s2.Select(x => x.Pp ?? 0).ToArray();
+            var xs = s2.Select(x => x.CreatedAt.DateTime.ToOADate()).ToArray();
+
+            var x1 = xs[0];
+            var x2 = xs[^1];
+
+            var model = new ScottPlot.Statistics.LinearRegressionLine(xs, ys);
+
+            plt.XAxis.DateTimeFormat(true);
+            plt.AddScatter(xs, ys, lineWidth: 0,
+                markerShape: MarkerShape.filledCircle, color: System.Drawing.Color.FromArgb(127, 233, 190, 53), markerSize: 10);
+            var linePlot = plt.AddLine(model.slope, model.offset, (x1, x2),
+                lineWidth: 2, color: System.Drawing.Color.FromArgb(127, 140, 39, 167));
+            linePlot.LineStyle = LineStyle.Dash;
+
+            plt.XAxis.Line(false);
+            plt.YAxis.Line(false);
+            plt.XAxis2.Hide();
+            plt.YAxis2.Hide();
+
+            img.DrawImage(plt.GetBitmap().ToImageSharpImage<Rgba32>(), 0, pieSize * 2);
         }
 
         // 分布
@@ -240,7 +268,6 @@ public static class OsuScoreDrawer
             plt.Title("Best Performance Distribution", size: 40);
             plt.YAxis.Label("Count (#)");
             plt.YAxis2.Label("Probability (%)");
-            plt.XAxis.Label("PP");
             plt.SetAxisLimits(yMin: 0);
             plt.SetAxisLimits(yMin: 0, yAxisIndex: 1);
 
