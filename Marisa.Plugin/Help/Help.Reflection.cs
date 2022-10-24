@@ -31,7 +31,7 @@ public partial class Help
         return Filter(plugins.Select(p => p.GetType())).Select(GetHelp).ToList();
     }
 
-    private static HelpDoc GetHelp(Type plugin)
+    public static HelpDoc GetHelp(Type plugin)
     {
         var doc = plugin.GetCustomAttribute<MarisaPluginDocAttribute>();
         var commands = plugin.GetCustomAttributes<MarisaPluginCommand>()
