@@ -1,10 +1,21 @@
-﻿using Marisa.Plugin.Shared.Chunithm;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Configuration;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
 
 public class ChunithmTest
 {
+    [SetUp]
+    public void SetUp()
+    {
+        var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
+        ConfigurationManager.SetConfigFilePath(configPath);
+    }
+
     [Test]
     [TestCase(101_0000, 14.9, 17.05)]
     [TestCase(100_7777, 14.9, 16.92)]
@@ -31,5 +42,14 @@ public class ChunithmTest
     {
         var actual = ChunithmSong.NextRa(ach, constant);
         Assert.AreEqual(nextAch, actual);
+    }
+
+    [Test]
+    public async Task Test()
+    {
+        var rating = await Chunithm.Chunithm.GetRating(null, 2435865554);
+        var _ = rating.Draw();
+
+        Assert.Pass();
     }
 }

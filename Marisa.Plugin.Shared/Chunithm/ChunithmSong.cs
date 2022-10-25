@@ -135,6 +135,16 @@ public class ChunithmSong : Song
         return ResourceManager.GetCover(Id);
     }
 
+    public static readonly Dictionary<string, Color> LevelColor = new()
+    {
+        { "BASIC", MaiMaiSong.LevelColor[0] },
+        { "ADVANCED", MaiMaiSong.LevelColor[1] },
+        { "EXPERT", MaiMaiSong.LevelColor[2] },
+        { "MASTER", MaiMaiSong.LevelColor[3] },
+        { "ULTIMA", Color.Black },
+        { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
+    };
+
     public override string GetImage()
     {
         return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
@@ -232,19 +242,10 @@ public class ChunithmSong : Song
                 y += h;
                 x =  0;
 
-                var color = new Dictionary<string, Color>
-                {
-                    { "BASIC", MaiMaiSong.LevelColor[0] },
-                    { "ADVANCED", MaiMaiSong.LevelColor[1] },
-                    { "EXPERT", MaiMaiSong.LevelColor[2] },
-                    { "MASTER", MaiMaiSong.LevelColor[3] },
-                    { "ULTIMA", Color.Black },
-                    { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
-                };
 
                 for (var i = 0; i < Levels.Count; i++)
                 {
-                    var c = color[LevelName[i]];
+                    var c = LevelColor[LevelName[i]];
 
                     DrawCard(Levels[i], cardFontSize, c.SelectFontColor(), c, w1, h, true);
                     x += w1;

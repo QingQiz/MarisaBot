@@ -6,6 +6,24 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
+    #region 查分 
+
+    /// <summary>
+    /// b30
+    /// </summary>
+    [MarisaPluginDoc("查询 b40，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginCommand("b30", "查分")]
+    private static async Task<MarisaPluginTaskState> MaiMaiDxB40(Message message)
+    {
+        var ret = await GetB30Card(message);
+
+        message.Reply(ret);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
     #region 搜歌
 
     /// <summary>

@@ -62,8 +62,6 @@ public static class ResourceManager
     {
         var prefix = $"CoverBackground-{songId}-";
 
-        // var coverDominantColor = cover.DominantColor(new Rectangle(0, 0, 5, cover.Height));
-
         var image = new CacheableImage(TempPath,
             f => f.StartsWith(prefix) && f.EndsWith(".png"),
             cover => $"{prefix}#{cover.DominantColor(new Rectangle(0, 0, 5, cover.Height)).ToHex()}.png",
