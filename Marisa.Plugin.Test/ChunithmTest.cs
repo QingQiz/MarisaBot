@@ -45,10 +45,33 @@ public class ChunithmTest
     }
 
     [Test]
-    public async Task Test()
+    public void Should_Draw_Score_Card()
+    {
+        var score = new ChunithmScore
+        {
+            Id         = 335,
+            CId        = 335,
+            Constant   = 13.9,
+            Rating     = 16.0,
+            Fc         = "",
+            Level      = "13+",
+            LevelIndex = 3,
+            LevelLabel = "Expert",
+            Score      = 1009000,
+            Title      = "这是个名字名字名字名字名字名字名字名字名字名字",
+        };
+
+        score.Draw().Show();
+
+        Assert.Pass();
+    }
+
+    [Test]
+    public async Task Should_Draw_B30()
     {
         var rating = await Chunithm.Chunithm.GetRating(null, 2435865554);
-        var _ = rating.Draw();
+
+        rating.Draw().Show();
 
         Assert.Pass();
     }
