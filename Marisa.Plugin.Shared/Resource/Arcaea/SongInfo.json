@@ -20,9 +20,9 @@
     "song_pack": "Arcaea",
     "cover_name": "sayonarahatsukoi.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.5",
+      "4.5",
+      "7.0",
       "/"
     ]
   },
@@ -47,10 +47,10 @@
     "song_pack": "Arcaea",
     "cover_name": "lostcivilization.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.0",
+      "7.0",
+      "9.2",
+      "9.8"
     ]
   },
   {
@@ -74,10 +74,10 @@
     "song_pack": "Arcaea",
     "cover_name": "goodtek.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.0",
+      "6.5",
+      "9.3",
+      "9.8"
     ]
   },
   {
@@ -101,9 +101,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "viyella.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "8.5",
       "/"
     ]
   },
@@ -128,9 +128,9 @@
     "song_pack": "Arcaea",
     "cover_name": "rise.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "4.0",
+      "7.5",
       "/"
     ]
   },
@@ -155,9 +155,9 @@
     "song_pack": "Arcaea",
     "cover_name": "lucifer.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "8.2",
       "/"
     ]
   },
@@ -182,10 +182,10 @@
     "song_pack": "Arcaea",
     "cover_name": "fairytale.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "1.0",
+      "3.5",
+      "7.0",
+      "9.5"
     ]
   },
   {
@@ -209,9 +209,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "hearditsaid.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "8.1",
       "/"
     ]
   },
@@ -236,9 +236,9 @@
     "song_pack": "Arcaea",
     "cover_name": "babaroque.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "8.5",
       "/"
     ]
   },
@@ -263,9 +263,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "memoryfactory.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "8.9",
       "/"
     ]
   },
@@ -290,9 +290,9 @@
     "song_pack": "Arcaea",
     "cover_name": "snowwhite.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.0",
+      "8.4",
       "/"
     ]
   },
@@ -317,9 +317,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "relentless.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "6.5",
+      "8.0",
       "/"
     ]
   },
@@ -344,9 +344,9 @@
     "song_pack": "Arcaea",
     "cover_name": "shadesoflight.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
@@ -371,10 +371,10 @@
     "song_pack": "Arcaea",
     "cover_name": "vexaria.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.5",
+      "5.0",
+      "7.0",
+      "8.8"
     ]
   },
   {
@@ -398,9 +398,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "essenceoftwilight.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "9.1",
       "/"
     ]
   },
@@ -425,10 +425,10 @@
     "song_pack": "Arcaea",
     "cover_name": "qualia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "7.0",
+      "9.1",
+      "9.7"
     ]
   },
   {
@@ -452,10 +452,10 @@
     "song_pack": "Eternal Core",
     "cover_name": "pragmatism.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "8.6",
+      "10.1",
+      "11.0"
     ]
   },
   {
@@ -479,9 +479,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "sheriruth.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "7.5",
+      "10.1",
       "/"
     ]
   },
@@ -506,10 +506,10 @@
     "song_pack": "Eternal Core",
     "cover_name": "lumia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.5",
+      "5.5",
+      "8.4",
+      "9.5"
     ]
   },
   {
@@ -533,10 +533,10 @@
     "song_pack": "Arcaea",
     "cover_name": "dement.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.5",
+      "6.0",
+      "7.5",
+      "9.9"
     ]
   },
   {
@@ -560,9 +560,9 @@
     "song_pack": "Arcaea",
     "cover_name": "dandelion.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "8.5",
       "/"
     ]
   },
@@ -587,9 +587,9 @@
     "song_pack": "Arcaea",
     "cover_name": "anokumene.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "9.2",
       "/"
     ]
   },
@@ -614,10 +614,10 @@
     "song_pack": "Arcaea",
     "cover_name": "infinityheaven.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "1.5",
+      "5.5",
+      "7.5",
+      "9.6"
     ]
   },
   {
@@ -641,9 +641,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "partyvinyl.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.4",
       "/"
     ]
   },
@@ -668,9 +668,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "flashback.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "8.8",
       "/"
     ]
   },
@@ -695,9 +695,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "flyburg.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.0",
       "/"
     ]
   },
@@ -722,9 +722,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "nirvluce.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "7.0",
+      "10.3",
       "/"
     ]
   },
@@ -749,9 +749,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "paradise.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.0",
+      "4.0",
+      "7.5",
       "/"
     ]
   },
@@ -776,9 +776,9 @@
     "song_pack": "Arcaea",
     "cover_name": "brandnewworld.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "4.0",
+      "7.5",
       "/"
     ]
   },
@@ -803,9 +803,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "dataerror.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "9.5",
       "/"
     ]
   },
@@ -830,9 +830,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "crosssoul.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -857,9 +857,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "yourvoiceso.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -884,9 +884,9 @@
     "song_pack": "Arcaea",
     "cover_name": "chronostasis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "8.9",
       "/"
     ]
   },
@@ -911,10 +911,10 @@
     "song_pack": "Arcaea",
     "cover_name": "kanagawa.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "1.0",
+      "5.5",
+      "9.0",
+      "9.8"
     ]
   },
   {
@@ -938,9 +938,9 @@
     "song_pack": "Dynamix",
     "cover_name": "moonlightofsandcastle.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.5",
+      "5.0",
+      "7.5",
       "/"
     ]
   },
@@ -965,9 +965,9 @@
     "song_pack": "Dynamix",
     "cover_name": "reconstruction.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "8.4",
       "/"
     ]
   },
@@ -992,9 +992,9 @@
     "song_pack": "Dynamix",
     "cover_name": "evoltex.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "7.0",
+      "8.9",
       "/"
     ]
   },
@@ -1019,9 +1019,9 @@
     "song_pack": "Dynamix",
     "cover_name": "oracle.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "5.5",
+      "9.3",
       "/"
     ]
   },
@@ -1046,9 +1046,9 @@
     "song_pack": "Dynamix",
     "cover_name": "aterlbus.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.2",
       "/"
     ]
   },
@@ -1073,9 +1073,9 @@
     "song_pack": "Arcaea",
     "cover_name": "clotho.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "7.5",
       "/"
     ]
   },
@@ -1100,9 +1100,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "impurebird.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.5",
+      "9.4",
       "/"
     ]
   },
@@ -1127,10 +1127,10 @@
     "song_pack": "Arcaea",
     "cover_name": "ignotus.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.5",
+      "6.5",
+      "9.3",
+      "9.9"
     ]
   },
   {
@@ -1154,9 +1154,9 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "lethaeus.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.7",
       "/"
     ]
   },
@@ -1181,9 +1181,9 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "romancewars.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.0",
+      "4.0",
+      "7.5",
       "/"
     ]
   },
@@ -1208,9 +1208,9 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "blossoms.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.0",
+      "4.0",
+      "7.0",
       "/"
     ]
   },
@@ -1235,10 +1235,10 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "moonheart.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.5",
+      "5.5",
+      "8.4",
+      "9.7"
     ]
   },
   {
@@ -1262,9 +1262,9 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "genesis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.5",
+      "8.2",
       "/"
     ]
   },
@@ -1289,9 +1289,9 @@
     "song_pack": "Arcaea",
     "cover_name": "harutopia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.0",
+      "4.5",
+      "8.5",
       "/"
     ]
   },
@@ -1316,9 +1316,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "auxesia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -1343,9 +1343,9 @@
     "song_pack": "Arcaea",
     "cover_name": "rabbitintheblackroom.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "8.4",
       "/"
     ]
   },
@@ -1370,9 +1370,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "modelista.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "10.0",
       "/"
     ]
   },
@@ -1397,9 +1397,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "soundwitch.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.9",
       "/"
     ]
   },
@@ -1424,9 +1424,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "trappola.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "10.0",
       "/"
     ]
   },
@@ -1451,9 +1451,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "iconoclast.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.1",
       "/"
     ]
   },
@@ -1478,9 +1478,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "conflict.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -1505,9 +1505,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "axiumcrisis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.5",
+      "10.7",
       "/"
     ]
   },
@@ -1532,9 +1532,9 @@
     "song_pack": "Vicious Labyrinth",
     "cover_name": "grievouslady.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "6.5",
+      "9.3",
+      "11.3",
       "/"
     ]
   },
@@ -1559,9 +1559,9 @@
     "song_pack": "Arcaea",
     "cover_name": "dreaminattraction.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -1586,10 +1586,10 @@
     "song_pack": "Arcaea",
     "cover_name": "redandblue.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.0",
+      "7.5",
+      "9.4",
+      "10.0"
     ]
   },
   {
@@ -1613,9 +1613,9 @@
     "song_pack": "Arcaea",
     "cover_name": "onelastdrive.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "8.2",
       "/"
     ]
   },
@@ -1640,9 +1640,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "surrender.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "8.8",
       "/"
     ]
   },
@@ -1667,9 +1667,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "yozakurafubuki.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -1694,9 +1694,9 @@
     "song_pack": "Lanota",
     "cover_name": "cyanine.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.6",
       "/"
     ]
   },
@@ -1721,9 +1721,9 @@
     "song_pack": "Lanota",
     "cover_name": "dreamgoeson.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.5",
+      "5.0",
+      "7.5",
       "/"
     ]
   },
@@ -1748,9 +1748,9 @@
     "song_pack": "Lanota",
     "cover_name": "journey.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.8",
       "/"
     ]
   },
@@ -1775,9 +1775,9 @@
     "song_pack": "Lanota",
     "cover_name": "specta.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.5",
       "/"
     ]
   },
@@ -1802,9 +1802,9 @@
     "song_pack": "Lanota",
     "cover_name": "quon.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.5",
+      "9.6",
       "/"
     ]
   },
@@ -1829,9 +1829,9 @@
     "song_pack": "Arcaea",
     "cover_name": "syro.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -1856,9 +1856,9 @@
     "song_pack": "Arcaea",
     "cover_name": "reinvent.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "8.5",
       "/"
     ]
   },
@@ -1883,9 +1883,9 @@
     "song_pack": "Binary Enfold",
     "cover_name": "silentrush.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.0",
+      "8.6",
       "/"
     ]
   },
@@ -1910,10 +1910,10 @@
     "song_pack": "Binary Enfold",
     "cover_name": "singularity.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "7.5",
+      "10.7",
+      "10.4"
     ]
   },
   {
@@ -1937,9 +1937,9 @@
     "song_pack": "Binary Enfold",
     "cover_name": "memoryforest.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.8",
       "/"
     ]
   },
@@ -1964,9 +1964,9 @@
     "song_pack": "Binary Enfold",
     "cover_name": "strongholds.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.0",
+      "9.2",
       "/"
     ]
   },
@@ -1991,10 +1991,10 @@
     "song_pack": "Binary Enfold",
     "cover_name": "nexttoyou.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "7.0",
+      "8.8",
+      "9.6"
     ]
   },
   {
@@ -2018,9 +2018,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "metallicpunisher.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "10.3",
       "/"
     ]
   },
@@ -2045,9 +2045,9 @@
     "song_pack": "Arcaea",
     "cover_name": "blaster.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.3",
       "/"
     ]
   },
@@ -2072,9 +2072,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "guardina.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -2099,9 +2099,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "carminescythe.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.6",
       "/"
     ]
   },
@@ -2126,9 +2126,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "bethere.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.4",
       "/"
     ]
   },
@@ -2153,9 +2153,9 @@
     "song_pack": "Arcaea",
     "cover_name": "cyberneciacatharsis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.5",
       "/"
     ]
   },
@@ -2180,9 +2180,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "callmyname.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "8.7",
       "/"
     ]
   },
@@ -2207,9 +2207,9 @@
     "song_pack": "Arcaea",
     "cover_name": "inkarusi.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "4.0",
+      "7.5",
       "/"
     ]
   },
@@ -2234,9 +2234,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "mazenine.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "3.5",
+      "8.9",
       "/"
     ]
   },
@@ -2261,9 +2261,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "themessage.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.7",
       "/"
     ]
   },
@@ -2288,9 +2288,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "sulfur.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.0",
+      "9.7",
       "/"
     ]
   },
@@ -2315,9 +2315,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "halcyon.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.2",
+      "10.7",
       "/"
     ]
   },
@@ -2342,9 +2342,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "etherstrike.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.3",
+      "10.3",
       "/"
     ]
   },
@@ -2369,9 +2369,9 @@
     "song_pack": "Luminous Sky",
     "cover_name": "fractureray.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "6.0",
+      "9.5",
+      "11.3",
       "/"
     ]
   },
@@ -2396,9 +2396,9 @@
     "song_pack": "Arcaea",
     "cover_name": "suomi.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "7.5",
       "/"
     ]
   },
@@ -2423,10 +2423,10 @@
     "song_pack": "Arcaea",
     "cover_name": "bookmaker.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "6.5",
+      "8.3",
+      "10.0"
     ]
   },
   {
@@ -2450,9 +2450,9 @@
     "song_pack": "Arcaea",
     "cover_name": "darakunosono.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "7.0",
+      "9.5",
       "/"
     ]
   },
@@ -2477,10 +2477,10 @@
     "song_pack": "Memory Archive",
     "cover_name": "dropdead.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "1.5",
+      "9.5",
+      "9.1",
+      "10.5"
     ]
   },
   {
@@ -2504,9 +2504,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "fallensquare.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "9.6",
       "/"
     ]
   },
@@ -2531,9 +2531,9 @@
     "song_pack": "Arcaea",
     "cover_name": "nhelv.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.9",
       "/"
     ]
   },
@@ -2558,9 +2558,9 @@
     "song_pack": "Arcaea",
     "cover_name": "espebranch.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.6",
       "/"
     ]
   },
@@ -2585,10 +2585,10 @@
     "song_pack": "Arcaea",
     "cover_name": "purgatorium.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.5",
+      "6.0",
+      "8.4",
+      "9.6"
     ]
   },
   {
@@ -2612,9 +2612,9 @@
     "song_pack": "Tone Sphere",
     "cover_name": "hikari.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "8.1",
       "/"
     ]
   },
@@ -2639,9 +2639,9 @@
     "song_pack": "Tone Sphere",
     "cover_name": "stager.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.5",
       "/"
     ]
   },
@@ -2666,9 +2666,9 @@
     "song_pack": "Tone Sphere",
     "cover_name": "hallofmirrors.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "5.5",
+      "8.2",
       "/"
     ]
   },
@@ -2693,9 +2693,9 @@
     "song_pack": "Tone Sphere",
     "cover_name": "linearaccelerator.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "9.8",
       "/"
     ]
   },
@@ -2720,9 +2720,9 @@
     "song_pack": "Tone Sphere",
     "cover_name": "tiferet.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -2747,9 +2747,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "alexandrite.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.0",
       "/"
     ]
   },
@@ -2774,9 +2774,9 @@
     "song_pack": "Arcaea",
     "cover_name": "rugie.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.2",
       "/"
     ]
   },
@@ -2801,9 +2801,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "astraltale.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "9.6",
       "/"
     ]
   },
@@ -2828,9 +2828,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "phantasia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "5.5",
+      "9.2",
       "/"
     ]
   },
@@ -2855,9 +2855,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "empireofwinter.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.0",
       "/"
     ]
   },
@@ -2882,10 +2882,10 @@
     "song_pack": "Groove Coaster",
     "cover_name": "merlin.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.0",
+      "5.5",
+      "8.9",
+      "9.4"
     ]
   },
   {
@@ -2909,9 +2909,9 @@
     "song_pack": "Groove Coaster",
     "cover_name": "dxfullmetal.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.8",
       "/"
     ]
   },
@@ -2936,10 +2936,10 @@
     "song_pack": "Groove Coaster",
     "cover_name": "omakeno.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.0",
+      "6.5",
+      "9.5",
+      "10.2"
     ]
   },
   {
@@ -2963,9 +2963,9 @@
     "song_pack": "Groove Coaster",
     "cover_name": "scarletlance.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.1",
       "/"
     ]
   },
@@ -2990,9 +2990,9 @@
     "song_pack": "Groove Coaster",
     "cover_name": "ouroboros.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.7",
       "/"
     ]
   },
@@ -3017,9 +3017,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "libertas.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "9.2",
       "/"
     ]
   },
@@ -3044,9 +3044,9 @@
     "song_pack": "Eternal Core",
     "cover_name": "solitarydream.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "8.8",
       "/"
     ]
   },
@@ -3071,10 +3071,10 @@
     "song_pack": "Absolute Reason",
     "cover_name": "antithese.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.0",
+      "5.0",
+      "8.8",
+      "9.5"
     ]
   },
   {
@@ -3098,9 +3098,9 @@
     "song_pack": "Absolute Reason",
     "cover_name": "corruption.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.8",
       "/"
     ]
   },
@@ -3125,9 +3125,9 @@
     "song_pack": "Absolute Reason",
     "cover_name": "blackterritory.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -3152,9 +3152,9 @@
     "song_pack": "Absolute Reason",
     "cover_name": "viciousheroism.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.0",
       "/"
     ]
   },
@@ -3179,9 +3179,9 @@
     "song_pack": "Absolute Reason",
     "cover_name": "cyaegha.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.4",
+      "10.7",
       "/"
     ]
   },
@@ -3206,9 +3206,9 @@
     "song_pack": "Arcaea",
     "cover_name": "revixy.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.0",
       "/"
     ]
   },
@@ -3233,9 +3233,9 @@
     "song_pack": "Arcaea",
     "cover_name": "grimheart.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.0",
+      "8.6",
       "/"
     ]
   },
@@ -3260,9 +3260,9 @@
     "song_pack": "Arcaea",
     "cover_name": "vector.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -3287,9 +3287,9 @@
     "song_pack": "Arcaea",
     "cover_name": "supernova.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.7",
       "/"
     ]
   },
@@ -3314,9 +3314,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "dottodot.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
@@ -3341,9 +3341,9 @@
     "song_pack": "CHUNITHM",
     "cover_name": "garakuta.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "6.5",
+      "10.4",
       "/"
     ]
   },
@@ -3368,9 +3368,9 @@
     "song_pack": "CHUNITHM",
     "cover_name": "ikazuchi.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -3395,9 +3395,9 @@
     "song_pack": "CHUNITHM",
     "cover_name": "worldvanquisher.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "10.8",
       "/"
     ]
   },
@@ -3422,9 +3422,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "dreadnought.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.7",
       "/"
     ]
   },
@@ -3449,9 +3449,9 @@
     "song_pack": "Adverse Prelude",
     "cover_name": "particlearts.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "8.8",
       "/"
     ]
   },
@@ -3476,9 +3476,9 @@
     "song_pack": "Adverse Prelude",
     "cover_name": "vindication.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.5",
+      "9.6",
       "/"
     ]
   },
@@ -3503,10 +3503,10 @@
     "song_pack": "Adverse Prelude",
     "cover_name": "heavensdoor.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.5",
+      "7.5",
+      "9.9",
+      "10.8"
     ]
   },
   {
@@ -3530,9 +3530,9 @@
     "song_pack": "Adverse Prelude",
     "cover_name": "ringedgenesis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.4",
+      "10.8",
       "/"
     ]
   },
@@ -3557,9 +3557,9 @@
     "song_pack": "Sunset Radiance",
     "cover_name": "chelsea.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.5",
       "/"
     ]
   },
@@ -3584,9 +3584,9 @@
     "song_pack": "Sunset Radiance",
     "cover_name": "aiueoon.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -3611,9 +3611,9 @@
     "song_pack": "Sunset Radiance",
     "cover_name": "melodyoflove.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "9.6",
       "/"
     ]
   },
@@ -3638,9 +3638,9 @@
     "song_pack": "Sunset Radiance",
     "cover_name": "tiemedowngently.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "5.5",
+      "8.3",
       "/"
     ]
   },
@@ -3665,9 +3665,9 @@
     "song_pack": "Sunset Radiance",
     "cover_name": "valhallazero.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.4",
       "/"
     ]
   },
@@ -3692,9 +3692,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "mirzam.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.0",
       "/"
     ]
   },
@@ -3719,9 +3719,9 @@
     "song_pack": "Arcaea",
     "cover_name": "diode.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "8.1",
       "/"
     ]
   },
@@ -3746,9 +3746,9 @@
     "song_pack": "Arcaea",
     "cover_name": "freefall.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "8.6",
       "/"
     ]
   },
@@ -3773,9 +3773,9 @@
     "song_pack": "Crimson Solace",
     "cover_name": "gloryroad.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.6",
       "/"
     ]
   },
@@ -3800,9 +3800,9 @@
     "song_pack": "Arcaea",
     "cover_name": "monochromeprincess.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -3827,9 +3827,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "heavenlycaress.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -3854,9 +3854,9 @@
     "song_pack": "Arcaea",
     "cover_name": "senkyou.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "5.5",
+      "8.7",
       "/"
     ]
   },
@@ -3881,9 +3881,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "filament.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -3908,9 +3908,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "avantraze.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.6",
       "/"
     ]
   },
@@ -3935,9 +3935,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "battlenoone.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.7",
       "/"
     ]
   },
@@ -3962,10 +3962,10 @@
     "song_pack": "Memory Archive",
     "cover_name": "laqryma.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.5",
+      "6.5",
+      "9.1",
+      "9.9"
     ]
   },
   {
@@ -3989,9 +3989,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "einherjar.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -4016,9 +4016,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "izana.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.0",
+      "8.3",
+      "10.3",
       "/"
     ]
   },
@@ -4043,9 +4043,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "saikyostronger.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "9.4",
+      "11.0",
       "/"
     ]
   },
@@ -4070,9 +4070,9 @@
     "song_pack": "Arcaea",
     "cover_name": "worldexecuteme.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.0",
+      "8.0",
       "/"
     ]
   },
@@ -4097,9 +4097,9 @@
     "song_pack": "Adverse Prelude",
     "cover_name": "blrink.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -4124,9 +4124,9 @@
     "song_pack": "Arcaea",
     "cover_name": "oblivia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.0",
+      "8.3",
       "/"
     ]
   },
@@ -4151,9 +4151,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "amygdata.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -4178,9 +4178,9 @@
     "song_pack": "Ambivalent Vision",
     "cover_name": "corpssansorganes.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.6",
       "/"
     ]
   },
@@ -4205,9 +4205,9 @@
     "song_pack": "Black Fate",
     "cover_name": "equilibrium.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -4232,9 +4232,9 @@
     "song_pack": "Black Fate",
     "cover_name": "antagonism.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.9",
       "/"
     ]
   },
@@ -4259,9 +4259,9 @@
     "song_pack": "Black Fate",
     "cover_name": "lostdesire.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -4286,9 +4286,9 @@
     "song_pack": "Black Fate",
     "cover_name": "dantalion.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.0",
+      "8.2",
+      "10.9",
       "/"
     ]
   },
@@ -4313,9 +4313,9 @@
     "song_pack": "Black Fate",
     "cover_name": "ifi.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "9.2",
+      "10.9",
       "/"
     ]
   },
@@ -4340,10 +4340,10 @@
     "song_pack": "Black Fate",
     "cover_name": "tempestissimo.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "6.5",
+      "9.5",
+      "10.7",
+      "11.5"
     ]
   },
   {
@@ -4367,9 +4367,9 @@
     "song_pack": "Black Fate",
     "cover_name": "arcahv.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.9",
       "/"
     ]
   },
@@ -4394,9 +4394,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "altale.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "9.7",
       "/"
     ]
   },
@@ -4421,9 +4421,9 @@
     "song_pack": "World Extend",
     "cover_name": "givemeanightmare.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "8.9",
       "/"
     ]
   },
@@ -4448,9 +4448,9 @@
     "song_pack": "World Extend",
     "cover_name": "blacklotus.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.7",
       "/"
     ]
   },
@@ -4475,9 +4475,9 @@
     "song_pack": "World Extend",
     "cover_name": "gekka.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.0",
+      "8.6",
       "/"
     ]
   },
@@ -4502,9 +4502,9 @@
     "song_pack": "World Extend",
     "cover_name": "vividtheory.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "8.8",
       "/"
     ]
   },
@@ -4529,9 +4529,9 @@
     "song_pack": "World Extend",
     "cover_name": "onefr.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "8.2",
       "/"
     ]
   },
@@ -4556,9 +4556,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "scarletcage.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -4583,9 +4583,9 @@
     "song_pack": "World Extend",
     "cover_name": "faintlight.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.1",
       "/"
     ]
   },
@@ -4610,9 +4610,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "feelssoright.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -4637,9 +4637,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "teriqma.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -4664,9 +4664,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "mahoroba.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.5",
       "/"
     ]
   },
@@ -4691,9 +4691,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "badtek.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.7",
       "/"
     ]
   },
@@ -4718,9 +4718,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "maliciousmischance.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -4745,9 +4745,9 @@
     "song_pack": "Groove Coaster",
     "cover_name": "gothiveofra.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.8",
       "/"
     ]
   },
@@ -4772,9 +4772,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "buchigireberserker.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.0",
+      "8.6",
+      "10.9",
       "/"
     ]
   },
@@ -4799,9 +4799,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "galaxyfriends.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.8",
       "/"
     ]
   },
@@ -4826,9 +4826,9 @@
     "song_pack": "World Extend",
     "cover_name": "crossover.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -4853,9 +4853,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "xeraphinite.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -4880,9 +4880,9 @@
     "song_pack": "World Extend",
     "cover_name": "lapis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "6.0",
+      "9.4",
       "/"
     ]
   },
@@ -4907,9 +4907,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "xanatos.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.0",
       "/"
     ]
   },
@@ -4934,9 +4934,9 @@
     "song_pack": "World Extend",
     "cover_name": "purpleverse.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.6",
       "/"
     ]
   },
@@ -4961,9 +4961,9 @@
     "song_pack": "Ephemeral Page",
     "cover_name": "alicealamode.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "9.2",
       "/"
     ]
   },
@@ -4988,9 +4988,9 @@
     "song_pack": "Ephemeral Page",
     "cover_name": "eccentrictale.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.5",
+      "8.4",
       "/"
     ]
   },
@@ -5015,9 +5015,9 @@
     "song_pack": "Ephemeral Page",
     "cover_name": "alicessuitcase.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.1",
       "/"
     ]
   },
@@ -5042,9 +5042,9 @@
     "song_pack": "Ephemeral Page",
     "cover_name": "jump.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.0",
+      "9.0",
       "/"
     ]
   },
@@ -5069,9 +5069,9 @@
     "song_pack": "Ephemeral Page",
     "cover_name": "felis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -5096,9 +5096,9 @@
     "song_pack": "The Journey Onwards",
     "cover_name": "besideyou.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "8.7",
       "/"
     ]
   },
@@ -5123,9 +5123,9 @@
     "song_pack": "The Journey Onwards",
     "cover_name": "heartjackin.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "5.5",
+      "9.7",
       "/"
     ]
   },
@@ -5150,9 +5150,9 @@
     "song_pack": "The Journey Onwards",
     "cover_name": "toaliceliddell.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.3",
       "/"
     ]
   },
@@ -5177,9 +5177,9 @@
     "song_pack": "O.N.G.E.K.I.",
     "cover_name": "lazyaddiction.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "9.6",
       "/"
     ]
   },
@@ -5204,9 +5204,9 @@
     "song_pack": "O.N.G.E.K.I.",
     "cover_name": "dazzlehop.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.7",
       "/"
     ]
   },
@@ -5231,9 +5231,9 @@
     "song_pack": "O.N.G.E.K.I.",
     "cover_name": "viyellastears.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.3",
       "/"
     ]
   },
@@ -5258,9 +5258,9 @@
     "song_pack": "O.N.G.E.K.I.",
     "cover_name": "omegafour.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.5",
+      "10.8",
       "/"
     ]
   },
@@ -5285,9 +5285,9 @@
     "song_pack": "maimai",
     "cover_name": "aprilshowers.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.5",
+      "8.3",
       "/"
     ]
   },
@@ -5312,9 +5312,9 @@
     "song_pack": "maimai",
     "cover_name": "seventhsense.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.5",
+      "9.9",
       "/"
     ]
   },
@@ -5339,9 +5339,9 @@
     "song_pack": "maimai",
     "cover_name": "oshamascramble.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "10.0",
       "/"
     ]
   },
@@ -5366,9 +5366,9 @@
     "song_pack": "maimai",
     "cover_name": "amazingmightyyyy.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.7",
       "/"
     ]
   },
@@ -5393,9 +5393,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "climax.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -5420,9 +5420,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "lastcelebration.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "10.5",
       "/"
     ]
   },
@@ -5447,9 +5447,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "gou.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "8.5",
+      "10.9",
       "/"
     ]
   },
@@ -5474,9 +5474,9 @@
     "song_pack": "World Extend",
     "cover_name": "glow.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.3",
       "/"
     ]
   },
@@ -5501,9 +5501,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "attraqtia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.6",
       "/"
     ]
   },
@@ -5528,9 +5528,9 @@
     "song_pack": "World Extend",
     "cover_name": "enchantedlove.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "4.5",
+      "8.4",
       "/"
     ]
   },
@@ -5555,9 +5555,9 @@
     "song_pack": "World Extend",
     "cover_name": "take.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "10.0",
       "/"
     ]
   },
@@ -5582,9 +5582,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "gimmedablood.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "10.4",
       "/"
     ]
   },
@@ -5609,9 +5609,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "bassline.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -5636,9 +5636,9 @@
     "song_pack": "World Extend",
     "cover_name": "lifeispiano.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "9.1",
       "/"
     ]
   },
@@ -5663,9 +5663,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "paperwitch.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "8.7",
       "/"
     ]
   },
@@ -5690,9 +5690,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "crystalgravity.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -5717,9 +5717,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "farawaylight.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -5744,9 +5744,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "loschen.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "10.2",
       "/"
     ]
   },
@@ -5771,9 +5771,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "aegleseeker.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.5",
+      "9.1",
+      "11.1",
       "/"
     ]
   },
@@ -5798,9 +5798,9 @@
     "song_pack": "Pale Tapestry",
     "cover_name": "coastalhighway.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.8",
       "/"
     ]
   },
@@ -5825,9 +5825,9 @@
     "song_pack": "Pale Tapestry",
     "cover_name": "odysseia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.5",
       "/"
     ]
   },
@@ -5852,9 +5852,9 @@
     "song_pack": "Pale Tapestry",
     "cover_name": "overwhelm.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.0",
+      "8.5",
+      "10.6",
       "/"
     ]
   },
@@ -5879,9 +5879,9 @@
     "song_pack": "World Extend",
     "cover_name": "vandalism.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "9.7",
       "/"
     ]
   },
@@ -5906,9 +5906,9 @@
     "song_pack": "World Extend",
     "cover_name": "turbocharger.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "9.0",
       "/"
     ]
   },
@@ -5933,9 +5933,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "theultimacy.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -5960,9 +5960,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "rekkaresonance.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "5.0",
+      "8.3",
+      "10.7",
       "/"
     ]
   },
@@ -5987,9 +5987,9 @@
     "song_pack": "World Extend",
     "cover_name": "kyogenkigo.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -6014,9 +6014,9 @@
     "song_pack": "World Extend",
     "cover_name": "hivemind.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.0",
       "/"
     ]
   },
@@ -6041,9 +6041,9 @@
     "song_pack": "Esoteric Order",
     "cover_name": "seclusion.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "10.6",
       "/"
     ]
   },
@@ -6068,9 +6068,9 @@
     "song_pack": "Light of Salvation",
     "cover_name": "smallcloud.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.1",
       "/"
     ]
   },
@@ -6095,9 +6095,9 @@
     "song_pack": "Light of Salvation",
     "cover_name": "alterale.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.7",
       "/"
     ]
   },
@@ -6122,9 +6122,9 @@
     "song_pack": "Light of Salvation",
     "cover_name": "divinelight.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.8",
       "/"
     ]
   },
@@ -6149,9 +6149,9 @@
     "song_pack": "WACCA",
     "cover_name": "mazymetroplex.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -6176,10 +6176,10 @@
     "song_pack": "WACCA",
     "cover_name": "quonwacca.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "2.5",
+      "5.5",
+      "8.7",
+      "10.2"
     ]
   },
   {
@@ -6203,9 +6203,9 @@
     "song_pack": "WACCA",
     "cover_name": "withu.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -6230,9 +6230,9 @@
     "song_pack": "WACCA",
     "cover_name": "genocider.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "8.5",
+      "10.7",
       "/"
     ]
   },
@@ -6257,9 +6257,9 @@
     "song_pack": "WACCA",
     "cover_name": "letyoudivermx.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.4",
       "/"
     ]
   },
@@ -6284,9 +6284,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "sheriruthrmx.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.6",
       "/"
     ]
   },
@@ -6311,9 +6311,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "eveninginscarlet.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.5",
       "/"
     ]
   },
@@ -6338,9 +6338,9 @@
     "song_pack": "World Extend",
     "cover_name": "bluecomet.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.0",
+      "8.2",
       "/"
     ]
   },
@@ -6365,9 +6365,9 @@
     "song_pack": "World Extend",
     "cover_name": "energysynergymatrix.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "9.6",
       "/"
     ]
   },
@@ -6392,9 +6392,9 @@
     "song_pack": "World Extend",
     "cover_name": "gengaozo.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -6419,9 +6419,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "goldenslaughterer.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.5",
+      "9.7",
       "/"
     ]
   },
@@ -6446,10 +6446,10 @@
     "song_pack": "Memory Archive",
     "cover_name": "lastendconductor.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "3.5",
+      "7.0",
+      "9.4",
+      "10.1"
     ]
   },
   {
@@ -6473,9 +6473,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "redolentshape.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -6500,9 +6500,9 @@
     "song_pack": "Shared Time",
     "cover_name": "cosmica.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.0",
+      "8.5",
       "/"
     ]
   },
@@ -6527,9 +6527,9 @@
     "song_pack": "Shared Time",
     "cover_name": "ascent.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.8",
       "/"
     ]
   },
@@ -6554,9 +6554,9 @@
     "song_pack": "Shared Time",
     "cover_name": "livefastdieyoung.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "8.1",
+      "10.6",
       "/"
     ]
   },
@@ -6581,9 +6581,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "summerfireworks.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "9.9",
       "/"
     ]
   },
@@ -6608,9 +6608,9 @@
     "song_pack": "Divided Heart",
     "cover_name": "firstsnow.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "4.5",
+      "7.5",
       "/"
     ]
   },
@@ -6635,9 +6635,9 @@
     "song_pack": "Divided Heart",
     "cover_name": "bluerose.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.5",
+      "9.1",
       "/"
     ]
   },
@@ -6662,9 +6662,9 @@
     "song_pack": "Divided Heart",
     "cover_name": "blockedlibrary.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.3",
       "/"
     ]
   },
@@ -6689,9 +6689,9 @@
     "song_pack": "Divided Heart",
     "cover_name": "neokosmo.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.7",
       "/"
     ]
   },
@@ -6716,9 +6716,9 @@
     "song_pack": "Divided Heart",
     "cover_name": "lightningscrew.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.5",
       "/"
     ]
   },
@@ -6743,9 +6743,9 @@
     "song_pack": "Muse Dash",
     "cover_name": "lightsofmuse.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "5.5",
+      "8.7",
       "/"
     ]
   },
@@ -6770,9 +6770,9 @@
     "song_pack": "Muse Dash",
     "cover_name": "finalstep.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -6797,9 +6797,9 @@
     "song_pack": "Muse Dash",
     "cover_name": "akinokagerou.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -6824,9 +6824,9 @@
     "song_pack": "Muse Dash",
     "cover_name": "medusa.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.2",
       "/"
     ]
   },
@@ -6851,9 +6851,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "init.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.8",
       "/"
     ]
   },
@@ -6878,9 +6878,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "internetoverdose.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.5",
+      "8.4",
       "/"
     ]
   },
@@ -6905,9 +6905,9 @@
     "song_pack": "Arcaea",
     "cover_name": "sakurafubuki.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "5.5",
+      "9.3",
       "/"
     ]
   },
@@ -6932,9 +6932,9 @@
     "song_pack": "Arcaea",
     "cover_name": "nulctrl.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.5",
       "/"
     ]
   },
@@ -6959,9 +6959,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "macromod.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "9.8",
       "/"
     ]
   },
@@ -6986,9 +6986,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "neowings.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.2",
       "/"
     ]
   },
@@ -7013,9 +7013,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "kissinglucifer.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -7040,9 +7040,9 @@
     "song_pack": "Arcaea",
     "cover_name": "avril.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
@@ -7067,9 +7067,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "aurgelmir.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "10.5",
       "/"
     ]
   },
@@ -7094,9 +7094,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "headbonkache.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.0",
+      "9.4",
       "/"
     ]
   },
@@ -7121,9 +7121,9 @@
     "song_pack": "Arcaea",
     "cover_name": "ddd.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.5",
+      "8.5",
       "/"
     ]
   },
@@ -7148,9 +7148,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "prism.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "5.0",
+      "8.0",
       "/"
     ]
   },
@@ -7175,9 +7175,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "protoflicker.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.8",
       "/"
     ]
   },
@@ -7202,9 +7202,9 @@
     "song_pack": "Collaboration Chapter 2",
     "cover_name": "stasis.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.0",
+      "10.7",
       "/"
     ]
   },
@@ -7229,9 +7229,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "picopicotranslation.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.0",
+      "6.0",
+      "9.3",
       "/"
     ]
   },
@@ -7256,9 +7256,9 @@
     "song_pack": "Arcaea",
     "cover_name": "nekonote.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.0",
+      "6.0",
+      "9.2",
       "/"
     ]
   },
@@ -7283,9 +7283,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "mu.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "7.0",
+      "9.7",
       "/"
     ]
   },
@@ -7310,9 +7310,9 @@
     "song_pack": "Arcaea",
     "cover_name": "sanskia.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
@@ -7337,9 +7337,9 @@
     "song_pack": "Arcaea",
     "cover_name": "altair.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "2.5",
+      "6.0",
+      "8.3",
       "/"
     ]
   },
@@ -7364,9 +7364,9 @@
     "song_pack": "Arcaea",
     "cover_name": "mukishitsu.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "6.5",
+      "9.2",
       "/"
     ]
   },
@@ -7391,9 +7391,9 @@
     "song_pack": "Arcaea",
     "cover_name": "trapcrow.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.5",
+      "7.5",
+      "9.9",
       "/"
     ]
   },
@@ -7418,9 +7418,9 @@
     "song_pack": "Memory Archive",
     "cover_name": "pupa.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "4.0",
+      "7.5",
+      "10.4",
       "/"
     ]
   },
@@ -7445,9 +7445,9 @@
     "song_pack": "Final Verdict",
     "cover_name": "defection.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.8",
       "/"
     ]
   },
@@ -7472,10 +7472,10 @@
     "song_pack": "Final Verdict",
     "cover_name": "infinitestrife.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.0",
+      "7.5",
+      "9.9",
+      "10.9"
     ]
   },
   {
@@ -7499,10 +7499,10 @@
     "song_pack": "Final Verdict",
     "cover_name": "worldender.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "4.0",
+      "7.5",
+      "9.9",
+      "11.2"
     ]
   },
   {
@@ -7526,10 +7526,10 @@
     "song_pack": "Final Verdict",
     "cover_name": "pentiment.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "6.0",
+      "8.4",
+      "10.3",
+      "11.4"
     ]
   },
   {
@@ -7553,10 +7553,10 @@
     "song_pack": "Final Verdict",
     "cover_name": "arcanaeden.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
+      "5.5",
+      "8.7",
+      "10.5",
+      "11.4"
     ]
   },
   {
@@ -7580,114 +7580,252 @@
     "song_pack": "Final Verdict",
     "cover_name": "testify.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "7.0",
+      "9.4",
+      "10.8",
+      "12.0"
+    ]
+  },
+  {
+    "id": 281,
+    "title": "Loveless Dress",
+    "artist": "かねこちはる",
+    "bpm": "99",
+    "version": "4.0",
+    "level": [
+      "3",
+      "6",
+      "9",
+      "/"
+    ],
+    "charter": [
+      "Final Prayer",
+      "Final Prayer",
+      "Final Prayer",
+      "/"
+    ],
+    "song_pack": "Silent Answer",
+    "cover_name": "lovelessdress.jpg",
+    "constant": [
+      "3.5",
+      "6.5",
+      "9.6",
       "/"
     ]
   },
   {
-    "id": -1,
-    "title": "Tutorial",
-    "artist": "ak+q",
-    "bpm": "128",
+    "id": 282,
+    "title": "Last",
+    "artist": "onoken",
+    "bpm": "175",
+    "version": "4.0",
+    "level": [
+      "4",
+      "7",
+      "9",
+      "9"
+    ],
+    "charter": [
+      "Arcaea",
+      "Arcaea",
+      "Arcaea",
+      "Arcaea"
+    ],
+    "song_pack": "Silent Answer",
+    "cover_name": "last.jpg",
+    "constant": [
+      "4.0",
+      "7.0",
+      "9.0",
+      "9.6"
+    ]
+  },
+  {
+    "id": 283,
+    "title": "Last | Eternity",
+    "artist": "onoken",
+    "bpm": "175",
+    "version": "4.0",
+    "level": [
+      "0",
+      "0",
+      "0",
+      "9+"
+    ],
+    "charter": [
+      "",
+      "",
+      "",
+      "Arcaea"
+    ],
+    "song_pack": "Silent Answer",
+    "cover_name": "lasteternity.jpg",
+    "constant": [
+      "/",
+      "/",
+      "/",
+      "9.7"
+    ]
+  },
+  {
+    "id": 284,
+    "title": "Callima Karma",
+    "artist": "t+pazolite vs Feryquitous",
+    "bpm": "95",
+    "version": "4.0",
+    "level": [
+      "3",
+      "7",
+      "9+",
+      "/"
+    ],
+    "charter": [
+      "Forlorn Dream",
+      "Forlorn Dream",
+      "Forlorn Dream",
+      "/"
+    ],
+    "song_pack": "Silent Answer",
+    "cover_name": "callimakarma.jpg",
+    "constant": [
+      "3.5",
+      "7.0",
+      "9.8",
+      "/"
+    ]
+  },
+  {
+    "id": 285,
+    "title": "Heart",
+    "artist": "削除 (Violin : Katali)",
+    "bpm": "80",
+    "version": "4.1",
     "level": [
       "1",
-      "4",
-      "/",
+      "5",
+      "9",
       "/"
     ],
-    "song_pack": "/",
-    "version": "/",
-    "cover_name": "tutorial.jpg",
+    "charter": [
+      "écologie (from SEGA)",
+      "écologie (from SEGA)",
+      "écologie (from SEGA)",
+      "/"
+    ],
+    "song_pack": "Collaboration Chapter 2",
+    "cover_name": "kokoro.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "1.0",
+      "5.0",
+      "9.3",
       "/"
     ]
   },
   {
-    "id": -2,
-    "title": "Ignotus Afterburn",
-    "artist": "Arcaea Sound Team",
-    "bpm": "170",
-    "level": [
-      "/",
-      "/",
-      "?",
-      "/"
-    ],
-    "song_pack": "/",
-    "version": "/",
-    "cover_name": "ignotusafterburn.png",
-    "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
-    ]
-  },
-  {
-    "id": -3,
-    "title": "Red and Blue and Green",
-    "artist": "fn(ArcaeaSoundTeam)",
-    "bpm": "160",
-    "level": [
-      "/",
-      "/",
-      "?",
-      "/"
-    ],
-    "song_pack": "/",
-    "version": "/",
-    "cover_name": "redandblueandgreen.jpg",
-    "constant": [
-      "/",
-      "/",
-      "/",
-      "/"
-    ]
-  },
-  {
-    "id": -4,
-    "title": "Singularity VVVIP",
-    "artist": "Arcaea Sound Team against. ETIA.",
+    "id": 286,
+    "title": "Ai Drew",
+    "artist": "Feryquitous",
     "bpm": "175",
+    "version": "4.1",
     "level": [
-      "/",
-      "/",
-      "?",
+      "3",
+      "6",
+      "9+",
       "/"
     ],
-    "song_pack": "/",
-    "version": "/",
-    "cover_name": "singularityvvvip.jpg",
+    "charter": [
+      "moonquay【新入生】",
+      "moonquay v.EXPERT",
+      "moonquay v.MASTER",
+      "/"
+    ],
+    "song_pack": "Collaboration Chapter 2",
+    "cover_name": "aidrew.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.8",
       "/"
     ]
   },
   {
-    "id": -5,
-    "title": "Overdead.",
-    "artist": "fn",
-    "bpm": "-500 - 500",
+    "id": 287,
+    "title": "FLUFFY FLASH",
+    "artist": "Kobaryo",
+    "bpm": "252",
+    "version": "4.1",
     "level": [
-      "/",
-      "/",
-      "?",
+      "3",
+      "6",
+      "9+",
       "/"
     ],
-    "song_pack": "/",
-    "version": "/",
-    "cover_name": "overdead.jpg",
+    "charter": [
+      "Toaster",
+      "Toaster",
+      "Toaster",
+      "/"
+    ],
+    "song_pack": "Collaboration Chapter 2",
+    "cover_name": "fluffyflash.jpg",
     "constant": [
-      "/",
-      "/",
-      "/",
+      "3.5",
+      "6.5",
+      "9.8",
+      "/"
+    ]
+  },
+  {
+    "id": 288,
+    "title": "Good bye, Merry-Go-Round.",
+    "artist": "Yooh",
+    "bpm": "185",
+    "version": "4.1",
+    "level": [
+      "4",
+      "7",
+      "10",
+      "/"
+    ],
+    "charter": [
+      "絶滅",
+      "絶滅",
+      "絶滅",
+      "/"
+    ],
+    "song_pack": "Collaboration Chapter 2",
+    "cover_name": "goodbyemerry.jpg",
+    "constant": [
+      "4.5",
+      "7.5",
+      "10.5",
+      "/"
+    ]
+  },
+  {
+    "id": 289,
+    "title": "LAMIA",
+    "artist": "BlackY",
+    "bpm": "199",
+    "version": "4.1",
+    "level": [
+      "5",
+      "8",
+      "10+",
+      "/"
+    ],
+    "charter": [
+      "夜浪",
+      "夜浪「ノブレス・オブリージュ」",
+      "[漆黒の執行者] 夜浪",
+      "/"
+    ],
+    "song_pack": "Collaboration Chapter 2",
+    "cover_name": "lamia.jpg",
+    "constant": [
+      "5.0",
+      "8.3",
+      "10.9",
       "/"
     ]
   }
