@@ -9,6 +9,4 @@ public class OsuConfiguration
     
     public string TempPath { get; set; }
     public string ResourcePath { get; set; }
-
-    public string PpCalculator { get; set; }
 }

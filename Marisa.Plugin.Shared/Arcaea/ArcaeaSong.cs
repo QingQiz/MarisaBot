@@ -12,11 +12,24 @@ public class ArcaeaSong : Song
     private readonly string _coverFileName;
     public new readonly string Bpm;
 
-    public string CoverFileName => Levels[^1] == "/"
-        ? _coverFileName
-        : new Random().Next(2) == 0
-            ? _coverFileName.Replace(".", "_byd.")
-            : _coverFileName;
+    public string CoverFileName
+    {
+        get
+        {
+            if (Levels[^1] == "/") return _coverFileName;
+
+            var byd = _coverFileName.Replace(".", "_byd.");
+
+            if (File.Exists(byd))
+            {
+                return new Random().Next(2) == 0
+                    ? byd
+                    : _coverFileName;
+            }
+
+            return _coverFileName;
+        }
+    }
 
     public ArcaeaSong(dynamic d)
     {
