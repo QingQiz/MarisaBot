@@ -7,6 +7,7 @@ using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using NUnit.Framework;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -76,7 +77,7 @@ public static class OsuApi
         };
     }
 
-    public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
+    public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1, int retry = 5)
     {
         try
         {
@@ -89,13 +90,15 @@ public static class OsuApi
         }
         catch (FlurlHttpException e)
         {
-            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+            if (retry != 0) return await GetUserInfoByName(username, mode, retry - 1);
 
+            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
             throw new Exception($"Network Error While Getting User: {e.Message}");
         }
     }
 
-    public static async Task<OsuScore[]?> GetScores(long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false)
+    public static async Task<OsuScore[]?> GetScores(
+        long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false, int retry = 5)
     {
         try
         {
@@ -119,15 +122,16 @@ public static class OsuApi
         }
         catch (FlurlHttpException e)
         {
-            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+            if (retry != 0) return await GetScores(osuId, type, gameMode, skip, take, includeFails, retry - 1);
 
+            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
             throw new Exception($"Network Error While Retrieving Scores: {e.Message}");
         }
     }
 
     private static readonly HttpClient HttpClient = new(new HttpClientHandler
     {
-        AutomaticDecompression = DecompressionMethods.All,
+        AutomaticDecompression                    = DecompressionMethods.All,
         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
     });
 
