@@ -95,7 +95,7 @@ public partial class Osu : MarisaPluginBase
     }
 
     [MarisaPluginNoDoc]
-    [MarisaPluginCommand("help", "h")]
+    [MarisaPluginCommand("help")]
     private static MarisaPluginTaskState Help(Message message)
     {
         var doc = Plugin.Help.Help.GetHelp(typeof(Osu));
@@ -350,7 +350,7 @@ public partial class Osu : MarisaPluginBase
     {
         if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, mode: command.Mode.Value);
 
         var scores = (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?.ToArray();
 
