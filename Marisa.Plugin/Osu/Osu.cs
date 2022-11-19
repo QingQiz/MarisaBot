@@ -31,11 +31,6 @@ public partial class Osu
         }
     }
 
-    private static void AddCommandToQueue(Message message)
-    {
-        message.Reply("暂不可用！");
-    }
-
     private static bool TryParseCommand(Message message, bool withBpRank, out OsuCommandParser.OsuCommand? command)
     {
         command = ParseCommand(message, withBpRank);
@@ -104,5 +99,23 @@ public partial class Osu
 
         return new OsuCommandParser.OsuCommand(
             o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(mode));
+    }
+
+    /// <summary>
+    /// 大部分请求都是已经绑定的用户发出的，所以这里直接从数据库里取，不行再请求
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    private static async Task<long> GetOsuIdByName(string name)
+    {
+        var db = new BotDbContext();
+        
+        var u = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == name);
+        
+        if (u != null) return u.UserId;
+        
+        var id = await OsuApi.GetUserInfoByName(name);
+
+        return id.Id;
     }
 }
