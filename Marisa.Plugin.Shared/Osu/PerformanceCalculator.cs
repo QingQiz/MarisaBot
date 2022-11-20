@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using log4net;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
+using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
 using Microsoft.Win32;
 using osu.Framework.Audio.Track;
@@ -205,7 +206,7 @@ public static class PerformanceCalculator
         };
     }
 
-    public static double GetStarRating(this OsuScore score)
+    public static double StarRating(this OsuScore score)
     {
         var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
         var ruleSetChangeMods    = Enumerable.Range(1, 12).Select(i => $"{i}k").ToArray();
@@ -237,7 +238,7 @@ public static class PerformanceCalculator
         return attributes.StarRating;
     }
 
-    public static double GetPerformance(this OsuScore score)
+    public static double PerformancePoint(this OsuScore score)
     {
         if (score.Pp != null)
         {
@@ -283,6 +284,26 @@ public static class PerformanceCalculator
         }, difficultyAttributes);
 
         return ppAttributes!.Total;
+    }
+
+    public static (double scorePp, double bonusPp, long rankedScores) BonusPp(this OsuUserInfo info, IEnumerable<OsuScore> scores)
+    {
+        var scorePp = scores.Sum(s => s.Weight!.Pp);
+        var bonusPp =  info.Statistics.Pp - scorePp;
+
+        var totalScores =
+            info.Statistics.GradeCounts["a"] +
+            info.Statistics.GradeCounts["s"] +
+            info.Statistics.GradeCounts["sh"] +
+            info.Statistics.GradeCounts["ss"] +
+            info.Statistics.GradeCounts["ssh"];
+
+        if (!double.IsNaN(scorePp) && !double.IsNaN(bonusPp))
+        {
+            return (scorePp, bonusPp, totalScores);
+        }
+
+        return (0, 0, 0);
     }
 }
 

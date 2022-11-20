@@ -6,8 +6,6 @@ using log4net;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Utils;
-using NUnit.Framework;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -168,29 +166,6 @@ public static class OsuApi
         fs.Close();
 
         return beatmapPath;
-    }
-
-    // https://github.com/Monodesu/KanonBot/blob/f0f6bb1edcc4e460da6550a5626c5796441bf007/src/functions/osu/get.cs#L119
-    public static (double scorePp, double bonusPp, long rankedScores) BonusPp(OsuUserInfo info, IEnumerable<OsuScore> scores)
-    {
-        var scorePp = scores.Sum(s => s.Weight!.Pp);
-        var bonusPp =  info.Statistics.Pp - scorePp;
-
-        var totalScores =
-            info.Statistics.GradeCounts["a"] +
-            info.Statistics.GradeCounts["s"] +
-            info.Statistics.GradeCounts["sh"] +
-            info.Statistics.GradeCounts["ss"] +
-            info.Statistics.GradeCounts["ssh"];
-
-        var rankedScores = totalScores >= 25379 ? Math.Max(totalScores, 25397) : (int)Math.Round(Math.Log10(-(bonusPp / 416.6667) + 1.0) / Math.Log10(0.9994));
-
-        if (!double.IsNaN(scorePp) && !double.IsNaN(bonusPp))
-        {
-            return (scorePp, bonusPp, rankedScores);
-        }
-
-        return (0, 0, 0);
     }
 
     public enum OsuScoreType

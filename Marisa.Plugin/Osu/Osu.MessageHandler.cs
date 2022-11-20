@@ -349,7 +349,7 @@ public partial class Osu : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var bns = OsuApi.BonusPp(userInfo, scores);
+        var bns = userInfo.BonusPp(scores);
 
         var img = OsuUserInfoDrawer.BonusPp(bns.bonusPp, bns.scorePp);
 

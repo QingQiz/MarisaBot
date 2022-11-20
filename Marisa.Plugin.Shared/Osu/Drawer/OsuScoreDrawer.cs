@@ -151,7 +151,7 @@ public static class OsuScoreDrawer
 
         // stars
         {
-            var starRating = scores.AsParallel().Select(x => x.GetStarRating() * 10).OrderByDescending(x => x).ToList();
+            var starRating = scores.AsParallel().Select(x => x.StarRating() * 10).OrderByDescending(x => x).ToList();
 
             var g = new List<IGrouping<int, double>>();
 
@@ -225,7 +225,7 @@ public static class OsuScoreDrawer
         {
             var plt = new Plot(pieSize * pies.Count, pieSize * 2);
 
-            var values = scores.AsParallel().Select(x => x.GetPerformance()).ToArray();
+            var values = scores.AsParallel().Select(x => x.PerformancePoint()).ToArray();
 
             // create a histogram
             var (counts, binEdges) = ScottPlot.Statistics.Common.Histogram(values, min: values.Min() - 20, max: values.Max() + 20, binSize: 3);
@@ -487,7 +487,7 @@ public static class OsuScoreDrawer
         const int staCardGap  = 2;
         const int staCardVGap = 60;
 
-        var pp = score.GetPerformance().ToString("F2");
+        var pp = score.PerformancePoint().ToString("F2");
 
         var cards1 = new List<Image>();
 
@@ -781,7 +781,7 @@ public static class OsuScoreDrawer
 
         songInfoDrawX += songTypeIcon.Width + elementGap;
 
-        var starRating        = score.GetStarRating();
+        var starRating        = score.StarRating();
         var starRatingText    = $"★ {starRating:F2}";
         var starRatingFont    = _fontExo2.CreateFont(35, FontStyle.Bold);
         var starRatingMeasure = starRatingText.MeasureWithSpace(starRatingFont);
