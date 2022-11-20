@@ -112,7 +112,7 @@ public partial class Osu
         
         var u = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == name);
         
-        if (u != null) return u.UserId;
+        if (u != null) return u.OsuUserId;
         
         var id = await OsuApi.GetUserInfoByName(name);
 
