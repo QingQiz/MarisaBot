@@ -380,18 +380,28 @@ public static class ImageDraw
 
     public static IImageProcessingContext ResizeX(this IImageProcessingContext ctx, int width)
     {
-        var size  = ctx.GetCurrentSize();
-        var scale = (double)width / size.Width;
+        while (true)
+        {
+            var size  = ctx.GetCurrentSize();
 
-        return ctx.Resize(scale);
+            if (size.Width == width) return ctx;
+
+            var scale = (double)width / size.Width;
+            ctx.Resize(scale);
+        }
     }
 
     public static IImageProcessingContext ResizeY(this IImageProcessingContext ctx, int height)
     {
-        var size  = ctx.GetCurrentSize();
-        var scale = (double)height / size.Height;
+        while (true)
+        {
+            var size  = ctx.GetCurrentSize();
 
-        return ctx.Resize(scale);
+            if (size.Height == height) return ctx;
+
+            var scale = (double)height/ size.Height;
+            ctx.Resize(scale);
+        }
     }
 
     #endregion
