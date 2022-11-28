@@ -43,7 +43,7 @@ public partial class Osu
 
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            message.Reply("您未绑定，请使用 osu! bind <用户名> 绑定");
+            message.Reply("未绑定，请使用 osu! bind <用户名> 绑定");
             return false;
         }
 

@@ -426,6 +426,90 @@ public static class OsuScoreDrawer
         return im.RoundCorners(15);
     }
 
+    public static Image CompareWith(this OsuScore[] scoreSet, OsuScore[] anotherScoreSet)
+    {
+        const int width = 1000, height = 400;
+
+        Image DrawCompare(double[] data1, double[] data2, string title, string xLabel, double binSize)
+        {
+            var plt = new Plot(width, height);
+
+            var min = Math.Min(data1.Min(), data2.Min());
+            var max = Math.Max(data1.Max(), data2.Max());
+
+            min -= binSize;
+            max += binSize;
+
+            var (prob1, binEdges) = ScottPlot.Statistics.Common.Histogram(data1, min: min, max: max, binSize: binSize);
+            var (prob2, _)        = ScottPlot.Statistics.Common.Histogram(data2, min: min, max: max, binSize: binSize);
+            var leftEdges = binEdges.Take(binEdges.Length - 1).ToArray();
+
+            // plot histograms
+            var bar1 = plt.AddBar(values: prob1, positions: leftEdges);
+            bar1.BarWidth        = binSize;
+            bar1.FillColor       = System.Drawing.Color.FromArgb(50, System.Drawing.Color.Blue);
+            bar1.BorderLineWidth = 0;
+
+            var bar2 = plt.AddBar(values: prob2, positions: leftEdges);
+            bar2.BarWidth        = binSize;
+            bar2.FillColor       = System.Drawing.Color.FromArgb(50, System.Drawing.Color.Red);
+            bar2.BorderLineWidth = 0;
+
+            // plot probability function curves
+            var pdf1 = ScottPlot.Statistics.Common.ProbabilityDensity(data1, binEdges, percent: true);
+            plt.AddScatterLines(
+                xs: binEdges,
+                ys: pdf1,
+                color: System.Drawing.Color.FromArgb(150, System.Drawing.Color.Blue),
+                lineWidth: 3,
+                label: $"你：{scoreSet.First().User.Username}");
+
+            var pdf2 = ScottPlot.Statistics.Common.ProbabilityDensity(data2, binEdges, percent: true);
+            plt.AddScatterLines(
+                xs: binEdges,
+                ys: pdf2,
+                color: System.Drawing.Color.FromArgb(150, System.Drawing.Color.Red),
+                lineWidth: 3,
+                label: $"别人：{anotherScoreSet.First().User.Username}");
+
+            // customize styling
+            plt.Title(title);
+            plt.XLabel(xLabel);
+            plt.Legend(location: Alignment.UpperRight);
+            plt.SetAxisLimits(yMin: 0);
+
+            return plt.GetBitmap().ToImageSharpImage<Rgba32>();
+        }
+
+        var im1 = DrawCompare(
+            scoreSet.Select(s => s.Pp).Cast<double>().ToArray(),
+            anotherScoreSet.Select(s => s.Pp).Cast<double>().ToArray(),
+            "PP Comparison", "PP", 5
+        );
+
+        Image im2;
+
+        // mania 使用 pp acc
+        if (scoreSet.First().Mode == OsuApi.ModeList.Last())
+        {
+            im2 = DrawCompare(
+                scoreSet.Select(s => s.PpAccuracy *  100).ToArray(),
+                anotherScoreSet.Select(s => s.PpAccuracy * 100).ToArray(),
+                "PP Acc Comparison", "PP Acc", 0.5
+            );
+        }
+        else
+        {
+            im2 = DrawCompare(
+                scoreSet.Select(s => s.Accuracy * 100).ToArray(),
+                anotherScoreSet.Select(s => s.Accuracy * 100).ToArray(),
+                "Acc Comparison", "Acc", 0.5
+            );
+        }
+
+        return new Image<Rgba32>(im1.Width, im1.Height + im2.Height).DrawImage(im1, 0, 0).DrawImage(im2, 0, im1.Height);
+    }
+
     public static async Task<Image> GetImage(this OsuScore score, OsuUserInfo info)
     {
         var scoreHeader = GetScoreHeader(score);

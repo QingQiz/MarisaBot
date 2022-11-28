@@ -86,12 +86,16 @@ public static class OsuApi
                 .GetStringAsync();
             return OsuUserInfo.FromJson(json);
         }
+        catch (FlurlHttpException e) when (e.StatusCode == 404)
+        {
+            throw new HttpRequestException($"未知的用户 {username}");
+        }
         catch (FlurlHttpException e)
         {
             if (retry != 0) return await GetUserInfoByName(username, mode, retry - 1);
 
             LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
-            throw new Exception($"Network Error While Getting User: {e.Message}");
+            throw new HttpRequestException($"Network Error While Getting User: {e.Message}");
         }
     }
 
@@ -118,12 +122,16 @@ public static class OsuApi
 
             return OsuScore.FromJson(json);
         }
+        catch (FlurlHttpException e) when (e.StatusCode == 404)
+        {
+            throw new HttpRequestException($"未知的用户 {osuId}");
+        }
         catch (FlurlHttpException e)
         {
             if (retry != 0) return await GetScores(osuId, type, gameMode, skip, take, includeFails, retry - 1);
 
             LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
-            throw new Exception($"Network Error While Retrieving Scores: {e.Message}");
+            throw new HttpRequestException($"Network Error While Retrieving Scores: {e.Message}");
         }
     }
 

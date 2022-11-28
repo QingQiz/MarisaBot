@@ -240,6 +240,52 @@ public partial class Osu : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("将 *你的* bp 和别人的 bp 进行比较")]
+    [MarisaPluginSubCommand(nameof(BestPerformance))]
+    [MarisaPluginCommand("compare", "cmp")]
+    private async Task<MarisaPluginTaskState> BpCmp(Message message)
+    {
+        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        var db = new BotDbContext().OsuBinds;
+
+        var bind = db.First(x => x.UserId == message.Sender!.Id);
+
+        if (bind.OsuUserName == command!.Name)
+        {
+            message.Reply("你不能和自己比较");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 别人的
+        var best2 = (await OsuApi.GetScores(
+                await GetOsuIdByName(command.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))!
+            .ToList();
+
+        if (!best2.Any())
+        {
+            message.Reply($"{command.Name} 在 {command.Mode.Value} 上没有成绩");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+        
+        // 你的
+        var best1 = (await OsuApi.GetScores(
+                await GetOsuIdByName(bind.OsuUserName), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))!
+            .ToList();
+
+        if (!best1.Any())
+        {
+            message.Reply($"你在 {command.Mode.Value} 上没有成绩");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var im = best1.ToArray().CompareWith(best2.ToArray());
+        
+        message.Reply(MessageDataImage.FromBase64(im.ToB64()));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("列出某人前20的bp")]
     [MarisaPluginSubCommand(nameof(BestPerformance))]
     [MarisaPluginCommand("top", "list", "head")]
@@ -316,7 +362,8 @@ public partial class Osu : MarisaPluginBase
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var recentScores = (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
+        var recentScores =
+            (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))?
             .Select((x, i) => (x, i))
             .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < 24)
             .ToList();
