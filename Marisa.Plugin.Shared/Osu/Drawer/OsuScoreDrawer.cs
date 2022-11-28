@@ -49,9 +49,6 @@ public static class OsuScoreDrawer
     private const int ImageWidth = 2000;
     private const int MarginX = 100;
 
-    private static FontFamily _fontExo2 = SystemFonts.Get("Exo 2");
-    private static FontFamily _fontYaHei = SystemFonts.Get("Microsoft YaHei");
-    private static FontFamily _fontIcon = SystemFonts.Get("Segoe UI Symbol");
     private static readonly Color BgColor = Color.FromRgb(46, 53, 56);
 
     public static Image Distribution(this OsuScore[] scores)
@@ -274,7 +271,7 @@ public static class OsuScoreDrawer
             img.DrawImage(plt.GetBitmap().ToImageSharpImage<Rgba32>(), 0, 0);
         }
 
-        img.DrawText("Generate By QingQiz/MarisaBot", _fontExo2.CreateFont(18), Color.Gray, 10, 10);
+        img.DrawText("Generate By QingQiz/MarisaBot", OsuDrawerCommon.FontExo2.CreateFont(18), Color.Gray, 10, 10);
 
         return img;
     }
@@ -291,7 +288,7 @@ public static class OsuScoreDrawer
 
         var drawY = margin;
 
-        var font = _fontExo2.CreateFont(16);
+        var font = OsuDrawerCommon.FontExo2.CreateFont(16);
 
         for (var i = 0; i < ims.Count; i++)
         {
@@ -303,7 +300,7 @@ public static class OsuScoreDrawer
         return image;
     }
 
-    public static Image GetMiniCard(this OsuScore score)
+    private static Image GetMiniCard(this OsuScore score)
     {
         const int width   = 2000;
         const int height  = 100;
@@ -319,7 +316,7 @@ public static class OsuScoreDrawer
         }
 
         {
-            var font = _fontExo2.CreateFont(28);
+            var font = OsuDrawerCommon.FontExo2.CreateFont(28);
 
             var opt = ImageDraw.GetTextOptions(font);
 
@@ -347,8 +344,8 @@ public static class OsuScoreDrawer
 
             var text1 = $"{score.Pp:N0}";
             var text2 = "pp";
-            var font1 = _fontExo2.CreateFont(40, FontStyle.Bold);
-            var font2 = _fontExo2.CreateFont(30);
+            var font1 = OsuDrawerCommon.FontExo2.CreateFont(40, FontStyle.Bold);
+            var font2 = OsuDrawerCommon.FontExo2.CreateFont(30);
 
             var w1 = text1.MeasureWithSpace(font1).Width;
             var w2 = text2.MeasureWithSpace(font2).Width;
@@ -365,7 +362,7 @@ public static class OsuScoreDrawer
         {
             var truePp = $"{score.Weight?.Pp ?? 0:N0}pp";
 
-            var font = _fontExo2.CreateFont(40, FontStyle.Bold);
+            var font = OsuDrawerCommon.FontExo2.CreateFont(40, FontStyle.Bold);
 
             var opt = ImageDraw.GetTextOptions(font);
 
@@ -379,8 +376,8 @@ public static class OsuScoreDrawer
             var acc    = $"{score.Accuracy * 100:F2}%";
             var weight = $"权重：{score.Weight?.Percentage ?? 0:F0}%";
 
-            var font1 = _fontExo2.CreateFont(33, FontStyle.Bold);
-            var font2 = _fontYaHei.CreateFont(28);
+            var font1 = OsuDrawerCommon.FontExo2.CreateFont(33, FontStyle.Bold);
+            var font2 = OsuDrawerCommon.FontYaHei.CreateFont(28);
 
             var opt = ImageDraw.GetTextOptions(font1);
 
@@ -400,7 +397,7 @@ public static class OsuScoreDrawer
             const int modIconWidth = 80;
             const int iconGap      = 10;
 
-            var icons = score.Mods.Select(GetModIconWithoutText);
+            var icons = score.Mods.Select(OsuModDrawer.GetModIconWithoutText);
 
             foreach (var i in icons)
             {
@@ -413,7 +410,7 @@ public static class OsuScoreDrawer
         }
 
         {
-            var font = _fontExo2.CreateFont(35);
+            var font = OsuDrawerCommon.FontExo2.CreateFont(35);
 
             var text = score.Beatmapset.TitleUnicode + " by " + score.Beatmapset.ArtistUnicode;
 
@@ -449,7 +446,7 @@ public static class OsuScoreDrawer
         grade.DrawImageVCenter(ring, MarginX + iconBar.Width + ringMarginLeft);
 
         // 谱面详情
-        var beatmapDetail = GetBeatmapDetail(score.Beatmap);
+        var beatmapDetail = OsuBeatmapDrawer.GetBeatmapDetail(score.Beatmap);
         grade.DrawImageVCenter(beatmapDetail, ImageWidth - MarginX - beatmapDetail.Width);
 
         // 成绩数值
@@ -583,8 +580,8 @@ public static class OsuScoreDrawer
     {
         const int gap = 10;
 
-        var fKey   = _fontYaHei.CreateFont(60);
-        var fValue = _fontExo2.CreateFont(100);
+        var fKey   = OsuDrawerCommon.FontYaHei.CreateFont(60);
+        var fValue = OsuDrawerCommon.FontExo2.CreateFont(100);
 
         var mKey   = key.MeasureWithSpace(fKey);
         var mValue = value.MeasureWithSpace(fValue);
@@ -601,47 +598,6 @@ public static class OsuScoreDrawer
         return image;
     }
 
-    private static Image GetStatusIcon(string status)
-    {
-        status = status.ToLower();
-
-        var im = new Image<Rgba32>(60, 60);
-
-        switch (status)
-        {
-            case "ranked":
-            {
-                var font = _fontExo2.CreateFont(60);
-
-                im.DrawTextCenter("❰❰", font, Color.ParseHex("#64c6f5"), withSpace: false);
-                im.Mutate(i => i.Rotate(90));
-                break;
-            }
-            case "loved":
-            {
-                var font = _fontIcon.CreateFont(70, FontStyle.Regular);
-
-                im.DrawTextCenter("♥", font, Color.FromRgb(255, 102, 171), withSpace: false);
-                break;
-            }
-            case "approved" or "qualified":
-            {
-                var font = _fontYaHei.CreateFont(50);
-
-                im.DrawTextCenter("✔", font, Color.Black, withSpace: false);
-                break;
-            }
-            default:
-            {
-                var font = _fontYaHei.CreateFont(45);
-
-                im.DrawTextCenter("❔", font, Color.Black, withSpace: false);
-                break;
-            }
-        }
-
-        return im;
-    }
 
     private static Image<Rgba32> GetGradeAndMods(int maxWidth, long grade, string[] mods, DateTimeOffset time)
     {
@@ -650,10 +606,10 @@ public static class OsuScoreDrawer
 
         var card = new Image<Rgba32>(maxWidth, 500);
 
-        var font1 = _fontExo2.CreateFont(160);
-        var font3 = _fontExo2.CreateFont(40);
+        var font1 = OsuDrawerCommon.FontExo2.CreateFont(160);
+        var font3 = OsuDrawerCommon.FontExo2.CreateFont(40);
 
-        var icons = mods.Select(GetModIcon);
+        var icons = mods.Select(OsuModDrawer.GetModIcon);
 
         int y1, y2, y3;
 
@@ -745,12 +701,12 @@ public static class OsuScoreDrawer
         var songInfoDrawY = songNameMarginTop;
 
         // 歌曲状态，ranked、loved 等
-        var statusMark = GetStatusIcon(beatmap.Status);
+        var statusMark = OsuBeatmapDrawer.GetBeatmapStatusIcon(beatmap.Status);
 
         songInfo.DrawImage(statusMark, songInfoDrawX, songInfoDrawY + 10);
 
         // song name
-        var songNameFont    = _fontExo2.CreateFont(60);
+        var songNameFont    = OsuDrawerCommon.FontExo2.CreateFont(60);
         var songName        = $"{beatmapset.TitleUnicode} by {beatmapset.ArtistUnicode}";
         var songNameMeasure = songName.MeasureWithSpace(songNameFont);
 
@@ -783,13 +739,13 @@ public static class OsuScoreDrawer
 
         var starRating        = score.StarRating();
         var starRatingText    = $"★ {starRating:F2}";
-        var starRatingFont    = _fontExo2.CreateFont(35, FontStyle.Bold);
+        var starRatingFont    = OsuDrawerCommon.FontExo2.CreateFont(35, FontStyle.Bold);
         var starRatingMeasure = starRatingText.MeasureWithSpace(starRatingFont);
 
         var starRatingImg = new Image<Rgba32>((int)starRatingMeasure.Width + starRatingPaddingX * 2, songTypeSize);
 
         starRatingImg
-            .Clear(GetStarRatingColor(starRating))
+            .Clear(OsuBeatmapDrawer.GetStarRatingColor(starRating))
             .DrawTextCenter(starRatingText, starRatingFont, starRating < 9 ? Color.Black : Color.White)
             .RoundCorners(starRatingImg.Height / 2);
 
@@ -797,14 +753,14 @@ public static class OsuScoreDrawer
 
         // level name
         var mapperName = $"谱师：{beatmapset.Creator}";
-        var mapperFont = _fontExo2.CreateFont(45, FontStyle.Bold);
+        var mapperFont = OsuDrawerCommon.FontExo2.CreateFont(45, FontStyle.Bold);
 
         var mapperWidth = mapperName.MeasureWithSpace(mapperFont).Width;
 
         songInfoDrawX += starRatingImg.Width + elementGap;
 
         var levelName = beatmap.Version;
-        var levelFont = _fontExo2.CreateFont(45);
+        var levelFont = OsuDrawerCommon.FontExo2.CreateFont(45);
 
         // 调整 levelName 字符串，让他不要超出宽度
         while (levelName.MeasureWithSpace(levelFont).Width + mapperWidth + songInfoDrawX + elementGap > ImageWidth)
@@ -882,275 +838,5 @@ public static class OsuScoreDrawer
         accRing.DrawImageCenter(im);
 
         return accRing;
-    }
-
-    private static Color GetStarRatingColor(double starRating)
-    {
-        if (starRating > 10) starRating = 10;
-        if (starRating < 0) starRating  = 0;
-
-        var starRatingColorGradiant = new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, "StarRatingColorGradiant.png"), () =>
-        {
-            var brush = new LinearGradientBrush(
-                new PointF(0, 0), new PointF(2000, 0),
-                GradientRepetitionMode.None,
-                new ColorStop(0, Color.ParseHex("#4290ff")),
-                new ColorStop(0.20f, Color.ParseHex("#4fc0ff")),
-                new ColorStop(0.27f, Color.ParseHex("#7cff4f")),
-                new ColorStop(0.35f, Color.ParseHex("#f6f05c")),
-                new ColorStop(0.50f, Color.ParseHex("#ff4e6f")),
-                new ColorStop(0.65f, Color.ParseHex("#c645b8")),
-                new ColorStop(0.75f, Color.ParseHex("#6563de")),
-                new ColorStop(0.90f, Color.ParseHex("#12106d")),
-                new ColorStop(1.00f, Color.ParseHex("#000000"))
-            );
-
-            var res = new Image<Rgba32>(2000, 50);
-            res.Mutate(i => i.Fill(brush));
-
-            return res;
-        }).Value.CloneAs<Rgba32>();
-
-        var x = (int)(starRating / 10.0 * starRatingColorGradiant.Width);
-
-        if (x == starRatingColorGradiant.Width) x--;
-
-        return starRatingColorGradiant[x, starRatingColorGradiant.Height / 2];
-    }
-
-    private static Image GetModIconWithoutText(string mod)
-    {
-        mod = mod.ToUpper();
-
-        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, $"mod-{mod}-NoText.png"), () =>
-        {
-            var (iconId, type) = OsuFont.GetModeCharacter(mod);
-            var color = OsuFont.GetColorByModeType(type);
-
-            var border = OsuFont.GetCharacter(OsuFont.BorderChar);
-            border.Mutate(i =>
-            {
-                i.SetGraphicsOptions(new GraphicsOptions
-                {
-                    AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-                });
-                i.Fill(color.Item1);
-            });
-
-            if (iconId == 0)
-            {
-                var f = _fontExo2.CreateFont(40);
-                border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
-            }
-            else
-            {
-                var icon = OsuFont.GetCharacter(iconId).ResizeY(border.Height - 10);
-                icon.Mutate(i =>
-                {
-                    i.SetGraphicsOptions(new GraphicsOptions
-                    {
-                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-                    });
-                    i.Fill(color.Item2);
-                });
-
-                border.DrawImageCenter(icon);
-            }
-
-            return border;
-        }).Value;
-    }
-
-    private static Image GetModIcon(string mod)
-    {
-        mod = mod.ToUpper();
-
-        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, $"mod-{mod}.png"), () =>
-        {
-            var (iconId, type) = OsuFont.GetModeCharacter(mod);
-            var color = OsuFont.GetColorByModeType(type);
-
-            var border = OsuFont.GetCharacter(OsuFont.BorderChar);
-            border.Mutate(i =>
-            {
-                i.SetGraphicsOptions(new GraphicsOptions
-                {
-                    AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-                });
-                i.Fill(color.Item1);
-            });
-
-            if (iconId == 0)
-            {
-                var f = _fontExo2.CreateFont(40);
-                border.DrawTextCenter(mod, f, color.Item2, withSpace: false);
-            }
-            else
-            {
-                var icon = OsuFont.GetCharacter(iconId).ResizeY(26);
-                icon.Mutate(i =>
-                {
-                    i.SetGraphicsOptions(new GraphicsOptions
-                    {
-                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcIn
-                    });
-                    i.Fill(color.Item2);
-                });
-
-                border.DrawImageCenter(icon, offsetY: -10);
-
-                var font = _fontExo2.CreateFont(15);
-
-                var m = mod.Measure(font);
-
-                var imgText = new Image<Rgba32>((int)(m.Width + 15), (int)(m.Height + 10)).Clear(color.Item2);
-                imgText.DrawTextCenter(mod.ToUpper(), font, color.Item1, withSpace: false);
-
-                border.DrawImageCenter(imgText.RoundCorners(imgText.Height / 2 + 1), offsetY: 17);
-            }
-
-            return border;
-        }).Value;
-    }
-
-    private static Image GetBeatmapDetail(Beatmap beatmap)
-    {
-        return new CacheableImage(Path.Join(OsuDrawerCommon.TempPath, "BeatmapDetail-") + beatmap.Checksum + ".png", () =>
-        {
-            const int imageWidth = 500, margin = 20, padding = 10;
-
-            // same to BgColor, but with transparent
-            var bgColor     = Color.FromRgba(46, 53, 56, (byte)(0.2 * 255));
-            var colorYellow = Color.ParseHex("#ffdd55");
-
-            Image BeatmapCounter()
-            {
-                const int iconWidth = 40;
-
-                var length  = TimeSpan.FromSeconds(beatmap.HitLength).ToString("m':'s");
-                var bpm     = beatmap.Bpm.ToString();
-                var circles = beatmap.CountCircles.ToString("N0");
-                var sliders = beatmap.CountSliders.ToString("N0");
-
-                var font = _fontExo2.CreateFont(20, FontStyle.Bold);
-
-                var img = new Image<Rgba32>(imageWidth, iconWidth + margin * 2).Clear(bgColor);
-
-                var step = (int)((imageWidth - margin * 2 - sliders.MeasureWithSpace(font).Width - padding - iconWidth) / 3);
-
-                var x = margin;
-                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("total_length").ResizeX(iconWidth), x);
-                img.DrawTextVCenter(length, font, colorYellow, x + iconWidth + padding);
-                x += step;
-                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("bpm").ResizeX(iconWidth), x);
-                img.DrawTextVCenter(bpm, font, colorYellow, x + iconWidth + padding);
-                x += step;
-                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_circles").ResizeX(iconWidth), x);
-                img.DrawTextVCenter(circles, font, colorYellow, x + iconWidth + padding);
-                x += step;
-                img.DrawImageVCenter(OsuDrawerCommon.GetIcon("count_sliders").ResizeX(iconWidth), x);
-                img.DrawTextVCenter(sliders, font, colorYellow, x + iconWidth + padding);
-
-                return img;
-            }
-
-            Image BeatmapConfig()
-            {
-                const int barHeight      = 40;
-                const int barHeightInner = 10;
-
-                List<(string, double)> kv = new();
-
-                switch (beatmap.ModeInt)
-                {
-                    case 3:
-                    {
-                        kv.AddRange(new[]
-                        {
-                            ("键位数量", beatmap.Cs),
-                            ("掉血速度", beatmap.Drain),
-                            ("准度要求", beatmap.Accuracy),
-                            ("难度星级", beatmap.StarRating)
-                        });
-                        break;
-                    }
-                    case 0:
-                    {
-                        kv.AddRange(new[]
-                        {
-                            ("圆圈大小", beatmap.Cs),
-                            ("掉血速度", beatmap.Drain),
-                            ("准度要求", beatmap.Accuracy),
-                            ("缩圈速度", beatmap.Ar),
-                            ("难度星级", beatmap.StarRating)
-                        });
-                        break;
-                    }
-                    case 1:
-                    {
-                        kv.AddRange(new[]
-                        {
-                            ("掉血速度", beatmap.Drain),
-                            ("准度要求", beatmap.Accuracy),
-                            ("难度星级", beatmap.StarRating)
-                        });
-                        break;
-                    }
-                    case 2:
-                    {
-                        kv.AddRange(new[]
-                        {
-                            ("圆圈大小", beatmap.Cs),
-                            ("掉血速度", beatmap.Drain),
-                            ("准度要求", beatmap.Accuracy),
-                            ("缩圈速度", beatmap.Ar),
-                            ("难度星级", beatmap.StarRating)
-                        });
-                        break;
-                    }
-                }
-
-                var img = new Image<Rgba32>(imageWidth, barHeight * kv.Count + margin * 2 + padding * (kv.Count - 1)).Clear(bgColor);
-
-                var font = _fontYaHei.CreateFont(20);
-
-                var (_, _, kWidth, kHeight) = kv[0].Item1.MeasureWithSpace(font);
-
-                var vWidth   = kv.Max(x => x.Item2.ToString("0.##").MeasureWithSpace(font).Width);
-                var barWidth = (int)(imageWidth - margin * 2 - padding * 2 - kWidth - vWidth);
-
-                for (var i = 0; i < kv.Count; i++)
-                {
-                    var color = i == kv.Count - 1 ? colorYellow : Color.White;
-
-                    var v  = kv[i].Item2.ToString("0.##");
-                    var vM = v.MeasureWithSpace(font).Width;
-
-                    var x2 = (int)(margin + kWidth + padding);
-                    var x3 = (int)(imageWidth + kWidth + padding + barWidth + padding - vM) / 2;
-                    var y1 = (int)(margin + i * (barHeight + padding) + (barHeight - kHeight) / 2);
-                    var y2 = margin + i * (barHeight + padding) + (barHeight - barHeightInner) / 2;
-
-                    img.DrawText(kv[i].Item1, font, Color.White, margin, y1);
-
-                    var rect1 = new Rectangle(x2, y2, barWidth, barHeightInner);
-                    var rect2 = new Rectangle(x2, y2, (int)(barWidth * (Math.Min(kv[i].Item2, 10.0) / 10)), barHeightInner);
-
-                    img.Mutate(x => x.Fill(Color.Black, rect1).Fill(color, rect2));
-                    img.DrawText(v, font, Color.White, x3, y1);
-                }
-
-                return img;
-            }
-
-            var im1 = BeatmapCounter();
-            var im2 = BeatmapConfig();
-
-            var im = new Image<Rgba32>(imageWidth, im1.Height + 3 + im2.Height);
-            im.DrawImage(im1, 0, 0);
-            im.DrawImage(im2, 0, im1.Height + 3);
-
-            return im;
-        }).Value;
     }
 }

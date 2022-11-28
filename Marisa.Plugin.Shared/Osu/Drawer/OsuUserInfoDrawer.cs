@@ -22,10 +22,6 @@ public static class OsuUserInfoDrawer
     private const int ImageWidth = 2000;
     private const int MarginX = 50;
 
-    private static readonly FontFamily FontExo2 = SystemFonts.Get("Exo 2");
-    private static readonly FontFamily FontYaHei = SystemFonts.Get("Microsoft YaHei");
-    private static readonly FontFamily FontIcon = SystemFonts.Get("Segoe UI Symbol");
-
     private static readonly Color FontColor = Color.FromRgb(240, 219, 228);
 
     private static readonly TimeSpan PPlusUpdateInterval = TimeSpan.FromHours(24 * 30);
@@ -121,7 +117,7 @@ public static class OsuUserInfoDrawer
 
         if (info.IsSupporter)
         {
-            var fontSupporter = new Font(FontIcon, 52, FontStyle.Regular);
+            var fontSupporter = new Font(OsuDrawerCommon.FontIcon, 52, FontStyle.Regular);
 
             var supportImg = new Image<Rgba32>(flagHeight, flagHeight).Clear(Color.FromRgb(255, 102, 171));
 
@@ -130,7 +126,7 @@ public static class OsuUserInfoDrawer
             image.DrawImage(supportImg.RoundCorners(flagHeight / 2), margin + avatar.Width + gap + regionIcon.Width + gap, margin);
         }
 
-        var fontName = new Font(FontExo2, 80);
+        var fontName = new Font(OsuDrawerCommon.FontExo2, 80);
         image.DrawText(info.Username, fontName, Color.White, margin + avatar.Width + gap, margin + flagHeight + gap / 2);
 
         const int ringRadius = 40;
@@ -140,7 +136,7 @@ public static class OsuUserInfoDrawer
 
         image.Mutate(i => i.Fill(info.IsOnline ? Color.ParseHex("#b3d944") : Color.Black, ring));
 
-        var font = new Font(FontYaHei, 40);
+        var font = new Font(OsuDrawerCommon.FontYaHei, 40);
 
         if (info.IsOnline)
         {
@@ -211,8 +207,8 @@ public static class OsuUserInfoDrawer
 
     private static Image<Rgba32> GetUserSummary(Statistics st, int height)
     {
-        var font1 = new Font(FontYaHei, 32, FontStyle.Regular);
-        var font2 = new Font(FontExo2, 36, FontStyle.Bold);
+        var font1 = new Font(OsuDrawerCommon.FontYaHei, 32, FontStyle.Regular);
+        var font2 = new Font(OsuDrawerCommon.FontExo2, 36, FontStyle.Bold);
 
         var textHeader = new[]
         {
@@ -260,9 +256,9 @@ public static class OsuUserInfoDrawer
     {
         var counter = new Image<Rgba32>(detailWidth, 74);
 
-        var font1 = new Font(FontYaHei, 24, FontStyle.Regular);
-        var font2 = new Font(FontExo2, 32, FontStyle.Bold);
-        var font3 = new Font(FontExo2, 24, FontStyle.Bold);
+        var font1 = new Font(OsuDrawerCommon.FontYaHei, 24, FontStyle.Regular);
+        var font2 = new Font(OsuDrawerCommon.FontExo2, 32, FontStyle.Bold);
+        var font3 = new Font(OsuDrawerCommon.FontExo2, 24, FontStyle.Bold);
 
         const string text1 = "奖章";
         const string text3 = "游戏时间";
@@ -304,8 +300,8 @@ public static class OsuUserInfoDrawer
         const string rankText1 = "全球排名";
         const string rankText2 = "国内/区内排名";
 
-        var font1 = new Font(FontYaHei, 24, FontStyle.Regular);
-        var font2 = new Font(FontExo2, 60, FontStyle.Bold);
+        var font1 = new Font(OsuDrawerCommon.FontYaHei, 24, FontStyle.Regular);
+        var font2 = new Font(OsuDrawerCommon.FontExo2, 60, FontStyle.Bold);
 
         var text1H = rankText1.MeasureWithSpace(font1).Height - 8;
 
@@ -401,7 +397,7 @@ public static class OsuUserInfoDrawer
 
         var nameCard = new Image<Rgba32>(1000, 140);
 
-        var font = new Font(FontExo2, 48, FontStyle.Bold);
+        var font = new Font(OsuDrawerCommon.FontExo2, 48, FontStyle.Bold);
 
         // username
         var (_, _, nameWidth, nameHeight) = info.Username.MeasureWithSpace(font);
@@ -410,7 +406,7 @@ public static class OsuUserInfoDrawer
         // supporter
         if (info.IsSupporter)
         {
-            var fontSupporter = new Font(FontIcon, 46, FontStyle.Regular);
+            var fontSupporter = new Font(OsuDrawerCommon.FontIcon, 46, FontStyle.Regular);
             var supporterChar = new string('♥', info.SupportLevel);
 
             var supportColor = Color.FromRgb(255, 102, 171);
@@ -424,7 +420,7 @@ public static class OsuUserInfoDrawer
         nameCard.DrawImage(regionIcon, 2, (int)(nameHeight + 12));
 
         // region name
-        font = new Font(FontExo2, 32, FontStyle.Bold);
+        font = new Font(OsuDrawerCommon.FontExo2, 32, FontStyle.Bold);
         var regionName   = info.Region.Name + (string.IsNullOrWhiteSpace(info.Title) ? "" : $" // {info.Title}");
         var regionHeight = regionName.MeasureWithSpace(font).Height;
         nameCard.DrawText(regionName, font, Color.White, regionIcon.Width + 10, (nameCard.Height - nameHeight - regionHeight) / 2 + nameHeight);
@@ -440,7 +436,7 @@ public static class OsuUserInfoDrawer
         // 等级的框
         nameBanner.DrawImage(levelIcon, levelIconX, levelIconY);
 
-        var levelFont   = new Font(FontExo2, 40, FontStyle.Bold);
+        var levelFont   = new Font(OsuDrawerCommon.FontExo2, 40, FontStyle.Bold);
         var levelString = info.Statistics.Level.Current.ToString("N0");
         var (_, _, levelStringW, levelStringH) = levelString.MeasureWithSpace(levelFont);
         var levelStringX = levelIconX + (levelIcon.Width - levelStringW) / 2;
@@ -470,7 +466,7 @@ public static class OsuUserInfoDrawer
         // 等级的进度条
         nameBanner.DrawImage(levelBar, levelBarX, levelBarY);
 
-        var progressF = new Font(FontExo2, 24, FontStyle.Regular);
+        var progressF = new Font(OsuDrawerCommon.FontExo2, 24, FontStyle.Regular);
         var progressS = info.Statistics.Level.Progress.ToString("N0") + '%';
         var progressM = progressS.MeasureWithSpace(progressF);
         var progressX = levelBarX + levelBar.Width - progressM.Width;
@@ -487,7 +483,7 @@ public static class OsuUserInfoDrawer
         header.Clear(Color.FromRgb(61, 41, 50));
 
         // 标题
-        var font = new Font(FontYaHei, 40, FontStyle.Regular);
+        var font = new Font(OsuDrawerCommon.FontYaHei, 40, FontStyle.Regular);
 
         var userIcon = OsuDrawerCommon.GetIcon("user").ResizeX(80);
         header.DrawImageVCenter(userIcon, MarginX);
@@ -622,7 +618,7 @@ public static class OsuUserInfoDrawer
 
                 // 画顶点、画 pp+ 的类型和值
                 var idx = 0;
-                font = new Font(FontExo2, 50);
+                font = new Font(OsuDrawerCommon.FontExo2, 50);
 
                 //扩展一下图片，防止文本画出边界
                 pPlusChart = new Image<Rgba32>(pPlusChart.Width * 2, pPlusChart.Height + 40)
@@ -667,7 +663,7 @@ public static class OsuUserInfoDrawer
                     .RoundCorners(40);
 
                 const string text = "PP+数据不可用";
-                font = new Font(FontYaHei, 60);
+                font = new Font(OsuDrawerCommon.FontYaHei, 60);
 
                 pPlusDisabled.DrawTextCenter(text, font, Color.White);
 

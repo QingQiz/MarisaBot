@@ -1,6 +1,7 @@
 ﻿using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Utils;
+using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -10,6 +11,10 @@ public static class OsuDrawerCommon
 {
     public static string TempPath => ConfigurationManager.Configuration.Osu.TempPath;
     public static string ResourcePath => ConfigurationManager.Configuration.Osu.ResourcePath;
+
+    public static FontFamily FontIcon => SystemFonts.Get("Segoe UI Symbol");
+    public static FontFamily FontExo2 => SystemFonts.Get("Exo 2");
+    public static FontFamily FontYaHei => SystemFonts.Get("Microsoft YaHei");
 
     public static async Task<Image> GetCacheOrDownload(Uri uri, string ext = "")
     {
@@ -23,7 +28,7 @@ public static class OsuDrawerCommon
         return await GetCacheOrDownload(filename, uri);
     }
 
-    public static async Task<Image> GetCacheOrDownload(string filename, Uri uri)
+    private static async Task<Image> GetCacheOrDownload(string filename, Uri uri)
     {
         var filepath = Path.Join(TempPath, filename);
         if (File.Exists(filepath))

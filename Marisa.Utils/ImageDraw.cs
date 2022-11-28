@@ -382,7 +382,7 @@ public static class ImageDraw
     {
         while (true)
         {
-            var size  = ctx.GetCurrentSize();
+            var size = ctx.GetCurrentSize();
 
             if (size.Width == width) return ctx;
 
@@ -395,11 +395,11 @@ public static class ImageDraw
     {
         while (true)
         {
-            var size  = ctx.GetCurrentSize();
+            var size = ctx.GetCurrentSize();
 
             if (size.Height == height) return ctx;
 
-            var scale = (double)height/ size.Height;
+            var scale = (double)height / size.Height;
             ctx.Resize(scale);
         }
     }
@@ -410,25 +410,35 @@ public static class ImageDraw
 
     public static System.Drawing.Bitmap ToBitmap<TPixel>(this Image<TPixel> image) where TPixel : unmanaged, IPixel<TPixel>
     {
-        using var memoryStream = new MemoryStream();
+        if (OperatingSystem.IsWindows())
+        {
+            using var memoryStream = new MemoryStream();
 
-        var imageEncoder = image.GetConfiguration().ImageFormatsManager.FindEncoder(PngFormat.Instance);
-        image.Save(memoryStream, imageEncoder);
+            var imageEncoder = image.GetConfiguration().ImageFormatsManager.FindEncoder(PngFormat.Instance);
+            image.Save(memoryStream, imageEncoder);
 
-        memoryStream.Seek(0, SeekOrigin.Begin);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-        return new System.Drawing.Bitmap(memoryStream);
+            return new System.Drawing.Bitmap(memoryStream);
+        }
+
+        throw new PlatformNotSupportedException($@"{Environment.OSVersion} is not supported");
     }
 
     public static Image<TPixel> ToImageSharpImage<TPixel>(this System.Drawing.Bitmap bitmap) where TPixel : unmanaged, IPixel<TPixel>
     {
-        using var memoryStream = new MemoryStream();
+        if (OperatingSystem.IsWindows())
+        {
+            using var memoryStream = new MemoryStream();
 
-        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+            bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
 
-        memoryStream.Seek(0, SeekOrigin.Begin);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-        return Image.Load<TPixel>(memoryStream);
+            return Image.Load<TPixel>(memoryStream);
+        }
+
+        throw new PlatformNotSupportedException($@"{Environment.OSVersion} is not supported");
     }
 
     public static string ToB64(this Image image, int quality = 90)
