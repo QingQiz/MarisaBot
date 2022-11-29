@@ -264,7 +264,7 @@ public partial class Osu : MarisaPluginBase
 
         if (!best2.Any())
         {
-            message.Reply($"{command.Name} 在 {command.Mode.Value} 上没有成绩");
+            message.Reply($"{command.Name} 在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
             return MarisaPluginTaskState.CompletedTask;
         }
         
@@ -275,7 +275,7 @@ public partial class Osu : MarisaPluginBase
 
         if (!best1.Any())
         {
-            message.Reply($"你在 {command.Mode.Value} 上没有成绩");
+            message.Reply($"你在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
             return MarisaPluginTaskState.CompletedTask;
         }
 
