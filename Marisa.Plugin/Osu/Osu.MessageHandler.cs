@@ -9,7 +9,7 @@ namespace Marisa.Plugin.Osu;
 
 [MarisaPlugin(PluginPriority.Osu)]
 [MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
-[MarisaPluginCommand("osu!", "osu", "o", "!", "！")]
+[MarisaPluginCommand("osu!", "osu！", "osu", "o", "!", "！")]
 public partial class Osu : MarisaPluginBase
 {
     #region 绑定 / help
