@@ -3,7 +3,6 @@ using Flurl.Http;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
-using Marisa.Utils.Cacheable;
 using ScottPlot;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
@@ -220,26 +219,31 @@ public static class OsuScoreDrawer
 
         // 分布
         {
+            const int binSize = 3;
+
             var plt = new Plot(pieSize * pies.Count, pieSize * 2);
 
             var values = scores.AsParallel().Select(x => x.PerformancePoint()).ToArray();
 
-            // create a histogram
-            var (counts, binEdges) = ScottPlot.Statistics.Common.Histogram(values, min: values.Min() - 20, max: values.Max() + 20, binSize: 3);
+            // 统计图
+            var (counts, binEdges) = ScottPlot.Statistics.Common.Histogram(values, min: values.Min() - binSize, max: values.Max() + binSize, binSize: binSize);
             var leftEdges = binEdges.Take(binEdges.Length - 1).ToArray();
 
-            // display histogram probability as a bar plot
+            // bar plot
             var bar = plt.AddBar(values: counts, positions: leftEdges);
             bar.BarWidth        = 3;
             bar.BorderLineWidth = 1;
             bar.FillColor       = System.Drawing.ColorTranslator.FromHtml("#9bc3eb");
 
-            // display histogram distribution curve as a line plot on a secondary Y axis
-            var smoothEdges     = DataGen.Range(start: binEdges.First(), stop: binEdges.Last(), step: 0.1, includeStop: true);
-            var smoothDensities = ScottPlot.Statistics.Common.ProbabilityDensity(values, smoothEdges, percent: true);
+            // 极值分布
+            var xs       = DataGen.Range(start: binEdges.First(), stop: binEdges.Last(), step: 0.1, includeStop: true);
+            var pdfParam = MathExt.FitExtremeValueDistribution(values);
+            var pdf      = MathExt.ExtremeValueDistribution(pdfParam.alpha, pdfParam.beta);
+            var ys       = xs.Select(x => pdf(x) * 100).ToArray();
+
             var probPlot = plt.AddScatterLines(
-                xs: smoothEdges,
-                ys: smoothDensities,
+                xs: xs,
+                ys: ys,
                 lineWidth: 2,
                 label: "probability");
             probPlot.YAxisIndex = 1;
@@ -249,12 +253,10 @@ public static class OsuScoreDrawer
             var stats = new ScottPlot.Statistics.BasicStats(values);
 
             plt.AddVerticalLine(stats.Mean, SDColor.Black, 2, LineStyle.Solid, "mean");
+            plt.AddVerticalLine(pdfParam.alpha, SDColor.Black, 2, LineStyle.Dash, "alpha");
 
-            plt.AddVerticalLine(stats.Mean - stats.StDev, SDColor.Black, 2, LineStyle.Dash, "1 SD");
-            plt.AddVerticalLine(stats.Mean + stats.StDev, SDColor.Black, 2, LineStyle.Dash);
-
-            plt.AddVerticalLine(stats.Mean - stats.StDev * 2, SDColor.Black, 2, LineStyle.Dot, "2 SD");
-            plt.AddVerticalLine(stats.Mean + stats.StDev * 2, SDColor.Black, 2, LineStyle.Dot);
+            plt.AddVerticalLine(stats.Mean - stats.StDev, SDColor.Black, 2, LineStyle.Dot, "SD");
+            plt.AddVerticalLine(stats.Mean + stats.StDev, SDColor.Black, 2, LineStyle.Dot);
 
             plt.AddVerticalLine(stats.Min, SDColor.Gray, 1, LineStyle.Dash, "min/max");
             plt.AddVerticalLine(stats.Max, SDColor.Gray, 1, LineStyle.Dash);
@@ -430,7 +432,7 @@ public static class OsuScoreDrawer
     {
         const int width = 1000, height = 400;
 
-        Image DrawCompare(double[] data1, double[] data2, string title, string xLabel, double binSize)
+        Image DrawCompare(double[] data1, double[] data2, string title, string xLabel, double binSize, bool gumbelDist = false)
         {
             var plt = new Plot(width, height);
 
@@ -440,43 +442,66 @@ public static class OsuScoreDrawer
             min -= binSize;
             max += binSize;
 
-            var (prob1, binEdges) = ScottPlot.Statistics.Common.Histogram(data1, min: min, max: max, binSize: binSize);
-            var (prob2, _)        = ScottPlot.Statistics.Common.Histogram(data2, min: min, max: max, binSize: binSize);
+            // 统计
+            var (cnt1, binEdges) = ScottPlot.Statistics.Common.Histogram(data1, min: min, max: max, binSize: binSize);
+            var (cnt2, _)        = ScottPlot.Statistics.Common.Histogram(data2, min: min, max: max, binSize: binSize);
             var leftEdges = binEdges.Take(binEdges.Length - 1).ToArray();
 
-            // plot histograms
-            var bar1 = plt.AddBar(values: prob1, positions: leftEdges);
+            // bar plot
+            var bar1 = plt.AddBar(values: cnt1, positions: leftEdges);
             bar1.BarWidth        = binSize;
             bar1.FillColor       = System.Drawing.Color.FromArgb(50, System.Drawing.Color.Blue);
             bar1.BorderLineWidth = 0;
 
-            var bar2 = plt.AddBar(values: prob2, positions: leftEdges);
+            var bar2 = plt.AddBar(values: cnt2, positions: leftEdges);
             bar2.BarWidth        = binSize;
             bar2.FillColor       = System.Drawing.Color.FromArgb(50, System.Drawing.Color.Red);
             bar2.BorderLineWidth = 0;
 
-            // plot probability function curves
-            var pdf1 = ScottPlot.Statistics.Common.ProbabilityDensity(data1, binEdges, percent: true);
-            plt.AddScatterLines(
-                xs: binEdges,
-                ys: pdf1,
+            double[] pdf1data, pdf2data;
+
+            var xs = DataGen.Range(start: binEdges.First(), stop: binEdges.Last(), step: 0.1, includeStop: true);
+
+            // 分布
+            if (gumbelDist)
+            {
+                var pdf1Param = MathExt.FitExtremeValueDistribution(data1);
+                var pdf1      = MathExt.ExtremeValueDistribution(pdf1Param.alpha, pdf1Param.beta);
+                pdf1data = xs.Select(x => pdf1(x) * 100).ToArray();
+
+                var pdf2Param = MathExt.FitExtremeValueDistribution(data2);
+                var pdf2      = MathExt.ExtremeValueDistribution(pdf2Param.alpha, pdf2Param.beta);
+                pdf2data = xs.Select(x => pdf2(x) * 100).ToArray();
+            }
+            else
+            {
+                pdf1data = ScottPlot.Statistics.Common.ProbabilityDensity(data1, xs, true);
+                pdf2data = ScottPlot.Statistics.Common.ProbabilityDensity(data2, xs, true);
+            }
+
+            // 画分布
+            var dist1 = plt.AddScatterLines(
+                xs: xs,
+                ys: pdf1data,
                 color: System.Drawing.Color.FromArgb(150, System.Drawing.Color.Blue),
                 lineWidth: 3,
                 label: $"你：{scoreSet.First().User.Username}");
+            dist1.YAxisIndex = 1;
 
-            var pdf2 = ScottPlot.Statistics.Common.ProbabilityDensity(data2, binEdges, percent: true);
-            plt.AddScatterLines(
-                xs: binEdges,
-                ys: pdf2,
+            var dist2 = plt.AddScatterLines(
+                xs: xs,
+                ys: pdf2data,
                 color: System.Drawing.Color.FromArgb(150, System.Drawing.Color.Red),
                 lineWidth: 3,
                 label: $"别人：{anotherScoreSet.First().User.Username}");
+            dist2.YAxisIndex = 1;
+            plt.YAxis2.Ticks(true);
 
-            // customize styling
             plt.Title(title);
             plt.XLabel(xLabel);
-            plt.Legend(location: Alignment.UpperRight);
+            plt.Legend(location: gumbelDist ? Alignment.UpperRight : Alignment.UpperLeft);
             plt.SetAxisLimits(yMin: 0);
+            plt.SetAxisLimits(yMin: 0, yAxisIndex: 1);
 
             return plt.GetBitmap().ToImageSharpImage<Rgba32>();
         }
@@ -484,7 +509,7 @@ public static class OsuScoreDrawer
         var im1 = DrawCompare(
             scoreSet.Select(s => s.Pp).Cast<double>().ToArray(),
             anotherScoreSet.Select(s => s.Pp).Cast<double>().ToArray(),
-            "PP Comparison", "PP", 5
+            "PP Comparison", "PP", 5, true
         );
 
         Image im2;
@@ -493,7 +518,7 @@ public static class OsuScoreDrawer
         if (scoreSet.First().Mode == OsuApi.ModeList.Last())
         {
             im2 = DrawCompare(
-                scoreSet.Select(s => s.PpAccuracy *  100).ToArray(),
+                scoreSet.Select(s => s.PpAccuracy * 100).ToArray(),
                 anotherScoreSet.Select(s => s.PpAccuracy * 100).ToArray(),
                 "PP Acc Comparison", "PP Acc", 0.5
             );

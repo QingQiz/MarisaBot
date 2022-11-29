@@ -249,7 +249,13 @@ public partial class Osu : MarisaPluginBase
 
         var db = new BotDbContext().OsuBinds;
 
-        var bind = db.First(x => x.UserId == message.Sender!.Id);
+        var bind = db.FirstOrDefault(x => x.UserId == message.Sender!.Id);
+
+        if (bind == null)
+        {
+            message.Reply("您未绑定");
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         if (bind.OsuUserName == command!.Name)
         {
