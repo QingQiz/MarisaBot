@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <Reference Include="System.Drawing.Common">
-        <HintPath>..\Marisa.StartUp\bin\Release\net6.0\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll</HintPath>
+        <HintPath>..\Marisa.StartUp\bin\Release\net7.0\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll</HintPath>
       </Reference>
     </ItemGroup>
 
