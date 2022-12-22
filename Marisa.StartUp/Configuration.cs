@@ -4,7 +4,7 @@ using log4net.Appender;
 using log4net.Core;
 using log4net.Layout;
 using log4net.Repository.Hierarchy;
-using Marisa.Backend.Mirai;
+using Marisa.Backend.GoCq;
 using Marisa.BotDriver.DI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +18,7 @@ public class Configuration
     public Configuration(string[] args)
     {
         _serviceCollection =
-            MiraiBackend.Config(
+            GoCqBackend.Config(
                 Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Marisa.Plugin.dll")));
         _args = args;
     }

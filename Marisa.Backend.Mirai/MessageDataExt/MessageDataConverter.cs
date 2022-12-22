@@ -134,7 +134,7 @@ public static class MessageDataConverter
             case "NudgeEvent":
             {
                 var message =
-                    new Message(ms, new MessageDataNudge(m.target, m.fromId, m.subject.id, m.action, m.suffix))
+                    new Message(ms, new MessageDataNudge(m.target, m.fromId))
                     {
                         Type = m.subject.kind switch
                         {

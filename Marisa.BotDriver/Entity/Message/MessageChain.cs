@@ -36,33 +36,6 @@ public class MessageChain
         return new MessageChain(MessageDataVoice.FromBase64(b64));
     }
 
-    public MessageChain(IEnumerable<dynamic> data)
-    {
-        Messages ??= new List<MessageData.MessageData>();
-
-        foreach (var m in data)
-        {
-            switch (m.type)
-            {
-                case "Source":
-                    Messages.Add(new MessageDataId(m.id, m.time));
-                    break;
-                case "Plain":
-                    Messages.Add(new MessageDataText(m.text));
-                    break;
-                case "At":
-                    Messages.Add(new MessageDataAt(m.target, m.display));
-                    break;
-                case "Image":
-                    Messages.Add(MessageDataImage.FromUrl(m.url));
-                    break;
-                default:
-                    Messages.Add(new MessageDataUnknown());
-                    break;
-            }
-        }
-    }
-
     public override string ToString()
     {
         return string.Join(' ', Messages.Select(m =>
@@ -75,6 +48,12 @@ public class MessageChain
         }));
     }
 
-    public string Text => string.Join(' ',
-        Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text));
+    public string? _plain;
+
+    public string Text
+    {
+        get => _plain ?? string.Join(' ',
+            Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text));
+        set => _plain = value;
+    }
 }

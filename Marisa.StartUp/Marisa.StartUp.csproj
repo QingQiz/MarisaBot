@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Marisa.Backend.GoCq\Marisa.Backend.GoCq.csproj" />
       <ProjectReference Include="..\Marisa.Backend.Mirai\Marisa.Backend.Mirai.csproj" />
       <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
     </ItemGroup>

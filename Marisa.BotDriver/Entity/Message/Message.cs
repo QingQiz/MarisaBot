@@ -17,13 +17,6 @@ public class Message
     public MessageType Type;
     private readonly MessageSenderProvider _sender;
 
-    public Message(IEnumerable<MessageData.MessageData> message, MessageSenderProvider sender)
-    {
-        _sender      = sender;
-        MessageChain = new MessageChain(message);
-        Command      = MessageChain.Text.Trim();
-    }
-
     public Message(MessageChain chain, MessageSenderProvider sender)
     {
         MessageChain = chain;
@@ -64,8 +57,9 @@ public class Message
     /// <returns></returns>
     public bool IsPlainText()
     {
-        return MessageChain!.Messages.All(m => m.Type is MessageDataType.Text or MessageDataType.Id) && // 确保所有消息都是纯文本
-               MessageChain!.Messages.Any(m => m.Type == MessageDataType.Text);                         // 确保至少存在一条数据
+        // return MessageChain!.Messages.All(m => m.Type is MessageDataType.Text or MessageDataType.Id) && // 确保所有消息都是纯文本
+        //        MessageChain!.Messages.Any(m => m.Type == MessageDataType.Text);                         // 确保至少存在一条数据
+        return true;
     }
 
     /// <summary>
