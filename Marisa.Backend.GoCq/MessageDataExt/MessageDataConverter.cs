@@ -14,7 +14,8 @@ public static class MessageDataConverter
 {
     private static string Escape(this string s)
     {
-        return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
+        return s;
+        // return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
     }
 
     private static string Unescape(this string s)
@@ -24,9 +25,9 @@ public static class MessageDataConverter
 
     private static MessageData? CqCodeToMessage(string raw)
     {
-        if (raw.StartsWith("CQ:at"))
+        if (raw.StartsWith("CQ:at,", StringComparison.OrdinalIgnoreCase))
         {
-            return new MessageDataAt(long.Parse(raw[("CQ:at".Length + 1)..].Split(',')[0].Split('=')[1]));
+            return new MessageDataAt(long.Parse(raw["CQ:at,".Length ..].Split(',')[0].Split('=')[1]));
         }
 
         return null;
@@ -46,8 +47,11 @@ public static class MessageDataConverter
 
                 l = i;
 
-                var msg = new MessageDataText(messageRaw[r..i].Unescape());
-                res.Add(msg);
+                if (l > r)
+                {
+                    var msg = new MessageDataText(messageRaw[r..l].Unescape());
+                    res.Add(msg);
+                }
             }
             else if (messageRaw[i] == ']')
             {
@@ -142,7 +146,7 @@ public static class MessageDataConverter
     {
         var mc = new MessageChain(FromString(m.message).ToArray())
         {
-            Text = m.message
+            // Text = Unescape(m.message)
         };
 
         mc.Messages.Insert(0, new MessageDataId(m.message_id, m.time));
