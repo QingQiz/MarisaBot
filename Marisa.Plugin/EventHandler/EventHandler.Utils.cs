@@ -38,7 +38,7 @@ public partial class EventHandler
     {
         var m = (msg as MessageDataNewMember)!;
         // 被人邀请
-        if (m.InvitorId != null)
+        if (m.InvitorId != null && m.InvitorId != 0)
         {
             message.Reply(new MessageDataAt((long)m.InvitorId),
                 new MessageDataText("邀请"),

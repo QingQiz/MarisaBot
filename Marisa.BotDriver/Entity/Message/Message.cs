@@ -57,9 +57,8 @@ public class Message
     /// <returns></returns>
     public bool IsPlainText()
     {
-        // return MessageChain!.Messages.All(m => m.Type is MessageDataType.Text or MessageDataType.Id) && // 确保所有消息都是纯文本
-        //        MessageChain!.Messages.Any(m => m.Type == MessageDataType.Text);                         // 确保至少存在一条数据
-        return true;
+        return MessageChain!.Messages.All(m => m.Type is MessageDataType.Text or MessageDataType.Id) && // 确保所有消息都是纯文本
+               MessageChain!.Messages.Any(m => m.Type == MessageDataType.Text);                         // 确保至少存在一条数据
     }
 
     /// <summary>

@@ -14,8 +14,7 @@ public static class MessageDataConverter
 {
     private static string Escape(this string s)
     {
-        return s;
-        // return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
+        return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
     }
 
     private static string Unescape(this string s)
@@ -83,7 +82,7 @@ public static class MessageDataConverter
             switch (data.Type)
             {
                 case MessageDataType.Text:
-                    sb.Append((data as MessageDataText)!.Text.Escape());
+                    sb.Append((data as MessageDataText)!.Text);
                     break;
                 case MessageDataType.At:
                 {
@@ -101,11 +100,11 @@ public static class MessageDataConverter
                     }
                     else if (m.Url != null)
                     {
-                        sb.Append($"[CQ:image,file={m.Url}]");
+                        sb.Append($"[CQ:image,file={m.Url.Escape()}]");
                     }
                     else if (m.Path != null)
                     {
-                        sb.Append($"[CQ:image,file=file:///{m.Path}]");
+                        sb.Append($"[CQ:image,file=file:///{m.Path.Escape()}]");
                     }
 
                     break;
@@ -182,23 +181,27 @@ public static class MessageDataConverter
         {
             case "notify":
             {
-                var message =
-                    new Message(ms, new MessageDataNudge(m.target_id, m.user_id))
-                    {
-                        Type   = d.ContainsKey("group_id") ? MessageType.GroupMessage : MessageType.FriendMessage,
-                        Sender = new SenderInfo(m.user_id, null, null, null),
-                    };
-
-                if (message.Type == MessageType.GroupMessage)
+                if (m.sub_type == "poke")
                 {
-                    message.GroupInfo = new GroupInfo(m.group_id, null, null);
-                }
+                    var message =
+                        new Message(ms, new MessageDataNudge(m.target_id, m.user_id))
+                        {
+                            Type   = d.ContainsKey("group_id") ? MessageType.GroupMessage : MessageType.FriendMessage,
+                            Sender = new SenderInfo(m.user_id, null, null, null),
+                        };
 
-                return message;
+                    if (message.Type == MessageType.GroupMessage)
+                    {
+                        message.GroupInfo = new GroupInfo(m.group_id, null, null);
+                    }
+
+                    return message;
+                }
+                return null;
             }
             case "group_increase":
             {
-                var md = new MessageDataNewMember(m.user_id, m.group_id, m.operator_id == m.user_id ? null : m.operator_id);
+                var md = new MessageDataNewMember(m.user_id, m.group_id, m.sub_type == "approve" ? null : m.operator_id);
                 var message = new Message(ms, md)
                 {
                     Type      = MessageType.GroupMessage,
