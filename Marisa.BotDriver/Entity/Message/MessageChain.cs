@@ -11,6 +11,11 @@ public class MessageChain
         Messages = messages.ToList();
     }
 
+    public MessageChain(IEnumerable<MessageData.MessageData> messages)
+    {
+        Messages = messages.ToList();
+    }
+
     public bool EnableReference = true;
 
     public bool CanBeReferenced => EnableReference && Messages.All(m => m.Type is not (

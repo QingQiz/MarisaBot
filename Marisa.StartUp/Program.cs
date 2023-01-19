@@ -1,4 +1,4 @@
-﻿using Marisa.Backend.GoCq;
+﻿using Marisa.Backend.Mirai;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marisa.StartUp;
@@ -9,7 +9,7 @@ public static class Program
     {
         var provider = new Configuration(args).Config();
 
-        var session = provider.GetService<GoCqBackend>()!;
+        var session = provider.GetService<MiraiBackend>()!;
 
         Console.WriteLine("---------------------------------------------------------------");
         Console.WriteLine("-- Running ");

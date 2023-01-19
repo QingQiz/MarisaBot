@@ -92,7 +92,30 @@ public static class MessageDataConverter
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     private static Message MessageToMessage(dynamic m, MessageSenderProvider ms)
     {
-        var message = new Message(new MessageChain(m.messageChain), ms)
+        var mds = new List<MessageData>();
+        foreach (var md in m.messageChain)
+        {
+            switch (md.type)
+            {
+                case "Source":
+                    mds.Add(new MessageDataId(md.id, md.time));
+                    break;
+                case "Plain":
+                    mds.Add(new MessageDataText(md.text));
+                    break;
+                case "At":
+                    mds.Add(new MessageDataAt(md.target, md.display));
+                    break;
+                case "Image":
+                    mds.Add(MessageDataImage.FromUrl(md.url));
+                    break;
+                default:
+                    mds.Add(new MessageDataUnknown());
+                    break;
+            }
+        }
+
+        var message = new Message(new MessageChain(mds), ms)
         {
             Type = m.type switch
             {
