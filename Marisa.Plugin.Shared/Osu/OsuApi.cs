@@ -4,6 +4,7 @@ using Flurl;
 using Flurl.Http;
 using log4net;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 
@@ -29,6 +30,7 @@ public static class OsuApi
 
     private const string TokenUri = "https://osu.ppy.sh/oauth/token";
     private const string UserInfoUri = "https://osu.ppy.sh/api/v2/users";
+    private const string FakeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
     public static readonly List<string> ModeList = new()
     {
@@ -158,8 +160,7 @@ public static class OsuApi
             request.Headers.TryAddWithoutValidation("sec-fetch-site", "none");
             request.Headers.TryAddWithoutValidation("sec-fetch-user", "?1");
             request.Headers.TryAddWithoutValidation("upgrade-insecure-requests", "1");
-            request.Headers.TryAddWithoutValidation("user-agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
+            request.Headers.TryAddWithoutValidation("user-agent", FakeUserAgent);
 
             var response = await HttpClient.SendAsync(request);
 
@@ -189,6 +190,42 @@ public static class OsuApi
         }
     }
 
+    public static async Task<List<AlphaOsuRecommend>> GetRecommends(long osuUid)
+    {
+        await "https://alphaosu.keytoix.vip/api/v1/self/users/synchronize"
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .PostJsonAsync(new object());
+
+        var rep = await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend"
+            .SetQueryParams(new
+            {
+                gameMode = 3,
+                keyCount = "4,7",
+                difficulty = "0,15",
+                passPercent = "0.2,1",
+                newRecordPercent = "0,1",
+                search = "",
+                hidePlayed = 0,
+                rule = 4,
+                current = 1,
+                pageSize = 100
+            })
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .GetStringAsync();
+
+        var res = AlphaOsuResponse.FromJson(rep);
+
+        if (!res.Success)
+        {
+            throw new HttpRequestException($"AlphaOsu Failed [{res.Code}]: {res.Message}");
+        }
+
+        return res.AlphaOsuData.Recommends;
+    }
 
     public enum OsuScoreType
     {
