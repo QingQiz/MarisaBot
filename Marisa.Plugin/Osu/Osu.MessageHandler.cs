@@ -363,7 +363,7 @@ public partial class Osu : MarisaPluginBase
     }
 
     [MarisaPluginDoc("查询某人今天恰到的 pp")]
-    [MarisaPluginCommand("todaybp")]
+    [MarisaPluginCommand("todaybp", "tdbp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message)
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
