@@ -60,14 +60,14 @@ public class ChunithmSong : Song
         var res = achievement switch
         {
             >= 100_9000 => constant + 2.15,
-            >= 100_7500 => constant + 2.0 + 0.1 / 1000 * (achievement - 100_7500),
-            >= 100_5000 => constant + 1.5 + 0.1 / 500 * (achievement - 100_5000),
-            >= 100_0000 => constant + 1.0 + 0.1 / 1000 * (achievement - 100_0000),
-            >= 97_5000  => constant + 0.0 + 0.1 / 2500 * (achievement - 97_5000),
-            >= 92_5000  => constant - 3.0 + 0.1 / 2500 * (achievement - 92_5000),
-            >= 90_0000  => constant - 5.0 + 0.1 / 1250 * (achievement - 90_0000),
-            >= 80_0000  => (constant - 5.0) / 2 + (achievement - 80_0000) * (constant - 5.0) / 2 / 10_0000,
-            >= 50_0000  => (achievement - 50_0000) * (constant - 5.0) / 2 / 30_0000,
+            >= 100_7500 => constant + 2.0 + (achievement - 100_7500.0) / (100_9000.0 - 100_7500.0) * (2.15 - 2.0),
+            >= 100_5000 => constant + 1.5 + (achievement - 100_5000.0) / (100_7500.0 - 100_5000.0) * (2.0 - 1.5),
+            >= 100_0000 => constant + 1.0 + (achievement - 100_0000.0) / (100_5000.0 - 100_0000.0) * (1.5 - 1.0),
+            >= 97_5000  => constant + 0.0 + (achievement - 97_5000.0) / (100_0000.0 - 97_5000.0) * (1.0 - 0.0),
+            >= 92_5000  => constant - 3.0 + (achievement - 92_5000.0) / (97_5000.0 - 92_5000.0) * (3.0 - 0.0),
+            >= 90_0000  => constant - 5.0 + (achievement - 90_0000.0) / (92_5000.0 - 90_0000.0) * (5.0 - 3.0),
+            >= 80_0000  => (constant - 5.0) / 2 + (achievement - 80_0000.0) / (90_0000.0 - 80_0000.0) * ((constant - 5.0) / 2),
+            >= 50_0000  => (achievement - 50_0000.0) / (80_0000.0 - 50_0000.0) * (constant - 5.0) / 2,
             _           => 0
         };
         return Math.Round(res, 2, MidpointRounding.ToZero);

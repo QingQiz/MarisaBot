@@ -181,7 +181,7 @@ public partial class ChunithmRating
 
                     var ra = $"RATING: {r:00.00}";
 
-                    nameCard.DrawText(opt, ra, Color.ParseHex("#f3ce00"));
+                    nameCard.DrawText(opt, ra, Color.ParseHex("#1f1e33"));
                     break;
                 }
 
