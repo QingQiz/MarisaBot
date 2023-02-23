@@ -15,7 +15,7 @@ public class ChunithmScore
     public long CId { get; set; }
 
     [JsonProperty("ds", Required = Required.Always)]
-    public double Constant { get; set; }
+    public decimal Constant { get; set; }
 
     [JsonProperty("fc", Required = Required.Always)]
     public string Fc { get; set; }

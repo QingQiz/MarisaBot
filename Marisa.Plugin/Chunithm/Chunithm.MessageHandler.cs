@@ -287,12 +287,12 @@ public partial class Chunithm
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState RatingLine(Message message)
     {
-        if (double.TryParse(message.Command, out var constant))
+        if (decimal.TryParse(message.Command, out var constant))
         {
             if (constant is <= 16 and >= 1)
             {
                 var a      = 97_4999;
-                var lastRa = 0.0;
+                var lastRa = 0m;
 
                 var ret = "达成率 -> Rating（每0.1分输出一次）";
 
@@ -301,7 +301,7 @@ public partial class Chunithm
                     a = ChunithmSong.NextRa(a, constant);
                     var ra = ChunithmSong.Ra(a, constant);
 
-                    if (ra - lastRa < 0.1 && a != 100_9000) continue;
+                    if (ra - lastRa < 0.1m && a != 100_9000) continue;
 
                     lastRa = ra;
                     ret    = $"{ret}\n{a:0000000} -> {ra:00.00}";

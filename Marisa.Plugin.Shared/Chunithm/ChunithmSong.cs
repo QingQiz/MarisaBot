@@ -53,21 +53,19 @@ public class ChunithmSong : Song
         }
     }
 
-    public static double Ra(int achievement, double constant)
+    public static decimal Ra(int achievement, decimal constant)
     {
-        var maxRa = constant + 2.15;
-
         var res = achievement switch
         {
-            >= 100_9000 => constant + 2.15,
-            >= 100_7500 => constant + 2.0 + (achievement - 100_7500.0) / (100_9000.0 - 100_7500.0) * (2.15 - 2.0),
-            >= 100_5000 => constant + 1.5 + (achievement - 100_5000.0) / (100_7500.0 - 100_5000.0) * (2.0 - 1.5),
-            >= 100_0000 => constant + 1.0 + (achievement - 100_0000.0) / (100_5000.0 - 100_0000.0) * (1.5 - 1.0),
-            >= 97_5000  => constant + 0.0 + (achievement - 97_5000.0) / (100_0000.0 - 97_5000.0) * (1.0 - 0.0),
-            >= 92_5000  => constant - 3.0 + (achievement - 92_5000.0) / (97_5000.0 - 92_5000.0) * (3.0 - 0.0),
-            >= 90_0000  => constant - 5.0 + (achievement - 90_0000.0) / (92_5000.0 - 90_0000.0) * (5.0 - 3.0),
-            >= 80_0000  => (constant - 5.0) / 2 + (achievement - 80_0000.0) / (90_0000.0 - 80_0000.0) * ((constant - 5.0) / 2),
-            >= 50_0000  => (achievement - 50_0000.0) / (80_0000.0 - 50_0000.0) * (constant - 5.0) / 2,
+            >= 100_9000 => constant + 2.15m,
+            >= 100_7500 => constant + 2.0m + (achievement - 100_7500m) / (100_9000m - 100_7500m) * (2.15m - 2.0m),
+            >= 100_5000 => constant + 1.5m + (achievement - 100_5000m) / (100_7500m - 100_5000m) * (2.0m - 1.5m),
+            >= 100_0000 => constant + 1.0m + (achievement - 100_0000m) / (100_5000m - 100_0000m) * (1.5m - 1.0m),
+            >= 97_5000  => constant + 0.0m + (achievement - 97_5000m) / (100_0000m - 97_5000m) * (1.0m - 0.0m),
+            >= 92_5000  => constant - 3.0m + (achievement - 92_5000m) / (97_5000m - 92_5000m) * (3.0m - 0.0m),
+            >= 90_0000  => constant - 5.0m + (achievement - 90_0000m) / (92_5000m - 90_0000m) * (5.0m - 3.0m),
+            >= 80_0000  => (constant - 5.0m) / 2 + (achievement - 80_0000m) / (90_0000m - 80_0000m) * ((constant - 5.0m) / 2),
+            >= 50_0000  => (achievement - 50_0000m) / (80_0000m - 50_0000m) * (constant - 5m) / 2,
             _           => 0
         };
         return Math.Round(res, 2, MidpointRounding.ToZero);
@@ -79,7 +77,7 @@ public class ChunithmSong : Song
     /// <param name="achievement">当前的达成率</param>
     /// <param name="constant">定数</param>
     /// <returns>达成率</returns>
-    public static int NextRa(int achievement, double constant)
+    public static int NextRa(int achievement, decimal constant)
     {
         var l = achievement;
         var r = 100_9000;
@@ -108,7 +106,7 @@ public class ChunithmSong : Song
     /// <param name="constant">定数</param>
     /// <param name="minRa">最小的Ra</param>
     /// <returns>达成率</returns>
-    public static int NextRa(double constant, double minRa)
+    public static int NextRa(decimal constant, decimal minRa)
     {
         var a = 0;
 

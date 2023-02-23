@@ -28,7 +28,7 @@ public class ChunithmTest
     [TestCase(88_8888, 14.9, 9.34)]
     [TestCase(66_6666, 14.9, 2.74)]
     [TestCase(44_4444, 14.9, 0)]
-    public void Rating_Calculator(int ach, double constant, double expected)
+    public void Rating_Calculator(int ach, decimal constant, double expected)
     {
         var actual = ChunithmSong.Ra(ach, constant);
         Assert.AreEqual(expected, actual);
@@ -39,7 +39,7 @@ public class ChunithmTest
     [TestCase(14.9, 923456, 923500)]
     [TestCase(14.9, 500000, 500607)]
     [TestCase(14.9, 0, 500607)]
-    public void Binary_Search_NextRa(double constant, int ach, int nextAch)
+    public void Binary_Search_NextRa(decimal constant, int ach, int nextAch)
     {
         var actual = ChunithmSong.NextRa(ach, constant);
         Assert.AreEqual(nextAch, actual);
@@ -52,7 +52,7 @@ public class ChunithmTest
         {
             Id         = 335,
             CId        = 335,
-            Constant   = 13.9,
+            Constant   = 13.9m,
             Rating     = 16.0,
             Fc         = "",
             Level      = "13+",
