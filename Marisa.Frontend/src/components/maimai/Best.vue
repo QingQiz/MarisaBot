@@ -2,28 +2,28 @@
     <div class="best-body">
         <div :style="`background-image: url('/assets/maimai/pic/UI_UNL_BG.png')`"
              class="bg-center bg-no-repeat bg-cover w-best">
-            <div class="">
+            <div class="font-osu-web">
                 <div class="h-[650px] bg-cover bg-bottom flex items-center justify-center"
                      :style="`background-image:url('/assets/maimai/pic/Sub.png')`">
-                    <div class="w-[800px] h-[400px] bg-cover pb-[40px] pt-[80px] px-[120px] relative"
-                         :style="`background-image:url('/assets/maimai/pic/name.png')`">
+                    <img src="/assets/maimai/pic/name.png" alt class="absolute h-[450px]">
+                    <div class="w-[800px] h-[400px] bg-cover pb-[50px] px-[130px] relative">
                         <div style="overflow-wrap: anywhere"
-                             class="text-8xl font-sans font-bold overflow-hidden w-full h-full flex justify-center items-center"
+                             class="text-8xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center"
                              :class="ra_old() + ra_new() >= (b50 ? 15000 : 8500) ? 'rainbow-text-shadow' : ''"
                         >
                             {{ json.nickname }}
                         </div>
-                        <div class="absolute text-6xl top-5 left-0 right-0 text-center"
+                        <div class="absolute text-6xl -top-3 left-0 right-0 text-center"
                              :class="ra_old() + ra_new() >= (b50 ? 15000 : 8500) ? 'rainbow-text-shadow' : ''">
                             {{ ra_old() + ra_new() }}
                         </div>
-                        <div class="absolute text-4xl top-20 left-0 right-0 text-center mt-2 font-bold">
+                        <div class="absolute text-4xl top-12 left-0 right-0 text-center mt-2 font-bold">
                             {{ ra_old() }}+{{ ra_new() }}
                         </div>
                     </div>
                 </div>
                 <div
-                    class="w-[var(--best-width)] h-[calc(var(--best-gap)_*_1.5)] overflow-x-hidden bg-center flex -mt-[100px]">
+                    class="w-[var(--best-width)] h-[calc(var(--best-gap)_*_1.5)] overflow-x-hidden bg-center flex -mt-[100px] z-10">
                     <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt>
                     <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt>
                 </div>
@@ -170,6 +170,6 @@ export default defineComponent({
 .rainbow-text-shadow {
     color: #ef3550;
     letter-spacing: 7px;
-    text-shadow: 1px 0 #f48fb1, 2px 0 #7e57c2, 3px 0 #2196f3, 4px 0 #26c6da, 5px 0 #43a047, 6px 0 #eeff41, 7px 0 #f9a825, 8px 0 #ff5722, -1px 0 #f48fb1, -2px 0 #7e57c2, -3px 0 #2196f3, -4px 0 #26c6da, -5px 0 #43a047, -6px 0 #eeff41, -7px 0 #f9a825, -8px 0 #ff5722;
+    text-shadow: 1px 0 #f48fb1, 2px 0 #7e57c2, 3px 0 #2196f3, 4px 0 #26c6da, 5px 0 #43a047, -1px 0 #f48fb1, -2px 0 #7e57c2, -3px 0 #2196f3, -4px 0 #26c6da, -5px 0 #43a047;
 }
 </style>
