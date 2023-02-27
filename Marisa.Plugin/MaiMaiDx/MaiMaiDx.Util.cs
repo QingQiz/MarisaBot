@@ -47,31 +47,7 @@ public partial class MaiMaiDx
             }
         }
 
-        MessageChain ret;
-        try
-        {
-            ret = MessageChain.FromImageB64(
-                MaiMaiDraw.DrawB40Card(await GetDxRating(username, qq, b50)).ToB64()
-            );
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
-        {
-            ret = MessageChain.FromText("“查无此人”");
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 403)
-        {
-            ret = MessageChain.FromText("“403 forbidden”");
-        }
-        catch (FlurlHttpTimeoutException)
-        {
-            ret = MessageChain.FromText("Timeout");
-        }
-        catch (FlurlHttpException e)
-        {
-            ret = MessageChain.FromText(e.Message);
-        }
-
-        return ret;
+        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(username, qq, b50));
     }
 
     #endregion

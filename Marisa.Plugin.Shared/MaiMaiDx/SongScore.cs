@@ -33,7 +33,8 @@ public class SongScore
         Type        = data.type;
     }
 
-    public SongScore(double achievement, double constant, long dxScore, string fc, string fs, string level,
+    public SongScore(
+        double achievement, double constant, long dxScore, string fc, string fs, string level,
         long levelIdx, string levelLabel, long rating, string rank, long id, string title, string type)
     {
         Achievement = achievement;
@@ -51,26 +52,31 @@ public class SongScore
         Type        = type;
     }
 
+    public static int B50Ra(decimal achievement, decimal constant)
+    {
+        var baseRa = achievement switch
+        {
+            < 50     => 7.0m,
+            < 60     => 8.0m,
+            < 70     => 9.6m,
+            < 75     => 11.2m,
+            < 80     => 12.0m,
+            < 90     => 13.6m,
+            < 94     => 15.2m,
+            < 97     => 16.8m,
+            < 98     => 20.0m,
+            < 99     => 20.3m,
+            < 99.5m  => 20.8m,
+            < 100    => 21.1m,
+            < 100.5m => 21.6m,
+            _        => 22.4m
+        };
+        return (int)Math.Floor(constant * (Math.Min(100.5m, achievement) / 100) * baseRa);
+    }
+
     public int B50Ra()
     {
-        var baseRa = Achievement switch
-        {
-            < 50    => 7.0,
-            < 60    => 8.0,
-            < 70    => 9.6,
-            < 75    => 11.2,
-            < 80    => 12.0,
-            < 90    => 13.6,
-            < 94    => 15.2,
-            < 97    => 16.8,
-            < 98    => 20.0,
-            < 99    => 20.3,
-            < 99.5  => 20.8,
-            < 100   => 21.1,
-            < 100.5 => 21.6,
-            _       => 22.4
-        };
-        return (int)Math.Floor(Constant * (Math.Min(100.5, Achievement) / 100) * baseRa);
+        return B50Ra((decimal)Achievement, (decimal)Constant);
     }
 
     public int Ra()

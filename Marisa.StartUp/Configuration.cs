@@ -1,37 +1,15 @@
-﻿using System.Reflection;
-using log4net;
+﻿using log4net;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Layout;
 using log4net.Repository.Hierarchy;
-using Marisa.Backend.Mirai;
-using Marisa.BotDriver.DI;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Marisa.StartUp;
 
-public class Configuration
+public static class Configuration
 {
-    private readonly IServiceCollection _serviceCollection;
-    private readonly string[] _args;
-
-    public Configuration(string[] args)
-    {
-        _serviceCollection =
-            MiraiBackend.Config(
-                Assembly.LoadFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Marisa.Plugin.dll")));
-        _args = args;
-    }
-
-    private void ConfigCommandLineArguments(IServiceProvider provider)
-    {
-        provider.GetService<DictionaryProvider>()!
-            .Add("QQ", long.Parse(_args[1]))
-            .Add("ServerAddress", _args[0])
-            .Add("AuthKey", _args[2]);
-    }
-
-    private void ConfigLogger()
+    public static void ConfigLogger(this IServiceCollection c)
     {
         var hierarchy = (Hierarchy)LogManager.GetRepository();
         // var hierarchy = new Hierarchy();
@@ -91,18 +69,6 @@ public class Configuration
         hierarchy.Root.Level = Level.Info;
         hierarchy.Configured = true;
 
-        _serviceCollection.AddScoped(_ => LogManager.GetLogger(GetType()));
-    }
-
-    public IServiceProvider Config()
-    {
-        ConfigLogger();
-
-        var provider = _serviceCollection.BuildServiceProvider();
-
-        // 注入命令行参数
-        ConfigCommandLineArguments(provider);
-
-        return provider;
+        c.AddScoped(_ => LogManager.GetLogger("LOG"));
     }
 }

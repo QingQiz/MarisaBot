@@ -265,7 +265,7 @@ public static class MessageDataConverter
     public static Message? ToMessage(this ResponseMessage msgIn, MessageSenderProvider ms)
     {
         var mExpando = JsonConvert.DeserializeObject<ExpandoObject>(msgIn.Text);
-        var m        = (mExpando as dynamic).data;
+        var m        = (mExpando as dynamic)!.data;
         var mDict    = (m as IDictionary<string, object>)!;
 
         var logger = LogManager.GetLogger(nameof(MessageDataConverter));

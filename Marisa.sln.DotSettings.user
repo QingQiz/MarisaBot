@@ -1,4 +1,8 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="C:\Users\sofee\.nuget\packages\microsoft.aspnetcore.openapi\7.0.3\lib\net7.0\Microsoft.AspNetCore.OpenApi.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\sofee\.nuget\packages\ffmpeg.autogen\4.3.0.1\lib\netstandard2.1\FFmpeg.AutoGen.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=cac66734_002Db1f1_002D4fce_002Db218_002D5cb62d71acbb/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Rating_Calculator" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
@@ -6,4 +10,6 @@
     &lt;TestId&gt;NUnit3x::2A61D282-1CA2-4818-89CF-5E96F94F9CB9::net7.0::Marisa.Plugin.Test.ChunithmTest.Rating_Calculator&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
+	
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=beatmapset/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

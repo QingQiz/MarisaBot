@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
@@ -9,21 +8,31 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Marisa.Backend.GoCq\Marisa.Backend.GoCq.csproj" />
-      <ProjectReference Include="..\Marisa.Backend.Mirai\Marisa.Backend.Mirai.csproj" />
-      <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
+        <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
+        <ProjectReference Include="..\Marisa.Backend.GoCq\Marisa.Backend.GoCq.csproj" />
+        <ProjectReference Include="..\Marisa.Backend.Mirai\Marisa.Backend.Mirai.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="log4net" Version="2.0.14" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Include="log4net" Version="2.0.14" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="config.yaml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <Content Include="config.yaml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
+
+        <ContentWithTargetPath Include="..\Marisa.Frontend\dist\**\*" Visible="false">
+            <TargetPath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </ContentWithTargetPath>
     </ItemGroup>
+
+    <Target Name="RunWebpack" AfterTargets="Build">
+        <Exec Command="yarn build" WorkingDirectory="..\Marisa.Frontend" />
+    </Target>
 
     <PropertyGroup>
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=.\Marisa.StartUp\</PathMap>
