@@ -2,14 +2,16 @@ import {createApp} from 'vue'
 import {createRouter, createWebHistory} from 'vue-router'
 
 import App from '@/App.vue'
-import Best from "@/components/maimai/Best.vue";
+import BestScores from "@/components/maimai/BestScores.vue";
+import MaiSong from "@/components/maimai/MaiSong.vue";
 import NotFound from "@/components/NotFound.vue";
 
 import './assets/css/tailwind.css'
 
 const routes = [
     {path: '/', component: NotFound},
-    {path: '/maimai/best', component: Best},
+    {path: '/maimai/best', component: BestScores},
+    {path: '/maimai/song', component: MaiSong},
     {path: '/:catchAll(.*)', redirect:'/'}
 
 ]

@@ -9,16 +9,16 @@
                     <div class="w-[800px] h-[400px] bg-cover pb-[50px] px-[130px] relative">
                         <div style="overflow-wrap: anywhere"
                              class="text-8xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center"
-                             :class="ra_old() + ra_new() >= (b50 ? 15000 : 8500) ? 'rainbow-text-shadow' : ''"
+                             :class="{'rainbow-text-shadow' : ra_old + ra_new >= (b50 ? 15000 : 8500)}"
                         >
                             {{ json.nickname }}
                         </div>
                         <div class="absolute text-6xl -top-3 left-0 right-0 text-center"
-                             :class="ra_old() + ra_new() >= (b50 ? 15000 : 8500) ? 'rainbow-text-shadow' : ''">
-                            {{ ra_old() + ra_new() }}
+                             :class="{'rainbow-text-shadow': ra_old + ra_new >= (b50 ? 15000 : 8500)}">
+                            {{ ra_old + ra_new }}
                         </div>
                         <div class="absolute text-4xl top-12 left-0 right-0 text-center mt-2 font-bold">
-                            {{ ra_old() }}+{{ ra_new() }}
+                            {{ ra_old }}+{{ ra_new }}
                         </div>
                     </div>
                 </div>
@@ -46,79 +46,77 @@
     </div>
 </template>
 
-<script lang="ts">
-import {defineComponent} from 'vue';
+<script setup lang="ts">
+import {computed, onMounted, ref} from 'vue';
 import axios from 'axios';
+import {useRoute} from "vue-router";
 
 import ScoreCard from "@/components/maimai/ScoreCard.vue"
 import {maimai_newRa} from '@/GlobalVars'
-import j from '../../assets/maimai/test_b50.json'
+import j from '@/assets/maimai/test_b40.json'
 
-export default defineComponent({
-    name: "BestScores",
-    components: {ScoreCard},
-    data() {
-        return {
-            json: j,
-            username: this.$route.query.username,
-            qq: this.$route.query.qq,
-            b50: this.$route.query.b50 !== undefined
-        }
-    },
-    methods: {
-        ra_old() {
-            if (this.b50) {
-                return this.json.charts.sd.reduce((ra, cur) => ra + cur.ra, 0);
-            } else {
-                return this.json.charts.sd.reduce((ra, cur) => ra + cur.ra, 0) + this.json.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
-            }
-        },
-        ra_new() {
-            if (this.b50) {
-                return this.json.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
-            } else {
-                return this.json.additional_rating
-            }
-        },
-        calcRaNew() {
-            let ds = this.json.charts.dx.map(x => x.ds)
-            let ach = this.json.charts.dx.map(x => x.achievements)
+const route = useRoute()
 
-            ds = ds.concat(this.json.charts.sd.map(x => x.ds))
-            ach = ach.concat(this.json.charts.sd.map(x => x.achievements))
+let json = ref(j)
+let username = ref(route.query.username)
+let qq = ref(route.query.qq)
+let b50 = ref(route.query.b50 != null)
 
-            let ds_str = ds.map(x => 'constants=' + x).join('&')
-            let ach_str = ach.map(x => 'achievements=' + x).join('&')
 
-            return axios.get(maimai_newRa + '?' + ds_str + '&' + ach_str)
-        }
-    },
-    mounted() {
-        axios.post('https://www.diving-fish.com/api/maimaidxprober/query/player', this.username !== undefined ? {
-            username: this.username,
-            b50: this.b50 ? true : undefined
-        } : {
-            qq: this.qq,
-            b50: this.b50 ? true : undefined
-        }).then(data => {
-            this.json = data.data
-            if (this.b50) {
-                this.calcRaNew().then(data => {
-                    for (let i = 0; i < this.json.charts.dx.length; i++) {
-                        this.json.charts.dx[i].ra = data.data[i + this.json.charts.sd.length]
-                    }
-                    for (let i = 0; i < this.json.charts.sd.length; i++) {
-                        this.json.charts.sd[i].ra = data.data[i]
-                    }
-                }).catch(err => {
-                    console.log(err)
-                });
-            }
-        }).catch(err => {
-            console.log(err)
-            document.body.innerHTML = err.response.status + ': ' + err.response.data.message
-        })
+let ra_old = computed(() => {
+    if (b50.value) {
+        return json.value.charts.sd.reduce((ra, cur) => ra + cur.ra, 0);
+    } else {
+        return json.value.charts.sd.reduce((ra, cur) => ra + cur.ra, 0) + json.value.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
     }
+})
+
+let ra_new = computed(() => {
+    if (b50.value) {
+        return json.value.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
+    } else {
+        return json.value.additional_rating
+    }
+});
+
+function calc_b50_ra() {
+    let ds = json.value.charts.dx.map(x => x.ds)
+    let ach = json.value.charts.dx.map(x => x.achievements)
+
+    ds = ds.concat(json.value.charts.sd.map(x => x.ds))
+    ach = ach.concat(json.value.charts.sd.map(x => x.achievements))
+
+    let ds_str = ds.map(x => 'constants=' + x).join('&')
+    let ach_str = ach.map(x => 'achievements=' + x).join('&')
+
+    return axios.get(maimai_newRa + '?' + ds_str + '&' + ach_str)
+}
+
+onMounted(() => {
+    axios.post('https://www.diving-fish.com/api/maimaidxprober/query/player', username.value != null ? {
+        username: username.value,
+        b50: b50.value ? true : undefined
+    } : {
+        qq: qq.value,
+        b50: b50.value ? true : undefined
+    }).then(data => {
+        json.value = data.data
+        if (b50.value) {
+            calc_b50_ra().then(data => {
+                for (let i = 0; i < json.value.charts.dx.length; i++) {
+                    json.value.charts.dx[i].ra = data.data[i + json.value.charts.sd.length]
+                }
+                for (let i = 0; i < json.value.charts.sd.length; i++) {
+                    json.value.charts.sd[i].ra = data.data[i]
+                }
+            }).catch(err => {
+                console.log(err)
+            });
+        }
+    }).catch(err => {
+        console.log(err)
+        document.body.innerHTML = err.response.status + ': ' + err.response.data.message
+    })
 })
 </script>
 
@@ -151,20 +149,6 @@ export default defineComponent({
 
 .h-gap {
     height: var(--best-gap);
-}
-
-.h-best-t {
-    height: var(--best-height-t);
-}
-
-.h-best-b {
-    height: var(--best-height-b)
-}
-
-.rainbow-text {
-    background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
-    color: transparent;
-    -webkit-background-clip: text;
 }
 
 .rainbow-text-shadow {
