@@ -125,6 +125,8 @@ public partial class Osu
     public override async Task BackgroundService()
     {
         // 不要并发，小心ppy给你ban了
+        // 1200/minute, with burst capability of up to 200 beyond that
+        // > 60/minute, you should probably give peppy a yell
         while (true)
         {
             var now  = DateTime.Now;
@@ -169,6 +171,7 @@ public partial class Osu
 
                     tasks.Enqueue(task);
                 }
+                await Task.Delay(TimeSpan.FromSeconds(1));
             }
         }
     }

@@ -49,6 +49,7 @@ public static class Program
             ctx.Response.Redirect("/index.html");
             return Task.CompletedTask;
         });
+        app.MapFallbackToFile("index.html");
 
         // run
         await Task.WhenAll(app.RunAsync(), app.Services.GetService<MiraiBackend>()!.Invoke());

@@ -25,8 +25,8 @@
 
         <ContentWithTargetPath Include="..\Marisa.Frontend\dist\**\*" Visible="false">
             <TargetPath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
         </ContentWithTargetPath>
     </ItemGroup>
 

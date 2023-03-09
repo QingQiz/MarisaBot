@@ -9,5 +9,6 @@
         <ProductionBuildCommand>npm run build</ProductionBuildCommand>
         <!-- Folder where production build objects will be placed -->
         <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+        <OutputType>Module</OutputType>
     </PropertyGroup>
 </Project>
