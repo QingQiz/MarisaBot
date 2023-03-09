@@ -16,6 +16,7 @@ public class BotDbContext : DbContext
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }
     public DbSet<BlackList> BlackLists { get; set; }
     public DbSet<OsuBind> OsuBinds { get; set; }
+    public DbSet<OsuUserHistory> OsuUserHistories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {

@@ -1,4 +1,7 @@
-﻿using Marisa.EntityFrameworkCore;
+﻿using Flurl.Http;
+using log4net;
+using Marisa.EntityFrameworkCore;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Osu;
 
@@ -109,13 +112,64 @@ public partial class Osu
     private static async Task<long> GetOsuIdByName(string name)
     {
         var db = new BotDbContext();
-        
+
         var u = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == name);
-        
+
         if (u != null) return u.OsuUserId;
-        
+
         var id = await OsuApi.GetUserInfoByName(name);
 
         return id.Id;
+    }
+
+    public override async Task BackgroundService()
+    {
+        // 不要并发，小心ppy给你ban了
+        while (true)
+        {
+            var now  = DateTime.Now;
+            var next = now.AddDays(1);
+
+            await Task.Delay(new DateTime(next.Year, next.Month, next.Day) - now);
+
+            var db = new BotDbContext();
+
+            var tasks = new Queue<(string OsuUserName, int i, long id)>();
+
+            foreach (var bind in db.OsuBinds)
+            {
+                if (bind == null) continue;
+
+                for (var i = 0; i < 4; i++)
+                {
+                    tasks.Enqueue((bind.OsuUserName, i, bind.OsuUserId));
+                }
+            }
+
+            while (tasks.Any())
+            {
+                var task = tasks.Dequeue();
+
+                try
+                {
+                    var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i, 0);
+                    await db.OsuUserHistories.AddAsync(new OsuUserHistory
+                    {
+                        OsuUserName = task.OsuUserName,
+                        OsuUserId   = task.id,
+                        Mode        = task.i,
+                        UserInfo    = result.ToJson(),
+                    });
+                    await db.SaveChangesAsync();
+                }
+                catch (FlurlHttpException e) when (e.StatusCode != 404)
+                {
+                    var log = LogManager.GetLogger(typeof(Osu));
+                    log.Error("获取用户信息失败: ", e);
+
+                    tasks.Enqueue(task);
+                }
+            }
+        }
     }
 }
