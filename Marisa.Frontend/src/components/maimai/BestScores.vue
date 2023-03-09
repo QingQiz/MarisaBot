@@ -43,7 +43,7 @@
             </div>
         </div>
     </div>
-    <div v-else class="w-[1000px] h-[300px] flex items-center justify-center bg-red-600">
+    <div v-else class="w-[1000px] h-[700px] flex items-center justify-center bg-red-600">
         <div class="text-white font-bold font-osu-web text-8xl text-center break-all">
             {{ err_msg }}
         </div>
@@ -109,10 +109,10 @@ onMounted(() => {
         if (b50.value) {
             calc_b50_ra().then(data => {
                 for (let i = 0; i < json.value.charts.dx.length; i++) {
-                    json.value.charts.dx[i].ra = data.data[i + json.value.charts.sd.length]
+                    json.value.charts.dx[i].ra = data.data[i]
                 }
                 for (let i = 0; i < json.value.charts.sd.length; i++) {
-                    json.value.charts.sd[i].ra = data.data[i]
+                    json.value.charts.sd[i].ra = data.data[i + json.value.charts.dx.length]
                 }
             }).catch(err => {
                 console.log(err)

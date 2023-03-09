@@ -22,8 +22,6 @@ public static class WebApi
                 return Browser;
             }
 
-
-
             lock (Frontend)
             {
                 using var browserFetcher = new BrowserFetcher();
