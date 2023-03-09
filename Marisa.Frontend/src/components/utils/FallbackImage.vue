@@ -1,23 +1,21 @@
 ﻿<template>
     <img :src="src[srcIndex]" v-if="srcIndex < src.length" @error="srcIndex++" alt v-bind="$attrs" ref="img"/>
-    <img :src="fallback" v-if="srcIndex === src.length" alt v-bind="$attrs" ref="img">
+    <img :src="fallback" v-if="fallback != null && srcIndex === src.length" alt v-bind="$attrs" ref="img">
 </template>
 
 <script setup lang="ts">
-import {defineProps, ref, defineExpose} from 'vue';
+import {computed, ref} from 'vue';
 
 const props = defineProps({
     src: Array,
     fallback: String,
 });
 
-defineExpose({
-    GetAverageRGB
-})
 
 const img = ref<HTMLImageElement | null>(null);
 
 let srcIndex = ref(0)
+let currentSrc = computed(() => img.value?.src);
 
 function GetAverageRGB(x: number, y: number, w: number, h: number) {
     let blockSize = 3,
@@ -66,5 +64,10 @@ function GetAverageRGB(x: number, y: number, w: number, h: number) {
 
     return rgb;
 }
+
+defineExpose({
+    GetAverageRGB,
+    src: currentSrc,
+})
 
 </script>

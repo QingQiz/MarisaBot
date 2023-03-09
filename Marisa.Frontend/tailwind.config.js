@@ -4,7 +4,8 @@ module.exports = {
     theme: {
         extend: {},
         fontFamily: {
-            'osu-web': 'Torus,Inter,"Helvetica Neue",Tahoma,Arial,"Hiragino Kaku Gothic ProN",Meiryo,"Microsoft YaHei","Apple SD Gothic Neo",sans-serif'.split(',')
+            'osu-web': 'Torus,Inter,"Helvetica Neue",Tahoma,Arial,"Hiragino Kaku Gothic ProN",Meiryo,"Microsoft YaHei","Apple SD Gothic Neo",sans-serif'.split(','),
+            'fangSong': 'Torus,FangSong'.split(','),
         }
     },
     variants: {

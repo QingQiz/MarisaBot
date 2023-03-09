@@ -43,40 +43,33 @@
 
 <script setup lang="ts">
 
-import {computed, ref, defineProps} from "vue";
+import {computed, ref} from "vue";
 import FallbackImage from "@/components/utils/FallbackImage.vue";
+import {maimai_alternativeCover, maimai_levelColors} from "@/GlobalVars";
 
 interface Props {
-    song_id: number,
+    song_id?: number,
 
-    title: string,
-    type: string,
-    level_index: number,
+    title?: string,
+    type?: string,
+    level_index?: number,
 
-    achievements: number,
+    achievements?: number,
 
-    rate: string,
-    ds: number,
-    ra: number,
+    rate?: string,
+    ds?: number,
+    ra?: number,
 
-    fs: string,
-    fc: string,
+    fs?: string,
+    fc?: string,
 }
 
 const props = defineProps<Props>();
 const imgEl = ref<typeof FallbackImage | null>(null);
 
-const level_colors = [
-    '#52e72b',
-    '#ffa801',
-    '#ff5a66',
-    '#c64fe4',
-    '#dbaaff'
-]
-
 let img_color = ref({r: -1, g: -1, b: -1})
 
-let level_color = computed(() => level_colors[props.level_index ?? 0])
+let level_color = computed(() => maimai_levelColors[props.level_index ?? 0])
 
 let text_color = computed(() => {
     let {r, g, b} = img_color.value
@@ -92,16 +85,7 @@ let bg_color = computed(() => {
     return `linear-gradient(to right, ${MakeRgba(img_color.value, 1)} 50%, ${MakeRgba(img_color.value, 0)})`
 })
 
-let available_cover = computed(() => {
-    return [
-        `/assets/maimai/cover/${props.song_id}.png`,
-        `/assets/maimai/cover/${props.song_id}.jpg`,
-        `/assets/maimai/cover/${(props.song_id ?? 0) + 10000}.jpg`,
-        `/assets/maimai/cover/${(props.song_id ?? 0) + 10000}.png`,
-        `/assets/maimai/cover/${(props.song_id ?? 0) - 10000}.jpg`,
-        `/assets/maimai/cover/${(props.song_id ?? 0) - 10000}.png`,
-    ]
-});
+let available_cover = computed(() => maimai_alternativeCover(props.song_id ?? 0));
 
 function UpdateColor() {
     img_color.value = imgEl.value?.GetAverageRGB(0, 0, 12, 200)

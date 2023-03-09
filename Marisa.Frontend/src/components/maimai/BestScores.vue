@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="best-body">
+    <div class="best-body" v-if="err_msg === ''">
         <div :style="`background-image: url('/assets/maimai/pic/UI_UNL_BG.png')`"
              class="bg-center bg-no-repeat bg-cover w-best">
             <div class="font-osu-web">
@@ -7,8 +7,7 @@
                      :style="`background-image:url('/assets/maimai/pic/Sub.png')`">
                     <img src="/assets/maimai/pic/name.png" alt class="absolute h-[450px]">
                     <div class="w-[800px] h-[400px] bg-cover pb-[50px] px-[130px] relative">
-                        <div style="overflow-wrap: anywhere"
-                             class="text-8xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center"
+                        <div class="text-8xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center break-all"
                              :class="{'rainbow-text-shadow' : ra_old + ra_new >= (b50 ? 15000 : 8500)}"
                         >
                             {{ json.nickname }}
@@ -44,6 +43,11 @@
             </div>
         </div>
     </div>
+    <div v-else class="w-[1000px] h-[300px] flex items-center justify-center bg-red-600">
+        <div class="text-white font-bold font-osu-web text-8xl text-center break-all">
+            {{ err_msg }}
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -61,6 +65,7 @@ let json = ref(j)
 let username = ref(route.query.username)
 let qq = ref(route.query.qq)
 let b50 = ref(route.query.b50 != null)
+let err_msg = ref('')
 
 
 let ra_old = computed(() => {
@@ -114,8 +119,7 @@ onMounted(() => {
             });
         }
     }).catch(err => {
-        console.log(err)
-        document.body.innerHTML = err.response.status + ': ' + err.response.data.message
+        err_msg.value = err.response.status + ': ' + err.response.data.message
     })
 })
 </script>
