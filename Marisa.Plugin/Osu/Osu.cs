@@ -142,10 +142,7 @@ public partial class Osu
             {
                 if (bind == null) continue;
 
-                for (var i = 0; i < 4; i++)
-                {
-                    tasks.Enqueue((bind.OsuUserName, i, bind.OsuUserId));
-                }
+                tasks.Enqueue((bind.OsuUserName, OsuApi.ModeList.IndexOf(bind.GameMode), bind.OsuUserId));
             }
 
             while (tasks.Any())
@@ -157,10 +154,11 @@ public partial class Osu
                     var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i, 0);
                     await db.OsuUserHistories.AddAsync(new OsuUserHistory
                     {
-                        OsuUserName = task.OsuUserName,
-                        OsuUserId   = task.id,
-                        Mode        = task.i,
-                        UserInfo    = result.ToJson(),
+                        OsuUserName  = task.OsuUserName,
+                        OsuUserId    = task.id,
+                        Mode         = task.i,
+                        UserInfo     = result.ToJson(),
+                        CreationTime = DateTime.Now
                     });
                     await db.SaveChangesAsync();
                 }
@@ -171,6 +169,7 @@ public partial class Osu
 
                     tasks.Enqueue(task);
                 }
+
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
         }

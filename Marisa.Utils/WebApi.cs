@@ -14,7 +14,15 @@ public static class WebApi
     {
         get
         {
-            if (_browserInner is not null) return _browserInner;
+            if (_browserInner is not null)
+            {
+                if (!_browserInner.IsClosed) return _browserInner;
+
+                _browserInner = null;
+                return Browser;
+            }
+
+
 
             lock (Frontend)
             {
@@ -29,6 +37,7 @@ public static class WebApi
     public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
     {
         await using var page = await Browser.NewPageAsync();
+        await page.BringToFrontAsync();
 
         if (!string.IsNullOrWhiteSpace(username))
         {
@@ -38,6 +47,7 @@ public static class WebApi
         {
             await page.GoToAsync(Frontend + "/maimai/best?" + "qq=" + qq + (b50 ? "&b50=" + b50 : ""));
         }
+
         await page.WaitForNetworkIdleAsync();
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
     }

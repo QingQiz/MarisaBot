@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,4 +20,6 @@ public class OsuUserHistory
     public long OsuUserId { get; set; }
     
     public string UserInfo { get; set; }
+
+    public DateTime CreationTime { get; set; }
 }
