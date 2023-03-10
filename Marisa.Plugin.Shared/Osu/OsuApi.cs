@@ -1,16 +1,21 @@
-﻿using System.Net;
+﻿using System.IO.Compression;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Web;
 using Flurl;
 using Flurl.Http;
 using log4net;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
+using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Osu;
 
-public static class OsuApi
+public static partial class OsuApi
 {
     private static string? _token;
     private static DateTime? _tokenExpire;
@@ -101,6 +106,12 @@ public static class OsuApi
         }
     }
 
+    public static IFlurlRequest Request(string uri)
+    {
+        return uri.WithHeader("Accept", "application/json")
+            .WithOAuthBearerToken(Token);
+    }
+
     public static async Task<OsuScore[]?> GetScores(
         long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false, int retry = 5)
     {
@@ -143,6 +154,76 @@ public static class OsuApi
         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
     });
 
+    public static async Task<List<AlphaOsuRecommend>> GetRecommends(long osuUid)
+    {
+        await "https://alphaosu.keytoix.vip/api/v1/self/users/synchronize"
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .PostJsonAsync(new object());
+
+        var rep = await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend"
+            .SetQueryParams(new
+            {
+                gameMode         = 3,
+                keyCount         = "4,7",
+                difficulty       = "0,15",
+                passPercent      = "0.2,1",
+                newRecordPercent = "0,1",
+                search           = "",
+                hidePlayed       = 0,
+                rule             = 4,
+                current          = 1,
+                pageSize         = 100
+            })
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .GetStringAsync();
+
+        var res = AlphaOsuResponse.FromJson(rep);
+
+        if (!res.Success)
+        {
+            throw new HttpRequestException($"AlphaOsu Failed [{res.Code}]: {res.Message}");
+        }
+
+        return res.AlphaOsuData.Recommends;
+    }
+
+    public enum OsuScoreType
+    {
+        Recent,
+        Best
+    }
+
+    public static bool TryGetBeatmapCover(string beatmapPath, out string? coverPath)
+    {
+        var lines = File.ReadLines(beatmapPath);
+        var regex = BeatmapCoverMatcher();
+
+        foreach (var line in lines)
+        {
+            if (regex.Match(line) is not { Success: true } match) continue;
+
+            coverPath = Path.Join(Path.GetDirectoryName(beatmapPath), match.Groups[1].Value);
+            return true;
+        }
+
+        coverPath = null;
+        return false;
+    }
+
+    [GeneratedRegex(@"^\s*\d+\s*,\s*\d+\s*,\s*""(.*)""\s*,\s*\d+\s*,\s*\d+\s*$")]
+    private static partial Regex BeatmapCoverMatcher();
+
+    #region Beatmap Downloader
+
+    private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
+
+    private static Func<long, string> BeatmapsetPath => beatmapsetId => Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
+
+    // 从 sayobot 镜像下载 beatmap
     public static async Task<string> DownloadBeatmap(long beatmapId, string path, int retry = 10)
     {
         async Task<string> DownloadBeatmapInner()
@@ -190,46 +271,162 @@ public static class OsuApi
         }
     }
 
-    public static async Task<List<AlphaOsuRecommend>> GetRecommends(long osuUid)
+    // 从指定的 beatmapsetId 和 beatmap 的 md5 获取 beatmap 的路径
+    private static string GetBeatmapPathByMd5(long beatmapsetId, string checksum)
     {
-        await "https://alphaosu.keytoix.vip/api/v1/self/users/synchronize"
-            .WithHeader("uid", osuUid)
-            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
-            .WithHeader("User-Agent", FakeUserAgent)
-            .PostJsonAsync(new object());
+        var path = BeatmapsetPath(beatmapsetId);
 
-        var rep = await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend"
-            .SetQueryParams(new
-            {
-                gameMode = 3,
-                keyCount = "4,7",
-                difficulty = "0,15",
-                passPercent = "0.2,1",
-                newRecordPercent = "0,1",
-                search = "",
-                hidePlayed = 0,
-                rule = 4,
-                current = 1,
-                pageSize = 100
-            })
-            .WithHeader("uid", osuUid)
-            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
-            .WithHeader("User-Agent", FakeUserAgent)
-            .GetStringAsync();
-
-        var res = AlphaOsuResponse.FromJson(rep);
-
-        if (!res.Success)
+        if (Directory.Exists(path))
         {
-            throw new HttpRequestException($"AlphaOsu Failed [{res.Code}]: {res.Message}");
+            foreach (var f in Directory.GetFiles(path, "*.osu", SearchOption.AllDirectories))
+            {
+                var hash = File.ReadAllText(f).GetMd5Hash();
+
+                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
+                {
+                    return f;
+                }
+            }
         }
 
-        return res.AlphaOsuData.Recommends;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            goto Exception;
+        }
+
+        // 如果是 windows 的话，检查是否已经安装过 osu
+        var reg = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes\osu\DefaultIcon");
+
+        var osuPath = reg?.GetValue(string.Empty) as string;
+
+        // 没安装 osu 直接跳过
+        if (string.IsNullOrEmpty(osuPath))
+        {
+            goto Exception;
+        }
+
+        osuPath = Path.GetDirectoryName(osuPath.Split(",")[0].Trim('"'));
+        // osu 中已上传的图以 beatmapset id 开头，并且不会嵌套
+        foreach (var p in Directory.GetDirectories(Path.Join(osuPath, "Songs"), $"{beatmapsetId}*", SearchOption.TopDirectoryOnly))
+        {
+            foreach (var f in Directory.GetFiles(p, "*.osu", SearchOption.AllDirectories))
+            {
+                var hash = File.ReadAllText(f).GetMd5Hash();
+
+                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
+                {
+                    return f;
+                }
+            }
+        }
+
+        Exception:
+        throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
     }
 
-    public enum OsuScoreType
+    // 从 beatmap 获取 beatmap 的路径
+    public static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
     {
-        Recent,
-        Best
+        var path = BeatmapsetPath(beatmap.BeatmapsetId);
+
+        object l;
+
+        // 获取特定 beatmap set 的锁（没有的话创建一个）
+        lock (BeatmapDownloaderLocker)
+        {
+            if (BeatmapDownloaderLocker.ContainsKey(beatmap.BeatmapsetId))
+            {
+                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId];
+            }
+            else
+            {
+                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId] = new object();
+            }
+        }
+
+        // 套上这个锁，如果同时有两个下载，则会分别走 if 的两个分支
+        lock (l)
+        {
+            // 已经额外下了谱面，要么直接获取，要么下载更新
+            if (Directory.Exists(path))
+            {
+                // 如果谱面更新了，这里会抛异常
+                try
+                {
+                    return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+                }
+                catch (FileNotFoundException)
+                {
+                    Directory.Delete(path, true);
+
+                    // 重新下载一次，如果还找不到，那就不重试了
+                    if (retry)
+                    {
+                        return GetBeatmapPath(beatmap, false);
+                    }
+
+                    throw;
+                }
+            }
+
+            // 如果没有额外下载谱面，我们尝试找已经安装了的 osu，找里面有没有我们需要的谱面
+            try
+            {
+                return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+            }
+            catch (FileNotFoundException)
+            {
+                // 没找到就额外下载
+            }
+
+            string download;
+            try
+            {
+                download = DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
+            }
+            catch (Exception e)
+            {
+                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                throw new Exception($"Network Error While Downloading Beatmap: {e.Message}");
+            }
+
+            try
+            {
+                ZipFile.ExtractToDirectory(download, path);
+            }
+            catch (Exception e)
+            {
+                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                throw new Exception($"A Error Occurred While Extracting Beatmap: {e.Message}");
+            }
+
+            File.Delete(download);
+
+            var cover = Directory.GetFiles(path, "*.osu", SearchOption.AllDirectories)
+                .AsParallel()
+                .Select(f =>
+                {
+                    TryGetBeatmapCover(f, out var cover);
+                    return Path.GetFileName(cover);
+                })
+                .Where(x => x != null)
+                .Cast<string>()
+                .ToHashSet();
+
+            // 删除除了谱面文件（.osu）和封面 以外的所有文件，从而减小体积
+            Parallel.ForEach(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories), f =>
+            {
+                if (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)) return;
+                if (cover.Contains(Path.GetFileName(f))) return;
+
+                File.Delete(f);
+            });
+
+            return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+        }
+
+        // 我们不需要删除字典里的锁，因为下载的谱面总数不会特别巨大
     }
+
+    #endregion
 }

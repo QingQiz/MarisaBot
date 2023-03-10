@@ -1,8 +1,11 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu;
+using Marisa.Plugin.Shared.Osu.Entity.Score;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
@@ -31,4 +34,26 @@ public class OsuTest
 
         Assert.IsTrue(File.Exists(filename));
     }
+
+    [Test]
+    [TestCase(4001513)]
+    public async Task BeatmapCover_Should_Be_Got(long beatmapId)
+    {
+        var result = await OsuApi.Request("https://osu.ppy.sh/api/v2/users/16265882/scores/best?include_fails=0&mode=mania&limit=1&offset=0").GetStringAsync();
+        var score  = OsuScore.FromJson(result)!.First(x => x.Beatmap.Id == beatmapId);
+        var cover  = score.Beatmap.TryGetCover();
+        Assert.NotNull(cover);
+        Assert.IsTrue(File.Exists(cover));
+    }
+    //
+    // [Test]
+    // public async Task T()
+    // {
+    //     var result = await OsuApi.Request("https://osu.ppy.sh/api/v2/users/16265882/scores/best?include_fails=0&mode=mania&limit=1&offset=0").GetStringAsync();
+    //     
+    //     await File.WriteAllTextAsync(@"C:\Users\sofee\Desktop\score.json", result);
+    //
+    //     result = await OsuApi.Request("https://osu.ppy.sh/api/v2/beatmaps/4001513").GetStringAsync();
+    //     await File.WriteAllTextAsync(@"C:\Users\sofee\Desktop\beatmap.json", result);
+    // }
 }

@@ -85,4 +85,9 @@ public class Beatmap
 
     [JsonProperty("checksum", Required = Required.Always)]
     public string Checksum { get; set; }
+
+    public string? TryGetCover()
+    {
+        return OsuApi.TryGetBeatmapCover(OsuApi.GetBeatmapPath(this), out var cover) ? cover! : null;
+    }
 }

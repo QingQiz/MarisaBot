@@ -1,11 +1,5 @@
-﻿using System.IO.Compression;
-using System.Runtime.InteropServices;
-using log4net;
-using Marisa.Plugin.Shared.Osu.Drawer;
-using Marisa.Plugin.Shared.Osu.Entity.Score;
+﻿using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Utils;
-using Microsoft.Win32;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
@@ -27,153 +21,6 @@ namespace Marisa.Plugin.Shared.Osu;
 
 public static class PerformanceCalculator
 {
-    private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
-
-    private static Func<long, string> BeatmapsetPath => beatmapsetId => Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
-
-    private static string GetBeatmapPath(long beatmapsetId, string checksum)
-    {
-        var path = BeatmapsetPath(beatmapsetId);
-
-        if (Directory.Exists(path))
-        {
-            foreach (var f in Directory.GetFiles(path, "*.osu", SearchOption.AllDirectories))
-            {
-                var hash = File.ReadAllText(f).GetMd5Hash();
-
-                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
-                {
-                    return f;
-                }
-            }
-        }
-
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            goto Exception;
-        }
-
-        // 如果是 windows 的话，检查是否已经安装过 osu
-        var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes\osu\DefaultIcon");
-
-        var osuPath = reg?.GetValue(string.Empty) as string;
-
-        // 没安装 osu 直接跳过
-        if (string.IsNullOrEmpty(osuPath))
-        {
-            goto Exception;
-        }
-
-        osuPath = Path.GetDirectoryName(osuPath.Split(",")[0].Trim('"'));
-        // osu 中已上传的图以 beatmapset id 开头，并且不会嵌套
-        foreach (var p in Directory.GetDirectories(Path.Join(osuPath, "Songs"), $"{beatmapsetId}*", SearchOption.TopDirectoryOnly))
-        {
-            foreach (var f in Directory.GetFiles(p, "*.osu", SearchOption.AllDirectories))
-            {
-                var hash = File.ReadAllText(f).GetMd5Hash();
-
-                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
-                {
-                    return f;
-                }
-            }
-        }
-
-        Exception:
-        throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
-    }
-
-    private static string GetBeatmapPath(Entity.Score.Beatmap beatmap, bool retry = true)
-    {
-        var path = BeatmapsetPath(beatmap.BeatmapsetId);
-
-        object l;
-
-        // 获取特定 beatmap set 的锁（没有的话创建一个）
-        lock (BeatmapDownloaderLocker)
-        {
-            if (BeatmapDownloaderLocker.ContainsKey(beatmap.BeatmapsetId))
-            {
-                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId];
-            }
-            else
-            {
-                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId] = new object();
-            }
-        }
-
-        // 套上这个锁，如果同时有两个下载，则会分别走 if 的两个分支
-        lock (l)
-        {
-            // 已经额外下了谱面，要么直接获取，要么下载更新
-            if (Directory.Exists(path))
-            {
-                // 如果谱面更新了，这里会抛异常
-                try
-                {
-                    return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
-                }
-                catch (FileNotFoundException)
-                {
-                    Directory.Delete(path, true);
-
-                    // 重新下载一次，如果还找不到，那就不重试了
-                    if (retry)
-                    {
-                        return GetBeatmapPath(beatmap, false);
-                    }
-
-                    throw;
-                }
-            }
-
-            // 如果没有额外下载谱面，我们尝试找已经安装了的 osu，找里面有没有我们需要的谱面
-            try
-            {
-                return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
-            }
-            catch (FileNotFoundException)
-            {
-                // 没找到就额外下载
-            }
-
-            string download;
-            try
-            {
-                download = OsuApi.DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
-            }
-            catch (Exception e)
-            {
-                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
-                throw new Exception($"Network Error While Downloading Beatmap: {e.Message}");
-            }
-
-            try
-            {
-                ZipFile.ExtractToDirectory(download, path);
-            }
-            catch (Exception e)
-            {
-                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
-                throw new Exception($"A Error Occurred While Extracting Beatmap: {e.Message}");
-            }
-
-            File.Delete(download);
-
-            // 删除除了谱面文件（.osu）以外的所有文件，从而减小体积
-            Parallel.ForEach(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories), f =>
-            {
-                if (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)) return;
-
-                File.Delete(f);
-            });
-
-            return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum);
-        }
-
-        // 我们不需要删除字典里的锁，因为下载的谱面总数不会特别巨大
-    }
-
     private static Mod[] GetMods(Ruleset ruleset, string[]? modsIn)
     {
         if (modsIn == null) return Array.Empty<Mod>();
@@ -222,7 +69,7 @@ public static class PerformanceCalculator
         string path;
         try
         {
-            path = GetBeatmapPath(score.Beatmap);
+            path = OsuApi.GetBeatmapPath(score.Beatmap);
         }
         catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
         {
@@ -249,7 +96,7 @@ public static class PerformanceCalculator
 
         try
         {
-            path = GetBeatmapPath(score.Beatmap);
+            path = OsuApi.GetBeatmapPath(score.Beatmap);
         }
         catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
         {
