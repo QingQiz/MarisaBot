@@ -22,13 +22,13 @@ public static class OsuScoreDrawer
     {
         var cover = score.Beatmap.TryGetCover();
 
-        if (cover == null)
+        if (cover != null && !File.Exists(cover))
         {
-            Directory.Delete(OsuApi.GetBeatmapPath(score.Beatmap), true);
+            var p = OsuApi.GetBeatmapPath(score.Beatmap);
+            Directory.Delete(Path.GetDirectoryName(p)!, true);
+            // re-download
+            cover = score.Beatmap.TryGetCover();
         }
-
-        // re-download
-        cover = score.Beatmap.TryGetCover();
 
         return await Image.LoadAsync(cover);
     }
