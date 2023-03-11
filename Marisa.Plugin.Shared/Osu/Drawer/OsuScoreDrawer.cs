@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Flurl.Http;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
@@ -22,15 +23,30 @@ public static class OsuScoreDrawer
     {
         var cover = score.Beatmap.TryGetCover();
 
-        if (cover != null && !File.Exists(cover))
+        if (cover != null && File.Exists(cover)) return await Image.LoadAsync(cover);
+
+        var coverList = new[]
         {
-            var p = OsuApi.GetBeatmapPath(score.Beatmap);
-            Directory.Delete(Path.GetDirectoryName(p)!, true);
-            // re-download
-            cover = score.Beatmap.TryGetCover();
+            score.Beatmapset.Covers.Cover2X,
+            score.Beatmapset.Covers.Card2X,
+            score.Beatmapset.Covers.Cover,
+            score.Beatmapset.Covers.Card,
+            score.Beatmapset.Covers.Slimcover2X,
+            score.Beatmapset.Covers.Slimcover,
+        };
+
+        foreach (var uri in coverList)
+        {
+            try
+            {
+                return await OsuDrawerCommon.GetCacheOrDownload(uri, "jpg");
+            }
+            catch (FlurlHttpException e) when (e.StatusCode == 404)
+            {
+            }
         }
 
-        return await Image.LoadAsync(cover);
+        return new Image<Rgba32>(ImageWidth, 500).Clear(Color.Black);
     }
 
     private const int ImageWidth = 2000;
