@@ -27,10 +27,15 @@ public partial class MaiMaiDx
             }
             else
             {
-                songPath =
+                var path =
                     Directory.GetDirectories(ConfigurationManager.Configuration.MaiMai.BeatMapPath, $"{song.Id}_*",
-                        SearchOption.AllDirectories).First();
-                songPath = Path.Join(songPath, "track.mp3");
+                        SearchOption.AllDirectories).FirstOrDefault();
+                if (path == null)
+                {
+                    StartSongSoundGuess(message, qq);
+                    return;
+                }
+                songPath = Path.Join(path, "track.mp3");
 
                 SongPath[song.Id] = songPath;
             }
