@@ -625,9 +625,9 @@ public static class OsuScoreDrawer
 
                 cards2.AddRange(new[]
                 {
-                    GetKeyValuePair("MAX", $"{score.Statistics.CountGeki:N0}", width),
+                    GetKeyValuePair("MAX", $"{score.Statistics.Count300P:N0}", width),
                     GetKeyValuePair("300", $"{score.Statistics.Count300:N0}", width),
-                    GetKeyValuePair("200", $"{score.Statistics.CountKatu:N0}", width),
+                    GetKeyValuePair("200", $"{score.Statistics.Count200:N0}", width),
                     GetKeyValuePair("100", $"{score.Statistics.Count100:N0}", width),
                     GetKeyValuePair("50", $"{score.Statistics.Count50:N0}", width),
                     GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
@@ -667,7 +667,7 @@ public static class OsuScoreDrawer
                 {
                     GetKeyValuePair("FRUITS", $"{score.Statistics.Count300:N0}", width),
                     GetKeyValuePair("TICKS", $"{score.Statistics.Count100:N0}", width),
-                    GetKeyValuePair("DRP MISS", $"{score.Statistics.CountKatu:N0}", width),
+                    GetKeyValuePair("DRP MISS", $"{score.Statistics.Count200:N0}", width),
                     GetKeyValuePair("MISS", $"{score.Statistics.CountMiss:N0}", width),
                 });
                 break;

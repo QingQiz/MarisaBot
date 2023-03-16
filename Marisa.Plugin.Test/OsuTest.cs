@@ -36,6 +36,13 @@ public class OsuTest
     }
 
     [Test]
+    [TestCase(1931476, 4001513)]
+    public void Beatmap_Should_Be_Got_By_Id(long beatmapsetId, long beatmapId)
+    {
+        Assert.DoesNotThrow(() => OsuApi.GetBeatmapPathByBeatmapId(beatmapsetId, beatmapId));
+    }
+
+    [Test]
     [TestCase(4001513)]
     public async Task BeatmapCover_Should_Be_Got(long beatmapId)
     {

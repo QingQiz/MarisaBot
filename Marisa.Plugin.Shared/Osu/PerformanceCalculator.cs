@@ -119,9 +119,9 @@ public static class PerformanceCalculator
             MaxCombo = score.MaxCombo,
             Statistics = new Dictionary<HitResult, int>
             {
-                { HitResult.Perfect, score.Statistics.CountGeki },
+                { HitResult.Perfect, score.Statistics.Count300P },
                 { HitResult.Great, score.Statistics.Count300 },
-                { HitResult.Good, score.Statistics.CountKatu },
+                { HitResult.Good, score.Statistics.Count200 },
                 { HitResult.Ok, score.Statistics.Count100 },
                 { HitResult.Meh, score.Statistics.Count50 },
                 { HitResult.Miss, score.Statistics.CountMiss }
@@ -136,7 +136,7 @@ public static class PerformanceCalculator
     public static (double scorePp, double bonusPp, long rankedScores) BonusPp(this OsuUserInfo info, IEnumerable<OsuScore> scores)
     {
         var scorePp = scores.Sum(s => s.Weight!.Pp);
-        var bonusPp =  info.Statistics.Pp - scorePp;
+        var bonusPp = info.Statistics.Pp - scorePp;
 
         var totalScores =
             info.Statistics.GradeCounts["a"] +

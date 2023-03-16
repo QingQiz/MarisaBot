@@ -15,10 +15,10 @@ public class Statistics
     public int Count50 { get; set; }
 
     [JsonProperty("count_geki", Required = Required.Always)]
-    public int CountGeki { get; set; }
+    public int Count300P { get; set; }
 
     [JsonProperty("count_katu", Required = Required.Always)]
-    public int CountKatu { get; set; }
+    public int Count200 { get; set; }
 
     [JsonProperty("count_miss", Required = Required.Always)]
     public int CountMiss { get; set; }

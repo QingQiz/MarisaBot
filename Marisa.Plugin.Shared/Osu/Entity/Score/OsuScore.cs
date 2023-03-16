@@ -94,7 +94,7 @@ public partial class OsuScore
     public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
 
     public double PpAccuracy => ModeInt == 3
-        ? (320 * Statistics.CountGeki + 300 * Statistics.Count300 + 200 * Statistics.CountKatu + 100 * Statistics.Count100 + 50 * Statistics.Count50) /
-          (double)(320 * (Statistics.CountGeki + Statistics.Count300 + Statistics.CountKatu + Statistics.Count100 + Statistics.Count50 + Statistics.CountMiss))
+        ? (320 * Statistics.Count300P + 300 * Statistics.Count300 + 200 * Statistics.Count200 + 100 * Statistics.Count100 + 50 * Statistics.Count50) /
+          (double)(320 * (Statistics.Count300P + Statistics.Count300 + Statistics.Count200 + Statistics.Count100 + Statistics.Count50 + Statistics.CountMiss))
         : throw new NotSupportedException("Only MANIA is supported");
 }

@@ -271,8 +271,7 @@ public static partial class OsuApi
         }
     }
 
-    // 从指定的 beatmapsetId 和 beatmap 的 md5 获取 beatmap 的路径
-    private static string GetBeatmapPathByMd5(long beatmapsetId, string checksum)
+    private static string GetBeatmapPathBy(long beatmapsetId, Func<string, bool> condition)
     {
         var path = BeatmapsetPath(beatmapsetId);
 
@@ -280,9 +279,7 @@ public static partial class OsuApi
         {
             foreach (var f in Directory.GetFiles(path, "*.osu", SearchOption.AllDirectories))
             {
-                var hash = File.ReadAllText(f).GetMd5Hash();
-
-                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
+                if (condition(f))
                 {
                     return f;
                 }
@@ -311,17 +308,61 @@ public static partial class OsuApi
         {
             foreach (var f in Directory.GetFiles(p, "*.osu", SearchOption.AllDirectories))
             {
-                var hash = File.ReadAllText(f).GetMd5Hash();
-
-                if (hash.Equals(checksum, StringComparison.OrdinalIgnoreCase))
-                {
-                    return f;
-                }
+                if (condition(f)) return f;
             }
         }
 
         Exception:
-        throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
+        throw new FileNotFoundException();
+    }
+
+    // 从指定的 beatmapsetId 和 beatmap 的 md5 获取 beatmap 的路径
+    private static string GetBeatmapPathByMd5(long beatmapsetId, string checksum)
+    {
+        try
+        {
+            return GetBeatmapPathBy(beatmapsetId, f =>
+            {
+                var hash = File.ReadAllText(f).GetMd5Hash();
+
+                return hash.Equals(checksum, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+        catch (FileNotFoundException)
+        {
+            throw new FileNotFoundException($"Can not find beatmap with MD5 {checksum}");
+        }
+    }
+
+    public static string GetBeatmapPathByBeatmapId(long beatmapsetId, long beatmapId)
+    {
+        try
+        {
+            return GetBeatmapPathBy(beatmapsetId, f =>
+            {
+                var lines = File.ReadLines(f)
+                    .SkipWhile(l => !l.Trim().Equals("[Metadata]", StringComparison.OrdinalIgnoreCase))
+                    .Skip(1)
+                    .TakeWhile(l => l.Trim()[0] != '[');
+                foreach (var line in lines)
+                {
+                    if (!line.Trim().StartsWith("BeatmapID:", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    if (long.TryParse(line.Split(':')[1], out var id))
+                    {
+                        if (id == beatmapId) return true;
+                    }
+
+                    break;
+                }
+
+                return false;
+            });
+        }
+        catch (FileNotFoundException)
+        {
+            throw new FileNotFoundException($"Can not find beatmap with ID {beatmapId}");
+        }
     }
 
     // 从 beatmap 获取 beatmap 的路径
@@ -350,22 +391,28 @@ public static partial class OsuApi
             // 已经额外下了谱面，要么直接获取，要么下载更新
             if (Directory.Exists(path))
             {
-                // 如果谱面更新了，这里会抛异常
+                // 用MD5找，如果谱面更新了，这里会抛异常
                 try
                 {
                     return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
                 }
                 catch (FileNotFoundException)
                 {
-                    Directory.Delete(path, true);
-
-                    // 重新下载一次，如果还找不到，那就不重试了
-                    if (retry)
+                    if (!retry)
                     {
-                        return GetBeatmapPath(beatmap, false);
+                        throw;
                     }
 
-                    throw;
+                    // 重新下载一次，如果还找不到，那就直接用ID找，用没更新的（镜像更新有延迟？）做替代品
+                    try
+                    {
+                        Directory.Delete(path, true);
+                        return GetBeatmapPath(beatmap, false);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        return GetBeatmapPathByBeatmapId(beatmap.BeatmapsetId, beatmap.Id);
+                    }
                 }
             }
 
