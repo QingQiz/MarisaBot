@@ -26,16 +26,29 @@ public static class WebApi
             {
                 using var browserFetcher = new BrowserFetcher();
                 browserFetcher.DownloadAsync().Wait();
-                _browserInner = Puppeteer.LaunchAsync(new LaunchOptions { Headless = false }).Result;
+                _browserInner = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true }).Result;
                 return _browserInner;
             }
         }
     }
 
+    private static IPage Page
+    {
+        get
+        {
+            var page = Browser.NewPageAsync().Result;
+            page.BringToFrontAsync().Wait();
+            page.SetViewportAsync(new ViewPortOptions
+            {
+                Width = 1, Height = 1
+            });
+            return page;
+        }
+    }
+
     public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
     {
-        await using var page = await Browser.NewPageAsync();
-        await page.BringToFrontAsync();
+        await using var page = Page;
 
         if (!string.IsNullOrWhiteSpace(username))
         {
@@ -46,6 +59,17 @@ public static class WebApi
             await page.GoToAsync(Frontend + "/maimai/best?" + "qq=" + qq + (b50 ? "&b50=" + b50 : ""));
         }
 
+        await page.WaitForNetworkIdleAsync();
+        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
+    }
+
+    public static async Task<string> OsuScore(string name, int modeInt, int bpRank, bool recent, bool fail)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + bpRank +
+            (recent ? "&recent=" + recent : "") +
+            (fail ? "&fail=" + fail : ""));
         await page.WaitForNetworkIdleAsync();
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
     }

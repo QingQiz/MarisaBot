@@ -1,0 +1,112 @@
+[
+    {
+        "accuracy": 0.9395919303071986,
+        "best_id": 528818765,
+        "created_at": "2023-02-25T15:48:37Z",
+        "id": 528818765,
+        "max_combo": 541,
+        "mode": "mania",
+        "mode_int": 3,
+        "mods": [
+            "HT",
+            "MR"
+        ],
+        "passed": true,
+        "perfect": false,
+        "pp": 585.617,
+        "rank": "A",
+        "replay": false,
+        "score": 356556,
+        "statistics": {
+            "count_100": 117,
+            "count_300": 3045,
+            "count_50": 55,
+            "count_geki": 3385,
+            "count_katu": 529,
+            "count_miss": 139
+        },
+        "type": "score_best_mania",
+        "user_id": 16265882,
+        "current_user_attributes": {
+            "pin": null
+        },
+        "beatmap": {
+            "beatmapset_id": 1931476,
+            "difficulty_rating": 10.24,
+            "id": 4001513,
+            "mode": "mania",
+            "status": "ranked",
+            "total_length": 294,
+            "user_id": 18219603,
+            "version": "[7K] Obsession: Nyctophilia",
+            "accuracy": 6.5,
+            "ar": 5,
+            "bpm": 200,
+            "convert": false,
+            "count_circles": 4770,
+            "count_sliders": 2500,
+            "count_spinners": 0,
+            "cs": 7,
+            "deleted_at": null,
+            "drain": 8,
+            "hit_length": 293,
+            "is_scoreable": true,
+            "last_updated": "2023-02-13T13:04:13Z",
+            "mode_int": 3,
+            "passcount": 3659,
+            "playcount": 12574,
+            "ranked": 1,
+            "url": "https:\/\/osu.ppy.sh\/beatmaps\/4001513",
+            "checksum": "0ef7a728e36ba5ba9c5a94eeffc304a0"
+        },
+        "beatmapset": {
+            "artist": "Laur",
+            "artist_unicode": "Laur",
+            "covers": {
+                "cover": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/cover.jpg?1676293467",
+                "cover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/cover@2x.jpg?1676293467",
+                "card": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/card.jpg?1676293467",
+                "card@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/card@2x.jpg?1676293467",
+                "list": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/list.jpg?1676293467",
+                "list@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/list@2x.jpg?1676293467",
+                "slimcover": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/slimcover.jpg?1676293467",
+                "slimcover@2x": "https:\/\/assets.ppy.sh\/beatmaps\/1931476\/covers\/slimcover@2x.jpg?1676293467"
+            },
+            "creator": "Leeju",
+            "favourite_count": 212,
+            "hype": null,
+            "id": 1931476,
+            "nsfw": false,
+            "offset": 0,
+            "play_count": 12574,
+            "preview_url": "\/\/b.ppy.sh\/preview\/1931476.mp3",
+            "source": "",
+            "spotlight": false,
+            "status": "ranked",
+            "title": "SYSTEM ERROR",
+            "title_unicode": "SYSTEM ERROR",
+            "track_id": null,
+            "user_id": 18219603,
+            "video": false
+        },
+        "user": {
+            "avatar_url": "https:\/\/a.ppy.sh\/16265882?1609748387.jpeg",
+            "country_code": "HK",
+            "default_group": "default",
+            "id": 16265882,
+            "is_active": true,
+            "is_bot": false,
+            "is_deleted": false,
+            "is_online": true,
+            "is_supporter": true,
+            "last_visit": "2023-03-10T03:49:55+00:00",
+            "pm_friends_only": false,
+            "profile_colour": null,
+            "username": "QINGQIZ"
+        },
+        "weight": {
+            "percentage": 100,
+            "pp": 585.617
+        }
+    }
+]

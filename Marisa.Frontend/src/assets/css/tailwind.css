@@ -9,6 +9,26 @@
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@layer base {
+    @font-face {
+        font-family: 'Venera';
+        font-weight: 700;
+        src: url('@/assets/fonts/Venera-700.otf') format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Torus';
+        font-weight: normal;
+        src: url('@/assets/fonts/Torus-Regular.otf') format('opentype');
+    }
+
+    @font-face {
+        font-family: 'Torus';
+        font-weight: bold;
+        src: url("@/assets/fonts/Torus-SemiBold.otf") format("opentype");
+    }
 }

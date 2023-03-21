@@ -1,0 +1,476 @@
+{
+  "avatar_url": "https://a.ppy.sh/16265882?1609748387.jpeg",
+  "country_code": "HK",
+  "default_group": "default",
+  "id": 16265882,
+  "is_active": true,
+  "is_bot": false,
+  "is_deleted": false,
+  "is_online": false,
+  "is_supporter": true,
+  "last_visit": "2023-03-17T16:09:50+00:00",
+  "pm_friends_only": false,
+  "username": "QINGQIZ",
+  "cover_url": "https://assets.ppy.sh/user-profile-covers/16265882/1f0ace7f467d70909bf85396dbee8e7a12f64c8edef54eea31cdd9b55e9eee8f.jpeg",
+  "has_supported": true,
+  "join_date": "2020-02-24T15:30:55+00:00",
+  "kudosu": {
+    "total": 0,
+    "available": 0
+  },
+  "max_blocks": 100,
+  "max_friends": 500,
+  "playmode": "mania",
+  "playstyle": [
+    "keyboard"
+  ],
+  "post_count": 1,
+  "profile_order": [
+    "recent_activity",
+    "top_ranks",
+    "historical",
+    "me",
+    "medals",
+    "beatmaps",
+    "kudosu"
+  ],
+  "country": {
+    "code": "HK",
+    "name": "Hong Kong"
+  },
+  "cover": {
+    "custom_url": "https://assets.ppy.sh/user-profile-covers/16265882/1f0ace7f467d70909bf85396dbee8e7a12f64c8edef54eea31cdd9b55e9eee8f.jpeg",
+    "url": "https://assets.ppy.sh/user-profile-covers/16265882/1f0ace7f467d70909bf85396dbee8e7a12f64c8edef54eea31cdd9b55e9eee8f.jpeg"
+  },
+  "account_history": [],
+  "badges": [],
+  "beatmap_playcounts_count": 3694,
+  "comments_count": 0,
+  "favourite_beatmapset_count": 0,
+  "follower_count": 20,
+  "graveyard_beatmapset_count": 0,
+  "groups": [],
+  "guest_beatmapset_count": 0,
+  "loved_beatmapset_count": 0,
+  "mapping_follower_count": 0,
+  "monthly_playcounts": [
+    {
+      "start_date": "2020-02-01T00:00:00+00:00",
+      "count": 28
+    },
+    {
+      "start_date": "2020-09-01T00:00:00+00:00",
+      "count": 1
+    },
+    {
+      "start_date": "2020-10-01T00:00:00+00:00",
+      "count": 2
+    },
+    {
+      "start_date": "2020-12-01T00:00:00+00:00",
+      "count": 1
+    },
+    {
+      "start_date": "2021-01-01T00:00:00+00:00",
+      "count": 1615
+    },
+    {
+      "start_date": "2021-02-01T00:00:00+00:00",
+      "count": 280
+    },
+    {
+      "start_date": "2021-03-01T00:00:00+00:00",
+      "count": 256
+    },
+    {
+      "start_date": "2021-05-01T00:00:00+00:00",
+      "count": 39
+    },
+    {
+      "start_date": "2021-07-01T00:00:00+00:00",
+      "count": 1
+    },
+    {
+      "start_date": "2021-09-01T00:00:00+00:00",
+      "count": 72
+    },
+    {
+      "start_date": "2021-10-01T00:00:00+00:00",
+      "count": 29
+    },
+    {
+      "start_date": "2022-01-01T00:00:00+00:00",
+      "count": 14
+    },
+    {
+      "start_date": "2022-03-01T00:00:00+00:00",
+      "count": 528
+    },
+    {
+      "start_date": "2022-04-01T00:00:00+00:00",
+      "count": 940
+    },
+    {
+      "start_date": "2022-05-01T00:00:00+00:00",
+      "count": 957
+    },
+    {
+      "start_date": "2022-06-01T00:00:00+00:00",
+      "count": 930
+    },
+    {
+      "start_date": "2022-07-01T00:00:00+00:00",
+      "count": 722
+    },
+    {
+      "start_date": "2022-08-01T00:00:00+00:00",
+      "count": 628
+    },
+    {
+      "start_date": "2022-09-01T00:00:00+00:00",
+      "count": 943
+    },
+    {
+      "start_date": "2022-10-01T00:00:00+00:00",
+      "count": 967
+    },
+    {
+      "start_date": "2022-11-01T00:00:00+00:00",
+      "count": 1120
+    },
+    {
+      "start_date": "2022-12-01T00:00:00+00:00",
+      "count": 1039
+    },
+    {
+      "start_date": "2023-01-01T00:00:00+00:00",
+      "count": 996
+    },
+    {
+      "start_date": "2023-02-01T00:00:00+00:00",
+      "count": 1024
+    },
+    {
+      "start_date": "2023-03-01T00:00:00+00:00",
+      "count": 848
+    }
+  ],
+  "page": {
+    "html": "<div class='bbcode bbcode--profile-page'></div>",
+    "raw": ""
+  },
+  "pending_beatmapset_count": 0,
+  "previous_usernames": [
+    "sofeeys"
+  ],
+  "ranked_beatmapset_count": 0,
+  "replays_watched_counts": [],
+  "scores_best_count": 100,
+  "scores_first_count": 0,
+  "scores_pinned_count": 0,
+  "scores_recent_count": 25,
+  "statistics": {
+    "level": {
+      "current": 94,
+      "progress": 90
+    },
+    "global_rank": 8609,
+    "pp": 6345.06,
+    "ranked_score": 1459555518,
+    "hit_accuracy": 96.1704,
+    "play_count": 10390,
+    "play_time": 1200725,
+    "total_score": 6686608174,
+    "total_hits": 13835651,
+    "maximum_combo": 3679,
+    "replays_watched_by_others": 0,
+    "is_ranked": true,
+    "grade_counts": {
+      "ss": 0,
+      "ssh": 0,
+      "s": 1327,
+      "sh": 0,
+      "a": 357
+    },
+    "country_rank": 130,
+    "rank": {
+      "country": 130
+    },
+    "variants": [
+      {
+        "mode": "mania",
+        "variant": "4k",
+        "country_rank": 241,
+        "global_rank": 15541,
+        "pp": 5043.8
+      },
+      {
+        "mode": "mania",
+        "variant": "7k",
+        "country_rank": 22,
+        "global_rank": 1789,
+        "pp": 6149.26
+      }
+    ]
+  },
+  "support_level": 1,
+  "user_achievements": [
+    {
+      "achieved_at": "2023-02-22T15:08:55+00:00",
+      "achievement_id": 51
+    },
+    {
+      "achieved_at": "2023-02-03T16:47:58+00:00",
+      "achievement_id": 168
+    },
+    {
+      "achieved_at": "2022-12-11T16:33:51+00:00",
+      "achievement_id": 66
+    },
+    {
+      "achieved_at": "2022-12-08T18:07:48+00:00",
+      "achievement_id": 4
+    },
+    {
+      "achieved_at": "2022-09-26T17:25:56+00:00",
+      "achievement_id": 92
+    },
+    {
+      "achieved_at": "2022-07-16T16:04:49+00:00",
+      "achievement_id": 48
+    },
+    {
+      "achieved_at": "2022-06-16T16:52:22+00:00",
+      "achievement_id": 164
+    },
+    {
+      "achieved_at": "2022-06-10T17:38:27+00:00",
+      "achievement_id": 132
+    },
+    {
+      "achieved_at": "2022-06-03T09:31:46+00:00",
+      "achievement_id": 80
+    },
+    {
+      "achieved_at": "2022-04-16T06:28:01+00:00",
+      "achievement_id": 111
+    },
+    {
+      "achieved_at": "2022-04-11T13:01:59+00:00",
+      "achievement_id": 50
+    },
+    {
+      "achieved_at": "2022-04-11T12:55:49+00:00",
+      "achievement_id": 114
+    },
+    {
+      "achieved_at": "2022-04-09T16:55:03+00:00",
+      "achievement_id": 91
+    },
+    {
+      "achieved_at": "2022-04-03T05:03:04+00:00",
+      "achievement_id": 47
+    },
+    {
+      "achieved_at": "2022-03-26T14:17:57+00:00",
+      "achievement_id": 128
+    },
+    {
+      "achieved_at": "2022-03-26T11:13:57+00:00",
+      "achievement_id": 90
+    },
+    {
+      "achieved_at": "2022-03-26T11:03:09+00:00",
+      "achievement_id": 113
+    },
+    {
+      "achieved_at": "2022-03-26T10:30:33+00:00",
+      "achievement_id": 112
+    },
+    {
+      "achieved_at": "2022-03-24T13:55:34+00:00",
+      "achievement_id": 46
+    },
+    {
+      "achieved_at": "2021-02-04T12:50:21+00:00",
+      "achievement_id": 59
+    },
+    {
+      "achieved_at": "2021-01-24T13:04:18+00:00",
+      "achievement_id": 3
+    },
+    {
+      "achieved_at": "2021-01-22T12:51:42+00:00",
+      "achievement_id": 89
+    },
+    {
+      "achieved_at": "2021-01-13T08:25:20+00:00",
+      "achievement_id": 123
+    },
+    {
+      "achieved_at": "2021-01-12T11:51:47+00:00",
+      "achievement_id": 65
+    },
+    {
+      "achieved_at": "2021-01-12T11:49:47+00:00",
+      "achievement_id": 137
+    },
+    {
+      "achieved_at": "2021-01-12T11:45:47+00:00",
+      "achievement_id": 122
+    },
+    {
+      "achieved_at": "2021-01-09T07:03:47+00:00",
+      "achievement_id": 58
+    },
+    {
+      "achieved_at": "2021-01-08T08:24:02+00:00",
+      "achievement_id": 79
+    },
+    {
+      "achieved_at": "2021-01-06T12:15:44+00:00",
+      "achievement_id": 176
+    },
+    {
+      "achieved_at": "2021-01-06T06:44:04+00:00",
+      "achievement_id": 15
+    },
+    {
+      "achieved_at": "2021-01-05T16:13:53+00:00",
+      "achievement_id": 121
+    },
+    {
+      "achieved_at": "2021-01-04T14:31:36+00:00",
+      "achievement_id": 57
+    },
+    {
+      "achieved_at": "2021-01-04T14:13:15+00:00",
+      "achievement_id": 64
+    },
+    {
+      "achieved_at": "2021-01-04T08:15:17+00:00",
+      "achievement_id": 1
+    },
+    {
+      "achieved_at": "2021-01-04T07:28:20+00:00",
+      "achievement_id": 127
+    },
+    {
+      "achieved_at": "2021-01-03T13:24:12+00:00",
+      "achievement_id": 56
+    },
+    {
+      "achieved_at": "2021-01-03T13:14:20+00:00",
+      "achievement_id": 55
+    },
+    {
+      "achieved_at": "2020-12-29T09:00:22+00:00",
+      "achievement_id": 87
+    },
+    {
+      "achieved_at": "2020-02-24T16:03:05+00:00",
+      "achievement_id": 88
+    },
+    {
+      "achieved_at": "2020-02-24T16:03:05+00:00",
+      "achievement_id": 54
+    }
+  ],
+  "rank_history": {
+    "mode": "mania",
+    "data": [
+      13908,
+      13926,
+      13939,
+      13953,
+      13976,
+      14002,
+      14021,
+      14042,
+      14064,
+      14086,
+      14106,
+      14133,
+      14147,
+      14175,
+      14197,
+      14215,
+      14225,
+      14249,
+      14263,
+      14289,
+      14307,
+      14331,
+      14347,
+      14355,
+      14366,
+      14389,
+      14408,
+      14429,
+      14447,
+      14460,
+      14477,
+      14487,
+      14491,
+      14505,
+      14522,
+      14543,
+      14558,
+      14569,
+      14587,
+      14618,
+      14648,
+      14668,
+      14686,
+      14700,
+      14711,
+      14721,
+      14675,
+      14374,
+      14390,
+      13991,
+      14003,
+      14011,
+      14025,
+      14044,
+      14027,
+      14040,
+      14055,
+      14056,
+      13690,
+      13589,
+      13588,
+      12158,
+      12169,
+      12183,
+      11652,
+      10601,
+      9955,
+      9961,
+      9790,
+      9413,
+      9179,
+      9187,
+      9149,
+      9073,
+      9071,
+      9084,
+      9100,
+      9093,
+      9069,
+      9084,
+      9096,
+      9063,
+      8695,
+      8571,
+      8578,
+      8575,
+      8591,
+      8598,
+      8610,
+      8609
+    ]
+  },
+  "ranked_and_approved_beatmapset_count": 0,
+  "unranked_beatmapset_count": 0
+}

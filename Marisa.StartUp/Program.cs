@@ -27,11 +27,7 @@ public static class Program
         app.MapControllers();
         app.UseDeveloperExceptionPage();
         
-        app.Use((context, next) =>
-        {
-            context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-            return next.Invoke();
-        });
+        app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
         app.UseStaticFiles(new StaticFileOptions
         {
@@ -53,5 +49,6 @@ public static class Program
 
         // run
         await Task.WhenAll(app.RunAsync(), app.Services.GetService<MiraiBackend>()!.Invoke());
+        // await app.RunAsync();
     }
 }

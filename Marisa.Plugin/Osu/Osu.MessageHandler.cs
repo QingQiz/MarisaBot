@@ -148,19 +148,7 @@ public partial class Osu : MarisaPluginBase
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
-
-        if (!(recentScores?.Any() ?? false))
-        {
-            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var img = await recentScores![0].GetImage(userInfo);
-
-        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value, command.BpRank.Value, true, false)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -171,20 +159,7 @@ public partial class Osu : MarisaPluginBase
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1,
-            true);
-
-        if (!(recentScores?.Any() ?? false))
-        {
-            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var img = await recentScores[0].GetImage(userInfo);
-
-        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value, command.BpRank.Value, true, true)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -223,19 +198,7 @@ public partial class Osu : MarisaPluginBase
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name);
-
-        var recentScores = await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value - 1, 1);
-
-        if (!(recentScores?.Any() ?? false))
-        {
-            message.Reply("无");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var img = await recentScores[0].GetImage(userInfo);
-
-        message.Reply(MessageDataImage.FromBase64(img.ToB64(100)));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value, command.BpRank.Value, false, false)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -273,7 +236,7 @@ public partial class Osu : MarisaPluginBase
             message.Reply($"{command.Name} 在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
             return MarisaPluginTaskState.CompletedTask;
         }
-        
+
         // 你的
         var best1 = (await OsuApi.GetScores(
                 await GetOsuIdByName(bind.OsuUserName), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0, 100))!
@@ -286,7 +249,7 @@ public partial class Osu : MarisaPluginBase
         }
 
         var im = best1.ToArray().CompareWith(best2.ToArray());
-        
+
         message.Reply(MessageDataImage.FromBase64(im.ToB64()));
 
         return MarisaPluginTaskState.CompletedTask;

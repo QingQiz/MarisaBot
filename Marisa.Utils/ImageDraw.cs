@@ -462,5 +462,13 @@ public static class ImageDraw
         return Convert.ToBase64String(ms.ToArray());
     }
 
+    public static MemoryStream ToStream(this Image image)
+    {
+        var ms = new MemoryStream();
+        image.SaveAsPng(ms);
+        ms.Seek(0, SeekOrigin.Begin);
+        return ms;
+    }
+
     #endregion
 }

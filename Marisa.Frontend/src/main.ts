@@ -3,7 +3,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 
 import App from '@/App.vue'
 import BestScores from "@/components/maimai/BestScores.vue";
-import MaiSong from "@/components/maimai/MaiSong.vue";
+import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
 
 import './assets/css/tailwind.css'
@@ -11,9 +11,8 @@ import './assets/css/tailwind.css'
 const routes = [
     {path: '/', component: NotFound},
     {path: '/maimai/best', component: BestScores},
-    {path: '/maimai/song', component: MaiSong},
+    {path: '/osu/score', component: OsuScore},
     {path: '/:catchAll(.*)', redirect:'/'}
-
 ]
 
 const router = createRouter({

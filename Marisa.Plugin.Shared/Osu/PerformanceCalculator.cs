@@ -53,6 +53,32 @@ public static class PerformanceCalculator
         };
     }
 
+    public static (double ppMax, double length, double multiplier) ManiaPpChart(string beatmapPath, string[] gameMods)
+    {
+        var ruleset = GetRuleset(3);
+
+        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, gameMods));
+        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(beatmapPath);
+
+        var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+        var difficultyAttributes = difficultyCalculator.Calculate(mods);
+        // var performanceCalculator = ruleset.CreatePerformanceCalculator();
+        return ManiaPerformanceCalculator.Calculate(gameMods, difficultyAttributes.StarRating, workingBeatmap.Beatmap.HitObjects.Count);
+    }
+
+    public static double GetStarRating(long beatmapsetId, string beatmapChecksum, long beatmapId, int modeInt, string[] mods)
+    {
+        var path = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
+
+        var ruleset = GetRuleset(modeInt);
+
+        var mods2          = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, mods));
+        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
+        var attributes     = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(mods2);
+
+        return attributes.StarRating;
+    }
+
     public static double StarRating(this OsuScore score)
     {
         var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
@@ -85,6 +111,42 @@ public static class PerformanceCalculator
         return attributes.StarRating;
     }
 
+    public static double GetPerformancePoint(
+        long beatmapsetId, string beatmapChecksum, long beatmapId, int modeInt, string[] mods, double acc, int maxCombo, int cMax, int c300, int c200, int c100,
+        int c50, int cMiss, long score)
+    {
+        var path = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
+
+        var ruleset = GetRuleset(modeInt);
+
+        var mods2          = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, mods));
+        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
+        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods2);
+
+        var difficultyCalculator  = ruleset.CreateDifficultyCalculator(workingBeatmap);
+        var difficultyAttributes  = difficultyCalculator.Calculate(mods2);
+        var performanceCalculator = ruleset.CreatePerformanceCalculator();
+
+        var ppAttributes = performanceCalculator!.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
+        {
+            Accuracy = acc,
+            MaxCombo = maxCombo,
+            Statistics = new Dictionary<HitResult, int>
+            {
+                { HitResult.Perfect, cMax },
+                { HitResult.Great, c300 },
+                { HitResult.Good, c200 },
+                { HitResult.Ok, c100 },
+                { HitResult.Meh, c50 },
+                { HitResult.Miss, cMiss }
+            },
+            Mods       = mods2,
+            TotalScore = score,
+        }, difficultyAttributes);
+
+        return ppAttributes!.Total;
+    }
+
     public static double PerformancePoint(this OsuScore score)
     {
         if (score.Pp != null)
@@ -92,45 +154,17 @@ public static class PerformanceCalculator
             return (double)score.Pp;
         }
 
-        string path;
-
         try
         {
-            path = OsuApi.GetBeatmapPath(score.Beatmap);
+            return GetPerformancePoint(score.Beatmapset.Id, score.Beatmap.Checksum, score.Beatmap.Id, score.ModeInt, score.Mods,
+                score.Accuracy, score.MaxCombo,
+                score.Statistics.Count300P, score.Statistics.Count300, score.Statistics.Count200, score.Statistics.Count100, score.Statistics.Count50,
+                score.Statistics.CountMiss, score.Score);
         }
         catch (Exception e) when (e is FileNotFoundException or HttpRequestException)
         {
             return 0;
         }
-
-        var ruleset = GetRuleset(score.ModeInt);
-
-        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
-        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods);
-
-        var difficultyCalculator  = ruleset.CreateDifficultyCalculator(workingBeatmap);
-        var difficultyAttributes  = difficultyCalculator.Calculate(mods);
-        var performanceCalculator = ruleset.CreatePerformanceCalculator();
-
-        var ppAttributes = performanceCalculator!.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
-        {
-            Accuracy = score.Accuracy,
-            MaxCombo = score.MaxCombo,
-            Statistics = new Dictionary<HitResult, int>
-            {
-                { HitResult.Perfect, score.Statistics.Count300P },
-                { HitResult.Great, score.Statistics.Count300 },
-                { HitResult.Good, score.Statistics.Count200 },
-                { HitResult.Ok, score.Statistics.Count100 },
-                { HitResult.Meh, score.Statistics.Count50 },
-                { HitResult.Miss, score.Statistics.CountMiss }
-            },
-            Mods       = mods,
-            TotalScore = score.Score,
-        }, difficultyAttributes);
-
-        return ppAttributes!.Total;
     }
 
     public static (double scorePp, double bonusPp, long rankedScores) BonusPp(this OsuUserInfo info, IEnumerable<OsuScore> scores)
@@ -280,5 +314,23 @@ internal static class LegacyHelper
         protected override ISkin GetSkin() => throw new NotImplementedException();
 
         public override Stream GetStream(string storagePath) => throw new NotImplementedException();
+    }
+}
+
+public static class ManiaPerformanceCalculator
+{
+    public static (double ppMax, double length, double multiplier) Calculate(string[] mods, double starRating, int totalHits)
+    {
+        // Arbitrary initial value for scaling pp in order to standardize distributions across game modes.
+        // The specific number has no intrinsic meaning and can be adjusted as needed.
+        var multiplier = 8.0;
+
+        if (mods.Any(m => m.Equals("nf", StringComparison.OrdinalIgnoreCase))) multiplier *= 0.75;
+        if (mods.Any(m => m.Equals("ez", StringComparison.OrdinalIgnoreCase))) multiplier *= 0.5;
+
+        return (
+            Math.Pow(Math.Max(starRating - 0.15, 0.05), 2.2) // Star rating to pp curve
+          , 1 + 0.1 * Math.Min(1, totalHits / 1500)          // Length bonus, capped at 1500 notes
+          , multiplier);
     }
 }

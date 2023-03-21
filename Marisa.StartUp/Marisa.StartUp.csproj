@@ -30,7 +30,7 @@
         </ContentWithTargetPath>
     </ItemGroup>
 
-    <Target Name="RunWebpack" AfterTargets="Build" Condition="'$(PublishProtocol)'!=''">
+    <Target Name="RunWebpack" AfterTargets="Build">
         <Exec Command="yarn build" WorkingDirectory="..\Marisa.Frontend" />
     </Target>
 

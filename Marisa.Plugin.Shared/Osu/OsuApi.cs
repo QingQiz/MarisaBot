@@ -365,23 +365,22 @@ public static partial class OsuApi
         }
     }
 
-    // 从 beatmap 获取 beatmap 的路径
-    public static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
+    public static string GetBeatmapPath(long beatmapsetId, string beatmapChecksum, long beatmapId, bool retry = true)
     {
-        var path = BeatmapsetPath(beatmap.BeatmapsetId);
+        var path = BeatmapsetPath(beatmapsetId);
 
         object l;
 
         // 获取特定 beatmap set 的锁（没有的话创建一个）
         lock (BeatmapDownloaderLocker)
         {
-            if (BeatmapDownloaderLocker.ContainsKey(beatmap.BeatmapsetId))
+            if (BeatmapDownloaderLocker.ContainsKey(beatmapsetId))
             {
-                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId];
+                l = BeatmapDownloaderLocker[beatmapsetId];
             }
             else
             {
-                l = BeatmapDownloaderLocker[beatmap.BeatmapsetId] = new object();
+                l = BeatmapDownloaderLocker[beatmapsetId] = new object();
             }
         }
 
@@ -394,7 +393,7 @@ public static partial class OsuApi
                 // 用MD5找，如果谱面更新了，这里会抛异常
                 try
                 {
-                    return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+                    return GetBeatmapPathByMd5(beatmapsetId, beatmapChecksum);
                 }
                 catch (FileNotFoundException)
                 {
@@ -407,11 +406,11 @@ public static partial class OsuApi
                     try
                     {
                         Directory.Delete(path, true);
-                        return GetBeatmapPath(beatmap, false);
+                        return GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId, false);
                     }
                     catch (FileNotFoundException)
                     {
-                        return GetBeatmapPathByBeatmapId(beatmap.BeatmapsetId, beatmap.Id);
+                        return GetBeatmapPathByBeatmapId(beatmapsetId, beatmapId);
                     }
                 }
             }
@@ -419,7 +418,7 @@ public static partial class OsuApi
             // 如果没有额外下载谱面，我们尝试找已经安装了的 osu，找里面有没有我们需要的谱面
             try
             {
-                return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+                return GetBeatmapPathByMd5(beatmapsetId, beatmapChecksum);
             }
             catch (FileNotFoundException)
             {
@@ -429,7 +428,7 @@ public static partial class OsuApi
             string download;
             try
             {
-                download = DownloadBeatmap(beatmap.BeatmapsetId, Path.GetDirectoryName(path)!).Result;
+                download = DownloadBeatmap(beatmapsetId, Path.GetDirectoryName(path)!).Result;
             }
             catch (Exception e)
             {
@@ -469,10 +468,17 @@ public static partial class OsuApi
                 File.Delete(f);
             });
 
-            return GetBeatmapPathByMd5(beatmap.BeatmapsetId, beatmap.Checksum);
+            return GetBeatmapPathByMd5(beatmapsetId, beatmapChecksum);
         }
 
         // 我们不需要删除字典里的锁，因为下载的谱面总数不会特别巨大
+        
+    }
+
+    // 从 beatmap 获取 beatmap 的路径
+    public static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
+    {
+        return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum, beatmap.Id, retry);
     }
 
     #endregion

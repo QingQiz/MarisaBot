@@ -893,7 +893,7 @@ public static class OsuScoreDrawer
         return songInfo;
     }
 
-    private static Image GetAccRing(string rank, double acc, int modeInt)
+    public static Image GetAccRing(string rank, double acc, int modeInt, bool withText = true)
     {
         var fontCollection = new FontCollection();
 
@@ -940,6 +940,8 @@ public static class OsuScoreDrawer
             .Fill(Color.Black, ShapeDraw.BuildRing(gradeRingCenter, accRing.Height / 2, 50, 360))
             .Fill(accRingBrush, ShapeDraw.BuildRing(gradeRingCenter, accRing.Height / 2, 50, (int)(360 * acc)))
         );
+
+        if (!withText) return accRing;
 
         var im = new Image<Rgba32>(300, 300);
 
