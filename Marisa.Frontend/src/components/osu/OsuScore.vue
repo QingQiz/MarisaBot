@@ -52,7 +52,7 @@
                     </div>
                     <div class="absolute right-10 top-5 flex flex-col gap-2 items-center">
                         <div class="diff-text">
-                            {{ beatmap.difficulty_rating }}
+                            {{ sr.toFixed(2) }}
                         </div>
                         <div class=rank-status>
                             {{ beatmap.status }}
@@ -562,7 +562,7 @@ const profile_height = cover_height - cover_padding * 2 - profile_padding_y * 2;
 }
 
 .diff-text {
-    @apply rounded-3xl px-2 py-0.5 font-bold flex place-content-center gap-1 text-xl;
+    @apply rounded-3xl px-2 py-0.5 font-bold flex place-content-center gap-1 text-xl pr-3;
     color: v-bind(diffTextColor);
     background-color: v-bind(diffColor);
 }
