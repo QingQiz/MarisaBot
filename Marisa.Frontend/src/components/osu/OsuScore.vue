@@ -228,7 +228,7 @@
                                 </div>
                                 <div>
                                     <div>pp</div>
-                                    <div>{{ score.pp.toFixed(2) }}</div>
+                                    <div>{{ pp.toFixed(2) }}</div>
                                 </div>
                             </div>
 
