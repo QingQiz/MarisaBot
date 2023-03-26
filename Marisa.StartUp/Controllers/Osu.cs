@@ -26,10 +26,10 @@ public class Osu : Controller
     }
 
     [HttpGet]
-    public object ManiaPpChart(long beatmapsetId, string beatmapChecksum, long beatmapId, [FromQuery] string[] mods)
+    public object ManiaPpChart(long beatmapsetId, string beatmapChecksum, long beatmapId, [FromQuery] string[] mods, int totalHits)
     {
         var beatmapPath = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
-        var res         = Plugin.Shared.Osu.PerformanceCalculator.ManiaPpChart(beatmapPath, mods);
+        var res         = Plugin.Shared.Osu.PerformanceCalculator.ManiaPpChart(beatmapPath, mods, totalHits);
 
         return new
         {

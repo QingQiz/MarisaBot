@@ -53,7 +53,7 @@ public static class PerformanceCalculator
         };
     }
 
-    public static (double ppMax, double length, double multiplier) ManiaPpChart(string beatmapPath, string[] gameMods)
+    public static (double ppMax, double length, double multiplier) ManiaPpChart(string beatmapPath, string[] gameMods, int totalHits)
     {
         var ruleset = GetRuleset(3);
 
@@ -63,7 +63,7 @@ public static class PerformanceCalculator
         var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
         var difficultyAttributes = difficultyCalculator.Calculate(mods);
         // var performanceCalculator = ruleset.CreatePerformanceCalculator();
-        return ManiaPerformanceCalculator.Calculate(gameMods, difficultyAttributes.StarRating, workingBeatmap.Beatmap.HitObjects.Count);
+        return ManiaPerformanceCalculator.Calculate(gameMods, difficultyAttributes.StarRating, totalHits);
     }
 
     public static double GetStarRating(long beatmapsetId, string beatmapChecksum, long beatmapId, int modeInt, string[] mods)

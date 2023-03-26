@@ -47,7 +47,7 @@ const props_n = defineProps<{
 const props = ref(props_n)
 
 watch(props_n, () => {
-    axios.get(osu_maniaPpChart_builder(props.value.beatmapsetId, props.value.beatmapChecksum, props.value.beatmapId, props.value.mods)).then(data => {
+    axios.get(osu_maniaPpChart_builder(props.value.beatmapsetId, props.value.beatmapChecksum, props.value.beatmapId, props.value.mods, totalHits())).then(data => {
         ppConfig.value = data.data
     });
 })
@@ -65,6 +65,10 @@ const ppDisplay = computed(() => {
         .map(x => [x[0], x[1], CalcPP(x[0])])
         .map(x => [x[0], x[1], x[2], x[2] / max * 100, x[1] === 0 ? '#fc2' : '#ff66ab',])
 })
+
+function totalHits() {
+    return props.value.count_100 + props.value.count_300 + props.value.count_50 + props.value.count_geki + props.value.count_katu + props.value.count_miss;
+}
 
 function CalcPP(acc: number) {
     if (ppConfig.value == null) return NaN;

@@ -19,8 +19,8 @@ export function osu_modIcon_builder(mod: string) {
     return `${osu_modIcon}?mod=${mod}`;
 }
 
-export function osu_maniaPpChart_builder(beatmapsetId: number, beatmapChecksum: string, beatmapId: number, mods: string[]) {
-    return `${osu_maniaPpChart}?beatmapsetId=${beatmapsetId}&beatmapChecksum=${beatmapChecksum}&beatmapId=${beatmapId}&${mods.map(x => `mods=${x}`).join('&')}`;
+export function osu_maniaPpChart_builder(beatmapsetId: number, beatmapChecksum: string, beatmapId: number, mods: string[], totalHits: number) {
+    return `${osu_maniaPpChart}?beatmapsetId=${beatmapsetId}&beatmapChecksum=${beatmapChecksum}&beatmapId=${beatmapId}&${mods.map(x => `mods=${x}`).join('&')}&totalHits=${totalHits}`;
 }
 
 export function osu_pp_builder(beatmapsetId: number, beatmapChecksum: string, beatmapId: number, modeInt: number, mods: string[], acc: number, maxCombo: number, cMax: number, c300: number, c200: number, c100: number, c50: number, cMiss: number, score: number) {

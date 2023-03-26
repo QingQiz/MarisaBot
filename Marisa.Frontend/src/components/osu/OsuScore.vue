@@ -271,7 +271,7 @@
         </div>
     </div>
     <div v-else>
-        <div class="bg-red-500 text-white text-2xl">
+        <div class="bg-red-500 text-white text-2xl w-[1000px]">
             <pre>{{ errorMessage }}</pre>
         </div>
     </div>
