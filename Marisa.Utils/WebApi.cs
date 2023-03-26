@@ -59,7 +59,7 @@ public static class WebApi
             await page.GoToAsync(Frontend + "/maimai/best?" + "qq=" + qq + (b50 ? "&b50=" + b50 : ""));
         }
 
-        await page.WaitForNetworkIdleAsync();
+        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions {Timeout = 0});
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
     }
 
@@ -70,7 +70,7 @@ public static class WebApi
         await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + bpRank +
             (recent ? "&recent=" + recent : "") +
             (fail ? "&fail=" + fail : ""));
-        await page.WaitForNetworkIdleAsync();
-        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
+        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions { Timeout = 0 });
+        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
     }
 }
