@@ -13,9 +13,10 @@ namespace Marisa.Plugin.Shared.Chunithm;
 public class ChunithmSong : Song
 {
     public readonly string Genre;
-    public readonly string ReleaseDate;
     public readonly List<string> LevelName = new();
     public readonly List<long> MaxCombo = new();
+    public new readonly string Bpm;
+    public string BpmNorm => Bpm.Split(' ')[0];
 
     public ChunithmSong(dynamic o)
     {
@@ -24,27 +25,26 @@ public class ChunithmSong : Song
         Artist  = o.Artist;
         Genre   = o.Genre;
         Version = o.Version;
-        Bpm     = o.Beatmaps[0].Bpm;
 
-        try
+        var bpms = new List<string>();
+
+        foreach (var i in o.Beatmaps)
         {
-            ReleaseDate = o.ReleaseDate;
+            bpms.Add(i.Bpm);
         }
-        catch (RuntimeBinderException)
-        {
-            ReleaseDate = "N/A";
-        }
+
+        Bpm = bpms.MaxBy(x => x.Length)!;
 
         foreach (var i in o.Beatmaps)
         {
             Constants.Add(i.Constant);
             Charters.Add(i.Charter);
-            Levels.Add($"{(int)i.Constant}{(i.Constant - (int)i.Constant >= 0.5 ? "+" : "")}");
+            Levels.Add(i.LevelStr);
             LevelName.Add(i.LevelName);
 
             try
             {
-                MaxCombo.Add(i.MaxCombo);
+                MaxCombo.Add(i.maxCombo);
             }
             catch (RuntimeBinderException)
             {
@@ -196,17 +196,17 @@ public class ChunithmSong : Song
                 DrawKeyValuePair("类别", Genre, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("追加日期", ReleaseDate, x, y, w, h, background.Width);
+                DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
+                DrawKeyValuePair("BPM FULL", Bpm, x, y, w, h, background.Width);
 
                 y = 3 * h;
                 w = 100;
                 DrawKeyValuePair("ID", Id.ToString(), 0, y, w, h, 3 * padding + 200, true, true);
 
                 y += h;
-                DrawKeyValuePair("BPM", Bpm.ToString("F1"), 0, y, w, h, 3 * padding + 200, true);
+                DrawKeyValuePair("BPM", BpmNorm, 0, y, w, h, 3 * padding + 200, true);
 
                 return background;
             }
@@ -247,7 +247,7 @@ public class ChunithmSong : Song
 
                     DrawCard(Levels[i], cardFontSize, c.SelectFontColor(), c, w1, h, true);
                     x += w1;
-                    DrawCard(Constants[i].ToString("F1"), cardFontSize, Color.Black, bgColor2, w1, h, true);
+                    DrawCard(Constants[i] == 0 ? "-" : Constants[i].ToString("F1"), cardFontSize, Color.Black, bgColor2, w1, h, true);
                     x += w1;
                     DrawCard(MaxCombo[i].ToString(), cardFontSize, Color.Black, bgColor2, w1, h, true);
                     x += w1;
