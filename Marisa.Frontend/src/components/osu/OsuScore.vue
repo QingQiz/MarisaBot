@@ -117,7 +117,7 @@
                                         <div class="font-bold">
                                             Tags
                                         </div>
-                                        <div class="text-[#29b]">
+                                        <div class="text-[#29b] max-h-[150px] overflow-hidden">
                                             {{ beatmap.beatmapset.tags }}
                                         </div>
 
