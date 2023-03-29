@@ -106,7 +106,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1855,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "そらいろカリン",
@@ -573,7 +573,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2710,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "【Ex】ミストルティン",
@@ -917,7 +917,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1884,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "Ruby supported by ミストルティン",
@@ -1057,7 +1057,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1837,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "J.J.L.L.J.L.L.",
@@ -1278,7 +1278,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2647,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "ものくろっく＠宝鐘の一味",
@@ -1401,7 +1401,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1313,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "緑化委員長",
@@ -1459,7 +1459,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2906,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "じゃこレモン vs Redarrow",
@@ -1722,7 +1722,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2272,
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "ミストルティン",
@@ -1730,7 +1730,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3474,
         "LevelStr": "15",
         "Constant": 15.2,
         "Charter": "CODE:Violetta",
@@ -2213,7 +2213,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1367,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "rioN",
@@ -2221,7 +2221,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1873,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "Redarrow",
@@ -2287,7 +2287,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2277,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "【Ex】Piercing Blade",
@@ -2295,7 +2295,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3375,
         "LevelStr": "15",
         "Constant": 15.4,
         "Charter": "Pizzicat a.k.a Russianblack",
@@ -2377,7 +2377,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1741,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "違う、奉行じゃない",
@@ -2778,7 +2778,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2716,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "ぴちネコ（帝国軍したっぱ）",
@@ -2844,7 +2844,7 @@
       },
       {
         "LevelName": "ADVANCED",
-        "maxCombo": 0,
+        "maxCombo": 1368,
         "LevelStr": "11+",
         "Constant": 11.9,
         "Charter": "【Ex】そらいろカリン",
@@ -2852,7 +2852,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2023,
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "じゃこレモン",
@@ -2860,7 +2860,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2859,
         "LevelStr": "15",
         "Constant": 15.2,
         "Charter": "【Ex】Redarrow -For KOP4th-",
@@ -3245,7 +3245,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2113,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "【Ex】Techno Kitchen -For KOP4th-",
@@ -3720,7 +3720,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1287,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "Techno Kitchen",
@@ -3728,7 +3728,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1670,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "ぴちネコ",
@@ -4080,7 +4080,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1522,
         "LevelStr": "11",
         "Constant": 11.3,
         "Charter": "START \" A I R \"",
@@ -4088,7 +4088,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1668,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "Sorano (Key)",
@@ -4260,7 +4260,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1835,
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "【Ex】Redarrow resurrected by Mistilteinn",
@@ -4801,7 +4801,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2078,
         "LevelStr": "13",
         "Constant": 13.3,
         "Charter": "ロシェ♡ペンギン",
@@ -5268,7 +5268,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1500,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "そらいろカリン",
@@ -5563,7 +5563,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1555,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "アミノハバキリ",
@@ -5571,7 +5571,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2918,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Redarrow -LIFE STREAM-",
@@ -5792,7 +5792,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1972,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "ロシェ＠ペンギン",
@@ -6021,7 +6021,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1888,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "羅叢雲剣",
@@ -6062,7 +6062,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1396,
         "LevelStr": "11",
         "Constant": 11.4,
         "Charter": "ロシェ＠ペンギン",
@@ -6177,7 +6177,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1901,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "watch?v=HiSAVRDX3c0",
@@ -6440,7 +6440,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2008,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "みそかつ侍",
@@ -6457,7 +6457,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1594,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ロシェ＠ペンギン",
@@ -6506,7 +6506,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2512,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "【Ex】SEGA Fumen Unit [B.]",
@@ -7717,7 +7717,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2171,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "ものくろっく",
@@ -7889,7 +7889,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 849,
         "LevelStr": "11+",
         "Constant": 11.7,
         "Charter": "Meteian + Techno Kitchen",
@@ -8029,7 +8029,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1631,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "Techno Kitchen",
@@ -8168,7 +8168,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1816,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "Unlimited Lemon!",
@@ -8258,7 +8258,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2102,
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "【Ex】ULTIMA Force -Ixion-",
@@ -8887,7 +8887,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1484,
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "そらいろカリン",
@@ -8936,7 +8936,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1741,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "ぴちネコ@taterenda lovers",
@@ -9026,7 +9026,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1743,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "大奉行になったらね",
@@ -9476,7 +9476,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2019,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "じゃこレモン＠ステージXII",
@@ -9517,7 +9517,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1861,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "■■■■■LEmOn■■■■■",
@@ -9902,7 +9902,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2455,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "【Ex】Techno Kitchen",
@@ -9959,7 +9959,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1818,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "Mistilteinn",
@@ -10172,7 +10172,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1568,
         "LevelStr": "11+",
         "Constant": 11.8,
         "Charter": "ロシェ＠ペンギン",
@@ -10278,7 +10278,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1609,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "物凄いULTIMAで赤矢が物凄い譜面",
@@ -10311,7 +10311,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1352,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "【Ex】小鳥遊さん",
@@ -10319,7 +10319,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2323,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "XXX:THE MONSTER",
@@ -10450,7 +10450,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1415,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "NEW Techno Kitchen+",
@@ -10597,7 +10597,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1479,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "ロシェ＠ペンギン",
@@ -10679,7 +10679,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1903,
         "LevelStr": "13",
         "Constant": 13.2,
         "Charter": "ミストルティン＠愛莉ファン",
@@ -10851,7 +10851,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1580,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "【Ex】アミノハバキリ",
@@ -10859,7 +10859,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2182,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "【Ex】堕天使《月梟》†vs† 熾天使《月梟》",
@@ -11252,7 +11252,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1400,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "ミストルティン＠瑞希ファン",
@@ -11514,7 +11514,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1685,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "Techno Kitchen",
@@ -11621,7 +11621,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1866,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Techno Kitchen SC",
@@ -12154,7 +12154,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1778,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "【Ex】ロシェ＠ペンギン",
@@ -12556,7 +12556,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2323,
         "LevelStr": "15",
         "Constant": 15.0,
         "Charter": "【Ex】FRANTIC LEMON",
@@ -12638,7 +12638,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1912,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "Redarrow",
@@ -12990,7 +12990,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1339,
         "LevelStr": "13+",
         "Constant": 13.6,
         "Charter": "Redarrow",
@@ -12998,7 +12998,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2539,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "ぴちネコ",
@@ -13170,7 +13170,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1999,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "羅波露斯",
@@ -13211,7 +13211,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1561,
         "LevelStr": "11+",
         "Constant": 11.8,
         "Charter": "ロシェ＠淀川",
@@ -13440,7 +13440,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1462,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "アミノハバキリ",
@@ -13448,7 +13448,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2512,
         "LevelStr": "15",
         "Constant": 15.0,
         "Charter": "ROCHER GALACTIC STRIKE",
@@ -13702,7 +13702,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1558,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "すきやき奉行",
@@ -13710,7 +13710,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2168,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "たけなしさん",
@@ -15576,7 +15576,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1511,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "ロシェ＠ペンギン",
@@ -16747,7 +16747,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2149,
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "【Ex】Techno Kitchen",
@@ -16886,7 +16886,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2218,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "南の島のペンギン",
@@ -17099,7 +17099,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2081,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ロシェ＠ペンギン",
@@ -17271,7 +17271,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1490,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "ミストルティン",
@@ -17623,7 +17623,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3201,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "聖剣ミストルティン＠401円(税込）",
@@ -17721,7 +17721,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1659,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "狂気のゆかり",
@@ -17729,7 +17729,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1832,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "緑譜面が許されるのはMASTERまでだよねー",
@@ -17950,7 +17950,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1369,
         "LevelStr": "13+",
         "Constant": 13.6,
         "Charter": "アミノハバキリ",
@@ -17958,7 +17958,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2060,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "CHAOTIC LEMON",
@@ -18736,7 +18736,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2222,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "Redarrow",
@@ -19097,7 +19097,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1714,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "ロシェ＠ペンギン",
@@ -19359,7 +19359,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1761,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "Lost Lemon’s Weeping",
@@ -19580,7 +19580,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 3210,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Air -INSANITY-",
@@ -19711,7 +19711,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1950,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "ス゜イロ゜ウヤ゜",
@@ -20022,7 +20022,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1670,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "jako lemons...",
@@ -20243,7 +20243,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1906,
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "すきやき奉行",
@@ -21447,7 +21447,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1810,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "ちょっとヤバいんじゃない？",
@@ -22241,7 +22241,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 967,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "某S氏",
@@ -22249,7 +22249,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1696,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "AMN feat.空色かりん",
@@ -22478,7 +22478,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1999,
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "Komplemon",
@@ -22871,7 +22871,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1788,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "Redarrow",
@@ -24584,7 +24584,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2065,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "【Ex】Techno Kitchen",
@@ -24797,7 +24797,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1949,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "ものくろっく",
@@ -25256,7 +25256,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1524,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "【Ex】ミストルティン",
@@ -25878,7 +25878,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1822,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "monoclock -alternative-",
@@ -27549,7 +27549,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1353,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "小鳥遊さん",
@@ -27557,7 +27557,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1900,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Redarrow",
@@ -27680,7 +27680,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1454,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "ロシェ＠ペンギン",
@@ -27983,7 +27983,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1286,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "【Ex】Magistr4te",
@@ -28204,7 +28204,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2048,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "【Ex】Redarrow",
@@ -28712,7 +28712,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1664,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "Moon Strix",
@@ -29007,7 +29007,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1353,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "Techno Kitchen",
@@ -29187,7 +29187,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2135,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "Red→→→Arrow",
@@ -29310,7 +29310,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1884,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "【Ex】Techno Kitchen",
@@ -29564,7 +29564,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1446,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ミストルティン",
@@ -29818,7 +29818,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2682,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "ロシェ＠ペンギン",
@@ -30105,7 +30105,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1850,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "羅・ハBぁ斬i",
@@ -30310,7 +30310,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1692,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "Redarrow",
@@ -31450,7 +31450,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1546,
         "LevelStr": "13",
         "Constant": 13.2,
         "Charter": "小鳥遊さん supported by Techno Kitchen",
@@ -31458,7 +31458,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1777,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "ETARTSIGAM",
@@ -32163,7 +32163,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1926,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "†はっぴー†",
@@ -32360,7 +32360,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1503,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "アミノハバキリ",
@@ -32368,7 +32368,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2202,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Curse\"Mistilteinn\"G.O.D",
@@ -32581,7 +32581,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1500,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "そらいろカリン",
@@ -33335,7 +33335,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1228,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "Techno Kitchen",
@@ -34630,7 +34630,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1293,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "Redarrow",
@@ -34671,7 +34671,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1706,
         "LevelStr": "13",
         "Constant": 13.3,
         "Charter": "Redarrow",
@@ -34876,7 +34876,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1575,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "じゃこレモン",
@@ -35081,7 +35081,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1805,
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "音楽的同位体 月梟",
@@ -36409,7 +36409,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2031,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "Ruby vs Jack",
@@ -36729,7 +36729,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1859,
         "LevelStr": "13+",
         "Constant": 13.6,
         "Charter": "Moon Strix",
@@ -36737,7 +36737,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2231,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Mistilteinn -starry-",
@@ -36786,7 +36786,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 2478,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "Moon Strix",
@@ -36909,7 +36909,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1772,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "ぴちネコ",
@@ -36917,7 +36917,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3390,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Revo2LC  -CODENAME : AIRPLUS-",
@@ -37212,7 +37212,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 742,
         "LevelStr": "10",
         "Constant": 10.4,
         "Charter": "はっぴー",
@@ -37745,7 +37745,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1777,
         "LevelStr": "11",
         "Constant": 11.3,
         "Charter": "小鳥遊さん：Q",
@@ -37991,7 +37991,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1916,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "PhoeniX JAPAN",
@@ -38073,7 +38073,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1550,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "たかなし!!",
@@ -38417,7 +38417,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1820,
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "ミストルティン(一緒にクラップしませんか)",
@@ -38499,7 +38499,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1755,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "緑化支配人代行",
@@ -38581,7 +38581,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1802,
         "LevelStr": "11+",
         "Constant": 11.8,
         "Charter": "緑化委員長(この手の曲でよく出てきますね)",
@@ -38819,7 +38819,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1576,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "小鳥遊さん",
@@ -38827,7 +38827,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2160,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Re:vo@LC vs. ミストルティン",
@@ -39032,7 +39032,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2393,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "ロシェ↓ペンギン",
@@ -39360,7 +39360,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2206,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "【Ex】Techno Kitchen",
@@ -39729,7 +39729,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1802,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "A Lucidness",
@@ -39975,7 +39975,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1539,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "Redarrow",
@@ -40426,7 +40426,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1616,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "月梟",
@@ -40549,7 +40549,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2112,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "Lemon Kingdom",
@@ -40754,7 +40754,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1709,
         "LevelStr": "11+",
         "Constant": 11.9,
         "Charter": "そらいろカリン",
@@ -41140,7 +41140,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2140,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "【Ex】アミノハバキリ",
@@ -41148,7 +41148,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1659,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "Bloodypurity",
@@ -41156,7 +41156,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1519,
         "LevelStr": "15",
         "Constant": 15.0,
         "Charter": "Bloodypurity",
@@ -41238,7 +41238,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2035,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "ミストルティン vs Mistilteinn",
@@ -41320,7 +41320,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2067,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "じゃこレモン",
@@ -41501,7 +41501,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1881,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "うさぎランドリー",
@@ -41747,7 +41747,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2034,
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "月梟 -Moon Strix-",
@@ -42280,7 +42280,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1511,
         "LevelStr": "13+",
         "Constant": 13.5,
         "Charter": "アミノハバキリ",
@@ -42444,7 +42444,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3271,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Redarrow",
@@ -42690,7 +42690,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2081,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "いい波きてるよ！ロシェ＠ペンギン",
@@ -43026,7 +43026,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1816,
         "LevelStr": "10+",
         "Constant": 10.9,
         "Charter": "ミストルティン",
@@ -43149,7 +43149,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1677,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "Piercing Blade",
@@ -43387,7 +43387,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1475,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "ロシェ＠ペンギン",
@@ -43395,7 +43395,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1874,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "ミストルティン vs じゃこレモン",
@@ -43600,7 +43600,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2716,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "#FR33D0MP1221C4T",
@@ -43805,7 +43805,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2108,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "【Ex】MOON STRIX!!",
@@ -44051,7 +44051,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1747,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "【Ex】Techno Kitchen",
@@ -44207,7 +44207,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1325,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "écologie",
@@ -44215,7 +44215,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2777,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "PIZ2ICAT  -CODENAME : CRYSTAL-",
@@ -44297,7 +44297,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1864,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "じゃこレモン#すこん部",
@@ -44461,7 +44461,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1307,
         "LevelStr": "11",
         "Constant": 11.3,
         "Charter": "うさぎランドリー",
@@ -44699,7 +44699,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1875,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Techno Kitchen",
@@ -44707,7 +44707,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2928,
         "LevelStr": "15",
         "Constant": 15.2,
         "Charter": "redarrow Vs habakiri",
@@ -44994,7 +44994,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2829,
         "LevelStr": "13",
         "Constant": 13.3,
         "Charter": "Techno Kitchen",
@@ -45199,7 +45199,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2224,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "Redarrow last war",
@@ -45896,7 +45896,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1451,
         "LevelStr": "11+",
         "Constant": 11.9,
         "Charter": "Techno Kitchen",
@@ -46142,7 +46142,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2598,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "R.@.P.",
@@ -46593,7 +46593,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1853,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "夢中になりたい！レッドアロー",
@@ -46798,7 +46798,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2610,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "GODLEMONESS",
@@ -47077,7 +47077,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1200,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "アミノハバキリ",
@@ -47085,7 +47085,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1822,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "SAMBA MASTER 小鳥遊",
@@ -47126,7 +47126,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1581,
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "すきやき奉行",
@@ -47290,7 +47290,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1641,
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "ハバキリ@こしあん派",
@@ -47700,7 +47700,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1752,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "The ruler \"Mistilteinn\"",
@@ -47905,7 +47905,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1806,
         "LevelStr": "11+",
         "Constant": 11.5,
         "Charter": "じゃーんレモン",
@@ -48479,7 +48479,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1482,
         "LevelStr": "11+",
         "Constant": 11.7,
         "Charter": "翠楼屋 Re:Dive",
@@ -48528,7 +48528,7 @@
       },
       {
         "LevelName": "ULTIMA",
-        "maxCombo": 0,
+        "maxCombo": 1956,
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "Moon Strix＠ゆづきず推し",
@@ -48569,7 +48569,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2385,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "すきやき奉行＠ランドソル",
@@ -48733,7 +48733,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1610,
         "LevelStr": "10+",
         "Constant": 10.8,
         "Charter": "ミストルティン",
@@ -48938,7 +48938,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1923,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "ミストルティン",
@@ -49266,7 +49266,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1946,
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "ロシェ＠ペンギン",
@@ -49381,7 +49381,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2624,
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "ミストルティン",
@@ -49389,7 +49389,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3234,
         "LevelStr": "15",
         "Constant": 15.4,
         "Charter": "譜面ボーイズからの挑戦状 -Legends-",
@@ -49512,7 +49512,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1700,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "【CHUNITHM】小鳥遊さん【本店だよ！！】",
@@ -49553,7 +49553,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1373,
         "LevelStr": "11+",
         "Constant": 11.6,
         "Charter": "制作・ロシェ　監修・原D & Nameless One",
@@ -49586,7 +49586,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2560,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "【Ex】アミノハバキリ",
@@ -49594,7 +49594,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3898,
         "LevelStr": "15",
         "Constant": 15.3,
         "Charter": "譜面ボーイズからの挑戦状 -Revolutions-",
@@ -49799,7 +49799,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1766,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "そらいろカリン",
@@ -49840,7 +49840,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1872,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "【Ex】りょっかとレモン",
@@ -49881,7 +49881,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1333,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "いけないレモン",
@@ -49922,7 +49922,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1728,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "音ゲーみたいなウニに住んでる小鳥遊",
@@ -49939,7 +49939,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1496,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "【Ex】Techno Kitchen",
@@ -50038,7 +50038,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1857,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "【Ex】アミノハバキリ",
@@ -50046,7 +50046,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2784,
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Phoenix",
@@ -50063,7 +50063,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2423,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "ロシェ＠ペンギン",
@@ -50178,7 +50178,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2140,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "Techno Kitchen",
@@ -50186,7 +50186,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2778,
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "ロシェ＠ペンギン",
@@ -50449,7 +50449,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1671,
         "LevelStr": "13",
         "Constant": 13.2,
         "Charter": "アミノハバキリ",
@@ -50457,7 +50457,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2216,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Redarrow",
@@ -50597,7 +50597,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1398,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "【Ex】小鳥遊さん",
@@ -50605,7 +50605,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2355,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Bloodypurity",
@@ -50646,7 +50646,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1511,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "アミノハバキリ",
@@ -50663,7 +50663,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1761,
         "LevelStr": "13",
         "Constant": 13.4,
         "Charter": "ものくろっく",
@@ -50671,7 +50671,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2222,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "じゃこレモン -desperado-",
@@ -50770,7 +50770,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1851,
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "そらいろカリン",
@@ -50787,7 +50787,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1634,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "ミストルティン",
@@ -50968,7 +50968,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 987,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "ミストルティン",
@@ -51108,7 +51108,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1267,
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "ミストルティン＠一歩、前へ！",
@@ -51166,7 +51166,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1959,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "そらいろカリン",
@@ -51371,7 +51371,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1362,
         "LevelStr": "11+",
         "Constant": 11.9,
         "Charter": "Redarrow",
@@ -51511,7 +51511,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2200,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "【Ex】Revo@LC",
@@ -51528,7 +51528,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1221,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "Techno Kitchen",
@@ -51709,7 +51709,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2031,
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "Bloodypurity",
@@ -51750,7 +51750,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2369,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "Techno Kitchen",
@@ -51808,7 +51808,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2045,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "音楽的同位体 月梟",
@@ -51849,7 +51849,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2548,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ものくろっく",
@@ -51907,7 +51907,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1829,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Piercing Blade",
@@ -51989,7 +51989,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1653,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "Redarrow",
@@ -52170,7 +52170,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1667,
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "アミノハバキリ",
@@ -52178,7 +52178,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2299,
         "LevelStr": "15",
         "Constant": 15.3,
         "Charter": "Bloodypurity",
@@ -52236,7 +52236,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2213,
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "Redarrow",
@@ -52277,7 +52277,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2358,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "Ruby vs DJ CaT",
@@ -52335,7 +52335,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1930,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "ミストルティン",
@@ -52516,7 +52516,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1700,
         "LevelStr": "11+",
         "Constant": 11.7,
         "Charter": "Revo@LC + Techno Kitchen",
@@ -52574,7 +52574,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1954,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "【Ex】そらいろカリン",
@@ -52714,7 +52714,7 @@
     "Beatmaps": [
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1595,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "【Ex】アミノハバキリ",
@@ -52722,7 +52722,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2323,
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "ロシェ@ペンギン",
@@ -52886,7 +52886,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1775,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ロシェ＠ペンギン",
@@ -52903,7 +52903,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1533,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "【Ex】Techno Kithen",
@@ -52920,7 +52920,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1802,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "Bloodypurity",
@@ -52961,7 +52961,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2077,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "[チュウニ学園] フェニックスレッド",
@@ -53019,7 +53019,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2438,
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "カードゲーマー†レモン",
@@ -53159,7 +53159,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1730,
         "LevelStr": "12",
         "Constant": 12.1,
         "Charter": "Redarrow",
@@ -53200,7 +53200,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2160,
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "ロシェ＠ペンギン",
@@ -53299,7 +53299,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2153,
         "LevelStr": "13",
         "Constant": 13.3,
         "Charter": "ぴちネコ",
@@ -53316,7 +53316,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2005,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "緑化委員長・改 supported by †M†",
@@ -53497,7 +53497,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1600,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "じゃこレモン",
@@ -53530,7 +53530,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 1796,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "アミノハバキリ",
@@ -53538,7 +53538,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2561,
         "LevelStr": "15",
         "Constant": 15.1,
         "Charter": "ミストルティン vs 譜面-100号",
@@ -53555,7 +53555,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1908,
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "【Ex】Techno Kitchen",
@@ -53613,7 +53613,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2010,
         "LevelStr": "13+",
         "Constant": 13.6,
         "Charter": "一ノ瀬 リズ",
@@ -53671,7 +53671,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1574,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "Rochesthésie",
@@ -53794,7 +53794,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1819,
         "LevelStr": "12",
         "Constant": 12.4,
         "Charter": "ロシェ＠ペンギン",
@@ -53835,7 +53835,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1960,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "habaqili",
@@ -53852,7 +53852,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2003,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "ぶっかましペンギン",
@@ -53992,7 +53992,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3067,
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "【Ex】「猫」(CV：ぴちネコ)】",
@@ -54025,7 +54025,7 @@
       },
       {
         "LevelName": "EXPERT",
-        "maxCombo": 0,
+        "maxCombo": 2126,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "じゃこレモン",
@@ -54033,7 +54033,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 3426,
         "LevelStr": "15",
         "Constant": 15.2,
         "Charter": "Techno Kitchen -+- Moon Strix",
@@ -54074,7 +54074,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2235,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "白狼天狗じゃこレモン",
@@ -54115,7 +54115,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1998,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "もふもふブラック",
@@ -54279,7 +54279,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1443,
         "LevelStr": "11",
         "Constant": 11.0,
         "Charter": "Moon Strix",
@@ -54320,7 +54320,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1187,
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "そらいろカリンドロップ",
@@ -54402,7 +54402,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 949,
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "SUGOI REDARROW",
@@ -54443,7 +54443,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2127,
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "ロシェ＠ペンギン",
@@ -54501,7 +54501,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2250,
         "LevelStr": "13",
         "Constant": 13.1,
         "Charter": "ロシェ@ペンギン",
@@ -54559,7 +54559,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1633,
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "【Ex】みそかつ侍",
@@ -54658,7 +54658,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 2033,
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "[チュウニ学園]レッドアロー",
@@ -54757,7 +54757,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1026,
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "斬っぽいな",
@@ -54774,7 +54774,7 @@
     "Beatmaps": [
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1522,
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "【Ex】ミストルティン＠笑顔の魔法使い",
@@ -54840,7 +54840,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1494,
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Redarrow",
@@ -54881,7 +54881,7 @@
       },
       {
         "LevelName": "MASTER",
-        "maxCombo": 0,
+        "maxCombo": 1749,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "ロシェ＠ペンギン",
