@@ -9,12 +9,12 @@
                 <div class="bg-[#808080] relative h-[5px]">
                     <div class="absolute left-0 top-0 bottom-0" :style="`background-color: ${d[4]}; width: ${d[3]}%`"/>
                 </div>
-                <div :class="{'current-pp': d[1]}">{{ d[2].toFixed(2) }}</div>
+                <div :class="{'current-pp': d[1]}">{{ (d[2] as number).toFixed(2) }}</div>
             </template>
         </div>
         <div v-if="ppConfig" class="text-center text-xl font-bold">
             <span class="text-[#ff66ab]">pp</span>
-            = {{ ppConfig['ppMax'].toFixed(2) }} × (5 ×
+            = {{ (ppConfig['ppMax'] as number).toFixed(2) }} × (5 ×
             <span class="text-[#ff66ab]">pp-acc</span>
             - 4) × {{ ppConfig['length'] }} ×
             {{ ppConfig['multiplier'] }}
@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 
-import {computed, onUpdated, ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import axios from "axios";
 import {osu_maniaPpChart_builder, PpAcc} from "@/GlobalVars";
 

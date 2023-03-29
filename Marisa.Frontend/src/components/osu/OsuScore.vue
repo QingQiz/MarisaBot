@@ -78,7 +78,7 @@
                                         </div>
                                         <div class="h-2 bg-[#808080] relative w-full">
                                             <div class="absolute h-2 left-0 top-0"
-                                                 :style="`width: ${val[1] > 10 ? 100 : val[1] / 10 * 100}%; background-color: ${val[2]}`"/>
+                                                 :style="`width: ${val![1] > 10 ? 100 : val![1] / 10 * 100}%; background-color: ${val![2]}`"/>
                                         </div>
                                         <div class="place-self-center">
                                             {{ val[1] }}
