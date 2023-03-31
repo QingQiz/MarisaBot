@@ -11,7 +11,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPlugin(PluginPriority.MaiMaiDx)]
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public partial class MaiMaiDx : MarisaPluginBase
+public partial class MaiMaiDx : PluginBase
 {
     #region 汇总 / summary
 

@@ -10,7 +10,7 @@ namespace Marisa.Plugin.Osu;
 [MarisaPlugin(PluginPriority.Osu)]
 [MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
 [MarisaPluginCommand("osu!", "osu！", "osu", "o", "!", "！")]
-public partial class Osu : MarisaPluginBase
+public partial class Osu : PluginBase
 {
     #region 绑定 / help
 
@@ -90,16 +90,6 @@ public partial class Osu : MarisaPluginBase
         db.OsuBinds.Update(o);
         await db.SaveChangesAsync();
         message.Reply("好了");
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    [MarisaPluginNoDoc]
-    [MarisaPluginCommand("help")]
-    private static MarisaPluginTaskState Help(Message message)
-    {
-        var doc = Plugin.Help.Help.GetHelp(typeof(Osu));
-        message.Reply(MessageDataImage.FromBase64(doc.GetImage().ToB64()));
 
         return MarisaPluginTaskState.CompletedTask;
     }

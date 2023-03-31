@@ -5,7 +5,7 @@ namespace Marisa.Plugin.Arcaea;
 [MarisaPlugin(PluginPriority.Arcaea)]
 [MarisaPluginDoc("音游 Arcaea 相关功能")]
 [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "arcaea", "arc", "阿卡伊")]
-public partial class Arcaea : MarisaPluginBase
+public partial class Arcaea : PluginBase
 {
     /// <summary>
     /// 搜歌

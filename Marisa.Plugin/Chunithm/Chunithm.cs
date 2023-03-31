@@ -12,7 +12,7 @@ namespace Marisa.Plugin.Chunithm;
 [MarisaPluginDoc("音游 Chunithm 的相关功能")]
 [MarisaPluginCommand("chunithm", "chu", "中二")]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public partial class Chunithm : MarisaPluginBase
+public partial class Chunithm : PluginBase
 {
     private readonly SongDb<ChunithmSong, ChunithmGuess> _songDb = new(
         ResourceManager.ResourcePath + "/aliases.tsv",
