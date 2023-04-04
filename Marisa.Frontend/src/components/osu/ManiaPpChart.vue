@@ -24,13 +24,13 @@
 
 <script lang="ts" setup>
 
-import {computed, ref, watch} from "vue";
+import {computed, ref} from "vue";
 import axios from "axios";
 import {osu_maniaPpChart_builder, PpAcc} from "@/GlobalVars";
 
 const ppConfig = ref(null);
 
-const props_n = defineProps<{
+const props = defineProps<{
     beatmapsetId: number,
     beatmapId: number,
     beatmapChecksum: string,
@@ -44,20 +44,15 @@ const props_n = defineProps<{
     count_miss: number;
 }>();
 
-const props = ref(props_n)
-
-watch(props_n, () => {
-    axios.get(osu_maniaPpChart_builder(props.value.beatmapsetId, props.value.beatmapChecksum, props.value.beatmapId, props.value.mods, totalHits())).then(data => {
-        ppConfig.value = data.data
-    });
-})
+axios.get(osu_maniaPpChart_builder(props.beatmapsetId, props.beatmapChecksum, props.beatmapId, props.mods, GetTotalHits()))
+    .then(data => ppConfig.value = data.data);
 
 const ppDisplay = computed(() => {
     const range = (start: number, stop: number, step: number) =>
         Array.from({length: (stop - start) / step + 1}, (_, i) => start + (i * step))
 
     let max = CalcPP(1)
-    let r = range(0.9, 1.01, 0.02).map(x => [x, 0])
+    let r   = range(0.9, 1.01, 0.02).map(x => [x, 0])
     r.push([CalcPpAcc(), 1])
     r.sort((a, b) => a[0] - b[0])
     r.reverse()
@@ -66,17 +61,17 @@ const ppDisplay = computed(() => {
         .map(x => [x[0], x[1], x[2], x[2] / max * 100, x[1] === 0 ? '#fc2' : '#ff66ab',])
 })
 
-function totalHits() {
-    return props.value.count_100 + props.value.count_300 + props.value.count_50 + props.value.count_geki + props.value.count_katu + props.value.count_miss;
+function GetTotalHits() {
+    return props.count_100 + props.count_300 + props.count_50 + props.count_geki + props.count_katu + props.count_miss;
 }
 
 function CalcPP(acc: number) {
     if (ppConfig.value == null) return NaN;
-    return ppConfig.value!['ppMax'] * ppConfig.value!['multiplier'] * (5 * acc - 4) * ppConfig.value!['length']
+    return ppConfig.value!['ppMax'] * ppConfig.value!['multiplier'] * (Math.max(5 * acc - 4, 0)) * ppConfig.value!['length']
 }
 
 function CalcPpAcc() {
-    return PpAcc(props.value.count_geki, props.value.count_300, props.value.count_katu, props.value.count_100, props.value.count_50, props.value.count_miss);
+    return PpAcc(props.count_geki, props.count_300, props.count_katu, props.count_100, props.count_50, props.count_miss);
 }
 
 </script>

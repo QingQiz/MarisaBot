@@ -4,10 +4,10 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from 'vue';
+import {computed, PropType, ref} from 'vue';
 
 const props = defineProps({
-    src: Array,
+    src: {type: Array as PropType<string[]>, required: true},
     fallback: String,
 });
 
