@@ -57,7 +57,7 @@ import {ref} from 'vue';
 import axios from 'axios';
 import {useRoute} from "vue-router";
 
-import ScoreCard from "@/components/maimai/ScoreCard.vue"
+import ScoreCard from "@/components/maimai/partial/ScoreCard.vue"
 import {maimai_newRa} from '@/GlobalVars'
 import {MaiMaiRating} from "@/components/maimai/MaiMai.Data";
 

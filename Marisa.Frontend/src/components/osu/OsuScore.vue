@@ -293,7 +293,7 @@ import {
     PpAcc
 } from "@/GlobalVars";
 import {BeatmapInfo, Score, UserInfo} from "@/components/osu/Osu.Data";
-import ManiaPpChart from "@/components/osu/ManiaPpChart.vue";
+import ManiaPpChart from "@/components/osu/partial/ManiaPpChart.vue";
 import {useRoute} from "vue-router";
 
 
