@@ -108,7 +108,7 @@ public class ChunithmScore
             var img1 = new Image<Rgba32>((int)rect1.Width, (int)rect1.Height);
             var img2 = img1.CloneAs<Rgba32>();
 
-            img1.DrawTextCenter(Constant.ToString("F1"), constFont, Color.White);
+            img1.DrawTextCenter(Constant.ToString("F1"), constFont, Color.Black);
             img2.DrawTextCenter(Rating.ToString("F1"), ratingFont, Color.White);
 
             img1.Clear(color2).Mutate(i => i.Fill(color1, rect2));
