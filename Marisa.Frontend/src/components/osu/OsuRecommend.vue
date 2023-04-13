@@ -2,8 +2,11 @@
     <template v-if="data_fetched ">
         <div class="p-10 w-fit" style="background-color: hsl(200, 15%, 15%)" v-if="error_message === ''">
             <div class="grid grid-cols-2 gap-10 w-[2080px]">
-                <div v-for="i in d" class="z-50">
-                    <mania-recommend-card :data="i"/>
+                <div v-for="i in d" class="z-50" v-if="mode === '3'">
+                    <mania-recommend-card :data="i as ManiaRecommendData"/>
+                </div>
+                <div v-for="i in d" class="z-50" v-else>
+                    <osu-recommend-card :data="i as OsuRecommendData"/>
                 </div>
             </div>
         </div>
@@ -15,8 +18,9 @@
 
 <script lang="ts" setup>
 import {ref} from "vue";
-import {ManiaRecommendData} from "@/components/osu/Osu.Data";
+import {ManiaRecommendData, OsuRecommendData, RecommendData} from "@/components/osu/Osu.Data";
 import ManiaRecommendCard from "@/components/osu/partial/ManiaRecommendCard.vue";
+import OsuRecommendCard from "@/components/osu/partial/OsuRecommendCard.vue";
 import axios from "axios";
 import {osu_getRecommend} from "@/GlobalVars";
 import {useRoute} from "vue-router";
@@ -29,7 +33,7 @@ let mode    = ref(route.query.mode)
 const data_fetched  = ref(true)
 const error_message = ref('')
 
-let d = ref([] as ManiaRecommendData[])
+let d = ref([] as RecommendData[])
 
 axios.get(osu_getRecommend, {params: {uid: uid.value, modeInt: mode.value}})
     .then(data => {
