@@ -18,7 +18,7 @@ import {ref} from "vue";
 import {ManiaRecommendData} from "@/components/osu/Osu.Data";
 import ManiaRecommendCard from "@/components/osu/partial/ManiaRecommendCard.vue";
 import axios from "axios";
-import {osu_recommend} from "@/GlobalVars";
+import {osu_getRecommend} from "@/GlobalVars";
 import {useRoute} from "vue-router";
 
 
@@ -31,7 +31,7 @@ const error_message = ref('')
 
 let d = ref([] as ManiaRecommendData[])
 
-axios.get(osu_recommend, {params: {uid: uid.value, modeInt: mode.value}})
+axios.get(osu_getRecommend, {params: {uid: uid.value, modeInt: mode.value}})
     .then(data => {
         if (data.data.success === true) {
             d.value = data.data.data.list

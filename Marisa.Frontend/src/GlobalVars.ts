@@ -3,16 +3,16 @@ import * as d3 from 'd3';
 export const host = "http://localhost:14311"
 
 export const maimai_newRa     = host + "/MaiMai/RaNew"
-export const osu_pp           = host + '/osu/PerformanceCalculator'
+export const osu_pp           = host + '/Osu/PerformanceCalculator'
 export const osu_maniaPpChart = host + '/Osu/ManiaPpChart'
-export const osu_userInfo     = host + '/osu/GetUserInfo'
-export const osu_accRing      = host + '/osu/GetAccRing'
-export const osu_modIcon      = host + '/osu/GetModIcon'
-export const osu_beatmapCover = host + '/osu/GetCover'
-export const osu_recent       = host + '/osu/GetRecent'
-export const osu_best         = host + '/osu/GetBest'
-export const osu_beatmapInfo  = host + '/osu/GetBeatmapInfo'
-export const osu_recommend    = host + '/osu/Recommend'
+export const osu_userInfo     = host + '/Osu/GetUserInfo'
+export const osu_accRing      = host + '/Osu/GetAccRing'
+export const osu_modIcon      = host + '/Osu/GetModIcon'
+export const osu_beatmapCover = host + '/Osu/GetCover'
+export const osu_recent       = host + '/Osu/GetRecent'
+export const osu_best         = host + '/Osu/GetBest'
+export const osu_beatmapInfo  = host + '/Osu/GetBeatmapInfo'
+export const osu_getRecommend = host + '/Osu/GetRecommend'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {
     return `${osu_accRing}?acc=${acc}&modeInt=${modeInt}`;

@@ -107,7 +107,7 @@ public class Osu : Controller
     }
 
     [HttpGet]
-    public async Task<string> Recommend(int modeInt, long uid)
+    public async Task<string> GetRecommend(int modeInt, long uid)
     {
         return await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend".SetQueryParams(new
         {
