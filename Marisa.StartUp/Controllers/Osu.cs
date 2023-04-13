@@ -1,4 +1,5 @@
-﻿using Flurl.Http;
+﻿using Flurl;
+using Flurl.Http;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Utils;
@@ -103,5 +104,23 @@ public class Osu : Controller
     {
         var result = await OsuApi.Request($"https://osu.ppy.sh/api/v2/beatmaps/{beatmapId}").GetStringAsync();
         return result;
+    }
+
+    [HttpGet]
+    public async Task<string> Recommend(int modeInt, long uid)
+    {
+        return await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend".SetQueryParams(new
+        {
+            newRecordPercent = "0.2,1",
+            passPercent      = "0.2,1",
+            difficulty       = "0,15",
+            keyCount         = "4,7",
+            gameMode         = modeInt,
+            hidePlayed       = 0,
+            mod              = "NM",
+            rule             = 4,
+            current          = 1,
+            pageSize         = 20
+        }).WithHeader("uid", uid).GetStringAsync();
     }
 }

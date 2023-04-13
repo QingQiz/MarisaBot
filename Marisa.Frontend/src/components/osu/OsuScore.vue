@@ -13,7 +13,7 @@
                                 </div>
                                 <div class="flex flex-col place-content-between gap-7">
                                     <!-- title -->
-                                    <div class="text-5xl">
+                                    <div class="text-5xl overflow-ellipsis overflow-hidden whitespace-nowrap">
                                         {{ score.beatmapset.title_unicode }}
                                         <!-- artist -->
                                         <div class="text-3xl">
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <div class="absolute right-10 top-5 flex flex-col gap-2 items-center">
-                            <div class="diff-text">
+                            <div class="osu-star-rating">
                                 {{ sr.toFixed(2) }}
                             </div>
                             <div class=rank-status>
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-col w-full gap-5">
-                                <div class="osu-grade-detail-table">
+                                <div class="osu-table">
                                     <div>
                                         <div>Accuracy</div>
                                         <div>{{ (score.accuracy * 100).toFixed(2) }}%</div>
@@ -230,7 +230,7 @@
                                     </div>
                                 </div>
 
-                                <div class="osu-grade-detail-table">
+                                <div class="osu-table">
                                     <!-- mania -->
                                     <div v-if="score.mode_int === 3">
                                         <div class="text-[#97ecfd]">max</div>
@@ -280,11 +280,11 @@
 </template>
 
 <script setup lang="ts">
-import * as d3 from 'd3';
 import {computed, ref} from "vue";
 import {max} from "d3";
 import axios from "axios";
 import {
+    GetDiffColor, GetDiffTextColor,
     osu_accRing_builder,
     osu_beatmapCover_builder, osu_beatmapInfo, osu_best,
     osu_modIcon_builder, osu_pp_builder,
@@ -370,21 +370,6 @@ axios.get(osu_userInfo, {params: {username: name.value, modeInt: mode.value}})
     })
     .catch(SetErrorMessage)
     .finally(() => data_fetched.value = true);
-
-
-// see https://github.com/cl8n/osu-web/blob/94e14a47fc2606b1f3ddf45acf86b2677b881aec/resources/assets/lib/utils/beatmap-helper.ts#L23
-const difficultyColourSpectrum = d3.scaleLinear<string>()
-    .domain([0.1, 1.25, 2, 2.5, 3.3, 4.2, 4.9, 5.8, 6.7, 7.7, 9])
-    .clamp(true)
-    .range(['#4290FB', '#4FC0FF', '#4FFFD5', '#7CFF4F', '#F6F05C', '#FF8068', '#FF4E6F', '#C645B8', '#6563DE', '#18158E', '#000000'])
-    .interpolate(d3.interpolateRgb.gamma(2.2));
-
-function GetDiffColor(rating: number) {
-    if (isNaN(rating)) return '#AAAAAA';
-    if (rating < 0.1) return '#AAAAAA';
-    if (rating >= 9) return '#000000';
-    return difficultyColourSpectrum(rating);
-}
 
 function SetErrorMessage(err: any) {
     errorMessage.value = err.response.data
@@ -487,11 +472,6 @@ function GetPpAcc() {
 
 function GetBeatmapCoverPath() {
     return `url(${osu_beatmapCover_builder(score.value.beatmapset.id, score.value.beatmap.checksum, score.value.beatmap.id)}),url(${score.value.beatmapset.covers["cover@2x"]})`
-}
-
-function GetDiffTextColor(sr: number) {
-    if (isNaN(sr)) return '#000000';
-    return sr >= 7.5 ? '#ffd996' : '#000000';
 }
 
 const page_width  = 1700;
@@ -619,14 +599,9 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
     background-color: v-bind(diffColor);
 }
 
-.diff-text {
-    @apply rounded-3xl px-2 py-0.5 font-bold flex place-content-center gap-1 text-xl pr-3;
+.osu-star-rating {
     color: v-bind(diffTextColor);
     background-color: v-bind(diffColor);
-}
-
-.diff-text:before {
-    content: '★';
 }
 
 .rank-status {
@@ -667,21 +642,12 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
     text-shadow: 0 0 20px hsl(200, 40%, 100%);
 }
 
-.osu-grade-detail-table {
-    @apply flex w-full uppercase gap-1;
-    white-space: nowrap;
-}
-
-.osu-grade-detail-table > div {
-    @apply flex flex-col items-center grow basis-0;
-}
-
-.osu-grade-detail-table > div > div:nth-child(1) {
-    @apply bg-black w-full text-center rounded-full text-lg bg-opacity-50;
+.osu-table > div > div:nth-child(1) {
+    @apply text-lg;
 
 }
 
-.osu-grade-detail-table > div > div:nth-child(2) {
+.osu-table > div > div:nth-child(2) {
     @apply text-3xl
 }
 

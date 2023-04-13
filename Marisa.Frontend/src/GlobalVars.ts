@@ -1,22 +1,26 @@
+import * as d3 from 'd3';
+
 export const host = "http://localhost:14311"
 
-export const maimai_newRa = host + "/MaiMai/RaNew"
-export const osu_pp = host + '/osu/PerformanceCalculator'
+export const maimai_newRa     = host + "/MaiMai/RaNew"
+export const osu_pp           = host + '/osu/PerformanceCalculator'
 export const osu_maniaPpChart = host + '/Osu/ManiaPpChart'
-export const osu_userInfo = host + '/osu/GetUserInfo'
-export const osu_accRing = host + '/osu/GetAccRing'
-export const osu_modIcon = host + '/osu/GetModIcon'
+export const osu_userInfo     = host + '/osu/GetUserInfo'
+export const osu_accRing      = host + '/osu/GetAccRing'
+export const osu_modIcon      = host + '/osu/GetModIcon'
 export const osu_beatmapCover = host + '/osu/GetCover'
-export const osu_recent = host + '/osu/GetRecent'
-export const osu_best = host + '/osu/GetBest'
-export const osu_beatmapInfo = host + '/osu/GetBeatmapInfo'
+export const osu_recent       = host + '/osu/GetRecent'
+export const osu_best         = host + '/osu/GetBest'
+export const osu_beatmapInfo  = host + '/osu/GetBeatmapInfo'
+export const osu_recommend    = host + '/osu/Recommend'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {
     return `${osu_accRing}?acc=${acc}&modeInt=${modeInt}`;
 }
 
-export function osu_modIcon_builder(mod: string) {
-    return `${osu_modIcon}?mod=${mod}`;
+export function osu_modIcon_builder(mod: string, withText: boolean = true) {
+    if (withText) return `${osu_modIcon}?mod=${mod}`;
+    return `${osu_modIcon}?mod=${mod}&withText=false`;
 }
 
 export function osu_maniaPpChart_builder(beatmapsetId: number, beatmapChecksum: string, beatmapId: number, mods: string[], totalHits: number) {
@@ -54,4 +58,23 @@ export function maimai_alternativeCover(id: number) {
         `/assets/maimai/cover/${(id ?? 0) - 10000}.png`,
         `/assets/maimai/cover/0.png`,
     ]
+}
+
+// see https://github.com/cl8n/osu-web/blob/94e14a47fc2606b1f3ddf45acf86b2677b881aec/resources/assets/lib/utils/beatmap-helper.ts#L23
+const difficultyColourSpectrum = d3.scaleLinear<string>()
+    .domain([0.1, 1.25, 2, 2.5, 3.3, 4.2, 4.9, 5.8, 6.7, 7.7, 9])
+    .clamp(true)
+    .range(['#4290FB', '#4FC0FF', '#4FFFD5', '#7CFF4F', '#F6F05C', '#FF8068', '#FF4E6F', '#C645B8', '#6563DE', '#18158E', '#000000'])
+    .interpolate(d3.interpolateRgb.gamma(2.2));
+
+export function GetDiffColor(rating: number) {
+    if (isNaN(rating)) return '#AAAAAA';
+    if (rating < 0.1) return '#AAAAAA';
+    if (rating >= 9) return '#000000';
+    return difficultyColourSpectrum(rating);
+}
+
+export function GetDiffTextColor(sr: number) {
+    if (isNaN(sr)) return '#000000';
+    return sr >= 7.5 ? '#ffd996' : '#000000';
 }

@@ -73,4 +73,13 @@ public static class WebApi
         await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions { Timeout = 0 });
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
     }
+
+    public static async Task<string> OsuRecommend(long uid, int modeInt)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(Frontend + "/osu/recommend?" + "uid=" + uid + "&mode=" + modeInt);
+        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions { Timeout = 0 });
+        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
+    }
 }

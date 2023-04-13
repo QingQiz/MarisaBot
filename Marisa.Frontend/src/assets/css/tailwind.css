@@ -1,34 +1,59 @@
 @tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
+:root::-webkit-scrollbar {
     display: none;
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
+:root {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
-@layer base {
-    @font-face {
-        font-family: 'Venera';
-        font-weight: 700;
-        src: url('@/assets/fonts/Venera-700.otf') format('opentype');
-    }
-
-    @font-face {
-        font-family: 'Torus';
-        font-weight: normal;
-        src: url('@/assets/fonts/Torus-Regular.otf') format('opentype');
-    }
-
-    @font-face {
-        font-family: 'Torus';
-        font-weight: bold;
-        src: url("@/assets/fonts/Torus-SemiBold.otf") format("opentype");
-    }
+@font-face {
+    font-family: 'Venera';
+    font-weight: 700;
+    src: url('@/assets/fonts/Venera-700.otf') format('opentype');
 }
+
+@font-face {
+    font-family: 'Torus';
+    font-weight: normal;
+    src: url('@/assets/fonts/Torus-Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Torus';
+    font-weight: bold;
+    src: url("@/assets/fonts/Torus-SemiBold.otf") format("opentype");
+}
+
+@tailwind components;
+
+.osu-table {
+    @apply flex gap-0.5 uppercase;
+    white-space: nowrap;
+}
+
+.osu-table > div {
+    @apply flex flex-col items-center grow basis-0;
+}
+
+.osu-table > div > div:nth-child(1) {
+    @apply bg-black bg-opacity-50 rounded-full w-full text-center
+}
+
+.osu-table > div > div:nth-child(2) {
+}
+
+.osu-star-rating {
+    @apply flex gap-1 items-center justify-center w-fit pr-4 pl-3 pb-0.5 rounded-full font-bold text-2xl;
+    text-shadow: none;
+}
+
+.osu-star-rating:before {
+    content: '★';
+}
+
+@tailwind utilities;

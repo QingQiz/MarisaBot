@@ -132,6 +132,24 @@ public partial class Osu : PluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("从 AlphaOsu 获取某人的推分推荐")]
+    [MarisaPluginCommand("recommend", "什么推分", "打什么推分", "打什么歌推分")]
+    private async Task<MarisaPluginTaskState> Recommend(Message message)
+    {
+        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+        if (command!.Mode.Value is not (0 or 3))
+        {
+            message.Reply("目前只支持 osu 和 mania 模式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var info = await OsuApi.GetUserInfoByName(command.Name);
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuRecommend(info.Id, command.Mode.Value)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("查询某人最近通过的图")]
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message)
@@ -145,7 +163,7 @@ public partial class Osu : PluginBase
 
     [MarisaPluginDoc("查询某人最近打的图")]
     [MarisaPluginCommand("recent", "rec", "re")]
-    private async Task<MarisaPluginTaskState> Recent(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> Recent(Message message)
     {
         if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 

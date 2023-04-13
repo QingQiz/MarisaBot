@@ -1,10 +1,19 @@
-export interface BeatmapInfo extends ScoreBeatmapInfo {
+export {
+    BeatmapInfo,
+    UserInfo,
+    Score,
+    RecommendData,
+    ManiaRecommendData,
+    OsuRecommendData
+}
+
+interface BeatmapInfo extends ScoreBeatmapInfo {
     beatmapset: BeatmapInfoBeatmapset;
     failtimes:  FailTimes;
     max_combo:  number;
 }
 
-export interface ScoreBeatmapInfo {
+interface ScoreBeatmapInfo {
     beatmapset_id:     number;
     difficulty_rating: number;
     id:                number;
@@ -34,7 +43,7 @@ export interface ScoreBeatmapInfo {
     checksum:          string;
 }
 
-export interface BeatmapInfoBeatmapset extends ScoreBeatmapset {
+interface BeatmapInfoBeatmapset extends ScoreBeatmapset {
     bpm:                 number;
     can_be_hyped:        boolean;
     deleted_at:          null;
@@ -53,12 +62,12 @@ export interface BeatmapInfoBeatmapset extends ScoreBeatmapset {
     ratings:             number[];
 }
 
-export interface Availability {
+interface Availability {
     download_disabled: boolean;
     more_information:  null;
 }
 
-export interface BeatmapsetCovers {
+interface BeatmapsetCovers {
     cover:          string;
     "cover@2x":     string;
     card:           string;
@@ -69,17 +78,17 @@ export interface BeatmapsetCovers {
     "slimcover@2x": string;
 }
 
-export interface NominationsSummary {
+interface NominationsSummary {
     current:  number;
     required: number;
 }
 
-export interface FailTimes {
+interface FailTimes {
     fail: number[];
     exit: number[];
 }
 
-export interface Score {
+interface Score {
     accuracy:                number;
     best_id:                 number;
     created_at:              Date;
@@ -104,7 +113,7 @@ export interface Score {
     weight:                  Weight;
 }
 
-export interface ScoreBeatmapset {
+interface ScoreBeatmapset {
     artist:          string;
     artist_unicode:  string;
     covers:          BeatmapsetCovers;
@@ -126,11 +135,11 @@ export interface ScoreBeatmapset {
     video:           boolean;
 }
 
-export interface CurrentUserAttributes {
+interface CurrentUserAttributes {
     pin: null;
 }
 
-export interface ScoreStatistics {
+interface ScoreStatistics {
     count_100:  number;
     count_300:  number;
     count_50:   number;
@@ -139,7 +148,7 @@ export interface ScoreStatistics {
     count_miss: number;
 }
 
-export interface User {
+interface User {
     avatar_url:      string;
     country_code:    string;
     default_group:   string;
@@ -155,12 +164,12 @@ export interface User {
     username:        string;
 }
 
-export interface Weight {
+interface Weight {
     percentage: number;
     pp:         number;
 }
 
-export interface UserInfo {
+interface UserInfo {
     avatar_url:                           string;
     country_code:                         string;
     default_group:                        string;
@@ -214,37 +223,37 @@ export interface UserInfo {
     unranked_beatmapset_count:            number;
 }
 
-export interface Country {
+interface Country {
     code: string;
     name: string;
 }
 
-export interface UserProfileCover {
+interface UserProfileCover {
     custom_url: string;
     url:        string;
 }
 
-export interface Kudosu {
+interface Kudosu {
     total:     number;
     available: number;
 }
 
-export interface MonthlyPlayCount {
+interface MonthlyPlayCount {
     start_date: Date;
     count:      number;
 }
 
-export interface Page {
+interface Page {
     html: string;
     raw:  string;
 }
 
-export interface RankHistory {
+interface RankHistory {
     mode: string;
     data: number[];
 }
 
-export interface UserStatistics {
+interface UserStatistics {
     level:                     Level;
     global_rank:               number;
     pp:                        number;
@@ -263,7 +272,7 @@ export interface UserStatistics {
     variants:                  Variant[];
 }
 
-export interface GradeCounts {
+interface GradeCounts {
     ss:  number;
     ssh: number;
     s:   number;
@@ -271,16 +280,16 @@ export interface GradeCounts {
     a:   number;
 }
 
-export interface Level {
+interface Level {
     current:  number;
     progress: number;
 }
 
-export interface Rank {
+interface Rank {
     country: number;
 }
 
-export interface Variant {
+interface Variant {
     mode:         string;
     variant:      string;
     country_rank: number;
@@ -288,7 +297,37 @@ export interface Variant {
     pp:           number;
 }
 
-export interface UserAchievement {
+interface UserAchievement {
     achieved_at:    Date;
     achievement_id: number;
+}
+
+interface RecommendData {
+    id:                  string;
+    mapName:             string;
+    mapLink:             string;
+    mapCoverUrl:         string;
+    mod:                 string[];
+    currentMod:          string[] | null;
+    difficulty:          number;
+    currentPP:           number | null;
+    predictPP:           number;
+    accurate:            boolean;
+    newRecordPercent:    number;
+    ppIncrement:         number;
+    passPercent:         number;
+    ppIncrementExpect:   number;
+}
+
+interface ManiaRecommendData extends RecommendData {
+    keyCount:            number;
+    currentAccuracy:     number | null;
+    predictAccuracy:     number;
+    currentSpeed:        number | null;
+    currentAccuracyLink: null | string;
+}
+
+interface OsuRecommendData extends RecommendData {
+    currentScoreLink:  null | string;
+    currentScore:      number | null;
 }
