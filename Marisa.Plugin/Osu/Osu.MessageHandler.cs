@@ -31,11 +31,7 @@ public partial class Osu : PluginBase
         {
             var info = await OsuApi.GetUserInfoByName(name);
 
-            if (dbContext.OsuBinds.Any(o => o.OsuUserId == info.Id))
-            {
-                message.Reply($"名为 '{info.Username}' 的 osu 用户已被绑定。。");
-            }
-            else if (dbContext.OsuBinds.Any(o => o.UserId == sender))
+            if (dbContext.OsuBinds.Any(o => o.UserId == sender))
             {
                 var bind = dbContext.OsuBinds.First(o => o.UserId == sender);
 
