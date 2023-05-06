@@ -9,7 +9,7 @@ using Image = SixLabors.ImageSharp.Image;
 namespace Marisa.StartUp.Controllers;
 
 [ApiController]
-[Route("[controller]/[action]")]
+[Route("Api/[controller]/[action]")]
 public class Osu : Controller
 {
     [HttpGet]

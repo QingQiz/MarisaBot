@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Marisa.StartUp.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("Api/[controller]")]
 public class MaiMai : Controller
 {
     [HttpGet("RaNew")]
