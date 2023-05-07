@@ -1,6 +1,7 @@
 export {
     BeatmapInfo,
     UserInfo,
+    ScoreSimple,
     Score,
     RecommendData,
     ManiaRecommendData,
@@ -88,7 +89,7 @@ interface FailTimes {
     exit: number[];
 }
 
-interface Score {
+interface ScoreSimple {
     accuracy:                number;
     best_id:                 number;
     created_at:              Date;
@@ -107,6 +108,9 @@ interface Score {
     type:                    string;
     user_id:                 number;
     current_user_attributes: CurrentUserAttributes;
+}
+
+interface Score extends ScoreSimple {
     beatmap:                 ScoreBeatmapInfo;
     beatmapset:              ScoreBeatmapset;
     user:                    User;
