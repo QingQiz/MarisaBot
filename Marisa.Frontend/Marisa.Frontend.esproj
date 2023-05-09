@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.74-alpha">
     <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
         <StartupCommand>npm run serve</StartupCommand>
         <JavaScriptTestRoot>.\</JavaScriptTestRoot>
         <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
