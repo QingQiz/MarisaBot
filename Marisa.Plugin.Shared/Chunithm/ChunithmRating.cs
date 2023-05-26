@@ -179,7 +179,7 @@ public partial class ChunithmRating
                     opt.Font              = rateFont;
                     opt.VerticalAlignment = VerticalAlignment.Top;
 
-                    var ra = $"RATING: {r:00.00}";
+                    var ra = $"RATING: {Math.Round(r, 2, MidpointRounding.ToZero):00.00}";
 
                     nameCard.DrawText(opt, ra, Color.ParseHex("#1f1e33"));
                     break;
@@ -194,7 +194,7 @@ public partial class ChunithmRating
 
             nameFont = new Font(yaHei, 35, FontStyle.Bold);
 
-            var text = $"B30 {b30 / 30:00.00} / R10 {r10 / 10:00.00}";
+            var text = $"B30 {Math.Round(b30 / 30, 2, MidpointRounding.ToZero):00.00} / R10 {Math.Round(r10 / 10, 2, MidpointRounding.ToZero):00.00}";
 
             rainbowCard.DrawTextCenter(text, nameFont, Color.Black);
 
