@@ -16,13 +16,25 @@ namespace Marisa.Plugin.Shared.Chunithm;
 public partial class ChunithmRating
 {
     [JsonProperty("rating", Required = Required.Always)]
-    public double Rating { get; set; }
+    public decimal Rating
+    {
+        get
+        {
+            var (r10, b30) = (Records.Best.Sum(s => s.Rating), Records.R10.Sum(s => s.Rating));
+            return Math.Round((r10 + b30) / 40, 2, MidpointRounding.ToZero);
+        }
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
+    }
 
     [JsonProperty("records", Required = Required.Always)]
     public Records Records { get; set; }
 
     [JsonProperty("username", Required = Required.Always)]
     public string Username { get; set; }
+
+    public decimal B30 => Math.Round(Records.Best.Sum(s => s.Rating) / 30, 2, MidpointRounding.ToZero);
+    public decimal R10 => Math.Round(Records.R10.Sum(s => s.Rating) / 10, 2, MidpointRounding.ToZero);
 
     public static ChunithmRating FromJson(string json) => JsonConvert.DeserializeObject<ChunithmRating>(json, Converter.Settings)!;
     public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
@@ -137,21 +149,19 @@ public partial class ChunithmRating
             var consolas = SystemFonts.Get("Consolas");
             var yaHei    = SystemFonts.Get("Microsoft Yahei");
 
-            var (r10, b30) = (Records.R10.Sum(s => s.Rating), Records.Best.Sum(s => s.Rating));
-
-            var r = (int)((r10 + b30) / 40 * 100) / 100.0;
+            var r = Rating;
 
             var num = r switch
             {
-                >= 16    => 0,
-                >= 15.25 => 1,
-                >= 14.5  => 2,
-                >= 13.25 => 3,
-                >= 12    => 4,
-                >= 10    => 5,
-                >= 7     => 6,
-                >= 4     => 7,
-                _        => 8
+                >= 16     => 0,
+                >= 15.25m => 1,
+                >= 14.5m  => 2,
+                >= 13.25m => 3,
+                >= 12     => 4,
+                >= 10     => 5,
+                >= 7      => 6,
+                >= 4      => 7,
+                _         => 8
             };
 
             num = num <= 4 ? num : 10;
@@ -179,7 +189,7 @@ public partial class ChunithmRating
                     opt.Font              = rateFont;
                     opt.VerticalAlignment = VerticalAlignment.Top;
 
-                    var ra = $"RATING: {Math.Round(r, 2, MidpointRounding.ToZero):00.00}";
+                    var ra = $"RATING: {r:00.00}";
 
                     nameCard.DrawText(opt, ra, Color.ParseHex("#1f1e33"));
                     break;
@@ -194,7 +204,7 @@ public partial class ChunithmRating
 
             nameFont = new Font(yaHei, 35, FontStyle.Bold);
 
-            var text = $"B30 {Math.Round(b30 / 30, 2, MidpointRounding.ToZero):00.00} / R10 {Math.Round(r10 / 10, 2, MidpointRounding.ToZero):00.00}";
+            var text = $"B30 {B30:00.00} / R10 {R10:00.00}";
 
             rainbowCard.DrawTextCenter(text, nameFont, Color.Black);
 

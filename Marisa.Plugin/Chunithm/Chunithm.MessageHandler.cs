@@ -1,4 +1,5 @@
-﻿using Marisa.EntityFrameworkCore;
+﻿using Flurl.Http;
+using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
@@ -13,11 +14,38 @@ public partial class Chunithm
     /// </summary>
     [MarisaPluginDoc("查询 b30，参数为：查分器的账号名 或 @某人 或 留空")]
     [MarisaPluginCommand("b30", "查分")]
-    private static async Task<MarisaPluginTaskState> MaiMaiDxB40(Message message)
+    private static async Task<MarisaPluginTaskState> B30(Message message)
     {
         var ret = await GetB30Card(message);
 
         message.Reply(ret);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("b30的汇总情况，具体的试一试命令就知道了（懒）")]
+    [MarisaPluginSubCommand(nameof(B30))]
+    [MarisaPluginCommand("sum")]
+    private static async Task<MarisaPluginTaskState> B30Sum(Message message)
+    {
+        try
+        {
+            var rating = await GetRating(null, message.Sender!.Id);
+
+            var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
+            var rSum = rating.Records.R10.Sum(x => x.Rating) * 100;
+
+            message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
+                $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
+        }
+        catch (FlurlHttpException e) when (e.StatusCode == 400)
+        {
+            message.Reply("“查无此人”");
+        }
+        catch (FlurlHttpTimeoutException)
+        {
+            message.Reply("Timeout");
+        }
 
         return MarisaPluginTaskState.CompletedTask;
     }

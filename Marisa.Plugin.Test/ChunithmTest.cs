@@ -50,16 +50,16 @@ public class ChunithmTest
     {
         var score = new ChunithmScore
         {
-            Id         = 335,
-            CId        = 335,
-            Constant   = 13.9m,
-            Rating     = 16.0,
-            Fc         = "",
-            Level      = "13+",
-            LevelIndex = 3,
-            LevelLabel = "Expert",
-            Score      = 1009000,
-            Title      = "这是个名字名字名字名字名字名字名字名字名字名字",
+            Id          = 335,
+            CId         = 335,
+            Constant    = 13.9m,
+            Rating      = 16.0m,
+            Fc          = "",
+            Level       = "13+",
+            LevelIndex  = 3,
+            LevelLabel  = "Expert",
+            Achievement = 1009000,
+            Title       = "这是个名字名字名字名字名字名字名字名字名字名字",
         };
 
         score.Draw().Show();

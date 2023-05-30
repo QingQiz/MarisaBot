@@ -31,17 +31,24 @@ public class ChunithmScore
 
     [JsonProperty("mid", Required = Required.Always)]
     public long Id { get; set; }
+    
+    private decimal? _rating;
 
     [JsonProperty("ra", Required = Required.Always)]
-    public double Rating { get; set; }
+    public decimal Rating
+    {
+        get => _rating ?? (decimal)(_rating = ChunithmSong.Ra(Achievement, Constant));
+        // ReSharper disable once ValueParameterNotUsed
+        set { }
+    }
 
     [JsonProperty("score", Required = Required.Always)]
-    public int Score { get; set; }
+    public int Achievement { get; set; }
 
     [JsonProperty("title", Required = Required.Always)]
     public string Title { get; set; }
 
-    private string Rank => Score switch
+    private string Rank => Achievement switch
     {
         >= 100_9000 => "sssp",
         >= 100_7500 => "sss",
@@ -91,7 +98,7 @@ public class ChunithmScore
         var drawY = levelBar.PaddingTop;
 
         var titleFont  = mm.CreateFont(30, FontStyle.Bold);
-        var constFont = exo2.CreateFont(20);
+        var constFont  = exo2.CreateFont(20);
         var ratingFont = exo2.CreateFont(20, FontStyle.Bold);
         var scoreFont  = exo2.CreateFont(60, FontStyle.Bold);
 
@@ -112,7 +119,7 @@ public class ChunithmScore
             img2.Clear(color2);
 
             img1.DrawTextCenter(Constant.ToString("F1"), ratingFont, Color.Black);
-            img2.DrawTextCenter(ChunithmSong.Ra(Score, Constant).ToString("F2"), ratingFont, Color.White);
+            img2.DrawTextCenter(ChunithmSong.Ra(Achievement, Constant).ToString("F2"), ratingFont, Color.White);
 
             coverBackground
                 .DrawImage(img1, drawX, drawY)
@@ -140,7 +147,7 @@ public class ChunithmScore
 
         // score
         {
-            var score = Score.ToString("N0");
+            var score = Achievement.ToString("N0");
 
             var measure = score.Measure(scoreFont);
 
