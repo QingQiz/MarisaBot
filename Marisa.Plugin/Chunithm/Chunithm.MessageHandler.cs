@@ -30,7 +30,8 @@ public partial class Chunithm
     {
         try
         {
-            var rating = await GetRating(null, message.Sender!.Id);
+            var (username, qq) = AtOrSelf(message);
+            var rating = await GetRating(username, qq);
 
             var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
             var rSum = rating.Records.R10.Sum(x => x.Rating) * 100;

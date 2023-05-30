@@ -5,7 +5,7 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-    private static async Task<MessageChain> GetB30Card(Message message, bool b50 = false)
+    private static (string, long) AtOrSelf(Message message)
     {
         var username = message.Command;
         var qq       = message.Sender!.Id;
@@ -18,6 +18,13 @@ public partial class Chunithm
                 qq = (at as MessageDataAt)?.Target ?? qq;
             }
         }
+
+        return (username, qq);
+    }
+
+    private static async Task<MessageChain> GetB30Card(Message message, bool b50 = false)
+    {
+        var (username, qq) = AtOrSelf(message);
 
         MessageChain ret;
         try
