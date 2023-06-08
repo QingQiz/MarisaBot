@@ -287,27 +287,13 @@ public partial class MaiMaiDx : PluginBase
     #region 查分
 
     /// <summary>
-    /// b40
-    /// </summary>
-    [MarisaPluginDoc("查询 b40，参数为：查分器的账号名 或 @某人 或 留空")]
-    [MarisaPluginCommand("b40", "查分")]
-    private static async Task<MarisaPluginTaskState> MaiMaiDxB40(Message message)
-    {
-        var ret = await GetB40Card(message);
-
-        message.Reply(ret);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
     /// b50
     /// </summary>
     [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
-    [MarisaPluginCommand("b50")]
+    [MarisaPluginCommand("best", "b50", "查分")]
     private static async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
     {
-        var ret = await GetB40Card(message, true);
+        var ret = await GetB40Card(message);
 
         message.Reply(ret);
 

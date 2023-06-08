@@ -428,7 +428,7 @@ public static class MaiMaiDraw
             songScores[1] = rating.NewScores.Where(s => s.Achievement < 100.5).ToList().RandomTake();
         }
 
-        // 找到不在b40里但定数不超过b40里最高定数的能推的旧谱
+        // 找到不在b40里但定数不超过b40里最高定数+0.1的能推的旧谱
         long minSdRating = 0;
         if (rating.OldScores.Any())
         {
@@ -439,7 +439,7 @@ public static class MaiMaiDraw
             var songListSd = songList
                 .Where(s => s.Info.IsNew == false)
                 .Where(s => rating.OldScores.All(ss => ss.Id != s.Id))
-                .Where(s => s.Constants.Any(c => c <= playableSd && SongScore.Ra(100.5, c) > minSdRating))
+                .Where(s => s.Constants.Any(c => c <= playableSd + 0.1 && SongScore.Ra(100.5, c) > minSdRating))
                 .ToList();
 
             if (songListSd.Any())
@@ -459,7 +459,7 @@ public static class MaiMaiDraw
             var songListDx = songList
                 .Where(s => s.Info.IsNew)
                 .Where(s => rating.NewScores.All(ss => ss.Id != s.Id))
-                .Where(s => s.Constants.Any(c => c <= playableDx && SongScore.Ra(100.5, c) > minDxRating))
+                .Where(s => s.Constants.Any(c => c <= playableDx + 0.1 && SongScore.Ra(100.5, c) > minDxRating))
                 .ToList();
 
             if (songListDx.Any())

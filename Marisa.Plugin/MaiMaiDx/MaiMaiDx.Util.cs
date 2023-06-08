@@ -21,19 +21,18 @@ public partial class MaiMaiDx
 
     #region rating
 
-    private static async Task<DxRating> GetDxRating(string? username, long? qq, bool b50 = false)
+    private static async Task<DxRating> GetDxRating(string? username, long? qq)
     {
-        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(b50
-            ? string.IsNullOrEmpty(username)
+        const bool b50 = true;
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
+            string.IsNullOrEmpty(username)
                 ? new { qq, b50 }
-                : new { username, b50 }
-            : string.IsNullOrEmpty(username)
-                ? new { qq }
-                : new { username });
+                : new { username, b50 });
+            
         return new DxRating(await response.GetJsonAsync(), b50);
     }
 
-    private static async Task<MessageChain> GetB40Card(Message message, bool b50 = false)
+    private static async Task<MessageChain> GetB40Card(Message message)
     {
         var username = message.Command;
         var qq       = message.Sender!.Id;
@@ -47,7 +46,7 @@ public partial class MaiMaiDx
             }
         }
 
-        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(username, qq, b50));
+        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(username, qq, true));
     }
 
     #endregion
