@@ -51,11 +51,6 @@ export const maimai_levelColors = [
 export function maimai_alternativeCover(id: number) {
     return [
         `/assets/maimai/cover/${id}.png`,
-        `/assets/maimai/cover/${id}.jpg`,
-        `/assets/maimai/cover/${(id ?? 0) + 10000}.jpg`,
-        `/assets/maimai/cover/${(id ?? 0) + 10000}.png`,
-        `/assets/maimai/cover/${(id ?? 0) - 10000}.jpg`,
-        `/assets/maimai/cover/${(id ?? 0) - 10000}.png`,
         `/assets/maimai/cover/0.png`,
     ]
 }

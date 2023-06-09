@@ -10,7 +10,6 @@
 
     <ItemGroup>
       <Folder Include="Resource\Arcaea" />
-      <Folder Include="Resource\MaiMaiDx" />
     </ItemGroup>
 
     <ItemGroup>
