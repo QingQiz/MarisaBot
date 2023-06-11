@@ -66,10 +66,10 @@ public static class MaiMaiDraw
             DrawKeyValuePair("类别", song.Info.Genre, x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("追加日期", song.Info.ReleaseDate, x, y, w, h, background.Width);
+            DrawKeyValuePair("版本", song.Version, x, y, w, h, background.Width);
 
             y += h;
-            DrawKeyValuePair("版本", song.Info.From, x, y, w, h, background.Width);
+            DrawKeyValuePair("来源", song.Info.From, x, y, w, h, background.Width);
 
             y = 3 * h;
             w = 100;
