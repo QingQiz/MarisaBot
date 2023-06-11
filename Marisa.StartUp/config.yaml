@@ -10,7 +10,6 @@ osu:
   clientSecret: 
   tempPath:     C:\Users\sofee\Desktop\temp\osu
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Osu
-  ppCalculator: C:\Users\sofee\Desktop\workspace\osu-tools\PerformanceCalculator\bin\Release\net6.0\win-x64\publish\PerformanceCalculator.exe
 
 chunithm:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Chunithm
@@ -113,6 +112,15 @@ maimai:
       - spplus
       - sp加
       - 煌
+    maimai でらっくす UNiVERSE:
+      - universe
+      - uni
+      - 宙
+      - 星
+    maimai でらっくす FESTiVAL:
+      - festival
+      - fes
+      - 祭
 
 commander:
   - 642191352

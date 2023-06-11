@@ -76,9 +76,7 @@ public class MaiMaiSong : Song
         "MiLK PLUS",
         "maimai FiNALE",
         "maimai でらっくす",
-        "maimai でらっくす PLUS",
         "maimai でらっくす Splash",
-        "maimai でらっくす Splash PLUS",
         "maimai でらっくす UNiVERSE",
         "maimai でらっくす FESTiVAL"
     };
