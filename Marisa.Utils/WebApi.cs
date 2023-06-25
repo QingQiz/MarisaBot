@@ -45,6 +45,12 @@ public static class WebApi
             return page;
         }
     }
+    
+    private static WaitForNetworkIdleOptions NetworkIdleOptions => new()
+    {
+        Timeout = 0,
+        IdleTime = 0
+    };
 
     public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
     {
@@ -59,7 +65,7 @@ public static class WebApi
             await page.GoToAsync(Frontend + "/maimai/best?" + "qq=" + qq + (b50 ? "&b50=" + b50 : ""));
         }
 
-        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions {Timeout = 0});
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
     }
 
@@ -70,7 +76,7 @@ public static class WebApi
         await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + bpRank +
             (recent ? "&recent=" + recent : "") +
             (fail ? "&fail=" + fail : ""));
-        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions { Timeout = 0 });
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
     }
 
@@ -79,7 +85,7 @@ public static class WebApi
         await using var page = Page;
 
         await page.GoToAsync(Frontend + "/osu/recommend?" + "uid=" + uid + "&mode=" + modeInt);
-        await page.WaitForNetworkIdleAsync(new WaitForNetworkIdleOptions { Timeout = 0 });
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
     }
 }
