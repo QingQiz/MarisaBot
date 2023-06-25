@@ -432,7 +432,7 @@ public static class MaiMaiDraw
         long minSdRating = 0;
         if (rating.OldScores.Any())
         {
-            minSdRating = rating.OldScores.Min(s => s.Rating);
+            minSdRating = rating.OldScores.Count < 35 ? 0 : rating.OldScores.Min(s => s.Rating);
 
             var playableSd = rating.OldScores.Select(s => s.Constant).Distinct().Max();
 
@@ -452,7 +452,7 @@ public static class MaiMaiDraw
         long minDxRating = 0;
         if (rating.NewScores.Any())
         {
-            minDxRating = rating.NewScores.Min(s => s.Rating);
+            minDxRating = rating.NewScores.Count < 15 ? 0 : rating.NewScores.Min(s => s.Rating);
 
             var playableDx = rating.NewScores.Select(s => s.Constant).Distinct().Max();
 
@@ -551,7 +551,7 @@ public static class MaiMaiDraw
 
             sd.Add(
                 (song.Title, titleFont, Color.Black),
-                ($"\n歌曲不在你的B40里,地板: {minRating}\n", font, Color.Peru),
+                ($"\n歌曲不在你的B50里,地板: {minRating}\n", font, Color.Peru),
                 ($"推分到达成率: {nextA:F4}\n", font, Color.Black),
                 ($"   Rating为: {nextR}", font, Color.Black),
                 ($"(+{nextR - minRating})\n", font, Color.SpringGreen),
