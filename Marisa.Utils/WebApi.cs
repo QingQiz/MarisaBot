@@ -51,6 +51,13 @@ public static class WebApi
         Timeout = 0,
         IdleTime = 1000
     };
+    
+    private static ScreenshotOptions ScreenshotOptions => new()
+    {
+        FullPage = true,
+        Type = ScreenshotType.Jpeg,
+        Quality = 90
+    };
 
     public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
     {
@@ -66,7 +73,7 @@ public static class WebApi
         }
 
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
-        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage = true });
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
     public static async Task<string> OsuScore(string name, int modeInt, int bpRank, bool recent, bool fail)
@@ -77,7 +84,7 @@ public static class WebApi
             (recent ? "&recent=" + recent : "") +
             (fail ? "&fail=" + fail : ""));
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
-        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
     public static async Task<string> OsuRecommend(long uid, int modeInt)
@@ -86,6 +93,6 @@ public static class WebApi
 
         await page.GoToAsync(Frontend + "/osu/recommend?" + "uid=" + uid + "&mode=" + modeInt);
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
-        return await page.ScreenshotBase64Async(new ScreenshotOptions { FullPage   = true });
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 }
