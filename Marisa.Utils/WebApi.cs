@@ -48,8 +48,8 @@ public static class WebApi
     
     private static WaitForNetworkIdleOptions NetworkIdleOptions => new()
     {
-        Timeout = 10000,
-        IdleTime = 10000
+        Timeout = 0,
+        IdleTime = 1000
     };
 
     public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
