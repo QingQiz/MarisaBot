@@ -54,10 +54,17 @@ public class GoCqBackend : BotDriver.BotDriver
                 var message = msg.ToMessage(MessageSenderProvider);
 
                 if (message == null) return;
-                _logger.Info(message.GroupInfo == null
-                    ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
-                    : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
-                await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                if (Environment.GetEnvironmentVariable("RESPONSE") == null)
+                {
+                    _logger.Info(message.GroupInfo == null
+                        ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
+                        : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                }
+                else if (Environment.GetEnvironmentVariable("RESPONSE") == message.Sender!.Id.ToString())
+                {
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                }
             }
             catch (Exception e)
             {

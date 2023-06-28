@@ -12,6 +12,11 @@ namespace Marisa.Backend.GoCq.MessageDataExt;
 
 public static class MessageDataConverter
 {
+    private static string EscapePar(this string s)
+    {
+        return s.Replace("[", "&#91;").Replace("]", "&#93;");
+    }
+
     private static string Escape(this string s)
     {
         return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
@@ -82,7 +87,7 @@ public static class MessageDataConverter
             switch (data.Type)
             {
                 case MessageDataType.Text:
-                    sb.Append((data as MessageDataText)!.Text);
+                    sb.Append((data as MessageDataText)!.Text.EscapePar());
                     break;
                 case MessageDataType.At:
                 {
