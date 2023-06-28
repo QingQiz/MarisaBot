@@ -21,10 +21,15 @@ public class Dirty : MarisaPluginBase
     [MarisaPluginDoc("@人：骂别人")]
     [MarisaPluginCommand(true, "")]
     [MarisaPluginTrigger(typeof(Dirty), nameof(Trigger))]
-    private MarisaPluginTaskState You(Message message)
+    private MarisaPluginTaskState You(Message message, long qq)
     {
         var word = ConfigurationManager.Configuration.Dirty.RandomTake();
         var at   = message.At().FirstOrDefault();
+
+        if (at == qq || at == 642191352)
+        {
+            at = message.Sender!.Id;
+        }
 
         message.Send(new MessageDataText(word), new MessageDataAt(at));
 
