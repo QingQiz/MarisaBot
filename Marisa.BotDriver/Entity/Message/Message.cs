@@ -93,6 +93,11 @@ public class Message
         _sender.Reply(new MessageChain(messages), this, MessageChain!.CanBeReferenced).Wait();
     }
 
+    public void Send(params MessageData.MessageData[] messages)
+    {
+        _sender.Reply(new MessageChain(messages), this, false).Wait();
+    }
+
     /// <summary>
     /// 通过接收到的消息发送纯文本消息到接收处
     /// </summary>
