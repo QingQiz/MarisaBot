@@ -252,18 +252,18 @@ public static class MessageDataConverter
 
                     if (m.sub_type == "ban")
                     {
-                        md = new MessageDataBotMute(m.group.id, m.duration < 0 ? long.MaxValue : m.duration);
+                        md = new MessageDataBotMute(m.group_id, m.duration < 0 ? long.MaxValue : m.duration);
                     }
                     else
                     {
-                        md = new MessageDataBotUnmute(m.group.id);
+                        md = new MessageDataBotUnmute(m.group_id);
                     }
 
                     return new Message(ms, md)
                     {
                         Type      = MessageType.GroupMessage,
                         Sender    = new SenderInfo(m.operator_id, "", null, null),
-                        GroupInfo = new GroupInfo(m.group.id, "", null)
+                        GroupInfo = new GroupInfo(m.group_id, "", null)
                     };
                 }
 
