@@ -250,7 +250,7 @@ public static class MessageDataConverter
                 {
                     MessageData md;
 
-                    if (m.sub_type)
+                    if (m.sub_type == "ban")
                     {
                         md = new MessageDataBotMute(m.group.id, m.duration < 0 ? long.MaxValue : m.duration);
                     }
