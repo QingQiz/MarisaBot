@@ -1,4 +1,5 @@
-﻿using Marisa.Backend.Mirai;
+﻿using Marisa.Backend.GoCq;
+using Marisa.Backend.Mirai;
 using Marisa.BotDriver.DI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,12 +13,14 @@ public static class Program
 {
     private static async Task Main(string[] args)
     {
+        var useMirai = !(args.Length > 3 && args[3] == "gocq");
+
         // asp dotnet
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddRange(MiraiBackend.Config(Plugin.Utils.Assembly()));
+        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
         builder.Services.ConfigLogger();
         builder.WebHost.UseUrls("http://localhost:14311");
 
@@ -26,7 +29,7 @@ public static class Program
         app.UseSwaggerUI();
         app.MapControllers();
         app.UseDeveloperExceptionPage();
-        
+
         app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
         app.UseStaticFiles(new StaticFileOptions
@@ -48,7 +51,14 @@ public static class Program
         app.MapFallbackToFile("index.html");
 
         // run
-        await Task.WhenAll(app.RunAsync(), app.Services.GetService<MiraiBackend>()!.Invoke());
+        if (!useMirai)
+        {
+            await Task.WhenAll(app.RunAsync(), app.Services.GetService<GoCqBackend>()!.Invoke());
+        }
+        else
+        {
+            await Task.WhenAll(app.RunAsync(), app.Services.GetService<MiraiBackend>()!.Invoke());
+        }
         // await app.RunAsync();
     }
 }
