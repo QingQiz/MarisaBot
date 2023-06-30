@@ -11,6 +11,7 @@ namespace Marisa.EntityFrameworkCore;
 
 public class BotDbContext : DbContext
 {
+    public DbSet<CommandFilter> CommandFilters { get; set; }
     public DbSet<ChunithmGuess> ChunithmGuesses { get; set; }
     public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }

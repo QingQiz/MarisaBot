@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Marisa.Plugin;
 
 [MarisaPluginNoDoc]
-[MarisaPluginCommand]
 [MarisaPlugin(PluginPriority.BlackList)]
+[MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
 public class BlackList : MarisaPluginBase
 {
     private static readonly HashSet<long> Cache = new();
-    private static bool _cacheInitialized = false;
+    private static bool _cacheInitialized;
 
-    [MarisaPluginCommand]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
     private static async Task<MarisaPluginTaskState> Handler(Message message)
     {
         var u = message.Sender!.Id;
@@ -19,14 +19,45 @@ public class BlackList : MarisaPluginBase
         if (!_cacheInitialized)
         {
             _cacheInitialized = true;
-           
+
             var db = new BotDbContext();
             await db.BlackLists.ForEachAsync(b => Cache.Add(b.UId));
         }
 
-        return Cache.Contains(u)
-            ? MarisaPluginTaskState.CompletedTask // 插件处理了这条消息，并阻断了消息传播，等于ban了
-            : MarisaPluginTaskState.NoResponse;   // 插件不处理这条消息，等于不ban
+        if (Cache.Contains(u)) return MarisaPluginTaskState.CompletedTask;
+
+        if (message.GroupInfo != null)
+        {
+            var db = new BotDbContext();
+            var filters = db.CommandFilters.Where(x => x.GroupId == message.GroupInfo.Id);
+
+            foreach (var f in filters)
+            {
+                if (!string.IsNullOrWhiteSpace(f.Prefix))
+                {
+                    if (message.Command.StartsWith(f.Prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 阻断
+                        message.Reply("被阻止的");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(f.Type))
+                {
+                    var t = (MessageDataType)Enum.Parse(typeof(MessageDataType), f.Type);
+
+                    if (message.MessageChain!.Messages.Any(x => x.Type == t))
+                    {
+                        // 阻断
+                        message.Reply("被阻止的");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                }
+            }
+        }
+
+        return MarisaPluginTaskState.NoResponse;   // 插件不处理这条消息，等于不ban
     }
 
     [MarisaPluginCommand(":ban")]

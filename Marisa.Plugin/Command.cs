@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using Marisa.EntityFrameworkCore;
+using Marisa.EntityFrameworkCore.Entity;
 
 namespace Marisa.Plugin;
 
@@ -9,11 +11,91 @@ public class Command : MarisaPluginBase
 {
     private static IEnumerable<long> Commander => ConfigurationManager.Configuration.Commander;
 
+    [MarisaPluginCommand(MessageType.GroupMessage, false, "filter")]
+    private static MarisaPluginTaskState Filter(Message m)
+    {
+        m.Reply("错误的命令格式");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginSubCommand(nameof(Filter))]
+    [MarisaPluginCommand(MessageType.GroupMessage, false, "prefix")]
+    private static MarisaPluginTaskState Prefix(Message m)
+    {
+        if (m.Sender!.Id != 642191352)
+        {
+            m.Reply("你没有资格");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var prefix = m.Command.Trim();
+
+        if (string.IsNullOrWhiteSpace(prefix))
+        {
+            m.Reply("?");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var db = new BotDbContext();
+        db.CommandFilters.Add(new CommandFilter
+        {
+            GroupId = m.GroupInfo!.Id,
+            Prefix  = prefix,
+            Type   = "",
+        });
+        db.SaveChanges();
+
+        m.Reply("好了");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginSubCommand(nameof(Filter))]
+    [MarisaPluginCommand(MessageType.GroupMessage, false, "type")]
+    private static MarisaPluginTaskState Type(Message m)
+    {
+        if (m.Sender!.Id != 642191352)
+        {
+            m.Reply("你没有资格");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var names = Enum.GetNames(typeof(MessageDataType));
+
+        var type = m.Command.Trim();
+
+        if (string.IsNullOrWhiteSpace(type))
+        {
+            m.Reply(string.Join('\n', names));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (!names.Contains(type))
+        {
+            m.Reply($"错误的类型：`{type}`");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var db = new BotDbContext();
+        db.CommandFilters.Add(new CommandFilter
+        {
+            GroupId = m.GroupInfo!.Id,
+            Prefix  = "",
+            Type   = type,
+        });
+        db.SaveChanges();
+
+        m.Reply("好了");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     /// <summary>
     /// start an interactive shell
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
+    [MarisaPluginNoDoc]
     [MarisaPluginCommand("shell")]
     private static MarisaPluginTaskState Shell(Message m)
     {
@@ -27,7 +109,7 @@ public class Command : MarisaPluginBase
             {
                 StartInfo = new ProcessStartInfo("cmd.exe")
                 {
-                    Arguments = "/Q /K @echo off & cd c:\\",
+                    Arguments              = "/Q /K @echo off & cd c:\\",
                     UseShellExecute        = false,
                     RedirectStandardInput  = true,
                     RedirectStandardOutput = true,
@@ -42,12 +124,10 @@ public class Command : MarisaPluginBase
                 {
                     m.Reply(output.Trim(), false);
                 }
+
                 output += args.Data?.Trim() + "\n";
             };
-            proc.ErrorDataReceived+= (_, args) =>
-            {
-                output += args.Data?.Trim() + "\n";
-            };
+            proc.ErrorDataReceived += (_, args) => { output += args.Data?.Trim() + "\n"; };
             proc.Start();
             proc.StandardInput.WriteLine("@echo off");
 
@@ -77,12 +157,13 @@ public class Command : MarisaPluginBase
 
         return MarisaPluginTaskState.CompletedTask;
     }
- 
+
     /// <summary>
     /// restart bot
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
+    [MarisaPluginNoDoc]
     [MarisaPluginCommand("reboot", "restart")]
     private static MarisaPluginTaskState Reboot(Message m)
     {
@@ -106,6 +187,7 @@ public class Command : MarisaPluginBase
 
             Environment.Exit(0);
         }
+
         return MarisaPluginTaskState.CompletedTask;
     }
 }
