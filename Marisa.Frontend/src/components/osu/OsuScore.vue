@@ -2,7 +2,7 @@
     <template v-if="data_fetched">
         <ScoreCard :data="data" v-if="!errorMessage"/>
         <div v-else>
-            <div class="bg-red-500 text-white text-2xl w-[1000px]">
+            <div class="bg-red-500 text-white text-2xl w-fit min-w-1000px">
                 <pre>{{ errorMessage }}</pre>
             </div>
         </div>

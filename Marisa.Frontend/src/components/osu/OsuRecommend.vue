@@ -1,7 +1,7 @@
 <template>
     <template v-if="data_fetched ">
         <div class="p-10 w-fit" style="background-color: hsl(200, 15%, 15%)" v-if="error_message === ''">
-            <div class="grid grid-cols-1 gap-10 w-fit">
+            <div class="grid grid-cols-1 gap-y-10 w-[1020px]">
                 <div v-for="i in d" class="z-50" v-if="mode === '3'">
                     <mania-recommend-card :data="i as ManiaRecommendData"/>
                 </div>
@@ -10,7 +10,7 @@
                 </div>
             </div>
         </div>
-        <div v-else class="bg-red-500 text-white text-2xl w-[1000px]">
+        <div v-else class="bg-red-500 text-white text-2xl w-fit min-w-[1000px]">
             <pre>{{ error_message }}</pre>
         </div>
     </template>
