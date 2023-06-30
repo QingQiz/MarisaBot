@@ -68,6 +68,13 @@ public class Osu : Controller
     }
 
     [HttpGet]
+    public async Task<FileStreamResult> GetImage(string uri)
+    {
+        var img = await OsuDrawerCommon.GetCacheOrDownload(new Uri(uri));
+        return new FileStreamResult(img.ToStream(), "image/png");
+    }
+
+    [HttpGet]
     public async Task<string> GetUserInfo(string username, int modeInt)
     {
         return (await OsuApi.GetUserInfoByName(username, modeInt)).ToJson();

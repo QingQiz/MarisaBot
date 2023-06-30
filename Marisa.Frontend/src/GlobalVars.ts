@@ -13,6 +13,7 @@ export const osu_recent       = host + '/Osu/GetRecent'
 export const osu_best         = host + '/Osu/GetBest'
 export const osu_beatmapInfo  = host + '/Osu/GetBeatmapInfo'
 export const osu_getRecommend = host + '/Osu/GetRecommend'
+export const osu_getImage     = host + '/Osu/GetImage'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {
     return `${osu_accRing}?acc=${acc}&modeInt=${modeInt}`;
@@ -38,6 +39,10 @@ export function PpAcc(c_300p: number, c_300: number, c_200: number, c_100: numbe
 
 export function osu_beatmapCover_builder(beatmapsetId: number, beatmapChecksum: string, beatmapId: number) {
     return `${osu_beatmapCover}?beatmapsetId=${beatmapsetId}&beatmapChecksum=${beatmapChecksum}&beatmapId=${beatmapId}`;
+}
+
+export function osu_image_builder(uri: string) {
+    return `${osu_getImage}?uri=${encodeURIComponent(uri)}`;
 }
 
 export const maimai_levelColors = [

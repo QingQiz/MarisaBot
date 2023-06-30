@@ -20,7 +20,8 @@ public static class OsuDrawerCommon
     {
         if (string.IsNullOrWhiteSpace(ext))
         {
-            ext = uri.ToString().Split('.').Last();
+            ext = uri.LocalPath.Split('.').Last();
+            ext = ext.Equals(uri.LocalPath) ? uri.Query.Split('.').Last() : ext;
         }
 
         var filename = uri.ToString().GetSha256Hash() + '.' + ext;
@@ -63,9 +64,9 @@ public static class OsuDrawerCommon
             "s"   => GetIcon("rank-s"),
             "sh"  => GetIcon("rank-s-s"),
             "ss"  => GetIcon("rank-ss"),
-            "ssh"  => GetIcon("rank-ss-s"),
-            "x"  => GetIcon("rank-ss"),
-            "xh" => GetIcon("rank-ss-s"),
+            "ssh" => GetIcon("rank-ss-s"),
+            "x"   => GetIcon("rank-ss"),
+            "xh"  => GetIcon("rank-ss-s"),
             _     => throw new ArgumentOutOfRangeException()
         };
     }

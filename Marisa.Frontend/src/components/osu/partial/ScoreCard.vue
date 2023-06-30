@@ -3,7 +3,7 @@ import {computed, ref} from "vue";
 import {
     GetDiffColor, GetDiffTextColor,
     osu_accRing_builder,
-    osu_beatmapCover_builder,
+    osu_beatmapCover_builder, osu_image_builder,
     osu_modIcon_builder,
     osu_pp_builder,
     PpAcc
@@ -144,7 +144,7 @@ function GetPpAcc() {
 }
 
 function GetBeatmapCoverPath() {
-    return `url(${osu_beatmapCover_builder(beatmap.value.beatmapset.id, beatmap.value.checksum, beatmap.value.id)}),url(${beatmap.value.beatmapset.covers["cover@2x"]}),url('/assets/osu/nocover.jfif')`
+    return `url(${osu_beatmapCover_builder(beatmap.value.beatmapset.id, beatmap.value.checksum, beatmap.value.id)}),url(${osu_image_builder(beatmap.value.beatmapset.covers["cover@2x"])})`
 }
 
 const page_width  = 1700;
@@ -326,9 +326,9 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
             <!-- profile -->
             <div class="profile-clip profile_wrapper">
                 <div class="profile-size bg-center bg-cover flex flex-col p-5 place-content-between"
-                     :style="`background-image: url(${user.cover_url})`">
+                     :style="`background-image: url(${osu_image_builder(user.cover_url)})`">
                     <div class="flex flex-row-reverse content-end gap-5 items-center bg-black bg-opacity-5 rounded-r-[60px]">
-                        <img :src="user.avatar_url" height="160" width="160" alt="" class="rounded-[60px]">
+                        <img :src="osu_image_builder(user.avatar_url)" height="160" width="160" alt="" class="rounded-[60px]">
                         <div class="text-white flex flex-col h-full place-content-between py-2">
                             <div class="text-7xl font-bold text-right">
                                 {{ user.username }}
@@ -499,6 +499,7 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
 
 .bg:after {
     @apply w-full h-full absolute blur-md bg-cover bg-center ;
+    @apply bg-blue-300;
     width: v-bind(page_width+ 'px');
     height: v-bind(page_height+ 'px');
     background-image: v-bind(cover_path);
@@ -524,6 +525,7 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
 .cover:after {
     @apply bg-cover bg-center absolute;
     @apply cover-clip;
+    @apply bg-blue-300;
     z-index: -1;
     content: '';
     background-image: v-bind(cover_path);

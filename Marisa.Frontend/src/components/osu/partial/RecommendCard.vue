@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {RecommendData} from "@/components/osu/Osu.Data";
 import {computed} from "vue";
-import {GetDiffColor, GetDiffTextColor, osu_modIcon_builder} from "@/GlobalVars";
+import {GetDiffColor, GetDiffTextColor, osu_image_builder, osu_modIcon_builder} from "@/GlobalVars";
 import * as d3 from "d3";
 
 const props = defineProps<{ data: RecommendData }>();
@@ -13,8 +13,8 @@ const coverUrl = computed(() => props.data.mapCoverUrl);
 const cardWidth  = 1000;
 const cardHeight = 300;
 
-const lUrlCss = `url('${listUrl.value}')`
-const rUrlCss = `url('${coverUrl.value}')`
+const lUrlCss = `url('${osu_image_builder(listUrl.value)}')`
+const rUrlCss = `url('${osu_image_builder(coverUrl.value)}')`
 
 const lWidthCss  = `${cardHeight}px`
 const lHeightCss = `${cardHeight}px`
