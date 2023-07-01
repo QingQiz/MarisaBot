@@ -38,7 +38,7 @@ public class BlackList : MarisaPluginBase
                     if (message.Command.StartsWith(f.Prefix, StringComparison.OrdinalIgnoreCase))
                     {
                         // 阻断
-                        message.Reply("被阻止的");
+                        // message.Reply("被阻止的");
                         return MarisaPluginTaskState.CompletedTask;
                     }
                 }
