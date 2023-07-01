@@ -19,6 +19,53 @@ public class Command : MarisaPluginBase
     }
 
     [MarisaPluginSubCommand(nameof(Filter))]
+    [MarisaPluginCommand(MessageType.GroupMessage, true, "remove")]
+    private static MarisaPluginTaskState Remove(Message m)
+    {
+        if (m.Sender!.Id != 642191352)
+        {
+            m.Reply("你没有资格");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var db = new BotDbContext();
+
+        if (!db.CommandFilters.Any())
+        {
+            m.Reply("无");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var reply = string.Join('\n', db.CommandFilters.Select(x => $"{x.Id}\t{x.Prefix}\t{x.Type}"));
+
+        m.Reply(reply);
+
+        Dialog.AddHandler(m.GroupInfo?.Id, m.Sender?.Id, next =>
+        {
+            if (next.Sender!.Id != m.Sender!.Id)
+            {
+                return Task.FromResult(MarisaPluginTaskState.NoResponse);
+            }
+
+            var ids = next.Command.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var id in ids)
+            {
+                if (long.TryParse(next.Command, out var idLong))
+                {
+                    db.CommandFilters.Remove(db.CommandFilters.First(x => x.Id == idLong));
+                }
+            }
+
+            db.SaveChanges();
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginSubCommand(nameof(Filter))]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "prefix")]
     private static MarisaPluginTaskState Prefix(Message m)
     {
@@ -41,7 +88,7 @@ public class Command : MarisaPluginBase
         {
             GroupId = m.GroupInfo!.Id,
             Prefix  = prefix,
-            Type   = "",
+            Type    = "",
         });
         db.SaveChanges();
 
@@ -81,7 +128,7 @@ public class Command : MarisaPluginBase
         {
             GroupId = m.GroupInfo!.Id,
             Prefix  = "",
-            Type   = type,
+            Type    = type,
         });
         db.SaveChanges();
 
