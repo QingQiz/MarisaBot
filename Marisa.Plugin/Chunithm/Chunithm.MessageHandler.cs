@@ -391,7 +391,7 @@ public partial class Chunithm
 
             if (achievement is > 101_0000 or < 0)
             {
-                next.Reply("你查🐴呢");
+                next.Reply("你查**呢");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 

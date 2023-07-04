@@ -767,7 +767,7 @@ public partial class MaiMaiDx : PluginBase
 
             if (achievement is > 101 or < 0)
             {
-                next.Reply("你查🐴呢");
+                next.Reply("你查**呢");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 

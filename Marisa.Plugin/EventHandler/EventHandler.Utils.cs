@@ -13,9 +13,7 @@ public partial class EventHandler
 
         if (m.Target != qq) return;
 
-        var word = ConfigurationManager.Configuration.Dirty.Take(31).ToList().RandomTake();
-
-        if (ConfigurationManager.Configuration.Commander.Contains(m.FromId)) word = "别戳啦！";
+        const string word = "别戳啦！";
 
         if (message.GroupInfo != null)
         {

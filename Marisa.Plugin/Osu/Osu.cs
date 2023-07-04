@@ -25,7 +25,7 @@ public partial class Osu
         {
             if (Debounce.Contains(name))
             {
-                message.Reply(new[] { "别急", "你先别急", "急你妈", "有点急", "你急也没用" }.RandomTake());
+                message.Reply(new[] { "别急", "你先别急", "有点急", "你急也没用" }.RandomTake());
                 return true;
             }
 
