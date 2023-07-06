@@ -45,7 +45,7 @@ public static class ResourceManager
         if (!File.Exists(cp))
         {
             // ReSharper disable once TailRecursiveCall
-            return GetCover(1000, resize);
+            return GetCover(0, resize);
         }
 
         var img = Image.Load(cp)!;
