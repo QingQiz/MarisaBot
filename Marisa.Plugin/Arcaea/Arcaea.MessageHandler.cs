@@ -69,7 +69,8 @@ public partial class Arcaea : PluginBase
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, true, "v2")]
     private MarisaPluginTaskState ArcaeaGuessV2(Message message, long qq)
     {
-        StartSongSoundGuess(message, qq);
+        message.Reply("死了的功能");
+        // StartSongSoundGuess(message, qq);
         return MarisaPluginTaskState.CompletedTask;
     }
 

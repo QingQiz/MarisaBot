@@ -1,5 +1,6 @@
 ﻿namespace Marisa.Plugin.RandomPicture;
 
+[MarisaPluginDisabled]
 [MarisaPluginDoc("从作者图库里随机抽取一张图")]
 [MarisaPluginCommand("抽图", "ct")]
 [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]

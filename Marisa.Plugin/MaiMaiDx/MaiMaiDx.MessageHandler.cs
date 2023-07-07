@@ -558,7 +558,8 @@ public partial class MaiMaiDx : PluginBase
     [MarisaPluginCommand(true, "v2")]
     private MarisaPluginTaskState MaiMaiDxGuessV2(Message message, long qq)
     {
-        StartSongSoundGuess(message, qq);
+        message.Reply("死了的功能");
+        // StartSongSoundGuess(message, qq);
         return MarisaPluginTaskState.CompletedTask;
     }
 
