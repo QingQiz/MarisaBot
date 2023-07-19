@@ -42,6 +42,11 @@ public static class ConfigurationManager
         {
             Directory.CreateDirectory(config.Arcaea.TempPath);
         }
+        if (!Directory.Exists(config.Game.TempPath))
+        {
+            Directory.CreateDirectory(config.Game.TempPath);
+            Directory.CreateDirectory(Path.Join(config.Game.TempPath, "Guess"));
+        }
 
         return config;
     }

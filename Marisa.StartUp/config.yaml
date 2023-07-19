@@ -4,7 +4,10 @@ arcaea:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
   tempPath:     C:\Users\sofee\Desktop\temp\arcaea
   assetsPath:   D:\arcaea_song_assets
-  
+
+game:
+  tempPath:     C:\Users\sofee\Desktop\temp\game
+
 osu:
   clientId:     
   clientSecret: 
@@ -16,7 +19,7 @@ chunithm:
   tempPath:     C:\Users\sofee\Desktop\temp\chunithm
 
 maimai:
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\MaiMaiDx
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\maimai
   tempPath:     C:\Users\sofee\Desktop\temp\maimai
   beatMapPath:  D:\maimai_beatmap_without_bga
   version:
