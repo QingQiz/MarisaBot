@@ -5,6 +5,7 @@ using Flurl.Http;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Newtonsoft.Json;
+using SixLabors.Fonts;
 
 namespace Marisa.Plugin.Game;
 
@@ -61,69 +62,101 @@ public partial class Game
         var tips  = new HashSet<char>();
         var right = new HashSet<int>();
 
-        var startTime = DateTime.Now;
+        var cooldown       = new Dictionary<long, DateTime>();
+        var cooldownGlobal = DateTime.MinValue;
+
+        var openTimes  = new Dictionary<string, int>();
+        var rightTimes = new Dictionary<string, int>();
+        var wrongTimes = new Dictionary<string, int>();
+
+        string GetStatistic()
+        {
+            var openStr  = "开的次数：\n" + string.Join('\n', openTimes.OrderByDescending(x => x.Value).Select(x => $"{x.Key}: {x.Value}"));
+            var rightStr = "答对次数：\n" + string.Join('\n', rightTimes.OrderByDescending(x => x.Value).Select(x => $"{x.Key}: {x.Value}"));
+            var wrongStr = "答错次数：\n" + string.Join('\n', wrongTimes.OrderByDescending(x => x.Value).Select(x => $"{x.Key}: {x.Value}"));
+            return $"{openStr}\n{rightStr}\n{wrongStr}";
+        }
+
+        var consolas = new Font(SystemFonts.Get("Consolas"), 22);
 
         string ReplyGenerator()
         {
-            const string header = "猜歌游戏开始！\n";
-            const string footer = "回复“开`任意字符`”并@bot获取提示\n回复“`序号`:`歌名`”并@bot进行猜曲";
-
             var sb = new StringBuilder();
 
-            sb.Append(header);
             for (var i = 0; i < songName.Count; i++)
             {
-                sb.Append($"{i + 1}、");
+                if (right.Contains(i)) continue;
 
-                if (right.Contains(i))
-                {
-                    sb.AppendLine(songName[i]);
-                }
-                else
-                {
-                    foreach (var c in songName[i])
-                    {
-                        if (tips.Contains(c) || c == ' ')
-                            sb.Append(c);
-                        else
-                            sb.Append('#');
-                    }
+                sb.Append($"{"①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"[i]}: ");
 
-                    sb.AppendLine();
+                foreach (var c in songName[i])
+                {
+                    if (tips.Contains(c) || c == ' ')
+                        sb.Append(c);
+                    else
+                        sb.Append('#');
                 }
+
+                sb.AppendLine();
             }
 
-            sb.Append(footer);
+            if (tips.Any())
+            {
+                sb.Append("开了的：" + string.Join("", tips));
+            }
 
             return sb.ToString();
         }
 
+        MessageDataText ImageGenerator(string s)
+        {
+            return new MessageDataText(s);
+            // var sd = new StringDrawer(5);
+            // sd.Add(s, consolas, Color.Black);
+            // var measure = sd.Measure();
+            //
+            // var image = new Image<Rgba32>((int)measure.Width, (int)measure.Height);
+            // image.Clear(Color.White);
+            // sd.Draw(image);
+            // return MessageDataImage.FromBase64(image.ToB64());
+        }
+
         var res = Dialog.AddHandler(message.GroupInfo?.Id, null, mNext =>
         {
-            switch (mNext.Command)
+            if (mNext.Command.StartsWith("开") && mNext.Command.Length == 2)
             {
-                case "结束猜曲" or "答案":
+                if (!regex.IsMatch(mNext.Command[1..]))
                 {
-                    mNext.Reply("猜曲结束");
-                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    return Task.FromResult(MarisaPluginTaskState.NoResponse);
                 }
-            }
 
-            if (!mNext.IsAt(qq))
-            {
-                // continue
-                if (DateTime.Now - startTime <= TimeSpan.FromMinutes(15)) return Task.FromResult(MarisaPluginTaskState.NoResponse);
+                if (DateTime.Now - cooldownGlobal < TimeSpan.FromMinutes(1))
+                {
+                    // mNext.Reply("你们开太快了");
+                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                }
 
-                // time out
-                mNext.Reply("猜曲已结束", false);
-                return Task.FromResult(MarisaPluginTaskState.Canceled);
-            }
+                if (cooldown.TryGetValue(mNext.Sender!.Id, out var t))
+                {
+                    if (DateTime.Now - t < TimeSpan.FromMinutes(3))
+                    {
+                        // mNext.Reply("你开太快了");
+                        return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                    }
+                }
+                
+                if (tips.Contains(mNext.Command[1]))
+                {
+                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                }
 
-            if (mNext.Command.StartsWith("开"))
-            {
+                cooldown[mNext.Sender!.Id] = DateTime.Now;
+                cooldownGlobal             = DateTime.Now;
+
+                openTimes[mNext.Sender.Name] = openTimes.TryGetValue(mNext.Sender.Name, out var ot) ? ot + 1 : 1;
                 tips.Add(char.ToLower(mNext.Command[1]));
                 tips.Add(char.ToUpper(mNext.Command[1]));
-                mNext.Reply(ReplyGenerator(), false);
+                mNext.Reply(ImageGenerator(ReplyGenerator()), false);
             }
             else
             {
@@ -132,42 +165,41 @@ public partial class Game
 
                 var numStr = mNext.Command[..idx].Trim();
                 var name   = mNext.Command[(idx + 1)..].Trim();
-                if (int.TryParse(numStr, out var num))
-                {
-                    if (num <= 0 || num > songName.Count)
-                    {
-                        mNext.Reply("序号错误");
-                    }
-                    else
-                    {
-                        if (name.Length != songName[num - 1].Length)
-                        {
-                            mNext.Reply("歌名长度错误");
-                        }
-                        else
-                        {
-                            if (name.Equals(songName[num - 1], StringComparison.OrdinalIgnoreCase))
-                            {
-                                mNext.Reply("答对了！");
-                                right.Add(num - 1);
-                                mNext.Reply(ReplyGenerator(), false);
 
-                                if (right.Count == songName.Count)
-                                {
-                                    mNext.Reply("全部猜出来了耶");
-                                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-                                }
-                            }
-                            else
-                            {
-                                mNext.Reply("错错错");
-                            }
-                        }
-                    }
+                if (!int.TryParse(numStr, out var num)) return Task.FromResult(MarisaPluginTaskState.NoResponse);
+                if (num <= 0 || num > songName.Count) return Task.FromResult(MarisaPluginTaskState.NoResponse);
+
+                if (name.Length != songName[num - 1].Length)
+                {
+                    // mNext.Reply("歌名长度错误");
+                    wrongTimes[mNext.Sender!.Name] = wrongTimes.TryGetValue(mNext.Sender.Name, out var wt) ? wt + 1 : 1;
                 }
                 else
                 {
-                    mNext.Reply("序号错误");
+                    if (name.Equals(songName[num - 1], StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!right.Contains(num - 1))
+                        {
+                            right.Add(num - 1);
+
+                            rightTimes[mNext.Sender!.Name] = rightTimes.TryGetValue(mNext.Sender.Name, out var rt) ? rt + 1 : 1;
+
+                            if (right.Count == songName.Count)
+                            {
+                                mNext.Reply($"全部猜出来了耶！", false);
+                                // mNext.Reply(ImageGenerator(GetStatistic()), false);
+                                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                            }
+
+                            // mNext.Reply(ImageGenerator(ReplyGenerator()), false);
+                            mNext.Reply("对对对");
+                        }
+                    }
+                    else
+                    {
+                        // mNext.Reply("错错错");
+                        wrongTimes[mNext.Sender!.Name] = wrongTimes.TryGetValue(mNext.Sender.Name, out var wt) ? wt + 1 : 1;
+                    }
                 }
             }
 
@@ -176,7 +208,7 @@ public partial class Game
 
         if (res)
         {
-            message.Reply(ReplyGenerator(), false);
+            message.Reply(ImageGenerator($"猜歌游戏开始！\n{ReplyGenerator()}发送“开`任意字符`”\n发送“`序号`:`歌名`”"), false);
         }
         else
         {
@@ -186,6 +218,6 @@ public partial class Game
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [GeneratedRegex("^[a-zA-Z0-9,./?():;'\"*!@#$%^&-_=+`~ ]+$")]
+    [GeneratedRegex("^[a-zA-Z0-9,./?():;'\"*!@#$%^&-_=+`~<> ]+$")]
     private static partial Regex SongTitleMatcher();
 }
