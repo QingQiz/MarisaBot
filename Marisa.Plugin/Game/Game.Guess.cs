@@ -6,6 +6,7 @@ using Flurl.Http;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Newtonsoft.Json;
+using osu.Game.Extensions;
 
 namespace Marisa.Plugin.Game;
 
@@ -42,9 +43,11 @@ public partial class Game
 
     [MarisaPluginDoc("添加曲库，仅私聊可用，参数：曲库名字")]
     [MarisaPluginSubCommand(nameof(Guess))]
-    [MarisaPluginCommand(MessageType.FriendMessage, StringComparison.OrdinalIgnoreCase, "add")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "add")]
     private static MarisaPluginTaskState GuessAddDb(Message message, long qq)
     {
+        if (message.GroupInfo != null) return MarisaPluginTaskState.CompletedTask;
+
         var dbName = message.Command.Trim();
 
         switch (dbName)
@@ -62,10 +65,26 @@ public partial class Game
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply("请给出要猜的单词，每行一个，所有歌名都必须匹配如下正则表达式：\n" + SongTitleMatcher());
+        message.Reply("请给出要猜的单词，每行一个，可以分多次回复\n发送“结束”结束\n发送“取消”取消\n所有歌名都必须匹配如下正则表达式：\n" + SongTitleMatcher());
+
+        var res = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, mNext =>
         {
+            switch (mNext.Command)
+            {
+                case "结束" when res.Count < 20:
+                    mNext.Reply("太少了，最少20个，请继续", false);
+                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                case "结束":
+                    File.WriteAllLines(Path.Join(GuessDbPath, dbName), res, Encoding.UTF8);
+                    mNext.Reply("完成", false);
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                case "取消":
+                    mNext.Reply("行吧", false);
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
             var titles = mNext.Command
                 .Split('\n')
                 .Select(x => x.Trim())
@@ -76,14 +95,14 @@ public partial class Game
             var illegalTitles = titles.Where(t => !SongTitleMatcher().IsMatch(t)).ToArray();
             if (illegalTitles.Any())
             {
-                mNext.Reply("不合法的标题：\n" + string.Join('\n', illegalTitles));
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                mNext.Reply($"不合法的标题，此次所有的都无效，请重试：{illegalTitles.First()}");
+                return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
             }
 
-            File.WriteAllLines(Path.Join(GuessDbPath, dbName), titles, Encoding.UTF8);
-            mNext.Reply("完成");
+            res.AddRange(titles);
+            mNext.Reply("继续", false);
 
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         });
 
         return MarisaPluginTaskState.CompletedTask;
@@ -91,9 +110,11 @@ public partial class Game
 
     [MarisaPluginDoc("严格模式，需要报名和排队")]
     [MarisaPluginSubCommand(nameof(Guess))]
-    [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "strict")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "strict")]
     private static MarisaPluginTaskState GuessStrict(Message message)
     {
+        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
         if (!ReadTitles(message, out var songName, out var marisaPluginTaskState)) return marisaPluginTaskState;
 
         Debug.Assert(songName != null, nameof(songName) + " != null");
@@ -176,7 +197,8 @@ public partial class Game
                 }
             }
 
-            mNext.Send(new MessageDataText($"{reply}{(string.IsNullOrWhiteSpace(reply) ? "" : "\n")}轮到"), new MessageDataAt(queue.Peek()), new MessageDataText("了"));
+            mNext.Send(new MessageDataText($"{reply}{(string.IsNullOrWhiteSpace(reply) ? "" : "\n")}轮到"), new MessageDataAt(queue.Peek()),
+                new MessageDataText("了"));
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         });
@@ -197,9 +219,11 @@ public partial class Game
     }
 
     [MarisaPluginDoc("一种新的猜歌游戏，参数为数据库名，可写多个，用:分隔，仅群聊可用（非严格模式）")]
-    [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "guess")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "guess")]
     private static MarisaPluginTaskState Guess(Message message)
     {
+        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
         if (!ReadTitles(message, out var songName, out var marisaPluginTaskState)) return marisaPluginTaskState;
 
         Debug.Assert(songName != null, nameof(songName) + " != null");
