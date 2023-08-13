@@ -56,6 +56,9 @@ export const maimai_levelColors = [
 export function maimai_alternativeCover(id: number) {
     return [
         `/assets/maimai/cover/${id}.png`,
+        `https://www.diving-fish.com/covers/${id}.png`,
+        `https://www.diving-fish.com/covers/${id - 10000}.png`,
+        `https://www.diving-fish.com/covers/${id + 10000}.png`,
         `/assets/maimai/cover/0.png`,
     ]
 }
