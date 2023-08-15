@@ -87,11 +87,11 @@ public static class WebApi
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
-    public static async Task<string> OsuRecommend(long uid, int modeInt)
+    public static async Task<string> OsuRecommend(Guid contextId)
     {
         await using var page = Page;
 
-        await page.GoToAsync(Frontend + "/osu/recommend?" + "uid=" + uid + "&mode=" + modeInt);
+        await page.GoToAsync(Frontend + "/osu/recommend?id=" + contextId);
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }

@@ -141,7 +141,13 @@ public partial class Osu : PluginBase
         }
 
         var info = await OsuApi.GetUserInfoByName(command.Name);
-        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuRecommend(info.Id, command.Mode.Value)));
+
+        var context = new WebContext();
+
+        context.Put("info", info);
+        context.Put("recommend", await OsuApi.GetRecommend(info.Id, command.Mode.Value));
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuRecommend(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
     }

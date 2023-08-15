@@ -302,6 +302,13 @@ public static partial class OsuApi
             goto Exception;
         }
 
+        // 检查一下存在性
+        if (!Directory.Exists(osuPath))
+        {
+            goto Exception;
+        }
+            
+
         osuPath = Path.GetDirectoryName(osuPath.Split(",")[0].Trim('"'));
         // osu 中已上传的图以 beatmapset id 开头，并且不会嵌套
         foreach (var p in Directory.GetDirectories(Path.Join(osuPath, "Songs"), $"{beatmapsetId}*", SearchOption.TopDirectoryOnly))
@@ -482,4 +489,21 @@ public static partial class OsuApi
     }
 
     #endregion
+
+    public static async Task<String> GetRecommend(long uid, int modeInt)
+    {
+        return await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend".SetQueryParams(new
+        {
+            newRecordPercent = "0.2,1",
+            passPercent      = "0.2,1",
+            difficulty       = "0,15",
+            keyCount         = "4,7",
+            gameMode         = modeInt,
+            hidePlayed       = 0,
+            mod              = "NM",
+            rule             = 4,
+            current          = 1,
+            pageSize         = 20
+        }).WithHeader("uid", uid).GetStringAsync();
+    }
 }
