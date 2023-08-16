@@ -26,7 +26,7 @@
     </ItemGroup>
 
     <Target Name="RunWebpack" AfterTargets="Build">
-        <Exec Command="yarn build" WorkingDirectory="..\Marisa.Frontend" />
+        <Exec Command="npx vite build" WorkingDirectory="..\Marisa.Frontend" />
     </Target>
 
     <PropertyGroup>
