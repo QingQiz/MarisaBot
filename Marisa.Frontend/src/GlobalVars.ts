@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 export const host = "http://localhost:14311/Api"
 
 export const context_get      = host + "/WebContext/Get"
-export const maimai_newRa     = host + "/MaiMai/RaNew"
 export const osu_pp           = host + '/Osu/PerformanceCalculator'
 export const osu_maniaPpChart = host + '/Osu/ManiaPpChart'
 export const osu_userInfo     = host + '/Osu/GetUserInfo'

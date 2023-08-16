@@ -59,20 +59,13 @@ public static class WebApi
         Quality = 90
     };
 
-    public static async Task<string> MaiMaiBest(string? username, long? qq, bool b50)
+    public static async Task<string> MaiMaiBest(Guid guid)
     {
         await using var page = Page;
 
-        if (!string.IsNullOrWhiteSpace(username))
-        {
-            await page.GoToAsync(Frontend + "/maimai/best?" + "username=" + username + (b50 ? "&b50=" + b50 : ""));
-        }
-        else
-        {
-            await page.GoToAsync(Frontend + "/maimai/best?" + "qq=" + qq + (b50 ? "&b50=" + b50 : ""));
-        }
-
+        await page.GoToAsync(Frontend + "/maimai/best?id=" + guid);
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
+
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 

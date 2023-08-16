@@ -21,15 +21,19 @@ public partial class MaiMaiDx
 
     #region rating
 
+    private static async Task<IFlurlResponse> B50Request(string? username, long? qq)
+    {
+        return await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
+            string.IsNullOrEmpty(username)
+                ? new { qq, b50 = true }
+                : new { username, b50 = true });
+    }
+
     private static async Task<DxRating> GetDxRating(string? username, long? qq)
     {
-        const bool b50 = true;
-        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
-            string.IsNullOrEmpty(username)
-                ? new { qq, b50 }
-                : new { username, b50 });
+        var rating = await B50Request(username, qq);
             
-        return new DxRating(await response.GetJsonAsync(), b50);
+        return new DxRating(await rating.GetJsonAsync());
     }
 
     private static async Task<MessageChain> GetB40Card(Message message)
@@ -46,7 +50,13 @@ public partial class MaiMaiDx
             }
         }
 
-        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(username, qq, true));
+        var b50 = await B50Request(username, qq);
+
+        var context = new WebContext();
+
+        context.Put("b50", await b50.GetStringAsync());
+
+        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id));
     }
 
     #endregion
