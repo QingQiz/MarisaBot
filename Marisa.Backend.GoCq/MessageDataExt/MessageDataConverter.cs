@@ -220,24 +220,24 @@ public static class MessageDataConverter
             {
                 if (m.sub_type == "kick")
                 {
-                    var md = new MessageDataMemberLeave(m.member.id, m.member.memberName);
+                    var md = new MessageDataMemberLeave(m.user_id, "", m.operator_id);
                     var message = new Message(ms, md)
                     {
                         Type      = MessageType.GroupMessage,
                         Sender    = new SenderInfo(md.Id, "", null, null),
-                        GroupInfo = new GroupInfo(m.member.group.id, "", null)
+                        GroupInfo = new GroupInfo(m.group_id, "", null)
                     };
                     return message;
                 }
 
                 if (m.sub_type == "leave")
                 {
-                    var md = new MessageDataMemberLeave(m.member.id, m.member.memberName, m.@operator.id);
+                    var md = new MessageDataMemberLeave(m.user_id, "");
                     var message = new Message(ms, md)
                     {
                         Type      = MessageType.GroupMessage,
                         Sender    = new SenderInfo(md.Id, "", null, null),
-                        GroupInfo = new GroupInfo(m.member.group.id, "", null)
+                        GroupInfo = new GroupInfo(m.group_id, "", null)
                     };
                     return message;
                 }
