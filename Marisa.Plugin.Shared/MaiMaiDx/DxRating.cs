@@ -2,16 +2,11 @@
 
 public class DxRating
 {
-    public readonly long AdditionalRating;
     public readonly List<SongScore> NewScores = new();
     public readonly List<SongScore> OldScores = new();
-    public readonly string Nickname;
 
     public DxRating(dynamic data)
     {
-        AdditionalRating = data.additional_rating;
-        Nickname         = data.nickname;
-
         foreach (var d in data.charts.dx) NewScores.Add(new SongScore(d));
         foreach (var d in data.charts.sd) OldScores.Add(new SongScore(d));
 

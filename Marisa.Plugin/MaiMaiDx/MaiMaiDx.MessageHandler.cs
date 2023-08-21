@@ -1,9 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -317,6 +321,79 @@ public partial class MaiMaiDx : PluginBase
     #endregion
 
     #region 打什么歌
+
+    [MarisaPluginDoc("如何推分到：参数")]
+    [MarisaPluginCommand("howto", "how to")]
+    private async Task<MarisaPluginTaskState> MaiMaiDxHowTo(Message message)
+    {
+        var sender = message.Sender!.Id;
+
+        if (!int.TryParse(message.Command, out var target))
+        {
+            message.Reply("参数不是数字");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        try
+        {
+            var rating = await GetDxRating(null, sender);
+
+            var (up, down) = GetRecommend(rating, target);
+
+            if (!up.Any())
+            {
+                message.Reply("No Way");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("新加入的：");
+            foreach (var kv in up)
+            {
+                if (down.ContainsKey(kv.Key)) continue;
+
+                var song = _songDb.GetSongById(kv.Key.Id)!;
+                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {kv.Value:000.0000}({song.Ra(kv.Key.Idx, kv.Value)})");
+            }
+
+            sb.AppendLine("更新的：");
+            foreach (var kv in up)
+            {
+                if (!down.ContainsKey(kv.Key)) continue;
+
+                var song = _songDb.GetSongById(kv.Key.Id)!;
+                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {down[kv.Key]}({song.Ra(kv.Key.Idx, down[kv.Key])}) -> {kv.Value}({song.Ra(kv.Key.Idx, kv.Value)})");
+            }
+
+            sb.AppendLine("退出的：");
+            foreach (var kv in down)
+            {
+                if (up.ContainsKey(kv.Key)) continue;
+                
+                var song = _songDb.GetSongById(kv.Key.Id)!;
+                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {kv.Value:000.0000}({song.Ra(kv.Key.Idx, kv.Value)})");
+            }
+
+            var sd = new StringDrawer(3);
+            sd.Add(new Font(SystemFonts.Get("Consolas"), 16), Color.Black, sb.ToString());
+
+            var size = sd.Measure();
+            var image = new Image<Rgba32>((int)size.Width + 10, (int)size.Height + 10);
+
+            image.Clear(Color.White);
+            sd.Draw(image, 5, 5);
+            
+            message.Reply(MessageDataImage.FromBase64(image.ToB64()));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+        catch (FlurlHttpException e) when (e.StatusCode == 400)
+        {
+            message.Reply("你谁啊？");
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
     /// <summary>
     /// mai什么
@@ -801,7 +878,7 @@ public partial class MaiMaiDx : PluginBase
 
         var noCover = _songDb.SongList
             .Where(s => !File.Exists($"{coverPath}/{s.Id}.jpg") && !File.Exists($"{coverPath}/{s.Id}.png"));
-        
+
         _songDb.MultiPageSelectResult(noCover.ToList(), message);
 
         return MarisaPluginTaskState.CompletedTask;

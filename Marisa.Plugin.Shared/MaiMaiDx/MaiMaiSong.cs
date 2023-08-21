@@ -36,6 +36,11 @@ public class MaiMaiSong : Song
         }
     }
 
+    public int Ra(int idx, double achievement)
+    {
+        return SongScore.Ra(achievement, Constants[idx]);
+    }
+
     public override string MaxLevel()
     {
         return Levels.Last();

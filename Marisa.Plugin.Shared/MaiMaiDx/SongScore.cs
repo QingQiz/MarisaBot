@@ -4,13 +4,13 @@ public class SongScore
 {
     public readonly double Achievement;
     public readonly double Constant;
-    public long DxScore;
+    public int DxScore;
     public readonly string Fc;
     public readonly string Fs;
     public string Level;
-    public readonly long LevelIdx;
+    public readonly int LevelIdx;
     public string LevelLabel;
-    public long Rating;
+    public int Rating;
     public readonly string Rank;
     public readonly long Id;
     public readonly string Title;
@@ -20,13 +20,13 @@ public class SongScore
     {
         Achievement = data.achievements;
         Constant    = data.ds;
-        DxScore     = data.dxScore;
+        DxScore     = (int)data.dxScore;
         Fc          = data.fc;
         Fs          = data.fs;
         Level       = data.level;
-        LevelIdx    = data.level_index;
+        LevelIdx    = (int)data.level_index;
         LevelLabel  = data.level_label;
-        Rating      = data.ra;
+        Rating      = (int)data.ra;
         Rank        = data.rate;
         Id          = data.song_id;
         Title       = data.title;
@@ -34,8 +34,8 @@ public class SongScore
     }
 
     public SongScore(
-        double achievement, double constant, long dxScore, string fc, string fs, string level,
-        long levelIdx, string levelLabel, long rating, string rank, long id, string title, string type)
+        double achievement, double constant, int dxScore, string fc, string fs, string level,
+        int levelIdx, string levelLabel, int rating, string rank, long id, string title, string type)
     {
         Achievement = achievement;
         Constant    = constant;
@@ -157,8 +157,10 @@ public class SongScore
     /// <param name="constant">定数</param>
     /// <param name="minRa">最小的Ra</param>
     /// <returns>达成率</returns>
-    public static double NextRa(double constant, long minRa)
+    public static double NextAchievement(double constant, long minRa)
     {
+        if (minRa >= SongScore.Ra(100.5, constant)) return -1;
+
         var a = 0.0;
 
         while (a < 100.5)
@@ -167,7 +169,7 @@ public class SongScore
 
             if (Ra(a, constant) > minRa)
             {
-                return a;
+                return a > 100.5 ? 100.5 : a;
             }
         }
 

@@ -168,7 +168,7 @@ public static class MaiMaiDraw
     /// </summary>
     public static Image? DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, MaiMaiSong Song)>> groupedSong,
-        IReadOnlyDictionary<(long SongId, long LevelIdx), SongScore> scores)
+        IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores)
     {
         const int column      = 8;
         const int height      = 120;
@@ -536,10 +536,10 @@ public static class MaiMaiDraw
 
             bg.Mutate(i => i.Fill(Color.White).DrawImage(cover, padding, y));
 
-            var constantIndex = song.Constants.FindIndex(c => SongScore.NextRa(c, minRating) > 0);
+            var constantIndex = song.Constants.FindIndex(c => SongScore.NextAchievement(c, minRating) > 0);
             var constant      = song.Constants[constantIndex];
 
-            var nextA = SongScore.NextRa(constant, minRating);
+            var nextA = SongScore.NextAchievement(constant, minRating);
             var nextR = SongScore.Ra(nextA, constant);
 
             var lvStr   = $"{MaiMaiSong.LevelName[constantIndex]}: {constant}";
