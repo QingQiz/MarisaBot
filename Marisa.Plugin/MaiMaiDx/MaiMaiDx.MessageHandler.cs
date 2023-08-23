@@ -1,13 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -340,51 +336,42 @@ public partial class MaiMaiDx : PluginBase
 
             var (up, down) = GetRecommend(rating, target);
 
-            if (!up.Any())
+            var current = new
             {
-                message.Reply("No Way");
-                return MarisaPluginTaskState.CompletedTask;
-            }
+                OldScores = rating.OldScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)),
+                NewScores = rating.NewScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)),
+            };
 
-            var sb = new StringBuilder();
+            var flattenUp = up.Select(x => (x.Key.Song, x.Key.Idx, x.Value.Item1, x.Value.Item2)).ToList();
 
-            sb.AppendLine("新加入的：");
-            foreach (var kv in up)
+            var flattenUpNew = flattenUp.Where(x => x.Item1.Info.IsNew);
+            var flattenUpOld = flattenUp.Where(x => !x.Item1.Info.IsNew);
+
+            var recommend = new
             {
-                if (down.ContainsKey(kv.Key)) continue;
+                OldScores = (IEnumerable<(MaiMaiSong, int LevelIdx, double Achievement, int Rating)>)flattenUpOld
+                    .Concat(current.OldScores
+                        .Where(x =>
+                            !up.ContainsKey((x.Item1, x.Item2))
+                         && !down.ContainsKey((x.Item1, x.Item2)))
+                    )
+                    .OrderByDescending(x => x.Item4),
+                NewScores = (IEnumerable<(MaiMaiSong, int LevelIdx, double Achievement, int Rating)>)flattenUpNew
+                    .Concat(current.NewScores
+                        .Where(x =>
+                            !up.ContainsKey((x.Item1, x.Item2))
+                         && !down.ContainsKey((x.Item1, x.Item2)))
+                    )
+                    .OrderByDescending(x => x.Item4),
+            };
 
-                var song = _songDb.GetSongById(kv.Key.Id)!;
-                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {kv.Value:000.0000}({song.Ra(kv.Key.Idx, kv.Value)})");
-            }
+            var context = new WebContext();
 
-            sb.AppendLine("更新的：");
-            foreach (var kv in up)
-            {
-                if (!down.ContainsKey(kv.Key)) continue;
+            context.Put("current", current);
+            context.Put("recommend", recommend);
 
-                var song = _songDb.GetSongById(kv.Key.Id)!;
-                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {down[kv.Key]}({song.Ra(kv.Key.Idx, down[kv.Key])}) -> {kv.Value}({song.Ra(kv.Key.Idx, kv.Value)})");
-            }
+            message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiRecommend(context.Id)));
 
-            sb.AppendLine("退出的：");
-            foreach (var kv in down)
-            {
-                if (up.ContainsKey(kv.Key)) continue;
-                
-                var song = _songDb.GetSongById(kv.Key.Id)!;
-                sb.AppendLine($"{song.Title}{(song.Info.IsNew ? "(new)" : "")}: {song.Constants[kv.Key.Idx]:00.0}: {kv.Value:000.0000}({song.Ra(kv.Key.Idx, kv.Value)})");
-            }
-
-            var sd = new StringDrawer(3);
-            sd.Add(new Font(SystemFonts.Get("Consolas"), 16), Color.Black, sb.ToString());
-
-            var size = sd.Measure();
-            var image = new Image<Rgba32>((int)size.Width + 10, (int)size.Height + 10);
-
-            image.Clear(Color.White);
-            sd.Draw(image, 5, 5);
-            
-            message.Reply(MessageDataImage.FromBase64(image.ToB64()));
             return MarisaPluginTaskState.CompletedTask;
         }
         catch (FlurlHttpException e) when (e.StatusCode == 400)

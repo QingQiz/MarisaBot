@@ -1,49 +1,68 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace Marisa.StartUp;
+namespace Marisa.StartUp.Controllers;
 
 [ApiController]
 [Route("Api/[controller]/[action]")]
 public class WebContext : Controller
 {
-    private static void WriteHistory(Guid id, string name, object obj)
+    private static void WriteHistory(Guid id, string name, string str)
     {
         var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
 
         Directory.CreateDirectory(path);
 
         var file = Path.Join(path, $"{name}.{id}");
-        System.IO.File.WriteAllText(file, obj is string ? obj.ToString() : JsonConvert.SerializeObject(obj));
+        System.IO.File.WriteAllText(file, str);
     }
 
-    private static string ReadHistory(string name)
+    private static bool TryReadHistory(Guid id, string name, out string output)
     {
         var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
 
-        foreach (var i in Directory.GetFiles(path))
+        if (id == Guid.Empty)
         {
-            var file = Path.GetFileName(i);
-            if (file.StartsWith(name))
+            foreach (var i in Directory.GetFiles(path))
             {
-                return System.IO.File.ReadAllText(i);
+                var file = Path.GetFileName(i);
+                if (file.StartsWith(name))
+                {
+                    output = System.IO.File.ReadAllText(i);
+                    return true;
+                }
             }
         }
-        throw new Exception($"No history found for {name}");
+        else
+        {
+            foreach (var i in Directory.GetFiles(path))
+            {
+                var file = Path.GetFileName(i);
+                if (file.StartsWith(name) && file.EndsWith(id.ToString()))
+                {
+                    output = System.IO.File.ReadAllText(i);
+                    return true;
+                }
+            }
+        }
+
+        output = "";
+        return false;
     }
 
     [HttpGet]
-    public object Get(Guid id, string name)
+    public string Get(Guid id, string name)
     {
-        if (id == Guid.Empty)
+        if (TryReadHistory(id, name, out var output))
         {
-            return ReadHistory(name);
+            return output;
         }
 
         var obj = Utils.WebContext.Get(id, name);
+        var str = obj is string ? obj.ToString()! : JsonConvert.SerializeObject(obj);
 
-        Task.Run(() => WriteHistory(id, name, obj));
+        Task.Run(() => WriteHistory(id, name, str));
 
-        return obj;
+        return str;
     }
 }

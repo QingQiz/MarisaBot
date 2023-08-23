@@ -9,11 +9,13 @@ import BestScores from "@/components/maimai/BestScores.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
 import OsuRecommend from "@/components/osu/OsuRecommend.vue";
+import Recommend from "@/components/maimai/Recommend.vue";
 
 
 const routes = [
     {path: '/', component: NotFound},
     {path: '/maimai/best', component: BestScores},
+    {path: '/maimai/recommend', component: Recommend},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},
     {path: '/:catchAll(.*)', redirect: '/'}
