@@ -2,9 +2,9 @@
     <div class="relative w-[400px] h-[200px] ">
         <!-- cover -->
         <fallback-image
-                ref="imgEl" @load="UpdateColor"
-                :src="available_cover" fallback="/assets/maimai/cover/0.png"
-                class="inline w-[200px] h-[200px] rounded-r-3xl ml-[200px]"/>
+            ref="imgEl" @load="UpdateColor"
+            :src="available_cover" fallback="/assets/maimai/cover/0.png"
+            class="inline w-[200px] h-[200px] rounded-r-3xl ml-[200px]"/>
         <div class="absolute top-0 left-0 right-0 w-[400px] h-[200px] rounded-l-3xl"
              :style="['background-image:' + bg_color]">
             <div class="font-osu-web mt-4 ml-5 relative flex flex-col gap-[2px]" :style="['color:' + text_color]">
@@ -48,7 +48,7 @@
 import {computed, ref} from "vue";
 import FallbackImage from "@/components/utils/FallbackImage.vue";
 import {maimai_alternativeCover, maimai_levelColors} from "@/GlobalVars";
-import {Score as MaiScore} from "@/components/maimai/MaiMai.Data";
+import {Score as MaiScore} from "@/components/maimai/BestScores.vue";
 
 const props = defineProps<{ score: MaiScore }>();
 const imgEl = ref<typeof FallbackImage | null>(null);
