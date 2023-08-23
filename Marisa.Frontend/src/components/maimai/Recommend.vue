@@ -69,11 +69,11 @@ function GetDiff(scores1: Score[], scores2: Score[]) {
 
 <template>
     <template v-if="data_fetched">
-        <div style="width: 1200px">
+        <div style="width: 1000px">
             <div v-for="item in GetDiff(current.NewScores, recommend.NewScores)">
                 <RecommendCard :a="item[0]" :b="item[1]" />
             </div>
-            <hr>
+            <div class="h-5 bg-[#ccc]"></div>
             <div v-for="item in GetDiff(current.OldScores, recommend.OldScores)">
                 <RecommendCard :a="item[0]" :b="item[1]" />
             </div>

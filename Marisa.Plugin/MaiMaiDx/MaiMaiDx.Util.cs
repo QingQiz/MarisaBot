@@ -22,8 +22,7 @@ public partial class MaiMaiDx
 
     #region rating
 
-    private (Dictionary<(MaiMaiSong Song, int Idx), (double, int)> Up, Dictionary<(MaiMaiSong Song, int Idx), (double, int)> Down) GetRecommend(
-        DxRating rating, int targetRating)
+    private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool) GetRecommend( DxRating rating, int targetRating)
     {
         var listOld = rating.OldScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
         var listNew = rating.NewScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
@@ -35,85 +34,96 @@ public partial class MaiMaiDx
         idSet.AddRange(rating.OldScores.Select(s => (s.Id, s.LevelIdx)));
         idSet.AddRange(rating.NewScores.Select(s => (s.Id, s.LevelIdx)));
 
-        var up   = new Dictionary<(MaiMaiSong Song, int Idx), (double, int)>();
-        var down = new Dictionary<(MaiMaiSong Song, int Idx), (double, int)>();
-
         var newSongList = _songDb.SongList.Where(s => s.Info.IsNew).ToList();
         var oldSongList = _songDb.SongList.Where(s => !s.Info.IsNew).ToList();
 
         var maxConst = Math.Max(rating.NewScores.Max(x => x.Constant), rating.OldScores.Max(x => x.Constant));
 
+        var fails = 0b1111;
+        var rand  = new Random();
         while (true)
         {
             if (raOld + raNew >= targetRating) break;
+            if (fails == 0) break;
 
-            var successOld = UpdateRa(listOld, ref raOld, oldSongList);
+            int r;
+            do
+            {
+                r = rand.Next(4);
+            } while (((1 << r) & fails) == 0);
 
-            if (raOld + raNew >= targetRating) break;
+            switch (r)
+            {
+                case 0:
+                {
+                    var success = Update1(listOld, ref raOld, oldSongList);
 
-            var successNew = UpdateRa(listNew, ref raNew, newSongList);
+                    if (!success)
+                        fails &= 0b1110;
+                    else
+                        fails |= 0b0100;
+                    break;
+                }
+                case 1:
+                {
+                    var success = Update1(listNew, ref raNew, newSongList);
 
-            if (!successOld && !successNew)
-                return (new Dictionary<(MaiMaiSong Song, int Idx), (double, int)>(), new Dictionary<(MaiMaiSong Song, int Idx), (double, int)>());
+                    if (!success)
+                        fails &= 0b1101;
+                    else
+                        fails |= 0b1000;
+                    break;
+                    
+                }
+                case 2:
+                {
+                    var success = Update2(listOld, ref raOld);
+
+                    if (!success) fails &= 0b1011;
+                    break;
+                }
+                case 3:
+                {
+                    var success = Update2(listNew, ref raNew);
+
+                    if (!success) fails &= 0b0111;
+                    break;
+                }
+            }
         }
 
-        return (up, down);
+        return (listOld, listNew, fails != 0);
 
-        bool UpdateRa(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum, IEnumerable<MaiMaiSong> songList)
+        List<MaiMaiSong> GetAvailableSongs(IEnumerable<MaiMaiSong> songs, int minRa)
         {
-            var (oldSong, oldIdx, oldAchievement, oldRa) = list.MinBy(x => x.Rating);
-
-            var oldKey = (oldSong, oldIdx);
-
-            idSet.Remove((oldSong.Id, oldIdx));
-
-            var @const = maxConst;
-            var ra     = oldRa;
-            var songs = songList
+            return songs
                 .Where(s => s.Constants
                     .Select((c, i) => (c, i))
                     // 你妈逼的浮点误差，14.7 -> 14.699999999999999
                     .Any(c =>
                         !idSet.Contains((s.Id, c.i))
-                     && c.c <= @const + 0.15
-                     && SongScore.Ra(100.5, c.c) > ra
+                     && c.c <= maxConst + 0.15
+                     && SongScore.Ra(100.5, c.c) > minRa
                     )
                 )
                 .ToList();
+        }
 
-            double newAchievement;
-            int    newRa;
+        bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum, IEnumerable<MaiMaiSong> songList)
+        {
+            var (oldSong, oldIdx, oldAchievement, oldRa) = list.MinBy(x => x.Rating);
+
+            idSet.Remove((oldSong.Id, oldIdx));
+
+            var songs = GetAvailableSongs(songList, oldRa);
+
             if (!songs.Any())
             {
                 // revert change
                 idSet.Add((oldSong.Id, oldIdx));
 
-                var items = list.Select((x, i) => (x, i)).Where(x => x.x.Achievement < 100.5).ToList();
-
-                if (!items.Any()) return false;
-
-                var (item, idx) = items.RandomTake();
-
-                oldRa          = SongScore.Ra(item.Achievement, item.Song.Constants[item.Idx]);
-                newAchievement = SongScore.NextAchievement(item.Song.Constants[item.Idx], oldRa);
-                newRa          = SongScore.Ra(newAchievement, item.Song.Constants[item.Idx]);
-
-                raSum -= oldRa;
-                raSum += newRa;
-
-                list[idx] = (item.Song, item.Idx, newAchievement, newRa);
-
-                if (!down.ContainsKey((item.Song, item.Idx)))
-                {
-                    down.Add((item.Song, item.Idx), (item.Achievement, oldRa));
-                }
-
-                up[(item.Song, item.Idx)] = (newAchievement, newRa);
-
-                return true;
+                return Update2(list, ref raSum);
             }
-
-            if (!up.Remove(oldKey)) down.TryAdd(oldKey, (oldAchievement, oldRa));
 
             var newSong = songs.RandomTake();
 
@@ -121,20 +131,37 @@ public partial class MaiMaiDx
             var newIdx = achievements
                 .Select((x, i) => (x, i)).ToList()
                 .FindIndex(x => !idSet.Contains((newSong.Id, x.i)) && x.x > 0);
-            newAchievement = achievements[newIdx];
-            var newKey = (newSong, newIdx);
-
-            newRa = SongScore.Ra(newAchievement, newSong.Constants[newIdx]);
+            var newAchievement = achievements[newIdx];
+            var newRa          = SongScore.Ra(newAchievement, newSong.Constants[newIdx]);
 
             raSum -= oldRa;
             raSum += newRa;
 
             maxConst = Math.Max(maxConst, newSong.Constants[newIdx]);
 
-            up[newKey] = (newAchievement, newRa);
             idSet.Add((newSong.Id, newIdx));
             list.Remove((oldSong, oldIdx, oldAchievement, oldRa));
             list.Add((newSong, newIdx, newAchievement, newRa));
+            return true;
+        }
+
+        bool Update2(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum)
+        {
+            var items = list.Select((x, i) => (x, i)).Where(x => x.x.Achievement < 100.5).ToList();
+
+            if (!items.Any()) return false;
+
+            var (item, idx) = items.RandomTake();
+
+            var oldRa          = SongScore.Ra(item.Achievement, item.Song.Constants[item.Idx]);
+            var newAchievement = SongScore.NextAchievement(item.Song.Constants[item.Idx], oldRa);
+            var newRa          = SongScore.Ra(newAchievement, item.Song.Constants[item.Idx]);
+
+            raSum -= oldRa;
+            raSum += newRa;
+
+            list[idx] = (item.Song, item.Idx, newAchievement, newRa);
+
             return true;
         }
     }

@@ -334,35 +334,24 @@ public partial class MaiMaiDx : PluginBase
         {
             var rating = await GetDxRating(null, sender);
 
-            var (up, down) = GetRecommend(rating, target);
+            var (old, @new, success) = GetRecommend(rating, target);
+
+            if (!success)
+            {
+                message.Reply("no way");
+                return MarisaPluginTaskState.CompletedTask;
+            }
 
             var current = new
             {
-                OldScores = rating.OldScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)),
-                NewScores = rating.NewScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)),
+                OldScores = rating.OldScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)).OrderByDescending(x => x.Item4),
+                NewScores = rating.NewScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)).OrderByDescending(x => x.Item4),
             };
-
-            var flattenUp = up.Select(x => (x.Key.Song, x.Key.Idx, x.Value.Item1, x.Value.Item2)).ToList();
-
-            var flattenUpNew = flattenUp.Where(x => x.Item1.Info.IsNew);
-            var flattenUpOld = flattenUp.Where(x => !x.Item1.Info.IsNew);
 
             var recommend = new
             {
-                OldScores = (IEnumerable<(MaiMaiSong, int LevelIdx, double Achievement, int Rating)>)flattenUpOld
-                    .Concat(current.OldScores
-                        .Where(x =>
-                            !up.ContainsKey((x.Item1, x.Item2))
-                         && !down.ContainsKey((x.Item1, x.Item2)))
-                    )
-                    .OrderByDescending(x => x.Item4),
-                NewScores = (IEnumerable<(MaiMaiSong, int LevelIdx, double Achievement, int Rating)>)flattenUpNew
-                    .Concat(current.NewScores
-                        .Where(x =>
-                            !up.ContainsKey((x.Item1, x.Item2))
-                         && !down.ContainsKey((x.Item1, x.Item2)))
-                    )
-                    .OrderByDescending(x => x.Item4),
+                OldScores = old.OrderByDescending(x => x.Item4),
+                NewScores = @new.OrderByDescending(x => x.Item4),
             };
 
             var context = new WebContext();
