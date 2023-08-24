@@ -22,7 +22,7 @@ public partial class MaiMaiDx
 
     #region rating
 
-    private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool) GetRecommend( DxRating rating, int targetRating)
+    private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool) GetRecommend(DxRating rating, int targetRating)
     {
         var listOld = rating.OldScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
         var listNew = rating.NewScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
@@ -56,7 +56,7 @@ public partial class MaiMaiDx
             {
                 case 0:
                 {
-                    var success = Update1(listOld, ref raOld, oldSongList);
+                    var success = Update1(listOld, ref raOld, oldSongList, 35);
 
                     if (!success)
                         fails &= 0b1110;
@@ -66,14 +66,13 @@ public partial class MaiMaiDx
                 }
                 case 1:
                 {
-                    var success = Update1(listNew, ref raNew, newSongList);
+                    var success = Update1(listNew, ref raNew, newSongList, 15);
 
                     if (!success)
                         fails &= 0b1101;
                     else
                         fails |= 0b1000;
                     break;
-                    
                 }
                 case 2:
                 {
@@ -109,7 +108,7 @@ public partial class MaiMaiDx
                 .ToList();
         }
 
-        bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum, IEnumerable<MaiMaiSong> songList)
+        bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum, IEnumerable<MaiMaiSong> songList, int cap)
         {
             var (oldSong, oldIdx, oldAchievement, oldRa) = list.MinBy(x => x.Rating);
 
@@ -140,7 +139,7 @@ public partial class MaiMaiDx
             maxConst = Math.Max(maxConst, newSong.Constants[newIdx]);
 
             idSet.Add((newSong.Id, newIdx));
-            list.Remove((oldSong, oldIdx, oldAchievement, oldRa));
+            if (list.Count >= cap) list.Remove((oldSong, oldIdx, oldAchievement, oldRa));
             list.Add((newSong, newIdx, newAchievement, newRa));
             return true;
         }
