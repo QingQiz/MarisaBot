@@ -97,11 +97,6 @@ public static class SearchSongInDb
 
         message.Reply(DisplaySong(0));
 
-        if (songs.Count <= SongDbConfig.PageSize)
-        {
-            return;
-        }
-
         db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender?.Id, next =>
         {
             if (next.Command.StartsWith("p", StringComparison.OrdinalIgnoreCase))
