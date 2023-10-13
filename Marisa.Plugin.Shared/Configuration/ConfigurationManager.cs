@@ -47,6 +47,10 @@ public static class ConfigurationManager
             Directory.CreateDirectory(config.Game.TempPath);
             Directory.CreateDirectory(Path.Join(config.Game.TempPath, "Guess"));
         }
+        if (!Directory.Exists(config.WordCloud.TempPath))
+        {
+            Directory.CreateDirectory(config.WordCloud.TempPath);
+        }
 
         return config;
     }

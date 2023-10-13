@@ -14,6 +14,7 @@ export const osu_best         = host + '/Osu/GetBest'
 export const osu_beatmapInfo  = host + '/Osu/GetBeatmapInfo'
 export const osu_getRecommend = host + '/Osu/GetRecommend'
 export const osu_getImage     = host + '/Osu/GetImage'
+export const wordcloud_get    = host + '/WordCloud'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {
     return `${osu_accRing}?acc=${acc}&modeInt=${modeInt}`;

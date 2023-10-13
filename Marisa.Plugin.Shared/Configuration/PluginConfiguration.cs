@@ -24,4 +24,6 @@ public class PluginConfiguration
     public OsuConfiguration Osu { get; set; }
     
     public GameConfiguration Game { get; set; }
+    
+    public WordCloudConfiguration WordCloud { get; set; }
 }
