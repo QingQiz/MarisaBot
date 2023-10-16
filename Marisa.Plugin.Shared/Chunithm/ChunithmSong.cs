@@ -143,7 +143,17 @@ public class ChunithmSong : Song
         { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
     };
 
-    public override string GetImage()
+    public static readonly Dictionary<string, string> LevelAlias = new()
+    {
+        { "绿", "BASIC" },
+        { "黄", "ADVANCED" },
+        { "红", "EXPERT" },
+        { "紫", "MASTER" },
+        { "黑", "ULTIMA" },
+        { "we", "WORLD'S END" },
+    };
+
+public override string GetImage()
     {
         return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
         {

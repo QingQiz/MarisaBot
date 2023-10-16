@@ -838,10 +838,22 @@ public partial class MaiMaiDx : PluginBase
             var (x, y) = song.NoteScore(levelIdx);
 
             var tolerance = (int)((101 - achievement) / (0.2 * x));
+            var dxScore   = song.Charts[levelIdx].Notes.Sum() * 3;
+
+            var dxScores = new[] { 0.85, 0.9, 0.93, 0.95, 0.97 }
+                .Select(mul => ((int)Math.Ceiling(dxScore * mul), dxScore - (int)Math.Ceiling(dxScore * mul))).ToArray();
+
             next.Reply(
                 new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
                 new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
                 new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
+                new MessageDataText($"\nDX分：{dxScore}\n"),
+                new MessageDataText($"★ 最低 {dxScores[0].Item1}(-{dxScores[0].Item2})\n"),
+                new MessageDataText($"★★ 最低 {dxScores[1].Item1}(-{dxScores[1].Item2})\n"),
+                new MessageDataText($"★★★ 最低 {dxScores[2].Item1}(-{dxScores[2].Item2})\n"),
+                new MessageDataText($"★★★★ 最低 {dxScores[3].Item1}(-{dxScores[3].Item2})\n"),
+                new MessageDataText($"★★★★★ 最低 {dxScores[4].Item1}(-{dxScores[4].Item2})\n"),
+                new MessageDataText("每小DX分减1，每粉DX分减2，否则DX分减3\n"),
                 MessageDataImage.FromBase64(MaiMaiDraw.DrawFaultTable(x, y).ToB64())
             );
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
