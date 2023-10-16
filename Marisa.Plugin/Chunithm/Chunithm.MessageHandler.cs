@@ -365,14 +365,33 @@ public partial class Chunithm
             var song    = searchResult.First();
 
             var levelName = song.LevelName;
-            var level     = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
 
-            if (level == null)
+            // 全名
+            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+            var levelPrefix = level ?? "";
+            if (level != null) goto RightLabel;
+
+            // 首字母
+            level = levelName.FirstOrDefault(n => command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+            if (level != null)
             {
-                next.Reply("错误的难度名，会话已关闭。可用的难度名：" + string.Join("、", levelName));
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                levelPrefix = command[0].ToString();
+                goto RightLabel;
             }
 
+            // 别名
+            level       = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a => command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
+            levelPrefix = level ?? "";
+            if (level != null)
+            {
+                level = ChunithmSong.LevelAlias[level];
+                goto RightLabel;
+            }
+
+            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+
+            RightLabel:
             var levelIdx = levelName.IndexOf(level);
 
             if (song.MaxCombo[levelIdx] == 0)
@@ -381,7 +400,7 @@ public partial class Chunithm
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command.TrimStart(level), out var achievement);
+            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix), out var achievement);
 
             if (!parseSuccess)
             {

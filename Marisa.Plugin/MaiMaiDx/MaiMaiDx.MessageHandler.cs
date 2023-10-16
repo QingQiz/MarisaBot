@@ -802,16 +802,23 @@ public partial class MaiMaiDx : PluginBase
         {
             var command = next.Command.Trim();
 
-            var levelName = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
-            var level     = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+            var levelName   = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
+            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+            var levelPrefix = level ?? "";
+            if (level != null) goto RightLabel;
 
-            if (level == null)
+            level = levelName.FirstOrDefault(n => command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+            if (level != null)
             {
-                next.Reply("错误的难度格式，会话已关闭");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                levelPrefix = command[0].ToString();
+                goto RightLabel;
             }
 
-            var parseSuccess = double.TryParse(command.TrimStart(level), out var achievement);
+            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+
+            RightLabel:
+            var parseSuccess = double.TryParse(command.TrimStart(levelPrefix), out var achievement);
 
             if (!parseSuccess)
             {
