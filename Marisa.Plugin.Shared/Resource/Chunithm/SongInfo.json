@@ -89,18 +89,18 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1051,
-        "LevelStr": "戻",
-        "Constant": 0.0,
-        "Charter": ".K.K.B.K.K.B.B",
-        "Bpm": "170.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
         "maxCombo": 2102,
         "LevelStr": "両",
         "Constant": 0.0,
         "Charter": "左：EXPERT／右：EXPERT",
+        "Bpm": "170.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1051,
+        "LevelStr": "戻",
+        "Constant": 0.0,
+        "Charter": ".K.K.B.K.K.B.B",
         "Bpm": "170.00"
       }
     ]
@@ -2106,16 +2106,8 @@
     "Title": "Gate of Fate",
     "Artist": "Godspeed",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4543,
-        "LevelStr": "敷",
-        "Constant": 0.0,
-        "Charter": "驚きの白さ",
-        "Bpm": "128.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 464,
@@ -2154,6 +2146,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Techno Kitchen",
+        "Bpm": "128.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4543,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "驚きの白さ",
         "Bpm": "128.00"
       },
       {
@@ -2207,18 +2207,18 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 2500,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "崇め♡奉れEDIT",
-        "Bpm": "214.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
         "maxCombo": 1718,
         "LevelStr": "光",
         "Constant": 0.0,
         "Charter": "崇め奉れ！",
+        "Bpm": "214.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2500,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "崇め♡奉れEDIT",
         "Bpm": "214.00"
       }
     ]
@@ -2280,14 +2280,6 @@
     "Version": "CHUNITHM AIR",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1915,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "明るい譜面",
-        "Bpm": "228.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 524,
         "LevelStr": "4",
@@ -2317,6 +2309,14 @@
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "如月 ゆかり",
+        "Bpm": "228.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1915,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "明るい譜面",
         "Bpm": "228.00"
       }
     ]
@@ -2416,16 +2416,8 @@
     "Title": "The wheel to the right",
     "Artist": "Sampling Masters MEGA",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4000,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "DJ-BOMB",
-        "Bpm": "200 (133.33 - 200.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 525,
@@ -2465,6 +2457,14 @@
         "Constant": 0.0,
         "Charter": "インド人を右に",
         "Bpm": "200 (133.33 - 200.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4000,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "DJ-BOMB",
+        "Bpm": "200 (133.33 - 200.00)"
       }
     ]
   },
@@ -2473,16 +2473,8 @@
     "Title": "STAR",
     "Artist": "SEXY-SYNTHESIZER",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1926,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "【祝】CHUNITHM STAR稼働!!",
-        "Bpm": "136.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 397,
@@ -2514,6 +2506,14 @@
         "Constant": 13.1,
         "Charter": "Revo@LC cooperated with 譜面-100号",
         "Bpm": "136.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1926,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "【祝】CHUNITHM STAR稼働!!",
+        "Bpm": "136.00"
       }
     ]
   },
@@ -2522,16 +2522,8 @@
     "Title": "Infantoon Fantasy",
     "Artist": "t+pazolite",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2399,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "避keroon Fantasy",
-        "Bpm": "185.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 590,
@@ -2570,6 +2562,14 @@
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "ロシェ＠ペンギン",
+        "Bpm": "185.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2399,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "避keroon Fantasy",
         "Bpm": "185.00"
       }
     ]
@@ -2623,7 +2623,7 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1779,
+        "maxCombo": 1595,
         "LevelStr": "分",
         "Constant": 0.0,
         "Charter": "Genesis type-?",
@@ -2639,7 +2639,7 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1595,
+        "maxCombo": 1779,
         "LevelStr": "分",
         "Constant": 0.0,
         "Charter": "Genesis type-?",
@@ -2660,16 +2660,8 @@
     "Title": "MUSIC PЯAYER",
     "Artist": "A-One",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4056,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "( ﾟ∀ﾟ)o彡°ﾐｭｰｼﾞｯﾌﾟﾚｲﾔｰ！",
-        "Bpm": "168.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 465,
@@ -2700,6 +2692,14 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "譜面-100号",
+        "Bpm": "168.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4056,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "( ﾟ∀ﾟ)o彡°ﾐｭｰｼﾞｯﾌﾟﾚｲﾔｰ！",
         "Bpm": "168.00"
       }
     ]
@@ -2758,16 +2758,8 @@
     "Title": "Counselor",
     "Artist": "DECO*27 feat.echo",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1259,
-        "LevelStr": "？",
-        "Constant": 0.0,
-        "Charter": "せぇえええええええええええええええええい",
-        "Bpm": "135.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 302,
@@ -2798,6 +2790,14 @@
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "Revo@LC",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1259,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "せぇえええええええええええええええええい",
         "Bpm": "135.00"
       }
     ]
@@ -2966,18 +2966,18 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1784,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "ＧＯ↑ＧＯ↑エアリズム♥",
-        "Bpm": "176.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
         "maxCombo": 1600,
         "LevelStr": "跳",
         "Constant": 0.0,
         "Charter": "ＧＯ！ＧＯ！エアリズム♥",
+        "Bpm": "176.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1784,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "ＧＯ↑ＧＯ↑エアリズム♥",
         "Bpm": "176.00"
       }
     ]
@@ -3331,24 +3331,8 @@
     "Title": "The Concept of Love",
     "Artist": "長沼 英樹",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2036,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "The Concept of Bomb",
-        "Bpm": "122.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 5451,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "The Concept of Bomb+",
-        "Bpm": "122.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 220,
@@ -3379,6 +3363,22 @@
         "LevelStr": "13",
         "Constant": 13.2,
         "Charter": "Revo@LC",
+        "Bpm": "122.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2036,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "The Concept of Bomb",
+        "Bpm": "122.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 5451,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "The Concept of Bomb+",
         "Bpm": "122.00"
       },
       {
@@ -3445,16 +3445,8 @@
     "Title": "L'épisode",
     "Artist": "Osamu Kubota",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1372,
-        "LevelStr": "半",
-        "Constant": 0.0,
-        "Charter": "時を紡ぎ出す旋律",
-        "Bpm": "118.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 627,
@@ -3485,6 +3477,14 @@
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "Op.-C",
+        "Bpm": "118.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1372,
+        "LevelStr": "半",
+        "Constant": 0.0,
+        "Charter": "時を紡ぎ出す旋律",
         "Bpm": "118.00"
       }
     ]
@@ -3658,16 +3658,8 @@
     "Title": "砂漠のハンティングガール♡",
     "Artist": "海田 明里",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2349,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "砂漠の月明かり",
-        "Bpm": "139.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 354,
@@ -3715,6 +3707,14 @@
         "Constant": 0.0,
         "Charter": "砂漠のフリッキングガール♡",
         "Bpm": "139.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2349,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "砂漠の月明かり",
+        "Bpm": "139.00"
       }
     ]
   },
@@ -3723,16 +3723,8 @@
     "Title": "チルノのパーフェクトさんすう教室",
     "Artist": "ARM＋夕野ヨシミ (IOSYS) feat.miko",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1760,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "⑨[Easy]",
-        "Bpm": "175.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 273,
@@ -3763,6 +3755,14 @@
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "某S氏",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1760,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "⑨[Easy]",
         "Bpm": "175.00"
       }
     ]
@@ -3862,16 +3862,8 @@
     "Title": "言ノ葉カルマ",
     "Artist": "そらる・ろん×れるりり",
     "Genre": "ゲキマイ",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1389,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "フリック → 一部ダメージノーツ",
-        "Bpm": "150.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 325,
@@ -3902,6 +3894,14 @@
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "mai-Star",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1389,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "フリック → 一部ダメージノーツ",
         "Bpm": "150.00"
       }
     ]
@@ -4034,16 +4034,8 @@
     "Title": "エンドマークに希望と涙を添えて",
     "Artist": "cosMo＠暴走P",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3574,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "エンドマークに絶望と汗を添えて",
-        "Bpm": "257.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 445,
@@ -4074,6 +4066,14 @@
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Revo@LC",
+        "Bpm": "257.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3574,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "エンドマークに絶望と汗を添えて",
         "Bpm": "257.00"
       }
     ]
@@ -4214,16 +4214,8 @@
     "Title": "We Gonna Journey",
     "Artist": "Queen P.A.L.",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 773,
-        "LevelStr": "覚",
-        "Constant": 0.0,
-        "Charter": "FLICK BATTLE(上級)",
-        "Bpm": "160.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 413,
@@ -4263,6 +4255,14 @@
         "Constant": 14.8,
         "Charter": "Queen P.H.X.",
         "Bpm": "160.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 773,
+        "LevelStr": "覚",
+        "Constant": 0.0,
+        "Charter": "FLICK BATTLE(上級)",
+        "Bpm": "160.00"
       }
     ]
   },
@@ -4271,16 +4271,8 @@
     "Title": "The ether",
     "Artist": "浜渦 正志",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 7266,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "譜面-6.25号",
-        "Bpm": "98.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 411,
@@ -4319,6 +4311,14 @@
         "LevelStr": "！",
         "Constant": 0.0,
         "Charter": "2→16　8・4→2",
+        "Bpm": "98.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 7266,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "譜面-6.25号",
         "Bpm": "98.00"
       },
       {
@@ -4770,16 +4770,8 @@
     "Title": "アウターサイエンス",
     "Artist": "じん",
     "Genre": "niconico",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2140,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "跳ねちゃったんでしょう？",
-        "Bpm": "195.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 381,
@@ -4810,6 +4802,14 @@
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "Techno Kitchen",
+        "Bpm": "195.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2140,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "跳ねちゃったんでしょう？",
         "Bpm": "195.00"
       }
     ]
@@ -5360,16 +5360,8 @@
     "Title": "HAELEQUIN (Original Remaster)",
     "Artist": "orangentle",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2117,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "左：ADVANCED／右：EXPERT",
-        "Bpm": "167 (83.50 - 167.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 438,
@@ -5400,6 +5392,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "ぴちネコ",
+        "Bpm": "167 (83.50 - 167.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2117,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "左：ADVANCED／右：EXPERT",
         "Bpm": "167 (83.50 - 167.00)"
       }
     ]
@@ -5491,16 +5491,8 @@
     "Title": "Angel dust",
     "Artist": "LV.4",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2194,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "深淵",
-        "Bpm": "170.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 436,
@@ -5531,6 +5523,14 @@
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Revo@LC",
+        "Bpm": "170.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2194,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "深淵",
         "Bpm": "170.00"
       }
     ]
@@ -5813,18 +5813,18 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1501,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "蔵gami+",
-        "Bpm": "98 (48.00 - 196.00)"
-      },
-      {
-        "LevelName": "WORLD'S END",
         "maxCombo": 1414,
         "LevelStr": "半",
         "Constant": 0.0,
         "Charter": "半gami",
+        "Bpm": "98 (48.00 - 196.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1404,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "【Ex】後光荒神+",
         "Bpm": "98 (48.00 - 196.00)"
       },
       {
@@ -5837,10 +5837,10 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 1404,
-        "LevelStr": "光",
+        "maxCombo": 1501,
+        "LevelStr": "蔵",
         "Constant": 0.0,
-        "Charter": "【Ex】後光荒神+",
+        "Charter": "蔵gami+",
         "Bpm": "98 (48.00 - 196.00)"
       }
     ]
@@ -5850,16 +5850,8 @@
     "Title": "Change Our MIRAI！",
     "Artist": "イロドリミドリ",
     "Genre": "イロドリミドリ",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1896,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "左：TREPXE／EXPERT：右",
-        "Bpm": "256.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 328,
@@ -5890,6 +5882,14 @@
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "ロシェ＠ペンギン",
+        "Bpm": "256.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1896,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "左：TREPXE／EXPERT：右",
         "Bpm": "256.00"
       }
     ]
@@ -5989,16 +5989,8 @@
     "Title": "Theme of SeelischTact",
     "Artist": "植松 伸夫",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1983,
-        "LevelStr": "弾",
-        "Constant": 0.0,
-        "Charter": "フリックマスターシズマEX",
-        "Bpm": "137.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 384,
@@ -6045,6 +6037,14 @@
         "LevelStr": "弾",
         "Constant": 0.0,
         "Charter": "フリックマスターシズマ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1983,
+        "LevelStr": "弾",
+        "Constant": 0.0,
+        "Charter": "フリックマスターシズマEX",
         "Bpm": "137.00"
       }
     ]
@@ -6136,16 +6136,8 @@
     "Title": "Alma",
     "Artist": "光田 康典",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2171,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "HOLDから指を離すな！",
-        "Bpm": "132.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 302,
@@ -6176,6 +6168,14 @@
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "譜面-100号",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2171,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "HOLDから指を離すな！",
         "Bpm": "132.00"
       }
     ]
@@ -6275,16 +6275,8 @@
     "Title": "ブルー・フィールド",
     "Artist": "Trident 「蒼き鋼のアルペジオ ‐アルス・ノヴァ‐」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1941,
-        "LevelStr": "敷",
-        "Constant": 0.0,
-        "Charter": "Blue Field",
-        "Bpm": "135.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 350,
@@ -6316,6 +6308,14 @@
         "Constant": 10.7,
         "Charter": "Techno Kitchen",
         "Bpm": "135.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1941,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "Blue Field",
+        "Bpm": "135.00"
       }
     ]
   },
@@ -6324,16 +6324,8 @@
     "Title": "FREELY TOMORROW",
     "Artist": "Mitchie M",
     "Genre": "niconico",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1231,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "全部のFLICKをダメージノーツに差し替えた。",
-        "Bpm": "129.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 304,
@@ -6364,6 +6356,14 @@
         "LevelStr": "11",
         "Constant": 11.4,
         "Charter": "rioN",
+        "Bpm": "129.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1231,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "全部のFLICKをダメージノーツに差し替えた。",
         "Bpm": "129.00"
       }
     ]
@@ -6463,16 +6463,8 @@
     "Title": "ジングルベル",
     "Artist": "SEGA Sound Unit[H.]",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1799,
-        "LevelStr": "弾",
-        "Constant": 0.0,
-        "Charter": "フリックの音が鈴の音に聞こえる",
-        "Bpm": "90 (90.00 - 100.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 257,
@@ -6503,6 +6495,14 @@
         "LevelStr": "14+",
         "Constant": 14.5,
         "Charter": "チャン@DP皆伝からのメリークリスマス",
+        "Bpm": "90 (90.00 - 100.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1799,
+        "LevelStr": "弾",
+        "Constant": 0.0,
+        "Charter": "フリックの音が鈴の音に聞こえる",
         "Bpm": "90 (90.00 - 100.00)"
       }
     ]
@@ -6695,18 +6695,18 @@
       },
       {
         "LevelName": "WORLD'S END",
-        "maxCombo": 2326,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "ぼくらの16分(?)TAP戦争",
-        "Bpm": "122.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
         "maxCombo": 3577,
         "LevelStr": "割",
         "Constant": 0.0,
         "Charter": "ぼくらの16分割戦争",
+        "Bpm": "122.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2326,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "ぼくらの16分(?)TAP戦争",
         "Bpm": "122.00"
       }
     ]
@@ -6716,24 +6716,8 @@
     "Title": "裏表ラバーズ",
     "Artist": "wowaka",
     "Genre": "niconico",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1374,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "ADVANCED／EXPERT",
-        "Bpm": "159.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1021,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "ウラオモテLovers",
-        "Bpm": "159.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 280,
@@ -6772,6 +6756,22 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "Redarrow",
+        "Bpm": "159.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1021,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "ウラオモテLovers",
+        "Bpm": "159.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1374,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "ADVANCED／EXPERT",
         "Bpm": "159.00"
       },
       {
@@ -6871,16 +6871,8 @@
     "Title": "elegante",
     "Artist": "Junk",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4302,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "割gante",
-        "Bpm": "133.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 220,
@@ -6923,6 +6915,14 @@
       },
       {
         "LevelName": "WORLD'S END",
+        "maxCombo": 4302,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "割gante",
+        "Bpm": "133.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
         "maxCombo": 1410,
         "LevelStr": "両",
         "Constant": 0.0,
@@ -6936,24 +6936,8 @@
     "Title": "DETARAME ROCK&ROLL THEORY",
     "Artist": "箱部 なる(CV:M・A・O)",
     "Genre": "イロドリミドリ",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1336,
-        "LevelStr": "？",
-        "Constant": 0.0,
-        "Charter": "DETARAME ROCK&NOTES THEORY",
-        "Bpm": "140 (140.00 - 178.00)"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1411,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "譜面rand()号",
-        "Bpm": "140 (140.00 - 178.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 443,
@@ -6984,6 +6968,22 @@
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "譜面-100号",
+        "Bpm": "140 (140.00 - 178.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1336,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "DETARAME ROCK&NOTES THEORY",
+        "Bpm": "140 (140.00 - 178.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1411,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "譜面rand()号",
         "Bpm": "140 (140.00 - 178.00)"
       }
     ]
@@ -7624,16 +7624,8 @@
     "Title": "エテルニタス・ルドロジー",
     "Artist": "IRON ATTACK!",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2316,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "私を壊して蝕んだ",
-        "Bpm": "178.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 425,
@@ -7664,6 +7656,14 @@
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "月まで届け、S氏の煙",
+        "Bpm": "178.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2316,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "私を壊して蝕んだ",
         "Bpm": "178.00"
       }
     ]
@@ -8107,16 +8107,8 @@
     "Title": "Contrapasso -inferno-",
     "Artist": "t+pazolite",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3333,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "HOLDから指を離すな！（上級編）",
-        "Bpm": "243.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 414,
@@ -8147,6 +8139,14 @@
         "LevelStr": "15",
         "Constant": 15.0,
         "Charter": "譜面ボーイズからの挑戦状",
+        "Bpm": "243.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3333,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "HOLDから指を離すな！（上級編）",
         "Bpm": "243.00"
       }
     ]
@@ -8303,16 +8303,8 @@
     "Title": "SNIPE WHOLE",
     "Artist": "Masayoshi Minoshima feat.Mei Ayakura",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1806,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "かわせ！かわせ！かわせ！かわせ！かわせ！",
-        "Bpm": "172.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 474,
@@ -8343,6 +8335,14 @@
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Revo@LC",
+        "Bpm": "172.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1806,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "かわせ！かわせ！かわせ！かわせ！かわせ！",
         "Bpm": "172.00"
       }
     ]
@@ -8393,16 +8393,8 @@
     "Title": "Your Affection (Daisuke Asakura Remix)",
     "Artist": "目黒将司 Remixed by 浅倉大介「ペルソナ4 ダンシング・オールナイト」",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4970,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "You割ffection (Daisuke Asakura Remix)",
-        "Bpm": "138.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 305,
@@ -8442,6 +8434,14 @@
         "Constant": 0.0,
         "Charter": "ダメージノーツが来たら避けよう！",
         "Bpm": "138.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4970,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "You割ffection (Daisuke Asakura Remix)",
+        "Bpm": "138.00"
       }
     ]
   },
@@ -8450,16 +8450,8 @@
     "Title": "SAMBISTA",
     "Artist": "DOT96",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 428,
-        "LevelStr": "覚",
-        "Constant": 0.0,
-        "Charter": "FLICK BATTLE(初級)",
-        "Bpm": "152.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 270,
@@ -8491,6 +8483,14 @@
         "Constant": 13.7,
         "Charter": "譜面-100号",
         "Bpm": "152.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 428,
+        "LevelStr": "覚",
+        "Constant": 0.0,
+        "Charter": "FLICK BATTLE(初級)",
+        "Bpm": "152.00"
       }
     ]
   },
@@ -8499,16 +8499,8 @@
     "Title": "君色シグナル",
     "Artist": "春奈 るな 「冴えない彼女の育てかた」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1363,
-        "LevelStr": "敷",
-        "Constant": 0.0,
-        "Charter": "フラットな譜面の作りかた",
-        "Bpm": "164.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 231,
@@ -8539,6 +8531,14 @@
         "LevelStr": "11",
         "Constant": 11.2,
         "Charter": "Revo＠六天場モール",
+        "Bpm": "164.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1363,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "フラットな譜面の作りかた",
         "Bpm": "164.00"
       }
     ]
@@ -8933,24 +8933,8 @@
     "Title": "玩具狂奏曲 -終焉-",
     "Artist": "きくお",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3028,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "譜面ボーイズからの挑戦状",
-        "Bpm": "130.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2268,
-        "LevelStr": "敷",
-        "Constant": 0.0,
-        "Charter": "玩具狂奏曲 -赤敷-",
-        "Bpm": "130.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 532,
@@ -8981,6 +8965,22 @@
         "LevelStr": "15",
         "Constant": 15.1,
         "Charter": "譜百ボーイズからの挑戦状",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2268,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "玩具狂奏曲 -赤敷-",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3028,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "130.00"
       }
     ]
@@ -9785,16 +9785,8 @@
     "Title": "回レ！雪月花",
     "Artist": "歌組雪月花 夜々(原田 ひとみ)/いろり(茅野 愛衣)/小紫(小倉 唯) 「機巧少女は傷つかない」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1499,
-        "LevelStr": "速",
-        "Constant": 0.0,
-        "Charter": "「回」で3%加速してしまう雪月花",
-        "Bpm": "160.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 357,
@@ -9833,6 +9825,14 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "じゃこ回レ！モン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1499,
+        "LevelStr": "速",
+        "Constant": 0.0,
+        "Charter": "「回」で3%加速してしまう雪月花",
         "Bpm": "160.00"
       }
     ]
@@ -11694,16 +11694,8 @@
     "Title": "ウソラセラ",
     "Artist": "ピノキオピー",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4644,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "オオカミが二倍！本当なんだよ！",
-        "Bpm": "188.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 479,
@@ -11735,6 +11727,14 @@
         "Constant": 13.2,
         "Charter": "イヌハッピー",
         "Bpm": "188.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4644,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "オオカミが二倍！本当なんだよ！",
+        "Bpm": "188.00"
       }
     ]
   },
@@ -11743,16 +11743,8 @@
     "Title": "檄!帝国華撃団",
     "Artist": "真宮寺さくら（横山智佐）＆帝国歌劇団「サクラ大戦」",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2878,
-        "LevelStr": "歌",
-        "Constant": 0.0,
-        "Charter": "【一部語り】檄!帝国華撃団",
-        "Bpm": "142.60"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 313,
@@ -11783,6 +11775,14 @@
         "LevelStr": "11",
         "Constant": 11.3,
         "Charter": "某神S郎",
+        "Bpm": "142.60"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2878,
+        "LevelStr": "歌",
+        "Constant": 0.0,
+        "Charter": "【一部語り】檄!帝国華撃団",
         "Bpm": "142.60"
       }
     ]
@@ -12407,16 +12407,8 @@
     "Title": "凛として咲く花の如く",
     "Artist": "紅色リトマス",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4650,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "やっ！",
-        "Bpm": "163.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 307,
@@ -12456,6 +12448,14 @@
         "Constant": 14.3,
         "Charter": "わくわくフクロウ探検隊",
         "Bpm": "163.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4650,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "やっ！",
+        "Bpm": "163.00"
       }
     ]
   },
@@ -12464,16 +12464,8 @@
     "Title": "Paqqin",
     "Artist": "owl＊tree",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1444,
-        "LevelStr": "止",
-        "Constant": 0.0,
-        "Charter": "Stoppin",
-        "Bpm": "110.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 468,
@@ -12504,6 +12496,14 @@
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "Jack",
+        "Bpm": "110.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1444,
+        "LevelStr": "止",
+        "Constant": 0.0,
+        "Charter": "Stoppin",
         "Bpm": "110.00"
       }
     ]
@@ -12718,16 +12718,8 @@
     "Title": "ひだまりデイズ",
     "Artist": "妹S（シスターズ）（土間うまる [CV.田中あいみ]、海老名菜々 [CV.影山灯]、本場切絵 [CV.白石晴香]、橘・シルフィンフォード [CV.古川由利奈]）「干物妹！うまるちゃん」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1091,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "食う寝る遊ぶ-100号ちゃん",
-        "Bpm": "134.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 182,
@@ -12758,6 +12750,14 @@
         "LevelStr": "11",
         "Constant": 11.4,
         "Charter": "お兄ちゃんに怒られた譜面-100号",
+        "Bpm": "134.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1091,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "食う寝る遊ぶ-100号ちゃん",
         "Bpm": "134.00"
       }
     ]
@@ -12890,16 +12890,8 @@
     "Title": "Air",
     "Artist": "SHIKI",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3000,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "Air -INFINITY-",
-        "Bpm": "178.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 393,
@@ -12938,6 +12930,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Air -INSANITY-",
+        "Bpm": "178.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3000,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "Air -INFINITY-",
         "Bpm": "178.00"
       }
     ]
@@ -13373,16 +13373,8 @@
     "Title": "★LittlE HearTs★",
     "Artist": "ねこみみ魔法使い",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM AIR PLUS",
+    "Version": "CHUNITHM AIR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2638,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "神域",
-        "Bpm": "200.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 483,
@@ -13413,6 +13405,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "チャン＠ちっちゃなドキドキ皆伝",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2638,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "神域",
         "Bpm": "200.00"
       }
     ]
@@ -13594,16 +13594,8 @@
     "Title": "Oshama Scramble!",
     "Artist": "t+pazolite",
     "Genre": "ゲキマイ",
-    "Version": "CHUNITHM AIR",
+    "Version": "CHUNITHM CRYSTAL PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1945,
-        "LevelStr": "改",
-        "Constant": 0.0,
-        "Charter": "チュウニ譜面ボーイズ",
-        "Bpm": "190.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 606,
@@ -13634,6 +13626,14 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "アミノハバキリ",
+        "Bpm": "190.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1945,
+        "LevelStr": "改",
+        "Constant": 0.0,
+        "Charter": "チュウニ譜面ボーイズ",
         "Bpm": "190.00"
       }
     ]
@@ -13848,16 +13848,8 @@
     "Title": "RevolutionGame",
     "Artist": "れるりり feat.ろん",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 5056,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "WORLD'S ENDへようこそ☆",
-        "Bpm": "147.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 392,
@@ -13888,6 +13880,14 @@
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "★スイーツ系すとりっくす★",
+        "Bpm": "147.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 5056,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "WORLD'S ENDへようこそ☆",
         "Bpm": "147.00"
       }
     ]
@@ -14236,14 +14236,6 @@
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3022,
-        "LevelStr": "敷",
-        "Constant": 0.0,
-        "Charter": "つーりんぐ!!",
-        "Bpm": "130.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 330,
         "LevelStr": "3",
@@ -14274,6 +14266,14 @@
         "Constant": 13.7,
         "Charter": "Revo@LC",
         "Bpm": "130.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3022,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "つーりんぐ!!",
+        "Bpm": "130.00"
       }
     ]
   },
@@ -14284,14 +14284,6 @@
     "Genre": "POPS & ANIME",
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 5316,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "もしものせかい!!",
-        "Bpm": "202.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 359,
@@ -14323,6 +14315,14 @@
         "Constant": 13.9,
         "Charter": "国道-100号",
         "Bpm": "202.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 5316,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "もしものせかい!!",
+        "Bpm": "202.00"
       }
     ]
   },
@@ -14331,16 +14331,8 @@
     "Title": "Star☆Glitter",
     "Artist": "セブンスシスターズ「Tokyo 7th シスターズ」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1209,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "西暦2034年",
-        "Bpm": "171.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 371,
@@ -14371,6 +14363,14 @@
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "Revo@LC",
+        "Bpm": "171.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1209,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "西暦2034年",
         "Bpm": "171.00"
       }
     ]
@@ -15162,14 +15162,6 @@
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1140,
-        "LevelStr": "時",
-        "Constant": 0.0,
-        "Charter": "全国共通リズム感テスト",
-        "Bpm": "94 (88.00 - 10240.00)"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 344,
         "LevelStr": "3",
@@ -15200,6 +15192,14 @@
         "Constant": 11.5,
         "Charter": "譜面-100号",
         "Bpm": "94 (88.00 - 160.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1140,
+        "LevelStr": "時",
+        "Constant": 0.0,
+        "Charter": "全国共通リズム感テスト",
+        "Bpm": "94 (88.00 - 10240.00)"
       }
     ]
   },
@@ -15331,24 +15331,8 @@
     "Title": "Starlight Dance Floor",
     "Artist": "発熱巫女～ず",
     "Genre": "東方Project",
-    "Version": "CHUNITHM STAR",
+    "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1438,
-        "LevelStr": "覚",
-        "Constant": 0.0,
-        "Charter": "HOLD BATTLE(初級)",
-        "Bpm": "128.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1716,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "TREPXE / EXPERT",
-        "Bpm": "128.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 380,
@@ -15379,6 +15363,22 @@
         "LevelStr": "11+",
         "Constant": 11.5,
         "Charter": "Moon Strix",
+        "Bpm": "128.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1438,
+        "LevelStr": "覚",
+        "Constant": 0.0,
+        "Charter": "HOLD BATTLE(初級)",
+        "Bpm": "128.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1716,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "TREPXE / EXPERT",
         "Bpm": "128.00"
       }
     ]
@@ -15604,14 +15604,6 @@
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2751,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "Space",
-        "Bpm": "210.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 645,
         "LevelStr": "5",
@@ -15641,6 +15633,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "Revo2LC  -CODENAME : AIRPLUS-",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2751,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "Space",
         "Bpm": "210.00"
       }
     ]
@@ -15817,22 +15817,6 @@
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1787,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "チュウニ万ボルト",
-        "Bpm": "155.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2461,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "ﾋﾞﾘﾋﾞﾘﾋﾞﾘﾋﾞﾘ",
-        "Bpm": "155.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 369,
         "LevelStr": "4",
@@ -15863,6 +15847,22 @@
         "Constant": 14.9,
         "Charter": "チャン@16kf.゜ω゜",
         "Bpm": "155.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2461,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "ﾋﾞﾘﾋﾞﾘﾋﾞﾘﾋﾞﾘ",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1787,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "チュウニ万ボルト",
+        "Bpm": "155.00"
       }
     ]
   },
@@ -15871,16 +15871,8 @@
     "Title": "若い力 -SEGA HARD GIRLS MIX-",
     "Artist": "セガ・ハード・ガールズ",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1821,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "知的創造 あふれる 英知",
-        "Bpm": "162.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 271,
@@ -15911,6 +15903,14 @@
         "LevelStr": "11+",
         "Constant": 11.7,
         "Charter": "若いペンギンとお絵描きネコ",
+        "Bpm": "162.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1821,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "知的創造 あふれる 英知",
         "Bpm": "162.00"
       }
     ]
@@ -15964,14 +15964,6 @@
     "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 4001,
-        "LevelStr": "嘘",
-        "Constant": 0.0,
-        "Charter": "わしがつるぺったんな話",
-        "Bpm": "180.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 521,
         "LevelStr": "3",
@@ -16001,6 +15993,14 @@
         "LevelStr": "12",
         "Constant": 12.3,
         "Charter": "ねこぺったん",
+        "Bpm": "180.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 4001,
+        "LevelStr": "嘘",
+        "Constant": 0.0,
+        "Charter": "わしがつるぺったんな話",
         "Bpm": "180.00"
       }
     ]
@@ -16133,16 +16133,8 @@
     "Title": "悪戯",
     "Artist": "ろん×田中秀和(MONACA)",
     "Genre": "ゲキマイ",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM AIR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1518,
-        "LevelStr": "？",
-        "Constant": 0.0,
-        "Charter": "可笑しな世界",
-        "Bpm": "140.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 309,
@@ -16173,6 +16165,14 @@
         "LevelStr": "12+",
         "Constant": 12.5,
         "Charter": "小鳥遊さん",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1518,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "可笑しな世界",
         "Bpm": "140.00"
       }
     ]
@@ -16880,16 +16880,8 @@
     "Title": "MIRU key way",
     "Artist": "JaccaPoP",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM STAR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1070,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "柔らかな風がふく　僕の飛行機",
-        "Bpm": "130.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 267,
@@ -16920,6 +16912,14 @@
         "LevelStr": "11+",
         "Constant": 11.6,
         "Charter": "Techno Kitchen",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1070,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "柔らかな風がふく　僕の飛行機",
         "Bpm": "130.00"
       }
     ]
@@ -17011,16 +17011,8 @@
     "Title": "Aleph-0",
     "Artist": "LeaF",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM SUN PLUS",
+    "Version": "CHUNITHM SUN",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 5735,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "全世界共通押し直し選手権",
-        "Bpm": "125 (125.00 - 400.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 445,
@@ -17059,6 +17051,14 @@
         "LevelStr": "15",
         "Constant": 15.1,
         "Charter": "Welcome to mathworld.",
+        "Bpm": "125 (125.00 - 400.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 5735,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "全世界共通押し直し選手権",
         "Bpm": "125 (125.00 - 400.00)"
       }
     ]
@@ -17601,24 +17601,8 @@
     "Title": "Glorious Crown (tpz over-Over-OVERCUTE REMIX)",
     "Artist": "t+pazolite",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM STAR PLUS",
+    "Version": "CHUNITHM STAR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2547,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "／／／／／／／／ ( ／-／-／ REMIX)",
-        "Bpm": "235.79"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3825,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "／／／／／／／／ ( ／-／-／ CRAZY)",
-        "Bpm": "235.79"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 617,
@@ -17649,6 +17633,22 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "FREEDOM \"over-Over-OVERDRIVE\" CAT!!!!!",
+        "Bpm": "235.79"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2547,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "／／／／／／／／ ( ／-／-／ REMIX)",
+        "Bpm": "235.79"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3825,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "／／／／／／／／ ( ／-／-／ CRAZY)",
         "Bpm": "235.79"
       }
     ]
@@ -18068,16 +18068,8 @@
     "Title": "風に乗せた願い",
     "Artist": "豚乙女",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1929,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "(*｀・∀・´*)彡",
-        "Bpm": "99.9 (99.90 - 188.00)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 476,
@@ -18108,6 +18100,14 @@
         "LevelStr": "13+",
         "Constant": 13.9,
         "Charter": "常識に囚われない譜面-100号",
+        "Bpm": "99.9 (99.90 - 188.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1929,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "(*｀・∀・´*)彡",
         "Bpm": "99.9 (99.90 - 188.00)"
       }
     ]
@@ -18333,22 +18333,6 @@
     "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3223,
-        "LevelStr": "？",
-        "Constant": 0.0,
-        "Charter": "the answer to life the universe and everything",
-        "Bpm": "300 (42.00 - 320.00)"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3182,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "CatastroPhe\"-UNIVERSE-\"†",
-        "Bpm": "300 (42.00 - 320.00)"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 580,
         "LevelStr": "4",
@@ -18378,6 +18362,22 @@
         "LevelStr": "15",
         "Constant": 15.2,
         "Charter": "CatastroPhe\"-UNIVERSE-\"",
+        "Bpm": "300 (42.00 - 320.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3223,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "the answer to life the universe and everything",
+        "Bpm": "300 (42.00 - 320.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3182,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "CatastroPhe\"-UNIVERSE-\"†",
         "Bpm": "300 (42.00 - 320.00)"
       }
     ]
@@ -19963,14 +19963,6 @@
     "Version": "CHUNITHM STAR",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2766,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "C H U N I _ O v e r j o y",
-        "Bpm": "153.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 469,
         "LevelStr": "4",
@@ -20016,6 +20008,14 @@
         "LevelStr": "覚",
         "Constant": 0.0,
         "Charter": "TAP BATTLE(初級～上級)",
+        "Bpm": "153.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2766,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "C H U N I _ O v e r j o y",
         "Bpm": "153.00"
       }
     ]
@@ -20946,14 +20946,6 @@
     "Version": "CHUNITHM STAR",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1527,
-        "LevelStr": "戻",
-        "Constant": 0.0,
-        "Charter": "!!!!YYYYTHGIM",
-        "Bpm": "185.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 483,
         "LevelStr": "4",
@@ -20983,6 +20975,14 @@
         "LevelStr": "14+",
         "Constant": 14.8,
         "Charter": "Revo@LCYYYY!!!!",
+        "Bpm": "185.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1527,
+        "LevelStr": "戻",
+        "Constant": 0.0,
+        "Charter": "!!!!YYYYTHGIM",
         "Bpm": "185.00"
       }
     ]
@@ -21077,14 +21077,6 @@
     "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1792,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "エロマンガフェスティバル",
-        "Bpm": "134.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 400,
         "LevelStr": "2",
@@ -21114,6 +21106,14 @@
         "LevelStr": "11+",
         "Constant": 11.7,
         "Charter": "スケベクロックちゃん",
+        "Bpm": "134.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1792,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "エロマンガフェスティバル",
         "Bpm": "134.00"
       }
     ]
@@ -21708,14 +21708,6 @@
     "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 6666,
-        "LevelStr": "嘘",
-        "Constant": 0.0,
-        "Charter": "イロドリミドリで一番強いやつの話",
-        "Bpm": "190.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 527,
         "LevelStr": "3",
@@ -21745,6 +21737,14 @@
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "わるのり奉行",
+        "Bpm": "190.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 6666,
+        "LevelStr": "嘘",
+        "Constant": 0.0,
+        "Charter": "イロドリミドリで一番強いやつの話",
         "Bpm": "190.00"
       }
     ]
@@ -21795,16 +21795,8 @@
     "Title": "未来イマジネーション！",
     "Artist": "SPRiNGS「温泉むすめ」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3000,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "SPECIAL YUKEMURI FESTA in AMAZON",
-        "Bpm": "175.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 572,
@@ -21835,6 +21827,14 @@
         "LevelStr": "11+",
         "Constant": 11.8,
         "Charter": "エメラルド温泉",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3000,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "SPECIAL YUKEMURI FESTA in AMAZON",
         "Bpm": "175.00"
       }
     ]
@@ -21888,14 +21888,6 @@
     "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2222,
-        "LevelStr": "布",
-        "Constant": 0.0,
-        "Charter": "NOW ON☆SENSATION!!",
-        "Bpm": "160.00"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 365,
         "LevelStr": "3",
@@ -21925,6 +21917,14 @@
         "LevelStr": "12+",
         "Constant": 12.9,
         "Charter": "Revo＠ぽか旦那",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2222,
+        "LevelStr": "布",
+        "Constant": 0.0,
+        "Charter": "NOW ON☆SENSATION!!",
         "Bpm": "160.00"
       }
     ]
@@ -22016,24 +22016,8 @@
     "Title": "Pastel Party",
     "Artist": "Tomggg",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 5777,
-        "LevelStr": "割",
-        "Constant": 0.0,
-        "Charter": "Pastel Split Party",
-        "Bpm": "125.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1111,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "更にイカすSLIDE",
-        "Bpm": "125.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 326,
@@ -22064,6 +22048,22 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "譜面-100号号号",
+        "Bpm": "125.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 5777,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "Pastel Split Party",
+        "Bpm": "125.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1111,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "更にイカすSLIDE",
         "Bpm": "125.00"
       }
     ]
@@ -22237,16 +22237,8 @@
     "Title": "WARNING×WARNING×WARNING",
     "Artist": "暁Records",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 6259,
-        "LevelStr": "！",
-        "Constant": 0.0,
-        "Charter": "ほらもっともっと避けて！",
-        "Bpm": "172.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 494,
@@ -22277,6 +22269,14 @@
         "LevelStr": "12+",
         "Constant": 12.8,
         "Charter": "Moon Strix",
+        "Bpm": "172.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 6259,
+        "LevelStr": "！",
+        "Constant": 0.0,
+        "Charter": "ほらもっともっと避けて！",
         "Bpm": "172.00"
       }
     ]
@@ -23147,16 +23147,8 @@
     "Title": "頓珍漢の宴",
     "Artist": "ピノキオピー",
     "Genre": "niconico",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2496,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "お冷6つで",
-        "Bpm": "145.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 391,
@@ -23187,6 +23179,14 @@
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "ものくろっく",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2496,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "お冷6つで",
         "Bpm": "145.00"
       }
     ]
@@ -23582,16 +23582,8 @@
     "Title": "あ・え・い・う・え・お・あお!!",
     "Artist": "劇団ひととせ「ひなこのーと」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM CRYSTAL PLUS",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2293,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "くくらら☆Climax",
-        "Bpm": "145.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 461,
@@ -23622,6 +23614,14 @@
         "LevelStr": "13",
         "Constant": 13.0,
         "Charter": "み・す・と・る・て・ぃん!!",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2293,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "くくらら☆Climax",
         "Bpm": "145.00"
       }
     ]
@@ -23672,16 +23672,8 @@
     "Title": "SEVENTH HAVEN",
     "Artist": "セブンスシスターズ「Tokyo 7th シスターズ」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1542,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "Are You Ready STEREO-TYPES ??",
-        "Bpm": "132.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 377,
@@ -23712,6 +23704,14 @@
         "LevelStr": "12",
         "Constant": 12.2,
         "Charter": "新米支配人すきやき",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1542,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "Are You Ready STEREO-TYPES ??",
         "Bpm": "132.00"
       }
     ]
@@ -23926,16 +23926,8 @@
     "Title": "Surveiller et punir",
     "Artist": "cybermiso",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2219,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "～【データ欠損のため観測不能】～",
-        "Bpm": "145.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 416,
@@ -23966,6 +23958,14 @@
         "LevelStr": "14+",
         "Constant": 14.9,
         "Charter": "ミストルティン -アポートル-",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2219,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "～【データ欠損のため観測不能】～",
         "Bpm": "145.00"
       }
     ]
@@ -24019,14 +24019,6 @@
     "Version": "CHUNITHM AMAZON",
     "Beatmaps": [
       {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1769,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "CHUNI ReQuiEm",
-        "Bpm": "180 (120.00 - 180.00)"
-      },
-      {
         "LevelName": "BASIC",
         "maxCombo": 310,
         "LevelStr": "3",
@@ -24057,6 +24049,14 @@
         "Constant": 14.9,
         "Charter": "すきやき奉行 supported by ぴちネコ",
         "Bpm": "180 (120.00 - 180.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1769,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "CHUNI ReQuiEm",
+        "Bpm": "180 (120.00 - 180.00)"
       }
     ]
   },
@@ -24065,16 +24065,8 @@
     "Title": "メニメニマニマニ",
     "Artist": "高宮なすの(CV:鳴海杏子)「てーきゅう」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM CRYSTAL",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2371,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "先輩とFULL CHAIN",
-        "Bpm": "154.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 445,
@@ -24105,6 +24097,14 @@
         "LevelStr": "12+",
         "Constant": 12.7,
         "Charter": "先輩と後輩とヘンタイと小鳥遊さん",
+        "Bpm": "154.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2371,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "先輩とFULL CHAIN",
         "Bpm": "154.00"
       }
     ]
@@ -24237,16 +24237,8 @@
     "Title": "灼熱スイッチ",
     "Artist": "雀が原中学卓球部「灼熱の卓球娘」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2489,
-        "LevelStr": "弾",
-        "Constant": 0.0,
-        "Charter": "ラリーを続けろ！",
-        "Bpm": "203.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 612,
@@ -24278,6 +24270,14 @@
         "Constant": 12.2,
         "Charter": "ものくろっく",
         "Bpm": "203.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2489,
+        "LevelStr": "弾",
+        "Constant": 0.0,
+        "Charter": "ラリーを続けろ！",
+        "Bpm": "203.00"
       }
     ]
   },
@@ -24288,22 +24288,6 @@
     "Genre": "VARIETY",
     "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3000,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "自然の脅威が君に襲い掛かる！",
-        "Bpm": "191.00"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2770,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "TAPの脅威が君に襲い掛かる！",
-        "Bpm": "191.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 613,
@@ -24334,6 +24318,22 @@
         "LevelStr": "14",
         "Constant": 14.4,
         "Charter": "すきやきの奉行が君に襲い掛かる！",
+        "Bpm": "191.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2770,
+        "LevelStr": "光",
+        "Constant": 0.0,
+        "Charter": "TAPの脅威が君に襲い掛かる！",
+        "Bpm": "191.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3000,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "自然の脅威が君に襲い掛かる！",
         "Bpm": "191.00"
       }
     ]
@@ -24425,16 +24425,8 @@
     "Title": "サドマミホリック",
     "Artist": "ビートまりお（COOL&CREATE）",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1933,
-        "LevelStr": "弾",
-        "Constant": 0.0,
-        "Charter": "サドマミフリック",
-        "Bpm": "200.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 491,
@@ -24465,6 +24457,14 @@
         "LevelStr": "14",
         "Constant": 14.2,
         "Charter": "ラビラビホリック",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1933,
+        "LevelStr": "弾",
+        "Constant": 0.0,
+        "Charter": "サドマミフリック",
         "Bpm": "200.00"
       }
     ]
@@ -24515,16 +24515,8 @@
     "Title": "初音ミクの激唱",
     "Artist": "Storyteller",
     "Genre": "niconico",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2190,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "EXTRA EXTREME",
-        "Bpm": "200.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 560,
@@ -24555,6 +24547,14 @@
         "LevelStr": "14+",
         "Constant": 14.7,
         "Charter": "ぴちネコの激唱",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2190,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "EXTRA EXTREME",
         "Bpm": "200.00"
       }
     ]
@@ -24728,16 +24728,8 @@
     "Title": "きゅうりバーにダイブ",
     "Artist": "ゆずひこ feat.めらみぽっぷ",
     "Genre": "東方Project",
-    "Version": "CHUNITHM AMAZON",
+    "Version": "CHUNITHM STAR PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1640,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "頭お菓子なるは！っぴー",
-        "Bpm": "176.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 490,
@@ -24776,6 +24768,14 @@
         "LevelStr": "光",
         "Constant": 0.0,
         "Charter": "【Ex】ポコらないダイブ",
+        "Bpm": "176.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1640,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "頭お菓子なるは！っぴー",
         "Bpm": "176.00"
       }
     ]
@@ -24867,16 +24867,8 @@
     "Title": "POP TEAM EPIC",
     "Artist": "上坂すみれ「ポプテピピック」",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM AMAZON",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2785,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "あー 一面のクソミドリ",
-        "Bpm": "142.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 273,
@@ -24907,6 +24899,14 @@
         "LevelStr": "12",
         "Constant": 12.0,
         "Charter": "島中作家　犬川ぶくぶ",
+        "Bpm": "142.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2785,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "あー 一面のクソミドリ",
         "Bpm": "142.00"
       }
     ]
@@ -26023,16 +26023,8 @@
     "Title": "Taiko Drum Monster",
     "Artist": "steμ feat.siroa「太鼓の達人」より",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM PARADISE",
+    "Version": "CHUNITHM AMAZON",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1316,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "おに ★★★★★★★★★★",
-        "Bpm": "266.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 418,
@@ -26063,6 +26055,14 @@
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "奉行の達人",
+        "Bpm": "266.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1316,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "おに ★★★★★★★★★★",
         "Bpm": "266.00"
       }
     ]
@@ -26728,16 +26728,8 @@
     "Title": "Blessed",
     "Artist": "Palme",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM CRYSTAL PLUS",
+    "Version": "CHUNITHM AMAZON",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2146,
-        "LevelStr": "？",
-        "Constant": 0.0,
-        "Charter": "Crossed Fingers",
-        "Bpm": "165.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 432,
@@ -26768,6 +26760,14 @@
         "LevelStr": "13+",
         "Constant": 13.8,
         "Charter": "Revo@LC",
+        "Bpm": "165.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2146,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "Crossed Fingers",
         "Bpm": "165.00"
       }
     ]
@@ -27023,16 +27023,8 @@
     "Title": "folern",
     "Artist": "ぬゆり",
     "Genre": "ORIGINAL",
-    "Version": "CHUNITHM AMAZON PLUS",
+    "Version": "CHUNITHM AMAZON",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2280,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "Silvius vs Astraea",
-        "Bpm": "200.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 513,
@@ -27063,6 +27055,14 @@
         "LevelStr": "14+",
         "Constant": 14.6,
         "Charter": "すきやき奉行",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2280,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "Silvius vs Astraea",
         "Bpm": "200.00"
       }
     ]
@@ -30983,16 +30983,8 @@
     "Title": "星の器～STAR OF ANDROMEDA",
     "Artist": "sun3",
     "Genre": "東方Project",
-    "Version": "CHUNITHM CRYSTAL",
+    "Version": "CHUNITHM AMAZON PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1839,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "Sound Only",
-        "Bpm": "155.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 376,
@@ -31024,6 +31016,14 @@
         "Constant": 14.5,
         "Charter": "ぴちネコ",
         "Bpm": "155.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1839,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "Sound Only",
+        "Bpm": "155.00"
       }
     ]
   },
@@ -31049,16 +31049,8 @@
     "Title": "STARTLINER",
     "Artist": "曲：kz(livetune)／歌：オンゲキシューターズ",
     "Genre": "ゲキマイ",
-    "Version": "CHUNITHM CRYSTAL",
+    "Version": "CHUNITHM AMAZON PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1163,
-        "LevelStr": "避",
-        "Constant": 0.0,
-        "Charter": "STARTMINER",
-        "Bpm": "135.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 363,
@@ -31089,6 +31081,14 @@
         "LevelStr": "10",
         "Constant": 10.4,
         "Charter": "Techno Kitchen",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1163,
+        "LevelStr": "避",
+        "Constant": 0.0,
+        "Charter": "STARTMINER",
         "Bpm": "135.00"
       }
     ]
@@ -31238,16 +31238,8 @@
     "Title": "BlythE",
     "Artist": "M2U",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM CRYSTAL",
+    "Version": "CHUNITHM AMAZON PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 931,
-        "LevelStr": "招",
-        "Constant": 0.0,
-        "Charter": "\"Beyond The Future\"",
-        "Bpm": "180.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 443,
@@ -31278,6 +31270,14 @@
         "LevelStr": "14",
         "Constant": 14.1,
         "Charter": "Jack TP",
+        "Bpm": "180.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 931,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "\"Beyond The Future\"",
         "Bpm": "180.00"
       }
     ]
@@ -34614,16 +34614,8 @@
     "Title": "巫女みこナース・愛のテーマ",
     "Artist": "Chu☆",
     "Genre": "POPS & ANIME",
-    "Version": "CHUNITHM PARADISE",
+    "Version": "CHUNITHM CRYSTAL",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 2357,
-        "LevelStr": "狂",
-        "Constant": 0.0,
-        "Charter": "巫女みcosmos",
-        "Bpm": "160.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 367,
@@ -34654,6 +34646,14 @@
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "巫女みこ奉行",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 2357,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "巫女みcosmos",
         "Bpm": "160.00"
       }
     ]
@@ -35024,16 +35024,8 @@
     "Title": "conflict(斉唱)",
     "Artist": "イロドリミドリ",
     "Genre": "イロドリミドリ",
-    "Version": "CHUNITHM CRYSTAL",
+    "Version": "CHUNITHM CRYSTAL PLUS",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 3706,
-        "LevelStr": "嘘",
-        "Constant": 0.0,
-        "Charter": "皆様、ご起立の上ご斉唱ください。",
-        "Bpm": "160.00"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 645,
@@ -35065,6 +35057,14 @@
         "Constant": 14.3,
         "Charter": "みんなで歌おう！じゃこレモン",
         "Bpm": "160.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 3706,
+        "LevelStr": "嘘",
+        "Constant": 0.0,
+        "Charter": "皆様、ご起立の上ご斉唱ください。",
+        "Bpm": "160.00"
       }
     ]
   },
@@ -35073,16 +35073,8 @@
     "Title": "チョウの標本",
     "Artist": "Bitplane",
     "Genre": "VARIETY",
-    "Version": "CHUNITHM CRYSTAL PLUS",
+    "Version": "CHUNITHM CRYSTAL",
     "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "maxCombo": 1345,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "チョウの蔵本",
-        "Bpm": "170 (110.00 - 196.90)"
-      },
       {
         "LevelName": "BASIC",
         "maxCombo": 548,
@@ -35113,6 +35105,14 @@
         "LevelStr": "14",
         "Constant": 14.3,
         "Charter": "譜面-100号",
+        "Bpm": "170 (110.00 - 196.90)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "maxCombo": 1345,
+        "LevelStr": "蔵",
+        "Constant": 0.0,
+        "Charter": "チョウの蔵本",
         "Bpm": "170 (110.00 - 196.90)"
       }
     ]
