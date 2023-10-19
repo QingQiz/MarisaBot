@@ -416,21 +416,22 @@ public partial class Chunithm
 
             var maxCombo  = song.MaxCombo[levelIdx];
             var tolerance = 101_0000 - achievement;
-            var noteScore = 101_0000.0 / maxCombo;
+            var noteScore = 101_0000.0m / maxCombo;
 
-            var greenScore = 50.0 / 101 * noteScore;
-            var 小p减分       = 1.0 / 101 * noteScore;
+            var greenScore = 50.0m / 101 * noteScore;
+            var v绿减分    = noteScore - greenScore;
+            var v小p减分       = 1.0m / 101 * noteScore;
 
-            var greenCount = (int)(tolerance / (noteScore - greenScore));
+            var greenCount = (int)(tolerance / v绿减分);
             var grayCount  = (int)(tolerance / noteScore);
-            var greenRest  = tolerance - greenCount * greenScore;
-            var grayRest   = tolerance - grayCount * noteScore;
+            var greenRemaining  = tolerance - greenCount * v绿减分;
+            var grayRemaining   = tolerance - grayCount * noteScore;
 
             next.Reply(
                 new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
-                new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRest / 小p减分)} 小\n"),
-                new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRest / 小p减分)} 小\n"),
-                new MessageDataText($"每个绿减 {noteScore - greenScore:F2}，每个灰减 {noteScore:F2}，每小减 {小p减分:F2}")
+                new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRemaining / v小p减分)} 小\n"),
+                new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining / v小p减分)} 小\n"),
+                new MessageDataText($"每个绿减 {v绿减分:F2}，每个灰减 {noteScore:F2}，每小减 {v小p减分:F2}")
             );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
