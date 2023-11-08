@@ -11,7 +11,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPlugin(PluginPriority.MaiMaiDx)]
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public partial class MaiMaiDx : PluginBase
+public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 {
     #region 汇总 / summary
 
@@ -40,10 +40,6 @@ public partial class MaiMaiDx : PluginBase
             .GroupBy(x => x.song.Levels[x.i]);
 
         var scores = await GetAllSongScores(message);
-        if (scores == null)
-        {
-            return MarisaPluginTaskState.NoResponse;
-        }
 
         var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
         // 一定不是空的
@@ -68,10 +64,6 @@ public partial class MaiMaiDx : PluginBase
             .GroupBy(x => x.song.Levels[x.i]);
 
         var scores = await GetAllSongScores(message);
-        if (scores == null)
-        {
-            return MarisaPluginTaskState.NoResponse;
-        }
 
         var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
         // 一定不是空的
@@ -110,10 +102,6 @@ public partial class MaiMaiDx : PluginBase
             }
 
             var scores = await GetAllSongScores(message);
-            if (scores == null)
-            {
-                return MarisaPluginTaskState.NoResponse;
-            }
 
             var groupedSong = _songDb.SongList
                 .Select(song => song.Constants
@@ -153,10 +141,6 @@ public partial class MaiMaiDx : PluginBase
         else
         {
             var scores = await GetAllSongScores(message);
-            if (scores == null)
-            {
-                return MarisaPluginTaskState.NoResponse;
-            }
 
             var groupedSong = _songDb.SongList
                 .Where(song => song.Info.Genre == genre)
@@ -202,11 +186,6 @@ public partial class MaiMaiDx : PluginBase
 
         var versions = version.Split(',');
         var scores   = await GetAllSongScores(message, versions);
-
-        if (scores == null)
-        {
-            return MarisaPluginTaskState.NoResponse;
-        }
 
         var groupedSong = _songDb.SongList
             .Where(song => versions.Contains(song.Version, StringComparer.OrdinalIgnoreCase))
@@ -255,10 +234,6 @@ public partial class MaiMaiDx : PluginBase
         }
 
         var scores = await GetAllSongScores(message);
-        if (scores == null)
-        {
-            return MarisaPluginTaskState.NoResponse;
-        }
 
         var groupedSong = _songDb.SongList
             .Select(song => song.Constants
@@ -330,43 +305,38 @@ public partial class MaiMaiDx : PluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        try
+        var rating = await GetDxRating(null, sender);
+
+        var (old, @new, success) = GetRecommend(rating, target);
+
+        if (!success)
         {
-            var rating = await GetDxRating(null, sender);
-
-            var (old, @new, success) = GetRecommend(rating, target);
-
-            if (!success)
-            {
-                message.Reply("no way");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
-            var current = new
-            {
-                OldScores = rating.OldScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)).OrderByDescending(x => x.Item4),
-                NewScores = rating.NewScores.Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating)).OrderByDescending(x => x.Item4),
-            };
-
-            var recommend = new
-            {
-                OldScores = old.OrderByDescending(x => x.Item4),
-                NewScores = @new.OrderByDescending(x => x.Item4),
-            };
-
-            var context = new WebContext();
-
-            context.Put("current", current);
-            context.Put("recommend", recommend);
-
-            message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiRecommend(context.Id)));
-
+            message.Reply("no way");
             return MarisaPluginTaskState.CompletedTask;
         }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
+
+        var current = new
         {
-            message.Reply("你谁啊？");
-        }
+            OldScores = rating.OldScores
+                .Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating))
+                .OrderByDescending(x => x.Item4),
+            NewScores = rating.NewScores
+                .Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating))
+                .OrderByDescending(x => x.Item4),
+        };
+
+        var recommend = new
+        {
+            OldScores = old.OrderByDescending(x => x.Item4),
+            NewScores = @new.OrderByDescending(x => x.Item4),
+        };
+
+        var context = new WebContext();
+
+        context.Put("current", current);
+        context.Put("recommend", recommend);
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiRecommend(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -394,23 +364,16 @@ public partial class MaiMaiDx : PluginBase
         var sender = message.Sender!.Id;
 
         // 拿b40
-        try
-        {
-            var rating    = await GetDxRating(null, sender);
-            var recommend = rating.DrawRecommendCard(_songDb.SongList);
+        var rating    = await GetDxRating(null, sender);
+        var recommend = rating.DrawRecommendCard(_songDb.SongList);
 
-            if (recommend == null)
-            {
-                message.Reply("您无分可恰");
-            }
-            else
-            {
-                message.Reply(MessageDataImage.FromBase64(recommend.ToB64()));
-            }
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
+        if (recommend == null)
         {
-            message.Reply("你谁啊？");
+            message.Reply("您无分可恰");
+        }
+        else
+        {
+            message.Reply(MessageDataImage.FromBase64(recommend.ToB64()));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -755,7 +718,8 @@ public partial class MaiMaiDx : PluginBase
                 var ret    = "定数 -> 达成率 -> rating\n";
 
                 Enumerable.Range(1, 150)
-                    .Where(rat => SongScore.Ra(100.5, rat / 10.0) >= constant && SongScore.Ra(50, rat / 10.0) <= constant)
+                    .Where(rat =>
+                        SongScore.Ra(100.5, rat / 10.0) >= constant && SongScore.Ra(50, rat / 10.0) <= constant)
                     .ToList()
                     .ForEach(rat =>
                     {
@@ -773,7 +737,8 @@ public partial class MaiMaiDx : PluginBase
                         }
                     });
 
-                ret += string.Join('\n', result.Select(x => $"{x.Constant:00.0} -> {x.Achievement:000.0000} -> {(int)constant}"));
+                ret += string.Join('\n',
+                    result.Select(x => $"{x.Constant:00.0} -> {x.Achievement:000.0000} -> {(int)constant}"));
 
                 message.Reply(ret);
                 return MarisaPluginTaskState.CompletedTask;
@@ -807,7 +772,8 @@ public partial class MaiMaiDx : PluginBase
             var levelPrefix = level ?? "";
             if (level != null) goto RightLabel;
 
-            level = levelName.FirstOrDefault(n => command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+            level = levelName.FirstOrDefault(n =>
+                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
                 levelPrefix = command[0].ToString();
@@ -841,12 +807,13 @@ public partial class MaiMaiDx : PluginBase
             var dxScore   = song.Charts[levelIdx].Notes.Sum() * 3;
 
             var dxScores = new[] { 0.85, 0.9, 0.93, 0.95, 0.97 }
-                .Select(mul => ((int)Math.Ceiling(dxScore * mul), dxScore - (int)Math.Ceiling(dxScore * mul))).ToArray();
+                .Select(mul => ((int)Math.Ceiling(dxScore * mul), dxScore - (int)Math.Ceiling(dxScore * mul)))
+                .ToArray();
 
             next.Reply(
                 new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
                 new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
-                new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
+                new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y          / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
                 new MessageDataText($"\nDX分：{dxScore}\n"),
                 new MessageDataText($"★ 最低 {dxScores[0].Item1}(-{dxScores[0].Item2})\n"),
                 new MessageDataText($"★★ 最低 {dxScores[1].Item1}(-{dxScores[1].Item2})\n"),

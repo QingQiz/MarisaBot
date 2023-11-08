@@ -102,7 +102,7 @@ public abstract class BotDriver
         }
 
         const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
-            BindingFlags.Static | BindingFlags.Public;
+                                          BindingFlags.Static  | BindingFlags.Public;
 
         var availablePlugins = Plugins.Where(p =>
             p.GetType().GetCustomAttributes<MarisaPluginTrigger>().Any() ||
@@ -133,95 +133,6 @@ public abstract class BotDriver
                 .Select(m =>
                     (parentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, methodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
-
-        async IAsyncEnumerable<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
-        {
-            // 每次进入循环都会将 command 的头去掉，因此记录一下原始的 command，在每次循环结束后还原头
-            var command = message.Command;
-            foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
-            {
-                var m = method;
-
-                while (true)
-                {
-                    // 所有子命令
-                    var subCommands = availableSubCommands[plugin]
-                        .Where(n => n.parentName == method.Name)
-                        .Select(n => n.methodInfo)
-                        .ToList();
-                    // 没有子命令则执行当前
-                    if (!subCommands.Any()) break;
-                    // 检查子命令
-                    var sub = subCommands.FirstOrDefault(sub => CheckMember(sub, message));
-                    // 没有有成功的则执行当前
-                    if (sub is null)
-                    {
-                        break;
-                    }
-
-                    // 有成功的则继续找当前命令的子命令
-                    m = sub;
-                }
-
-                var parameters = new List<dynamic>();
-
-                // 构造参数列表
-                foreach (var param in m.GetParameters())
-                {
-                    if (param.ParameterType == message.GetType())
-                    {
-                        parameters.Add(message);
-                    }
-                    else
-                    {
-                        var p = ServiceProvider.GetService(param.ParameterType);
-                        parameters.Add(p ?? DictionaryProvider[param.Name!]);
-                    }
-                }
-
-                // 调用处理函数并处理异常
-                MarisaPluginTaskState? ret = null;
-                try
-                {
-                    if (m.ReturnType == typeof(Task<MarisaPluginTaskState>))
-                    {
-                        ret = await (Task<MarisaPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
-                    }
-                    else if (m.ReturnType == typeof(MarisaPluginTaskState))
-                    {
-                        ret = (MarisaPluginTaskState)m.Invoke(plugin, parameters.ToArray())!;
-                    }
-                    else
-                    {
-                        throw new Exception("插件方法返回类型无效");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-
-                    var target    = message.Location;
-                    var exception = e.InnerException?.ToString() ?? e.ToString();
-
-                    await MessageSenderProvider.Send(exception, message.Type, target, null);
-                }
-
-                if (ret != null)
-                {
-                    // NOTE 当一个插件中有多个指令会被触发时，分为以下情况：
-                    // 1. 使用 Command 同时触发了 A 和 B，此时A、B会存在相同的触发前缀，
-                    //    这样的情况下需设计成子命令的形式以保证正确运行（因为A触发后消息会被修改）
-                    //    若是 A 的触发前缀是空字符串，则没有影响
-                    // 2. 同上，但是有 Trigger 的参与，此时没什么影响，还是应当设计成子命令的形式
-                    // 3. 只有 Trigger 作用，没什么要注意的
-                    yield return (MarisaPluginTaskState)ret;
-                }
-
-                message.Command = command;
-            }
-
-            message.Command = command;
-        }
 
         var taskList = new List<Task>();
 
@@ -260,6 +171,95 @@ public abstract class BotDriver
         }
 
         await Task.WhenAll(taskList);
+        return;
+
+        async IAsyncEnumerable<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
+        {
+            // 每次进入循环都会将 command 的头去掉，因此记录一下原始的 command，在每次循环结束后还原头
+            var command = message.Command;
+            foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
+            {
+                var m = method;
+
+                while (true)
+                {
+                    // 所有子命令
+                    var subCommands = availableSubCommands[plugin]
+                        .Where(n => n.parentName == method.Name)
+                        .Select(n => n.methodInfo)
+                        .ToList();
+                    // 没有子命令则执行当前
+                    if (!subCommands.Any()) break;
+                    // 检查子命令
+                    var sub = subCommands.FirstOrDefault(sub => CheckMember(sub, message));
+                    // 没有有成功的则执行当前
+                    if (sub is null)
+                    {
+                        break;
+                    }
+
+                    // 有成功的则继续找当前命令的子命令
+                    m = sub;
+                }
+
+                var ret = await DependencyInjectInvoke(plugin, m, message);
+
+                if (ret != null)
+                {
+                    // NOTE 当一个插件中有多个指令会被触发时，分为以下情况：
+                    // 1. 使用 Command 同时触发了 A 和 B，此时A、B会存在相同的触发前缀，
+                    //    这样的情况下需设计成子命令的形式以保证正确运行（因为A触发后消息会被修改）
+                    //    若是 A 的触发前缀是空字符串，则没有影响
+                    // 2. 同上，但是有 Trigger 的参与，此时没什么影响，还是应当设计成子命令的形式
+                    // 3. 只有 Trigger 作用，没什么要注意的
+                    yield return (MarisaPluginTaskState)ret;
+                }
+
+                message.Command = command;
+            }
+
+            message.Command = command;
+        }
+    }
+
+    private async Task<MarisaPluginTaskState?> DependencyInjectInvoke(MarisaPluginBase plugin, MethodInfo m, Message message)
+    {
+        var parameters = new List<dynamic>();
+
+        // 构造参数列表
+        foreach (var param in m.GetParameters())
+        {
+            if (param.ParameterType == message.GetType())
+            {
+                parameters.Add(message);
+            }
+            else
+            {
+                var p = ServiceProvider.GetService(param.ParameterType);
+                parameters.Add(p ?? DictionaryProvider[param.Name!]);
+            }
+        }
+
+        // 调用处理函数并处理异常
+        try
+        {
+            if (m.ReturnType == typeof(Task<MarisaPluginTaskState>))
+            {
+                return await (Task<MarisaPluginTaskState>)m.Invoke(plugin, parameters.ToArray())!;
+            }
+
+            if (m.ReturnType == typeof(MarisaPluginTaskState))
+            {
+                return (MarisaPluginTaskState)m.Invoke(plugin, parameters.ToArray())!;
+            }
+
+            throw new Exception("插件方法返回类型无效");
+        }
+        catch (Exception e)
+        {
+            await plugin.ExceptionHandler(e, message);
+            return null;
+        }
     }
 
     /// <summary>

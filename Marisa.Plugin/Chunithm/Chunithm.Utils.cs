@@ -26,29 +26,7 @@ public partial class Chunithm
     {
         var (username, qq) = AtOrSelf(message);
 
-        MessageChain ret;
-        try
-        {
-            ret = MessageChain.FromImageB64((await GetRating(username, qq)).Draw().ToB64());
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
-        {
-            ret = MessageChain.FromText("“查无此人”");
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 403)
-        {
-            ret = MessageChain.FromText("“403 forbidden”");
-        }
-        catch (FlurlHttpTimeoutException)
-        {
-            ret = MessageChain.FromText("Timeout");
-        }
-        catch (FlurlHttpException e)
-        {
-            ret = MessageChain.FromText(e.Message);
-        }
-
-        return ret;
+        return MessageChain.FromImageB64((await GetRating(username, qq)).Draw().ToB64());
     }
 
     public static async Task<ChunithmRating> GetRating(string? username, long? qq)

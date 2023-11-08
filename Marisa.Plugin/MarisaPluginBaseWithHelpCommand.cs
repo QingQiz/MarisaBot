@@ -1,7 +1,7 @@
 ﻿namespace Marisa.Plugin;
 
 [MarisaPluginDisabled]
-public class PluginBase : MarisaPluginBase
+public class MarisaPluginBaseWithHelpCommand : MarisaPluginBase
 {
     [MarisaPluginNoDoc]
     [MarisaPluginCommand("help")]

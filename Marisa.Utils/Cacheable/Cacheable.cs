@@ -6,19 +6,24 @@ public abstract class Cacheable<T>
     protected abstract void SaveCache(string path, T t);
 
     private Func<T> Get { get; }
+    private Func<string?> GetCacheFile { get; }
+
     private T? _value;
 
     public T Value => _value ??= Get();
+    public bool Available => GetCacheFile() is not null;
+
     public string? CacheFilePath { get; private set; }
 
     protected Cacheable(string cacheFilePath, Func<T> create)
     {
+        GetCacheFile = () => File.Exists(cacheFilePath) ? cacheFilePath : null;
         Get = () =>
         {
-            if (File.Exists(cacheFilePath))
+            if (GetCacheFile() is { } s)
             {
-                CacheFilePath = cacheFilePath;
-                return LoadCache(cacheFilePath);
+                CacheFilePath = s;
+                return LoadCache(s);
             }
 
             var obj = create();
@@ -32,17 +37,13 @@ public abstract class Cacheable<T>
 
     protected Cacheable(string cachePath, Func<string, bool> useCacheCondition, Func<T, string> otherwiseCreate, Func<T> create)
     {
+        GetCacheFile = () => Directory.GetFiles(cachePath, "*.*", SearchOption.TopDirectoryOnly).FirstOrDefault(useCacheCondition);
         Get = () =>
         {
-            foreach (var f in Directory.GetFiles(cachePath, "*.*", SearchOption.TopDirectoryOnly))
+            if (GetCacheFile() is { } s)
             {
-                var canUse = useCacheCondition(f);
-
-                if (canUse)
-                {
-                    CacheFilePath = f;
-                    return LoadCache(f);
-                }
+                CacheFilePath = s;
+                return LoadCache(s);
             }
 
             var obj = create();

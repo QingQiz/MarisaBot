@@ -28,25 +28,14 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private static async Task<MarisaPluginTaskState> B30Sum(Message message)
     {
-        try
-        {
-            var (username, qq) = AtOrSelf(message);
-            var rating = await GetRating(username, qq);
+        var (username, qq) = AtOrSelf(message);
+        var rating = await GetRating(username, qq);
 
-            var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
-            var rSum = rating.Records.R10.Sum(x => x.Rating) * 100;
+        var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
+        var rSum = rating.Records.R10.Sum(x => x.Rating)  * 100;
 
-            message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
-                $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
-        {
-            message.Reply("“查无此人”");
-        }
-        catch (FlurlHttpTimeoutException)
-        {
-            message.Reply("Timeout");
-        }
+        message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
+                      $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -372,7 +361,8 @@ public partial class Chunithm
             if (level != null) goto RightLabel;
 
             // 首字母
-            level = levelName.FirstOrDefault(n => command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+            level = levelName.FirstOrDefault(n =>
+                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
                 levelPrefix = command[0].ToString();
@@ -380,7 +370,8 @@ public partial class Chunithm
             }
 
             // 别名
-            level       = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a => command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
+            level = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a =>
+                command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
             levelPrefix = level ?? "";
             if (level != null)
             {
@@ -419,18 +410,18 @@ public partial class Chunithm
             var noteScore = 101_0000.0m / maxCombo;
 
             var greenScore = 50.0m / 101 * noteScore;
-            var v绿减分    = noteScore - greenScore;
-            var v小p减分       = 1.0m / 101 * noteScore;
+            var v绿减分       = noteScore - greenScore;
+            var v小p减分      = 1.0m / 101 * noteScore;
 
-            var greenCount = (int)(tolerance / v绿减分);
-            var grayCount  = (int)(tolerance / noteScore);
-            var greenRemaining  = tolerance - greenCount * v绿减分;
-            var grayRemaining   = tolerance - grayCount * noteScore;
+            var greenCount     = (int)(tolerance / v绿减分);
+            var grayCount      = (int)(tolerance / noteScore);
+            var greenRemaining = tolerance - greenCount * v绿减分;
+            var grayRemaining  = tolerance - grayCount  * noteScore;
 
             next.Reply(
                 new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
                 new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRemaining / v小p减分)} 小\n"),
-                new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining / v小p减分)} 小\n"),
+                new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining   / v小p减分)} 小\n"),
                 new MessageDataText($"每个绿减 {v绿减分:F2}，每个灰减 {noteScore:F2}，每小减 {v小p减分:F2}")
             );
 

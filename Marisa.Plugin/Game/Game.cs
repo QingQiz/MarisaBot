@@ -6,6 +6,6 @@ namespace Marisa.Plugin.Game;
 [MarisaPluginDoc("一些小游戏")]
 [MarisaPluginCommand(":game", "：game")]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public partial class Game : PluginBase
+public partial class Game : MarisaPluginBaseWithHelpCommand
 {
 }

@@ -22,10 +22,15 @@ public partial class MaiMaiDx
 
     #region rating
 
-    private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool) GetRecommend(DxRating rating, int targetRating)
+    private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool)
+        GetRecommend(DxRating rating, int targetRating)
     {
-        var listOld = rating.OldScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
-        var listNew = rating.NewScores.Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating)).ToList();
+        var listOld = rating.OldScores
+            .Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .ToList();
+        var listNew = rating.NewScores
+            .Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .ToList();
 
         var raOld = rating.OldScores.Sum(s => s.Ra());
         var raNew = rating.NewScores.Sum(s => s.Ra());
@@ -44,7 +49,7 @@ public partial class MaiMaiDx
         while (true)
         {
             if (raOld + raNew >= targetRating) break;
-            if (fails == 0) break;
+            if (fails         == 0) break;
 
             int r;
             do
@@ -101,14 +106,15 @@ public partial class MaiMaiDx
                     // 你妈逼的浮点误差，14.7 -> 14.699999999999999
                     .Any(c =>
                         !idSet.Contains((s.Id, c.i))
-                     && c.c <= maxConst + 0.15
-                     && SongScore.Ra(100.5, c.c) > minRa
+                        && c.c                      <= maxConst + 0.15
+                        && SongScore.Ra(100.5, c.c) > minRa
                     )
                 )
                 .ToList();
         }
 
-        bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum, IEnumerable<MaiMaiSong> songList, int cap)
+        bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum,
+            IEnumerable<MaiMaiSong> songList, int cap)
         {
             var (oldSong, oldIdx, oldAchievement, oldRa) = list.MinBy(x => x.Rating);
 
@@ -207,9 +213,7 @@ public partial class MaiMaiDx
 
     #region summary
 
-    private async Task<Dictionary<(long Id, int LevelIdx), SongScore>?> GetAllSongScores(
-        Message message,
-        string[]? versions = null)
+    private async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetAllSongScores(Message message, string[]? versions = null)
     {
         var qq  = message.Sender!.Id;
         var ats = message.At().ToList();
@@ -219,53 +223,25 @@ public partial class MaiMaiDx
             qq = ats.First();
         }
 
-        try
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
         {
-            var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
-            {
-                qq, version = versions ?? MaiMaiSong.Plates
-            });
+            qq, version = versions ?? MaiMaiSong.Plates
+        });
 
-            var verList = ((await response.GetJsonAsync())!.verlist as List<object>)!;
+        var verList = ((await response.GetJsonAsync())!.verlist as List<object>)!;
 
-            return verList.Select(data =>
-            {
-                var d    = data as dynamic;
-                var song = (_songDb.FindSong(d.id) as MaiMaiSong)!;
-                var idx  = (int)d.level_index;
+        return verList.Select(data =>
+        {
+            var d    = data as dynamic;
+            var song = (_songDb.FindSong(d.id) as MaiMaiSong)!;
+            var idx  = (int)d.level_index;
 
-                var ach      = d.achievements;
-                var constant = song.Constants[idx];
+            var ach      = d.achievements;
+            var constant = song.Constants[idx];
 
-                return new SongScore(ach, constant, -1, d.fc, d.fs, d.level, idx, MaiMaiSong.LevelName[idx],
-                    SongScore.Ra(ach, constant), SongScore.CalcRank(ach), song.Id, song.Title, song.Type);
-            }).ToDictionary(ss => (ss.Id, ss.LevelIdx));
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 404)
-        {
-            message.Reply("NotFound");
-            return null;
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 400)
-        {
-            message.Reply("400");
-            return null;
-        }
-        catch (FlurlHttpException e) when (e.StatusCode == 403)
-        {
-            message.Reply("Forbidden");
-            return null;
-        }
-        catch (FlurlHttpTimeoutException)
-        {
-            message.Reply("Timeout");
-            return null;
-        }
-        catch (FlurlHttpException e)
-        {
-            message.Reply(e.Message);
-            return null;
-        }
+            return new SongScore(ach, constant, -1, d.fc, d.fs, d.level, idx, MaiMaiSong.LevelName[idx],
+                SongScore.Ra(ach, constant), SongScore.CalcRank(ach), song.Id, song.Title, song.Type);
+        }).ToDictionary(ss => (ss.Id, ss.LevelIdx));
     }
 
     #endregion

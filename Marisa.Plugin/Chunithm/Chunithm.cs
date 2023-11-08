@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
+using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
@@ -12,7 +13,7 @@ namespace Marisa.Plugin.Chunithm;
 [MarisaPluginDoc("音游 Chunithm 的相关功能")]
 [MarisaPluginCommand("chunithm", "chu", "中二")]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public partial class Chunithm : PluginBase
+public partial class Chunithm : MarisaPluginBaseWithHelpCommand
 {
     private readonly SongDb<ChunithmSong, ChunithmGuess> _songDb = new(
         ResourceManager.ResourcePath + "/aliases.tsv",
@@ -27,4 +28,30 @@ public partial class Chunithm : PluginBase
         nameof(BotDbContext.ChunithmGuesses),
         Dialog.AddHandler
     );
+
+    public override Task ExceptionHandler(Exception exception, Message message)
+    {
+        switch (exception)
+        {
+            case FlurlHttpException { StatusCode: 400 }:
+                message.Reply("“查无此人”");
+                break;
+            case (FlurlHttpException { StatusCode: 403 }):
+                message.Reply("“403 forbidden”");
+                break;
+            case (FlurlHttpException { StatusCode: 404 }):
+                message.Reply("404 Not Found");
+                break;
+            case FlurlHttpTimeoutException:
+                message.Reply("Timeout");
+                break;
+            case FlurlHttpException e:
+                message.Reply(e.Message);
+                break;
+            default:
+                base.ExceptionHandler(exception, message);
+                break;
+        }
+        return Task.CompletedTask;
+    }
 }

@@ -41,4 +41,30 @@ public partial class MaiMaiDx
             return !(File.Exists(p + ".jpg") || File.Exists(p + ".png") || File.Exists(p + ".jpeg"));
         });
     }
+
+    public override Task ExceptionHandler(Exception exception, Message message)
+    {
+        switch (exception)
+        {
+            case FlurlHttpException { StatusCode: 400 }:
+                message.Reply("“查无此人”");
+                break;
+            case (FlurlHttpException { StatusCode: 403 }):
+                message.Reply("“403 forbidden”");
+                break;
+            case (FlurlHttpException { StatusCode: 404 }):
+                message.Reply("404 Not Found");
+                break;
+            case FlurlHttpTimeoutException:
+                message.Reply("Timeout");
+                break;
+            case FlurlHttpException e:
+                message.Reply(e.Message);
+                break;
+            default:
+                base.ExceptionHandler(exception, message);
+                break;
+        }
+        return Task.CompletedTask;
+    }
 }
