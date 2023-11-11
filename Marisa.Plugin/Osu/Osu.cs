@@ -179,17 +179,8 @@ public partial class Osu
     {
         switch (exception)
         {
-            case (FlurlHttpException { StatusCode: 404 }):
-                message.Reply("未知的用户");
-                break;
-            case FlurlHttpException e:
-                message.Reply(e.Message);
-                break;
-            case HttpRequestException e:
-                message.Reply(e.Message);
-                break;
             case not null:
-                message.Reply(exception.Message);
+                message.Reply(exception.GetType().Name + ": " + exception.Message);
                 break;
         }
         return Task.CompletedTask;

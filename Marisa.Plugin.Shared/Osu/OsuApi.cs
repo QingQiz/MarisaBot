@@ -12,6 +12,8 @@ using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using osu.Game.Beatmaps.Formats;
+using osu.Game.IO;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -33,14 +35,23 @@ public static partial class OsuApi
         }
     }
 
+    private const string ApiUriBase = "https://osu.ppy.sh/api/v2";
     private const string TokenUri = "https://osu.ppy.sh/oauth/token";
-    private const string UserInfoUri = "https://osu.ppy.sh/api/v2/users";
-    private const string FakeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private const string UserInfoUri = $"{ApiUriBase}/users";
+
+    private const string FakeUserAgent =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
     public static readonly List<string> ModeList = new()
     {
         "osu", "taiko", "fruit", "mania"
     };
+
+    public enum OsuScoreType
+    {
+        Recent,
+        Best
+    }
 
     /// <summary>
     /// 更新 token
@@ -65,9 +76,10 @@ public static partial class OsuApi
         _tokenExpire = DateTime.Now + TimeSpan.FromSeconds(res.expires_in);
     }
 
-    public static async Task<string> GetPPlusJsonById(long uid)
+    public static IFlurlRequest Request(string uri)
     {
-        return await $"https://syrin.me/pp+/api/user/{uid}/".GetStringAsync();
+        return uri.WithHeader("Accept", "application/json")
+            .WithOAuthBearerToken(Token);
     }
 
     public static string GetModeName(int i)
@@ -81,6 +93,43 @@ public static partial class OsuApi
             _ => "mania"
         };
     }
+
+    private static readonly HttpClient HttpClient = new(new HttpClientHandler
+    {
+        AutomaticDecompression                    = DecompressionMethods.All,
+        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+    });
+
+    public static bool TryGetBeatmapCover(string beatmapPath, out string? coverPath)
+    {
+        var lines = File.ReadLines(beatmapPath);
+        var regex = BeatmapCoverMatcher();
+
+        foreach (var line in lines)
+        {
+            if (regex.Match(line) is not { Success: true } match) continue;
+
+            coverPath = Path.Join(Path.GetDirectoryName(beatmapPath), match.Groups[1].Value);
+            return true;
+        }
+
+        coverPath = null;
+        return false;
+    }
+
+    [GeneratedRegex(@"^\s*\d+\s*,\s*\d+\s*,\s*""(.*)""\s*,\s*\d+\s*,\s*\d+\s*$")]
+    private static partial Regex BeatmapCoverMatcher();
+
+    #region pplus
+
+    public static async Task<string> GetPPlusJsonById(long uid)
+    {
+        return await $"https://syrin.me/pp+/api/user/{uid}/".GetStringAsync();
+    }
+
+    #endregion
+
+    #region info
 
     public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1, int retry = 5)
     {
@@ -106,11 +155,9 @@ public static partial class OsuApi
         }
     }
 
-    public static IFlurlRequest Request(string uri)
-    {
-        return uri.WithHeader("Accept", "application/json")
-            .WithOAuthBearerToken(Token);
-    }
+    #endregion
+
+    #region Score
 
     public static async Task<OsuScore[]?> GetScores(
         long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false, int retry = 5)
@@ -148,92 +195,28 @@ public static partial class OsuApi
         }
     }
 
-    private static readonly HttpClient HttpClient = new(new HttpClientHandler
-    {
-        AutomaticDecompression                    = DecompressionMethods.All,
-        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-    });
-
-    public static async Task<List<AlphaOsuRecommend>> GetRecommends(long osuUid)
-    {
-        await "https://alphaosu.keytoix.vip/api/v1/self/users/synchronize"
-            .WithHeader("uid", osuUid)
-            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
-            .WithHeader("User-Agent", FakeUserAgent)
-            .PostJsonAsync(new object());
-
-        var rep = await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend"
-            .SetQueryParams(new
-            {
-                gameMode         = 3,
-                keyCount         = "4,7",
-                difficulty       = "0,15",
-                passPercent      = "0.2,1",
-                newRecordPercent = "0,1",
-                search           = "",
-                hidePlayed       = 0,
-                rule             = 4,
-                current          = 1,
-                pageSize         = 100
-            })
-            .WithHeader("uid", osuUid)
-            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
-            .WithHeader("User-Agent", FakeUserAgent)
-            .GetStringAsync();
-
-        var res = AlphaOsuResponse.FromJson(rep);
-
-        if (!res.Success)
-        {
-            throw new HttpRequestException($"AlphaOsu Failed [{res.Code}]: {res.Message}");
-        }
-
-        return res.AlphaOsuData.Recommends;
-    }
-
-    public enum OsuScoreType
-    {
-        Recent,
-        Best
-    }
-
-    public static bool TryGetBeatmapCover(string beatmapPath, out string? coverPath)
-    {
-        var lines = File.ReadLines(beatmapPath);
-        var regex = BeatmapCoverMatcher();
-
-        foreach (var line in lines)
-        {
-            if (regex.Match(line) is not { Success: true } match) continue;
-
-            coverPath = Path.Join(Path.GetDirectoryName(beatmapPath), match.Groups[1].Value);
-            return true;
-        }
-
-        coverPath = null;
-        return false;
-    }
-
-    [GeneratedRegex(@"^\s*\d+\s*,\s*\d+\s*,\s*""(.*)""\s*,\s*\d+\s*,\s*\d+\s*$")]
-    private static partial Regex BeatmapCoverMatcher();
+    #endregion
 
     #region Beatmap Downloader
 
     private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
 
-    private static Func<long, string> BeatmapsetPath => beatmapsetId => Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
+    private static Func<long, string> BeatmapsetPath => beatmapsetId =>
+        Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
 
     // 从 sayobot 镜像下载 beatmap
-    public static async Task<string> DownloadBeatmap(long beatmapId, string path, int retry = 10)
+    public static async Task<string> DownloadBeatmap(long beatmapSetId, string path, int retry = 10)
     {
         async Task<string> DownloadBeatmapInner()
         {
-            using var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapId}");
+            using var request = new HttpRequestMessage(new HttpMethod("GET"),
+                $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapSetId}");
             request.Headers.TryAddWithoutValidation("authority", "dl.sayobot.cn");
             request.Headers.TryAddWithoutValidation("accept",
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
             request.Headers.TryAddWithoutValidation("accept-language", "zh-CN,zh;q=0.9,en-GB;q=0.8,en;q=0.7");
-            request.Headers.TryAddWithoutValidation("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
+            request.Headers.TryAddWithoutValidation("sec-ch-ua",
+                "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
             request.Headers.TryAddWithoutValidation("sec-ch-ua-mobile", "?0");
             request.Headers.TryAddWithoutValidation("sec-ch-ua-platform", "\"Windows\"");
             request.Headers.TryAddWithoutValidation("sec-fetch-dest", "document");
@@ -245,7 +228,8 @@ public static partial class OsuApi
 
             var response = await HttpClient.SendAsync(request);
 
-            var filename = (HttpUtility.ParseQueryString(request.RequestUri!.Query).Get("filename") ?? beatmapId.ToString()) + ".osz";
+            var filename = (HttpUtility.ParseQueryString(request.RequestUri!.Query).Get("filename") ??
+                            beatmapSetId.ToString()) + ".osz";
 
             var beatmapPath = Path.Join(path, filename);
 
@@ -267,7 +251,7 @@ public static partial class OsuApi
         catch (FlurlHttpException)
         {
             if (retry == 0) throw;
-            return await DownloadBeatmap(beatmapId, path, retry - 1);
+            return await DownloadBeatmap(beatmapSetId, path, retry - 1);
         }
     }
 
@@ -307,11 +291,12 @@ public static partial class OsuApi
         {
             goto Exception;
         }
-            
+
 
         osuPath = Path.GetDirectoryName(osuPath.Split(",")[0].Trim('"'));
         // osu 中已上传的图以 beatmapset id 开头，并且不会嵌套
-        foreach (var p in Directory.GetDirectories(Path.Join(osuPath, "Songs"), $"{beatmapsetId}*", SearchOption.TopDirectoryOnly))
+        foreach (var p in Directory.GetDirectories(Path.Join(osuPath, "Songs"), $"{beatmapsetId}*",
+                     SearchOption.TopDirectoryOnly))
         {
             foreach (var f in Directory.GetFiles(p, "*.osu", SearchOption.AllDirectories))
             {
@@ -479,7 +464,6 @@ public static partial class OsuApi
         }
 
         // 我们不需要删除字典里的锁，因为下载的谱面总数不会特别巨大
-        
     }
 
     // 从 beatmap 获取 beatmap 的路径
@@ -490,7 +474,46 @@ public static partial class OsuApi
 
     #endregion
 
-    public static async Task<String> GetRecommend(long uid, int modeInt)
+    #region AlphaOsu
+
+    public static async Task<List<AlphaOsuRecommend>> GetRecommends(long osuUid)
+    {
+        await "https://alphaosu.keytoix.vip/api/v1/self/users/synchronize"
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .PostJsonAsync(new object());
+
+        var rep = await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend"
+            .SetQueryParams(new
+            {
+                gameMode         = 3,
+                keyCount         = "4,7",
+                difficulty       = "0,15",
+                passPercent      = "0.2,1",
+                newRecordPercent = "0,1",
+                search           = "",
+                hidePlayed       = 0,
+                rule             = 4,
+                current          = 1,
+                pageSize         = 100
+            })
+            .WithHeader("uid", osuUid)
+            .WithHeader("Origin", "https://alphaosu.keytoix.vip")
+            .WithHeader("User-Agent", FakeUserAgent)
+            .GetStringAsync();
+
+        var res = AlphaOsuResponse.FromJson(rep);
+
+        if (!res.Success)
+        {
+            throw new HttpRequestException($"AlphaOsu Failed [{res.Code}]: {res.Message}");
+        }
+
+        return res.AlphaOsuData.Recommends;
+    }
+
+    public static async Task<string> GetRecommend(long uid, int modeInt)
     {
         return await "https://alphaosu.keytoix.vip/api/v1/self/maps/recommend".SetQueryParams(new
         {
@@ -505,5 +528,43 @@ public static partial class OsuApi
             current          = 1,
             pageSize         = 20
         }).WithHeader("uid", uid).GetStringAsync();
+    }
+
+    #endregion
+
+    #region beatmap
+
+    public static async Task<Beatmap> GetBeatmapInfoById(long beatmapId)
+    {
+        return await $"{ApiUriBase}/beatmaps/{beatmapId}"
+            .WithOAuthBearerToken(Token)
+            .GetJsonAsync<Beatmap>();
+    }
+
+    public static async Task<osu.Game.Beatmaps.Beatmap> GetBeatmapNotesById(long beatmapId)
+    {
+        var info    = await GetBeatmapInfoById(beatmapId);
+
+        if (info.ModeInt != 3)
+        {
+            throw new UnSupportedBeatmapException("only support osu!mania beatmap");
+        }
+
+        var beatmap = GetBeatmapPath(info);
+
+        var fs      = File.OpenRead(beatmap);
+        var stream  = new LineBufferedReader(fs);
+        var decoder = Decoder.GetDecoder<osu.Game.Beatmaps.Beatmap>(stream);
+        return decoder.Decode(stream)!;
+    }
+
+    #endregion
+}
+
+internal class UnSupportedBeatmapException : Exception
+{
+    public UnSupportedBeatmapException(string onlySupportManiaBeatmap)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -89,6 +89,15 @@ public static class WebApi
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
+    public static async Task<string> OsuPreview(Guid contextId)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(Frontend + "/osu/preview?id=" + contextId);
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
+    }
+
     public static async Task<string> MaiMaiRecommend(Guid contextId)
     {
         await using var page = Page;

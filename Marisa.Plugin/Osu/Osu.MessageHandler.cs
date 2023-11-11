@@ -1,5 +1,4 @@
-﻿using Flurl.Http;
-using Marisa.EntityFrameworkCore;
+﻿using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
@@ -389,6 +388,23 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
                 $"总pp：{bns.scorePp + bns.bonusPp:F2}，原始pp：{bns.scorePp:F2}，bonus pp：{bns.bonusPp:F2}，成绩总数：{bns.rankedScores}\n"),
             MessageDataImage.FromBase64(img.ToB64(100))
         );
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("预览某个mania图，参数beatmap id")]
+    [MarisaPluginCommand("view")]
+    private async Task<MarisaPluginTaskState> Preview(Message message)
+    {
+        var beatmapId = long.Parse(message.Command.Trim());
+
+        var beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
+
+        var context = new WebContext();
+
+        context.Put("beatmap", beatmap);
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuPreview(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
     }

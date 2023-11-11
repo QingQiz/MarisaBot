@@ -9,14 +9,15 @@ import {
     PpAcc
 } from "@/GlobalVars";
 import ManiaPpChart from "@/components/osu/partial/ManiaPpChart.vue";
-import {BeatmapInfo, ScoreSimple, UserInfo} from "@/components/osu/Osu.Data";
+import {BeatmapInfo as BeatmapInfoT, ScoreSimple, UserInfo} from "@/components/osu/Osu.Data";
 import {max} from "d3";
 import axios from "axios";
+import BeatmapInfo from './BeatmapInfo.vue';
 
 
 const props = defineProps<{
     data: {
-        beatmap: BeatmapInfo
+        beatmap: BeatmapInfoT
         score: ScoreSimple
         user: UserInfo
     }
@@ -52,15 +53,7 @@ axios.get(osu_pp_builder(beatmap.value.beatmapset.id, beatmap.value.checksum, be
         }
     )
 
-function SecondsToTime(seconds: number): string {
-    if (seconds > 3600) {
-        return `${Math.floor(seconds / 3600)}:${SecondsToTime(seconds % 3600)}`;
-    } else {
-        return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
-    }
-}
-
-function GetRankStatusColor() {
+function GetRankStatusColor(): [string, string] {
     switch (beatmap.value.status[0].toLowerCase()) {
         case "a":
         case "r":
@@ -79,7 +72,7 @@ function GetRankStatusColor() {
     }
 }
 
-function GetCircleSize() {
+function GetCircleSize(): [string, number, string] | null {
     switch (beatmap.value.mode_int) {
         case 0:
         case 2:
@@ -91,15 +84,15 @@ function GetCircleSize() {
     }
 }
 
-function GetHpDrain() {
+function GetHpDrain(): [string, number, string] {
     return ['HP Drain', beatmap.value.drain, '#fff'];
 }
 
-function GetAcc() {
+function GetAcc(): [string, number, string] {
     return ['Accuracy', beatmap.value.accuracy, '#fff'];
 }
 
-function GetApproachRate() {
+function GetApproachRate(): [string, number, string] | null {
     switch (beatmap.value.mode_int) {
         case 0:
         case 2:
@@ -109,15 +102,15 @@ function GetApproachRate() {
     }
 }
 
-function GetStarRating() {
+function GetStarRating(): [string, number, string] {
     return ['Star Rating', beatmap.value.difficulty_rating, '#fc2'];
 }
 
 function GetBeatmapDetail() {
-    return [cs, hp, acc, ar, starRating].filter((v) => v !== null);
+    return [cs, hp, acc, ar, starRating].filter((v) => v !== null) as [string, number, string][];
 }
 
-function GetUserRating() {
+function GetUserRating(): [number, number, number, number[]] {
     let x = [...beatmap.value.beatmapset.ratings];
     for (let i = 1; i < x.length; i++) {
         x[i] += x[i - 1];
@@ -199,28 +192,7 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
                                     mapped by <span class="text-[#65ccfe]">{{ beatmap.beatmapset.creator }}</span>
                                 </div>
                                 <!-- beatmap detail -->
-                                <div class="song-info-with-icon">
-                                    <!-- length -->
-                                    <div>
-                                        <img :src="`/assets/osu/icon-total_length.png`" alt="">
-                                        {{ SecondsToTime(beatmap.total_length) }}
-                                    </div>
-                                    <!-- bpm -->
-                                    <div>
-                                        <img :src="`/assets/osu/icon-bpm.png`" alt="">
-                                        {{ beatmap.bpm }}
-                                    </div>
-                                    <!-- circles -->
-                                    <div>
-                                        <img :src="`/assets/osu/icon-count_circles.png`" alt="">
-                                        {{ beatmap.count_circles }}
-                                    </div>
-                                    <!-- sliders -->
-                                    <div>
-                                        <img :src="`/assets/osu/icon-count_sliders.png`" alt="">
-                                        {{ beatmap.count_sliders }}
-                                    </div>
-                                </div>
+                                <beatmap-info :beatmap="beatmap"/>
                             </div>
                         </div>
                     </div>
@@ -448,20 +420,6 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
 </template>
 
 <style scoped>
-
-.song-info-with-icon {
-    @apply flex gap-7 text-[#ffd996] font-bold text-2xl
-}
-
-.song-info-with-icon > div {
-    @apply flex items-center gap-2
-}
-
-.song-info-with-icon > div > img {
-    width: 40px;
-    height: 40px;
-}
-
 .profile-clip {
     clip-path: v-bind(profile_clip)
 }
@@ -560,8 +518,8 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
 
 .rank-status {
     @apply rounded-3xl px-2 py-0.5 text-black uppercase text-sm font-bold;
-    background-color: v-bind(rankStatusColor [0]);
-    color: v-bind(rankStatusColor [1]);
+    background-color: v-bind('rankStatusColor[0]');
+    color: v-bind('rankStatusColor[1]');
 }
 
 .detail {

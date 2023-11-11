@@ -1,4 +1,3 @@
-﻿using Flurl;
 using Flurl.Http;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
@@ -56,9 +55,12 @@ public class Osu : Controller
     }
 
     [HttpGet]
-    public FileStreamResult GetCover(long beatmapsetId, string beatmapChecksum, long beatmapId)
+    public FileStreamResult GetCover(long beatmapsetId, long beatmapId, string? beatmapChecksum = null)
     {
-        var beatmapPath = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
+        var beatmapPath = beatmapChecksum == null
+            ? OsuApi.GetBeatmapPathByBeatmapId(beatmapsetId, beatmapId)
+            : OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
+
         if (OsuApi.TryGetBeatmapCover(beatmapPath, out var coverPath))
         {
             return new FileStreamResult(Image.Load(coverPath).ToStream(), "image/png");

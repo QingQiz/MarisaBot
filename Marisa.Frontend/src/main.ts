@@ -9,6 +9,7 @@ import BestScores from "@/components/maimai/BestScores.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
 import OsuRecommend from "@/components/osu/OsuRecommend.vue";
+import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
 import WordCloud from "@/components/WordCloud/WordCloud.vue";
 
@@ -19,6 +20,7 @@ const routes = [
     {path: '/maimai/recommend', component: Recommend},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},
+    {path: '/osu/preview', component: OsuPreview},
     {path: '/wordcloud', component: WordCloud},
     {path: '/:catchAll(.*)', redirect: '/'}
 ]
