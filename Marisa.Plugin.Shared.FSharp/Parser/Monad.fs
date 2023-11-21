@@ -20,7 +20,7 @@ module Monad =
             | Some res, nextPos -> parse (p2 res) inp nextPos
 
     // 扩展实现
-    // let (>>) (p1: Parser<'a>) (p2: Parser<'b>) : Parser<'b> = p1 >>= fun _ -> p2
+    let (>>) (p1: Parser<'a>) (p2: Parser<'b>) : Parser<'b> = p1 >>= fun _ -> p2
 
     let ret a = Parser <| fun _ -> succeedWith a
 

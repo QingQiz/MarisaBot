@@ -45,7 +45,7 @@ module Parser =
     let stringOfCharset (cs: IEnumerable<char>) =
         let hs = HashSet<char>(cs)
 
-        (many <| satisfy hs.Contains) >>= (Array.ofList >> String.Concat >> ret)
+        (many <| satisfy hs.Contains) >>= fun x -> ret (String (Array.ofList x))
 
     // 数字
     let number =

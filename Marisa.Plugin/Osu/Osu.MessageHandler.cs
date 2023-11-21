@@ -90,7 +90,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         if (DebounceCheck(message, command!.Name))
         {
@@ -124,7 +124,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("recommend", "什么推分", "打什么推分", "打什么歌推分")]
     private async Task<MarisaPluginTaskState> Recommend(Message message)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         if (command!.Mode.Value is not (0 or 3))
         {
@@ -148,10 +148,10 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
-            command.BpRank.Value, true, false)));
+            command.BpRank?.Value.Item1, true, false)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -160,39 +160,10 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
-            command.BpRank.Value, true, true)));
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    [MarisaPluginDoc("分析某人最近打的图")]
-    [MarisaPluginSubCommand(nameof(Recent))]
-    [MarisaPluginCommand("distribution", "dist")]
-    private async Task<MarisaPluginTaskState> RecentDistribution(Message message, BotDbContext db)
-    {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var recentScores = await OsuApi.GetScores(
-            await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0,
-            1000, true
-        );
-
-        if (!(recentScores?.Any() ?? false))
-        {
-            message.Reply($"最近在 osu! {OsuApi.GetModeName(command.Mode.Value)} 上未打过图");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        if (recentScores.Length < 10)
-        {
-            message.Reply("你打的太少了，多打点吧！");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        message.Reply(MessageDataImage.FromBase64(recentScores.Distribution().ToB64(100)));
+            command.BpRank?.Value.Item1, true, true)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -201,10 +172,30 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, true, true, out var command))
+            return MarisaPluginTaskState.CompletedTask;
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
-            command.BpRank.Value, false, false)));
+        if (command!.BpRank?.Value?.Item2 == null)
+        {
+            message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
+                command.BpRank?.Value?.Item1, false, false)));
+        }
+        else
+        {
+            var best = (await OsuApi.GetScores(await GetOsuIdByName(command.Name), OsuApi.OsuScoreType.Best,
+                    OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value.Item1 - 1, command.BpRank.Value.Item2.Value - command.BpRank.Value.Item1 + 1))?
+                .Select((x, i) => (x, i + command.BpRank.Value.Item1 - 1))
+                .ToList();
+
+            if (!(best?.Any() ?? false))
+            {
+                message.Reply("无");
+            }
+            else
+            {
+                message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
+            }
+        }
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -214,7 +205,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("compare", "cmp")]
     private async Task<MarisaPluginTaskState> BpCmp(Message message)
     {
-        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var db = new BotDbContext().OsuBinds;
 
@@ -263,61 +254,12 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("列出某人前20的bp")]
-    [MarisaPluginSubCommand(nameof(BestPerformance))]
-    [MarisaPluginCommand("top", "list", "head")]
-    private async Task<MarisaPluginTaskState> BpTop(Message message)
-    {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var best = (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best,
-                OsuApi.GetModeName(command.Mode.Value), 0, 20))?
-            .Select((x, i) => (x, i))
-            .ToList();
-
-        if (!(best?.Any() ?? false))
-        {
-            message.Reply("无");
-        }
-        else
-        {
-            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
-        }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    [MarisaPluginDoc("列出某人后20的bp")]
-    [MarisaPluginSubCommand(nameof(BestPerformance))]
-    [MarisaPluginCommand("tail")]
-    private async Task<MarisaPluginTaskState> BpTail(Message message)
-    {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var best = (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best,
-                OsuApi.GetModeName(command.Mode.Value), 0, 100))?
-            .Select((x, i) => (x, i))
-            .TakeLast(20)
-            .ToList();
-
-        if (!(best?.Any() ?? false))
-        {
-            message.Reply("无");
-        }
-        else
-        {
-            message.Reply(MessageDataImage.FromBase64(best.GetMiniCards().ToB64(100)));
-        }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     [MarisaPluginDoc("统计某人的 bp 分布")]
     [MarisaPluginSubCommand(nameof(BestPerformance))]
     [MarisaPluginCommand("distribution", "dist")]
     private async Task<MarisaPluginTaskState> BpDistribution(Message message)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var best = await OsuApi.GetScores(
             await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
@@ -340,13 +282,13 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("todaybp", "tdbp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message)
     {
-        if (!TryParseCommand(message, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var recentScores =
             (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best,
                 OsuApi.GetModeName(command.Mode.Value), 0, 100))?
             .Select((x, i) => (x, i))
-            .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < 24)
+            .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < (command.BpRank == null ? 24 : command.BpRank.Value.Item1))
             .ToList();
 
         if (!(recentScores?.Any() ?? false))
@@ -365,7 +307,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("bns")]
     private async Task<MarisaPluginTaskState> BonusPp(Message message)
     {
-        if (!TryParseCommand(message, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         var userInfo = await OsuApi.GetUserInfoByName(command!.Name, mode: command.Mode.Value);
 
@@ -404,7 +346,10 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
 
         context.Put("beatmap", beatmap);
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuPreview(context.Id)));
+        message.Reply(
+            new MessageDataText(beatmap.Metadata.TitleUnicode),
+            MessageDataImage.FromBase64(await WebApi.OsuPreview(context.Id))
+        );
 
         return MarisaPluginTaskState.CompletedTask;
     }

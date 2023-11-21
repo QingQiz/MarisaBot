@@ -34,9 +34,9 @@ public partial class Osu
         }
     }
 
-    private static bool TryParseCommand(Message message, bool withBpRank, out OsuCommandParser.OsuCommand? command)
+    private static bool TryParseCommand(Message message, bool withBpRank, bool allowRange, out OsuCommandParser.OsuCommand? command)
     {
-        command = ParseCommand(message, withBpRank);
+        command = ParseCommand(message, withBpRank, allowRange);
 
         if (command == null)
         {
@@ -53,14 +53,14 @@ public partial class Osu
         if (command.BpRank == null)
         {
             command = command.Mode == null
-                ? new OsuCommandParser.OsuCommand(command.Name, 1, 3)
-                : new OsuCommandParser.OsuCommand(command.Name, 1, command.Mode);
+                ? new OsuCommandParser.OsuCommand(command.Name, null, 3)
+                : new OsuCommandParser.OsuCommand(command.Name, null, command.Mode);
         }
 
         return true;
     }
 
-    private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank = false)
+    private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank, bool allowRange)
     {
         var command = OsuCommandParser.parser(message.Command)?.Value;
 
@@ -70,6 +70,11 @@ public partial class Osu
         }
 
         if (command.BpRank != null && !withBpRank)
+        {
+            return null;
+        }
+
+        if (command.BpRank?.Value.Item2 != null && !allowRange)
         {
             return null;
         }

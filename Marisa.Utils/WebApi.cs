@@ -69,11 +69,11 @@ public static class WebApi
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
-    public static async Task<string> OsuScore(string name, int modeInt, int bpRank, bool recent, bool fail)
+    public static async Task<string> OsuScore(string name, int modeInt, int? bpRank, bool recent, bool fail)
     {
         await using var page = Page;
 
-        await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + bpRank +
+        await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + (bpRank ?? 1) +
             (recent ? "&recent=" + recent : "") +
             (fail ? "&fail=" + fail : ""));
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);

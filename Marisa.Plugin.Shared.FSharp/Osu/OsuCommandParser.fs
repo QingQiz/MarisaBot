@@ -12,7 +12,7 @@ module OsuCommandParser =
     type OsuCommand =
         {
             Name: OsuId
-            BpRank: int option
+            BpRank: (int*int option) option
             Mode: OsuMode option
         }
         override this.ToString() =
@@ -24,16 +24,27 @@ module OsuCommandParser =
 
     let osuCommandParser =
         let nameCharset = List.concat [ [ 'a' .. 'z' ]; [ 'A' .. 'Z' ]; [ '0' .. '9' ]; [ '-'; '_'; '['; ']'; ' ' ] ]
-        let name = stringOfCharset nameCharset >>= fun (s: string) -> ret <| s.Trim(' ')
+        let name = stringOfCharset nameCharset >>= fun (s: string) -> (ret <| s.Trim(' '))
 
-        let rank =
-            (many space *> ignorableChar '#' *> many space *> number
-             >>= fun n ->
-                     if n <= 0 || n > 100 then
-                         ret None
-                     else
-                         ret <| Some n)
-            <|> ret None
+        let rank = 
+            (many space *> ignorableChar '#' *> 
+                (
+                    (number >>= fun a -> char '-' >> number >>= fun b -> ret (a, Some b))
+                    <|>
+                    (number >>= fun a -> ret (a, None))
+                ) >>= (
+                    fun (a, b) ->
+                        if a <= 0 || a > 100 then
+                            ret None
+                        else
+                            match b with
+                            | Some b when b <= 0 || b > 100 || a >= b -> ret None
+                            | Some b -> ret <| Some (a, Some b)
+                            | None -> ret <| Some (a, None)
+                )
+            )
+            <|> 
+            ret None
 
         let modeIdx =
              let idx = number >>= fun num ->
