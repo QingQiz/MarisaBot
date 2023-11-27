@@ -55,16 +55,6 @@ public class MaiMaiSong : Song
         Color.FromRgb(219, 170, 255),
     };
 
-    public static readonly string[] Genres =
-    {
-        "maimai",
-        "POPSアニメ",
-        "ゲームバラエティ",
-        "niconicoボーカロイド",
-        "東方Project",
-        "オンゲキCHUNITHM"
-    };
-
     public static readonly string[] Plates =
     {
         "maimai",

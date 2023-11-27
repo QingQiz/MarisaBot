@@ -131,12 +131,14 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> MaiMaiSummaryGenre(Message message)
     {
-        var genre = MaiMaiSong.Genres.FirstOrDefault(p =>
+        var genres = _songDb.SongList.Select(song => song.Info.Genre).Distinct().ToArray();
+
+        var genre = genres.FirstOrDefault(p =>
             string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (genre == null)
         {
-            message.Reply("可用的类别有：\n" + string.Join('\n', MaiMaiSong.Genres));
+            message.Reply("可用的类别有：\n" + string.Join('\n', genres));
         }
         else
         {
