@@ -172,8 +172,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
     {
-        if (!TryParseCommand(message, true, true, out var command))
-            return MarisaPluginTaskState.CompletedTask;
+        if (!TryParseCommand(message, true, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
         if (command!.BpRank?.Value?.Item2 == null)
         {
@@ -182,8 +181,15 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         }
         else
         {
-            var best = (await OsuApi.GetScores(await GetOsuIdByName(command.Name), OsuApi.OsuScoreType.Best,
-                    OsuApi.GetModeName(command.Mode.Value), command.BpRank.Value.Item1 - 1, command.BpRank.Value.Item2.Value - command.BpRank.Value.Item1 + 1))?
+            var oid  = await GetOsuIdByName(command.Name);
+            var mode = OsuApi.GetModeName(command.Mode.Value);
+            var best = (await OsuApi.GetScores(
+                    oid,
+                    OsuApi.OsuScoreType.Best,
+                    mode,
+                    command.BpRank.Value.Item1 - 1,
+                    command.BpRank.Value.Item2.Value - command.BpRank.Value.Item1 + 1
+                ))?
                 .Select((x, i) => (x, i + command.BpRank.Value.Item1 - 1))
                 .ToList();
 

@@ -81,32 +81,48 @@ public partial class Osu
 
         var db = new BotDbContext();
 
-        // 有osu id了，看看id在数据库里有没有，有的话设置一下mode
-        if (!string.IsNullOrWhiteSpace(command.Name))
+        // 没设置名字，那就是查自己或者查@的人
+        if (string.IsNullOrWhiteSpace(command.Name))
+        {
+            OsuBind? bind;
+            // @了人
+            if (message.MessageChain?.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) is MessageDataAt at)
+            {
+                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == at.Target);
+            }
+            else
+            {
+                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+            }
+
+            // 没找到证明不知道查谁的
+            if (bind == null)
+            {
+                return command;
+            }
+
+            // 设置GameMode
+            var mode = command.Mode?.Value ?? OsuApi.ModeList.IndexOf(bind.GameMode);
+
+            return new OsuCommandParser.OsuCommand(bind.OsuUserName, command.BpRank, mode);
+        }
+        // 有设置名字，那么要检查GameMode
+        else
         {
             // 设置了mode的话就直接返回
             if (command.Mode != null) return command;
 
-            var u = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == command.Name);
+            var bind = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == command.Name);
 
-            return u == null
-                ? command
-                : new OsuCommandParser.OsuCommand(command.Name, command.BpRank, OsuApi.ModeList.IndexOf(u.GameMode));
+            // 没被绑定，说明我们不知道这个人的GameMode，需要请求OsuApi来拿
+            if (bind == null)
+            {
+                var u = OsuApi.GetUserInfoByName(command.Name).Result;
+                return new OsuCommandParser.OsuCommand(command.Name, command.BpRank, OsuApi.ModeList.IndexOf(u.Playmode.ToLower()));
+            }
+
+            return new OsuCommandParser.OsuCommand(command.Name, command.BpRank, OsuApi.ModeList.IndexOf(bind.GameMode));
         }
-
-        // 没有osu id的话在数据库里找，找at的人或发送者
-        var o = message.MessageChain?.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) is MessageDataAt at
-            ? db.OsuBinds.FirstOrDefault(o => o.UserId == at.Target)
-            : db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
-
-        // 没找到证明不知道查谁的
-        if (o == null) return command;
-
-        // 找到了就把他塞进去
-        var mode = string.IsNullOrEmpty(o.GameMode) ? OsuApi.ModeList[0] : o.GameMode;
-
-        return new OsuCommandParser.OsuCommand(
-            o.OsuUserName, command.BpRank, command.Mode ?? OsuApi.ModeList.IndexOf(mode));
     }
 
     /// <summary>
