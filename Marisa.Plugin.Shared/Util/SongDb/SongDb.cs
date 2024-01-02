@@ -98,8 +98,10 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     private FileSystemWatcher _songAliasChangedWatcher = null!;
 
     public List<TSong> SongList => _songList ??= _songListGen();
-
+    
     private Dictionary<long, TSong>? _songIndexer;
+
+    public Dictionary<long, TSong> SongIndexer => _songIndexer ??= SongList.ToDictionary(s => s.Id);
 
     /// <summary>
     /// 使用歌曲 id 建立索引
@@ -108,9 +110,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     /// <returns></returns>
     public TSong FindSong(long id)
     {
-        _songIndexer ??= SongList.ToDictionary(s => s.Id);
-
-        return _songIndexer[id];
+        return SongIndexer[id];
     }
 
     private Dictionary<string, List<string>> SongAlias

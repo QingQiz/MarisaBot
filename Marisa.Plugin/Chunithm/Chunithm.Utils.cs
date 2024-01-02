@@ -22,19 +22,28 @@ public partial class Chunithm
         return (username, qq);
     }
 
-    private static async Task<MessageChain> GetB30Card(Message message, bool b50 = false)
+    private async Task<MessageChain> GetB30Card(Message message, bool b50 = false)
     {
         var (username, qq) = AtOrSelf(message);
 
         return MessageChain.FromImageB64((await GetRating(username, qq)).Draw().ToB64());
     }
 
-    public static async Task<ChunithmRating> GetRating(string? username, long? qq)
+    public async Task<ChunithmRating> GetRating(string? username, long? qq)
     {
         var response = await "https://www.diving-fish.com/api/maimaidxprober/chuni/query/player".PostJsonAsync(
             string.IsNullOrEmpty(username)
                 ? new { qq }
                 : new { username });
-        return ChunithmRating.FromJson(await response.GetStringAsync());
+        var rating = ChunithmRating.FromJson(await response.GetStringAsync());
+
+        foreach (var r in rating.Records.Best.Concat(rating.Records.R10))
+        {
+            if (_songDb.SongIndexer.ContainsKey(r.Id)) continue;
+
+            r.Id = _songDb.SongList.First(s => s.Title == r.Title).Id;
+        }   
+
+        return rating;
     }
 }

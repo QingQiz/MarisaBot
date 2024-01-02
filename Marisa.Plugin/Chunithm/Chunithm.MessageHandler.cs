@@ -14,7 +14,7 @@ public partial class Chunithm
     /// </summary>
     [MarisaPluginDoc("查询 b30，参数为：查分器的账号名 或 @某人 或 留空")]
     [MarisaPluginCommand("b30", "查分")]
-    private static async Task<MarisaPluginTaskState> B30(Message message)
+    private async Task<MarisaPluginTaskState> B30(Message message)
     {
         var ret = await GetB30Card(message);
 
@@ -26,7 +26,7 @@ public partial class Chunithm
     [MarisaPluginDoc("b30的汇总情况，具体的试一试命令就知道了（懒）")]
     [MarisaPluginSubCommand(nameof(B30))]
     [MarisaPluginCommand("sum")]
-    private static async Task<MarisaPluginTaskState> B30Sum(Message message)
+    private async Task<MarisaPluginTaskState> B30Sum(Message message)
     {
         var (username, qq) = AtOrSelf(message);
         var rating = await GetRating(username, qq);

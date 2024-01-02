@@ -66,14 +66,4 @@ public class ChunithmTest
 
         Assert.Pass();
     }
-
-    [Test]
-    public async Task Should_Draw_B30()
-    {
-        var rating = await Chunithm.Chunithm.GetRating(null, 2435865554);
-
-        rating.Draw().Show();
-
-        Assert.Pass();
-    }
 }
