@@ -75,7 +75,7 @@ function reduce_bpm(): number[] {
                 <div>Boss</div>
             </div>
             <div class="data grow">
-                <div class="gap-2">
+                <div class="gap-5">
                     <div class="bg-gray-300 px-2 rounded-2xl">
                         ID:{{ song.Id }}
                     </div>
@@ -123,9 +123,12 @@ function reduce_bpm(): number[] {
                         </div>
                     </div>
                     <div>{{ c.BellCount }}</div>
-                    <div>{{ c.Creator }}</div>
+                    <div class="text-center" >{{ c.Creator }}</div>
                 </div>
             </template>
+        </div>
+        <div v-if="song.CopyRight != '-'" class="text-center -m-2" style="white-space: pre;">
+            {{ song.CopyRight }}
         </div>
     </div>
 </template>
@@ -157,7 +160,7 @@ function reduce_bpm(): number[] {
 }
 
 .chart {
-    @apply flex flex-col h-[300px];
+    @apply flex flex-col;
 }
 
 .chart>div {
