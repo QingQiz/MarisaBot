@@ -106,4 +106,13 @@ public static class WebApi
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
+
+    public static async Task<string> OngekiSong(int id)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(Frontend + $"/ongeki/song/{id}");
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
+    }
 }

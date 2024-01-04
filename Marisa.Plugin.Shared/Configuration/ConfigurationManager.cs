@@ -34,6 +34,10 @@ public static class ConfigurationManager
         {
             Directory.CreateDirectory(config.Chunithm.TempPath);
         }
+        if (!Directory.Exists(config.Ongeki.TempPath))
+        {
+            Directory.CreateDirectory(config.Ongeki.TempPath);
+        }
         if (!Directory.Exists(config.Osu.TempPath))
         {
             Directory.CreateDirectory(config.Osu.TempPath);

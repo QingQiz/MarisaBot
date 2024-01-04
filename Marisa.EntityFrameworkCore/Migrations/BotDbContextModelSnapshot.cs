@@ -149,6 +149,35 @@ namespace QQBot.EntityFrameworkCore.Migrations
                     b.ToTable("MaiMaiDx.Guess");
                 });
 
+            modelBuilder.Entity("Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki.OngekiGuess", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TimesCorrect")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimesStart")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimesWrong")
+                        .HasColumnType("int");
+
+                    b.Property<long>("UId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UId");
+
+                    b.ToTable("Ongeki.Guess");
+                });
+
             modelBuilder.Entity("Marisa.EntityFrameworkCore.Entity.Plugin.Osu.OsuBind", b =>
                 {
                     b.Property<long>("Id")

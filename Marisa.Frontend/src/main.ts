@@ -6,6 +6,7 @@ import '@/ExtensionMethods'
 
 import App from '@/App.vue'
 import BestScores from "@/components/maimai/BestScores.vue";
+import OngekiSong from "@/components/ongeki/OngekiSong.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
 import OsuRecommend from "@/components/osu/OsuRecommend.vue";
@@ -18,6 +19,7 @@ const routes = [
     {path: '/', component: NotFound},
     {path: '/maimai/best', component: BestScores},
     {path: '/maimai/recommend', component: Recommend},
+    {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},
     {path: '/osu/preview', component: OsuPreview},

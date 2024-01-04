@@ -20,6 +20,10 @@ osu:
 chunithm:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Chunithm
   tempPath:     C:\Users\sofee\Desktop\temp\chunithm
+  
+ongeki:
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\ongeki
+  tempPath:     C:\Users\sofee\Desktop\temp\ongeki
 
 maimai:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\maimai

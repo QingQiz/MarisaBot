@@ -19,6 +19,8 @@ public class PluginConfiguration
 
     public ChunithmConfiguration Chunithm { get; set; }
 
+    public OngekiConfiguration Ongeki{ get; set; }
+
     public string FfmpegPath { get; set; }
 
     public OsuConfiguration Osu { get; set; }
