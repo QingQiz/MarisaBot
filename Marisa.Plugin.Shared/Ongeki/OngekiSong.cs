@@ -67,7 +67,7 @@ public class OngekiSong : Song
 
     public override string MaxLevel()
     {
-        return Charts.MaxBy(x => x?.Const ?? 0)!.Const.ToString("F2");
+        return Charts.Max(x => x?.Const ?? 0).ToString("F2");
     }
 
     public override Image GetCover()

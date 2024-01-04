@@ -85,7 +85,7 @@ function reduce_bpm(): number[] {
                 <div>{{ reduce_bpm().join('-') }}</div>
                 <div>{{ song.Source }}</div>
                 <div>{{ song.Genre }}</div>
-                <div>{{ song.Version }} - {{ song.ReleaseDate.split('T')[0].replaceAll('-', '/') }}</div>
+                <div>{{ song.Version }}</div>
                 <div>Lv. {{ song.BossLevel }} - {{ song.BossCard }}</div>
             </div>
         </div>

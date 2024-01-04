@@ -23,7 +23,7 @@ public partial class Ongeki : MarisaPluginBaseWithHelpCommand
             ) as dynamic[];
             return data!.Select(d => new OngekiSong(d)).ToList();
         },
-        nameof(BotDbContext.ChunithmGuesses),
+        nameof(BotDbContext.OngekiGuesses),
         Dialog.AddHandler
     );
     
