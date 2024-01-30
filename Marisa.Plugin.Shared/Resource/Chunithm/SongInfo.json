@@ -59700,6 +59700,506 @@
     ]
   },
   {
+    "Id": 2416,
+    "Title": "Snow Colored Score",
+    "Artist": "イロドリミドリ",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 584,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "164.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 906,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "164.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1310,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "Moon Strix",
+        "Bpm": "164.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1912,
+        "LevelStr": "11",
+        "Constant": 11.1,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "164.00"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "maxCombo": 2512,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "WHITE WINTER NOTES",
+        "Bpm": "164.00"
+      }
+    ]
+  },
+  {
+    "Id": 2417,
+    "Title": "LiftOff",
+    "Artist": "MAYA AKAI",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 340,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 863,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1197,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "アミノハバキリ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1749,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "ミストルティン",
+        "Bpm": "137.00"
+      }
+    ]
+  },
+  {
+    "Id": 2418,
+    "Title": "独りんぼエンヴィー",
+    "Artist": "koyori（電ポルP）",
+    "Genre": "niconico",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 390,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 750,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1118,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1290,
+        "LevelStr": "11",
+        "Constant": 11.4,
+        "Charter": "ミニミライト",
+        "Bpm": "132.00"
+      }
+    ]
+  },
+  {
+    "Id": 2422,
+    "Title": "Hydra",
+    "Artist": "James Landino X Akira Complex「Cytus Ⅱ」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 408,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 968,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1250,
+        "LevelStr": "11+",
+        "Constant": 11.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1986,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "Moon Strix#ΦωΦ",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2425,
+    "Title": "Survive",
+    "Artist": "Kevin Penkin feat. Nikki Simmons「Cytus Ⅱ」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 366,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 671,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1182,
+        "LevelStr": "11",
+        "Constant": 11.2,
+        "Charter": "ミニミライト",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1549,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "アミノハバキリ",
+        "Bpm": "131.00"
+      }
+    ]
+  },
+  {
+    "Id": 2426,
+    "Title": "シンデレラディスコ",
+    "Artist": "曲：橘亮祐、篠崎あやと／歌：藍原 椿(CV：橋本 ちなみ)、早乙女 彩華(CV：中島 唯)",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 417,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 826,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1104,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "ミニミライト",
+        "Bpm": "130.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1674,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "ドレスアップ・ペンギン",
+        "Bpm": "130.00"
+      }
+    ]
+  },
+  {
+    "Id": 2427,
+    "Title": "うたかたのせかいで",
+    "Artist": "DJ Raisei vs. Setca. feat.nayuta",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 570,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "216 (155.00 - 216.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 1347,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "216 (155.00 - 216.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1561,
+        "LevelStr": "13",
+        "Constant": 13.4,
+        "Charter": "アミノハバキリ",
+        "Bpm": "216 (155.00 - 216.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 2236,
+        "LevelStr": "14+",
+        "Constant": 14.7,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "216 (155.00 - 216.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2428,
+    "Title": "とあちゃんのおもちゃ箱",
+    "Artist": "linear ring",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 338,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "106.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 816,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "106.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1519,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "ミニミライト",
+        "Bpm": "106.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 2114,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "M■o◆ S■r◆x",
+        "Bpm": "106.00"
+      }
+    ]
+  },
+  {
+    "Id": 2429,
+    "Title": "白庭",
+    "Artist": "くるぶっこちゃん",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 531,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "111 (77.00 - 111.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 1101,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "111 (77.00 - 111.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1851,
+        "LevelStr": "12",
+        "Constant": 12.2,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "111 (77.00 - 111.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 2108,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ミストルティン -禁圧解除-",
+        "Bpm": "111 (77.00 - 111.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2430,
+    "Title": "REL0VE REL1VE",
+    "Artist": "CHUBAY×打打だいず",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 472,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "155 (155.00 - 310.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 903,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "155 (155.00 - 310.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1428,
+        "LevelStr": "12+",
+        "Constant": 12.5,
+        "Charter": "アミノハバキリ",
+        "Bpm": "155 (155.00 - 310.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1974,
+        "LevelStr": "13+",
+        "Constant": 13.9,
+        "Charter": "J4K0 L5M0N",
+        "Bpm": "155 (155.00 - 310.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2431,
+    "Title": "deadeye",
+    "Artist": "Acotto",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 492,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "167.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 1013,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "167.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1455,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "ミニミライト",
+        "Bpm": "167.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 2190,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "Piercing Blade 'Sharp Eyes'",
+        "Bpm": "167.00"
+      }
+    ]
+  },
+  {
+    "Id": 2432,
+    "Title": "Aiolos",
+    "Artist": "xi",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 584,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "205.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 1131,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "205.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1639,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "ミニミライト",
+        "Bpm": "205.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 1969,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "habakiri -Ignited-",
+        "Bpm": "205.00"
+      }
+    ]
+  },
+  {
     "Id": 2464,
     "Title": "Sad Creature",
     "Artist": "麻枝 准×やなぎなぎ「ヘブンバーンズレッド」",
@@ -59778,6 +60278,47 @@
         "Constant": 12.7,
         "Charter": "ミストルティン＠どうか安寧な記憶を",
         "Bpm": "175.00"
+      }
+    ]
+  },
+  {
+    "Id": 2477,
+    "Title": "sølips",
+    "Artist": "rintaro soma",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "maxCombo": 511,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "ミニミライト",
+        "Bpm": "199 (99.50 - 199.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "maxCombo": 1205,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "199 (99.50 - 199.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "maxCombo": 1999,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "ミニミライト",
+        "Bpm": "199 (99.50 - 199.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "maxCombo": 2750,
+        "LevelStr": "15",
+        "Constant": 15.1,
+        "Charter": "One øf Chuni Fumen Boys",
+        "Bpm": "199 (99.50 - 199.00)"
       }
     ]
   },
