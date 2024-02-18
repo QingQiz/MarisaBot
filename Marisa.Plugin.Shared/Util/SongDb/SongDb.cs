@@ -61,9 +61,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         {
             lines = lines.Concat(File.ReadAllLines(_tempAliasPath)).ToArray();
         }
-        catch (FileNotFoundException)
-        {
-        }
+        catch (FileNotFoundException) {}
 
         var songNameAll = SongList.Select(s => s.Title).Distinct().ToHashSet();
 
@@ -72,7 +70,14 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
             var titles = line
                 .Split('\t')
                 .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToList();
+
+            titles = titles
+                .Take(1)
+                .Concat(titles
+                    .Skip(1)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                )
                 .ToList();
 
             // 跳过被删除了的歌
@@ -98,7 +103,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     private FileSystemWatcher _songAliasChangedWatcher = null!;
 
     public List<TSong> SongList => _songList ??= _songListGen();
-    
+
     private Dictionary<long, TSong>? _songIndexer;
 
     public Dictionary<long, TSong> SongIndexer => _songIndexer ??= SongList.ToDictionary(s => s.Id);
@@ -215,7 +220,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     {
         if (string.IsNullOrWhiteSpace(alias)) return new List<TSong>();
 
-        if (SearchSongByAliasWholeWord(alias) is { } song)
+        if (SearchSongByAliasWholeWord(alias) is {} song)
         {
             return song;
         }
@@ -480,7 +485,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         var cover = song.GetCover();
 
-        var cw = cover.Width / widthDiv;
+        var cw = cover.Width  / widthDiv;
         var ch = cover.Height / widthDiv;
 
         cover.Mutate(i => i.RandomCut(cw, ch));
