@@ -12,37 +12,7 @@ public static class SearchSongInDb
     public static MarisaPluginTaskState SearchSong<T, TSongGuess>(this SongDb<T, TSongGuess> songDb, Message message)
         where T : Song where TSongGuess : SongGuess, new()
     {
-        var search = songDb.SearchSong(message.Command);
-
-        message.Reply(songDb.GetSearchResult(search));
-
-        if (search.Count is > 1 and < SongDbConfig.PageSize)
-        {
-            songDb.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender?.Id, hMessage =>
-            {
-                // 不是纯文本
-                if (!hMessage.IsPlainText())
-                {
-                    return Task.FromResult(MarisaPluginTaskState.Canceled);
-                }
-
-                // 不是 id
-                if (!long.TryParse(hMessage.Command.Trim(), out var songId))
-                {
-                    return Task.FromResult(MarisaPluginTaskState.Canceled);
-                }
-
-                var song = songDb.GetSongById(songId);
-                // 没找到歌
-                if (song == null)
-                {
-                    return Task.FromResult(MarisaPluginTaskState.Canceled);
-                }
-
-                message.Reply(songDb.GetSearchResult(new[] { song }));
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            });
-        }
+        MultiPageSelectResult(songDb, songDb.SearchSong(message.Command), message);
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -65,7 +35,8 @@ public static class SearchSongInDb
     /// <summary>
     /// 分页展示多个结果
     /// </summary>
-    public static void MultiPageSelectResult<T, TG>(this SongDb<T, TG> db, IReadOnlyList<T> songs, Message message) where T : Song where TG : SongGuess, new()
+    public static void MultiPageSelectResult<T, TG>(this SongDb<T, TG> db, IReadOnlyList<T> songs, Message message)
+        where T : Song where TG : SongGuess, new()
     {
         string DisplaySong(int page)
         {
@@ -99,6 +70,8 @@ public static class SearchSongInDb
 
         db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender?.Id, next =>
         {
+            if (!next.IsPlainText()) return Task.FromResult(MarisaPluginTaskState.Canceled);
+
             if (next.Command.StartsWith("p", StringComparison.OrdinalIgnoreCase))
             {
                 if (int.TryParse(next.Command[1..], out var p))
@@ -126,7 +99,8 @@ public static class SearchSongInDb
         });
     }
 
-    public static List<T> SelectSongByBaseRange<T, TG>(this SongDb<T, TG> db, string baseRange) where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByBaseRange<T, TG>(this SongDb<T, TG> db, string baseRange)
+        where T : Song where TG : SongGuess, new()
     {
         if (baseRange.Contains('-'))
         {
@@ -147,19 +121,22 @@ public static class SearchSongInDb
         return new List<T>();
     }
 
-    public static List<T> SelectSongByCharter<T, TG>(this SongDb<T, TG> db, string charter) where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByCharter<T, TG>(this SongDb<T, TG> db, string charter)
+        where T : Song where TG : SongGuess, new()
     {
         return db.SongList
             .Where(s => s.Charters.Any(c => c.Contains(charter, StringComparison.OrdinalIgnoreCase)))
             .ToList();
     }
 
-    public static List<T> SelectSongByLevel<T, TG>(this SongDb<T, TG> db, string lv) where TG : SongGuess, new() where T : Song
+    public static List<T> SelectSongByLevel<T, TG>(this SongDb<T, TG> db, string lv)
+        where TG : SongGuess, new() where T : Song
     {
         return db.SongList.Where(s => s.Levels.Contains(lv)).ToList();
     }
 
-    public static List<T> SelectSongByBpmRange<T, TG>(this SongDb<T, TG> db, string bpm) where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByBpmRange<T, TG>(this SongDb<T, TG> db, string bpm)
+        where T : Song where TG : SongGuess, new()
     {
         if (bpm.Contains('-'))
         {
@@ -180,7 +157,8 @@ public static class SearchSongInDb
         return new List<T>();
     }
 
-    public static List<T> SelectSongByArtist<T, TG>(this SongDb<T, TG> db, string artist) where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByArtist<T, TG>(this SongDb<T, TG> db, string artist)
+        where T : Song where TG : SongGuess, new()
     {
         var regex = new Regex($@"\b{artist}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
