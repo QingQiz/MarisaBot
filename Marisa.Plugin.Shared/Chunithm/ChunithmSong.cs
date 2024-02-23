@@ -44,7 +44,7 @@ public class ChunithmSong : Song
 
             try
             {
-                MaxCombo.Add(i.maxCombo);
+                MaxCombo.Add(i.MaxCombo);
             }
             catch (RuntimeBinderException)
             {
