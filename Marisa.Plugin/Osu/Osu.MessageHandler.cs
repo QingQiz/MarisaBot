@@ -340,13 +340,36 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("预览某个mania图，参数beatmap id")]
+    [MarisaPluginDoc("预览某个mania图，参数beatmap id，留空时给出最近打的一张图的预览（包括failed）")]
     [MarisaPluginCommand("view")]
     private async Task<MarisaPluginTaskState> Preview(Message message)
     {
-        var beatmapId = long.Parse(message.Command.Trim());
+        osu.Game.Beatmaps.Beatmap? beatmap = null;
 
-        var beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
+        if (long.TryParse(message.Command.Trim(), out var beatmapId))
+        {
+            beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
+        }
+        else if (string.IsNullOrWhiteSpace(message.Command))
+        {
+            if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+
+            var id = await GetOsuIdByName(command!.Name);
+            var scores = await OsuApi.GetScores(
+                id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0, 1, true
+            );
+
+            if (scores.Any())
+            {
+                beatmap = await OsuApi.GetBeatmapNotesById(scores.First().Beatmap.Id);
+            }
+        }
+
+        if (beatmap == null)
+        {
+            message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         var context = new WebContext();
 

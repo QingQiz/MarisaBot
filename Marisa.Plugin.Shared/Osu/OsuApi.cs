@@ -159,7 +159,7 @@ public static partial class OsuApi
 
     #region Score
 
-    public static async Task<OsuScore[]?> GetScores(
+    public static async Task<OsuScore[]> GetScores(
         long osuId, OsuScoreType type, string gameMode, int skip, int take, bool includeFails = false, int retry = 5)
     {
         try
@@ -180,7 +180,7 @@ public static partial class OsuApi
                 .WithOAuthBearerToken(Token)
                 .GetStringAsync();
 
-            return OsuScore.FromJson(json);
+            return OsuScore.FromJson(json)!;
         }
         catch (FlurlHttpException e) when (e.StatusCode == 404)
         {

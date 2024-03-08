@@ -34,13 +34,17 @@
             <div class="stage-container z-10">
                 <div v-for="stage in Math.floor((max_time + time_per_stage - 1) / time_per_stage)">
                     <div class="text-center text-white font-osu-web">
-                        {{  (stage * time_per_stage - time_per_stage)/1000 }}s - {{  (stage * time_per_stage)/1000 }}s
+                        {{ (stage * time_per_stage - time_per_stage) / 1000 }}s - {{ (stage * time_per_stage) / 1000 }}s
                     </div>
                     <div class="stage-outter">
                         <div class="stage">
-                            <template v-for="point in filter_timing_points_by_stage(stage)">
-                                <div class="section-line" :style="`left: 0; bottom: calc(${point}% - var(--note-height))`">
-
+                            <template v-for="point in filter_measures_by_stage(stage)">
+                                <div class="measure-line"
+                                    :style="`left: 0; bottom: calc(${point}% - var(--note-height))`">
+                                </div>
+                            </template>
+                            <template v-for="point in filter_beats_by_stage(stage)">
+                                <div class="beat-line" :style="`left: 0; bottom: calc(${point}% - var(--note-height))`">
                                 </div>
                             </template>
                             <template v-for="obj in filter_obj_by_stage(stage)">
@@ -141,11 +145,18 @@
     @apply relative;
 }
 
-.section-line {
+.measure-line {
     width: 100%;
     height: 3px;
 
-    @apply absolute bg-green-800;
+    @apply absolute bg-green-400;
+}
+
+.beat-line {
+    width: 100%;
+    height: 1px;
+
+    @apply absolute bg-red-800;
 }
 
 .note {
@@ -192,7 +203,8 @@ let beatmap = ref({} as ManiaBeatmap)
 let info = ref({} as BeatmapInfoT)
 let max_time = ref(0)
 let key_count = ref(0)
-let timing_points = ref([] as number[])
+let measures = ref([] as number[])
+let beats = ref([] as number[])
 
 
 let time_per_stage = 10000
@@ -269,15 +281,23 @@ function filter_obj_by_stage(stage: number) {
 /**
  * @param stage start index is 1
  */
-function filter_timing_points_by_stage(stage: number) {
+function filter_measures_by_stage(stage: number) {
     let max = stage * time_per_stage
     let min = max - time_per_stage
 
-    return timing_points.value.filter(v => v >= min && v <= max).map(v => (v - min) / time_per_stage * 100)
+    return measures.value.filter(v => v >= min && v <= max).map(v => (v - min) / time_per_stage * 100)
+}
+
+function filter_beats_by_stage(stage: number) {
+    let max = stage * time_per_stage
+    let min = max - time_per_stage
+
+    return beats.value.filter(v => v >= min && v <= max).map(v => (v - min) / time_per_stage * 100)
 }
 
 function generate_timing_points() {
-    let result = [] as number[]
+    let measures = [] as number[]
+    let beats = [] as number[]
 
     let beat_length = 0;
     let numerator = 4;
@@ -297,14 +317,21 @@ function generate_timing_points() {
             }
         }
 
-        let time = beatmap.value.ControlPointInfo.Groups[i].Time
+        let time_measure = beatmap.value.ControlPointInfo.Groups[i].Time
+        while (time_measure < max) {
+            measures.push(time_measure)
+            time_measure += beat_length * numerator;
+        }
 
-        while (time < max) {
-            result.push(time)
-            time += beat_length * numerator;
+        let time_beat = beatmap.value.ControlPointInfo.Groups[i].Time
+        while (time_beat < max) {
+            for (let j = 1; j < numerator; j++) {
+                beats.push(time_beat + beat_length * j)
+            }
+            time_beat += beat_length * numerator;
         }
     }
-    return result
+    return [measures, beats]
 }
 
 
@@ -339,9 +366,11 @@ axios.get(context_get, { params: { id: id.value, name: "beatmap" } })
 
         key_count.value = d.BeatmapInfo.Difficulty.CircleSize
 
-        timing_points.value = generate_timing_points()
+        let [a, b] = generate_timing_points()
+        measures.value = a;
+        beats.value = b;
 
-        var stage_count = Math.floor((max_time.value + time_per_stage - 1) / time_per_stage)
+        let stage_count = Math.floor((max_time.value + time_per_stage - 1) / time_per_stage)
         while (stage_count < 10) {
             time_per_stage /= 2
             stage_count = Math.floor((max_time.value + time_per_stage - 1) / time_per_stage)
