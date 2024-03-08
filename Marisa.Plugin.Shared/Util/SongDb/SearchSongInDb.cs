@@ -27,6 +27,7 @@ public static class SearchSongInDb
         if (!songs.Any())
         {
             message.Reply("EMPTY");
+            return;
         }
 
         message.Reply(MessageDataImage.FromBase64(songs.RandomTake().GetImage()));
