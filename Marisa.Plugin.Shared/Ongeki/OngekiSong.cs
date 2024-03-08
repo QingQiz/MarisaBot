@@ -63,6 +63,19 @@ public class OngekiSong : Song
             .Where(c => c is not null)
             .SelectMany(c => c!.Bpm.Split('\t'))
             .Select(double.Parse).Max();
+
+        Constants.AddRange(d.Charts
+            .Where(c => c is not null)
+            .Select(c => c!.Const));
+
+        Levels.AddRange(d.Charts
+            .Select((c, i) => (c, i))
+            .Where(c => c.c is not null)
+            .Select(c => LevelAlias.Values.ElementAt(c.i)));
+
+        Charters.AddRange(d.Charts
+            .Where(c => c is not null)
+            .Select(c => c!.Creator));
     }
 
     public override string MaxLevel()
