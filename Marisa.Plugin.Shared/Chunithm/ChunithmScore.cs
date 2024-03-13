@@ -31,7 +31,7 @@ public class ChunithmScore
 
     [JsonProperty("mid", Required = Required.Always)]
     public long Id { get; set; }
-    
+
     private decimal? _rating;
 
     [JsonProperty("ra", Required = Required.Always)]
@@ -39,7 +39,7 @@ public class ChunithmScore
     {
         get => _rating ?? (decimal)(_rating = ChunithmSong.Ra(Achievement, Constant));
         // ReSharper disable once ValueParameterNotUsed
-        set { }
+        set {}
     }
 
     [JsonProperty("score", Required = Required.Always)]
@@ -48,19 +48,24 @@ public class ChunithmScore
     [JsonProperty("title", Required = Required.Always)]
     public string Title { get; set; }
 
-    private string Rank => Achievement switch
+    public static string GetRank(int achievement)
     {
-        >= 100_9000 => "sssp",
-        >= 100_7500 => "sss",
-        >= 100_5000 => "ssp",
-        >= 100_0000 => "ss",
-        >= 97_5000  => "s",
-        >= 92_5000  => "aa",
-        >= 90_0000  => "a",
-        >= 80_0000  => "bbb",
-        >= 50_0000  => "c",
-        _           => "d"
-    };
+        return achievement switch
+        {
+            >= 100_9000 => "sssp",
+            >= 100_7500 => "sss",
+            >= 100_5000 => "ssp",
+            >= 100_0000 => "ss",
+            >= 97_5000  => "s",
+            >= 92_5000  => "aa",
+            >= 90_0000  => "a",
+            >= 80_0000  => "bbb",
+            >= 50_0000  => "c",
+            _           => "d"
+        };
+    }
+
+    public string Rank => GetRank(Achievement);
 
     public Image Draw()
     {

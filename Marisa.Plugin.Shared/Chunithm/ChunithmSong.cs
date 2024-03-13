@@ -18,6 +18,25 @@ public class ChunithmSong : Song
     public new readonly string Bpm;
     public string BpmNorm => Bpm.Split(' ')[0];
 
+    public ChunithmSong(dynamic o, bool fromDivingFish)
+    {
+        Id     = o.id;
+        Title = o.title;
+        Artist = o.basic_info.artist;
+        Genre = o.basic_info.genre;
+        Version = o.basic_info.from;
+        Bpm = o.basic_info.bpm.ToString();
+        
+        for (var i = 0; i < o.level.Count; i++)
+        {
+            Constants.Add(o.ds[i]);
+            Charters.Add(o.charts[i].charter);
+            Levels.Add(o.level[i]);
+            LevelName.Add(o.level[i]);
+            MaxCombo.Add(o.charts[i].combo);
+        }
+    }
+
     public ChunithmSong(dynamic o)
     {
         Id      = o.Id;
@@ -153,7 +172,7 @@ public class ChunithmSong : Song
         { "we", "WORLD'S END" },
     };
 
-public override string GetImage()
+    public override string GetImage()
     {
         return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
         {

@@ -6,4 +6,5 @@ public class ChunithmConfiguration
 {
     public string ResourcePath { get ; set; }
     public string TempPath { get; set; }
+    public string DevToken { get; set; }
 }

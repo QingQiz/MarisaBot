@@ -42,8 +42,21 @@ public partial class ChunithmRating
 
 public class Records
 {
-    [JsonProperty("b30", Required = Required.Always)]
-    public ChunithmScore[] Best { get; set; }
+    private ChunithmScore[]? _best;
+
+    [JsonProperty("b30")]
+    public ChunithmScore[] B30
+    {
+        get => _best ?? Array.Empty<ChunithmScore>();
+        set => _best = value;
+    }
+
+    [JsonProperty("best")]
+    public ChunithmScore[] Best
+    {
+        get => _best ?? B30;
+        set => _best = value;
+    }
 
     [JsonProperty("r10", Required = Required.Always)]
     public ChunithmScore[] R10 { get; set; }

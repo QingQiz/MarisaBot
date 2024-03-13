@@ -1,4 +1,4 @@
-﻿using Flurl.Http;
+﻿using System.Text.RegularExpressions;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -7,6 +7,162 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
+    #region 汇总 / summary
+
+    [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
+    [MarisaPluginCommand("summary", "sum")]
+    private static async Task<MarisaPluginTaskState> Summary(Message message)
+    {
+        message.Reply("错误的命令格式");
+
+        return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2 或 定数")]
+    [MarisaPluginSubCommand(nameof(Summary))]
+    [MarisaPluginCommand("base", "b")]
+    private async Task<MarisaPluginTaskState> SummaryBase(Message message)
+    {
+        var constants = message.Command.Split('-').Select(x =>
+        {
+            var res = double.TryParse(x.Trim(), out var c);
+            return res ? c : -1;
+        }).ToList();
+
+        if (constants.Count is > 2 or < 1 || constants.Any(c => c < 1) || constants.Any(c => c > 16))
+        {
+            message.Reply("错误的命令格式");
+        }
+        else
+        {
+            if (constants.Count == 1)
+            {
+                constants.Add(constants[0]);
+            }
+
+            // 太大的话画图会失败，所以给判断一下
+            if (constants[1] - constants[0] > 3)
+            {
+                message.Reply("过大的跨度");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var scores = await GetAllSongScores(message);
+
+            var groupedSong = FilteredSongList
+                .Select(song => song.Constants
+                    .Select((constant, i) => (constant, i, song)))
+                .SelectMany(s => s)
+                .Where(x => x.constant >= constants[0] && x.constant <= constants[1])
+                .OrderByDescending(x => x.constant)
+                .GroupBy(x => x.constant.ToString("F1"));
+
+            var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
+
+            if (im == null)
+            {
+                message.Reply("EMPTY");
+            }
+            else
+            {
+                message.Reply(MessageDataImage.FromBase64(im.ToB64()));
+            }
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取类别的成绩汇总，参数为：类别")]
+    [MarisaPluginSubCommand(nameof(Summary))]
+    [MarisaPluginCommand("genre", "type")]
+    private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
+    {
+        var genres = FilteredSongList.Select(song => song.Genre).Distinct().ToArray();
+
+        var genre = genres.FirstOrDefault(p =>
+            string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (genre == null)
+        {
+            message.Reply("可用的类别有：\n" + string.Join('\n', genres));
+        }
+        else
+        {
+            var scores = await GetAllSongScores(message);
+
+            var groupedSong = FilteredSongList
+                .Where(song => song.Genre == genre)
+                .Select(song => song.Constants
+                    .Select((constant, i) => (constant, i, song)))
+                .SelectMany(s => s)
+                .Where(data => data.i >= 2)
+                .OrderByDescending(x => x.constant)
+                .GroupBy(x => x.song.Levels[x.i]);
+
+            var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
+
+            // 不可能是 null
+            message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]
+    [MarisaPluginSubCommand(nameof(Summary))]
+    [MarisaPluginCommand("level", "lv")]
+    private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
+    {
+        var lv = message.Command.Trim();
+
+        if (new Regex(@"^[0-9]+\+?$").IsMatch(lv))
+        {
+            var maxLv = lv.EndsWith('+') ? 14 : 15;
+            var lvNr  = lv.EndsWith('+') ? lv[..^1] : lv;
+
+            if (int.TryParse(lvNr, out var i))
+            {
+                if (!(1 <= i && i <= maxLv))
+                {
+                    goto _error;
+                }
+            }
+            else
+            {
+                goto _error;
+            }
+        }
+        else
+        {
+            goto _error;
+        }
+
+        var scores = await GetAllSongScores(message);
+
+        var groupedSong = FilteredSongList
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.song.Levels[data.i] == lv)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.constant.ToString("F1"));
+
+        var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
+
+        // 不可能是 null
+        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+
+        return MarisaPluginTaskState.CompletedTask;
+
+        // 集中处理错误
+        _error:
+        message.Reply("错误的命令格式");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
     #region 查分
 
     /// <summary>
