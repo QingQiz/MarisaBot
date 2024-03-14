@@ -69,7 +69,6 @@ function reduce_bpm(): number[] {
                 <div>乐曲名</div>
                 <div>演唱/作曲</div>
                 <div>BPM</div>
-                <div>来源</div>
                 <div>类别</div>
                 <div>版本</div>
                 <div>Boss</div>
@@ -83,7 +82,6 @@ function reduce_bpm(): number[] {
                 </div>
                 <div>{{ song.Artist }}</div>
                 <div>{{ reduce_bpm().join('-') }}</div>
-                <div>{{ song.Source }}</div>
                 <div>{{ song.Genre }}</div>
                 <div>{{ song.Version }}</div>
                 <div>Lv. {{ song.BossLevel }} - {{ song.BossCard }}</div>
