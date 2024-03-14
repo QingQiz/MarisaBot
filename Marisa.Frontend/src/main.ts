@@ -13,12 +13,14 @@ import OsuRecommend from "@/components/osu/OsuRecommend.vue";
 import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
 import WordCloud from "@/components/WordCloud/WordCloud.vue";
+import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
 
 
 const routes = [
     {path: '/', component: NotFound},
     {path: '/maimai/best', component: BestScores},
     {path: '/maimai/recommend', component: Recommend},
+    {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},

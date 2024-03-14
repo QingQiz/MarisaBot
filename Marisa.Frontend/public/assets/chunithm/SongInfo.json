@@ -508,7 +508,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1873,
         "LevelStr": "13+",
-        "Constant": 13.9,
+        "Constant": 13.7,
         "Charter": "Redarrow",
         "Bpm": "154.00"
       }
@@ -1095,11 +1095,11 @@
       },
       {
         "LevelName": "ULTIMA",
-        "MaxCombo": 0,
+        "MaxCombo": 1723,
         "LevelStr": "13+",
         "Constant": 13.7,
         "Charter": "アミノハバキリ",
-        "Bpm": "200.00"
+        "Bpm": "200 (200.00 - 205.00)"
       }
     ]
   },
@@ -1473,7 +1473,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1816,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.1,
         "Charter": "Unlimited Lemon!",
         "Bpm": "185.00"
       }
@@ -2519,7 +2519,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1821,
         "LevelStr": "13",
-        "Constant": 13.1,
+        "Constant": 13.3,
         "Charter": "Revo@LC cooperated with 譜面-100号",
         "Bpm": "136.00"
       },
@@ -2809,6 +2809,14 @@
         "Bpm": "135.00"
       },
       {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1482,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "ミニミライト",
+        "Bpm": "135.00"
+      },
+      {
         "LevelName": "WORLD'S END",
         "MaxCombo": 1259,
         "LevelStr": "？",
@@ -2845,7 +2853,7 @@
         "LevelName": "EXPERT",
         "MaxCombo": 1345,
         "LevelStr": "13",
-        "Constant": 13.1,
+        "Constant": 13.3,
         "Charter": "某S氏",
         "Bpm": "160.00"
       },
@@ -4549,6 +4557,14 @@
         "Constant": 11.7,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "210.00"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2248,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "アイマイペンギン",
+        "Bpm": "210.00"
       }
     ]
   },
@@ -5330,10 +5346,10 @@
       },
       {
         "LevelName": "ULTIMA",
-        "MaxCombo": 0,
+        "MaxCombo": 2135,
         "LevelStr": "14",
         "Constant": 14.1,
-        "Charter": "“JOKER” LEMON",
+        "Charter": "\"JOKER\"LEMON",
         "Bpm": "200.00"
       }
     ]
@@ -5675,8 +5691,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1380,
-        "LevelStr": "13",
-        "Constant": 13.1,
+        "LevelStr": "13+",
+        "Constant": 13.5,
         "Charter": "Jack",
         "Bpm": "140 (35.00 - 140.00)"
       },
@@ -5848,7 +5864,7 @@
         "MaxCombo": 1404,
         "LevelStr": "光",
         "Constant": 0.0,
-        "Charter": "【Ex】後光荒神+",
+        "Charter": "後光荒神+",
         "Bpm": "98 (48.00 - 196.00)"
       },
       {
@@ -6239,7 +6255,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1953,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.1,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "156.00"
       },
@@ -6525,7 +6541,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2512,
         "LevelStr": "14+",
-        "Constant": 14.9,
+        "Constant": 14.8,
         "Charter": "SEGA Fumen Unit[B.]",
         "Bpm": "90 (90.00 - 100.00)"
       },
@@ -6891,9 +6907,17 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1550,
-        "LevelStr": "11+",
-        "Constant": 11.9,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "某S氏",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2416,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ミストルティン＠Melee",
         "Bpm": "175.00"
       }
     ]
@@ -9567,8 +9591,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 1346,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "Piercing Blade",
         "Bpm": "144.00"
       },
@@ -12144,6 +12168,14 @@
         "Constant": 13.5,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "128 (119.00 - 159.95)"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2079,
+        "LevelStr": "14+",
+        "Constant": 14.7,
+        "Charter": "通信売□■",
+        "Bpm": "128 (119.00 - 123001.55)"
       }
     ]
   },
@@ -13576,6 +13608,14 @@
         "LevelStr": "12+",
         "Constant": 12.6,
         "Charter": "ぴちネコ",
+        "Bpm": "189 (126.00 - 252.00)"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2087,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "紅き鳳凰伝説を語り継ぎしカタストロフィ",
         "Bpm": "189 (126.00 - 252.00)"
       }
     ]
@@ -17050,7 +17090,7 @@
         "MaxCombo": 445,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "125 (125.00 - 400.00)"
       },
       {
@@ -17058,7 +17098,7 @@
         "MaxCombo": 512,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "125 (125.00 - 400.00)"
       },
       {
@@ -17066,7 +17106,7 @@
         "MaxCombo": 2140,
         "LevelStr": "13+",
         "Constant": 13.7,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "125 (125.00 - 500.00)"
       },
       {
@@ -17081,7 +17121,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1519,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.2,
         "Charter": "Welcome to mathworld.",
         "Bpm": "125 (125.00 - 400.00)"
       },
@@ -21827,6 +21867,14 @@
         "Constant": 15.0,
         "Charter": "MSИ-00100",
         "Bpm": "210 (210.00 - 240.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2834,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "MSИ-006",
+        "Bpm": "210 (210.00 - 240.00)"
       }
     ]
   },
@@ -22399,6 +22447,14 @@
         "LevelStr": "11+",
         "Constant": 11.9,
         "Charter": "タマゴのお考え",
+        "Bpm": "182.00"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2651,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "ピリ辛勇者ミニミ",
         "Bpm": "182.00"
       }
     ]
@@ -24807,7 +24863,7 @@
         "MaxCombo": 1614,
         "LevelStr": "光",
         "Constant": 0.0,
-        "Charter": "【Ex】ポコらないダイブ",
+        "Charter": "ポコらないダイブ",
         "Bpm": "176.00"
       },
       {
@@ -31313,6 +31369,14 @@
         "Bpm": "180.00"
       },
       {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1881,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "\"Beyond The Future\"",
+        "Bpm": "180.00"
+      },
+      {
         "LevelName": "WORLD'S END",
         "MaxCombo": 931,
         "LevelStr": "招",
@@ -32195,6 +32259,14 @@
         "LevelStr": "13",
         "Constant": 13.3,
         "Charter": "Moon Strix",
+        "Bpm": "188.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 1968,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "マ？",
         "Bpm": "188.00"
       }
     ]
@@ -38537,7 +38609,7 @@
         "MaxCombo": 3435,
         "LevelStr": "光",
         "Constant": 0.0,
-        "Charter": "【Ex】-Shining Notes of the SeelischScore-",
+        "Charter": "-Shining Notes of the SeelischScore-",
         "Bpm": "190 (175.00 - 190.00)"
       }
     ]
@@ -39826,6 +39898,14 @@
         "Constant": 14.6,
         "Charter": "A Lucidness",
         "Bpm": "168.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2356,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "Xr'oss Fortune",
+        "Bpm": "168.00"
       }
     ]
   },
@@ -39864,7 +39944,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3390,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.1,
         "Charter": "Magistrate -for KoP2020-",
         "Bpm": "110 (110.00 - 2020.00)"
       }
@@ -42315,7 +42395,7 @@
         "LevelName": "EXPERT",
         "MaxCombo": 2134,
         "LevelStr": "14",
-        "Constant": 14.4,
+        "Constant": 14.3,
         "Charter": "Redarrow",
         "Bpm": "180.00"
       },
@@ -43138,6 +43218,14 @@
         "Constant": 12.2,
         "Charter": "Redarrow",
         "Bpm": "138.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 1060,
+        "LevelStr": "招",
+        "Constant": 0.0,
+        "Charter": "MASTER／LV.29",
+        "Bpm": "138.00"
       }
     ]
   },
@@ -43440,7 +43528,7 @@
         "MaxCombo": 623,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "210.00"
       },
       {
@@ -43448,7 +43536,7 @@
         "MaxCombo": 995,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "210.00"
       },
       {
@@ -44947,7 +45035,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2693,
         "LevelStr": "14+",
-        "Constant": 14.9,
+        "Constant": 14.8,
         "Charter": "|v|0/V0<[_0<|X",
         "Bpm": "225.00"
       },
@@ -45917,6 +46005,14 @@
         "Constant": 11.9,
         "Charter": "じゃこレモン＠攻略中",
         "Bpm": "145 (145.00 - 150.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 4643,
+        "LevelStr": "割",
+        "Constant": 0.0,
+        "Charter": "WORLD'S ENDへようこそ♪",
+        "Bpm": "145 (145.00 - 150.00)"
       }
     ]
   },
@@ -46545,7 +46641,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1478,
         "LevelStr": "11+",
-        "Constant": 11.7,
+        "Constant": 11.8,
         "Charter": "Techno Kitchen",
         "Bpm": "138.00"
       }
@@ -48547,7 +48643,7 @@
         "MaxCombo": 396,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -48555,7 +48651,7 @@
         "MaxCombo": 846,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "150.00"
       },
       {
@@ -48588,7 +48684,7 @@
         "MaxCombo": 382,
         "LevelStr": "1",
         "Constant": 1.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "82.00"
       },
       {
@@ -48596,7 +48692,7 @@
         "MaxCombo": 647,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "82.00"
       },
       {
@@ -48604,7 +48700,7 @@
         "MaxCombo": 1012,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "82.00"
       },
       {
@@ -48629,7 +48725,7 @@
         "MaxCombo": 440,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "170.00"
       },
       {
@@ -48637,7 +48733,7 @@
         "MaxCombo": 873,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "170.00"
       },
       {
@@ -48652,7 +48748,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1923,
         "LevelStr": "13+",
-        "Constant": 13.9,
+        "Constant": 13.8,
         "Charter": "ミストルティン",
         "Bpm": "170.00"
       }
@@ -48670,7 +48766,7 @@
         "MaxCombo": 533,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -48678,7 +48774,7 @@
         "MaxCombo": 786,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "190.00"
       },
       {
@@ -48711,7 +48807,7 @@
         "MaxCombo": 407,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -48719,7 +48815,7 @@
         "MaxCombo": 723,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "150.00"
       },
       {
@@ -48752,7 +48848,7 @@
         "MaxCombo": 426,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "133.00"
       },
       {
@@ -48760,7 +48856,7 @@
         "MaxCombo": 651,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "133.00"
       },
       {
@@ -49147,6 +49243,14 @@
         "Constant": 12.5,
         "Charter": "[チュウニ学園] フェニックスレッド",
         "Bpm": "114.5 (91.50 - 170.00)"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2277,
+        "LevelStr": "両",
+        "Constant": 0.0,
+        "Charter": "ADVANCED/EXPERT",
+        "Bpm": "114.5 (91.50 - 170.00)"
       }
     ]
   },
@@ -49317,7 +49421,7 @@
         "MaxCombo": 2122,
         "LevelStr": "撃",
         "Constant": 0.0,
-        "Charter": "【Ex】千夏ふるぱわーーー！",
+        "Charter": "千夏ふるぱわーーー！",
         "Bpm": "130.00"
       }
     ]
@@ -49940,7 +50044,7 @@
         "MaxCombo": 2153,
         "LevelStr": "狂",
         "Constant": 0.0,
-        "Charter": "【Ex】千夏ストリーム！",
+        "Charter": "千夏ストリーム！",
         "Bpm": "184.00"
       }
     ]
@@ -50475,6 +50579,14 @@
         "Constant": 12.6,
         "Charter": "大奉行になったらね",
         "Bpm": "176.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2998,
+        "LevelStr": "敷",
+        "Constant": 0.0,
+        "Charter": "シク・ヴ・プレジデント",
+        "Bpm": "176.00"
       }
     ]
   },
@@ -50989,7 +51101,7 @@
         "MaxCombo": 2149,
         "LevelStr": "12+",
         "Constant": 12.9,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "185.00"
       }
     ]
@@ -51070,7 +51182,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1490,
         "LevelStr": "13+",
-        "Constant": 13.7,
+        "Constant": 13.8,
         "Charter": "ミストルティン",
         "Bpm": "148.00"
       }
@@ -51234,7 +51346,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1950,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.1,
         "Charter": "ス゜イロ゜ウヤ゜",
         "Bpm": "128 (128.00 - 256.00)"
       }
@@ -51274,8 +51386,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1906,
-        "LevelStr": "14+",
-        "Constant": 14.5,
+        "LevelStr": "14",
+        "Constant": 14.3,
         "Charter": "すきやき奉行",
         "Bpm": "195.00"
       }
@@ -51399,7 +51511,7 @@
         "MaxCombo": 2065,
         "LevelStr": "13",
         "Constant": 13.4,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "172.00"
       }
     ]
@@ -51440,7 +51552,7 @@
         "MaxCombo": 1524,
         "LevelStr": "12+",
         "Constant": 12.5,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "256.00"
       }
     ]
@@ -51563,7 +51675,7 @@
         "MaxCombo": 1286,
         "LevelStr": "12+",
         "Constant": 12.6,
-        "Charter": "【Ex】Magistr4te",
+        "Charter": "Magistr4te",
         "Bpm": "128.00"
       }
     ]
@@ -51645,7 +51757,7 @@
         "MaxCombo": 1884,
         "LevelStr": "13+",
         "Constant": 13.7,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "141.00"
       }
     ]
@@ -51949,7 +52061,7 @@
         "MaxCombo": 533,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "194.00"
       },
       {
@@ -51957,7 +52069,7 @@
         "MaxCombo": 822,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "194.00"
       },
       {
@@ -51990,7 +52102,7 @@
         "MaxCombo": 372,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "240.00"
       },
       {
@@ -51998,7 +52110,7 @@
         "MaxCombo": 573,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "240.00"
       },
       {
@@ -52031,7 +52143,7 @@
         "MaxCombo": 478,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "225.00"
       },
       {
@@ -52039,7 +52151,7 @@
         "MaxCombo": 899,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "225.00"
       },
       {
@@ -52072,7 +52184,7 @@
         "MaxCombo": 527,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "191.97"
       },
       {
@@ -52080,7 +52192,7 @@
         "MaxCombo": 818,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "191.97"
       },
       {
@@ -52113,7 +52225,7 @@
         "MaxCombo": 432,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "170.00"
       },
       {
@@ -52121,7 +52233,7 @@
         "MaxCombo": 743,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "170.00"
       },
       {
@@ -52154,7 +52266,7 @@
         "MaxCombo": 499,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "135.00"
       },
       {
@@ -52162,7 +52274,7 @@
         "MaxCombo": 851,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "135.00"
       },
       {
@@ -52195,7 +52307,7 @@
         "MaxCombo": 454,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "140.00"
       },
       {
@@ -52203,7 +52315,7 @@
         "MaxCombo": 756,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "140.00"
       },
       {
@@ -52236,7 +52348,7 @@
         "MaxCombo": 603,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "212.00"
       },
       {
@@ -52244,7 +52356,7 @@
         "MaxCombo": 897,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "212.00"
       },
       {
@@ -52277,7 +52389,7 @@
         "MaxCombo": 727,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "204.00"
       },
       {
@@ -52285,7 +52397,7 @@
         "MaxCombo": 1007,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "204.00"
       },
       {
@@ -52318,7 +52430,7 @@
         "MaxCombo": 502,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "136 (136.00 - 181.00)"
       },
       {
@@ -52326,7 +52438,7 @@
         "MaxCombo": 956,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "136 (136.00 - 181.00)"
       },
       {
@@ -52342,7 +52454,7 @@
         "MaxCombo": 2206,
         "LevelStr": "14+",
         "Constant": 14.6,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "136 (136.00 - 181.00)"
       }
     ]
@@ -52359,7 +52471,7 @@
         "MaxCombo": 423,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -52367,7 +52479,7 @@
         "MaxCombo": 773,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "150.00"
       },
       {
@@ -52400,7 +52512,7 @@
         "MaxCombo": 546,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "142.00"
       },
       {
@@ -52408,7 +52520,7 @@
         "MaxCombo": 741,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "142.00"
       },
       {
@@ -52441,7 +52553,7 @@
         "MaxCombo": 478,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "202.00"
       },
       {
@@ -52449,7 +52561,7 @@
         "MaxCombo": 1020,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "202.00"
       },
       {
@@ -52482,7 +52594,7 @@
         "MaxCombo": 602,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "206.00"
       },
       {
@@ -52490,7 +52602,7 @@
         "MaxCombo": 1015,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "206.00"
       },
       {
@@ -52523,7 +52635,7 @@
         "MaxCombo": 592,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "187.00"
       },
       {
@@ -52531,7 +52643,7 @@
         "MaxCombo": 966,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "187.00"
       },
       {
@@ -52564,7 +52676,7 @@
         "MaxCombo": 355,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "124.00"
       },
       {
@@ -52572,7 +52684,7 @@
         "MaxCombo": 620,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "124.00"
       },
       {
@@ -52605,7 +52717,7 @@
         "MaxCombo": 467,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "155.00"
       },
       {
@@ -52613,7 +52725,7 @@
         "MaxCombo": 818,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "155.00"
       },
       {
@@ -52646,7 +52758,7 @@
         "MaxCombo": 551,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "113 (113.00 - 116.00)"
       },
       {
@@ -52654,7 +52766,7 @@
         "MaxCombo": 1024,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "113 (113.00 - 116.00)"
       },
       {
@@ -52687,7 +52799,7 @@
         "MaxCombo": 457,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "257 (257.00 - 290.00)"
       },
       {
@@ -52695,7 +52807,7 @@
         "MaxCombo": 926,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "257 (257.00 - 290.00)"
       },
       {
@@ -52728,7 +52840,7 @@
         "MaxCombo": 614,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "210.00"
       },
       {
@@ -52736,7 +52848,7 @@
         "MaxCombo": 1049,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "210.00"
       },
       {
@@ -52769,7 +52881,7 @@
         "MaxCombo": 483,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "185.00"
       },
       {
@@ -52777,7 +52889,7 @@
         "MaxCombo": 799,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "185.00"
       },
       {
@@ -52793,7 +52905,7 @@
         "MaxCombo": 2108,
         "LevelStr": "14+",
         "Constant": 14.6,
-        "Charter": "【Ex】MOON STRIX!!",
+        "Charter": "MOON STRIX!!",
         "Bpm": "185.00"
       }
     ]
@@ -52810,7 +52922,7 @@
         "MaxCombo": 430,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -52818,7 +52930,7 @@
         "MaxCombo": 788,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -52834,7 +52946,7 @@
         "MaxCombo": 1747,
         "LevelStr": "14",
         "Constant": 14.2,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "160.00"
       }
     ]
@@ -52851,7 +52963,7 @@
         "MaxCombo": 583,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "163.00"
       },
       {
@@ -52859,7 +52971,7 @@
         "MaxCombo": 1022,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "163.00"
       },
       {
@@ -52892,7 +53004,7 @@
         "MaxCombo": 414,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "144.00"
       },
       {
@@ -52900,7 +53012,7 @@
         "MaxCombo": 608,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "144.00"
       },
       {
@@ -52933,7 +53045,7 @@
         "MaxCombo": 430,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "126.00"
       },
       {
@@ -52941,7 +53053,7 @@
         "MaxCombo": 630,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "126.00"
       },
       {
@@ -52974,7 +53086,7 @@
         "MaxCombo": 525,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "186.00"
       },
       {
@@ -52982,7 +53094,7 @@
         "MaxCombo": 889,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "186.00"
       },
       {
@@ -52990,7 +53102,7 @@
         "MaxCombo": 1738,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "186.00"
       },
       {
@@ -53015,7 +53127,7 @@
         "MaxCombo": 474,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "276 (276.00 - 370.00)"
       },
       {
@@ -53023,7 +53135,7 @@
         "MaxCombo": 721,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "276 (276.00 - 370.00)"
       },
       {
@@ -53056,7 +53168,7 @@
         "MaxCombo": 609,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "183.00"
       },
       {
@@ -53064,7 +53176,7 @@
         "MaxCombo": 1056,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "183.00"
       },
       {
@@ -53072,7 +53184,7 @@
         "MaxCombo": 1721,
         "LevelStr": "10+",
         "Constant": 10.9,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "183.00"
       },
       {
@@ -53097,7 +53209,7 @@
         "MaxCombo": 444,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -53105,7 +53217,7 @@
         "MaxCombo": 713,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "150.00"
       },
       {
@@ -53146,7 +53258,7 @@
         "MaxCombo": 552,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "197 (197.00 - 227.00)"
       },
       {
@@ -53154,7 +53266,7 @@
         "MaxCombo": 1730,
         "LevelStr": "12",
         "Constant": 12.3,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "197 (197.00 - 227.00)"
       },
       {
@@ -53187,7 +53299,7 @@
         "MaxCombo": 787,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "111 (111.00 - 222.00)"
       },
       {
@@ -53195,7 +53307,7 @@
         "MaxCombo": 2424,
         "LevelStr": "12",
         "Constant": 12.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "111 (111.00 - 222.00)"
       },
       {
@@ -53203,7 +53315,7 @@
         "MaxCombo": 2560,
         "LevelStr": "14",
         "Constant": 14.3,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "111 (111.00 - 222.00)"
       },
       {
@@ -53228,7 +53340,7 @@
         "MaxCombo": 405,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "200.00"
       },
       {
@@ -53236,7 +53348,7 @@
         "MaxCombo": 669,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "200.00"
       },
       {
@@ -53250,9 +53362,9 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1872,
-        "LevelStr": "13+",
-        "Constant": 13.9,
-        "Charter": "【Ex】りょっかとレモン",
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "りょっかとレモン",
         "Bpm": "200.00"
       }
     ]
@@ -53269,7 +53381,7 @@
         "MaxCombo": 399,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "86 (86.00 - 136.00)"
       },
       {
@@ -53277,7 +53389,7 @@
         "MaxCombo": 615,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "86 (86.00 - 136.00)"
       },
       {
@@ -53310,7 +53422,7 @@
         "MaxCombo": 422,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "158.00"
       },
       {
@@ -53318,7 +53430,7 @@
         "MaxCombo": 652,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "158.00"
       },
       {
@@ -53351,7 +53463,7 @@
         "MaxCombo": 417,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "144.00"
       },
       {
@@ -53359,7 +53471,7 @@
         "MaxCombo": 666,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "144.00"
       },
       {
@@ -53392,7 +53504,7 @@
         "MaxCombo": 560,
         "LevelStr": "1",
         "Constant": 1.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "105.00"
       },
       {
@@ -53400,7 +53512,7 @@
         "MaxCombo": 983,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "105.00"
       },
       {
@@ -53638,7 +53750,7 @@
         "MaxCombo": 536,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "163.00"
       },
       {
@@ -53646,7 +53758,7 @@
         "MaxCombo": 846,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "163.00"
       },
       {
@@ -53679,7 +53791,7 @@
         "MaxCombo": 420,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "110 (110.00 - 156.00)"
       },
       {
@@ -53687,7 +53799,7 @@
         "MaxCombo": 918,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "110 (110.00 - 156.00)"
       },
       {
@@ -53703,7 +53815,7 @@
         "MaxCombo": 2090,
         "LevelStr": "13+",
         "Constant": 13.7,
-        "Charter": "【Ex】譜面-100ミ",
+        "Charter": "譜面-100ミ",
         "Bpm": "110 (110.00 - 156.00)"
       }
     ]
@@ -53720,7 +53832,7 @@
         "MaxCombo": 456,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "168.00"
       },
       {
@@ -53728,7 +53840,7 @@
         "MaxCombo": 715,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "168.00"
       },
       {
@@ -53743,7 +53855,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2250,
         "LevelStr": "13",
-        "Constant": 13.1,
+        "Constant": 13.2,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "168.00"
       }
@@ -53761,7 +53873,7 @@
         "MaxCombo": 426,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "140.00"
       },
       {
@@ -53769,7 +53881,7 @@
         "MaxCombo": 672,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "140.00"
       },
       {
@@ -53802,7 +53914,7 @@
         "MaxCombo": 439,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "300.00"
       },
       {
@@ -53810,7 +53922,7 @@
         "MaxCombo": 575,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "300.00"
       },
       {
@@ -53826,7 +53938,7 @@
         "MaxCombo": 1633,
         "LevelStr": "13",
         "Constant": 13.0,
-        "Charter": "【Ex】みそかつ侍",
+        "Charter": "みそかつ侍",
         "Bpm": "300.00"
       }
     ]
@@ -53843,7 +53955,7 @@
         "MaxCombo": 363,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "156.00"
       },
       {
@@ -53851,7 +53963,7 @@
         "MaxCombo": 625,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "156.00"
       },
       {
@@ -53884,7 +53996,7 @@
         "MaxCombo": 345,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "125.00"
       },
       {
@@ -53892,7 +54004,7 @@
         "MaxCombo": 647,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "125.00"
       },
       {
@@ -53908,7 +54020,7 @@
         "MaxCombo": 1289,
         "LevelStr": "12+",
         "Constant": 12.7,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "125.00"
       },
       {
@@ -53933,7 +54045,7 @@
         "MaxCombo": 552,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "163 (163.00 - 195.00)"
       },
       {
@@ -53941,7 +54053,7 @@
         "MaxCombo": 904,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "163 (163.00 - 195.00)"
       },
       {
@@ -53974,7 +54086,7 @@
         "MaxCombo": 315,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "142.00"
       },
       {
@@ -53982,7 +54094,7 @@
         "MaxCombo": 544,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "142.00"
       },
       {
@@ -54015,7 +54127,7 @@
         "MaxCombo": 386,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -54023,7 +54135,7 @@
         "MaxCombo": 721,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -54056,7 +54168,7 @@
         "MaxCombo": 252,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "142.00"
       },
       {
@@ -54064,7 +54176,7 @@
         "MaxCombo": 488,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "142.00"
       },
       {
@@ -54097,7 +54209,7 @@
         "MaxCombo": 383,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "172 (160.00 - 180.00)"
       },
       {
@@ -54105,7 +54217,7 @@
         "MaxCombo": 829,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "172 (160.00 - 180.00)"
       },
       {
@@ -54121,7 +54233,7 @@
         "MaxCombo": 1522,
         "LevelStr": "13+",
         "Constant": 13.7,
-        "Charter": "【Ex】ミストルティン＠笑顔の魔法使い",
+        "Charter": "ミストルティン＠笑顔の魔法使い",
         "Bpm": "172 (160.00 - 180.00)"
       }
     ]
@@ -54138,7 +54250,7 @@
         "MaxCombo": 374,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -54146,7 +54258,7 @@
         "MaxCombo": 605,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】 rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -54162,7 +54274,7 @@
         "MaxCombo": 1579,
         "LevelStr": "13+",
         "Constant": 13.9,
-        "Charter": "【Ex】じゃこーレット警察、出動!!",
+        "Charter": "じゃこーレット警察、出動!!",
         "Bpm": "160.00"
       }
     ]
@@ -54179,7 +54291,7 @@
         "MaxCombo": 375,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "181.00"
       },
       {
@@ -54187,7 +54299,7 @@
         "MaxCombo": 573,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "181.00"
       },
       {
@@ -54220,7 +54332,7 @@
         "MaxCombo": 398,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "132.00"
       },
       {
@@ -54228,7 +54340,7 @@
         "MaxCombo": 608,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "132.00"
       },
       {
@@ -54236,7 +54348,7 @@
         "MaxCombo": 1075,
         "LevelStr": "10",
         "Constant": 10.0,
-        "Charter": "【Ex】Redarrow",
+        "Charter": "Redarrow",
         "Bpm": "132.00"
       },
       {
@@ -54244,7 +54356,7 @@
         "MaxCombo": 1496,
         "LevelStr": "14",
         "Constant": 14.4,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "132.00"
       }
     ]
@@ -54261,7 +54373,7 @@
         "MaxCombo": 430,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "155.00"
       },
       {
@@ -54269,7 +54381,7 @@
         "MaxCombo": 816,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "155.00"
       },
       {
@@ -54302,7 +54414,7 @@
         "MaxCombo": 573,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "187.00"
       },
       {
@@ -54310,7 +54422,7 @@
         "MaxCombo": 973,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "187.00"
       },
       {
@@ -54343,7 +54455,7 @@
         "MaxCombo": 419,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -54351,7 +54463,7 @@
         "MaxCombo": 1071,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -54384,7 +54496,7 @@
         "MaxCombo": 508,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -54392,7 +54504,7 @@
         "MaxCombo": 885,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -54425,7 +54537,7 @@
         "MaxCombo": 513,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "158.00"
       },
       {
@@ -54433,7 +54545,7 @@
         "MaxCombo": 996,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "158.00"
       },
       {
@@ -54466,7 +54578,7 @@
         "MaxCombo": 508,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "207.00"
       },
       {
@@ -54474,7 +54586,7 @@
         "MaxCombo": 867,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "207.00"
       },
       {
@@ -54507,7 +54619,7 @@
         "MaxCombo": 402,
         "LevelStr": "1",
         "Constant": 1.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "96.00"
       },
       {
@@ -54515,7 +54627,7 @@
         "MaxCombo": 573,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "96.00"
       },
       {
@@ -54531,7 +54643,7 @@
         "MaxCombo": 1211,
         "LevelStr": "12",
         "Constant": 12.3,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "96.00"
       }
     ]
@@ -54548,7 +54660,7 @@
         "MaxCombo": 415,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -54556,7 +54668,7 @@
         "MaxCombo": 808,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "160.00"
       },
       {
@@ -54589,7 +54701,7 @@
         "MaxCombo": 486,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "192.00"
       },
       {
@@ -54597,7 +54709,7 @@
         "MaxCombo": 818,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "192.00"
       },
       {
@@ -54630,7 +54742,7 @@
         "MaxCombo": 524,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "213.00"
       },
       {
@@ -54638,7 +54750,7 @@
         "MaxCombo": 965,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "213.00"
       },
       {
@@ -54654,7 +54766,7 @@
         "MaxCombo": 2200,
         "LevelStr": "14",
         "Constant": 14.0,
-        "Charter": "【Ex】Revo@LC",
+        "Charter": "Revo@LC",
         "Bpm": "213.00"
       }
     ]
@@ -54671,7 +54783,7 @@
         "MaxCombo": 542,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -54679,7 +54791,7 @@
         "MaxCombo": 1114,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "190.00"
       },
       {
@@ -54712,7 +54824,7 @@
         "MaxCombo": 717,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "165 (50.00 - 230.00)"
       },
       {
@@ -54720,7 +54832,7 @@
         "MaxCombo": 1305,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "165 (50.00 - 230.00)"
       },
       {
@@ -54753,7 +54865,7 @@
         "MaxCombo": 574,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "184.00"
       },
       {
@@ -54761,7 +54873,7 @@
         "MaxCombo": 864,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "184.00"
       },
       {
@@ -54794,7 +54906,7 @@
         "MaxCombo": 393,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "132.00"
       },
       {
@@ -54802,7 +54914,7 @@
         "MaxCombo": 605,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "132.00"
       },
       {
@@ -54835,7 +54947,7 @@
         "MaxCombo": 493,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "168.00"
       },
       {
@@ -54843,7 +54955,7 @@
         "MaxCombo": 919,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "168.00"
       },
       {
@@ -54876,7 +54988,7 @@
         "MaxCombo": 430,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "170.00"
       },
       {
@@ -54884,7 +54996,7 @@
         "MaxCombo": 927,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "170.00"
       },
       {
@@ -54917,7 +55029,7 @@
         "MaxCombo": 446,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "290.00"
       },
       {
@@ -54925,7 +55037,7 @@
         "MaxCombo": 882,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "290.00"
       },
       {
@@ -54941,7 +55053,7 @@
         "MaxCombo": 1954,
         "LevelStr": "14",
         "Constant": 14.2,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "290.00"
       },
       {
@@ -54966,7 +55078,7 @@
         "MaxCombo": 508,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "158.00"
       },
       {
@@ -54974,7 +55086,7 @@
         "MaxCombo": 955,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "158.00"
       },
       {
@@ -55007,7 +55119,7 @@
         "MaxCombo": 455,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "173.00"
       },
       {
@@ -55015,7 +55127,7 @@
         "MaxCombo": 839,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "173.00"
       },
       {
@@ -55023,7 +55135,7 @@
         "MaxCombo": 1184,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "173.00"
       },
       {
@@ -55048,7 +55160,7 @@
         "MaxCombo": 595,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "210.00"
       },
       {
@@ -55056,7 +55168,7 @@
         "MaxCombo": 1141,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "210.00"
       },
       {
@@ -55089,7 +55201,7 @@
         "MaxCombo": 480,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "186.00"
       },
       {
@@ -55097,7 +55209,7 @@
         "MaxCombo": 1095,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "186.00"
       },
       {
@@ -55130,7 +55242,7 @@
         "MaxCombo": 638,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "186.00"
       },
       {
@@ -55138,7 +55250,7 @@
         "MaxCombo": 992,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "186.00"
       },
       {
@@ -55171,7 +55283,7 @@
         "MaxCombo": 578,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "167.00"
       },
       {
@@ -55179,7 +55291,7 @@
         "MaxCombo": 871,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "167.00"
       },
       {
@@ -55195,7 +55307,7 @@
         "MaxCombo": 1908,
         "LevelStr": "12",
         "Constant": 12.2,
-        "Charter": "【Ex】Techno K!tchen",
+        "Charter": "Techno K!tchen",
         "Bpm": "167.00"
       }
     ]
@@ -55212,7 +55324,7 @@
         "MaxCombo": 472,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190 (125.00 - 400.00)"
       },
       {
@@ -55220,7 +55332,7 @@
         "MaxCombo": 1031,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "190 (125.00 - 400.00)"
       },
       {
@@ -55228,7 +55340,7 @@
         "MaxCombo": 1685,
         "LevelStr": "10+",
         "Constant": 10.5,
-        "Charter": "【Ex】そらいろカリン supported by Techno Kitchen",
+        "Charter": "そらいろカリン supported by Techno Kitchen",
         "Bpm": "190 (125.00 - 400.00)"
       },
       {
@@ -55236,7 +55348,7 @@
         "MaxCombo": 3067,
         "LevelStr": "14",
         "Constant": 14.3,
-        "Charter": "【Ex】「猫」(CV：ぴちネコ）",
+        "Charter": "「猫」(CV：ぴちネコ）",
         "Bpm": "190 (125.00 - 400.00)"
       }
     ]
@@ -55253,7 +55365,7 @@
         "MaxCombo": 577,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "188.00"
       },
       {
@@ -55261,7 +55373,7 @@
         "MaxCombo": 1191,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "188.00"
       },
       {
@@ -55294,7 +55406,7 @@
         "MaxCombo": 433,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "100.00"
       },
       {
@@ -55302,7 +55414,7 @@
         "MaxCombo": 806,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "100.00"
       },
       {
@@ -55318,7 +55430,7 @@
         "MaxCombo": 1593,
         "LevelStr": "11+",
         "Constant": 11.7,
-        "Charter": "【Ex】Techno Kitchen and ミストルティン",
+        "Charter": "Techno Kitchen and ミストルティン",
         "Bpm": "100.00"
       }
     ]
@@ -55335,7 +55447,7 @@
         "MaxCombo": 783,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "228.00"
       },
       {
@@ -55343,7 +55455,7 @@
         "MaxCombo": 1343,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "228.00"
       },
       {
@@ -55351,7 +55463,7 @@
         "MaxCombo": 1857,
         "LevelStr": "13+",
         "Constant": 13.6,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "228.00"
       },
       {
@@ -55376,7 +55488,7 @@
         "MaxCombo": 456,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "172.00"
       },
       {
@@ -55384,7 +55496,7 @@
         "MaxCombo": 1037,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "172.00"
       },
       {
@@ -55622,7 +55734,7 @@
         "MaxCombo": 472,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "197.00"
       },
       {
@@ -55630,7 +55742,7 @@
         "MaxCombo": 776,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "197.00"
       },
       {
@@ -55663,7 +55775,7 @@
         "MaxCombo": 347,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "115.00"
       },
       {
@@ -55671,7 +55783,7 @@
         "MaxCombo": 498,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "115.00"
       },
       {
@@ -55704,7 +55816,7 @@
         "MaxCombo": 286,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "168.00"
       },
       {
@@ -55712,7 +55824,7 @@
         "MaxCombo": 653,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "168.00"
       },
       {
@@ -55745,7 +55857,7 @@
         "MaxCombo": 351,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "163.00"
       },
       {
@@ -55753,7 +55865,7 @@
         "MaxCombo": 769,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "163.00"
       },
       {
@@ -55786,7 +55898,7 @@
         "MaxCombo": 537,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -55794,7 +55906,7 @@
         "MaxCombo": 1108,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "190.00"
       },
       {
@@ -55827,7 +55939,7 @@
         "MaxCombo": 507,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "170 (112.00 - 170.00)"
       },
       {
@@ -55835,7 +55947,7 @@
         "MaxCombo": 775,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "170 (112.00 - 170.00)"
       },
       {
@@ -55843,7 +55955,7 @@
         "MaxCombo": 1283,
         "LevelStr": "10+",
         "Constant": 10.5,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "170 (112.00 - 170.00)"
       },
       {
@@ -55868,7 +55980,7 @@
         "MaxCombo": 376,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "140.00"
       },
       {
@@ -55876,7 +55988,7 @@
         "MaxCombo": 837,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "140.00"
       },
       {
@@ -55892,8 +56004,49 @@
         "MaxCombo": 1533,
         "LevelStr": "13+",
         "Constant": 13.8,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "140.00"
+      }
+    ]
+  },
+  {
+    "Id": 2309,
+    "Title": "Let's Starry Party！",
+    "Artist": "曲：原田篤（Arte Refact）／歌：⊿TRiEDGE [高瀬 梨緒(CV：久保 ユリカ)、結城 莉玖(CV：朝日奈 丸佳)、藍原 椿(CV：橋本 ちなみ)]",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 644,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "ミニミライト",
+        "Bpm": "108.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 966,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "108.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1489,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "そらいろカリン",
+        "Bpm": "108.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2062,
+        "LevelStr": "12",
+        "Constant": 12.4,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "108.00"
       }
     ]
   },
@@ -55909,7 +56062,7 @@
         "MaxCombo": 577,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "185.00"
       },
       {
@@ -55917,7 +56070,7 @@
         "MaxCombo": 916,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "185.00"
       },
       {
@@ -55933,7 +56086,7 @@
         "MaxCombo": 2148,
         "LevelStr": "13",
         "Constant": 13.3,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "185.00"
       }
     ]
@@ -55950,7 +56103,7 @@
         "MaxCombo": 522,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "200 (200.00 - 274.00)"
       },
       {
@@ -55958,7 +56111,7 @@
         "MaxCombo": 1134,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "200 (200.00 - 274.00)"
       },
       {
@@ -55991,7 +56144,7 @@
         "MaxCombo": 614,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "202.00"
       },
       {
@@ -55999,7 +56152,7 @@
         "MaxCombo": 1068,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "202.00"
       },
       {
@@ -56015,7 +56168,7 @@
         "MaxCombo": 1783,
         "LevelStr": "13",
         "Constant": 13.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "202.00"
       }
     ]
@@ -56032,7 +56185,7 @@
         "MaxCombo": 334,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "129 (129.00 - 197.00)"
       },
       {
@@ -56040,7 +56193,7 @@
         "MaxCombo": 743,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "129 (129.00 - 197.00)"
       },
       {
@@ -56073,7 +56226,7 @@
         "MaxCombo": 468,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "158.00"
       },
       {
@@ -56081,7 +56234,7 @@
         "MaxCombo": 916,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "158.00"
       },
       {
@@ -56114,7 +56267,7 @@
         "MaxCombo": 515,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "188.00"
       },
       {
@@ -56122,7 +56275,7 @@
         "MaxCombo": 977,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "188.00"
       },
       {
@@ -56155,7 +56308,7 @@
         "MaxCombo": 409,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "138.00"
       },
       {
@@ -56163,7 +56316,7 @@
         "MaxCombo": 796,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "138.00"
       },
       {
@@ -56196,7 +56349,7 @@
         "MaxCombo": 483,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "220.00"
       },
       {
@@ -56204,7 +56357,7 @@
         "MaxCombo": 966,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "220.00"
       },
       {
@@ -56237,7 +56390,7 @@
         "MaxCombo": 402,
         "LevelStr": "1",
         "Constant": 1.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "112.00"
       },
       {
@@ -56245,14 +56398,14 @@
         "MaxCombo": 616,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "112.00"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 920,
-        "LevelStr": "8",
-        "Constant": 8.0,
+        "LevelStr": "8+",
+        "Constant": 8.5,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "112.00"
       },
@@ -56278,7 +56431,7 @@
         "MaxCombo": 519,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "156.00"
       },
       {
@@ -56286,7 +56439,7 @@
         "MaxCombo": 988,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "156.00"
       },
       {
@@ -56319,7 +56472,7 @@
         "MaxCombo": 599,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "186.00"
       },
       {
@@ -56327,7 +56480,7 @@
         "MaxCombo": 1095,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "186.00"
       },
       {
@@ -56360,7 +56513,7 @@
         "MaxCombo": 395,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "134.00"
       },
       {
@@ -56368,7 +56521,7 @@
         "MaxCombo": 768,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "134.00"
       },
       {
@@ -56401,7 +56554,7 @@
         "MaxCombo": 551,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "175.00"
       },
       {
@@ -56409,14 +56562,14 @@
         "MaxCombo": 999,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "175.00"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1739,
-        "LevelStr": "8+",
-        "Constant": 8.5,
+        "LevelStr": "9",
+        "Constant": 9.0,
         "Charter": "ミストルティン",
         "Bpm": "175.00"
       },
@@ -56425,7 +56578,7 @@
         "MaxCombo": 2309,
         "LevelStr": "13+",
         "Constant": 13.5,
-        "Charter": "【Ex】レッドアロー隊長",
+        "Charter": "レッドアロー隊長",
         "Bpm": "175.00"
       },
       {
@@ -56450,7 +56603,7 @@
         "MaxCombo": 384,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "168.00"
       },
       {
@@ -56458,7 +56611,7 @@
         "MaxCombo": 655,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "168.00"
       },
       {
@@ -56474,7 +56627,7 @@
         "MaxCombo": 1523,
         "LevelStr": "13",
         "Constant": 13.4,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "168.00"
       }
     ]
@@ -56491,7 +56644,7 @@
         "MaxCombo": 447,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -56499,7 +56652,7 @@
         "MaxCombo": 743,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "150.00"
       },
       {
@@ -56532,7 +56685,7 @@
         "MaxCombo": 435,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "140.00"
       },
       {
@@ -56540,7 +56693,7 @@
         "MaxCombo": 1049,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "140.00"
       },
       {
@@ -56573,7 +56726,7 @@
         "MaxCombo": 360,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "160.00"
       },
       {
@@ -56581,7 +56734,7 @@
         "MaxCombo": 632,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "160.00"
       },
       {
@@ -56597,7 +56750,7 @@
         "MaxCombo": 1781,
         "LevelStr": "14",
         "Constant": 14.4,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "160.00"
       }
     ]
@@ -56614,7 +56767,7 @@
         "MaxCombo": 616,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "199 (150.00 - 199.00)"
       },
       {
@@ -56622,7 +56775,7 @@
         "MaxCombo": 1074,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "199 (150.00 - 199.00)"
       },
       {
@@ -56638,7 +56791,7 @@
         "MaxCombo": 2710,
         "LevelStr": "13",
         "Constant": 13.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "199 (150.00 - 199.00)"
       }
     ]
@@ -56655,7 +56808,7 @@
         "MaxCombo": 505,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "198.00"
       },
       {
@@ -56663,7 +56816,7 @@
         "MaxCombo": 778,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "198.00"
       },
       {
@@ -56696,7 +56849,7 @@
         "MaxCombo": 428,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "155.00"
       },
       {
@@ -56704,7 +56857,7 @@
         "MaxCombo": 749,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "155.00"
       },
       {
@@ -56737,7 +56890,7 @@
         "MaxCombo": 491,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "190.00"
       },
       {
@@ -56745,7 +56898,7 @@
         "MaxCombo": 926,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "190.00"
       },
       {
@@ -56778,7 +56931,7 @@
         "MaxCombo": 571,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "192.00"
       },
       {
@@ -56786,7 +56939,7 @@
         "MaxCombo": 787,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "192.00"
       },
       {
@@ -56802,7 +56955,7 @@
         "MaxCombo": 1930,
         "LevelStr": "12+",
         "Constant": 12.7,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "192.00"
       }
     ]
@@ -56819,7 +56972,7 @@
         "MaxCombo": 458,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "180 (130.00 - 260.00)"
       },
       {
@@ -56827,7 +56980,7 @@
         "MaxCombo": 930,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "180 (130.00 - 260.00)"
       },
       {
@@ -56835,7 +56988,7 @@
         "MaxCombo": 1074,
         "LevelStr": "10",
         "Constant": 10.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "180 (130.00 - 260.00)"
       },
       {
@@ -56868,7 +57021,7 @@
         "MaxCombo": 528,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "200.00"
       },
       {
@@ -56876,7 +57029,7 @@
         "MaxCombo": 1136,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "200.00"
       },
       {
@@ -56909,7 +57062,7 @@
         "MaxCombo": 787,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "218.00"
       },
       {
@@ -56917,14 +57070,14 @@
         "MaxCombo": 1438,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "218.00"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 2131,
-        "LevelStr": "12",
-        "Constant": 12.0,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "じゃこレモン",
         "Bpm": "218.00"
       },
@@ -56932,7 +57085,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2906,
         "LevelStr": "14+",
-        "Constant": 14.9,
+        "Constant": 14.8,
         "Charter": "じゃこレモン vs Redarrow",
         "Bpm": "218.00"
       }
@@ -56950,7 +57103,7 @@
         "MaxCombo": 384,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "135.00"
       },
       {
@@ -56958,7 +57111,7 @@
         "MaxCombo": 774,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "135.00"
       },
       {
@@ -56991,7 +57144,7 @@
         "MaxCombo": 804,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "230 (230.00 - 400.00)"
       },
       {
@@ -56999,14 +57152,14 @@
         "MaxCombo": 1842,
         "LevelStr": "10",
         "Constant": 10.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "230 (230.00 - 400.00)"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 2272,
-        "LevelStr": "14+",
-        "Constant": 14.5,
+        "LevelStr": "14",
+        "Constant": 14.4,
         "Charter": "ミストルティン",
         "Bpm": "230 (230.00 - 400.00)"
       },
@@ -57014,7 +57167,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3474,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.1,
         "Charter": "CODE:Violetta",
         "Bpm": "230 (230.00 - 400.00)"
       }
@@ -57032,7 +57185,7 @@
         "MaxCombo": 564,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "204 (176.00 - 204.00)"
       },
       {
@@ -57040,7 +57193,7 @@
         "MaxCombo": 1197,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "204 (176.00 - 204.00)"
       },
       {
@@ -57048,7 +57201,7 @@
         "MaxCombo": 2277,
         "LevelStr": "14",
         "Constant": 14.4,
-        "Charter": "【Ex】Piercing Blade",
+        "Charter": "Piercing Blade",
         "Bpm": "204 (176.00 - 204.00)"
       },
       {
@@ -57073,7 +57226,7 @@
         "MaxCombo": 578,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "212.00"
       },
       {
@@ -57081,7 +57234,7 @@
         "MaxCombo": 1368,
         "LevelStr": "11+",
         "Constant": 11.9,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "212.00"
       },
       {
@@ -57097,7 +57250,7 @@
         "MaxCombo": 2859,
         "LevelStr": "15",
         "Constant": 15.2,
-        "Charter": "【Ex】Redarrow -For KOP4th-",
+        "Charter": "Redarrow -For KOP4th-",
         "Bpm": "212.00"
       }
     ]
@@ -57114,7 +57267,7 @@
         "MaxCombo": 537,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "174.00"
       },
       {
@@ -57122,14 +57275,14 @@
         "MaxCombo": 937,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "174.00"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1337,
-        "LevelStr": "9",
-        "Constant": 9.0,
+        "LevelStr": "9+",
+        "Constant": 9.5,
         "Charter": "Techno Kitchen",
         "Bpm": "174.00"
       },
@@ -57155,7 +57308,7 @@
         "MaxCombo": 437,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "175.00"
       },
       {
@@ -57163,7 +57316,7 @@
         "MaxCombo": 937,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "175.00"
       },
       {
@@ -57179,7 +57332,7 @@
         "MaxCombo": 1837,
         "LevelStr": "12",
         "Constant": 12.3,
-        "Charter": "【Ex】そらいろカリン@メン限たすかる",
+        "Charter": "そらいろカリン@メン限たすかる",
         "Bpm": "175.00"
       }
     ]
@@ -57196,7 +57349,7 @@
         "MaxCombo": 627,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "165 (100.00 - 165.00)"
       },
       {
@@ -57204,7 +57357,7 @@
         "MaxCombo": 1072,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "165 (100.00 - 165.00)"
       },
       {
@@ -57218,8 +57371,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2079,
-        "LevelStr": "11+",
-        "Constant": 11.6,
+        "LevelStr": "12",
+        "Constant": 12.0,
         "Charter": "じゃこレモン",
         "Bpm": "165 (100.00 - 8250.00)"
       }
@@ -57237,7 +57390,7 @@
         "MaxCombo": 773,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "190.00"
       },
       {
@@ -57245,7 +57398,7 @@
         "MaxCombo": 1302,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "190.00"
       },
       {
@@ -57278,7 +57431,7 @@
         "MaxCombo": 466,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "260.00"
       },
       {
@@ -57286,7 +57439,7 @@
         "MaxCombo": 966,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "260.00"
       },
       {
@@ -57319,7 +57472,7 @@
         "MaxCombo": 486,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "252.00"
       },
       {
@@ -57327,7 +57480,7 @@
         "MaxCombo": 901,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "252.00"
       },
       {
@@ -57342,8 +57495,8 @@
         "LevelName": "MASTER",
         "MaxCombo": 2113,
         "LevelStr": "14+",
-        "Constant": 14.8,
-        "Charter": "【Ex】Techno Kitchen -For KOP4th-",
+        "Constant": 14.7,
+        "Charter": "Techno Kitchen -For KOP4th-",
         "Bpm": "252.00"
       }
     ]
@@ -57360,7 +57513,7 @@
         "MaxCombo": 406,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "146.00"
       },
       {
@@ -57368,7 +57521,7 @@
         "MaxCombo": 905,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "146.00"
       },
       {
@@ -57401,7 +57554,7 @@
         "MaxCombo": 611,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "174.00"
       },
       {
@@ -57409,7 +57562,7 @@
         "MaxCombo": 967,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "174.00"
       },
       {
@@ -57425,7 +57578,7 @@
         "MaxCombo": 1835,
         "LevelStr": "14",
         "Constant": 14.3,
-        "Charter": "【Ex】Redarrow resurrected by Mistilteinn",
+        "Charter": "Redarrow resurrected by Mistilteinn",
         "Bpm": "174 (174.00 - 9600.00)"
       }
     ]
@@ -57442,7 +57595,7 @@
         "MaxCombo": 538,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "190 (170.00 - 190.00)"
       },
       {
@@ -57450,7 +57603,7 @@
         "MaxCombo": 1049,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "190 (170.00 - 190.00)"
       },
       {
@@ -57483,7 +57636,7 @@
         "MaxCombo": 343,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "165.00"
       },
       {
@@ -57491,7 +57644,7 @@
         "MaxCombo": 796,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "165.00"
       },
       {
@@ -57524,7 +57677,7 @@
         "MaxCombo": 475,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "185.00"
       },
       {
@@ -57532,7 +57685,7 @@
         "MaxCombo": 1051,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "185.00"
       },
       {
@@ -57547,7 +57700,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1972,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "185.00"
       }
@@ -57606,7 +57759,7 @@
         "MaxCombo": 477,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "160 (20.00 - 206.00)"
       },
       {
@@ -57614,7 +57767,7 @@
         "MaxCombo": 1029,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "160 (20.00 - 206.00)"
       },
       {
@@ -57629,7 +57782,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2032,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "cotelette samurai",
         "Bpm": "160 (20.00 - 206.00)"
       }
@@ -57647,7 +57800,7 @@
         "MaxCombo": 538,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "86 (14.00 - 136.00)"
       },
       {
@@ -57655,7 +57808,7 @@
         "MaxCombo": 917,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "86 (14.00 - 136.00)"
       },
       {
@@ -57671,7 +57824,7 @@
         "MaxCombo": 2555,
         "LevelStr": "14+",
         "Constant": 14.8,
-        "Charter": "【Ex】Opus Negativus Centum",
+        "Charter": "Opus Negativus Centum",
         "Bpm": "86 (14.00 - 136.00)"
       },
       {
@@ -57696,7 +57849,7 @@
         "MaxCombo": 384,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "150.00"
       },
       {
@@ -57704,7 +57857,7 @@
         "MaxCombo": 670,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "150.00"
       },
       {
@@ -57737,7 +57890,7 @@
         "MaxCombo": 439,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "200.00"
       },
       {
@@ -57745,7 +57898,7 @@
         "MaxCombo": 1067,
         "LevelStr": "9+",
         "Constant": 9.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "200.00"
       },
       {
@@ -57760,7 +57913,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1950,
         "LevelStr": "14",
-        "Constant": 14.3,
+        "Constant": 14.4,
         "Charter": "じゃこレモン respect for rioN",
         "Bpm": "200.00"
       }
@@ -57795,7 +57948,7 @@
         "MaxCombo": 401,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "41 (41.00 - 401.00)"
       },
       {
@@ -57803,7 +57956,7 @@
         "MaxCombo": 817,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "41 (41.00 - 401.00)"
       },
       {
@@ -57811,7 +57964,7 @@
         "MaxCombo": 1896,
         "LevelStr": "11",
         "Constant": 11.4,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "41 (41.00 - 401.00)"
       },
       {
@@ -57844,7 +57997,7 @@
         "MaxCombo": 547,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "158.00"
       },
       {
@@ -57852,7 +58005,7 @@
         "MaxCombo": 955,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "158.00"
       },
       {
@@ -57868,7 +58021,7 @@
         "MaxCombo": 1805,
         "LevelStr": "11",
         "Constant": 11.3,
-        "Charter": "【Ex】ロシェ＠ペンギン",
+        "Charter": "ロシェ＠ペンギン",
         "Bpm": "158.00"
       }
     ]
@@ -57885,7 +58038,7 @@
         "MaxCombo": 370,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -57893,7 +58046,7 @@
         "MaxCombo": 683,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "150.00"
       },
       {
@@ -57926,7 +58079,7 @@
         "MaxCombo": 438,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "150.00"
       },
       {
@@ -57934,7 +58087,7 @@
         "MaxCombo": 858,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "150.00"
       },
       {
@@ -57967,7 +58120,7 @@
         "MaxCombo": 460,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "178.00"
       },
       {
@@ -57975,7 +58128,7 @@
         "MaxCombo": 987,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "178.00"
       },
       {
@@ -58008,7 +58161,7 @@
         "MaxCombo": 513,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "188.00"
       },
       {
@@ -58016,7 +58169,7 @@
         "MaxCombo": 1041,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "188.00"
       },
       {
@@ -58049,7 +58202,7 @@
         "MaxCombo": 493,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "222.00"
       },
       {
@@ -58057,14 +58210,14 @@
         "MaxCombo": 1014,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "222.00"
       },
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1415,
-        "LevelStr": "11+",
-        "Constant": 11.9,
+        "LevelStr": "12",
+        "Constant": 12.0,
         "Charter": "ミストルティン",
         "Bpm": "222.00"
       },
@@ -58072,7 +58225,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2304,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.3,
         "Charter": "Redarrow",
         "Bpm": "222.00"
       }
@@ -58090,7 +58243,7 @@
         "MaxCombo": 410,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "121.00"
       },
       {
@@ -58098,7 +58251,7 @@
         "MaxCombo": 781,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "121.00"
       },
       {
@@ -58114,7 +58267,7 @@
         "MaxCombo": 1540,
         "LevelStr": "12",
         "Constant": 12.2,
-        "Charter": "【Ex】ぱくぱくカリン",
+        "Charter": "ぱくぱくカリン",
         "Bpm": "121.00"
       }
     ]
@@ -58131,7 +58284,7 @@
         "MaxCombo": 671,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -58139,7 +58292,7 @@
         "MaxCombo": 1149,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "190.00"
       },
       {
@@ -58172,7 +58325,7 @@
         "MaxCombo": 366,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "134.00"
       },
       {
@@ -58180,7 +58333,7 @@
         "MaxCombo": 689,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "134.00"
       },
       {
@@ -58213,7 +58366,7 @@
         "MaxCombo": 336,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "133.00"
       },
       {
@@ -58221,7 +58374,7 @@
         "MaxCombo": 784,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "133.00"
       },
       {
@@ -58254,7 +58407,7 @@
         "MaxCombo": 625,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -58262,7 +58415,7 @@
         "MaxCombo": 1130,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "190.00"
       },
       {
@@ -58270,7 +58423,7 @@
         "MaxCombo": 1520,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "190.00"
       },
       {
@@ -58295,7 +58448,7 @@
         "MaxCombo": 469,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "180.00"
       },
       {
@@ -58303,7 +58456,7 @@
         "MaxCombo": 832,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "180.00"
       },
       {
@@ -58336,7 +58489,7 @@
         "MaxCombo": 459,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "146.00"
       },
       {
@@ -58344,7 +58497,7 @@
         "MaxCombo": 916,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "146.00"
       },
       {
@@ -58377,7 +58530,7 @@
         "MaxCombo": 447,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "160.00"
       },
       {
@@ -58385,7 +58538,7 @@
         "MaxCombo": 921,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】そらいろカリン",
+        "Charter": "そらいろカリン",
         "Bpm": "160.00"
       },
       {
@@ -58393,7 +58546,7 @@
         "MaxCombo": 1295,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】ミストルティン",
+        "Charter": "ミストルティン",
         "Bpm": "160.00"
       },
       {
@@ -58401,7 +58554,7 @@
         "MaxCombo": 1524,
         "LevelStr": "12",
         "Constant": 12.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "160.00"
       }
     ]
@@ -58418,7 +58571,7 @@
         "MaxCombo": 512,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "180.00"
       },
       {
@@ -58426,7 +58579,7 @@
         "MaxCombo": 898,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "【Ex】rioN",
+        "Charter": "rioN",
         "Bpm": "180.00"
       },
       {
@@ -58459,7 +58612,7 @@
         "MaxCombo": 1575,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58476,7 +58629,7 @@
         "MaxCombo": 1498,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58493,7 +58646,7 @@
         "MaxCombo": 1598,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58510,7 +58663,7 @@
         "MaxCombo": 1556,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58527,7 +58680,7 @@
         "MaxCombo": 1520,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58544,7 +58697,7 @@
         "MaxCombo": 1563,
         "LevelStr": "分",
         "Constant": 0.0,
-        "Charter": "【Ex】Techno Kitchen + ？",
+        "Charter": "Techno Kitchen + ？",
         "Bpm": "132.00"
       }
     ]
@@ -58561,7 +58714,7 @@
         "MaxCombo": 496,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "185.00"
       },
       {
@@ -58569,7 +58722,7 @@
         "MaxCombo": 769,
         "LevelStr": "7",
         "Constant": 7.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "185.00"
       },
       {
@@ -58602,7 +58755,7 @@
         "MaxCombo": 496,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "200.00"
       },
       {
@@ -58610,7 +58763,7 @@
         "MaxCombo": 928,
         "LevelStr": "9",
         "Constant": 9.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "200.00"
       },
       {
@@ -58643,7 +58796,7 @@
         "MaxCombo": 431,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "200.00"
       },
       {
@@ -58651,7 +58804,7 @@
         "MaxCombo": 723,
         "LevelStr": "7+",
         "Constant": 7.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "200.00"
       },
       {
@@ -58684,7 +58837,7 @@
         "MaxCombo": 472,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "260.00"
       },
       {
@@ -58692,7 +58845,7 @@
         "MaxCombo": 907,
         "LevelStr": "8+",
         "Constant": 8.5,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "260.00"
       },
       {
@@ -58700,7 +58853,7 @@
         "MaxCombo": 1352,
         "LevelStr": "13",
         "Constant": 13.4,
-        "Charter": "【Ex】小鳥遊さん",
+        "Charter": "小鳥遊さん",
         "Bpm": "260.00"
       },
       {
@@ -58725,7 +58878,7 @@
         "MaxCombo": 489,
         "LevelStr": "4",
         "Constant": 4.0,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "246.00"
       },
       {
@@ -58733,7 +58886,7 @@
         "MaxCombo": 753,
         "LevelStr": "8",
         "Constant": 8.0,
-        "Charter": "【Ex】Techno Kitchen",
+        "Charter": "Techno Kitchen",
         "Bpm": "246.00"
       },
       {
@@ -58741,7 +58894,7 @@
         "MaxCombo": 1580,
         "LevelStr": "13",
         "Constant": 13.4,
-        "Charter": "【Ex】アミノハバキリ",
+        "Charter": "アミノハバキリ",
         "Bpm": "246.00"
       },
       {
@@ -58749,7 +58902,7 @@
         "MaxCombo": 2182,
         "LevelStr": "14+",
         "Constant": 14.8,
-        "Charter": "【Ex】堕天使《月梟》†vs† 熾天使《月梟》",
+        "Charter": "堕天使《月梟》†vs† 熾天使《月梟》",
         "Bpm": "246.00"
       }
     ]
@@ -59241,7 +59394,7 @@
         "MaxCombo": 2499,
         "LevelStr": "14+",
         "Constant": 14.9,
-        "Charter": "？",
+        "Charter": "ぴちネコ",
         "Bpm": "199.00"
       }
     ]
@@ -59313,8 +59466,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1956,
-        "LevelStr": "13+",
-        "Constant": 13.9,
+        "LevelStr": "14",
+        "Constant": 14.1,
         "Charter": "アミノハバキリ",
         "Bpm": "199.00"
       },
@@ -59322,7 +59475,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3000,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.0,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "199.00"
       }
@@ -59354,8 +59507,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1367,
-        "LevelStr": "12",
-        "Constant": 12.3,
+        "LevelStr": "12+",
+        "Constant": 12.6,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "260.00"
       },
@@ -59363,7 +59516,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1993,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.7,
         "Charter": "Redarrow",
         "Bpm": "260.00"
       }
@@ -59527,7 +59680,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1366,
         "LevelStr": "14",
-        "Constant": 14.1,
+        "Constant": 14.0,
         "Charter": "一ノ瀬 リズ",
         "Bpm": "124.00"
       }
@@ -59559,8 +59712,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1602,
-        "LevelStr": "13+",
-        "Constant": 13.9,
+        "LevelStr": "14",
+        "Constant": 14.0,
         "Charter": "アミノハバキリ",
         "Bpm": "270 (202.50 - 270.00)"
       },
@@ -59652,6 +59805,14 @@
         "LevelStr": "14",
         "Constant": 14.0,
         "Charter": "ロシェ＠ペンギン",
+        "Bpm": "180.00"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 1894,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "↓",
         "Bpm": "180.00"
       }
     ]
@@ -59854,8 +60015,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1550,
-        "LevelStr": "12",
-        "Constant": 12.2,
+        "LevelStr": "12+",
+        "Constant": 12.6,
         "Charter": "ものくろっく",
         "Bpm": "126.00"
       }
@@ -59936,8 +60097,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1912,
-        "LevelStr": "11",
-        "Constant": 11.1,
+        "LevelStr": "11+",
+        "Constant": 11.8,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "164.00"
       },
@@ -59945,7 +60106,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2512,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.4,
         "Charter": "WHITE WINTER NOTES",
         "Bpm": "164.00"
       }
@@ -61051,8 +61212,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1491,
-        "LevelStr": "12+",
-        "Constant": 12.9,
+        "LevelStr": "13",
+        "Constant": 13.1,
         "Charter": "▽▲じゃこレモン▲▽",
         "Bpm": "130.00"
       }
@@ -61838,6 +61999,252 @@
     ]
   },
   {
+    "Id": 2466,
+    "Title": "Λlteration",
+    "Artist": "小仏 凪(CV:佐倉 薫)＆月鈴 白奈(CV:高野 麻里佳)＆御形 アリシアナ(CV:福原 綾香)＆桔梗 小夜曲(CV:原田 彩楓)",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 529,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1074,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1408,
+        "LevelStr": "10",
+        "Constant": 10.1,
+        "Charter": "じゃこレモン",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2400,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "ミニミライト",
+        "Bpm": "150.00"
+      }
+    ]
+  },
+  {
+    "Id": 2467,
+    "Title": "Regulus",
+    "Artist": "お月さま交響曲",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 617,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "212.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1045,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "212.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1562,
+        "LevelStr": "12",
+        "Constant": 12.1,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "212.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2536,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "Moon Strix",
+        "Bpm": "212.00"
+      }
+    ]
+  },
+  {
+    "Id": 2468,
+    "Title": "カリスマ煉獄天神",
+    "Artist": "森羅万象",
+    "Genre": "東方Project",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 506,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 849,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1295,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1824,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "そらいろカリン＠シンラリコネクト",
+        "Bpm": "137 (137.00 - 9700.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2469,
+    "Title": "シアワセうさぎ",
+    "Artist": "ビートまりお＋あまね（COOL&CREATE）",
+    "Genre": "東方Project",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 420,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 737,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1036,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1224,
+        "LevelStr": "12",
+        "Constant": 12.4,
+        "Charter": "みぞれとやなぎ",
+        "Bpm": "140.00"
+      }
+    ]
+  },
+  {
+    "Id": 2475,
+    "Title": "Chaotic Ørder",
+    "Artist": "TAG VS Kai",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 591,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "165.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1450,
+        "LevelStr": "11",
+        "Constant": 11.3,
+        "Charter": "そらいろカリン",
+        "Bpm": "165.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1954,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ミストルティン",
+        "Bpm": "165.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3000,
+        "LevelStr": "15",
+        "Constant": 15.4,
+        "Charter": "Chaotic Blade vs Blanc=diLLe",
+        "Bpm": "165.00"
+      }
+    ]
+  },
+  {
+    "Id": 2476,
+    "Title": "ぽかぽか温泉音頭",
+    "Artist": "曲：橘亮祐、篠崎あやと／歌：三角 葵(CV：春野 杏)、逢坂 茜(CV：大空 直美)、日向 千夏(CV：岡咲 美保)",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 503,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1067,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1340,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ものくろっく",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2005,
+        "LevelStr": "12",
+        "Constant": 12.1,
+        "Charter": "みぞれヤナギ + そらいろカリン",
+        "Bpm": "150.00"
+      }
+    ]
+  },
+  {
     "Id": 2477,
     "Title": "sølips",
     "Artist": "rintaro soma",
@@ -61879,6 +62286,88 @@
     ]
   },
   {
+    "Id": 2478,
+    "Title": "茉子の日常",
+    "Artist": "常陸 茉子 (CV：小鳥居 夕花) 「千恋＊万花」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 481,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 861,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1219,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "アミノハバキリ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1560,
+        "LevelStr": "11+",
+        "Constant": 11.6,
+        "Charter": "ミストルティンが歌っていいんでしょうか？",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2479,
+    "Title": "キズナヒトツ",
+    "Artist": "ムラサメ (CV：佐藤 みかん) 「千恋＊万花」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 500,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "ミニミライト",
+        "Bpm": "112.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 909,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "112.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1254,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "112.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1500,
+        "LevelStr": "10+",
+        "Constant": 10.7,
+        "Charter": "びっくりするほどミニミライト!",
+        "Bpm": "112.00"
+      }
+    ]
+  },
+  {
     "Id": 2480,
     "Title": "GEOMETRIC DANCE",
     "Artist": "山本真央樹",
@@ -61916,6 +62405,170 @@
         "Constant": 14.4,
         "Charter": "ぴちネコ",
         "Bpm": "150.00"
+      }
+    ]
+  },
+  {
+    "Id": 2481,
+    "Title": "Love Cheat!",
+    "Artist": "MOSAIC.WAV",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 632,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "195.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 976,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "195.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1432,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミニミライト",
+        "Bpm": "195.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2005,
+        "LevelStr": "13",
+        "Constant": 13.4,
+        "Charter": "じゃこレモン＠実は計算どおり",
+        "Bpm": "195.00"
+      }
+    ]
+  },
+  {
+    "Id": 2482,
+    "Title": "ドーナドーナのうた",
+    "Artist": "水夏える feat.月乃",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 294,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "152.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 548,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "152.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 776,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ものくろっく",
+        "Bpm": "152.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1166,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "わるいことするみぞれ",
+        "Bpm": "152.00"
+      }
+    ]
+  },
+  {
+    "Id": 2483,
+    "Title": "未来への咆哮",
+    "Artist": "JAM Project feat. 影山ヒロノブ・遠藤正明・きただにひろし・福山芳樹",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 329,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "ミニミライト",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 668,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1004,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "ミニミライト",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1472,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "140.00"
+      }
+    ]
+  },
+  {
+    "Id": 2485,
+    "Title": "Singularity",
+    "Artist": "technoplanet",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM SUN PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 595,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1338,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1878,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "アミノハバキリ",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2574,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00"
       }
     ]
   },
@@ -62084,6 +62737,1113 @@
     ]
   },
   {
+    "Id": 2490,
+    "Title": "ALIVE",
+    "Artist": "ClariS「リコリス・リコイル」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 618,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "176 (174.00 - 180.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 946,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "176 (174.00 - 180.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1369,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "176 (174.00 - 180.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1425,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "ヤナギ・リコイル",
+        "Bpm": "176 (174.00 - 180.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2491,
+    "Title": "可愛くてごめん",
+    "Artist": "HoneyWorks feat. ちゅーたん(CV:早見沙織)",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 494,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 824,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1027,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1361,
+        "LevelStr": "11+",
+        "Constant": 11.5,
+        "Charter": "ミストルティン",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2492,
+    "Title": "トウキョウ・シャンディ・ランデヴ feat. 花譜, ツミキ",
+    "Artist": "MAISONdes",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 327,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 565,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 812,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1348,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "みそかつ侍",
+        "Bpm": "137.00"
+      }
+    ]
+  },
+  {
+    "Id": 2493,
+    "Title": "マツケンサンバⅡ",
+    "Artist": "松平健 [covered by 光吉猛修]",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 404,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "133.20"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 755,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "133.20"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1166,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "133.20"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1382,
+        "LevelStr": "12+",
+        "Constant": 12.9,
+        "Charter": "ジャコレモサンバ",
+        "Bpm": "133.20"
+      }
+    ]
+  },
+  {
+    "Id": 2494,
+    "Title": "アイドル",
+    "Artist": "YOASOBI",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 479,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "166 (150.00 - 167.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 805,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "166 (150.00 - 167.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 980,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミストルティン",
+        "Bpm": "166 (150.00 - 167.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1466,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "じゃこレモン",
+        "Bpm": "166 (150.00 - 167.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2495,
+    "Title": "STORM",
+    "Artist": "JAM Project featuring 水木一郎、影山ヒロノブ",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 241,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "137 (135.00 - 137.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 473,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "137 (135.00 - 137.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 595,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "137 (135.00 - 137.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1050,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "ミニミライト",
+        "Bpm": "137 (135.00 - 137.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2496,
+    "Title": "さくゆいたいそう",
+    "Artist": "さくゆい",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 482,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 924,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1216,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1370,
+        "LevelStr": "11+",
+        "Constant": 11.7,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2497,
+    "Title": "アイデン貞貞メルトダウン",
+    "Artist": "えなこ feat. P丸様。「お兄ちゃんはおしまい！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 303,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 592,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 748,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1169,
+        "LevelStr": "12",
+        "Constant": 12.1,
+        "Charter": "鳩ホルダー",
+        "Bpm": "155.00"
+      }
+    ]
+  },
+  {
+    "Id": 2498,
+    "Title": "ひめごと＊クライシスターズ",
+    "Artist": "ONIMAI SISTERS（高野麻里佳・石原夏織・金元寿子・津田美波）「お兄ちゃんはおしまい！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 557,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "183.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1040,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "183.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1291,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "183.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1712,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "天才科学者じゃこレモン",
+        "Bpm": "183.00"
+      }
+    ]
+  },
+  {
+    "Id": 2499,
+    "Title": "Stellar Stellar",
+    "Artist": "星街すいせい（ホロライブ）",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 651,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160 (120.00 - 200.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 966,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160 (120.00 - 200.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1730,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "そらいろカリン",
+        "Bpm": "160 (120.00 - 200.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2316,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "ものくろっく",
+        "Bpm": "160 (120.00 - 200.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2505,
+    "Title": "ラブカ？",
+    "Artist": "柊キライ",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 387,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "120 (82.00 - 135.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 834,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "ミニミライト",
+        "Bpm": "120 (82.00 - 135.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1090,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "120 (82.00 - 135.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1587,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "120 (82.00 - 135.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2506,
+    "Title": "強風オールバック",
+    "Artist": "ゆこぴ",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 367,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 615,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1004,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "アミノハバキリ",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1496,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "外出た瞬間ロシェペンギン",
+        "Bpm": "135.00"
+      }
+    ]
+  },
+  {
+    "Id": 2507,
+    "Title": "星界ちゃんと可不ちゃんのおつかい合騒曲",
+    "Artist": "南ノ南",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 591,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "220.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1099,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "ミニミライト",
+        "Bpm": "220.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1580,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "ミニミライト",
+        "Bpm": "220 (110.00 - 440.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2206,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "せかせかレモン",
+        "Bpm": "220.00"
+      }
+    ]
+  },
+  {
+    "Id": 2508,
+    "Title": "リレイアウター",
+    "Artist": "稲葉曇",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 529,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "151 (22.87 - 151.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 945,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "151 (22.87 - 151.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1154,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "151 (22.87 - 151.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1618,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "そらいろカリン",
+        "Bpm": "151 (22.87 - 151.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2509,
+    "Title": "おどロボ",
+    "Artist": "海茶・多良レイト",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 479,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 859,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1206,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1764,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "ミニミライト",
+        "Bpm": "145.00"
+      }
+    ]
+  },
+  {
+    "Id": 2510,
+    "Title": "Beat Eater",
+    "Artist": "ポリスピカデリー / 鏡音レン / Vivid BAD SQUAD「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 276,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 481,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 662,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "137.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 970,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "137.00"
+      }
+    ]
+  },
+  {
+    "Id": 2511,
+    "Title": "Glory Steady Go!",
+    "Artist": "キノシタ / 巡音ルカ / ワンダーランズ×ショウタイム「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 249,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 464,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 684,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 820,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "ミニミライト@勇気をくれた歌",
+        "Bpm": "131.00"
+      }
+    ]
+  },
+  {
+    "Id": 2512,
+    "Title": "ロウワー",
+    "Artist": "ぬゆり / MEIKO / 25時、ナイトコードで。「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 273,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 495,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 796,
+        "LevelStr": "10+",
+        "Constant": 10.5,
+        "Charter": "ミニミライト",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1025,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "ミストルティン＠待たれる側に",
+        "Bpm": "132.00"
+      }
+    ]
+  },
+  {
+    "Id": 2513,
+    "Title": "てらてら",
+    "Artist": "和田たけあき / 初音ミク / Leo/need「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 440,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 865,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "190.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1083,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "190.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1382,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "190.00"
+      }
+    ]
+  },
+  {
+    "Id": 2514,
+    "Title": "天使のクローバー",
+    "Artist": "DIVELA / 鏡音リン / MORE MORE JUMP！「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 456,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "193.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 694,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "193.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 968,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "193.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1632,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "ロシェ♣ペンギン",
+        "Bpm": "193.00"
+      }
+    ]
+  },
+  {
+    "Id": 2515,
+    "Title": "イナイイナイ依存症",
+    "Artist": "かいりきベア feat.GUMI・鏡音リン",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 402,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "294.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 804,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "294.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1153,
+        "LevelStr": "11",
+        "Constant": 11.1,
+        "Charter": "アミノハバキリ",
+        "Bpm": "294.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1888,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "じゃこレモン",
+        "Bpm": "294.00"
+      }
+    ]
+  },
+  {
+    "Id": 2517,
+    "Title": "バグ",
+    "Artist": "かいりきベア",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 518,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 912,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1406,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "ミストルティン",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1848,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "ミニミライト",
+        "Bpm": "186.00"
+      }
+    ]
+  },
+  {
+    "Id": 2525,
+    "Title": "本物のヒーローとの戦い",
+    "Artist": "Toby Fox「UNDERTALE」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 369,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 690,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1174,
+        "LevelStr": "11+",
+        "Constant": 11.5,
+        "Charter": "ミニミライト",
+        "Bpm": "150.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1632,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "Blade of Justice",
+        "Bpm": "150.00"
+      }
+    ]
+  },
+  {
+    "Id": 2526,
+    "Title": "華麗なる死闘",
+    "Artist": "Toby Fox「UNDERTALE」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 397,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "148.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 735,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "148.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1040,
+        "LevelStr": "11",
+        "Constant": 11.0,
+        "Charter": "サファ太",
+        "Bpm": "148.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1405,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "みぞれヤナギEXの　おひろめだ！",
+        "Bpm": "148 (148.00 - 296.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2528,
+    "Title": "Blow My Mind",
+    "Artist": "3R2「Cytus Ⅱ」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 472,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 871,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1373,
+        "LevelStr": "11+",
+        "Constant": 11.8,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1785,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00"
+      }
+    ]
+  },
+  {
+    "Id": 2529,
+    "Title": "Jakarta PROGRESSION",
+    "Artist": "KURORAK「Cytus Ⅱ」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 352,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 645,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 909,
+        "LevelStr": "12",
+        "Constant": 12.1,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1244,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "140.00"
+      }
+    ]
+  },
+  {
+    "Id": 2530,
+    "Title": "VALLIS-NERIA",
+    "Artist": "DJ YOSHITAKA",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 474,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "185.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 982,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "185.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1300,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "アミノハバキリ",
+        "Bpm": "185.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2247,
+        "LevelStr": "14+",
+        "Constant": 14.7,
+        "Charter": "片翼のペンギン",
+        "Bpm": "185.00"
+      }
+    ]
+  },
+  {
     "Id": 2531,
     "Title": "Big Bang",
     "Artist": "Massive New Krew「WACCA」",
@@ -62121,6 +63881,1072 @@
         "Constant": 14.9,
         "Charter": "SEGA Fumen Man",
         "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2532,
+    "Title": "Spasmodic",
+    "Artist": "姜米條「Phigros」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 602,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 913,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "ミニミライト",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1916,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "200.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2062,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "透明絵具",
+        "Bpm": "200.00"
+      }
+    ]
+  },
+  {
+    "Id": 2533,
+    "Title": "ΩΩPARTS",
+    "Artist": "かめりあ",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 683,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "120 (120.00 - 240.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1326,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "120 (120.00 - 240.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1734,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "じゃこレモン",
+        "Bpm": "120 (120.00 - 240.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3182,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "Violetta + ω",
+        "Bpm": "120 (120.00 - 240.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2534,
+    "Title": "ENERGY SYNERGY MATRIX",
+    "Artist": "Tanchiky",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 375,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 854,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "ミニミライト",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1256,
+        "LevelStr": "11",
+        "Constant": 11.3,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1572,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2535,
+    "Title": "New York Back Raise",
+    "Artist": "saaa + kei_iwata + stuv + わかどり",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 485,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160 (128.00 - 240.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 935,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "ミニミライト",
+        "Bpm": "160 (128.00 - 240.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1516,
+        "LevelStr": "11+",
+        "Constant": 11.9,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160 (128.00 - 240.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2022,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "obj:mnnn",
+        "Bpm": "160 (128.00 - 240.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2549,
+    "Title": "どこにもいかない",
+    "Artist": "箱部なる (CV: M・A・O)",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 425,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "146 (130.00 - 151.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 871,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "146 (130.00 - 151.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1298,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "146 (130.00 - 151.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1286,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "透明絵具",
+        "Bpm": "146 (130.00 - 151.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2550,
+    "Title": "ラビットランド・メッセンジャー",
+    "Artist": "天王洲 なずな(CV:山本 彩乃)",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 367,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "120.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 664,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "120.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1003,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "120.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1422,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "透明絵具",
+        "Bpm": "120.00"
+      }
+    ]
+  },
+  {
+    "Id": 2553,
+    "Title": "オン×ステージ！",
+    "Artist": "曲：塩野 海／歌：星咲 あかり(CV：赤尾 ひかる)、式宮 舞菜(CV：牧野 天音)",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 604,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "170.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 924,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "170.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1540,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "170.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2000,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "[O.N.×STAGE!]ミニミライト",
+        "Bpm": "170 (85.00 - 255.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2554,
+    "Title": "MarbleBlue.",
+    "Artist": "MisoilePunch♪",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 689,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "198.22"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1242,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "198.22"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1673,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "そらいろカリン",
+        "Bpm": "198.22"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2500,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "Twinrook.",
+        "Bpm": "198.22"
+      }
+    ]
+  },
+  {
+    "Id": 2555,
+    "Title": "Sage",
+    "Artist": "かめりあ",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 470,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 869,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1234,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "145.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1897,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "145.00"
+      }
+    ]
+  },
+  {
+    "Id": 2556,
+    "Title": "Mutation",
+    "Artist": "Laur",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 471,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 808,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1240,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2379,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "Piercing Blade -For KOP5th-",
+        "Bpm": "155.00"
+      }
+    ]
+  },
+  {
+    "Id": 2557,
+    "Title": "Adverse Gaff",
+    "Artist": "siromaru",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 415,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 956,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1383,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "160.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2045,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "アミノハバキリ",
+        "Bpm": "160.00"
+      }
+    ]
+  },
+  {
+    "Id": 2566,
+    "Title": "少女PastQ",
+    "Artist": "雄之助 feat.ねんね",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 404,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 722,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1003,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "135.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1153,
+        "LevelStr": "11+",
+        "Constant": 11.8,
+        "Charter": "ミストルティン",
+        "Bpm": "135.00"
+      }
+    ]
+  },
+  {
+    "Id": 2567,
+    "Title": "君と夏色っ！～わんダフルバケーション～",
+    "Artist": "コバヤシユウヤ（IOSYS） feat.まるもこ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 492,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 754,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1113,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "155.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1633,
+        "LevelStr": "12+",
+        "Constant": 12.9,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00"
+      }
+    ]
+  },
+  {
+    "Id": 2568,
+    "Title": "MyPaceInvention",
+    "Artist": "キツネリ feat.わかばやし",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 629,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 981,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1382,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "186.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1589,
+        "LevelStr": "12",
+        "Constant": 12.2,
+        "Charter": "イヌネリ",
+        "Bpm": "186.00"
+      }
+    ]
+  },
+  {
+    "Id": 2569,
+    "Title": "colorful",
+    "Artist": "higma feat.ほとけ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 502,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "182.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 879,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "182.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1282,
+        "LevelStr": "10",
+        "Constant": 10.1,
+        "Charter": "ミニミライト",
+        "Bpm": "182.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1960,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "182.00"
+      }
+    ]
+  },
+  {
+    "Id": 2570,
+    "Title": "ZegalltA",
+    "Artist": "Se-U-Ra",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 746,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "234 (220.00 - 238.00)"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1454,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "234 (220.00 - 238.00)"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1757,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "234 (220.00 - 238.00)"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2913,
+        "LevelStr": "15",
+        "Constant": 15.0,
+        "Charter": "CODE:Emperor",
+        "Bpm": "234 (220.00 - 238.00)"
+      }
+    ]
+  },
+  {
+    "Id": 2571,
+    "Title": "ウニの歌",
+    "Artist": "周防パトラ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 711,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1026,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1267,
+        "LevelStr": "11",
+        "Constant": 11.1,
+        "Charter": "ミニミライト",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2337,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "ものくろっく＠I ♡ うにプ",
+        "Bpm": "210.00"
+      }
+    ]
+  },
+  {
+    "Id": 2572,
+    "Title": "驚異の魔法",
+    "Artist": "長瀬有花",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 455,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 777,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "ミニミライト",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1043,
+        "LevelStr": "11",
+        "Constant": 11.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1637,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "だつりょく系ミニミライト",
+        "Bpm": "140.00"
+      }
+    ]
+  },
+  {
+    "Id": 2573,
+    "Title": "liberate",
+    "Artist": "somunia × nyankobrq",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 507,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "174.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 921,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "174.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1158,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "ミニミライト",
+        "Bpm": "174.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1611,
+        "LevelStr": "13",
+        "Constant": 13.4,
+        "Charter": "じゃこレモン",
+        "Bpm": "174.00"
+      }
+    ]
+  },
+  {
+    "Id": 2574,
+    "Title": "lucky omen",
+    "Artist": "TEMPLIME feat.星宮とと",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 345,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 583,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1018,
+        "LevelStr": "10",
+        "Constant": 10.4,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "131.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1575,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "Moon Strix",
+        "Bpm": "131.00"
+      }
+    ]
+  },
+  {
+    "Id": 2575,
+    "Title": "Sunlight Starlight",
+    "Artist": "Palme",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 488,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "184.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 754,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "184.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1181,
+        "LevelStr": "10+",
+        "Constant": 10.7,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "184.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1882,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "アミノハバキリ",
+        "Bpm": "184.00"
+      }
+    ]
+  },
+  {
+    "Id": 2576,
+    "Title": "ワーカーホリック",
+    "Artist": "ミディ feat.小鈴",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 391,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "146.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 777,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "146.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1164,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミニミライト",
+        "Bpm": "146.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1757,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "はたらくペンギン",
+        "Bpm": "146.00"
+      }
+    ]
+  },
+  {
+    "Id": 2577,
+    "Title": "Overturn",
+    "Artist": "Mameyudoufu feat.Kanata.N",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 482,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 851,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "ミニミライト",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1282,
+        "LevelStr": "11",
+        "Constant": 11.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "175.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1769,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ミニミライト",
+        "Bpm": "175.00"
+      }
+    ]
+  },
+  {
+    "Id": 2578,
+    "Title": "First Light",
+    "Artist": "Carpainter",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 423,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 558,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1071,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1480,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "2step lemon",
+        "Bpm": "132.00"
+      }
+    ]
+  },
+  {
+    "Id": 2579,
+    "Title": "ラストピースに祝福と栄光を",
+    "Artist": "cosMo＠暴走P",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 720,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "280.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1428,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "ミニミライト",
+        "Bpm": "280.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1911,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "280.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2939,
+        "LevelStr": "15",
+        "Constant": 15.3,
+        "Charter": "Mistilteinn vs Mizore respect for Finalists and \"Endmark\"",
+        "Bpm": "280.00"
+      }
+    ]
+  },
+  {
+    "Id": 2583,
+    "Title": "SILENT BLUE",
+    "Artist": "かねこちはる",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 761,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1190,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1628,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "210.00"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2100,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "SILENT LEMON",
+        "Bpm": "210.00"
       }
     ]
   }

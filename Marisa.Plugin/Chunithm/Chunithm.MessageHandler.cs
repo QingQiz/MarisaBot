@@ -59,14 +59,7 @@ public partial class Chunithm
 
             var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
 
-            if (im == null)
-            {
-                message.Reply("EMPTY");
-            }
-            else
-            {
-                message.Reply(MessageDataImage.FromBase64(im.ToB64()));
-            }
+            message.Reply(MessageDataImage.FromBase64(im));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -101,8 +94,7 @@ public partial class Chunithm
 
             var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
 
-            // 不可能是 null
-            message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+            message.Reply(MessageDataImage.FromBase64(im));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -117,12 +109,12 @@ public partial class Chunithm
 
         if (new Regex(@"^[0-9]+\+?$").IsMatch(lv))
         {
-            var maxLv = lv.EndsWith('+') ? 14 : 15;
-            var lvNr  = lv.EndsWith('+') ? lv[..^1] : lv;
+            const int maxLv = 15;
+            var       lvNr  = lv.EndsWith('+') ? lv[..^1] : lv;
 
             if (int.TryParse(lvNr, out var i))
             {
-                if (!(1 <= i && i <= maxLv))
+                if (i is < 1 or > maxLv)
                 {
                     goto _error;
                 }
@@ -149,8 +141,7 @@ public partial class Chunithm
 
         var im = await Task.Run(() => ChunithmDraw.DrawGroupedSong(groupedSong, scores));
 
-        // 不可能是 null
-        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
 

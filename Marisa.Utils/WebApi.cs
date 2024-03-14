@@ -45,6 +45,15 @@ public static class WebApi
             return page;
         }
     }
+    
+    private static async Task<string> RenderUrl(string url)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(url);
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
+    }
 
     private static WaitForNetworkIdleOptions NetworkIdleOptions => new()
     {
@@ -114,5 +123,10 @@ public static class WebApi
         await page.GoToAsync(Frontend + $"/ongeki/song/{id}");
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
+    }
+    
+    public static async Task<string> ChunithmSummary(Guid contextId)
+    {
+        return await RenderUrl(Frontend + "/chunithm/summary?id=" + contextId);
     }
 }

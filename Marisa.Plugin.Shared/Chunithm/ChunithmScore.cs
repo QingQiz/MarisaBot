@@ -56,10 +56,14 @@ public class ChunithmScore
             >= 100_7500 => "sss",
             >= 100_5000 => "ssp",
             >= 100_0000 => "ss",
+            >= 99_0000  => "sp",
             >= 97_5000  => "s",
+            >= 95_0000  => "aaa",
             >= 92_5000  => "aa",
             >= 90_0000  => "a",
             >= 80_0000  => "bbb",
+            >= 70_0000  => "bb",
+            >= 60_0000  => "b",
             >= 50_0000  => "c",
             _           => "d"
         };
@@ -93,10 +97,11 @@ public class ChunithmScore
 
         // 难度指示
         coverBackground.Mutate(i => i
-            .Fill(Color.White, new RectangleF(levelBar.PaddingLeft, levelBar.PaddingTop, levelBar.Width, levelBar.Height))
+            .Fill(Color.White,
+                new RectangleF(levelBar.PaddingLeft, levelBar.PaddingTop, levelBar.Width, levelBar.Height))
             .Fill(ChunithmSong.LevelColor[LevelLabel.ToUpper()], new RectangleF(
                 levelBar.PaddingLeft + levelBar.BorderWidth, levelBar.PaddingTop + levelBar.BorderWidth,
-                levelBar.Width - levelBar.BorderWidth * 2, levelBar.Height - levelBar.BorderWidth * 2))
+                levelBar.Width       - levelBar.BorderWidth * 2, levelBar.Height - levelBar.BorderWidth * 2))
         );
 
         var drawX = levelBar.PaddingLeft + levelBar.Width + marginX;
@@ -112,7 +117,8 @@ public class ChunithmScore
             const int ratingBorderWidth = 1;
 
             var rect1 = new RectangleF(0, 0, 60, 30);
-            var rect2 = new RectangleF(ratingBorderWidth, ratingBorderWidth, rect1.Width - ratingBorderWidth * 2, rect1.Height - ratingBorderWidth * 2);
+            var rect2 = new RectangleF(ratingBorderWidth, ratingBorderWidth, rect1.Width - ratingBorderWidth * 2,
+                rect1.Height                                                             - ratingBorderWidth * 2);
 
             var color1 = Color.ParseHex("#c8c8c8");
             var color2 = ChunithmSong.LevelColor[LevelLabel.ToUpper()];
@@ -173,7 +179,7 @@ public class ChunithmScore
 
             coverBackground
                 .DrawImage(fcImg, drawX, height - cornerRadius - fcImg.Height)
-                .DrawImage(rank, drawX + fcImg.Width + marginX, height - cornerRadius - fcImg.Height);
+                .DrawImage(rank, drawX          + fcImg.Width  + marginX, height - cornerRadius - fcImg.Height);
         }
 
         return coverBackground;

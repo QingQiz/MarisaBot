@@ -18,7 +18,7 @@ osu:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Osu
 
 chunithm:
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Chunithm
+  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\chunithm
   tempPath:     C:\Users\sofee\Desktop\temp\chunithm
   devToken:     
   
