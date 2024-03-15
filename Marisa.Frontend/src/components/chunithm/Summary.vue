@@ -1,24 +1,31 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { ref } from 'vue';
+import {useRoute} from 'vue-router';
+import {ref} from 'vue';
 import axios from 'axios';
-import { context_get } from "@/GlobalVars";
+import {context_get} from "@/GlobalVars";
 
 const route = useRoute()
-const id = ref(route.query.id)
+const id    = ref(route.query.id)
 
 const data_fetched = ref(false)
 
-const grouped = ref([] as any[])
-const scores = ref({} as { [key: string]: Score })
+const grouped = ref([] as SongInfo[][])
+const scores  = ref({} as { [key: string]: Score })
 
 
 axios.all([
-    axios.get(context_get, { params: { id: id.value, name: 'GroupedSongs' } }),
-    axios.get(context_get, { params: { id: id.value, name: 'Scores' } }),
+    axios.get(context_get, {params: {id: id.value, name: 'GroupedSongs'}}),
+    axios.get(context_get, {params: {id: id.value, name: 'Scores'}}),
 ]).then(data => {
     grouped.value = data[0].data
-    scores.value = data[1].data
+    scores.value  = data[1].data
+
+    for (let i = 0; i < grouped.value.length; i++) {
+        grouped.value[i].sort((a, b) => {
+            if (a.Item2 != b.Item2) return a.Item2 - b.Item2;
+            return a.Item3.Id - b.Item3.Id;
+        }).reverse()
+    }
 }).finally(() => {
     data_fetched.value = true
 })
@@ -73,7 +80,7 @@ function GetFontColor(fc: string, fallback = '#FFFFFF') {
 
 function GetGroupMinFc(group: any[]) {
     let min = 5
-    let fc = '';
+    let fc  = '';
 
     function FcRank(fc: string) {
         switch (fc) {
@@ -91,13 +98,13 @@ function GetGroupMinFc(group: any[]) {
     }
 
     for (let i = 0; i < group.length; i++) {
-        const song = group[i]
+        const song  = group[i]
         const score = GetScore(song.Item3.Id, song.Item2)
 
         if (score) {
             if (FcRank(score.fc) < min) {
                 min = FcRank(score.fc)
-                fc = score.fc
+                fc  = score.fc
             }
         } else {
             return ''
@@ -110,7 +117,7 @@ function GetGroupMinRank(group: any[]) {
     let min = 1145141919;
 
     for (let i = 0; i < group.length; i++) {
-        const song = group[i]
+        const song  = group[i]
         const score = GetScore(song.Item3.Id, song.Item2)
 
         if (score) {
@@ -123,7 +130,7 @@ function GetGroupMinRank(group: any[]) {
     }
 
     let score_key_points = [100_9000, 100_7500, 100_5000, 100_0000, 99_0000, 97_5000, 95_0000, 92_5000, 90_0000, 80_0000, 70_0000, 60_0000, 50_0000, 0]
-    let rank_key_points = ['sssp', 'sss', 'ssp', 'ss', 'sp', 's', 'aaa', 'aa', 'a', 'bbb', 'bb', 'b', 'c', 'd']
+    let rank_key_points  = ['sssp', 'sss', 'ssp', 'ss', 'sp', 's', 'aaa', 'aa', 'a', 'bbb', 'bb', 'b', 'c', 'd']
 
     for (let i = 0; i < score_key_points.length; i++) {
         if (min >= score_key_points[i]) {
@@ -137,23 +144,25 @@ function GetGroupMinRank(group: any[]) {
 <template>
     <div class="config" v-if="data_fetched">
         <div class="group">
-            <div v-for="g1 in grouped">
-                <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(g1), '#000000')}`">
-                    {{ g1[0].Item1 }}
-                    <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(g1)}.png`" alt="" class="group-min-rank"
-                        onerror="this.style.display='none'">
+            <div v-for="group in grouped">
+                <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(group), '#000000')}`">
+                    {{ group[0].Item1 }}
+                    <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
+                         onerror="this.style.display='none'">
                 </div>
                 <div class="row">
-                    <div v-for="song in g1" :set="score = GetScore(song.Item3.Id, song.Item2)" class="cell"
-                        :style="`background-image: url('${GetBorder(score?.Rank ?? '')}')`">
-                        <div class="cover"
-                            :style="`background-image: url('/assets/chunithm/cover/${song.Item3.Id}.png')`">
+                    <template v-for="song in group">
+                        <div v-for="score in [GetScore(song.Item3.Id, song.Item2)]" class="cell"
+                             :style="`background-image: url('${GetBorder(score?.Rank ?? '')}')`">
+                            <div class="cover"
+                                 :style="`background-image: url('/assets/chunithm/cover/${song.Item3.Id}.png')`">
+                            </div>
+                            <div class="achievement" :style="`color: ${GetFontColor(score.fc)}`" v-if="score">
+                                {{ score.score.toString().padStart(7, '0') }}
+                            </div>
+                            <div class="level-mark" :style="`background-color: ${GetLevelColor(song.Item2)}`"></div>
                         </div>
-                        <div class="achievement" :style="`color: ${GetFontColor(score.fc)}`" v-if="score">
-                            {{ score.score.toString().padStart(7, '0') }}
-                        </div>
-                        <div class="level-mark" :style="`background-color: ${GetLevelColor(song.Item2)}`"></div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -260,4 +269,22 @@ interface Score {
     Rank: string;
 }
 
+interface SongInfo {
+    Item1: number;
+    Item2: number;
+    Item3: {
+        Genre: string;
+        LevelName: string[];
+        MaxCombo: number[];
+        Bpm: string;
+        Id: number;
+        Title: string;
+        Artist: string;
+        Constants: number[];
+        Levels: string[];
+        Charters: string[];
+        Version: string;
+        BpmNorm: string;
+    };
+}
 </script>
