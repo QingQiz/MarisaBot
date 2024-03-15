@@ -93,7 +93,7 @@ function OpWidth(idx: number) {
 </script>
 
 <template>
-    <div class="flex gap-2 w-full">
+    <div class="flex gap-2 w-full text-black">
         <div class="bar-title">
             <div>
                 {{ op[-2].toFixed(2) }}

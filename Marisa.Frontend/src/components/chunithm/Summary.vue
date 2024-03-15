@@ -291,6 +291,5 @@ export interface SongInfo {
     Charters: string[];
     Version: string;
     BpmNorm: string;
-
 }
 </script>
