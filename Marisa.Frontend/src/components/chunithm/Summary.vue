@@ -3,13 +3,14 @@ import {useRoute} from 'vue-router';
 import {ref} from 'vue';
 import axios from 'axios';
 import {context_get} from "@/GlobalVars";
+import OverPower from "@/components/chunithm/partial/OverPower.vue";
 
 const route = useRoute()
 const id    = ref(route.query.id)
 
 const data_fetched = ref(false)
 
-const grouped = ref([] as SongInfo[][])
+const grouped = ref([] as GroupSongInfo[][])
 const scores  = ref({} as { [key: string]: Score })
 
 
@@ -138,7 +139,6 @@ function GetGroupMinRank(group: any[]) {
         }
     }
 }
-
 </script>
 
 <template>
@@ -148,7 +148,8 @@ function GetGroupMinRank(group: any[]) {
                 <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(group), '#000000')}`">
                     {{ group[0].Item1 }}
                     <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
-                         onerror="this.style.display='none'">
+                         onerror="this.style.opacity=0">
+                    <OverPower :group="group" :scores="group.map(s => GetScore(s.Item3.Id, s.Item2))" class="justify-self-end"/>
                 </div>
                 <div class="row">
                     <template v-for="song in group">
@@ -192,12 +193,14 @@ function GetGroupMinRank(group: any[]) {
 
 .group-title {
     font-size: var(--group-title-font-size);
-    display: flex;
-    @apply flex items-center place-content-between gap-5;
+    @apply grid grid-cols-3 place-content-center items-center;
+
+    grid-template-columns: 1fr 300px 1fr;
 }
 
 .group-min-rank {
     height: var(--group-title-font-size);
+    @apply justify-self-center;
 }
 
 .level-mark {
@@ -255,7 +258,7 @@ function GetGroupMinRank(group: any[]) {
 </style>
 
 <script lang="ts">
-interface Score {
+export interface Score {
     cid: number;
     ds: number;
     fc: string;
@@ -269,22 +272,25 @@ interface Score {
     Rank: string;
 }
 
-interface SongInfo {
+export interface GroupSongInfo {
     Item1: number;
     Item2: number;
-    Item3: {
-        Genre: string;
-        LevelName: string[];
-        MaxCombo: number[];
-        Bpm: string;
-        Id: number;
-        Title: string;
-        Artist: string;
-        Constants: number[];
-        Levels: string[];
-        Charters: string[];
-        Version: string;
-        BpmNorm: string;
-    };
+    Item3: SongInfo;
+}
+
+export interface SongInfo {
+    Genre: string;
+    LevelName: string[];
+    MaxCombo: number[];
+    Bpm: string;
+    Id: number;
+    Title: string;
+    Artist: string;
+    Constants: number[];
+    Levels: string[];
+    Charters: string[];
+    Version: string;
+    BpmNorm: string;
+
 }
 </script>
