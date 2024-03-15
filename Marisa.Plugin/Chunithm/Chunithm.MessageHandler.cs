@@ -152,6 +152,28 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("获取OverPower的统计")]
+    [MarisaPluginSubCommand(nameof(Summary))]
+    [MarisaPluginCommand("overpower", "op")]
+    private async Task<MarisaPluginTaskState> SummaryOverPower(Message message)
+    {
+        var scores = await GetAllSongScores(message);
+        
+        var songs = FilteredSongList
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s);
+        
+        var ctx = new WebContext();
+        ctx.Put("OverPowerScores", scores);
+        ctx.Put("OverPowerSongs", songs);
+
+        var img = await WebApi.ChunithmOverPowerAll(ctx.Id);
+        message.Reply(MessageDataImage.FromBase64(img));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     #endregion
 
     #region 查分

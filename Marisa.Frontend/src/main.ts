@@ -14,6 +14,7 @@ import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
 import WordCloud from "@/components/WordCloud/WordCloud.vue";
 import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
+import OverPowerAll from "@/components/chunithm/OverPowerAll.vue";
 
 
 const routes = [
@@ -21,6 +22,7 @@ const routes = [
     {path: '/maimai/best', component: BestScores},
     {path: '/maimai/recommend', component: Recommend},
     {path: '/chunithm/summary', component: ChunithmSummary},
+    {path: '/chunithm/overpower', component: OverPowerAll},
     {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},
