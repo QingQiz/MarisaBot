@@ -8,18 +8,19 @@ let props = defineProps<{
     scores: Score[]
 }>()
 
-function OverPower(achievement: number, constant: number, fc: string) {
-    if (achievement == 0) return 0;
+function OverPower(score: Score) {
+    if (score.score == 0) return 0;
 
-    let s = achievement <= 100_7500 ? constant : constant + 2;
-    let r = fc == 'fullcombo' || fc == 'fullchain' || fc == 'fullchain2' ? 0.5 : 0;
+    let s = score.score <= 100_7500 ? score.ra : score.ds + 2;
+    let r = score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2' ? 0.5 : 0;
 
-    if (fc == 'alljustice') r = 1.0;
-    if (achievement == 101_0000) r = 1.25;
+    if (score.fc == 'alljustice') r = 1.0;
+    if (score.score == 101_0000) r = 1.25;
 
-    let e = achievement <= 100_7500 ? 0 : (achievement - 100_7500) * 0.0015;
+    let e = score.score <= 100_7500 ? 0 : (score.score - 100_7500) * 0.0015;
 
-    return s * 5 + r + e;
+    let op = s * 5 + r + e;
+    return parseInt((op * 100 * 2).toString()) / 200.0;
 }
 
 function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
@@ -53,22 +54,26 @@ function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
         let song  = group[i]
         let score = scores[i]
 
-        if (song.Item2 <= 2) continue;
+        if (song.Item2 != 3 && song.Item2 != 4) continue;
 
         let constant = song.Item3.Constants[song.Item2]
+
+        // 好像有一些垃圾数据
+        if (constant < 10) continue;
 
         if (score) {
             let achievement = score.score
             let fc          = score.fc
 
             let rank = FcRank(achievement, fc)
-            let op   = OverPower(achievement, constant, fc)
+            let op   = OverPower(score)
             opSum += op;
             groupOp[rank] += 1
         } else {
             groupOp[4] += 1
+            console.log(song)
         }
-        opAll += OverPower(101_0000, constant, 'alljustice')
+        opAll += (constant) * 5 + 15;
     }
 
     groupOp[-1] = opAll;
