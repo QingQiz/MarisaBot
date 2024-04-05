@@ -92,6 +92,7 @@ public class BlackList : MarisaPluginBase
             if (long.TryParse(message.Command.Trim(), out var qq))
             {
                 var db = new BotDbContext();
+                Cache.Add(qq);
                 db.BlackLists.Add(new EntityFrameworkCore.Entity.BlackList(qq));
                 db.SaveChanges();
                 message.Reply("好了");
