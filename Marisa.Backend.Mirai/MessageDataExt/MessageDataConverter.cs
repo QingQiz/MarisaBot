@@ -135,7 +135,7 @@ public static class MessageDataConverter
         else
         {
             message.Sender =
-                new SenderInfo(m.sender.id, m.sender.memberName, permission: m.sender.permission);
+                new SenderInfo(m.sender.id, m.sender.memberName, null, m.sender.permission);
             message.GroupInfo =
                 new GroupInfo(m.sender.group.id, m.sender.group.name, m.sender.group.permission);
         }

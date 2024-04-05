@@ -3,12 +3,17 @@ using Marisa.Utils;
 
 namespace Marisa.BotDriver.Plugin.Trigger;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
 public class MarisaPluginCommand : Attribute
 {
     private readonly StringComparison _comparison;
     private readonly MessageType _target;
     private readonly bool _strict;
+
+    private bool Comparer(string a, string b)
+    {
+        return _strict ? string.Equals(a, b, _comparison) : a.StartsWith(b, _comparison);
+    }
 
     public string[] Commands { get; }
 
@@ -69,18 +74,23 @@ public class MarisaPluginCommand : Attribute
         _strict     = false;
     }
 
-    public bool Check(Message message)
+    public bool TryMatch(Message message, out string afterMatch)
     {
+        afterMatch = message.Command;
+
         if ((message.Type & _target) == 0) return false;
-        if (Commands.Length == 0) return true;
+        if (Commands.Length          == 0) return true;
 
-        return _strict
-            ? Commands.Any(p => p.Equals(message.Command.Trim(), _comparison))
-            : message.Command.Trim().StartWith(Commands, _comparison);
-    }
+        afterMatch = afterMatch.Trim();
 
-    public string Trim(Message message)
-    {
-        return Commands.Length == 0 ? message.Command : message.Command.Trim().TrimStart(Commands)!.Trim();
+        foreach (var prefix in Commands)
+        {
+            if (!Comparer(afterMatch, prefix)) continue;
+
+            afterMatch = afterMatch[prefix.Length..].TrimStart();
+            return true;
+        }
+
+        return false;
     }
 }

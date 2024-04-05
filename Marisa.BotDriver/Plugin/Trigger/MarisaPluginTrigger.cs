@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Marisa.BotDriver.Plugin.Trigger;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
 public class MarisaPluginTrigger: Attribute
 {
     public delegate bool PluginTrigger(Message message, IServiceProvider provider);

@@ -4,7 +4,7 @@ using Marisa.BotDriver.Entity.MessageSender;
 
 namespace Marisa.BotDriver.Entity.Message;
 
-public class Message
+public record Message(string Command)
 {
     // Info
     public GroupInfo? GroupInfo;
@@ -13,23 +13,17 @@ public class Message
     public readonly MessageChain? MessageChain;
 
     // Control
-    public string Command;
     public MessageType Type;
     private readonly MessageSenderProvider _sender;
 
-    public Message(MessageChain chain, MessageSenderProvider sender)
+    public Message(MessageChain chain, MessageSenderProvider sender) : this(chain.Text.Trim())
     {
         MessageChain = chain;
         _sender      = sender;
-        Command      = MessageChain.Text.Trim();
     }
 
     public Message(MessageSenderProvider sender, params MessageData.MessageData[] md)
-    {
-        MessageChain = new MessageChain(md);
-        _sender      = sender;
-        Command      = MessageChain.Text.Trim();
-    }
+        : this(new MessageChain(md), sender) {}
 
     public MessageDataId MessageId =>
         (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.Id) as MessageDataId)!;

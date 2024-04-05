@@ -2,7 +2,7 @@
 
 namespace Marisa.BotDriver.Entity.Message;
 
-public class MessageChain
+public record MessageChain
 {
     public readonly List<MessageData.MessageData> Messages;
 
@@ -16,9 +16,7 @@ public class MessageChain
         Messages = messages.ToList();
     }
 
-    public bool EnableReference = true;
-
-    public bool CanBeReferenced => EnableReference && Messages.All(m => m.Type is not (
+    public bool CanBeReferenced => Messages.All(m => m.Type is not (
         MessageDataType.Voice or
         MessageDataType.Nudge or
         MessageDataType.NewMember or
@@ -53,12 +51,7 @@ public class MessageChain
         }));
     }
 
-    public string? _plain;
-
-    public string Text
-    {
-        get => _plain ?? string.Join(' ',
-            Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text));
-        set => _plain = value;
-    }
+    public string Text => string.Join(' ',
+        Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text)
+    );
 }

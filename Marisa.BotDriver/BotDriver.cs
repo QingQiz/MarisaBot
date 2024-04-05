@@ -35,7 +35,7 @@ public abstract class BotDriver
     /// </summary>
     /// <param name="pluginAssembly"></param>
     /// <returns>ServiceCollection</returns>
-    public static IServiceCollection Config(Assembly pluginAssembly)
+    protected static IServiceCollection Config(Assembly pluginAssembly)
     {
         var sc = new ServiceCollection()
             .AddScoped(p => p)
@@ -66,49 +66,17 @@ public abstract class BotDriver
     /// <exception cref="Exception"></exception>
     protected virtual async Task ProcMessage()
     {
-        bool Check(
-            Message message, IReadOnlyCollection<MarisaPluginCommand> commands,
-            IReadOnlyCollection<MarisaPluginTrigger> triggers)
-        {
-            if (triggers.Any())
-            {
-                var resTrigger = triggers.Aggregate(false,
-                    (result, trigger) => result || trigger.Trigger(message, ServiceProvider));
-
-                if (!resTrigger) return false;
-            }
-
-            // ReSharper disable once InvertIf
-            if (commands.Any())
-            {
-                foreach (var command in commands.Where(command => command.Check(message)))
-                {
-                    message.Command = command.Trim(message);
-                    return true;
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        bool CheckMember(MemberInfo plugin, Message message)
-        {
-            var commands = plugin.GetCustomAttributes<MarisaPluginCommand>().ToList();
-            var triggers = plugin.GetCustomAttributes<MarisaPluginTrigger>().ToList();
-
-            return Check(message, commands, triggers);
-        }
-
         const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
                                           BindingFlags.Static  | BindingFlags.Public;
 
-        var availablePlugins = Plugins.Where(p =>
+        // get all MarisaPluginBase from plugins
+        var plugins = Plugins.Where(p =>
             p.GetType().GetCustomAttributes<MarisaPluginTrigger>().Any() ||
             p.GetType().GetCustomAttributes<MarisaPluginCommand>().Any()).ToList();
 
-        var availableMethods = availablePlugins
+        // get all Command or Trigger from MarisaPluginBase
+        // filter out subcommand
+        var commands = plugins
             .Select(p => (p, p.GetType()
                 .GetMethods(bindingFlags)
                 // 选择出含有这两个属性的方法
@@ -120,7 +88,9 @@ public abstract class BotDriver
                     !m.GetCustomAttributes<MarisaPluginSubCommand>().Any())))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
-        var availableSubCommands = availablePlugins
+        // get all Command or Trigger from MarisaPluginBase
+        // filter subcommand
+        var subCommands = plugins
             .Select(p => (p, p.GetType()
                 .GetMethods(bindingFlags)
                 // 选择出含有这两个属性的方法
@@ -134,91 +104,105 @@ public abstract class BotDriver
                     (parentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, methodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
-        var taskList = new List<Task>();
+        var tasks = new List<Task>();
 
         while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
         {
             var messageRecv = MessageQueueProvider.RecvQueue.Reader.ReadAllAsync();
 
-            taskList.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
+            tasks.Add(Parallel.ForEachAsync(messageRecv, async (message, _) =>
             {
-                // 这种写法非常的丑陋，并且很容易出 BUG，应该让 CheckMember 没有副作用
-                var command = message.Command;
-
-                foreach (var plugin in availablePlugins.Where(p => CheckMember(p.GetType(), message)))
+                foreach (var plugin in plugins)
                 {
+                    if (!ShouldTrigger(plugin.GetType(), message, out var afterTrigger)) continue;
+
                     var shouldBreak = false;
 
-                    // TrigPlugin 虽然会修改 command，但是最后我把它还原了，这里可能出 BUG
-                    await foreach (var state in TrigPlugin(plugin, message))
+                    await foreach (var state in TriggerPlugin(plugin, message with { Command = afterTrigger }))
                     {
                         if (state != MarisaPluginTaskState.CompletedTask) continue;
 
                         shouldBreak = true;
-                        break;
                     }
-
-                    message.Command = command;
 
                     if (shouldBreak) break;
                 }
             }));
 
-            if (taskList.Count < 100) continue;
+            if (tasks.Count < 100) continue;
 
             await Task.WhenAll();
-            taskList.Clear();
+            tasks.Clear();
         }
 
-        await Task.WhenAll(taskList);
+        await Task.WhenAll(tasks);
         return;
 
-        async IAsyncEnumerable<MarisaPluginTaskState> TrigPlugin(MarisaPluginBase plugin, Message message)
+        bool ShouldTrigger(MemberInfo member, Message message, out string afterTrigger)
         {
-            // 每次进入循环都会将 command 的头去掉，因此记录一下原始的 command，在每次循环结束后还原头
-            var command = message.Command;
-            foreach (var method in availableMethods[plugin].Where(m => CheckMember(m, message)))
+            afterTrigger = message.Command;
+
+            var c = member.GetCustomAttribute<MarisaPluginCommand>();
+            var t = member.GetCustomAttribute<MarisaPluginTrigger>();
+
+            if (c == null && t == null) return false;
+
+            if (t != null)
             {
-                var m = method;
+                var triggerResult = t.Trigger(message, ServiceProvider);
+                if (!triggerResult) return false;
+            }
 
-                while (true)
-                {
-                    // 所有子命令
-                    var subCommands = availableSubCommands[plugin]
-                        .Where(n => n.parentName == method.Name)
-                        .Select(n => n.methodInfo)
-                        .ToList();
-                    // 没有子命令则执行当前
-                    if (!subCommands.Any()) break;
-                    // 检查子命令
-                    var sub = subCommands.FirstOrDefault(sub => CheckMember(sub, message));
-                    // 没有有成功的则执行当前
-                    if (sub is null)
-                    {
-                        break;
-                    }
+            // ReSharper disable once InvertIf
+            if (c != null)
+            {
+                var matchResult = c.TryMatch(message, out var afterMatch);
+                if (!matchResult) return false;
 
-                    // 有成功的则继续找当前命令的子命令
-                    m = sub;
-                }
+                afterTrigger = afterMatch;
+            }
 
-                var ret = await DependencyInjectInvoke(plugin, m, message);
+            return true;
+        }
+
+        (MethodInfo witch, Message what) WhichMethodShouldBeTriggeredByWhat(MarisaPluginBase plugin, MethodInfo handler,
+            Message message)
+        {
+            // 获取当前handler的所有子handler
+            var currentSub = subCommands[plugin]
+                .Where(n => n.parentName == handler.Name)
+                .Select(n => n.methodInfo)
+                .ToList();
+
+            // 没有子命令则执行当前
+            if (!currentSub.Any()) return (handler, message);
+
+            // 检查子命令能否执行
+            foreach (var sub in currentSub)
+            {
+                if (ShouldTrigger(sub, message, out var after)) return (sub, message with { Command = after });
+            }
+
+            // 不能就执行当前
+            return (handler, message);
+        }
+
+        async IAsyncEnumerable<MarisaPluginTaskState> TriggerPlugin(MarisaPluginBase plugin, Message message)
+        {
+            foreach (var method in commands[plugin])
+            {
+                if (!ShouldTrigger(method, message, out var afterTrigger)) continue;
+
+                var (which, what) =
+                    WhichMethodShouldBeTriggeredByWhat(plugin, method, message with { Command = afterTrigger });
+
+                var ret = await DependencyInjectInvoke(plugin, which, what);
 
                 if (ret != null)
                 {
-                    // NOTE 当一个插件中有多个指令会被触发时，分为以下情况：
-                    // 1. 使用 Command 同时触发了 A 和 B，此时A、B会存在相同的触发前缀，
-                    //    这样的情况下需设计成子命令的形式以保证正确运行（因为A触发后消息会被修改）
-                    //    若是 A 的触发前缀是空字符串，则没有影响
-                    // 2. 同上，但是有 Trigger 的参与，此时没什么影响，还是应当设计成子命令的形式
-                    // 3. 只有 Trigger 作用，没什么要注意的
                     yield return (MarisaPluginTaskState)ret;
                 }
-
-                message.Command = command;
             }
-
-            message.Command = command;
         }
     }
 
