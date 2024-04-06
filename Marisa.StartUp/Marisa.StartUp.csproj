@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <Target Name="RunWebpack" BeforeTargets="BeforeBuild">
+        <Exec Command="npm install" WorkingDirectory="..\Marisa.Frontend" />
         <Exec Command="npx vite build" WorkingDirectory="..\Marisa.Frontend" />
     </Target>
 
