@@ -28,7 +28,7 @@ const score   = ref(props.data.score)
 const user    = ref(props.data.user)
 
 const ppAcc           = GetPpAcc()
-const pp              = ref(score.value.pp)
+const pp              = ref(score.value.pp ?? 0)
 const sr              = ref(beatmap.value.difficulty_rating)
 const cover_path      = GetBeatmapCoverPath()
 const rankStatusColor = GetRankStatusColor()
