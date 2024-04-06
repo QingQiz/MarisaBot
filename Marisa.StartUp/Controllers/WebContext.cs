@@ -7,6 +7,13 @@ namespace Marisa.StartUp.Controllers;
 [Route("Api/[controller]/[action]")]
 public class WebContext : Controller
 {
+    public WebContext()
+    {
+        var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
+        // create if not exists
+        Directory.CreateDirectory(path);
+    }
+
     private static void WriteHistory(Guid id, string name, string str)
     {
         var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
