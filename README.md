@@ -185,21 +185,63 @@
 
 ## 部署
 
-<details>
-<summary> 展开 </summary>
+- `git clone https://github.com/QingQiz/MarisaBot/`
+- 安装依赖
+    - dotnet 7.0
+    - ffmpeg
+    - Node.js
+- 选择一个QQ机器人框架，如Mirai/Go-CQ，以Mirai为例
+    - 依照Mirai的[官方文档](https://github.com/mamoe/mirai/blob/dev/docs/ConsoleTerminal.md)部署Mirai
+    - 安装Mirai的[HTTP插件](https://github.com/project-mirai/mirai-api-http)
+    - 配置Mirai的HTTP插件，这里给出一个例子
+      ```yaml
+      adapters:
+        - ws
+      enableVerify: true
+      ## 用于验证的 key
+      verifyKey: KEY
+      debug: false
+      singleMode: false
+      cacheSize: 4096
+      adapterSettings:
+        ws:
+          host: localhost
+          port: 18080
+          reservedSyncId: -1
+      ```
+- 在 Mirai 里登陆 bot
+- 改项目的配置文件`Marisa.StartUp/config.yaml`
+    - 需要修改里面的各种路径，
+        - 其中`resourcePath`中的资源为源码中自带的，只需要改前缀
+        - 其中`tempPath`为临时文件夹，可随意选用，用于存放Bot执行过程中的缓存
+        - 其中`ffmpegPath`为FFmpeg的路径，用于处理音频文件
+    - 需要补充里面的一些token
+        - `clientId`和`clientSecret`为osu!的API的token，可以在osu的用户设置界面进行申请
+        - `devToken`为水鱼的token，需要联系水鱼本人获取
+- 创建数据库
+    - `cd Marisa.EntityFrameworkCore`
+    - `dotnet ef database update`
+    - 需要注意的是
+        - 需要开启数据库的tcp访问
+        - 需要开启数据库的Windows身份验证
+        - 需要手动创建名为`QQBOT_DB`的数据库
+        - 若不想注意上面这些，则需要修改[该行](https://github.com/QingQiz/MarisaBot/blob/984715273c73aa9d3d9717c0a333f2569123df62/Marisa.EntityFrameworkCore/BotDbContext.cs#L26)来更换数据库和认证方式
+- 编译
+    - `cd Marisa.StartUp`
+    - `dotnet build -c Release`
+- 运行
+    - `cd /bin/Release/net7.0/`
+    - 运行 `Marisa.StartUp.exe` 命令行参数如下（顺序敏感）：
+        - [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:18080`
+        - bot的QQ账号，如 `123456789`
+        - Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
+        - （可选）传入`gocq`字符串则以Go-CQ为框架，否则以Mirai为框架
 
-1. 部署 mcl
-2. 在 mcl 里登陆 bot
-3. 改 config.yaml
-4. 配置数据库 (entity framework标准操作)
-5. 运行，命令行参数如下（顺序敏感）：
-   1. [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:8080`
-   2. bot 的账号，如 `123456789`
-   3. Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
-
-</details>
 
 ## 备忘
+
+<details>
+<summary> 展开 </summary>
 
 - 环境变量
   - DEV:
@@ -207,3 +249,5 @@
     - 未设置则前端地址指定为 `https://localhost:14311`
   - RESPONSE:
     - 设置了则 bot 只会相应该用户的消息
+
+</details>
