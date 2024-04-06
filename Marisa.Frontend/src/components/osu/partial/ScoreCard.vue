@@ -366,7 +366,9 @@ const profile_height         = cover_height - cover_padding * 2 - profile_paddin
                                 </div>
                                 <div>
                                     <div>max combo</div>
-                                    <div>{{ score.max_combo }} /
+                                    <div>
+                                        <div class="inline" :class="{'text-green-300': score.max_combo == beatmap.max_combo}">{{ score.max_combo }}</div>
+                                        /
                                         <div class="inline text-green-300">{{ beatmap.max_combo }}</div>
                                     </div>
                                 </div>
