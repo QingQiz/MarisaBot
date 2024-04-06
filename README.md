@@ -187,9 +187,10 @@
 
 - `git clone https://github.com/QingQiz/MarisaBot/`
 - 安装依赖
-    - dotnet 7.0
-    - ffmpeg
-    - Node.js
+    - 安装 dotnet 7.0
+    - 下载 ffmpeg.exe
+    - 安装 Node.js
+    - 安装`Marisa.Plugin.Shared\Resource\Font`下的所有字体
 - 选择一个QQ机器人框架，如Mirai/Go-CQ，以Mirai为例
     - 依照Mirai的[官方文档](https://github.com/mamoe/mirai/blob/dev/docs/ConsoleTerminal.md)部署Mirai
     - 安装Mirai的[HTTP插件](https://github.com/project-mirai/mirai-api-http)
@@ -198,7 +199,7 @@
       adapters:
         - ws
       enableVerify: true
-      ## 用于验证的 key
+      ## 用于验证的 key，填你自己的Key
       verifyKey: KEY
       debug: false
       singleMode: false
@@ -215,10 +216,11 @@
         - 其中`resourcePath`中的资源为源码中自带的，只需要改前缀
         - 其中`tempPath`为临时文件夹，可随意选用，用于存放Bot执行过程中的缓存
         - 其中`ffmpegPath`为FFmpeg的路径，用于处理音频文件
-    - 需要补充里面的一些token
+    - 需要补充里面的一些token（可以先不补充，但是有些功能会失效）
         - `clientId`和`clientSecret`为osu!的API的token，可以在osu的用户设置界面进行申请
         - `devToken`为水鱼的token，需要联系水鱼本人获取
 - 创建数据库
+    - 安装 dotnet ef `dotnet tool install --global dotnet-ef`
     - `cd Marisa.EntityFrameworkCore`
     - `dotnet ef database update`
     - 需要注意的是
@@ -230,7 +232,7 @@
     - `cd Marisa.StartUp`
     - `dotnet build -c Release`
 - 运行
-    - `cd /bin/Release/net7.0/`
+    - `cd bin/Release/net7.0/`
     - 运行 `Marisa.StartUp.exe` 命令行参数如下（顺序敏感）：
         - [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:18080`
         - bot的QQ账号，如 `123456789`
