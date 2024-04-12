@@ -17,7 +17,7 @@ const available_prefix = [
     // 固有的
     "TAP", "CHR", "HLD", "SLD", "SLC", "FLK", "AIR", "AUR", "AUL", "AHD", "ADW", "ADR", "ADL", "MNE",
     // NEW
-    "ASC", "ASD", "ALD",
+    "ASC", "ASD", "ALD", "HXD", "SXD", "AHX", "SXC"
 ];
 
 const alias_prefix = [
@@ -104,7 +104,7 @@ function UpdateSldHead(chart: Chart) {
             continue;
         }
 
-        chart['SLD_H'].push([tick, cell, width]);
+        chart[slide[6] == 1 ? 'CHR' : 'SLD_H'].push([tick, cell, width]);
     }
 }
 
@@ -164,11 +164,11 @@ function ScaleChartTickByBpm(chart: Chart) {
 
 function ParseLine(chart: Chart, data: any) {
     let key = data[0];
-    if (key == 'HLD') {
+    if (key == 'HLD' || key == "HXD") {
         ParseLn(chart, data as LnData);
-    } else if (key == 'AHD') {
+    } else if (key == 'AHD' || key == "AHX") {
         ParseAirHold(chart, data as AirHoldData);
-    } else if (key == "SLD" || key == "SLC") {
+    } else if (key == "SLD" || key == "SLC" || key == "SXD" || key == "SXC") {
         ParseSld(chart, data as SldData);
     } else if (key == "ASC" || key == "ASD") {
         ParseAirSld(chart, data as AirSldData);
@@ -190,14 +190,21 @@ function ParseLn(chart: Chart, data: LnData) {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], duration: data[5]
     };
 
-    chart['HLD_H'].push([ToTick(d.measure, d.offset), d.cell, d.width]);
-    chart['HLD_T'].push([
+    let h = [ToTick(d.measure, d.offset), d.cell, d.width];
+    let t = [
         ToTick(d.measure + Math.floor((d.offset + d.duration) / 384),
             (d.offset + d.duration) % 384
         ),
         d.cell, d.width
-    ]);
+    ]
 
+    if (data[0] == "HLD") {
+        chart['HLD_H'].push(h);
+    } else {
+        chart["CHR"].push(h);
+    }
+
+    chart["HLD_T"].push(t);
     chart['HLD_B'].push([ToTick(d.measure, d.offset), d.cell, d.width, ToTick(d.measure, d.offset) + d.duration]);
 }
 
@@ -206,7 +213,7 @@ function ParseAirHold(chart: Chart, data: AirHoldData) {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], type: data[5], duration: data[6]
     };
 
-    if (d.type != 'AHD') {
+    if (d.type != 'AHD' && d.type != 'AHX') {
         chart['AHD_H'].push([ToTick(d.measure, d.offset), d.cell, d.width]);
     }
 
@@ -225,7 +232,7 @@ function ParseSld(chart: Chart, data: SldData) {
         target_cell: data[6], target_width: data[7]
     };
 
-    if (data[0] == "SLD") {
+    if (data[0] == "SLD" || data[0] == "SXD") {
         chart['SLD_T'].push([
             ToTick(
                 d.measure + Math.floor((d.offset + d.duration) / 384), (d.offset + d.duration) % 384
@@ -233,9 +240,9 @@ function ParseSld(chart: Chart, data: SldData) {
         ]);
     }
 
-    chart[data[0]].push([
+    chart[data[0].replace('X', 'L')].push([
         ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width
+        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, data[0][1] == 'X' ? 1 : 0
     ]);
 }
 
