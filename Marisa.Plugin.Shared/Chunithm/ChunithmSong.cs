@@ -17,6 +17,7 @@ public class ChunithmSong : Song
     public readonly List<long> MaxCombo = new();
     public new readonly string Bpm;
     public string BpmNorm => Bpm.Split(' ')[0];
+    public readonly List<string> ChartName = new();
 
     public ChunithmSong(dynamic o, bool fromDivingFish)
     {
@@ -34,6 +35,7 @@ public class ChunithmSong : Song
             Levels.Add(o.level[i]);
             LevelName.Add(o.level[i]);
             MaxCombo.Add(o.charts[i].combo);
+            ChartName.Add("");
         }
     }
 
@@ -60,6 +62,7 @@ public class ChunithmSong : Song
             Charters.Add(i.Charter);
             Levels.Add(i.LevelStr);
             LevelName.Add(i.LevelName);
+            ChartName.Add(i.ChartName);
 
             try
             {

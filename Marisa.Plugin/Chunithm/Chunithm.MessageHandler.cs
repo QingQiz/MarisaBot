@@ -2,6 +2,7 @@
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils.Cacheable;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -158,12 +159,12 @@ public partial class Chunithm
     private async Task<MarisaPluginTaskState> SummaryOverPower(Message message)
     {
         var scores = await GetAllSongScores(message);
-        
+
         var songs = FilteredSongList
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s);
-        
+
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
         ctx.Put("OverPowerSongs", songs);
@@ -221,6 +222,57 @@ public partial class Chunithm
     private MarisaPluginTaskState SearchSong(Message message)
     {
         return _songDb.SearchSong(message);
+    }
+
+    /// <summary>
+    /// 谱面预览
+    /// </summary>
+    [MarisaPluginDoc("谱面预览，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
+    [MarisaPluginCommand("preview", "view", "谱面", "预览")]
+    private MarisaPluginTaskState PreviewSong(Message message)
+    {
+        var songName     = message.Command.Trim();
+        var searchResult = _songDb.SearchSong(songName);
+
+        if (searchResult.Count != 1)
+        {
+            message.Reply(_songDb.GetSearchResult(searchResult));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var song = searchResult.First();
+
+        message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
+            .Select((l, i) => $"{i}. [{song.LevelName[i]}] {l}").ToList())
+        }");
+
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        {
+            var command = next.Command.Trim();
+
+            if (!int.TryParse(command, out var levelIdx))
+            {
+                message.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var chartName = song.ChartName[levelIdx];
+            var cacheName = Path.Join(ResourceManager.TempPath, $"Preview-{chartName}.b64");
+            var img = new CacheableText(cacheName, () =>
+            {
+                var ctx = new WebContext();
+                ctx.Put("chart", File.ReadAllText(
+                    Path.Join(ResourceManager.ResourcePath, "chart", chartName + ".c2s")
+                ));
+                return WebApi.ChunithmPreview(ctx.Id).Result;
+            });
+
+            message.Reply(MessageDataImage.FromBase64(img.Value));
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     #endregion
@@ -524,35 +576,13 @@ public partial class Chunithm
 
             var levelName = song.LevelName;
 
-            // 全名
-            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
-            var levelPrefix = level ?? "";
-            if (level != null) goto RightLabel;
+            var (levelPrefix, levelIdx) = LevelAlias2Index(command, levelName);
 
-            // 首字母
-            level = levelName.FirstOrDefault(n =>
-                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
-            if (level != null)
+            if (levelIdx == -1)
             {
-                levelPrefix = command[0].ToString();
-                goto RightLabel;
+                next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
-
-            // 别名
-            level = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a =>
-                command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
-            levelPrefix = level ?? "";
-            if (level != null)
-            {
-                level = ChunithmSong.LevelAlias[level];
-                goto RightLabel;
-            }
-
-            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-
-            RightLabel:
-            var levelIdx = levelName.IndexOf(level);
 
             if (song.MaxCombo[levelIdx] == 0)
             {

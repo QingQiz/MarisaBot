@@ -24,6 +24,38 @@ public partial class Chunithm
 
     private List<ChunithmSong>? _songList;
 
+    private static (string, int) LevelAlias2Index(string command, IList<string> levels)
+    {
+        // 全名
+        var level       = levels.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+        var levelPrefix = level ?? "";
+        if (level != null) goto RightLabel;
+
+        // 首字母
+        level = levels.FirstOrDefault(n =>
+            command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+        if (level != null)
+        {
+            levelPrefix = command[0].ToString();
+            goto RightLabel;
+        }
+
+        // 别名
+        level = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a =>
+            command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
+        levelPrefix = level ?? "";
+        if (level != null)
+        {
+            level = ChunithmSong.LevelAlias[level];
+            goto RightLabel;
+        }
+
+        return ("", -1);
+
+        RightLabel:
+        return (levelPrefix, levels.IndexOf(level));
+    }
+
     private IEnumerable<ChunithmSong> FilteredSongList
     {
         get

@@ -134,4 +134,9 @@ public static class WebApi
     {
         return await RenderUrl(Frontend + "/chunithm/overpower?id=" + contextId);
     }
+
+    public static async Task<string> ChunithmPreview(Guid contextId)
+    {
+        return await RenderUrl(Frontend + "/chunithm/preview?id=" + contextId);
+    }
 }
