@@ -9,6 +9,7 @@ import axios from "axios";
 const route = useRoute()
 
 let id           = ref(route.query.id)
+let name         = ref(route.query.name)
 let data_fetched = ref(false);
 
 let chart    = ref({} as Chart);
@@ -17,7 +18,7 @@ let step     = 0;
 let split_to = 20;
 
 
-axios(context_get, {params: {id: id.value, name: 'chart'}})
+axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
     .then(data => {
         let [c, t] = Parse(data.data);
         step       = Math.floor(t / split_to)
