@@ -29,7 +29,7 @@
 }
 
 .stage {
-    @apply relative m-6;
+    @apply relative m-8;
 
     --tick-min: 0;
     --tick-max: 384;
@@ -52,7 +52,7 @@
 }
 
 .BPM {
-    @apply absolute text-gray-400 text-center border-t-[2px] border-gray-600;
+    @apply absolute text-gray-300 text-center border-t-[2px] border-gray-600;
 
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px + 2px);
 
@@ -60,7 +60,33 @@
     left: -40px;
     height: 30px;
 
+    z-index: 1;
+}
+
+.SFL {
+    @apply absolute text-gray-400 text-center text-sm;
+    @apply flex items-center;
+
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px + 2px);
+    height: calc(var(--duration) / (var(--tick-max) - var(--tick-min)) * 100%);
+
+    width: 80px;
+    left: -80px;
+
     z-index: 0;
+}
+
+.SFL.UP {
+    @apply border-r-4 border-indigo-300;
+    @apply justify-end pr-1;
+}
+
+.SFL.DOWN {
+    @apply border-l-4 border-amber-300;
+    @apply justify-start pl-1;
+
+    left: unset;
+    right: -80px;
 }
 
 .BEAT_1 {
@@ -71,7 +97,7 @@
     width: 40px;
     left: -40px;
 
-    z-index: 1;
+    z-index: 2;
 
     &:after {
         @apply absolute bg-green-600 right-0 w-full opacity-40;

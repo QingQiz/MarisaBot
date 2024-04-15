@@ -5,6 +5,7 @@ import {
     cat_1,
     cat_2,
     cat_3,
+    cat_4,
     color_map,
     Chart,
     GetMaxTick,
@@ -60,7 +61,7 @@ function ProcessChart4Display(chart: Chart): [Chart, number, number[][]] {
     max_tick       = GetMaxTick(chart);
     measure_length = GetMeasureLength(chart, max_tick);
 
-    let split_points = GetSplitPoint(measure_length, split_to);
+    let split_points              = GetSplitPoint(measure_length, split_to);
     let measure_length_prefix_sum = new Array(measure_length.length);
 
     measure_length_prefix_sum[0] = measure_length[0];
@@ -76,7 +77,7 @@ function ProcessChart4Display(chart: Chart): [Chart, number, number[][]] {
 
     let range = [[0, split_points[0]]];
     for (let i = 0; i < split_points.length; i++) {
-        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1]) ?? max_tick]);
+        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick)]);
     }
 
     return [chart, max_tick, range];
@@ -112,19 +113,17 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
                      :style="`--tick:${Math.floor(note[0])}; --cell:${note[1]}; --width:${note[2]}`">
                 </div>
             </div>
-            <div v-for="note  in GetNotes('BEAT_1', i[0], i[1])"
-                 class="BEAT_1"
-                 :style="`--tick:${Math.floor(note[0])};`">
-                #{{ note[1] }}
+            <div v-for="type in cat_4">
+                <div v-for="note in GetNotes(type, i[0], i[1])"
+                     :class="type"
+                     :style="`--tick:${Math.floor(note[0])};`">
+                    {{ type == "BEAT_1" ? "#" : "" }}{{note[1]}}
+                </div>
             </div>
-            <div v-for="note in GetNotes('BPM', i[0], i[1])"
-                 class="BPM"
-                 :style="`--tick:${note[0]};`">
-                {{ note[1] }}
-            </div>
-            <div v-for="note in GetNotes('BEAT_2', i[0], i[1])"
-                 class="BEAT_2"
-                 :style="`--tick:${note[0]};`">
+            <div v-for="note in GetNotes('SFL', i[0], i[1]).filter(x => x[2] != 1)"
+                 :class="`SFL ${note[2] >= 0 ? 'UP' : 'DOWN'}`"
+                 :style="`--tick:${Math.floor(note[0])}; --duration: ${note[1]}`">
+                 {{ note[2] }}
             </div>
         </div>
     </div>
@@ -152,16 +151,13 @@ function GetSplitPoint(arr: number[], n: number) {
 
         let current = prefix_sum[i + 1] - pre;
         let next    = prefix_sum[i + 2] - pre;
-        console.log(current, next, avg)
 
         if (Math.abs(current - avg) <= Math.abs(next - avg)) {
             res.push(i);
             sum += current;
             avg = sum / (res.length - 1);
-            console.log(i)
         }
     }
-    console.log(res)
 
     return res.slice(1);
 }

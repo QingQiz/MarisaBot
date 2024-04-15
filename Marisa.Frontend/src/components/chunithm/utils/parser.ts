@@ -13,7 +13,7 @@ type AldData = [string, number, number, number, number, number, number, number, 
 
 const available_prefix = [
     // 控制的
-    "BPM", "MET",
+    "BPM", "MET", "SFL",
     // 固有的
     "TAP", "CHR", "HLD", "SLD", "SLC", "FLK", "AIR", "AUR", "AUL", "AHD", "ADW", "ADR", "ADL", "MNE",
     // NEW
@@ -36,6 +36,7 @@ export const cat_1 = [
 ];
 export const cat_2 = ["HLD_B", "AHD_B"];
 export const cat_3 = ["SLC", "SLD", "ASC", "ASD", "ALD"];
+export const cat_4 = ["BPM", "BEAT_1", "BEAT_2"];
 
 export const color_map = [
     "AQA", "BLK", "BLU", "CYN", "DEF", "DGR", "GRN", "GRY", "LIM", "NON", "ORN", "PNK", "PPL", "RED", "VLT", "YEL"
@@ -308,6 +309,10 @@ function Line2Event(line: string) {
     let params = line.trim().split('\t').map(x => x.toUpperCase());
     if (params[0] == "BPM") {
         return [params[0], parseInt(params[1]), parseInt(params[2]), parseFloat(params[3])];
+    } else if (params[0] == "BPM_DEF") {
+        return [params[0], parseFloat(params[1]), parseFloat(params[2]), parseFloat(params[3]), parseFloat(params[4])];
+    } else if (params[0] == "SFL") {
+        return [params[0], parseInt(params[1]), parseInt(params[2]), parseInt(params[3]), parseFloat(params[4])];
     }
     // parse all to int if possible
     return params.map(x => isNaN(parseInt(x)) ? x : parseInt(x));
