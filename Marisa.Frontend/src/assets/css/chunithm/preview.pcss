@@ -21,11 +21,11 @@
 
     --height-per-tick: 1px;
 
-    @apply px-6 bg-gray-500;
+    @apply p-6 bg-gray-500;
 }
 
 .stage-container {
-    @apply flex flex-row;
+    @apply flex flex-row items-end;
 }
 
 .stage {
@@ -238,9 +238,9 @@
     --min-cell: calc(min(var(--target-cell), var(--cell)));
     --max-cell: calc(max(var(--target-cell) + var(--target-width), var(--cell) + var(--width)));
 
-    width: calc((var(--max-cell) - var(--min-cell)) / 16 * 100% - var(--note-gap) * 2);
+    width: calc((var(--max-cell) - var(--min-cell)) / 16 * 100%);
 
-    left: calc(var(--min-cell) / 16 * 100% + var(--note-gap));
+    left: calc(var(--min-cell) / 16 * 100%);
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
     top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 }
@@ -248,10 +248,10 @@
 .SLC, .SLD, .ASC, .ASD, .ALD {
     @apply cat-3-common;
 
-    --l-percent: calc((var(--cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100%);
-    --r-percent: calc((var(--cell) + var(--width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100%);
-    --target-l-percent: calc((var(--target-cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100%);
-    --target-r-percent: calc((var(--target-cell) + var(--target-width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100%);
+    --l-percent: calc((var(--cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% + var(--note-gap));
+    --r-percent: calc((var(--cell) + var(--width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% - var(--note-gap));
+    --target-l-percent: calc((var(--target-cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% + var(--note-gap));
+    --target-r-percent: calc((var(--target-cell) + var(--target-width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% - var(--note-gap));
 
     &:before {
         @apply absolute inset-0 bg-blue-400 opacity-40;

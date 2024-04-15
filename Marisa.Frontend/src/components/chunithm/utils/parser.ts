@@ -64,7 +64,7 @@ export function Parse(chart_string: string): [Chart, number] {
     ScaleChartTickByBpm(chart);
     UpdateSldHead(chart);
 
-    return [chart, GetMaxTick(chart)];
+    return chart;
 }
 
 function MakeBeatLine(chart: Chart) {
@@ -75,8 +75,8 @@ function MakeBeatLine(chart: Chart) {
 
     for (let i = 0; i < max_tick; i += 384) {
         chart["BEAT_1"].push([i, i / 384]);
-        for (let j = 1; j < 4; j++) {
-            chart["BEAT_2"].push([i + j * 96]);
+        for (let j = i + 96; j < i + 384 && j < max_tick; j += 96) {
+            chart["BEAT_2"].push([j]);
         }
     }
 }
@@ -108,7 +108,7 @@ function UpdateSldHead(chart: Chart) {
     }
 }
 
-function GetMaxTick(chart: Chart) {
+export function GetMaxTick(chart: Chart) {
     let tick_max = 0;
 
     for (let key of Object.keys(chart)) {
@@ -140,23 +140,25 @@ function ScaleChartTickByBpm(chart: Chart) {
 
                 if (tick_j < tick_i) continue;
 
-                chart[key][j][0] = Math.floor(tick_i + (tick_j - tick_i) * bpm_before / bpm);
+                chart[key][j][0] = tick_i + (tick_j - tick_i) * bpm_before / bpm;
 
                 if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
-                    chart[key][j][3] = Math.floor((chart[key][j][3] - tick_i) * bpm_before / bpm + tick_i);
+                    chart[key][j][3] = (chart[key][j][3] - tick_i) * bpm_before / bpm + tick_i;
                 }
             }
         }
 
         bpm_before = bpm;
     }
+}
 
+export function ScaleTick(chart: Chart, scale: number) {
     for (let key of Object.keys(chart)) {
         for (let j = 0; j < chart[key].length; j++) {
-            chart[key][j][0] = Math.floor(chart[key][j][0] * 1.5);
+            chart[key][j][0] = chart[key][j][0] * scale;
 
             if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
-                chart[key][j][3] = Math.floor(chart[key][j][3] * 1.5);
+                chart[key][j][3] = chart[key][j][3] * scale;
             }
         }
     }
@@ -404,20 +406,18 @@ function SplitLnToFitBpmScale(chart: Chart) {
     }
 }
 
-export function SplitChartByStep(chart: Chart, step: number, max_tick: number): void {
-    for (let i = 0; i < max_tick; i += step) {
-        for (let key of cat_2) {
-            SplitChart(chart, key, i,
-                data => SplitLnBody(data[0], i, data[3] - data[0], data[1], data[2]),
-            );
-        }
+export function SplitChartAt(chart: Chart, tick: number): void {
+    for (let key of cat_2) {
+        SplitChart(chart, key, tick,
+            data => SplitLnBody(data[0], tick, data[3] - data[0], data[1], data[2]),
+        );
+    }
 
-        for (let key of cat_3) {
-            SplitChart(chart, key, i,
-                data => SplitSldBody(
-                    data[0], i, data[3] - data[0], data[1], data[2], data[4], data[5]
-                )
-            );
-        }
+    for (let key of cat_3) {
+        SplitChart(chart, key, tick,
+            data => SplitSldBody(
+                data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5]
+            )
+        );
     }
 }
