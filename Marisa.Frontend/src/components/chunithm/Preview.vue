@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
 import {ref} from "vue";
-import {cat_1, cat_2, cat_3, Chart, Parse, SplitChartByStep} from "@/components/chunithm/utils/parser";
 import {
     cat_1,
     cat_2,
     cat_3,
+    color_map,
     Chart,
     GetMaxTick,
     Parse,
@@ -95,10 +95,8 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
         <div class="stage" v-for="i in index"
              :style="`--tick-min: ${i[0]}; --tick-max: ${i[1]}`">
             <div v-for="type in cat_3">
-                <div v-for="note in GetNotes(type, i)"
-                     :class="type"
-                     :style="`--tick:${note[0]}; --cell:${note[1]}; --width:${note[2]}; --tick-end:${note[3]}; --target-cell:${note[4]}; --target-width:${note[5]}`">
                 <div v-for="note in GetNotes(type, i[0], i[1])"
+                     :class="`${type} ${note[6] >= 0 ? color_map[note[6]] : ''}`"
                      :style="`--tick:${Math.floor(note[0])}; --cell:${note[1]}; --width:${note[2]}; --tick-end:${Math.floor(note[3])}; --target-cell:${note[4]}; --target-width:${note[5]}; `">
                 </div>
             </div>

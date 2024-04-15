@@ -8,7 +8,7 @@ type SldData = [string, number, number, number, number, number, number, number];
 // [measure, offset, cell, width, duration, target_cell, target_width, color]
 type AirSldData = [string, number, number, number, number, string, number, number, number, number, number, string];
 // [measure, offset, cell, width, interval, height, duration, target_cell, target_width, target_height, color]
-type AldData = [string, number, number, number, number, number, number, number, number, number, string];
+type AldData = [string, number, number, number, number, number, number, number, number, number, number, string];
 
 
 const available_prefix = [
@@ -37,7 +37,11 @@ export const cat_1 = [
 export const cat_2 = ["HLD_B", "AHD_B"];
 export const cat_3 = ["SLC", "SLD", "ASC", "ASD", "ALD"];
 
-export function Parse(chart_string: string): [Chart, number] {
+export const color_map = [
+    "AQA", "BLK", "BLU", "CYN", "DEF", "DGR", "GRN", "GRY", "LIM", "NON", "ORN", "PNK", "PPL", "RED", "VLT", "YEL"
+]
+
+export function Parse(chart_string: string): Chart {
     // read chart string and parse it to chart data
     let data = chart_string
         .split("\n")
@@ -251,7 +255,8 @@ function ParseSld(chart: Chart, data: SldData) {
 function ParseAirSld(chart: Chart, data: AirSldData) {
     let d = {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], type: data[5],
-        height: data[6], duration: data[7], target_cell: data[8], target_width: data[9], target_height: data[10]
+        height: data[6], duration: data[7], target_cell: data[8], target_width: data[9], target_height: data[10],
+        color: data[11]
     };
 
     if (data[0] == "ASD") {
@@ -268,19 +273,20 @@ function ParseAirSld(chart: Chart, data: AirSldData) {
 
     chart[data[0]].push([
         ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width
+        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, color_map.indexOf(d.color)
     ]);
 }
 
 function ParseAld(chart: Chart, data: AldData) {
     let d = {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], interval: data[5],
-        height: data[6], duration: data[7], target_cell: data[8], target_width: data[9], target_height: data[10]
+        height: data[6], duration: data[7], target_cell: data[8], target_width: data[9], target_height: data[10],
+        color: data[11]
     };
 
     chart[data[0]].push([
         ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width
+        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, color_map.indexOf(d.color)
     ]);
 
     if (d.interval == 0) return;
@@ -321,11 +327,11 @@ function ToTick(measure: number, offset: number) {
  * @param width
  * @param target_cell
  * @param target_width
- * @param extra 跨区补偿，和 NoteHeight 相等
+ * @param color
  */
 function SplitSldBody(
     tick_start: number, tick_split: number, duration: number, cell: number, width: number,
-    target_cell: number, target_width: number, extra: number = 0
+    target_cell: number, target_width: number, color: number
 ) {
     let result = [];
 
@@ -333,8 +339,8 @@ function SplitSldBody(
     let mid_cell  = (target_cell - cell) * ratio + cell;
     let mid_width = (target_width - width) * ratio + width;
 
-    result.push([tick_start, cell, width, tick_split + extra, mid_cell, mid_width]);
-    result.push([tick_split, mid_cell, mid_width, tick_start + duration, target_cell, target_width]);
+    result.push([tick_start, cell, width, tick_split, mid_cell, mid_width, color]);
+    result.push([tick_split, mid_cell, mid_width, tick_start + duration, target_cell, target_width, color]);
 
     return result;
 }
@@ -399,7 +405,7 @@ function SplitLnToFitBpmScale(chart: Chart) {
         for (let key of cat_3) {
             SplitChart(chart, key, tick,
                 data => SplitSldBody(
-                    data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5]
+                    data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5], data[6]
                 )
             );
         }
@@ -416,7 +422,7 @@ export function SplitChartAt(chart: Chart, tick: number): void {
     for (let key of cat_3) {
         SplitChart(chart, key, tick,
             data => SplitSldBody(
-                data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5]
+                data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5], data[6]
             )
         );
     }
