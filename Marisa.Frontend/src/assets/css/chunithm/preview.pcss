@@ -67,26 +67,26 @@
     @apply absolute text-gray-400 text-center text-sm;
     @apply flex items-center;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px + 2px);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
     height: calc(var(--duration) / (var(--tick-max) - var(--tick-min)) * 100%);
 
-    width: 80px;
-    left: -80px;
+    width: 30px;
+    left: -30px;
 
     z-index: 0;
 }
 
 .SFL.UP {
-    @apply border-r-4 border-indigo-300;
+    @apply border-r-4;
     @apply justify-end pr-1;
 }
 
 .SFL.DOWN {
-    @apply border-l-4 border-amber-300;
+    @apply border-l-4;
     @apply justify-start pl-1;
 
     left: unset;
-    right: -80px;
+    right: -30px;
 }
 
 .BEAT_1 {

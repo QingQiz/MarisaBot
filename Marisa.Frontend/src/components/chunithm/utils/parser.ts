@@ -63,11 +63,11 @@ export function Parse(chart_string: string): Chart {
         ParseLine(chart, line);
     }
 
+    UpdateSldHead(chart);
     MakeBeatLine(chart);
 
     SplitLnToFitBpmScale(chart);
     ScaleChartTickByBpm(chart);
-    UpdateSldHead(chart);
 
     return chart;
 }
@@ -149,6 +149,10 @@ function ScaleChartTickByBpm(chart: Chart) {
 
                 if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
                     chart[key][j][3] = (chart[key][j][3] - tick_i) * bpm_before / bpm + tick_i;
+                }
+
+                if (key == "SFL") {
+                    chart[key][j][1] = (chart[key][j][1]) * bpm_before / bpm;
                 }
             }
         }
@@ -370,13 +374,13 @@ function SplitLnBody(
     return result;
 }
 
-function SplitChart(chart: Chart, key: string, tick: number, fun: (x: number[]) => number[][]) {
+function SplitChart(chart: Chart, key: string, tick: number, get_tick_e: (x: number[]) => number, fun: (x: number[]) => number[][]) {
     let to_preserve = [];
     let to_add      = [];
 
     for (let i = 0; i < chart[key].length; i++) {
         let tick_s = chart[key][i][0];
-        let tick_e = chart[key][i][3];
+        let tick_e = get_tick_e(chart[key][i]);
 
         if (tick_s < tick && tick_e > tick) {
             for (let x of fun(chart[key][i])) {
@@ -401,34 +405,32 @@ function SplitChart(chart: Chart, key: string, tick: number, fun: (x: number[]) 
  */
 function SplitLnToFitBpmScale(chart: Chart) {
     for (let [tick, _] of chart['BPM']) {
-        for (let key of cat_2) {
-            SplitChart(chart, key, tick,
-                data => SplitLnBody(data[0], tick, data[3] - data[0], data[1], data[2])
-            );
-        }
-
-        for (let key of cat_3) {
-            SplitChart(chart, key, tick,
-                data => SplitSldBody(
-                    data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5], data[6]
-                )
-            );
-        }
+        SplitChartAt(chart, tick);
     }
 }
 
 export function SplitChartAt(chart: Chart, tick: number): void {
     for (let key of cat_2) {
         SplitChart(chart, key, tick,
+            x => x[3],
             data => SplitLnBody(data[0], tick, data[3] - data[0], data[1], data[2]),
         );
     }
 
     for (let key of cat_3) {
         SplitChart(chart, key, tick,
+            x => x[3],
             data => SplitSldBody(
                 data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5], data[6]
             )
         );
     }
+
+    SplitChart(chart, "SFL", tick,
+        x => x[1] + x[0],
+        data => [
+            [data[0], tick - data[0], data[2]],
+            [tick, data[1] + data[0] - tick, data[2]]
+        ]
+    );
 }

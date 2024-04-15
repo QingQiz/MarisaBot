@@ -117,13 +117,13 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
                 <div v-for="note in GetNotes(type, i[0], i[1])"
                      :class="type"
                      :style="`--tick:${Math.floor(note[0])};`">
-                    {{ type == "BEAT_1" ? "#" : "" }}{{note[1]}}
+                    {{ type == "BEAT_1" ? "#" : "" }}{{ note[1] }}
                 </div>
             </div>
             <div v-for="note in GetNotes('SFL', i[0], i[1]).filter(x => x[2] != 1)"
                  :class="`SFL ${note[2] >= 0 ? 'UP' : 'DOWN'}`"
-                 :style="`--tick:${Math.floor(note[0])}; --duration: ${note[1]}`">
-                 {{ note[2] }}
+                 :style="`--tick:${Math.floor(note[0])}; --duration: ${note[1]}; border-color: ${GetColor(note[2], 0, 2)}`">
+                {{ note[2] }}
             </div>
         </div>
     </div>
@@ -160,5 +160,35 @@ function GetSplitPoint(arr: number[], n: number) {
     }
 
     return res.slice(1);
+}
+
+function GetColor(val: number, min: number, max: number) {
+    if (val < 0) val = -val;
+
+    if (val > max) val = max;
+
+    let normalizedValue = (val - min) / (max - min);
+    let r, g, b;
+
+    const blue  = [0, 0, 255]; // 蓝色
+    const green = [0, 255, 0]; // 绿色
+    const red   = [255, 0, 0]; // 红色
+
+    if (normalizedValue < 0.5) {
+        // 在蓝色到绿色的过渡阶段，使用 normalizedValue 的两倍来作为插值因子
+        let t = normalizedValue * 2;
+        r     = Math.round((1 - t) * blue[0] + t * green[0]);
+        g     = Math.round((1 - t) * blue[1] + t * green[1]);
+        b     = Math.round((1 - t) * blue[2] + t * green[2]);
+    } else {
+        // 在绿色到红色的过渡阶段，使用 normalizedValue 减去 0.5 的两倍来作为插值因子
+        let t = (normalizedValue - 0.5) * 2;
+        r     = Math.round((1 - t) * green[0] + t * red[0]);
+        g     = Math.round((1 - t) * green[1] + t * red[1]);
+        b     = Math.round((1 - t) * green[2] + t * red[2]);
+    }
+
+    // 返回rgb颜色字符串
+    return `rgb(${r},${g},${b})`;
 }
 </script>
