@@ -122,7 +122,7 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
             </div>
             <div v-for="note in GetNotes('SFL', i[0], i[1]).filter(x => x[2] != 1)"
                  :class="`SFL ${note[2] >= 0 ? 'UP' : 'DOWN'}`"
-                 :style="`--tick:${Math.floor(note[0])}; --duration: ${note[1]}; border-color: ${GetColor(note[2], 0, 2)}`">
+                 :style="`--tick:${note[0]}; --duration: ${note[1]}; border-color: ${GetColor(note[2], 0, 2)}`">
                 {{ note[2] }}
             </div>
         </div>

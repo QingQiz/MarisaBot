@@ -122,6 +122,10 @@ export function GetMaxTick(chart: Chart) {
             if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
                 tick_max = Math.max(tick_max, chart[key][i][3]);
             }
+
+            if (key == "SFL") {
+                tick_max = Math.max(tick_max, chart[key][i][1] + chart[key][i][0]);
+            }
         }
     }
     return tick_max;
@@ -168,6 +172,10 @@ export function ScaleTick(chart: Chart, scale: number) {
 
             if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
                 chart[key][j][3] = chart[key][j][3] * scale;
+            }
+
+            if (key == "SFL") {
+                chart[key][j][1] *= scale;
             }
         }
     }
