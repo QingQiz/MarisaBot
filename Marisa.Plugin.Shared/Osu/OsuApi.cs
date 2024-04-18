@@ -98,7 +98,10 @@ public static partial class OsuApi
     {
         AutomaticDecompression                    = DecompressionMethods.All,
         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-    });
+    })
+    {
+        Timeout = TimeSpan.FromMinutes(2)
+    };
 
     public static bool TryGetBeatmapCover(string beatmapPath, out string? coverPath)
     {
@@ -230,6 +233,11 @@ public static partial class OsuApi
 
             var filename = (HttpUtility.ParseQueryString(request.RequestUri!.Query).Get("filename") ??
                             beatmapSetId.ToString()) + ".osz";
+            
+            if (filename.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            {
+                filename = beatmapSetId + ".osz";
+            }
 
             var beatmapPath = Path.Join(path, filename);
 
