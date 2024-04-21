@@ -14,7 +14,7 @@ import {
 import {useRoute} from "vue-router";
 import {context_get} from "@/GlobalVars";
 import axios from "axios";
-import {Noodle, Rice, Slide, SpeedVelocity} from "@/components/chunithm/utils/parser_t";
+import {Div, Noodle, Rice, Slide, SpeedVelocity} from "@/components/chunithm/utils/parser_t";
 
 const route = useRoute()
 
@@ -24,6 +24,8 @@ let data_fetched = ref(false);
 
 let chart = ref({} as Chart);
 let index = ref([] as number[][]);
+
+const overflow = 50;
 
 
 axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
@@ -71,11 +73,12 @@ function ProcessChart4Display(chart: Chart): [Chart, number[][]] {
 
     for (let point of split_points) {
         SplitChartAt(chart, point);
+        if (overflow > 0) SplitChartAt(chart, point + overflow);
     }
 
-    let range = [[0, split_points[0]]];
+    let range = [[0, split_points[0] + overflow]];
     for (let i = 0; i < split_points.length; i++) {
-        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick + 20)]);
+        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick) + overflow]);
     }
 
     return [chart, range];
@@ -118,10 +121,19 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
                     {{ note }}
                 </div>
             </div>
-            <div v-for="note in (GetNotes('SFL', i[0], i[1]) as SpeedVelocity[]).filter(x => x.velocity != 1)"
-                 class="SFL"
-                 :style="`--tick:${note.tick}; --tick-end: ${note.tick_end}; border-color: ${GetColor(note.velocity)}`">
-                {{ note.velocity }}
+            <div>
+                <div v-for="note in (GetNotes('SFL', i[0], i[1]) as SpeedVelocity[]).filter(x => x.velocity != 1)"
+                     class="SFL"
+                     :style="`--tick:${note.tick}; --tick-end: ${note.tick_end}; border-color: ${GetColor(note.velocity)}`">
+                    {{ note.velocity }}
+                </div>
+            </div>
+            <div>
+                <div v-for="note in (GetNotes('DIV', i[0], i[1]) as Div[])"
+                     class="DIV"
+                     :style="`--tick:${Math.floor(note.tick)};`">
+                    {{ note.first }}/{{ note.second }}
+                </div>
             </div>
         </div>
     </div>

@@ -32,6 +32,17 @@ export class Measure extends NotePublic {
     }
 }
 
+export class Div extends NotePublic {
+    first: number;
+    second: number;
+
+    constructor(tick: number, first: number, second: number) {
+        super(tick);
+        this.first  = first;
+        this.second = second;
+    }
+}
+
 export class Beat extends NotePublic {
     constructor(tick: number) {
         super(tick);

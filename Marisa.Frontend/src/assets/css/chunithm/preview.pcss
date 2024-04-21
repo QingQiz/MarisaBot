@@ -29,7 +29,7 @@
 }
 
 .stage {
-    @apply relative m-8;
+    @apply relative mx-11 my-5;
 
     --tick-min: 0;
     --tick-max: 384;
@@ -57,7 +57,7 @@ BPM线
 .BPM {
     @apply absolute text-gray-300 text-center border-t-[2px] border-gray-600;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px + 2px);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px);
 
     width: 40px;
     left: -40px;
@@ -67,13 +67,41 @@ BPM线
 }
 
 /*
+note在多少分音上
+ */
+.DIV {
+    @apply absolute text-gray-300 text-center pl-2;
+    @apply flex;
+
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 15px);
+
+    width: 40px;
+    right: -40px;
+    height: 30px;
+
+    z-index: 1;
+
+    &:after {
+        content: '';
+
+        @apply absolute bg-gray-200 right-0 w-full;
+
+        top: calc(50% - 1px);
+        left: 0;
+
+        height: 2px;
+        width: 4px;
+    }
+}
+
+/*
 变速条
  */
 .SFL {
     @apply absolute text-gray-400 text-center text-sm;
     @apply flex items-center;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
     top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 
     width: 30px;
@@ -95,7 +123,7 @@ BPM线
 .BEAT_1 {
     @apply absolute text-center border-b-[2px] border-green-600 text-white;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
 
     width: 40px;
     left: -40px;
@@ -120,14 +148,16 @@ BPM线
 .BEAT_2 {
     @apply absolute bg-gray-600 right-0 w-full;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
     height: 2px;
 
     z-index: 0;
 }
 
 .cat-rice-common {
-    @apply note-common;
+    @apply note-common rounded-full;
+
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - var(--note-height) / 2);
 
     height: var(--note-height);
     z-index: var(--tap-z-index);
@@ -171,7 +201,6 @@ SLIDE头，SLIDE尾
     @apply cat-rice-common;
 
     z-index: var(--air-z-index);
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 2);
     height: var(--air-height);
 }
 
@@ -242,7 +271,7 @@ air line尾
 
     z-index: var(--ahd-z-index);
     height: calc(var(--note-height) / 2);
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 4);
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - var(--note-height) / 4);
 }
 
 .cat-noodle-common {
@@ -269,7 +298,6 @@ air hand body
     @apply cat-noodle-common;
     @apply flex place-content-center;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 2);
     z-index: var(--air-sld-z-index);
 }
 
@@ -295,7 +323,6 @@ air hand body
     width: calc((var(--max-cell) - var(--min-cell)) / 16 * 100%);
 
     left: calc(var(--min-cell) / 16 * 100%);
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
     top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 }
 
@@ -354,9 +381,6 @@ air line不需要body，只有线
     &:before {
         all: initial;
     }
-
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 2);
-    top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - var(--note-height) / 2);
 
     &:after {
         @apply bg-green-800 opacity-60;

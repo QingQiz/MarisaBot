@@ -7,7 +7,7 @@ import {
     Noodle,
     Rice,
     Slide,
-    SpeedVelocity, NoteType
+    SpeedVelocity, NoteType, Div
 } from "@/components/chunithm/utils/parser_t";
 
 export type Chart = { [key: string]: NotePublic[] };
@@ -47,7 +47,9 @@ const alias_prefix = [
 
 const self_defined = [
     // 自己添加的
-    "HLD_H", "HLD_T", "HLD_B", "AHD_H", "AHD_T", "AHD_B", "SLD_H", "SLD_T", "ASD_H", "ASC_H", "ASD_T", "ALD_T"
+    "HLD_H", "HLD_T", "HLD_B", "AHD_H", "AHD_T", "AHD_B", "SLD_H", "SLD_T", "ASD_H", "ASC_H", "ASD_T", "ALD_T",
+    //
+    "BEAT_1", "BEAT_2", "DIV",
 ];
 
 export const cat_rice    = [
@@ -85,6 +87,7 @@ export function Parse(chart_string: string): Chart {
 
     UpdateSldHead(chart);
     MakeBeatLine(chart);
+    MakeNoteGapLine(chart);
 
     SplitLnToFitBpmScale(chart);
     ScaleChartTickByBpm(chart);
@@ -92,11 +95,40 @@ export function Parse(chart_string: string): Chart {
     return chart;
 }
 
+
+function MakeNoteGapLine(chart: Chart) {
+    function gcd(a: number, b: number): number {
+        if (b == 0) return a;
+        return gcd(b, a % b);
+    }
+
+    let res: number[] = [];
+    for (let key of cat_rice) {
+        if (key == "ALD_T") continue;
+        for (let note of chart[key]) {
+            res.push(note.tick);
+        }
+    }
+    res.sort((a, b) => a - b);
+    res = res.filter((x, i) => i == 0 || x != res[i - 1]);
+
+    let sep = res.map(x => [Math.floor(x / resolution), x % resolution]);
+
+    for (let i = 0, j = 1; i < sep.length; i++, j++) {
+        let tick_i = sep[i][1];
+        let tick_j = j == sep.length ? resolution : sep[j][1];
+
+        if (j < sep.length && sep[i][0] != sep[j][0]) tick_j = resolution;
+
+        let gap = tick_j - tick_i;
+        let div = gcd(gap, resolution);
+
+        chart["DIV"].push(new Div(ToTick(sep[i][0], tick_i), gap / div, resolution / div));
+    }
+}
+
 function MakeBeatLine(chart: Chart) {
     let max_tick = GetMaxTick(chart);
-
-    chart["BEAT_1"] = [];
-    chart["BEAT_2"] = [];
 
     let met = (chart["MET"] as Met[]).filter(x => x.first != 0 && x.second != 0);
 
