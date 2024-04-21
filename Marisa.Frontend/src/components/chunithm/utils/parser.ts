@@ -72,16 +72,45 @@ export function Parse(chart_string: string): Chart {
     return chart;
 }
 
+// function MakeBeatLine(chart: Chart) {
+//     let max_tick = GetMaxTick(chart);
+//
+//     chart["BEAT_1"] = [];
+//     chart["BEAT_2"] = [];
+//
+//     for (let i = 0; i < max_tick; i += 384) {
+//         chart["BEAT_1"].push([i, i / 384]);
+//         for (let j = i + 96; j < i + 384 && j < max_tick; j += 96) {
+//             chart["BEAT_2"].push([j]);
+//         }
+//     }
+// }
+
 function MakeBeatLine(chart: Chart) {
     let max_tick = GetMaxTick(chart);
 
     chart["BEAT_1"] = [];
     chart["BEAT_2"] = [];
 
-    for (let i = 0; i < max_tick; i += 384) {
-        chart["BEAT_1"].push([i, i / 384]);
-        for (let j = i + 96; j < i + 384 && j < max_tick; j += 96) {
-            chart["BEAT_2"].push([j]);
+    let met = chart["MET"].filter(x => x[1] != 0 && x[2] != 0);
+
+    met.sort((a, b) => a[0] - b[0]);
+
+    let measure_id = 0;
+
+    for (let i = 0; i < met.length; i++) {
+        let next_tick = i == met.length - 1 ? max_tick : met[i + 1][0];
+
+        let beat_length = 384 / met[i][1];
+        let measure_length = beat_length * met[i][2];
+        // console.log(measure_id, met[i][1], met[i][2], beat_length, measure_length, next_tick)
+
+        for (let j = met[i][0]; j < next_tick; j += measure_length) {
+            chart["BEAT_1"].push([j, measure_id++]);
+
+            for (let k = j + beat_length; k < j + measure_length && k < next_tick; k += beat_length) {
+                chart["BEAT_2"].push([k]);
+            }
         }
     }
 }

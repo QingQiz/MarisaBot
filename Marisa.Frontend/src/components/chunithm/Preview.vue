@@ -23,16 +23,14 @@ let name         = ref(route.query.name)
 let data_fetched = ref(false);
 
 let chart    = ref({} as Chart);
-let tick_max = ref(0);
 let index    = ref([] as number[][]);
-let split_to = 20;
 
 
 axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
     .then(data => {
         let c = Parse(data.data);
 
-        [chart.value, tick_max.value, index.value] = ProcessChart4Display(c);
+        [chart.value, index.value] = ProcessChart4Display(c);
     })
     .finally(() => data_fetched.value = true);
 
@@ -51,17 +49,17 @@ function GetMeasureLength(chart: Chart, max_tick: number) {
     return res;
 }
 
-function ProcessChart4Display(chart: Chart): [Chart, number, number[][]] {
+function ProcessChart4Display(chart: Chart): [Chart, number[][]] {
     let max_tick       = GetMaxTick(chart);
     let measure_length = GetMeasureLength(chart, max_tick);
     let average        = measure_length.reduce((a, b) => a + b, 0) / measure_length.length;
 
-    ScaleTick(chart, 384 / average);
+    ScaleTick(chart, 700 / average);
 
     max_tick       = GetMaxTick(chart);
     measure_length = GetMeasureLength(chart, max_tick);
 
-    let split_points              = GetSplitPoint(measure_length, split_to);
+    let split_points              = GetSplitPoint(measure_length);
     let measure_length_prefix_sum = new Array(measure_length.length);
 
     measure_length_prefix_sum[0] = measure_length[0];
@@ -77,10 +75,10 @@ function ProcessChart4Display(chart: Chart): [Chart, number, number[][]] {
 
     let range = [[0, split_points[0]]];
     for (let i = 0; i < split_points.length; i++) {
-        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick)]);
+        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick + 20)]);
     }
 
-    return [chart, max_tick, range];
+    return [chart, range];
 }
 
 function GetNotes(key: string, tick: number, tick_next: number = 0) {
@@ -94,7 +92,7 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
 <template>
     <div v-if="data_fetched" class="config stage-container">
         <div class="stage" v-for="i in index"
-             :style="`--tick-min: ${i[0]}; --tick-max: ${i[1]}`">
+             :style="`--tick-min: ${Math.floor(i[0])}; --tick-max: ${Math.floor(i[1])}`">
             <div v-for="type in cat_3">
                 <div v-for="note in GetNotes(type, i[0], i[1])"
                      :class="`${type} ${note[6] >= 0 ? color_map[note[6]] : ''}`"
@@ -133,7 +131,7 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
 
 
 <script lang="ts">
-function GetSplitPoint(arr: number[], n: number) {
+function GetSplitPoint(arr: number[]) {
     let prefix_sum = new Array(arr.length + 1);
     prefix_sum[0]  = 0;
 
@@ -141,7 +139,7 @@ function GetSplitPoint(arr: number[], n: number) {
         prefix_sum[i + 1] = prefix_sum[i] + arr[i];
     }
 
-    let avg = prefix_sum[arr.length - 1] / n;
+    let avg = prefix_sum[arr.length] / arr.length * 4;
     let sum = 0;
 
     let res = [-1]
