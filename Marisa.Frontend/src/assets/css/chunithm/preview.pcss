@@ -51,6 +51,9 @@
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 }
 
+/*
+BPM线
+ */
 .BPM {
     @apply absolute text-gray-300 text-center border-t-[2px] border-gray-600;
 
@@ -63,12 +66,15 @@
     z-index: 1;
 }
 
+/*
+变速条
+ */
 .SFL {
     @apply absolute text-gray-400 text-center text-sm;
     @apply flex items-center;
 
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
-    height: calc(var(--duration) / (var(--tick-max) - var(--tick-min)) * 100%);
+    top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 
     width: 30px;
     left: -30px;
@@ -83,6 +89,9 @@
     }
 }
 
+/*
+小节线
+ */
 .BEAT_1 {
     @apply absolute text-center border-b-[2px] border-green-600 text-white;
 
@@ -105,6 +114,9 @@
     }
 }
 
+/*
+拍线
+ */
 .BEAT_2 {
     @apply absolute bg-gray-600 right-0 w-full;
 
@@ -114,7 +126,7 @@
     z-index: 0;
 }
 
-.cat-1-common {
+.cat-rice-common {
     @apply note-common;
 
     height: var(--note-height);
@@ -122,35 +134,41 @@
 }
 
 .TAP {
-    @apply cat-1-common bg-red-400;
+    @apply cat-rice-common bg-red-400;
 }
 
 .CHR {
-    @apply cat-1-common bg-yellow-400;
+    @apply cat-rice-common bg-yellow-400;
 }
 
 .FLK {
-    @apply cat-1-common bg-blue-300;
+    @apply cat-rice-common bg-blue-300;
 }
 
 .MNE {
-    @apply cat-1-common bg-blue-700;
+    @apply cat-rice-common bg-blue-700;
 }
 
+/*
+面头，面尾
+ */
 .HLD_H, .HLD_T {
-    @apply cat-1-common bg-orange-400;
+    @apply cat-rice-common bg-orange-400;
 
     z-index: var(--hld-t-z-index);
 }
 
+/*
+SLIDE头，SLIDE尾
+ */
 .SLD_T, .SLD_H {
-    @apply cat-1-common bg-blue-500;
+    @apply cat-rice-common bg-blue-500;
 
     z-index: var(--sld-t-z-index);
 }
 
 .air-pos-common {
-    @apply cat-1-common;
+    @apply cat-rice-common;
 
     z-index: var(--air-z-index);
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 2);
@@ -164,7 +182,10 @@
     transform-origin: 50% 100%;
 }
 
-
+/*
+AIR UP
+AHD头，ASD头，ASC头
+ */
 .AIR, .AUR, .AUL, .AHD_H, .ASD_H, .ASC_H {
     @apply air-pos-common;
 
@@ -179,6 +200,9 @@
     }
 }
 
+/*
+AIR DOWN
+ */
 .ADW, .ADR, .ADL {
     @apply air-pos-common;
 
@@ -209,15 +233,19 @@
     transform: skewX(-35deg);
 }
 
+/*
+air hand尾
+air line尾
+ */
 .AHD_T, .ASD_T, .ALD_T {
-    @apply cat-1-common bg-purple-400;
+    @apply cat-rice-common bg-purple-400;
 
     z-index: var(--ahd-z-index);
     height: calc(var(--note-height) / 2);
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 4);
 }
 
-.cat-2-common {
+.cat-noodle-common {
     @apply note-common;
 
     --tick-end: 1;
@@ -225,14 +253,20 @@
     top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 }
 
+/*
+hold body
+ */
 .HLD_B {
-    @apply cat-2-common bg-orange-300 opacity-80;
+    @apply cat-noodle-common bg-orange-300 opacity-80;
 
     z-index: var(--hld-body-z-index);
 }
 
+/*
+air hand body
+ */
 .AHD_B {
-    @apply cat-2-common;
+    @apply cat-noodle-common;
     @apply flex place-content-center;
 
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% + var(--note-height) / 2);
@@ -248,7 +282,7 @@
     height: 100%;
 }
 
-.cat-3-common {
+.cat-slide-common {
     @apply note-common;
 
     --duration: 1;
@@ -265,13 +299,20 @@
     top: calc(100% - (var(--tick-end) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100%);
 }
 
+/*
+slide, air line
+ */
 .SLC, .SLD, .ASC, .ASD, .ALD {
-    @apply cat-3-common;
+    @apply cat-slide-common;
 
     --l-percent: calc((var(--cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% + var(--note-gap));
     --r-percent: calc((var(--cell) + var(--width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% - var(--note-gap));
     --target-l-percent: calc((var(--target-cell) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% + var(--note-gap));
     --target-r-percent: calc((var(--target-cell) + var(--target-width) - var(--min-cell)) / (var(--max-cell) - var(--min-cell)) * 100% - var(--note-gap));
+
+    /*
+    slide body
+     */
 
     &:before {
         @apply absolute inset-0 bg-blue-400 opacity-40;
@@ -284,6 +325,10 @@
                 var(--target-l-percent) 0%
         );
     }
+
+    /*
+    slide 中间的线
+     */
 
     &:after {
         @apply absolute inset-0 bg-blue-400;
@@ -302,6 +347,9 @@
     }
 }
 
+/*
+air line不需要body，只有线
+ */
 .ASC, .ASD, .ALD {
     &:before {
         all: initial;
@@ -324,6 +372,7 @@
 }
 
 /*
+颜色
 "AQA", "BLK", "BLU", "CYN", "DEF", "DGR", "GRN", "GRY", "LIM", "NON", "ORG", "PNK", "PPL", "RED", "VLT", "YEL"
  */
 .ALD.GRY, .ASC.GRY {

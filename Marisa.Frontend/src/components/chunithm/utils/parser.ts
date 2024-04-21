@@ -1,15 +1,36 @@
-export type Chart = { [key: string]: number[][] };
-// [measure, offset, cell, width, duration]
-type LnData = [string, number, number, number, number, number];
-// [measure, offset, cell, width, type, duration]
-type AirHoldData = [string, number, number, number, number, string, number];
-// [measure, offset, cell, width, duration, target_cell, target_width]
-type SldData = [string, number, number, number, number, number, number, number];
-// [measure, offset, cell, width, duration, target_cell, target_width, color]
-type AirSldData = [string, number, number, number, number, string, number, number, number, number, number, string];
-// [measure, offset, cell, width, interval, height, duration, target_cell, target_width, target_height, color]
-type AldData = [string, number, number, number, number, number, number, number, number, number, number, string];
+import {
+    Beat,
+    Measure,
+    Met,
+    NotePublic,
+    Bpm,
+    Noodle,
+    Rice,
+    Slide,
+    SpeedVelocity, NoteType
+} from "@/components/chunithm/utils/parser_t";
 
+export type Chart = { [key: string]: NotePublic[] };
+/**
+ * [measure, offset, cell, width, duration]
+ */
+type LnData = [string, number, number, number, number, number];
+/**
+ * [measure, offset, cell, width, type, duration]
+ */
+type AirHoldData = [string, number, number, number, number, string, number];
+/**
+ * [measure, offset, cell, width, duration, target_cell, target_width]
+ */
+type SldData = [string, number, number, number, number, number, number, number];
+/**
+ * [measure, offset, cell, width, duration, target_cell, target_width, color]
+ */
+type AirSldData = [string, number, number, number, number, string, number, number, number, number, number, string];
+/**
+ * [measure, offset, cell, width, interval, height, duration, target_cell, target_width, target_height, color]
+ */
+type AldData = [string, number, number, number, number, number, number, number, number, number, number, string];
 
 const available_prefix = [
     // 控制的
@@ -29,18 +50,17 @@ const self_defined = [
     "HLD_H", "HLD_T", "HLD_B", "AHD_H", "AHD_T", "AHD_B", "SLD_H", "SLD_T", "ASD_H", "ASC_H", "ASD_T", "ALD_T"
 ];
 
-export const cat_1 = [
+export const cat_rice    = [
     "TAP", "CHR", "MNE", "FLK",
     "HLD_H", "HLD_T", "AHD_H", "ASC_H", "ASD_H", "AHD_T", "SLD_H", "SLD_T", "ASD_T", "ALD_T",
     "AIR", "AUR", "AUL", "ADW", "ADR", "ADL",
 ];
-export const cat_2 = ["HLD_B", "AHD_B"];
-export const cat_3 = ["SLC", "SLD", "ASC", "ASD", "ALD"];
-export const cat_4 = ["BPM", "BEAT_1", "BEAT_2"];
+export const cat_noodle  = ["HLD_B", "AHD_B"];
+export const cat_slide   = ["SLC", "SLD", "ASC", "ASD", "ALD"];
+export const cat_control = ["BPM", "BEAT_1", "BEAT_2"];
 
-export const color_map = [
-    "AQA", "BLK", "BLU", "CYN", "DEF", "DGR", "GRN", "GRY", "LIM", "NON", "ORN", "PNK", "PPL", "RED", "VLT", "YEL"
-]
+export const resolution = 384;
+
 
 export function Parse(chart_string: string): Chart {
     // read chart string and parse it to chart data
@@ -72,73 +92,57 @@ export function Parse(chart_string: string): Chart {
     return chart;
 }
 
-// function MakeBeatLine(chart: Chart) {
-//     let max_tick = GetMaxTick(chart);
-//
-//     chart["BEAT_1"] = [];
-//     chart["BEAT_2"] = [];
-//
-//     for (let i = 0; i < max_tick; i += 384) {
-//         chart["BEAT_1"].push([i, i / 384]);
-//         for (let j = i + 96; j < i + 384 && j < max_tick; j += 96) {
-//             chart["BEAT_2"].push([j]);
-//         }
-//     }
-// }
-
 function MakeBeatLine(chart: Chart) {
     let max_tick = GetMaxTick(chart);
 
     chart["BEAT_1"] = [];
     chart["BEAT_2"] = [];
 
-    let met = chart["MET"].filter(x => x[1] != 0 && x[2] != 0);
+    let met = (chart["MET"] as Met[]).filter(x => x.first != 0 && x.second != 0);
 
-    met.sort((a, b) => a[0] - b[0]);
+    met.sort((a, b) => a.tick - b.tick);
 
     let measure_id = 0;
 
     for (let i = 0; i < met.length; i++) {
-        let next_tick = i == met.length - 1 ? max_tick : met[i + 1][0];
+        let next_tick = i == met.length - 1 ? max_tick : met[i + 1].tick;
 
-        let beat_length = 384 / met[i][1];
-        let measure_length = beat_length * met[i][2];
-        // console.log(measure_id, met[i][1], met[i][2], beat_length, measure_length, next_tick)
+        let beat_length    = resolution / met[i].second;
+        let measure_length = beat_length * met[i].first;
 
-        for (let j = met[i][0]; j < next_tick; j += measure_length) {
-            chart["BEAT_1"].push([j, measure_id++]);
+        for (let j = met[i].tick; j < next_tick; j += measure_length) {
+            chart["BEAT_1"].push(new Measure(j, measure_id++))
 
             for (let k = j + beat_length; k < j + measure_length && k < next_tick; k += beat_length) {
-                chart["BEAT_2"].push([k]);
+                chart["BEAT_2"].push(new Beat(k));
             }
         }
     }
 }
 
-
 function UpdateSldHead(chart: Chart) {
     let sld_end: { [key: string]: boolean } = {};
 
-    let slides = chart['SLD'].concat(chart['SLC']);
+    let slides = chart['SLD'].concat(chart['SLC']) as Slide[];
 
     for (const slide of slides) {
-        let tick_end     = slide[3];
-        let target_cell  = slide[4];
-        let target_width = slide[5];
+        let tick_end     = slide.tick_end;
+        let target_cell  = slide.cell_target;
+        let target_width = slide.width_target;
 
         sld_end[[tick_end, target_cell, target_width].toString()] = true;
     }
 
     for (const slide of slides) {
-        let tick  = slide[0];
-        let cell  = slide[1];
-        let width = slide[2];
+        let tick  = slide.tick;
+        let cell  = slide.cell;
+        let width = slide.width;
 
         if (sld_end[[tick, cell, width].toString()]) {
             continue;
         }
 
-        chart[slide[6] == 1 ? 'CHR' : 'SLD_H'].push([tick, cell, width]);
+        chart[slide.extra == NoteType.Ex ? 'CHR' : 'SLD_H'].push(new Rice(tick, cell, width));
     }
 }
 
@@ -147,13 +151,17 @@ export function GetMaxTick(chart: Chart) {
 
     for (let key of Object.keys(chart)) {
         for (let i = 0; i < chart[key].length; i++) {
-            tick_max = Math.max(tick_max, chart[key][i][0]);
-            if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
-                tick_max = Math.max(tick_max, chart[key][i][3]);
+
+            let note = chart[key][i];
+
+            tick_max = Math.max(tick_max, note.tick);
+
+            if (cat_slide.indexOf(key) != -1 || cat_noodle.indexOf(key) != -1) {
+                tick_max = Math.max(tick_max, (note as Noodle).tick_end);
             }
 
             if (key == "SFL") {
-                tick_max = Math.max(tick_max, chart[key][i][1] + chart[key][i][0]);
+                tick_max = Math.max(tick_max, (note as SpeedVelocity).tick_end);
             }
         }
     }
@@ -165,46 +173,33 @@ export function GetMaxTick(chart: Chart) {
  */
 function ScaleChartTickByBpm(chart: Chart) {
     // scale tick by BPM
-    let bpm_before = chart['BPM'][0][1];
+    let bpm_before = (chart['BPM'][0] as Bpm).bpm;
 
     for (let i = 0; i < chart['BPM'].length; i++) {
-        let [tick_i, bpm] = chart['BPM'][i];
-        if (bpm == bpm_before) continue;
-        if (bpm == 0) continue;
+        let bpm = (chart['BPM'][i] as Bpm);
 
-        for (let key of Object.keys(chart)) {
-            for (let j = 0; j < chart[key].length; j++) {
-                let tick_j = chart[key][j][0];
+        if (bpm.bpm == bpm_before) continue;
+        if (bpm.bpm == 0) continue;
 
-                if (tick_j < tick_i) continue;
+        ScaleTickFrom(chart, bpm_before / bpm.bpm, bpm.tick);
 
-                chart[key][j][0] = tick_i + (tick_j - tick_i) * bpm_before / bpm;
-
-                if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
-                    chart[key][j][3] = (chart[key][j][3] - tick_i) * bpm_before / bpm + tick_i;
-                }
-
-                if (key == "SFL") {
-                    chart[key][j][1] = (chart[key][j][1]) * bpm_before / bpm;
-                }
-            }
-        }
-
-        bpm_before = bpm;
+        bpm_before = bpm.bpm;
     }
 }
 
-export function ScaleTick(chart: Chart, scale: number) {
+export function ScaleTickFrom(chart: Chart, scale: number, tick: number = 0) {
     for (let key of Object.keys(chart)) {
         for (let j = 0; j < chart[key].length; j++) {
-            chart[key][j][0] = chart[key][j][0] * scale;
+            let note = chart[key][j];
 
-            if (cat_3.indexOf(key) != -1 || cat_2.indexOf(key) != -1) {
-                chart[key][j][3] = chart[key][j][3] * scale;
-            }
+            if (note.tick < tick) continue;
 
-            if (key == "SFL") {
-                chart[key][j][1] *= scale;
+            note.tick = (note.tick - tick) * scale + tick;
+
+            if (cat_slide.indexOf(key) != -1 || cat_noodle.indexOf(key) != -1 || key == "SFL") {
+                let ln = note as Noodle;
+
+                ln.tick_end = (ln.tick_end - tick) * scale + tick;
             }
         }
     }
@@ -212,24 +207,50 @@ export function ScaleTick(chart: Chart, scale: number) {
 
 function ParseLine(chart: Chart, data: any) {
     let key = data[0];
-    if (key == 'HLD' || key == "HXD") {
-        ParseLn(chart, data as LnData);
-    } else if (key == 'AHD' || key == "AHX") {
-        ParseAirHold(chart, data as AirHoldData);
-    } else if (key == "SLD" || key == "SLC" || key == "SXD" || key == "SXC") {
-        ParseSld(chart, data as SldData);
-    } else if (key == "ASC" || key == "ASD") {
-        ParseAirSld(chart, data as AirSldData);
-    } else if (key == "ALD") {
-        ParseAld(chart, data as AldData);
-    } else if (key == "BPM_DEF") {
-        chart["BPM"].push([0, data[1] as number]);
-    } else if (key == "MET_DEF") {
-        chart["MET"].push([0, data[1] as number, data[2] as number]);
-    } else {
-        chart[key].push(
-            [ToTick(data[1] as number, data[2] as number)].concat((data as number[]).slice(3))
-        );
+    switch (key) {
+        case 'HLD':
+        case "HXD":
+            ParseLn(chart, data as LnData);
+            break;
+        case 'AHD':
+        case "AHX":
+            ParseAirHold(chart, data as AirHoldData);
+            break;
+        case "SLD":
+        case "SLC":
+        case "SXD":
+        case "SXC":
+            ParseSld(chart, data as SldData);
+            break;
+        case "ASC":
+        case "ASD":
+            ParseAirSld(chart, data as AirSldData);
+            break;
+        case "ALD":
+            ParseAld(chart, data as AldData);
+            break;
+        case "BPM":
+            chart["BPM"].push(new Bpm(ToTick(data[1] as number, data[2] as number), data[3] as number));
+            break;
+        case "MET":
+            chart["MET"].push(new Met(ToTick(data[1] as number, data[2] as number), data[4] as number, data[3] as number));
+            break;
+        case "BPM_DEF":
+            chart["BPM"].push(new Bpm(0, data[1] as number));
+            break;
+        case "MET_DEF":
+            chart["MET"].push(new Met(0, data[2] as number, data[1] as number));
+            break;
+        case "SFL":
+            let tick = ToTick(data[1] as number, data[2] as number);
+
+            chart["SFL"].push(new SpeedVelocity(tick, data[3] as number + tick, data[4] as number));
+            break;
+        default:
+            chart[key].push(
+                new Rice(ToTick(data[1] as number, data[2] as number), data[3] as number, data[4] as number)
+            );
+            break;
     }
 }
 
@@ -238,22 +259,20 @@ function ParseLn(chart: Chart, data: LnData) {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], duration: data[5]
     };
 
-    let h = [ToTick(d.measure, d.offset), d.cell, d.width];
-    let t = [
-        ToTick(d.measure + Math.floor((d.offset + d.duration) / 384),
-            (d.offset + d.duration) % 384
-        ),
-        d.cell, d.width
-    ]
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
+    let lnH = new Rice(tick, d.cell, d.width);
+    let lnT = new Rice(tick_end, d.cell, d.width)
 
     if (data[0] == "HLD") {
-        chart['HLD_H'].push(h);
+        chart['HLD_H'].push(lnH);
     } else {
-        chart["CHR"].push(h);
+        chart["CHR"].push(lnT);
     }
 
-    chart["HLD_T"].push(t);
-    chart['HLD_B'].push([ToTick(d.measure, d.offset), d.cell, d.width, ToTick(d.measure, d.offset) + d.duration]);
+    chart["HLD_T"].push(lnT);
+    chart['HLD_B'].push(new Noodle(tick, d.cell, d.width, tick_end));
 }
 
 function ParseAirHold(chart: Chart, data: AirHoldData) {
@@ -261,17 +280,15 @@ function ParseAirHold(chart: Chart, data: AirHoldData) {
         measure: data[1], offset: data[2], cell: data[3], width: data[4], type: data[5], duration: data[6]
     };
 
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
     if (d.type != 'AHD' && d.type != 'AHX') {
-        chart['AHD_H'].push([ToTick(d.measure, d.offset), d.cell, d.width]);
+        chart['AHD_H'].push(new Rice(tick, d.cell, d.width));
     }
 
-    chart['AHD_T'].push([
-        ToTick(
-            d.measure + Math.floor((d.offset + d.duration) / 384), (d.offset + d.duration) % 384
-        ), d.cell, d.width
-    ]);
-
-    chart['AHD_B'].push([ToTick(d.measure, d.offset), d.cell, d.width, ToTick(d.measure, d.offset) + d.duration]);
+    chart['AHD_T'].push(new Rice(tick_end, d.cell, d.width));
+    chart['AHD_B'].push(new Noodle(tick, d.cell, d.width, tick_end));
 }
 
 function ParseSld(chart: Chart, data: SldData) {
@@ -280,18 +297,17 @@ function ParseSld(chart: Chart, data: SldData) {
         target_cell: data[6], target_width: data[7]
     };
 
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
     if (data[0] == "SLD" || data[0] == "SXD") {
-        chart['SLD_T'].push([
-            ToTick(
-                d.measure + Math.floor((d.offset + d.duration) / 384), (d.offset + d.duration) % 384
-            ), d.target_cell, d.target_width
-        ]);
+        chart['SLD_T'].push(new Rice(tick_end, d.target_cell, d.target_width));
     }
 
-    chart[data[0].replace('X', 'L')].push([
-        ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, data[0][1] == 'X' ? 1 : 0
-    ]);
+    chart[data[0].replace('X', 'L')].push(new Slide(
+        tick, d.cell, d.width, tick_end, d.target_cell, d.target_width,
+        data[0][1] == 'X' ? NoteType.Ex : NoteType.Normal)
+    );
 }
 
 function ParseAirSld(chart: Chart, data: AirSldData) {
@@ -301,22 +317,18 @@ function ParseAirSld(chart: Chart, data: AirSldData) {
         color: data[11]
     };
 
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
     if (data[0] == "ASD") {
-        chart['ASD_T'].push([
-            ToTick(
-                d.measure + Math.floor((d.offset + d.duration) / 384), (d.offset + d.duration) % 384
-            ), d.target_cell, d.target_width
-        ]);
+        chart['ASD_T'].push(new Rice(tick_end, d.target_cell, d.target_width));
     }
 
     if (d.type != 'ASC' && d.type != 'ASD' && d.type != 'AHD') {
-        chart[data[0] + '_H'].push([ToTick(d.measure, d.offset), d.cell, d.width, d.height]);
+        chart[data[0] + '_H'].push(new Rice(tick, d.cell, d.width));
     }
 
-    chart[data[0]].push([
-        ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, color_map.indexOf(d.color)
-    ]);
+    chart[data[0]].push(new Slide(tick, d.cell, d.width, tick_end, d.target_cell, d.target_width, d.color));
 }
 
 function ParseAld(chart: Chart, data: AldData) {
@@ -326,10 +338,10 @@ function ParseAld(chart: Chart, data: AldData) {
         color: data[11]
     };
 
-    chart[data[0]].push([
-        ToTick(d.measure, d.offset), d.cell, d.width,
-        ToTick(d.measure, d.offset) + d.duration, d.target_cell, d.target_width, color_map.indexOf(d.color)
-    ]);
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
+    chart[data[0]].push(new Slide(tick, d.cell, d.width, tick_end, d.target_cell, d.target_width, d.color));
 
     if (d.interval == 0) return;
 
@@ -338,11 +350,7 @@ function ParseAld(chart: Chart, data: AldData) {
         let cell  = (d.target_cell - d.cell) * ratio + d.cell;
         let width = (d.target_width - d.width) * ratio + d.width;
 
-        chart['ALD_T'].push([
-            ToTick(
-                d.measure + Math.floor((d.offset + duration) / 384), (d.offset + duration) % 384
-            ), cell, width
-        ]);
+        chart['ALD_T'].push(new Rice(tick + duration, cell, width));
     }
 }
 
@@ -361,7 +369,7 @@ function Line2Event(line: string) {
 
 
 function ToTick(measure: number, offset: number) {
-    return measure * 384 + offset;
+    return measure * resolution + offset;
 }
 
 /**
@@ -373,11 +381,11 @@ function ToTick(measure: number, offset: number) {
  * @param width
  * @param target_cell
  * @param target_width
- * @param color
+ * @param extra
  */
 function SplitSldBody(
     tick_start: number, tick_split: number, duration: number, cell: number, width: number,
-    target_cell: number, target_width: number, color: number
+    target_cell: number, target_width: number, extra: string | NoteType
 ) {
     let result = [];
 
@@ -385,8 +393,12 @@ function SplitSldBody(
     let mid_cell  = (target_cell - cell) * ratio + cell;
     let mid_width = (target_width - width) * ratio + width;
 
-    result.push([tick_start, cell, width, tick_split, mid_cell, mid_width, color]);
-    result.push([tick_split, mid_cell, mid_width, tick_start + duration, target_cell, target_width, color]);
+    result.push(new Slide(
+        tick_start, cell, width, tick_split, mid_cell, mid_width, extra)
+    );
+    result.push(new Slide(
+        tick_split, mid_cell, mid_width, tick_start + duration, target_cell, target_width, extra)
+    );
 
     return result;
 }
@@ -398,25 +410,20 @@ function SplitSldBody(
  * @param duration
  * @param cell
  * @param width
- * @param extra 跨区补偿，和 NoteHeight 相等
  */
-function SplitLnBody(
-    tick_start: number, tick_split: number, duration: number, cell: number, width: number, extra: number = 0
-) {
-    let result = [];
-
-    result.push([tick_start, cell, width, tick_split + extra]);
-    result.push([tick_split, cell, width, tick_start + duration]);
-
-    return result;
+function SplitLnBody(tick_start: number, tick_split: number, duration: number, cell: number, width: number) {
+    return [
+        new Noodle(tick_start, cell, width, tick_split),
+        new Noodle(tick_split, cell, width, tick_start + duration)
+    ];
 }
 
-function SplitChart(chart: Chart, key: string, tick: number, get_tick_e: (x: number[]) => number, fun: (x: number[]) => number[][]) {
+function SplitChart(chart: Chart, key: string, tick: number, get_tick_e: (x: NotePublic) => number, fun: (x: NotePublic) => NotePublic[]) {
     let to_preserve = [];
     let to_add      = [];
 
     for (let i = 0; i < chart[key].length; i++) {
-        let tick_s = chart[key][i][0];
+        let tick_s = chart[key][i].tick;
         let tick_e = get_tick_e(chart[key][i]);
 
         if (tick_s < tick && tick_e > tick) {
@@ -437,37 +444,46 @@ function SplitChart(chart: Chart, key: string, tick: number, get_tick_e: (x: num
 
 /**
  * 在BPM变化的地方分割所有的长条和滑条，以保证长条的长度和BPM成比例
- * 不需要补偿长条
  * @param chart
  */
 function SplitLnToFitBpmScale(chart: Chart) {
-    for (let [tick, _] of chart['BPM']) {
-        SplitChartAt(chart, tick);
+    for (let bpm of chart['BPM']) {
+        SplitChartAt(chart, bpm.tick);
     }
 }
 
 export function SplitChartAt(chart: Chart, tick: number): void {
-    for (let key of cat_2) {
+    for (let key of cat_noodle) {
         SplitChart(chart, key, tick,
-            x => x[3],
-            data => SplitLnBody(data[0], tick, data[3] - data[0], data[1], data[2]),
+            x => (x as Noodle).tick_end,
+            data => {
+                let note = data as Noodle;
+                return SplitLnBody(note.tick, tick, note.tick_end - note.tick, note.cell, note.width)
+            },
         );
     }
 
-    for (let key of cat_3) {
+    for (let key of cat_slide) {
         SplitChart(chart, key, tick,
-            x => x[3],
-            data => SplitSldBody(
-                data[0], tick, data[3] - data[0], data[1], data[2], data[4], data[5], data[6]
-            )
+            x => (x as Slide).tick_end,
+            data => {
+                let note = data as Slide;
+                return SplitSldBody(
+                    note.tick, tick, note.tick_end - note.tick,
+                    note.cell, note.width, note.cell_target, note.width_target, note.extra
+                )
+            }
         );
     }
 
     SplitChart(chart, "SFL", tick,
-        x => x[1] + x[0],
-        data => [
-            [data[0], tick - data[0], data[2]],
-            [tick, data[1] + data[0] - tick, data[2]]
-        ]
+        x => (x as SpeedVelocity).tick_end,
+        data => {
+            let note = data as SpeedVelocity;
+            return [
+                new SpeedVelocity(note.tick, tick, note.velocity),
+                new SpeedVelocity(tick, note.tick_end, note.velocity)
+            ]
+        }
     );
 }
