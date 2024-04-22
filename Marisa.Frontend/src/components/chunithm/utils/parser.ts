@@ -104,7 +104,7 @@ function MakeNoteGapLine(chart: Chart) {
 
     let res: number[] = [];
     for (let key of cat_rice) {
-        if (key == "ALD_T") continue;
+        // if (key == "ALD_T") continue;
         for (let note of chart[key]) {
             res.push(note.tick);
         }
@@ -311,7 +311,7 @@ function ParseLn(chart: Chart, data: LnData) {
     if (data[0] == "HLD") {
         chart['HLD_H'].push(lnH);
     } else {
-        chart["CHR"].push(lnT);
+        chart["CHR"].push(lnH);
     }
 
     chart["HLD_T"].push(lnT);
@@ -384,7 +384,9 @@ function ParseAld(chart: Chart, data: AldData) {
     let tick     = ToTick(d.measure, d.offset);
     let tick_end = tick + d.duration;
 
-    chart[data[0]].push(new Slide(tick, d.cell, d.width, tick_end, d.target_cell, d.target_width, d.color));
+    if (d.color != 'NON') {
+        chart[data[0]].push(new Slide(tick, d.cell, d.width, tick_end, d.target_cell, d.target_width, d.color));
+    }
 
     if (d.interval == 0) return;
 
