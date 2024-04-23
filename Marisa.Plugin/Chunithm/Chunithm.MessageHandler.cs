@@ -243,16 +243,24 @@ public partial class Chunithm
         var song = searchResult.First();
 
         message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
-            .Select((l, i) => $"{i}. [{song.LevelName[i]}] {l}").ToList())
+            .Select((l, i) =>
+                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
+            ).ToList())
         }");
 
         Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
         {
             var command = next.Command.Trim();
 
-            if (!int.TryParse(command, out var levelIdx))
+            if (!int.TryParse(command, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
-                message.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
+
+            if (string.IsNullOrEmpty(song.ChartName[levelIdx]))
+            {
+                next.Reply("暂无该难度的数据");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
