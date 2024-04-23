@@ -114,7 +114,7 @@ function MakeNoteGapLine(chart: Chart) {
 
     let sep = res.map(x => [Math.floor(x / resolution), x % resolution]);
 
-    let no_skip = [];
+    let no_skip = [0];
 
     for (let i = 0, j = 1; j < sep.length; i++, j++) {
         if (sep[i][0] == sep[j][0] && sep[i][1] + 1 == sep[j][1]) {
