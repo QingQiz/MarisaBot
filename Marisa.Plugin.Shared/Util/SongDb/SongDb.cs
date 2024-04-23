@@ -199,8 +199,12 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         if (!key.Any())
         {
-            var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
+            try
+            {
+                var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
+            }
+            catch (RegexParseException) {}
         }
 
         if (!key.Any()) return null;
