@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {
     cat_rice,
     cat_noodle,
@@ -25,8 +25,8 @@ let data_fetched = ref(false);
 let chart = ref({} as Chart);
 let index = ref([] as number[][]);
 
-const overflow = 50;
-
+const overflow    = 50;
+const pixel_ratio = ref(window.devicePixelRatio);
 
 axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
     .then(data => {
@@ -89,11 +89,24 @@ function GetNotes(key: string, tick: number, tick_next: number = 0) {
 
     return chart.value[key].filter(note => note.tick >= tick && note.tick < tick_next);
 }
+
+function listenOnDevicePixelRatio() {
+    function onChange() {
+        pixel_ratio.value = window.devicePixelRatio;
+        listenOnDevicePixelRatio();
+    }
+
+    matchMedia(
+        `(resolution: ${window.devicePixelRatio}dppx)`
+    ).addEventListener("change", onChange, {once: true});
+}
+
+onMounted(listenOnDevicePixelRatio);
 </script>
 
 
 <template>
-    <div v-if="data_fetched" class="config stage-container">
+    <div v-if="data_fetched" class="config stage-container" :style="`--pixel-ratio: ${pixel_ratio}`">
         <div class="stage" v-for="i in index"
              :style="`--tick-min: ${Math.floor(i[0])}; --tick-max: ${Math.floor(i[1])}`">
             <div v-for="type in cat_slide">

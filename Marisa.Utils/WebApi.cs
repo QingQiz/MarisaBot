@@ -26,7 +26,11 @@ public static class WebApi
             {
                 using var browserFetcher = new BrowserFetcher();
                 browserFetcher.DownloadAsync().Wait();
-                _browserInner = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true }).Result;
+                _browserInner = Puppeteer.LaunchAsync(new LaunchOptions
+                {
+                    Headless = true,
+                    Args     = new[] { "--force-device-scale-factor=1" }
+                }).Result;
                 return _browserInner;
             }
         }
@@ -45,7 +49,7 @@ public static class WebApi
             return page;
         }
     }
-    
+
     private static async Task<string> RenderUrl(string url)
     {
         await using var page = Page;
@@ -124,7 +128,7 @@ public static class WebApi
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
-    
+
     public static async Task<string> ChunithmSummary(Guid contextId)
     {
         return await RenderUrl(Frontend + "/chunithm/summary?id=" + contextId);

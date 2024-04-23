@@ -19,7 +19,8 @@
     --ahd-z-index: 60;
     --air-z-index: 70;
 
-    --height-per-tick: 1px;
+    --pixel-ratio: 1;
+    --height-per-tick: calc(1px / var(--pixel-ratio));
 
     @apply p-6 bg-gray-500;
 }
