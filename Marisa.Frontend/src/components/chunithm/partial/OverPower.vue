@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import {Score, GroupSongInfo} from "@/components/chunithm/Summary.vue";
+import {Score, GroupSongInfo} from "../utils/summary_t";
 import {computed} from "vue";
 
 
-let props = defineProps<{
-    group: GroupSongInfo[],
-    scores: Score[]
-}>()
+let props = defineProps({
+    group: {
+        type: Array as () => GroupSongInfo[],
+        required: true
+    },
+    scores: {
+        type: Array as () => Score[],
+        required: true
+    },
+    detail: {
+        type: Boolean,
+        default: false
+    }
+})
 
 function OverPower(score: Score) {
     if (score.score == 0) return 0;
@@ -39,9 +49,13 @@ function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
     }
 
     let groupOp: { [key: number]: number } = {
+        // 一般的
         0: 0,
+        // fullcombo & fullchain & fullchain2
         1: 0,
+        // aj
         2: 0,
+        // ajc
         3: 0,
         // 没打的
         4: 0,
@@ -71,7 +85,6 @@ function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
             groupOp[rank] += 1
         } else {
             groupOp[4] += 1
-            console.log(song)
         }
         opAll += (constant) * 5 + 15;
     }
@@ -98,29 +111,38 @@ function OpWidth(idx: number) {
 </script>
 
 <template>
-    <div class="flex gap-2 w-full text-black">
-        <div class="bar-title">
-            <div>
-                {{ op[-2].toFixed(2) }}
+    <div class="w-full">
+        <div class="flex gap-2 w-full text-black">
+            <div class="bar-title">
+                <pre>{{ op[-2].toFixed(2).padStart(8, ' ') }}</pre>
+                <pre>{{ op[-1].toFixed(2).padStart(8, ' ') }}</pre>
             </div>
-            <div>
-                {{ op[-1].toFixed(2) }}
-            </div>
-        </div>
 
-        <div class="bar relative">
-            <div class="h-full bg-amber-200" :style="`width: ${OpWidth(3)}`"></div>
-            <div class="h-full bg-amber-400" :style="`width: ${OpWidth(2)}`"></div>
-            <div class="h-full bg-green-500" :style="`width: ${OpWidth(1)}`"></div>
-            <div class="h-full bg-gray-100" :style="`width: ${OpWidth(0)}`"></div>
-            <div class="absolute text-5xl inset-0 flex items-center place-content-center">
-                {{ (op[-2] / op[-1] * 100).toFixed(2) }}%
+            <div class="w-full">
+                <div class="bar relative">
+                    <div class="h-full ajc" :style="`width: ${OpWidth(3)}`"></div>
+                    <div class="h-full aj" :style="`width: ${OpWidth(2)}`"></div>
+                    <div class="h-full fc" :style="`width: ${OpWidth(1)}`"></div>
+                    <div class="h-full pl" :style="`width: ${OpWidth(0)}`"></div>
+                    <div class="absolute text-5xl inset-0 flex items-center place-content-center">
+                        {{ (op[-2] / op[-1] * 100).toFixed(2) }}%
+                    </div>
+                </div>
+                <div v-if="detail" class="detail">
+                    <pre class="t-all">ALL: {{ opSum.toString() }}</pre>
+                    <pre class="t-ajc">AJC: {{ op[3].toString() }}</pre>
+                    <pre class="t-aj">AJ: {{ op[2].toString() }}</pre>
+                    <pre class="t-fc">FC: {{ op[1].toString() }}</pre>
+                    <pre class="t-pl">PL: {{ op[0].toString() }}</pre>
+                    <pre class="t-np">NP: {{ op[4].toString() }}</pre>
+                </div>
             </div>
+
         </div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="postcss">
 
 .bar-title {
     font-size: 35px;
@@ -133,5 +155,51 @@ function OpWidth(idx: number) {
     height: 100px;
 
     @apply border-4 border-black flex bg-gray-500;
+}
+
+.detail {
+    @apply flex justify-between;
+
+    font-size: 30px;
+}
+
+.ajc {
+    @apply bg-amber-200;
+}
+
+.aj {
+    @apply bg-amber-400;
+}
+
+.fc {
+    @apply bg-green-500;
+}
+
+.pl {
+    @apply bg-gray-100;
+}
+
+.t-all {
+    @apply text-black;
+}
+
+.t-ajc {
+    @apply text-amber-200;
+}
+
+.t-aj {
+    @apply text-amber-400;
+}
+
+.t-fc {
+    @apply text-green-500;
+}
+
+.t-pl {
+    @apply text-gray-300;
+}
+
+.t-np {
+    @apply text-gray-500;
 }
 </style>

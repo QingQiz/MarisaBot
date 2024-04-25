@@ -1,0 +1,84 @@
+.config {
+    --group-gap: 50px;
+    --group-col-count: 8;
+    --group-title-font-size: 100px;
+
+    --cell-width: 200px;
+    --cell-inset: 13px;
+    --cell-gap: 30px;
+
+    --achievemnet-height: 50px;
+    --achievemnet-font-size: 43px;
+
+    /* 小三角的尺寸 */
+    --level-mark-size: 30px;
+
+    padding: var(--cell-gap);
+
+    @apply font-osu-web;
+}
+
+.group-title {
+    font-size: var(--group-title-font-size);
+    @apply grid grid-cols-3 place-content-center items-center;
+
+    grid-template-columns: 1fr 300px 1fr;
+}
+
+.group-min-rank {
+    height: var(--group-title-font-size);
+    @apply justify-self-center;
+}
+
+.level-mark {
+    position: absolute;
+    width: var(--level-mark-size);
+    height: var(--level-mark-size);
+
+    top: var(--cell-inset);
+    left: var(--cell-inset);
+
+    clip-path: polygon(0% 0%, 0% 100%, 100% 0%);
+}
+
+.cover {
+    @apply h-full bg-cover;
+}
+
+.cell {
+    position: relative;
+    width: var(--cell-width);
+    height: var(--cell-width);
+
+    padding: var(--cell-inset);
+
+    @apply bg-cover;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(var(--group-col-count), var(--cell-width));
+    gap: var(--cell-gap);
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--group-gap);
+}
+
+.achievement {
+    width: calc(var(--cell-width) - 2 * var(--cell-inset));
+    height: var(--achievemnet-height);
+
+    bottom: var(--cell-inset);
+    left: var(--cell-inset);
+    right: var(--cell-inset);
+
+    font-size: var(--achievemnet-font-size);
+
+    @apply font-console;
+    @apply absolute bg-black;
+    @apply flex flex-col place-content-center;
+    @apply text-center;
+}
