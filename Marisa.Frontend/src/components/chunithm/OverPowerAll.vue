@@ -30,7 +30,7 @@ function GetScore(id: number, level: number) {
 }
 
 function GetSongsByConstRange(a: number, b: number) {
-    return songs.value.filter(x => x.Item1 >= a && x.Item1 <= b)
+    return songs.value.filter(x => x.Item1 >= a && x.Item1 < b)
 }
 
 function GetConstRange(): [number, number, string][] {
