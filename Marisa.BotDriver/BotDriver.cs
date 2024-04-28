@@ -123,6 +123,9 @@ public abstract class BotDriver
                         if (state != MarisaPluginTaskState.CompletedTask) continue;
 
                         shouldBreak = true;
+                        // 若break：根据定义的顺序执行所有满足条件的Command
+                        // 若不break：只执行第一个满足条件的Command
+                        break;
                     }
 
                     if (shouldBreak) break;
