@@ -14,6 +14,11 @@ public class MarisaPluginBase
 
     public virtual Task ExceptionHandler(Exception exception, Message message)
     {
+        if ((exception.InnerException ?? exception) is AggregateException {InnerExceptions.Count: 1 } aggregateException)
+        {
+            return ExceptionHandler(aggregateException.InnerExceptions[0], message);
+        }
+
         Console.WriteLine(exception.ToString());
 
         message.Send(new MessageDataText(exception.InnerException?.ToString() ?? exception.ToString()));
