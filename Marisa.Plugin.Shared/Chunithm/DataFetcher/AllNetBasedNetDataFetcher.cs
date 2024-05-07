@@ -204,7 +204,14 @@ public class AllNetBasedNetDataFetcher : DataFetcher
         var resp     = await $"http://{Host}/sys/servlet/PowerOn".PostStringAsync(postData);
         var respData = await resp.GetStringAsync();
 
-        return respData.Split('&').First(x => x.StartsWith("uri")).Split('=', 2)[1];
+        try
+        {
+            return respData.Split('&').First(x => x.StartsWith("uri")).Split('=', 2)[1];
+        }
+        catch (Exception)
+        {
+            throw new InvalidDataException("机台PowerOn请求失败，目标服务器可能宕机");
+        }
     }
 
     private int AccessCodeToAimeId(string accessCode, string keyChipId)
@@ -212,7 +219,7 @@ public class AllNetBasedNetDataFetcher : DataFetcher
         var bytes    = GenerateRequestBytes(accessCode, keyChipId);
         var outBytes = new byte[48];
 
-        var ip = Dns.GetHostAddresses(Host)[0];
+        var ip = Dns.GetHostAddresses(new Uri(ServerUri).Host)[0];
         using (var client = new TcpClient())
         {
             client.Connect(ip, 22345);
