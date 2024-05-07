@@ -20,12 +20,18 @@ public class ChunithmScore
     [JsonProperty("fc", Required = Required.Always)]
     public string Fc { get; set; }
 
+    /**
+     * 13+,14,...
+     */
     [JsonProperty("level", Required = Required.Always)]
     public string Level { get; set; }
 
     [JsonProperty("level_index", Required = Required.Always)]
     public long LevelIndex { get; set; }
 
+    /**
+     * Basic,Advanced,Expert,Master,...
+     */
     [JsonProperty("level_label", Required = Required.Always)]
     public string LevelLabel { get; set; }
 

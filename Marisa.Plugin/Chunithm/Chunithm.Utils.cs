@@ -1,28 +1,39 @@
-﻿using Flurl.Http;
+﻿using System.Net;
+using System.Net.Sockets;
+using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
 namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-    private static (string, long) AtOrSelf(Message message)
+    private readonly Dictionary<string, DataFetcher> _dataFetchers = new();
+
+    private DataFetcher GetDataFetcher(string name)
     {
-        var username = message.Command;
-        var qq       = message.Sender!.Id;
+        if (_dataFetchers.TryGetValue(name, out var fetcher)) return fetcher;
 
-        if (string.IsNullOrWhiteSpace(username))
+        try
         {
-            var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-            if (at != null)
+            return _dataFetchers[name] = name switch
             {
-                qq = (at as MessageDataAt)?.Target ?? qq;
-            }
+                "DivingFish" => new DivingFishDataFetcher(_songDb),
+                "RinNET" => new AllNetBasedNetDataFetcher(_songDb, "aqua.naominet.live",
+                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip),
+                "Aqua" => new AllNetBasedNetDataFetcher(_songDb, "aqua.msm.moe",
+                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip),
+                _ => Dns.GetHostAddresses(name).Any()
+                    ? new AllNetBasedNetDataFetcher(_songDb, name,
+                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip)
+                    : throw new InvalidDataException("无效的服务器名： " + name)
+            };
         }
-
-        return (username, qq);
+        catch (Exception  e) when (e is SocketException or ArgumentException)
+        {
+            throw new InvalidDataException("无效的服务器名： " + name);
+        }
     }
-
-    private List<ChunithmSong>? _songList;
 
     private static (string, int) LevelAlias2Index(string command, IList<string> levels)
     {
@@ -56,61 +67,27 @@ public partial class Chunithm
         return (levelPrefix, levels.IndexOf(level));
     }
 
-    private IEnumerable<ChunithmSong> FilteredSongList
+    private async Task<DataFetcher> GetDataFetcher(Message message)
     {
-        get
+        var qq = message.Sender!.Id;
+
+        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
+        if (at != null)
         {
-            if (_songList != null) return _songList;
-
-            var list = "https://www.diving-fish.com/api/chunithmprober/music_data"
-                .GetJsonListAsync()
-                .Result;
-
-            _songList = list.Select(x => new ChunithmSong(x, true)).ToList();
-
-            return _songList;
-        }
-    }
-
-    private async Task<MessageChain> GetB30Card(Message message, bool b50 = false)
-    {
-        var (username, qq) = AtOrSelf(message);
-
-        return MessageChain.FromImageB64((await GetRating(username, qq)).Draw().ToB64());
-    }
-
-    private async Task<ChunithmRating> GetRating(string? username, long? qq)
-    {
-        var response = await "https://www.diving-fish.com/api/maimaidxprober/chuni/query/player".PostJsonAsync(
-            string.IsNullOrEmpty(username)
-                ? new { qq }
-                : new { username });
-        var rating = ChunithmRating.FromJson(await response.GetStringAsync());
-
-        foreach (var r in rating.Records.Best.Concat(rating.Records.R10))
-        {
-            if (_songDb.SongIndexer.ContainsKey(r.Id)) continue;
-
-            r.Id = _songDb.SongList.First(s => s.Title == r.Title).Id;
+            qq = (at as MessageDataAt)?.Target ?? qq;
         }
 
-        return rating;
+        await using var db = new BotDbContext();
+
+        var bind = db.ChunithmBinds.FirstOrDefault(x => x.UId == qq);
+
+        return GetDataFetcher(bind == null ? "DivingFish" : bind.ServerName);
     }
 
-    private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetAllSongScores(Message message)
+    private async Task<MessageChain> GetB30Card(Message message)
     {
-        var qq  = message.Sender!.Id;
-        var ats = message.At().ToList();
+        var fetcher = await GetDataFetcher(message);
 
-        if (ats.Any())
-        {
-            qq = ats.First();
-        }
-
-        var response = await $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?qq={qq}"
-            .WithHeader("Developer-Token", ConfigurationManager.Configuration.Chunithm.DevToken)
-            .GetJsonAsync<ChunithmRating>();
-
-        return response.Records.Best.ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
+        return MessageChain.FromImageB64((await fetcher.GetRating(message)).Draw().ToB64());
     }
 }

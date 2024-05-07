@@ -14,6 +14,7 @@ public class BotDbContext : DbContext
 {
     public DbSet<CommandFilter> CommandFilters { get; set; }
     public DbSet<ChunithmGuess> ChunithmGuesses { get; set; }
+    public DbSet<ChunithmBind> ChunithmBinds { get; set; }
     public DbSet<OngekiGuess> OngekiGuesses { get; set; }
     public DbSet<MaiMaiDxGuess> MaiMaiDxGuesses { get; set; }
     public DbSet<ArcaeaGuess> ArcaeaGuesses { get; set; }

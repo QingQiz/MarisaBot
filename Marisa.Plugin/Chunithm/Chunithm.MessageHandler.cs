@@ -1,6 +1,9 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 using Marisa.EntityFrameworkCore;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Utils.Cacheable;
 
@@ -42,15 +45,17 @@ public partial class Chunithm
             }
 
             // 太大的话画图会失败，所以给判断一下
-            if (constants[1] - constants[0] > 3)
+            if (constants[1] - constants[0] > 2)
             {
-                message.Reply("过大的跨度");
+                message.Reply("过大的跨度，最多是2");
                 return MarisaPluginTaskState.CompletedTask;
             }
 
-            var scores = await GetAllSongScores(message);
+            var fetcher = await GetDataFetcher(message);
 
-            var groupedSong = FilteredSongList
+            var scores = await fetcher.GetScores(message);
+
+            var groupedSong = fetcher.GetSongList()
                 .Select(song => song.Constants
                     .Select((constant, i) => (constant, i, song)))
                 .SelectMany(s => s)
@@ -71,7 +76,9 @@ public partial class Chunithm
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
     {
-        var genres = FilteredSongList.Select(song => song.Genre).Distinct().ToArray();
+        var fetcher = await GetDataFetcher(message);
+
+        var genres = fetcher.GetSongList().Select(song => song.Genre).Distinct().ToArray();
 
         var genre = genres.FirstOrDefault(p =>
             string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -82,9 +89,9 @@ public partial class Chunithm
         }
         else
         {
-            var scores = await GetAllSongScores(message);
+            var scores = await fetcher.GetScores(message);
 
-            var groupedSong = FilteredSongList
+            var groupedSong = fetcher.GetSongList()
                 .Where(song => song.Genre == genre)
                 .Select(song => song.Constants
                     .Select((constant, i) => (constant, i, song)))
@@ -130,9 +137,10 @@ public partial class Chunithm
             goto _error;
         }
 
-        var scores = await GetAllSongScores(message);
+        var fetcher = await GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
 
-        var groupedSong = FilteredSongList
+        var groupedSong = fetcher.GetSongList()
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
@@ -158,9 +166,10 @@ public partial class Chunithm
     [MarisaPluginCommand("overpower", "op")]
     private async Task<MarisaPluginTaskState> SummaryOverPower(Message message)
     {
-        var scores = await GetAllSongScores(message);
+        var fetcher = await GetDataFetcher(message);
+        var scores = await fetcher.GetScores(message);
 
-        var songs = FilteredSongList
+        var songs = fetcher.GetSongList()
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s);
@@ -173,6 +182,144 @@ public partial class Chunithm
         message.Reply(MessageDataImage.FromBase64(img));
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 绑定
+
+    [MarisaPluginDoc("绑定某个查分器")]
+    [MarisaPluginCommand("bind", "绑定")]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    private Task<MarisaPluginTaskState> Bind(Message message)
+    {
+        var fetchers = new[]
+        {
+            "DivingFish",
+            "RinNET",
+            "Aqua",
+            "其它基于AllNet/Aqua/Chusan的服务"
+        };
+
+        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
+            .Select((x, i) => (x, i))
+            .Select(x => $"{x.i}. {x.x}"))
+        );
+
+        /*
+         * 0 -> 检查输入的index
+         * 1 -> 检查输入的服务器地址
+         * 2 -> 询问access code
+         * 3 -> 检查输入的access code
+         */
+        var stat   = 0;
+        var server = "";
+
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        {
+            switch (stat)
+            {
+                case 0:
+                {
+                    if (!int.TryParse(next.Command, out var idx) || idx < 0 || idx >= fetchers.Length)
+                    {
+                        next.Reply("错误的序号，会话已关闭");
+                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    }
+
+                    if (idx == 0)
+                    {
+                        using var dbContext = new BotDbContext();
+
+                        var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender!.Id);
+
+                        if (bind != null)
+                        {
+                            dbContext.ChunithmBinds.Remove(bind);
+                            dbContext.SaveChanges();
+                        }
+
+                        message.Reply("好了");
+                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    }
+
+                    if (idx == fetchers.Length - 1)
+                    {
+                        message.Reply("给出服务器的地址，即你填写在segatools.ini的[dns]中default的值");
+                        stat = 1;
+                    }
+                    else
+                    {
+                        server = fetchers[idx];
+                        message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
+                        stat = 2;
+                    }
+
+                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                }
+                case 1:
+                {
+                    var host = next.Command.Trim();
+                    try
+                    {
+                        if (Dns.GetHostAddresses(host).Any())
+                        {
+                            server = host;
+                            message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
+                            stat = 2;
+                            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                        }
+                    }
+                    catch (ArgumentException) {}
+
+                    next.Reply($"无效的服务器地址{host}，会话已关闭");
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                }
+                case 2:
+                {
+                    var accessCode = next.Command.Replace("-", "").Trim();
+
+                    if (accessCode.Length != 20)
+                    {
+                        next.Reply($"无效的Access Code: {accessCode}，长度应为20");
+                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    }
+
+                    var fetcher = GetDataFetcher(server);
+
+                    if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
+                    {
+                        next.Reply($"该Access Code尚未在{server}中绑定");
+                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    }
+
+                    using var dbContext = new BotDbContext();
+
+                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender!.Id);
+
+                    if (bind == null)
+                    {
+                        dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender!.Id, server, accessCode));
+                    }
+                    else
+                    {
+                        bind.ServerName = server;
+                        bind.AccessCode = accessCode;
+                        dbContext.ChunithmBinds.Update(bind);
+                    }
+
+                    dbContext.SaveChanges();
+
+                    message.Reply("好了");
+
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                }
+            }
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
     #endregion
@@ -198,8 +345,8 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B30Sum(Message message)
     {
-        var (username, qq) = AtOrSelf(message);
-        var rating = await GetRating(username, qq);
+        var fetcher = await GetDataFetcher(message);
+        var rating  = await fetcher.GetRating(message);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
         var rSum = rating.Records.R10.Sum(x => x.Rating)  * 100;
