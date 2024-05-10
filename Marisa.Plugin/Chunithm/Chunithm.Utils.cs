@@ -69,6 +69,12 @@ public partial class Chunithm
 
     private async Task<DataFetcher> GetDataFetcher(Message message)
     {
+        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
+        if (!string.IsNullOrWhiteSpace(message.Command))
+        {
+            return GetDataFetcher("DivingFish");
+        }
+
         var qq = message.Sender!.Id;
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
