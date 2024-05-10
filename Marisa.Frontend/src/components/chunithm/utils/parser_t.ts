@@ -21,10 +21,12 @@ export class Bpm extends NotePublic {
 
 export class Measure extends NotePublic {
     id: number;
+    met: Met;
 
-    constructor(tick: number, id: number) {
+    constructor(tick: number, id: number, met: Met) {
         super(tick);
         this.id = id;
+        this.met = met;
     }
 
     toString() {
@@ -44,8 +46,11 @@ export class Div extends NotePublic {
 }
 
 export class Beat extends NotePublic {
-    constructor(tick: number) {
+    measure_id: number;
+
+    constructor(tick: number, measure_id: number) {
         super(tick);
+        this.measure_id = measure_id;
     }
 
     toString() {

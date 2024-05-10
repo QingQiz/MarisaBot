@@ -147,12 +147,27 @@ note在多少分音上
 拍线
  */
 .BEAT_2 {
-    @apply absolute bg-gray-600 right-0 w-full;
+    @apply absolute text-center border-b-[2px] bg-gray-600 w-full opacity-40;
 
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
-    height: 2px;
+
+    --width: 10px;
+
+    width: var(--width);
+    left: calc(-1 * var(--width));
 
     z-index: 0;
+
+    &:after {
+        @apply absolute bg-gray-600 right-0 w-full;
+        @apply -bottom-[2px];
+
+        width: var(--stage-width);
+        left: calc(var(--width));
+
+        content: '';
+        height: 2px;
+    }
 }
 
 .cat-rice-common {

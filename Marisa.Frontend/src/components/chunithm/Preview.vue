@@ -9,12 +9,12 @@ import {
     Chart,
     GetMaxTick,
     Parse,
-    ScaleTickFrom, SplitChartAt,
+    ScaleTickFrom, SplitChartAt
 } from "@/components/chunithm/utils/parser";
 import {useRoute} from "vue-router";
 import {context_get} from "@/GlobalVars";
 import axios from "axios";
-import {Div, Noodle, Rice, Slide, SpeedVelocity} from "@/components/chunithm/utils/parser_t";
+import {Beat, Div, Measure, Noodle, Rice, Slide, SpeedVelocity} from "@/components/chunithm/utils/parser_t";
 
 const route = useRoute()
 
@@ -36,32 +36,79 @@ axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {pa
     })
     .finally(() => data_fetched.value = true);
 
+function GetLaneLength(mid_length: number) {
+    return mid_length * 4;
+}
 
-function GetMeasureLength(chart: Chart, max_tick: number) {
-    let res: number[] = []
+/**
+ * 将谱面根据小节划分，并将过长的小节以4拍为步长进行进一步切分
+ * @param chart
+ * @return，每个切分的起始tick，和这个切分最多 ***可能*** 有多少拍
+ */
+function GetMinSplit(chart: Chart) {
+    let measures = chart.BEAT_1 as Measure[];
+    let beats    = new Map<number, Beat[]>();
+    let split    = [] as [number, number][];
 
-    let time = chart.BEAT_1 // .concat(chart.BEAT_2);
-    time.sort((a, b) => a.tick - b.tick);
+    for (let x of chart.BEAT_2 as Beat[]) {
+        if (!beats.has(x.measure_id)) beats.set(x.measure_id, []);
 
-    for (let i = 0; i < time.length - 1; i++) {
-        res.push(time[i + 1].tick - time[i].tick);
+        beats.get(x.measure_id)?.push(x);
     }
-    res.push(max_tick - time[time.length - 1].tick);
+
+    beats.forEach((value, _) => {
+        value.sort((a, b) => a.tick - b.tick);
+
+        for (let i = 4; i < value.length; i += 4) {
+            split.push([value[i].tick, 4]);
+        }
+    });
+
+    for (let i = 0; i < measures.length; i++) {
+        split.push([measures[i].tick, measures[i].met.first]);
+    }
+
+    return split;
+}
+
+function GetMeasureLength(split_tick: number[], max_tick: number) {
+    split_tick.sort((a, b) => a - b);
+
+    let res: number[] = [];
+
+    for (let i = 0; i < split_tick.length - 1; i++) {
+        res.push(split_tick[i + 1] - split_tick[i]);
+    }
+    res.push(max_tick - split_tick[split_tick.length - 1]);
 
     return res;
 }
 
+function GetMeasureMidLength(min_split: [number, number][], max_tick: number) {
+    let res  = [] as number[];
+    let time = min_split.filter(x => x[1] != 1).map(x => x[0]);
+
+    for (let i = 0; i < time.length - 1; i++) {
+        res.push(time[i + 1] - time[i]);
+    }
+    res.push(max_tick - time[time.length - 1]);
+
+    return GetMidValue(res);
+}
+
 function ProcessChart4Display(chart: Chart): [Chart, number[][]] {
-    let max_tick       = GetMaxTick(chart);
-    let measure_length = GetMeasureLength(chart, max_tick);
-    let average        = measure_length.reduce((a, b) => a + b, 0) / measure_length.length;
+    let max_tick = GetMaxTick(chart);
+    let split    = GetMinSplit(chart);
+    let mid_len  = GetMeasureMidLength(split, max_tick);
 
-    ScaleTickFrom(chart, 700 / average);
+    ScaleTickFrom(chart, 700 / mid_len);
 
-    max_tick       = GetMaxTick(chart);
-    measure_length = GetMeasureLength(chart, max_tick);
+    split    = GetMinSplit(chart);
+    max_tick = GetMaxTick(chart);
+    mid_len  = GetMeasureMidLength(split, max_tick);
 
-    let split_points              = GetSplitPoint(measure_length);
+    let measure_length            = GetMeasureLength(split.map(x => x[0]), max_tick);
+    let split_points              = GetSplitPoint(measure_length, GetLaneLength(mid_len));
     let measure_length_prefix_sum = new Array(measure_length.length);
 
     measure_length_prefix_sum[0] = measure_length[0];
@@ -158,16 +205,19 @@ onMounted(listenOnDevicePixelRatio);
 <script lang="ts">
 import * as d3 from "d3";
 
-function GetSplitPoint(arr: number[]) {
+/**
+ * 使用贪心策略将小节按顺序合并为最接近 `lane_length` 的若干个序列
+ * @param arr
+ * @param lane_length
+ * @return 一系列坐标，表示切分的位置。将每个切分合并即为最终的结果
+ */
+function GetSplitPoint(arr: number[], lane_length: number) {
     let prefix_sum = new Array(arr.length + 1);
     prefix_sum[0]  = 0;
 
     for (let i = 0; i < arr.length; i++) {
         prefix_sum[i + 1] = prefix_sum[i] + arr[i];
     }
-
-    let avg = prefix_sum[arr.length] / arr.length * 4;
-    let sum = 0;
 
     let res = [-1]
 
@@ -177,10 +227,8 @@ function GetSplitPoint(arr: number[]) {
         let current = prefix_sum[i + 1] - pre;
         let next    = prefix_sum[i + 2] - pre;
 
-        if (Math.abs(current - avg) <= Math.abs(next - avg)) {
+        if (Math.abs(current - lane_length) <= Math.abs(next - lane_length)) {
             res.push(i);
-            sum += current;
-            avg = sum / (res.length - 1);
         }
     }
 
@@ -194,5 +242,11 @@ const SvColor = d3.scaleLinear<string>()
 
 function GetColor(val: number) {
     return SvColor(val);
+}
+
+function GetMidValue(arr: number[]) {
+    let copy = arr.slice();
+    copy.sort((a, b) => a - b);
+    return copy[Math.floor(copy.length / 2)];
 }
 </script>

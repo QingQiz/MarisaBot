@@ -154,11 +154,11 @@ function MakeBeatLine(chart: Chart) {
         let measure_length = beat_length * met[i].first;
 
         for (let j = met[i].tick; j < next_tick; j += measure_length) {
-            chart["BEAT_1"].push(new Measure(j, measure_id++))
-
             for (let k = j + beat_length; k < j + measure_length && k < next_tick; k += beat_length) {
-                chart["BEAT_2"].push(new Beat(k));
+                chart["BEAT_2"].push(new Beat(k, measure_id));
             }
+
+            chart["BEAT_1"].push(new Measure(j, measure_id++, met[i]))
         }
     }
 }
@@ -285,9 +285,22 @@ function ParseLine(chart: Chart, data: any) {
             chart["MET"].push(new Met(0, data[2] as number, data[1] as number));
             break;
         case "SFL":
-            let tick = ToTick(data[1] as number, data[2] as number);
+            let measure  = data[1] as number;
+            let offset   = data[2] as number;
+            let duration = data[3] as number;
 
-            chart["SFL"].push(new SpeedVelocity(tick, data[3] as number + tick, data[4] as number));
+            while (duration > 0) {
+                if (offset + duration > resolution) {
+                    chart["SFL"].push(new SpeedVelocity(ToTick(measure, offset), ToTick(measure, resolution), data[4] as number));
+                    duration -= resolution - offset;
+                    measure++;
+                    offset = 0;
+                } else {
+                    chart["SFL"].push(new SpeedVelocity(ToTick(measure, offset), ToTick(measure, offset + duration), data[4] as number));
+                    duration = 0;
+                }
+            }
+
             break;
         default:
             chart[key].push(
