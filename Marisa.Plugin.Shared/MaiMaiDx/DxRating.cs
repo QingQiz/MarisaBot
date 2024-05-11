@@ -1,19 +1,61 @@
-﻿namespace Marisa.Plugin.Shared.MaiMaiDx;
+﻿using System.Globalization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 public class DxRating
 {
-    public readonly List<SongScore> NewScores = new();
-    public readonly List<SongScore> OldScores = new();
-
-    public DxRating(dynamic data)
+    private class Charts
     {
-        foreach (var d in data.charts.dx) NewScores.Add(new SongScore(d));
-        foreach (var d in data.charts.sd) OldScores.Add(new SongScore(d));
+        [JsonProperty("dx")]
+        public List<SongScore> NewScores { get; set; }
 
-        NewScores.ForEach(s => s.Rating = s.B50Ra());
-        OldScores.ForEach(s => s.Rating = s.B50Ra());
-
-        NewScores = NewScores.OrderByDescending(s => s.Rating).ToList();
-        OldScores = OldScores.OrderByDescending(s => s.Rating).ToList();
+        [JsonProperty("sd")]
+        public List<SongScore> OldScores { get; set; }
     }
+
+    [JsonProperty("charts")]
+    private Charts _charts { get; set; } = new();
+
+    [JsonIgnore]
+    public List<SongScore> NewScores
+    {
+        get => _charts.NewScores;
+        set => _charts.NewScores = value;
+    }
+
+    [JsonIgnore]
+    public List<SongScore> OldScores
+    {
+        get => _charts.OldScores;
+        set => _charts.OldScores = value;
+    }
+
+    [JsonProperty("nickname")]
+    public string Nickname { get; set; }
+
+    [JsonProperty("rating")]
+    public int Rating
+    {
+        get => NewScores.Sum(x => x.Rating) + OldScores.Sum(x => x.Rating);
+        // ReSharper disable once ValueParameterNotUsed
+        set {}
+    }
+
+    public static DxRating FromJson(string json) => JsonConvert.DeserializeObject<DxRating>(json, Converter.Settings)!;
+    public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
+}
+
+internal static class Converter
+{
+    public static readonly JsonSerializerSettings Settings = new()
+    {
+        MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+        DateParseHandling        = DateParseHandling.None,
+        Converters =
+        {
+            new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
+        },
+    };
 }

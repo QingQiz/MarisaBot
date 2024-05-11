@@ -1,56 +1,73 @@
-﻿namespace Marisa.Plugin.Shared.MaiMaiDx;
+﻿using Newtonsoft.Json;
+
+namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 public class SongScore
 {
-    public readonly double Achievement;
-    public readonly double Constant;
-    public int DxScore;
-    public readonly string Fc;
-    public readonly string Fs;
-    public string Level;
-    public readonly int LevelIdx;
-    public string LevelLabel;
-    public int Rating;
-    public readonly string Rank;
-    public readonly long Id;
-    public readonly string Title;
-    public readonly string Type;
+    [JsonProperty("achievements")]
+    public double Achievement { get; set; }
 
-    public SongScore(dynamic data)
+    [JsonProperty("ds")]
+    public double Constant { get; set; }
+
+    [JsonProperty("dxScore")]
+    public int DxScore { get; set; }
+
+    [JsonProperty("fc")]
+    public string Fc { get; set; }
+
+    [JsonProperty("fs")]
+    public string Fs { get; set; }
+
+    [JsonProperty("level")]
+    public string Level { get; set; }
+
+    [JsonProperty("level_index")]
+    public int LevelIdx { get; set; }
+
+    [JsonProperty("level_label")]
+    public string LevelLabel
     {
-        Achievement = data.achievements;
-        Constant    = data.ds;
-        DxScore     = (int)data.dxScore;
-        Fc          = data.fc;
-        Fs          = data.fs;
-        Level       = data.level;
-        LevelIdx    = (int)data.level_index;
-        LevelLabel  = data.level_label;
-        Rating      = (int)data.ra;
-        Rank        = data.rate;
-        Id          = data.song_id;
-        Title       = data.title;
-        Type        = data.type;
+        get => MaiMaiSong.LevelName[LevelIdx];
+        // ReSharper disable once ValueParameterNotUsed
+        set {}
     }
 
-    public SongScore(
-        double achievement, double constant, int dxScore, string fc, string fs, string level,
-        int levelIdx, string levelLabel, int rating, string rank, long id, string title, string type)
+    [JsonProperty("ra")]
+    public int Rating
     {
-        Achievement = achievement;
-        Constant    = constant;
-        DxScore     = dxScore;
-        Fc          = fc;
-        Fs          = fs;
-        Level       = level;
-        LevelIdx    = levelIdx;
-        LevelLabel  = levelLabel;
-        Rating      = rating;
-        Rank        = rank;
-        Id          = id;
-        Title       = title;
-        Type        = type;
+        get => Ra(Achievement, Constant);
+        // ReSharper disable once ValueParameterNotUsed
+        set {}
     }
+
+    [JsonProperty("rate")]
+    public string Rank
+    {
+        get => CalcRank(Achievement);
+        // ReSharper disable once ValueParameterNotUsed
+        set {}
+    }
+
+    [JsonProperty("id")]
+    public long SongId
+    {
+        get => Id;
+        set => Id = value;
+    }
+
+    [JsonProperty("song_id")]
+    public long Id { get; set; }
+
+    [JsonProperty("title")]
+    public string Title { get; set; }
+
+    [JsonProperty("type")]
+    public string Type { get; set; }
+
+    public static DxRating FromJson(string json) => JsonConvert.DeserializeObject<DxRating>(json, Converter.Settings)!;
+
+    public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
 
     public static int B50Ra(decimal achievement, decimal constant)
     {
