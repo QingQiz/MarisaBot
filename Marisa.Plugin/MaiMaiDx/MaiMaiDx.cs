@@ -53,7 +53,7 @@ public partial class MaiMaiDx
                 message.Reply("“403 forbidden”");
                 break;
             case (FlurlHttpException { StatusCode: 404 }):
-                message.Reply("404 Not Found");
+                message.Reply("404 Not Found（如果你邦的是Wahlap，那有可能是它的网烂了）");
                 break;
             case FlurlHttpTimeoutException:
                 message.Reply("Timeout");

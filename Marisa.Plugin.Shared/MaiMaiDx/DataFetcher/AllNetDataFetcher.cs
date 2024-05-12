@@ -7,6 +7,7 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -23,9 +24,7 @@ public class AllNetDataFetcher : DataFetcher
     {
         var id = GetAimeId(message);
 
-        var scores = await GetScores(id);
-
-        var songs = scores.Keys.Select(x => SongDb.SongIndexer[x.Id]);
+        var (scores, preview) = await GetScores(id);
 
         var group = scores
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
@@ -47,11 +46,9 @@ public class AllNetDataFetcher : DataFetcher
             .Select(x => x.Value)
             .ToList();
 
-        var username = await GetUserName(id);
-
         return new DxRating
         {
-            Nickname  = username,
+            Nickname  = preview.Username,
             OldScores = b35,
             NewScores = b15,
         };
@@ -61,7 +58,7 @@ public class AllNetDataFetcher : DataFetcher
     {
         var id = GetAimeId(message);
 
-        return await GetScores(id);
+        return (await GetScores(id)).Scores;
     }
 
     public static async Task<bool> Logout(int userId)
@@ -74,8 +71,34 @@ public class AllNetDataFetcher : DataFetcher
         return JsonConvert.DeserializeObject<Dictionary<string, int>>(res)!["returnCode"] == 1;
     }
 
-    private async Task<Dictionary<(long Id, int LevelIndex), SongScore>> GetScores(int aimeId)
+    private async Task<(Dictionary<(long Id, int LevelIndex), SongScore> Scores, UserPreview Preview)>
+        GetScores(int aimeId)
     {
+        var preview = await GetUserPreview(aimeId);
+
+        var tempPath = ConfigurationManager.Configuration.MaiMai.TempPath;
+        var prefix   = $"UserScores-{aimeId}-";
+
+        var times = new List<(DateTime Time, string Path)>();
+
+        foreach (var i in Directory.GetFiles(tempPath))
+        {
+            var fn = Path.GetFileName(i);
+
+            if (!fn.StartsWith(prefix)) continue;
+
+            times.Add((DateTime.ParseExact(fn[prefix.Length..^5], "yyyy-MM-dd_hh-mm-ss", null), i));
+        }
+
+        var cache = times.Where(x => x.Time >= preview.LastLogin).ToList();
+
+        if (cache.Any())
+        {
+            var des = JsonConvert.DeserializeObject<Dictionary<(long Id, int LevelIndex), SongScore>>(
+                await File.ReadAllTextAsync(cache.First().Path));
+            return (des!, preview);
+        }
+
         var md = await GetMusicData(aimeId);
 
         var ret = new Dictionary<(long Id, int LevelIndex), SongScore>();
@@ -101,7 +124,12 @@ public class AllNetDataFetcher : DataFetcher
             };
         }
 
-        return ret;
+        await File.WriteAllTextAsync(
+            Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
+            JsonConvert.SerializeObject(ret)
+        );
+
+        return (ret, preview);
     }
 
     private int GetAimeId(Message message)
@@ -345,9 +373,16 @@ public class AllNetDataFetcher : DataFetcher
         int Combo,
         int Sync,
         int DxScore,
+        // ReSharper disable once NotAccessedPositionalProperty.Local
         int PlayCount);
 
-    private static async Task<string> GetUserName(int aimeId)
+    private record UserPreview(
+        [JsonProperty("userId")] int UserId,
+        [JsonProperty("userName")] string Username,
+        [JsonProperty("lastLoginDate")] DateTime LastLogin
+    );
+
+    private static async Task<UserPreview> GetUserPreview(int aimeId)
     {
         var req = JsonConvert.SerializeObject(new
         {
@@ -358,7 +393,7 @@ public class AllNetDataFetcher : DataFetcher
 
         var res = Encoding.UTF8.GetString(AesDecrypt(await Decompress(rep)));
 
-        return (string)((dynamic)JObject.Parse(res)).userName;
+        return JsonConvert.DeserializeObject<UserPreview>(res)!;
     }
 
     #endregion
