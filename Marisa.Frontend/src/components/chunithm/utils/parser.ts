@@ -102,17 +102,34 @@ function MakeNoteGapLine(chart: Chart) {
         return gcd(b, a % b);
     }
 
-    let res: number[] = [];
+    let ticks = [] as number[];
+    let beats = chart["BEAT_1"].map(x => x.tick);
+
     for (let key of cat_rice) {
-        // if (key == "ALD_T") continue;
+        if (key == "SLD_T") continue;
         for (let note of chart[key]) {
-            res.push(note.tick);
+            ticks.push(note.tick);
         }
     }
-    res.sort((a, b) => a - b);
-    res = res.filter((x, i) => i == 0 || x != res[i - 1]);
 
-    let sep = res.map(x => [Math.floor(x / resolution), x % resolution]);
+    beats.sort((a, b) => a - b);
+    ticks.sort((a, b) => a - b);
+    ticks = ticks.filter((x, i) => i == 0 || x != ticks[i - 1]);
+
+    let sep = ticks.map(x => {
+        let l = 0, r = beats.length;
+
+        while (l <= r) {
+            let mid = Math.floor((l + r) / 2);
+            if (beats[mid] <= x) {
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+
+        return [l - 1, x - beats[l - 1]]
+    });
 
     let no_skip = [0];
 
@@ -127,14 +144,14 @@ function MakeNoteGapLine(chart: Chart) {
 
     for (let i = 0, j = 1; i < sep.length; i++, j++) {
         let tick_i = sep[i][1];
-        let tick_j = j == sep.length ? resolution : sep[j][1];
+        let tick_j = j == sep.length ? resolution + tick_i : sep[j][1];
 
-        if (j < sep.length && sep[i][0] != sep[j][0]) tick_j = resolution;
+        if (j < sep.length && sep[i][0] != sep[j][0]) tick_j = beats[sep[i][0] + 1] - beats[sep[i][0]];
 
         let gap = tick_j - tick_i;
         let div = gcd(gap, resolution);
 
-        chart["DIV"].push(new Div(ToTick(sep[i][0], tick_i), gap / div, resolution / div));
+        chart["DIV"].push(new Div(beats[sep[i][0]] + tick_i, gap / div, resolution / div));
     }
 }
 

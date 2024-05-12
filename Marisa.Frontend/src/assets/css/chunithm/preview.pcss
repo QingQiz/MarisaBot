@@ -58,7 +58,13 @@ BPM线
 .BPM {
     @apply absolute text-gray-300 text-center border-t-[2px] border-gray-600;
 
+    --content: '';
+
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 30px + 1px);
+
+    &:before {
+        content: var(--content);
+    }
 
     width: 40px;
     left: -40px;
@@ -74,24 +80,28 @@ note在多少分音上
     @apply absolute text-gray-300 text-center pl-2;
     @apply flex;
 
-    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 15px);
+    --content: '';
 
-    width: 40px;
-    right: -40px;
-    height: 30px;
+    bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
+    left: var(--stage-width);
+
+    width: 2px;
+    height: 28px;
 
     z-index: 1;
 
+    &:before {
+        @apply absolute text-white top-1/2;
+
+        content: var(--content);
+    }
+
     &:after {
+        @apply absolute bg-white bottom-0 left-0;
+
         content: '';
-
-        @apply absolute bg-gray-200 right-0 w-full;
-
-        top: calc(50% - 1px);
-        left: 0;
-
-        height: 2px;
         width: 4px;
+        height: 2px;
     }
 }
 
@@ -122,21 +132,28 @@ note在多少分音上
 小节线
  */
 .BEAT_1 {
-    @apply absolute text-center border-b-[2px] border-green-600 text-white;
+    @apply absolute text-center;
+
+    --content: '';
 
     bottom: calc((var(--tick) - var(--tick-min)) / (var(--tick-max) - var(--tick-min)) * 100% - 1px);
 
-    width: 40px;
-    left: -40px;
-
     z-index: 2;
 
-    &:after {
-        @apply absolute bg-green-600 right-0 w-full opacity-40;
-        @apply -bottom-[2px];
+    &:before {
+        @apply absolute text-green-400 bottom-0;
 
-        width: var(--stage-width);
-        left: 40px;
+        left: -40px;
+        content: var(--content);
+    }
+
+    &:after {
+        @apply absolute bg-green-600 w-full bottom-0 left-0 opacity-80;
+
+        --overflow: 40px;
+
+        width: calc(var(--stage-width) + var(--overflow));
+        left: calc(-1 * var(--overflow));
 
         content: '';
         height: 2px;

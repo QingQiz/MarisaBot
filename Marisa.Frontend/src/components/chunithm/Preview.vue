@@ -59,8 +59,8 @@ function GetMinSplit(chart: Chart) {
     beats.forEach((value, _) => {
         value.sort((a, b) => a.tick - b.tick);
 
-        for (let i = 4; i < value.length; i += 4) {
-            split.push([value[i].tick, 4]);
+        for (let i = 8; i < value.length; i += 8) {
+            split.push([value[i].tick, 8]);
         }
     });
 
@@ -177,8 +177,7 @@ onMounted(listenOnDevicePixelRatio);
             <div v-for="type in cat_control">
                 <div v-for="note in GetNotes(type, i[0], i[1])"
                      :class="type"
-                     :style="`--tick:${Math.floor(note.tick)};`">
-                    {{ note }}
+                     :style="`--tick:${Math.floor(note.tick)}; --content:'${note}'`">
                 </div>
             </div>
             <div>
@@ -191,8 +190,7 @@ onMounted(listenOnDevicePixelRatio);
             <div>
                 <div v-for="note in (GetNotes('DIV', i[0], i[1]) as Div[])"
                      class="DIV"
-                     :style="`--tick:${Math.floor(note.tick)};`">
-                    {{ note.first }}/{{ note.second }}
+                     :style="`--tick:${Math.floor(note.tick)}; --content:'${note.first}/${note.second}'`">
                 </div>
             </div>
         </div>
