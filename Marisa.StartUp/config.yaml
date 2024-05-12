@@ -29,6 +29,11 @@ ongeki:
   tempPath:     C:\Users\sofee\Desktop\temp\ongeki
 
 maimai:
+  secret:
+    maiSalt:    
+    aimeSalt:   
+    aesKey:     
+    aesIv:      
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\maimai
   tempPath:     C:\Users\sofee\Desktop\temp\maimai
   beatMapPath:  D:\maimai_beatmap_without_bga

@@ -196,18 +196,18 @@ public class AllNetDataFetcher : DataFetcher
 
     #region Helper
 
-    private const string MaiSalt = "";
+    private static readonly string MaiSalt = ConfigurationManager.Configuration.MaiMai.Secret.MaiSalt;
 
     private const string MaiHost = "maimai-gm.wahlap.com:42081";
 
     private const string AimeHost = "ai.sys-all.cn";
-    private const string AimeSalt = "";
+    private static readonly string AimeSalt = ConfigurationManager.Configuration.MaiMai.Secret.AimeSalt;
 
     private const string WeChatId = "SGWC";
     private const string GameId = "MAID";
 
-    private const string AesKey = "";
-    private const string AesIv = "";
+    private static readonly string AesKey = ConfigurationManager.Configuration.MaiMai.Secret.AesKey;
+    private static readonly string AesIv = ConfigurationManager.Configuration.MaiMai.Secret.AesIv;
 
     // ReSharper disable InconsistentNaming
     // ReSharper disable once ClassNeverInstantiated.Local

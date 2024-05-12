@@ -8,5 +8,7 @@ public class MaiMaiConfiguration
     public string TempPath { get; set; }
     public string BeatMapPath { get; set; }
 
+    public MaiMaiSecret Secret { get; set; }
+
     public Dictionary<string, string[]> Version { get; set; }
 }
