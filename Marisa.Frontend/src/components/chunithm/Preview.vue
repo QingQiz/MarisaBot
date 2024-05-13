@@ -243,8 +243,11 @@ function GetColor(val: number) {
 }
 
 function GetMidValue(arr: number[]) {
-    let copy = arr.slice();
+    let copy   = arr.slice();
+    let ignore = 5;
+
     copy.sort((a, b) => a - b);
-    return copy[Math.floor(copy.length / 2)];
+
+    return copy.slice(ignore, copy.length - 2 * ignore).reduce((a, b) => a + b, 0) / (copy.length - 2 * ignore);
 }
 </script>
