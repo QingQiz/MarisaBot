@@ -28,7 +28,7 @@ GOODMEN	好男人	好人	良民
 Oshama Scramble!	牛奶	哦杀妈	牛奶猫
 最終鬼畜妹・一部声	鬼畜妹	一部声	蓝蓝路
 コネクト	小圆op	联系	connect
-砂の惑星 feat. HATSUNE MIKU	沙星	沙之行星	砂之惑星
+砂の惑星 feat. HATSUNE MIKU	沙星	沙之行星	砂之惑星	砂星
 Candy Tall Woman	糖果高女士	高血糖女人	糖高女	砍弟搞女人
 ロキ	口丰	roki	口≠	ruaki
 おちゃめ機能	天真烂漫机能	机能	五月病
@@ -42,7 +42,7 @@ Magical Flavor	魔法味道	MF	milk+op
 結ンデ開イテ羅刹ト骸	连起来又分开，罗刹与骨骸	罗刹	结骸
 MIRROR of MAGIC	MoM	镜魔	魔镜
 MAXRAGE	绝赞交互	极怒	良怒2	满怒	红温
-アージェントシンメトリー	argent symmetry	sta	pink op	银色对称	银对称	科目二
+アージェントシンメトリー	argent symmetry	sta	pink op	银色对称	银对称	科目二	白银对称性
 LOVE EAST	爱东	爱东方	转转
 ないせんのうた	再见IM外星人	好他妈烦	这个地球是一秒都待不下去了
 Streak	绿庙	米奇妙妙屋	拆房子
@@ -58,7 +58,7 @@ Caliburne ～Story of the Legendary sword～	生煎1	圣剑1	圣剑	咖喱棒
 only my railgun	炮姐	超炮
 The wheel to the right	印度人	电锯	三块钱
 Ultranova	A4纸	摩托车	超新星
-Alea jacta est!	黑人打架	白人打架	孤注一掷	黑人击剑	尼哥
+Alea jacta est!	黑人打架	白人打架	孤注一掷	黑人击剑	尼哥	种植园纠纷	科比肘击詹姆斯
 ねぇ、壊れタ人形ハ何処へ棄テらレるノ？	坏人偶	坏人形	坏人偶何处弃
 魔ジョ狩リ	魔女狩猎	魔狩
 花と、雪と、ドラムンベース。	花一轮	花雪	有好姐妹一起出勤吗
@@ -156,7 +156,7 @@ Dreampainter	梦境绘画者	sta金曲
 管弦楽組曲 第3番 ニ長調「第2曲（G線上のアリア）」BWV.1068-2	管弦乐	g弦
 ♡マイマイマイラブ♡	my my my love	sega游戏宇宙一	又人又人
 チルノのパーフェクトさんすう教室	算数教室	琪露诺的完美算数教室	⑨
-Last Brave ～ Go to zero	变成0	走向0
+Last Brave ～ Go to zero	变成0	走向0	最后的勇气波浪线变成零
 GET!! 夢&DREAM	取得梦和梦	学园handsome
 敗北の少年	败北少年	败北的少年
 Acceleration	加速	转圈金曲
@@ -198,7 +198,7 @@ Windy Hill -Zone 1	索4
 ロストワンの号哭	号哭	lost one的号哭	失去1的号哭
 Nyan Cat EX	彩虹猫
 Ignis Danse	火神
-ジングルベル	圣诞歌	圣诞节
+ジングルベル	圣诞歌	圣诞节	jingle bell
 DADDY MULK -Groove remix-	爸爸奶
 Space Harrier Main Theme [Reborn]	太空哈利
 the EmpErroR	皇帝
@@ -356,7 +356,7 @@ JACKY [Remix]	jacky
 ローリンガール	滚女	rolling girl	翻滚少女
 CocktaiL	鸡尾酒
 sweet little sister	甜小姐姐	甜二妹
-Night Fly	发热金曲
+Night Fly	发热金曲	夜飞
 マトリョシカ	俄罗斯套娃
 白ゆき	白雪
 彗星ハネムーン	彗星蜜月
@@ -378,7 +378,7 @@ GO BACK 2 YOUR RAVE	gb2	回去你的2rave	回去你的波	gb2yr	g2r
 フリィダム ロリィタ	自由洛丽塔	嘘嘘
 妖精村の月誕祭 ～Lunate Elf	妖精村
 サンバランド	桑巴
-ULTRA B+K	bk2
+ULTRA B+K	bk2	access to the light
 スイートマジック	甜甜魔法	甜蜜魔法	sweet magic
 怒槌	怒锤	怒捶	Ikazuchi
 はやくそれになりたい！	我想快点成为它！	好想快点变成那样	搞快点
@@ -455,7 +455,7 @@ Starlight Dance Floor	发热错位金曲	星光舞厅
 ナミダと流星	眼泪与流星	眼泪流星	流星
 YA･DA･YO [Reborn]	亚达哟
 フィクサー	fixer	修人
-サドマミホリック	灵梦撒币
+サドマミホリック	灵梦撒币	sb
 StargazeR	观星者
 しねばいいのに	死了一了百了
 ゴーストルール	幽灵法则	Ghost rule	狗斯特露露
@@ -541,7 +541,7 @@ fake!fake!	假假
 Let's Go Away	恶臭赛车
 御旗のもとに	
 ENJOY POLIS	
-セハガガガンバッちゃう！！	
+セハガガガンバッちゃう！！	世嘉硬件女孩
 エテルニタス・ルドロジー	～AETERNITAS LUDOLOGY～	东方鼓动
 Riders Of The Light	
 Quartet Theme [Reborn]	
@@ -571,11 +571,11 @@ Ignite Infinity
 Grip & Break down !!	
 RIDGE RACER STEPS -GMT remix-	我创死你
 The Great Journey	
-Tic Tac DREAMIN’	
+Tic Tac DREAMIN’	⏰
 SHOW TIME	
 maimaiちゃんのテーマ	maimai酱
 Tell Your World	TYW
-コトバ・カラフル	kotoba colorful
+コトバ・カラフル	kotoba colorful	女同3
 welcome to maimai!! with マイマイマー	
 HIMITSUスパーク	
 true my heart -Lovable mix-	真我心	女人打电话
@@ -602,7 +602,7 @@ Agitation！
 赤心性：カマトト荒療治	赤心性
 にめんせい☆ウラオモテライフ！	
 M.S.S.Planet	妈杀杀星球	mss
-SPILL OVER COLORS	小脸妹
+SPILL OVER COLORS	小脸妹	小画家
 ラブって♡ジュエリー♪えんじぇる☆ブレイク！！	
 麒麟	
 馬と鹿	马和鹿	笨和蛋
@@ -688,7 +688,7 @@ ARAIS
 町かどタンジェント	城镇角切线
 紅蓮華	红莲华
 命に嫌われている	命嫌	被生活讨厌	嫌命长
-アンクローズ・ヒューマン	未封闭的人类
+アンクローズ・ヒューマン	未封闭的人类	unclose human
 乙女解剖	处女解剖
 悪戯センセーション	调皮的感觉	恶戏
 Paranoia	偏执狂
@@ -697,11 +697,11 @@ Pretender	伪装者
 Aetheric Energy	
 Komplexe	
 Beautiful Future	美丽未来
-Mutation	
+Mutation	木糖醇
 レーイレーイ	ray ray	rayray
 絶え間なく藍色	绝间蓝色
 ガランド	花环	Airhead	garando
-とりあえずアナタがいなくなるまえに	
+とりあえずアナタがいなくなるまえに	总是在你消逝之前
 明星ギャラクティカ	明星银河号
 絶対にチョコミントを食べるアオイチャン	绝对	绝对要吃巧克力薄荷的葵酱	绝对要吃巧克力薄荷冰激淋的葵酱	绝对要吃巧克力薄荷冰淇淋的葵酱	琴叶葵
 デリヘル呼んだら君が来た	呼君来
@@ -733,7 +733,7 @@ Sound Chimera	声音奇美拉
 ロストワードクロニカル	东方归言录编年史	Lost word chronical
 Xenovcipher	泽拉斯
 ネガティブ進化論	negative进化论	负进化论	消极进化论	逊
-永遠にゲームで対戦したいキリタン	永远都想对战游戏的切蒲英	永远对战	想永远玩游戏的Kiritan
+永遠にゲームで対戦したいキリタン	永远都想对战游戏的切蒲英	永远对战	想永远玩游戏的Kiritan	东北切蒲英	切蒲英
 Heavenly Blast	天爆	皇冠2
 おジャ魔女カーニバル!!	奥哈女巫嘉年华	小魔女
 時計の国のジェミニ	钟表国度的双子座	时计之国	时计国
@@ -752,7 +752,7 @@ VANTABLACK RAVER	电乙姬	黑乙姬
 スローアライズ	slow rise	slow arise
 生命不詳	生命不详	二蚌	不知死活
 Rush-More	冲更多	多冲
-チエルカ／エソテリカ	宫下游	四个日本字杠五个日本字
+チエルカ／エソテリカ	宫下游	四个日本字杠五个日本字	千工儿力
 CO5M1C R4ILR0AD	银河铁道	cosmic railroad	5140	星穹铁道
 幽霊東京	幽灵东京
 星めぐり、果ての君へ。	星果君	星斗流转，赴你为终
@@ -764,7 +764,7 @@ VIIIbit Explorer	8bit浏览器
 約束	约束	约定
 グッバイ宣言	再见宣言	MEGATON KICK
 Estahv	白戒
-	无名	如月车站	空格
+	无名	如月车站	空格	空白	没名字		N/A
 僕の和風本当上手	我的和风真的很牛逼
 otorii INNOVATED -[i]3-	大鸟居	雷熊	电所有人前列腺	电前列腺
 猫猫的宇宙論	猫猫宇宙论	猫猫的宇宙论
@@ -775,7 +775,7 @@ Good bye, Merry-Go-Round.	旋转木马	旋转杩
 アカツキアライヴァル	拂晓抵达
 ヴァンパイア	吸血鬼
 sølips	solips	嗦	100块钱	一百元	一百块钱	👦🏻
-ヒトガタ	人型
+ヒトガタ	人型	匕卜力夕
 GIGANTØMAKHIA	老头环	三体
 ラグトレイン	延误列车
 失敗作少女	失败作少女
@@ -784,17 +784,17 @@ GIGANTØMAKHIA	老头环	三体
 Big Daddy	大爹	星野爱高潮
 インドア系ならトラックメイカー	室内系
 Lights of Muse	喵斯之光
-ヨミビトシラズ	原批大战罕见	东雪莲	冬雪莲
+ヨミビトシラズ	原批大战罕见	东雪莲	冬雪莲	咏人不详
 First Dance	一！舞！
 スピカの天秤	希望泪2
-Princess♂	蜘蛛精
+Princess♂	蜘蛛精	木桶饭
 INTERNET OVERDOSE	妍酱
 初音天地開闢神話	开天辟地	初音天地开辟神话	盘古	初音开天辟地神话
 蒼穹舞楽	苍穹舞乐	苍穹	舞乐
 ぱくぱく☆がーる	江江报菜名	肚子饿了	蔡明
 パーフェクション	perfection
 tape/stop/night	强虫
-ツクヨミステップ	月读
+ツクヨミステップ	月读	月读舞步
 エゴロック	ego rock
 チューリングの跡	图灵	萨克斯
 Love's Theme of BADASS ～バッド・アス 愛のテーマ～	拔大蒜
@@ -811,7 +811,7 @@ Raven Emperor	锐雯皇帝
 Southern Cross	南十字星
 とびだせ！TO THE COSMIC!!	去宇宙
 Shooting Stars	流星
-どぅーまいべすと！	do my best	domybest	我是个傻逼	
+どぅーまいべすと！	do my best	domybest
 Regulus	热咕噜
 ノイローゼ	神经病
 テレキャスタービーボーイ	telecaster b-boy	tbb
@@ -822,7 +822,7 @@ Falsum Atlantis.	亚特兰蒂斯
 Round Round Spinning Around	跑跑卡丁车
 ヒミツCULT	保安
 MAKE IT FUNKY NOW	三明治
-神々が恋した幻想郷	东十字星
+神々が恋した幻想郷	东十字星	众神眷恋的幻想乡	翠十字
 KING	无名指扣牙
 噛み係	咬系	96猫	牙线	齿系
 躯樹の墓守	欧内的守
@@ -836,3 +836,47 @@ Armageddon	阿妈咯噔
 Dreadnought	电棒子	手电筒
 夜に駆ける	夜驱
 ｉｓｏｐｈｏｔｅ	isophote
+エータ・ベータ・イータ	工一夕	hera2	蓝原椿	纵连2	赫拉2	赫拉二
+World's end loneliness	世终孤独
+ヒステリックナイトガール	歇斯底里的深夜女孩
+MOBILYS	灯球
+春嵐	春岚	春日风暴
+パラマウント☆ショータイム！！	魔法兔子	至高的表演时间	paramount show time
+Last Samurai	最后的武士
+folern	佛冷
+BLUE ZONE	蓝区	蓝的车
+[X]	推特	x
+フォニイ	phony	伪物
+Don't Fight The Music	别打歌	不要打歌	别打音乐
+ViRTUS	辣妹子辣	水神2	水神二
+Metamorphosism	消除鬼叫	变态主义
+SUPER AMBULANCE	超级救护车
+Never Give Up!	永不放弃
+コスモポップファンクラブ	宇宙星空俱乐部
+Strive against fate	逆天改命
+ジャンキーナイトタウンオーケストラ	玛奇玛	瘾者之城
+デッドマンズバラッド	僵尸娘
+ディカディズム	年代主义	decadism
+ホシシズク	fes主题曲	星雫	三小只2
+Rising on the horizon	在地平线升起
+mystique as iris	神秘如鸢尾花	如鸢尾花般神秘
+Hainuwele	华为	huawei
+Rainbow Rush Story	彩虹冲故事
+トラフィック・ジャム	traffic jam	交通堵塞	交通阻塞
+HECATONCHEIR	百臂巨人
+ピリオドサイン	休止符
+マーシャル・マキシマイザー	马歇尔最大化器	核事故
+秋の未確認生物	未确认生物
+ばかみたい【Taxi Driver Edition】	damedane
+群青シグナル	群青信号	群青讯号
+モンダイナイトリッパー！	没问题
+エナドリおいしいソング	能量饮料
+Re：End of a Dream	终梦
+Swift Swing	海澜之家
+Aegleseeker	光追
+"411Ψ892"	211985
+N3V3R G3T OV3R	ngo	3333
+星詠みとデスペラード	星咏
+きゅうくらりん	心跳不止	心跳不止
+Beat Opera op.1	甘雨
+Baddest	日本女子高中生大笑1分钟
