@@ -174,7 +174,7 @@ public partial class MaiMaiDx
 
     private async Task<MessageChain> GetB50Card(Message message)
     {
-        var fetcher = GetDataFetcher(message);
+        var fetcher = GetDataFetcher(message, true);
 
         var b50 = await fetcher.GetRating(message);
 
@@ -204,10 +204,10 @@ public partial class MaiMaiDx
 
     private readonly Dictionary<string, DataFetcher> _dataFetchers = new();
 
-    private DataFetcher GetDataFetcher(Message message)
+    private DataFetcher GetDataFetcher(Message message, bool allowUsername = false)
     {
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
-        if (!string.IsNullOrWhiteSpace(message.Command))
+        if (allowUsername && !string.IsNullOrWhiteSpace(message.Command))
         {
             return GetDataFetcher("DivingFish");
         }

@@ -67,10 +67,10 @@ public partial class Chunithm
         return (levelPrefix, levels.IndexOf(level));
     }
 
-    private async Task<DataFetcher> GetDataFetcher(Message message)
+    private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
     {
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
-        if (!string.IsNullOrWhiteSpace(message.Command))
+        if (allowUsername && !string.IsNullOrWhiteSpace(message.Command))
         {
             return GetDataFetcher("DivingFish");
         }
@@ -92,7 +92,7 @@ public partial class Chunithm
 
     private async Task<MessageChain> GetB30Card(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
+        var fetcher = await GetDataFetcher(message, true);
 
         return MessageChain.FromImageB64((await fetcher.GetRating(message)).Draw().ToB64());
     }
