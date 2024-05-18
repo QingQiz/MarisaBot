@@ -25,7 +25,7 @@ public class BotDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlServer(@"Server=localhost; Database=QQBOT_DB; Trusted_Connection=True");
+        options.UseSqlite(@"Data Source=F:\MarisaBotTemp\QQBOT_DB.db");
     }
 }
 

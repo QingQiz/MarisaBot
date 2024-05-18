@@ -221,18 +221,14 @@
         - `devToken`为水鱼的token，需要联系水鱼本人获取
 - 创建数据库
     - 安装 dotnet ef `dotnet tool install --global dotnet-ef`
+    - 修改`Marisa.EntityFrameworkCore/BotDbContext.cs`的第28行中的数据库路径
     - `cd Marisa.EntityFrameworkCore`
     - `dotnet ef database update`
-    - 需要注意的是
-        - 需要开启数据库的tcp访问
-        - 需要开启数据库的Windows身份验证
-        - 需要手动创建名为`QQBOT_DB`的数据库
-        - 若不想注意上面这些，则需要修改[该行](https://github.com/QingQiz/MarisaBot/blob/984715273c73aa9d3d9717c0a333f2569123df62/Marisa.EntityFrameworkCore/BotDbContext.cs#L26)来更换数据库和认证方式
 - 编译
     - `cd Marisa.StartUp`
     - `dotnet build -c Release`
 - 运行
-    - `cd bin/Release/net7.0/`
+    - `cd bin/Release/net8.0/`
     - 运行 `Marisa.StartUp.exe` 命令行参数如下（顺序敏感）：
         - [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:18080`
         - bot的QQ账号，如 `123456789`
