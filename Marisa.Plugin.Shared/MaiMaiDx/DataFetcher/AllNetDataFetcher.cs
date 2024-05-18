@@ -79,16 +79,14 @@ public class AllNetDataFetcher : DataFetcher
         var tempPath = ConfigurationManager.Configuration.MaiMai.TempPath;
         var prefix   = $"UserScores-{aimeId}-";
 
-        var times = new List<(DateTime Time, string Path)>();
-
-        foreach (var i in Directory.GetFiles(tempPath))
-        {
-            var fn = Path.GetFileName(i);
-
-            if (!fn.StartsWith(prefix)) continue;
-
-            times.Add((DateTime.ParseExact(fn[prefix.Length..^5], "yyyy-MM-dd_hh-mm-ss", null), i));
-        }
+        var times = Directory.GetFiles(tempPath)
+            .Select(x => (Path: x, FileName: Path.GetFileName(x)))
+            .Where(x => x.FileName.StartsWith(prefix))
+            .Select(x => (
+                Time: DateTime.ParseExact(x.FileName[prefix.Length..^5], "yyyy-MM-dd_hh-mm-ss", null),
+                x.Path
+            ))
+            .ToList();
 
         var cache = times.Where(x => x.Time >= preview.LastLogin).ToList();
 
@@ -260,35 +258,27 @@ public class AllNetDataFetcher : DataFetcher
 
     private static async Task<byte[]> Compress(byte[] data)
     {
-        byte[] compressedData;
+        using var compressedStream = new MemoryStream();
 
-        // 将字符串转换为字节数组
-        var originalBytes = data;
-
-        using (var compressedStream = new MemoryStream())
+        await using (var zLibStream = new ZLibStream(compressedStream, CompressionMode.Compress))
         {
-            await using (var zLibStream = new ZLibStream(compressedStream, CompressionMode.Compress))
-            {
-                zLibStream.Write(originalBytes, 0, originalBytes.Length);
-            }
-
-            compressedData = compressedStream.ToArray();
+            zLibStream.Write(data, 0, data.Length);
         }
 
-        return compressedData;
+        return compressedStream.ToArray();
     }
 
     private static async Task<byte[]> Decompress(byte[] data)
     {
-        using var       compressedStream   = new MemoryStream(data);
-        await using var zLibStream         = new ZLibStream(compressedStream, CompressionMode.Decompress);
-        using var       decompressedStream = new MemoryStream();
+        using var compressedStream   = new MemoryStream(data);
+        using var decompressedStream = new MemoryStream();
 
-        await zLibStream.CopyToAsync(decompressedStream);
+        await using (var zLibStream = new ZLibStream(compressedStream, CompressionMode.Decompress))
+        {
+            await zLibStream.CopyToAsync(decompressedStream);
+        }
 
-        var decompressedData = decompressedStream.ToArray();
-
-        return decompressedData;
+        return decompressedStream.ToArray();
     }
 
     private static async Task<byte[]> MakeMaiRequest(string api, string data, int aimeId)
