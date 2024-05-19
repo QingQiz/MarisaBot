@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-export const host = "http://localhost:14311/Api"
+export const host = `http://${window.location.host}/Api`
 
 export const context_get      = host + "/WebContext/Get"
 export const osu_pp           = host + '/Osu/PerformanceCalculator'
