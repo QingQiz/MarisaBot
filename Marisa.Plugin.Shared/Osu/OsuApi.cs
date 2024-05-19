@@ -5,13 +5,13 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Flurl;
 using Flurl.Http;
-using log4net;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using NLog;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 
@@ -153,7 +153,7 @@ public static partial class OsuApi
         {
             if (retry != 0) return await GetUserInfoByName(username, mode, retry - 1);
 
-            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+            LogManager.GetCurrentClassLogger().Error(e.ToString());
             throw new HttpRequestException($"Network Error While Getting User: {e.Message}");
         }
     }
@@ -193,7 +193,7 @@ public static partial class OsuApi
         {
             if (retry != 0) return await GetScores(osuId, type, gameMode, skip, take, includeFails, retry - 1);
 
-            LogManager.GetLogger(nameof(OsuApi)).Error(e.ToString());
+            LogManager.GetCurrentClassLogger().Error(e.ToString());
             throw new HttpRequestException($"Network Error While Retrieving Scores: {e.Message}");
         }
     }
@@ -432,7 +432,7 @@ public static partial class OsuApi
             }
             catch (Exception e)
             {
-                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                LogManager.GetCurrentClassLogger().Error(e.ToString());
                 throw new Exception($"Network Error While Downloading Beatmap: {e.Message}");
             }
 
@@ -442,7 +442,7 @@ public static partial class OsuApi
             }
             catch (Exception e)
             {
-                LogManager.GetLogger(nameof(PerformanceCalculator)).Error(e.ToString());
+                LogManager.GetCurrentClassLogger().Error(e.ToString());
                 throw new Exception($"A Error Occurred While Extracting Beatmap: {e.Message}");
             }
 

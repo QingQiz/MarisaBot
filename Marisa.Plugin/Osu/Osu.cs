@@ -1,5 +1,5 @@
 ﻿using Flurl.Http;
-using log4net;
+using NLog;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
@@ -185,7 +185,7 @@ public partial class Osu
                 }
                 catch (FlurlHttpException e) when (e.StatusCode != 404)
                 {
-                    var log = LogManager.GetLogger(typeof(Osu));
+                    var log = LogManager.GetCurrentClassLogger();
                     log.Error("获取用户信息失败: ", e);
 
                     tasks.Enqueue(task);

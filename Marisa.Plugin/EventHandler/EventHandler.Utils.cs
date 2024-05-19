@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 
 namespace Marisa.Plugin.EventHandler;
 
@@ -74,7 +74,7 @@ public partial class EventHandler
         var m = (msg as MessageDataBotMute)!;
 
         var now = DateTime.Now;
-        var log = LogManager.GetLogger(nameof(EventHandler));
+        var log = LogManager.GetCurrentClassLogger();
 
         Dialog.AddHandler(m.GroupId, null, message1 =>
         {

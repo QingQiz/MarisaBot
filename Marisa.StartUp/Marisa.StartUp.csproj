@@ -15,8 +15,8 @@
 
     <ItemGroup>
         <PackageReference Include="jieba.NET" Version="0.42.2"/>
-        <PackageReference Include="log4net" Version="2.0.14"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3"/>
+        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 

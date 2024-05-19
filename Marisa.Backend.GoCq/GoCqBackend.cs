@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
-using Flurl;
-using log4net;
 using Marisa.Backend.GoCq.MessageDataExt;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
@@ -10,6 +8,7 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
 using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
 using Websocket.Client;
 
 namespace Marisa.Backend.GoCq;
@@ -17,12 +16,12 @@ namespace Marisa.Backend.GoCq;
 public class GoCqBackend : BotDriver.BotDriver
 {
     private readonly WebsocketClient _wsClient;
-    private readonly ILog _logger;
+    private readonly ILogger _logger;
 
     public GoCqBackend(
         IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
         DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
-        ILog logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
+        ILogger logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
     {
         _logger = logger;
         string serverAddress = dict["ServerAddress"];

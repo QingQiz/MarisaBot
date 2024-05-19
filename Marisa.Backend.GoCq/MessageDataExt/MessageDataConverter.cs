@@ -1,11 +1,11 @@
 ﻿using System.Dynamic;
 using System.Text;
-using log4net;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Newtonsoft.Json;
+using NLog;
 using Websocket.Client;
 
 namespace Marisa.Backend.GoCq.MessageDataExt;
@@ -286,7 +286,7 @@ public static class MessageDataConverter
         var m        = mExpando as dynamic;
         var d        = mExpando as IDictionary<string, object>;
 
-        var logger = LogManager.GetLogger(nameof(MessageDataConverter));
+        var logger = LogManager.GetCurrentClassLogger();
 
         if (d.ContainsKey("retcode")) return null;
         if (m.post_type == "meta_event")

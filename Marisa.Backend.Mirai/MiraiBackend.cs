@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Text.Json;
 using Flurl;
-using log4net;
 using Marisa.Backend.Mirai.MessageDataExt;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
@@ -10,6 +9,7 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
 using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
 using Websocket.Client;
 
 namespace Marisa.Backend.Mirai;
@@ -17,12 +17,12 @@ namespace Marisa.Backend.Mirai;
 public class MiraiBackend : BotDriver.BotDriver
 {
     private readonly WebsocketClient _wsClient;
-    private readonly ILog _logger;
+    private readonly ILogger _logger;
 
     public MiraiBackend(
         IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
         DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
-        ILog logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
+        ILogger logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
     {
         _logger = logger;
         string serverAddress = dict["ServerAddress"];

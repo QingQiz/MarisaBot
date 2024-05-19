@@ -1,10 +1,10 @@
 ﻿using System.Dynamic;
-using log4net;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Newtonsoft.Json;
+using NLog;
 using Websocket.Client;
 
 namespace Marisa.Backend.Mirai.MessageDataExt;
@@ -268,7 +268,7 @@ public static class MessageDataConverter
         var m        = (mExpando as dynamic)!.data;
         var mDict    = (m as IDictionary<string, object>)!;
 
-        var logger = LogManager.GetLogger(nameof(MessageDataConverter));
+        var logger = LogManager.GetCurrentClassLogger();
 
         if (mDict.ContainsKey("code"))
         {

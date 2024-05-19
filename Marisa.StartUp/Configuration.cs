@@ -1,9 +1,7 @@
-﻿using log4net;
-using log4net.Appender;
-using log4net.Core;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace Marisa.StartUp;
 
@@ -11,64 +9,35 @@ public static class Configuration
 {
     public static void ConfigLogger(this IServiceCollection c)
     {
-        var hierarchy = (Hierarchy)LogManager.GetRepository();
-        // var hierarchy = new Hierarchy();
+        // Step 1. Create configuration object 
+        var config = new LoggingConfiguration();
 
-        var patternLayout = new PatternLayout
+        // Step 2. Create targets and set their properties 
+        var consoleTarget = new ColoredConsoleTarget("targetConsole")
         {
-            ConversionPattern = "[%date][%level] %message%newline"
+            Layout = @"[${date:format=HH\:mm\:ss}][${level:uppercase=true}] ${message}"
+        };
+        var fileTarget = new FileTarget("targetFile")
+        {
+            FileName = "${basedir}/logs/app_${shortdate}.log",
+            Layout   = "${longdate} ${uppercase:${level}} ${message}"
         };
 
-        patternLayout.ActivateOptions();
+        // Step 3. Add targets to the configuration
+        config.AddTarget(consoleTarget);
+        config.AddTarget(fileTarget);
 
-        var coloredConsoleAppender = new ColoredConsoleAppender();
+        // Step 4. Define rules
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, fileTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, fileTarget));
 
-        coloredConsoleAppender.AddMapping(new ColoredConsoleAppender.LevelColors
-        {
-            BackColor = ColoredConsoleAppender.Colors.Red,
-            ForeColor = ColoredConsoleAppender.Colors.White,
-            Level     = Level.Error
-        });
+        // Step 5. Activate the configuration
+        LogManager.Configuration = config;
 
-        coloredConsoleAppender.AddMapping(new ColoredConsoleAppender.LevelColors
-        {
-            ForeColor = ColoredConsoleAppender.Colors.Yellow,
-            Level     = Level.Warn
-        });
-
-        coloredConsoleAppender.AddMapping(new ColoredConsoleAppender.LevelColors
-        {
-            ForeColor = ColoredConsoleAppender.Colors.Red,
-            Level     = Level.Fatal
-        });
-
-        coloredConsoleAppender.AddMapping(new ColoredConsoleAppender.LevelColors
-        {
-            ForeColor = ColoredConsoleAppender.Colors.Green,
-            Level     = Level.Debug
-        });
-
-        coloredConsoleAppender.Layout = patternLayout;
-
-        var rollingFileAppender = new RollingFileAppender
-        {
-            File         = "Log.log",
-            AppendToFile = true,
-            RollingStyle = RollingFileAppender.RollingMode.Date,
-            DatePattern  = "yyyyMMdd",
-            Layout       = patternLayout
-        };
-        
-        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
-        coloredConsoleAppender.ActivateOptions();
-        rollingFileAppender.ActivateOptions();
-
-        hierarchy.Root.AddAppender(coloredConsoleAppender);
-        hierarchy.Root.AddAppender(rollingFileAppender);
-        hierarchy.Root.Level = Level.Info;
-        hierarchy.Configured = true;
-
-        c.AddScoped(_ => LogManager.GetLogger("LOG"));
+        c.AddScoped<ILogger>(_ => LogManager.GetCurrentClassLogger());
     }
 }
