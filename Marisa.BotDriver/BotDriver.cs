@@ -7,6 +7,7 @@ using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
 
 namespace Marisa.BotDriver;
 
@@ -51,9 +52,11 @@ public abstract class BotDriver
             .Where(t => t.GetCustomAttribute<MarisaPluginDisabledAttribute>(false) is null)
             .OrderByDescending(t => t.GetCustomAttribute<MarisaPluginAttribute>()!.Priority);
 
+        var logger = LogManager.GetCurrentClassLogger();
+
         foreach (var plugin in plugins)
         {
-            Console.WriteLine($"Enabled plugin: `{plugin}`");
+            logger.Info($"Enabled plugin: `{plugin}`");
             sc.AddScoped(typeof(MarisaPluginBase), plugin);
         }
 

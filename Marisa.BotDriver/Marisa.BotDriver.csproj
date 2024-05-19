@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="NLog" Version="5.3.2" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Marisa.Utils\Marisa.Utils.csproj" />
         <ProjectReference Include="..\Marisa.EntityFrameworkCore\Marisa.EntityFrameworkCore.csproj" />
     </ItemGroup>

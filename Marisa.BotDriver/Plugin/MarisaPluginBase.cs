@@ -1,6 +1,7 @@
 ﻿using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin.Attributes;
+using NLog;
 
 namespace Marisa.BotDriver.Plugin;
 
@@ -19,7 +20,7 @@ public class MarisaPluginBase
             return ExceptionHandler(aggregateException.InnerExceptions[0], message);
         }
 
-        Console.WriteLine(exception.ToString());
+        LogManager.GetCurrentClassLogger().Error(exception.ToString());
 
         message.Send(new MessageDataText(exception.InnerException?.ToString() ?? exception.ToString()));
         return Task.CompletedTask;
