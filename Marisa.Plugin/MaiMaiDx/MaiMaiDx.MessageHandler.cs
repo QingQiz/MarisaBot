@@ -315,7 +315,10 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         }
 
         var fetcher = GetDataFetcher(message);
-        var rating  = await fetcher.GetRating(message);
+        var rating = await fetcher.GetRating(message with
+        {
+            Command = ""
+        });
 
         var (old, @new, success) = GetRecommend(rating, target);
 
@@ -575,19 +578,6 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 听歌猜曲
-    /// </summary>
-    [MarisaPluginDoc("舞萌猜歌，听歌猜曲")]
-    [MarisaPluginSubCommand(nameof(MaiMaiDxGuess))]
-    [MarisaPluginCommand(true, "v2")]
-    private MarisaPluginTaskState MaiMaiDxGuessV2(Message message, long qq)
-    {
-        message.Reply("死了的功能");
-        // StartSongSoundGuess(message, qq);
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
     /// 舞萌猜歌
     /// </summary>
     [MarisaPluginDoc("舞萌猜歌，看封面猜曲")]
@@ -814,14 +804,17 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
             var tolerance = (int)((101 - achievement) / (0.2 * x));
             var dxScore   = song.Charts[levelIdx].Notes.Sum() * 3;
 
-            var dxScores = new[] { 0.85, 0.9, 0.93, 0.95, 0.97 }
+            var dxScores = new[]
+                {
+                    0.85, 0.9, 0.93, 0.95, 0.97
+                }
                 .Select(mul => ((int)Math.Ceiling(dxScore * mul), dxScore - (int)Math.Ceiling(dxScore * mul)))
                 .ToArray();
 
             next.Reply(
                 new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
                 new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
-                new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y          / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
+                new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
                 new MessageDataText($"\nDX分：{dxScore}\n"),
                 new MessageDataText($"★ 最低 {dxScores[0].Item1}(-{dxScores[0].Item2})\n"),
                 new MessageDataText($"★★ 最低 {dxScores[1].Item1}(-{dxScores[1].Item2})\n"),
@@ -863,8 +856,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     {
         var fetchers = new[]
         {
-            "DivingFish",
-            "Wahlap",
+            "DivingFish", "Wahlap",
         };
 
         message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers

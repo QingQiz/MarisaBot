@@ -26,7 +26,7 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var (_, qq) = AtOrSelf(message);
+        var (_, qq) = AtOrSelf(message, true);
 
         var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
         {
