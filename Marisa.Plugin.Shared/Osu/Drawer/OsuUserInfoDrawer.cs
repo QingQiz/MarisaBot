@@ -530,7 +530,8 @@ public static class OsuUserInfoDrawer
 
     private static Image GetPPlusChart(string mode, long osuId)
     {
-        var isOsu = mode == "osu";
+        const bool isOsu = false;
+        // var isOsu = mode == "osu";
 
         var prefix   = isOsu ? $"pp+cache-{osuId}-" : "pp+cache-disabled";
         var filename = isOsu ? $"{prefix}{DateTime.Now:yyyy-MM-dd}.png" : $"{prefix}.png";
