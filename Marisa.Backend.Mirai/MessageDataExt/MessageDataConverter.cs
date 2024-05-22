@@ -1,4 +1,5 @@
-﻿using System.Dynamic;
+﻿using System.Diagnostics;
+using System.Dynamic;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -11,6 +12,8 @@ namespace Marisa.Backend.Mirai.MessageDataExt;
 
 public static class MessageDataConverter
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     /// <summary>
     /// 将 <see cref="MessageData"/> 转换成 MiraiHttp 发送消息所需要的数据格式，方便后续转换为 json
     /// </summary>
@@ -268,14 +271,24 @@ public static class MessageDataConverter
         var m        = (mExpando as dynamic)!.data;
         var mDict    = (m as IDictionary<string, object>)!;
 
-        var logger = LogManager.GetCurrentClassLogger();
-
-        if (mDict.ContainsKey("code"))
+        if (mDict.TryGetValue("code", out var val))
         {
-            var code = mDict["code"].ToString();
+            var code = val.ToString();
             if (code != "0")
             {
-                logger.Warn(mDict["msg"]);
+                var msg = (string)mDict["msg"];
+
+                if (msg.Contains("Request timeout to", StringComparison.OrdinalIgnoreCase) ||
+                    msg.Contains("Connection refused", StringComparison.OrdinalIgnoreCase) ||
+                    msg.Contains("unidbg-fetch-qsign", StringComparison.OrdinalIgnoreCase))
+                {
+                    Logger.Warn("Lose connection to SingServer");
+                    KillSignServer();
+                }
+                else
+                {
+                    Logger.Warn(msg);
+                }
             }
 
             return null;
@@ -287,10 +300,8 @@ public static class MessageDataConverter
             {
                 return message;
             }
-            else
-            {
-                logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
-            }
+
+            Logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
         }
         else if (m.type.Contains("Event")) // Event
         {
@@ -298,16 +309,80 @@ public static class MessageDataConverter
             {
                 return message;
             }
-            else
-            {
-                logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
-            }
+
+            Logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
         }
         else
         {
-            logger.Warn($"Unknown message {msgIn.Text}");
+            Logger.Warn($"Unknown message {msgIn.Text}");
         }
 
         return null;
+    }
+
+    private static void KillSignServer()
+    {
+        // exit if not linux
+        if (Environment.OSVersion.Platform != PlatformID.Unix) return;
+
+        // kill sign server
+
+        // get all java processes and filter by its command line
+        const string command   = "/bin/bash";
+        const string arguments = "-c \"ps aux | grep '[j]ava' \"";
+
+        var procStartInfo = new ProcessStartInfo(command, arguments)
+        {
+            RedirectStandardOutput = true,
+            UseShellExecute        = false,
+            CreateNoWindow         = true
+        };
+
+        using var proc = new Process();
+
+        proc.StartInfo = procStartInfo;
+        proc.Start();
+        using var reader = proc.StandardOutput;
+
+        var result = reader.ReadToEnd()
+            .Split(Environment.NewLine)
+            .First(x => x.Contains("unidbg-fetch-qsign"))
+            .Split(' ', 11, StringSplitOptions.RemoveEmptyEntries);
+
+        var pid = result[1];
+        var cmd = result.Last();
+
+        Logger.Info("Killing sign server: {0}", cmd);
+
+        KillProcess(pid);
+    }
+
+    private static void KillProcess(string pid)
+    {
+        try
+        {
+            // Start the bash shell
+            using var proc = new Process();
+            proc.StartInfo.FileName        = "/bin/bash";
+            proc.StartInfo.Arguments       = $"-c \"kill -9 {pid}\"";
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow  = true;
+
+            proc.Start();
+            proc.WaitForExit();
+
+            if (proc.ExitCode == 0)
+            {
+                Logger.Info($"Process {pid} has been killed successfully.");
+            }
+            else
+            {
+                Logger.Error($"Failed to kill process {pid}. Exit code: {proc.ExitCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"An error occurred on killing process {pid}: {ex.Message}");
+        }
     }
 }
