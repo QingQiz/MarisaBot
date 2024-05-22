@@ -259,6 +259,8 @@ public static class MessageDataConverter
         return null;
     }
 
+    private static readonly Debounce _debounce = new(1000, 5000);
+
     /// <summary>
     /// 将 websocket 的接收消息转化为 <see cref="Message"/>
     /// </summary>
@@ -283,7 +285,8 @@ public static class MessageDataConverter
                     msg.Contains("unidbg-fetch-qsign", StringComparison.OrdinalIgnoreCase))
                 {
                     Logger.Warn("Lose connection to SingServer");
-                    KillSignServer();
+
+                    _debounce.Execute(KillSignServer);
                 }
                 else
                 {
@@ -352,7 +355,7 @@ public static class MessageDataConverter
         var pid = result[1];
         var cmd = result.Last();
 
-        Logger.Info("Killing sign server: {0}", cmd);
+        Logger.Info("Killing sign server: {0}...", cmd[..20]);
 
         KillProcess(pid);
     }
@@ -383,6 +386,32 @@ public static class MessageDataConverter
         catch (Exception ex)
         {
             Logger.Error($"An error occurred on killing process {pid}: {ex.Message}");
+        }
+    }
+
+    private class Debounce(int delayL, int delayR)
+    {
+        private Timer? _timer;
+        private readonly object _lock = new();
+        private bool _isThrottled;
+
+        public void Execute(Action action)
+        {
+            lock (_lock)
+            {
+                if (_isThrottled) return;
+
+                _timer?.Dispose();
+                _timer = new Timer(_ =>
+                {
+                    action();
+                    _isThrottled = true;
+                    _timer = new Timer(_ =>
+                    {
+                        _isThrottled = false;
+                    }, null, delayR, Timeout.Infinite);
+                }, null, delayL, Timeout.Infinite);
+            }
         }
     }
 }
