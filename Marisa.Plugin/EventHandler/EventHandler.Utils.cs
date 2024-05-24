@@ -114,11 +114,17 @@ public partial class EventHandler
                 _timer = new Timer(_ =>
                 {
                     action();
-                    _isThrottled = true;
-                    _timer = new Timer(_ =>
+                    lock (_lock)
                     {
-                        _isThrottled = false;
-                    }, null, delayR, Timeout.Infinite);
+                        _isThrottled = true;
+                        _timer = new Timer(_ =>
+                        {
+                            lock (_lock)
+                            {
+                                _isThrottled = false;
+                            }
+                        }, null, delayR, Timeout.Infinite);
+                    }
                 }, null, delayL, Timeout.Infinite);
             }
         }
@@ -127,6 +133,8 @@ public partial class EventHandler
         {
             lock (_lock)
             {
+                if (_isThrottled) return;
+
                 _timer?.Dispose();
                 _isThrottled = false;
             }

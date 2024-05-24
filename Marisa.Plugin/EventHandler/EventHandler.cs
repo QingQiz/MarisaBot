@@ -48,9 +48,11 @@ public partial class EventHandler : MarisaPluginBase
                 InvokeHandler(BotMuteHandler);
                 break;
             case MessageDataType.BotOffline:
+                Logger.Warn("Bot offline unexpectedly, try to login again.");
                 BotLoginDebounce.Execute(() => driver.Login().Wait());
                 break;
             case MessageDataType.BotOnline:
+                Logger.Warn("Bot online successfully.");
                 BotLoginDebounce.Cancel();
                 break;
             case MessageDataType.Unknown when msg is MessageDataSignServerLose:
