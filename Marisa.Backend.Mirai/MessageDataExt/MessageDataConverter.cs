@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Dynamic;
+﻿using System.Dynamic;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -254,12 +253,18 @@ public static class MessageDataConverter
                     GroupInfo = new GroupInfo(m.@operator.group.id, m.@operator.group.name, null)
                 };
             }
+            case "BotOfflineEventDropped":
+            {
+                return new Message(ms, [new MessageDataBotOffline()]);
+            }
+            case "BotOnlineEvent":
+            {
+                return new Message(ms, [new MessageDataBotOnline()]);
+            }
         }
 
         return null;
     }
-
-    private static readonly Debounce _debounce = new(1000, 5000);
 
     /// <summary>
     /// 将 websocket 的接收消息转化为 <see cref="Message"/>
@@ -284,14 +289,10 @@ public static class MessageDataConverter
                     msg.Contains("Connection refused", StringComparison.OrdinalIgnoreCase) ||
                     msg.Contains("unidbg-fetch-qsign", StringComparison.OrdinalIgnoreCase))
                 {
-                    Logger.Warn("Lose connection to SingServer");
+                    return new Message(ms, [new MessageDataSignServerLose()]);
+                }
 
-                    _debounce.Execute(KillSignServer);
-                }
-                else
-                {
-                    Logger.Warn(msg);
-                }
+                Logger.Warn(msg);
             }
 
             return null;
@@ -323,95 +324,4 @@ public static class MessageDataConverter
         return null;
     }
 
-    private static void KillSignServer()
-    {
-        // exit if not linux
-        if (Environment.OSVersion.Platform != PlatformID.Unix) return;
-
-        // kill sign server
-
-        // get all java processes and filter by its command line
-        const string command   = "/bin/bash";
-        const string arguments = "-c \"ps aux | grep '[j]ava' \"";
-
-        var procStartInfo = new ProcessStartInfo(command, arguments)
-        {
-            RedirectStandardOutput = true,
-            UseShellExecute        = false,
-            CreateNoWindow         = true
-        };
-
-        using var proc = new Process();
-
-        proc.StartInfo = procStartInfo;
-        proc.Start();
-        using var reader = proc.StandardOutput;
-
-        var result = reader.ReadToEnd()
-            .Split(Environment.NewLine)
-            .First(x => x.Contains("unidbg-fetch-qsign"))
-            .Split(' ', 11, StringSplitOptions.RemoveEmptyEntries);
-
-        var pid = result[1];
-        var cmd = result.Last();
-
-        Logger.Info("Killing sign server: {0}...", cmd[..20]);
-
-        KillProcess(pid);
-    }
-
-    private static void KillProcess(string pid)
-    {
-        try
-        {
-            // Start the bash shell
-            using var proc = new Process();
-            proc.StartInfo.FileName        = "/bin/bash";
-            proc.StartInfo.Arguments       = $"-c \"kill -9 {pid}\"";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow  = true;
-
-            proc.Start();
-            proc.WaitForExit();
-
-            if (proc.ExitCode == 0)
-            {
-                Logger.Info($"Process {pid} has been killed successfully.");
-            }
-            else
-            {
-                Logger.Error($"Failed to kill process {pid}. Exit code: {proc.ExitCode}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"An error occurred on killing process {pid}: {ex.Message}");
-        }
-    }
-
-    private class Debounce(int delayL, int delayR)
-    {
-        private Timer? _timer;
-        private readonly object _lock = new();
-        private bool _isThrottled;
-
-        public void Execute(Action action)
-        {
-            lock (_lock)
-            {
-                if (_isThrottled) return;
-
-                _timer?.Dispose();
-                _timer = new Timer(_ =>
-                {
-                    action();
-                    _isThrottled = true;
-                    _timer = new Timer(_ =>
-                    {
-                        _isThrottled = false;
-                    }, null, delayR, Timeout.Infinite);
-                }, null, delayL, Timeout.Infinite);
-            }
-        }
-    }
 }

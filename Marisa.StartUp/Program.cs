@@ -20,8 +20,8 @@ public static class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
         builder.Services.ConfigLogger();
+        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
         builder.WebHost.UseUrls("http://localhost:14311");
 
         var app = builder.Build();
@@ -51,14 +51,6 @@ public static class Program
         app.MapFallbackToFile("index.html");
 
         // run
-        if (!useMirai)
-        {
-            await Task.WhenAll(app.RunAsync(), app.Services.GetService<GoCqBackend>()!.Invoke());
-        }
-        else
-        {
-            await Task.WhenAll(app.RunAsync(), app.Services.GetService<MiraiBackend>()!.Invoke());
-        }
-        // await app.RunAsync();
+        await Task.WhenAll(app.RunAsync(), app.Services.GetService<BotDriver.BotDriver>()!.Invoke());
     }
 }

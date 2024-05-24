@@ -6,6 +6,7 @@ using Marisa.Backend.Mirai.MessageDataExt;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
 using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ public class MiraiBackend : BotDriver.BotDriver
 {
     private readonly WebsocketClient _wsClient;
     private readonly ILogger _logger;
+    private readonly long _id;
 
     public MiraiBackend(
         IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
@@ -25,14 +27,16 @@ public class MiraiBackend : BotDriver.BotDriver
         ILogger logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
     {
         _logger = logger;
+        _id     = dict["QQ"];
+
         string serverAddress = dict["ServerAddress"];
-        long   id            = dict["QQ"];
         string authKey       = dict["AuthKey"];
+
 
         _wsClient = new WebsocketClient(new Uri(
             $"{serverAddress}/all"
                 .SetQueryParam("verifyKey", authKey)
-                .SetQueryParam("qq", id)))
+                .SetQueryParam("qq", _id)))
         {
             ReconnectTimeout = TimeSpan.MaxValue,
         };
@@ -43,7 +47,7 @@ public class MiraiBackend : BotDriver.BotDriver
     public new static IServiceCollection Config(Assembly pluginAssembly)
     {
         var sc = BotDriver.BotDriver.Config(pluginAssembly);
-        sc.AddScoped<MiraiBackend>();
+        sc.AddScoped(typeof(BotDriver.BotDriver), typeof(MiraiBackend));
         return sc;
     }
 
@@ -90,7 +94,8 @@ public class MiraiBackend : BotDriver.BotDriver
                 command = "sendFriendMessage",
                 content = new
                 {
-                    target, quote,
+                    target,
+                    quote,
                     messageChain = message.Messages.Select(m => m.ToObject()).ToList()
                 }
             };
@@ -106,7 +111,8 @@ public class MiraiBackend : BotDriver.BotDriver
                 command = "sendGroupMessage",
                 content = new
                 {
-                    target, quote,
+                    target,
+                    quote,
                     messageChain = message.Messages.Select(m => m.ToObject()).ToList()
                 }
             };
@@ -162,6 +168,26 @@ public class MiraiBackend : BotDriver.BotDriver
         }
 
         await Task.WhenAll(taskList);
+    }
+
+    public override Task Login()
+    {
+        var toSend = new
+        {
+            syncId  = -1,
+            command = "cmd_execute",
+            content = new
+            {
+                command = new[]
+                {
+                    new MessageDataText("login").ToObject(), new MessageDataText(_id.ToString()).ToObject()
+                }
+            }
+        };
+
+        _wsClient.Send(JsonSerializer.Serialize(toSend));
+
+        return Task.CompletedTask;
     }
 
     public override async Task Invoke()

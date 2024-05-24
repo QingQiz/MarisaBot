@@ -30,6 +30,8 @@ public enum MessageDataType
     MemberLeave,
     BotMute,
     BotUnmute,
+    BotOffline,
+    BotOnline,
     // others
     Unknown
 }

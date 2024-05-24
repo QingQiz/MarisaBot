@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.Diagnostics;
+using NLog;
 
 namespace Marisa.Plugin.EventHandler;
 
@@ -95,5 +96,106 @@ public partial class EventHandler
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         });
+    }
+
+    private class Debounce(int delayL, int delayR)
+    {
+        private Timer? _timer;
+        private readonly object _lock = new();
+        private bool _isThrottled;
+
+        public void Execute(Action action)
+        {
+            lock (_lock)
+            {
+                if (_isThrottled) return;
+
+                _timer?.Dispose();
+                _timer = new Timer(_ =>
+                {
+                    action();
+                    _isThrottled = true;
+                    _timer = new Timer(_ =>
+                    {
+                        _isThrottled = false;
+                    }, null, delayR, Timeout.Infinite);
+                }, null, delayL, Timeout.Infinite);
+            }
+        }
+
+        public void Cancel()
+        {
+            lock (_lock)
+            {
+                _timer?.Dispose();
+                _isThrottled = false;
+            }
+        }
+    }
+
+    private static void KillSignServer()
+    {
+        // exit if not linux
+        if (Environment.OSVersion.Platform != PlatformID.Unix) return;
+
+        // kill sign server
+
+        // get all java processes and filter by its command line
+        const string command   = "/bin/bash";
+        const string arguments = "-c \"ps aux | grep '[j]ava' \"";
+
+        var procStartInfo = new ProcessStartInfo(command, arguments)
+        {
+            RedirectStandardOutput = true,
+            UseShellExecute        = false,
+            CreateNoWindow         = true
+        };
+
+        using var proc = new Process();
+
+        proc.StartInfo = procStartInfo;
+        proc.Start();
+        using var reader = proc.StandardOutput;
+
+        var result = reader.ReadToEnd()
+            .Split(Environment.NewLine)
+            .First(x => x.Contains("unidbg-fetch-qsign"))
+            .Split(' ', 11, StringSplitOptions.RemoveEmptyEntries);
+
+        var pid = result[1];
+        var cmd = result.Last();
+
+        Logger.Info("Killing sign server: {0}...", cmd[..20]);
+
+        KillProcess(pid);
+    }
+
+    private static void KillProcess(string pid)
+    {
+        try
+        {
+            // Start the bash shell
+            using var proc = new Process();
+            proc.StartInfo.FileName        = "/bin/bash";
+            proc.StartInfo.Arguments       = $"-c \"kill -9 {pid}\"";
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow  = true;
+
+            proc.Start();
+            proc.WaitForExit();
+
+            if (proc.ExitCode == 0)
+            {
+                Logger.Info($"Process {pid} has been killed successfully.");
+            }
+            else
+            {
+                Logger.Error($"Failed to kill process {pid}. Exit code: {proc.ExitCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"An error occurred on killing process {pid}: {ex.Message}");
+        }
     }
 }

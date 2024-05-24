@@ -263,6 +263,15 @@ public abstract class BotDriver
     protected abstract Task SendMessage();
 
     /// <summary>
+    /// 登录
+    /// </summary>
+    /// <returns></returns>
+    public virtual Task Login()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 调用bot的默认实现
     /// </summary>
     public virtual async Task Invoke()

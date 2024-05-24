@@ -40,7 +40,7 @@ public class GoCqBackend : BotDriver.BotDriver
     public new static IServiceCollection Config(Assembly pluginAssembly)
     {
         var sc = Marisa.BotDriver.BotDriver.Config(pluginAssembly);
-        sc.AddScoped<GoCqBackend>();
+        sc.AddScoped(typeof(BotDriver.BotDriver), typeof(GoCqBackend));
         return sc;
     }
 
