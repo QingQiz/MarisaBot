@@ -255,11 +255,17 @@ public static class MessageDataConverter
             }
             case "BotOfflineEventDropped":
             {
-                return new Message(ms, [new MessageDataBotOffline()]);
+                return new Message(ms, [new MessageDataBotOffline()])
+                {
+                    Sender = new SenderInfo(0, ""),
+                };
             }
             case "BotOnlineEvent":
             {
-                return new Message(ms, [new MessageDataBotOnline()]);
+                return new Message(ms, [new MessageDataBotOnline()])
+                {
+                    Sender = new SenderInfo(0, ""),
+                };
             }
         }
 
