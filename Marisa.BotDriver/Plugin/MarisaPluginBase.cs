@@ -1,4 +1,5 @@
-﻿using Marisa.BotDriver.Entity.Message;
+﻿using System.Text.Json;
+using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin.Attributes;
 using NLog;
@@ -15,14 +16,19 @@ public class MarisaPluginBase
 
     public virtual Task ExceptionHandler(Exception exception, Message message)
     {
-        if ((exception.InnerException ?? exception) is AggregateException {InnerExceptions.Count: 1 } aggregateException)
+        LogManager.GetCurrentClassLogger().Error(exception + "\nCasused by message: " + JsonSerializer.Serialize(message));
+
+        while (true)
         {
-            return ExceptionHandler(aggregateException.InnerExceptions[0], message);
+            if ((exception.InnerException ?? exception) is AggregateException { InnerExceptions.Count: 1 } aggregateException)
+            {
+                exception = aggregateException.InnerExceptions[0];
+                continue;
+            }
+
+            message.Send(new MessageDataText(exception.InnerException?.ToString() ?? exception.ToString()));
+
+            return Task.CompletedTask;
         }
-
-        LogManager.GetCurrentClassLogger().Error(exception.ToString());
-
-        message.Send(new MessageDataText(exception.InnerException?.ToString() ?? exception.ToString()));
-        return Task.CompletedTask;
-    }   
+    }
 }
