@@ -254,19 +254,9 @@ public static class MessageDataConverter
                 };
             }
             case "BotOfflineEventDropped":
-            {
-                return new Message(ms, [new MessageDataBotOffline()])
-                {
-                    Sender = new SenderInfo(0, ""),
-                };
-            }
+                return new Message(ms, [new MessageDataBotOffline()]);
             case "BotOnlineEvent":
-            {
-                return new Message(ms, [new MessageDataBotOnline()])
-                {
-                    Sender = new SenderInfo(0, ""),
-                };
-            }
+                return new Message(ms, [new MessageDataBotOnline()]);
         }
 
         return null;
@@ -295,7 +285,7 @@ public static class MessageDataConverter
                     msg.Contains("Connection refused", StringComparison.OrdinalIgnoreCase) ||
                     msg.Contains("unidbg-fetch-qsign", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new Message(ms, [new MessageDataSignServerLose()]);
+                    return new Message(ms, [new MessageDataSignServerLose(msg)]);
                 }
 
                 Logger.Warn(msg);

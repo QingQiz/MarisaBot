@@ -1,5 +1,4 @@
-﻿using Marisa.Backend.Mirai.MessageDataExt;
-using NLog;
+﻿using NLog;
 
 namespace Marisa.Plugin.EventHandler;
 
@@ -55,9 +54,9 @@ public partial class EventHandler : MarisaPluginBase
                 Logger.Warn("Bot online successfully.");
                 BotLoginDebounce.Cancel();
                 break;
-            case MessageDataType.Unknown when msg is MessageDataSignServerLose:
+            case MessageDataType.Unknown when msg is MessageDataSignServerLose e:
             {
-                Logger.Warn("Lose connection to SingServer");
+                Logger.Warn($"Lose connection to SingServer: {e.Text}");
 
                 SignServerKillerDebounce.Execute(KillSignServer);
                 break;

@@ -1,8 +1,8 @@
-﻿using Marisa.BotDriver.Entity.MessageData;
+﻿namespace Marisa.BotDriver.Entity.MessageData;
 
-namespace Marisa.Backend.Mirai.MessageDataExt;
-
-public class MessageDataSignServerLose : MessageData
+public class MessageDataSignServerLose(string text) : MessageData
 {
     public override MessageDataType Type => MessageDataType.Unknown;
+
+    public string Text { get; set; } = text;
 }

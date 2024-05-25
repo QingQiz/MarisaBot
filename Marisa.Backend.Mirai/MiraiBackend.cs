@@ -64,8 +64,8 @@ public class MiraiBackend : BotDriver.BotDriver
                 if (Environment.GetEnvironmentVariable("RESPONSE") == null)
                 {
                     _logger.Info(message.GroupInfo == null
-                        ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
-                        : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
+                        ? $"({message.Sender?.Id ?? 0,11}) -> {message.MessageChain}".Escape()
+                        : $"({message.GroupInfo.Id,11}) => ({message.Sender?.Id ?? 0,11}) -> {message.MessageChain}".Escape());
                     await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
                 }
                 else if (Environment.GetEnvironmentVariable("RESPONSE") == message.Sender!.Id.ToString())
