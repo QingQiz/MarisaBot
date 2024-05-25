@@ -288,7 +288,7 @@ public static class MessageDataConverter
                     return new Message(ms, [new MessageDataSignServerLose(msg)]);
                 }
 
-                Logger.Warn(msg);
+                Logger.Warn($"Bad response: {msg}");
             }
 
             return null;
@@ -301,7 +301,7 @@ public static class MessageDataConverter
                 return message;
             }
 
-            Logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
+            Logger.Debug($"Not implemented Message: `{msgIn.Text}`");
         }
         else if (m.type.Contains("Event")) // Event
         {
@@ -310,11 +310,11 @@ public static class MessageDataConverter
                 return message;
             }
 
-            Logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
+            Logger.Debug($"Not implemented Event: `{msgIn.Text}`");
         }
         else
         {
-            Logger.Warn($"Unknown message {msgIn.Text}");
+            Logger.Debug($"Not implemented data: `{msgIn.Text}`");
         }
 
         return null;

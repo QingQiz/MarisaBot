@@ -75,8 +75,7 @@ public class MiraiBackend : BotDriver.BotDriver
             }
             catch (Exception e)
             {
-                _logger.Error(e.ToString());
-                _logger.Error($"Unknown data: {msg.Text}");
+                _logger.Error(e + $"\ncaused by data: {msg.Text}");
             }
         }
 

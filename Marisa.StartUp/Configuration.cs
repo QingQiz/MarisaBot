@@ -17,23 +17,40 @@ public static class Configuration
         {
             Layout = @"[${date:format=HH\:mm\:ss}][${level:uppercase=true}] ${message}"
         };
-        var fileTarget = new FileTarget("targetFile")
+
+        var debug = new FileTarget("DebugTarget")
         {
-            FileName = "${basedir}/logs/app_${shortdate}.log",
-            Layout   = "${longdate} ${uppercase:${level}} ${message}"
+            FileName = "${basedir}/logs/debug/${shortdate}.log",
+            Layout   = "[${longdate}][${level:uppercase=true}] ${message}\n\n"
+        };
+
+        var error = new FileTarget("ErrorTarget")
+        {
+            FileName = "${basedir}/logs/error/${shortdate}.log",
+            Layout   = "[${longdate}][${level:uppercase=true}] ${message}\n\n"
+        };
+
+        var warn = new FileTarget("WarnTarget")
+        {
+            FileName = "${basedir}/logs/warn/${shortdate}.log",
+            Layout   = "[${longdate}][${level:uppercase=true}] ${message}\n\n"
         };
 
         // Step 3. Add targets to the configuration
         config.AddTarget(consoleTarget);
-        config.AddTarget(fileTarget);
+        config.AddTarget(debug);
+        config.AddTarget(error);
+        config.AddTarget(warn);
 
         // Step 4. Define rules
         config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
         config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
         config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, fileTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, fileTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, consoleTarget));
+
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, debug));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, warn));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, error));
 
         // Step 5. Activate the configuration
         LogManager.Configuration = config;
