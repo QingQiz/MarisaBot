@@ -43,14 +43,11 @@ public static class Configuration
         config.AddTarget(warn);
 
         // Step 4. Define rules
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, consoleTarget));
 
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, debug));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, warn));
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, error));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, LogLevel.Debug,  debug));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, LogLevel.Warn,  warn));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Error, LogLevel.Error,  error));
 
         // Step 5. Activate the configuration
         LogManager.Configuration = config;
