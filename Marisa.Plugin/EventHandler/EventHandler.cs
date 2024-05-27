@@ -15,9 +15,14 @@ public partial class EventHandler : MarisaPluginBase
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
         return message.MessageChain!.Messages.Any(m => m.Type is
-            MessageDataType.Nudge or
-            MessageDataType.NewMember or MessageDataType.MemberLeave or
-            MessageDataType.BotMute or MessageDataType.BotUnmute
+            MessageDataType.Nudge
+         or MessageDataType.NewMember
+         or MessageDataType.MemberLeave
+         or MessageDataType.BotMute
+         or MessageDataType.BotUnmute
+         or MessageDataType.Unknown
+         or MessageDataType.BotOffline
+         or MessageDataType.BotOnline
         );
     };
 
