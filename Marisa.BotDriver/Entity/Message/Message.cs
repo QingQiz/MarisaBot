@@ -67,6 +67,13 @@ public record Message(string Command)
         _                           => throw new ArgumentOutOfRangeException()
     };
 
+    public override string ToString()
+    {
+        return GroupInfo == null
+            ? $"[{Type}] {Sender?.Name ?? "Unknown"} ({Sender?.Id ?? 0}) => {MessageChain}"
+            : $"[{Type}] {Sender?.Name ?? "Unknown"} ({Sender?.Id ?? 0}) -> {GroupInfo?.Name ?? "Unknown"} ({GroupInfo?.Id ?? 0}) => {MessageChain}";
+    }
+
     #region Reply
 
     /// <summary>

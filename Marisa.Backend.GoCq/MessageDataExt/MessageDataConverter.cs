@@ -302,10 +302,8 @@ public static class MessageDataConverter
             {
                 return message;
             }
-            else
-            {
-                logger.Warn($"Can not convert message `{msgIn.Text}` to Message");
-            }
+
+            logger.Debug($"Not implemented Message: `{msgIn.Text}`");
         }
         else if (m.post_type == "notice")
         {
@@ -313,14 +311,12 @@ public static class MessageDataConverter
             {
                 return message;
             }
-            else
-            {
-                logger.Warn($"Can not convert event `{msgIn.Text}` to Message");
-            }
+
+            logger.Debug($"Not implemented Event: `{msgIn.Text}`");
         }
         else
         {
-            logger.Warn($"Unknown message {msgIn.Text}");
+            logger.Debug($"Not implemented data: `{msgIn.Text}`");
         }
 
         return null;

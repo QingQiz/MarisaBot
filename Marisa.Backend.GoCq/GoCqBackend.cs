@@ -16,20 +16,22 @@ namespace Marisa.Backend.GoCq;
 public class GoCqBackend : BotDriver.BotDriver
 {
     private readonly WebsocketClient _wsClient;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
     public GoCqBackend(
-        IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
-        DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
-        ILogger logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
+        IServiceProvider serviceProvider,
+        IEnumerable<MarisaPluginBase> pluginsAll,
+        DictionaryProvider dict,
+        MessageSenderProvider messageSenderProvider,
+        MessageQueueProvider messageQueueProvider
+    ) : base(serviceProvider, pluginsAll, dict, messageSenderProvider, messageQueueProvider)
     {
-        _logger = logger;
+        _logger = LogManager.GetCurrentClassLogger();
         string serverAddress = dict["ServerAddress"];
         long   id            = dict["QQ"];
         string authKey       = dict["AuthKey"];
 
-        _wsClient = new WebsocketClient(new Uri(
-            $"{serverAddress}"))
+        _wsClient = new WebsocketClient(new Uri($"{serverAddress}"))
         {
             ReconnectTimeout = TimeSpan.MaxValue,
         };
@@ -53,22 +55,12 @@ public class GoCqBackend : BotDriver.BotDriver
                 var message = msg.ToMessage(MessageSenderProvider);
 
                 if (message == null) return;
-                if (Environment.GetEnvironmentVariable("RESPONSE") == null)
-                {
-                    _logger.Info(message.GroupInfo == null
-                        ? $"({message.Sender!.Id,11}) -> {message.MessageChain}".Escape()
-                        : $"({message.GroupInfo.Id,11}) => ({message.Sender!.Id,11}) -> {message.MessageChain}".Escape());
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
-                }
-                else if (Environment.GetEnvironmentVariable("RESPONSE") == message.Sender!.Id.ToString())
-                {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
-                }
+
+                await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
             }
             catch (Exception e)
             {
-                _logger.Error(e.ToString());
-                _logger.Error($"Unknown data: {msg.Text}");
+                _logger.Error(e + $"\ncaused by data: {msg.Text}");
             }
         }
 

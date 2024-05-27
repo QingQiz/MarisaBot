@@ -13,7 +13,7 @@ public static class Configuration
         var config = new LoggingConfiguration();
 
         // Step 2. Create targets and set their properties 
-        var consoleTarget = new ColoredConsoleTarget("targetConsole")
+        var console = new ColoredConsoleTarget("targetConsole")
         {
             Layout = @"[${date:format=HH\:mm\:ss}][${level:uppercase=true}] ${message}"
         };
@@ -36,14 +36,21 @@ public static class Configuration
             Layout   = "[${longdate}][${level:uppercase=true}] ${message}\n\n"
         };
 
+        var trace = new FileTarget("TraceTarget")
+        {
+            FileName = "${basedir}/logs/trace/${shortdate}.log",
+            Layout   = "[${longdate}][${level:uppercase=true}] ${message}\n\n"
+        };
+
         // Step 3. Add targets to the configuration
-        config.AddTarget(consoleTarget);
+        config.AddTarget(console);
         config.AddTarget(debug);
         config.AddTarget(error);
         config.AddTarget(warn);
 
         // Step 4. Define rules
-        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, consoleTarget));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, console));
+        config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, trace));
 
         config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, LogLevel.Debug,  debug));
         config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, LogLevel.Warn,  warn));

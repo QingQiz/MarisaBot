@@ -18,7 +18,7 @@ namespace Marisa.Backend.Mirai;
 public class MiraiBackend : BotDriver.BotDriver
 {
     private readonly WebsocketClient _wsClient;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
     private readonly long _id;
 
     public MiraiBackend(
@@ -61,17 +61,7 @@ public class MiraiBackend : BotDriver.BotDriver
 
                 if (message == null) return;
 
-                if (Environment.GetEnvironmentVariable("RESPONSE") == null)
-                {
-                    _logger.Info(message.GroupInfo == null
-                        ? $"({message.Sender?.Id ?? 0,11}) -> {message.MessageChain}".Escape()
-                        : $"({message.GroupInfo.Id,11}) => ({message.Sender?.Id ?? 0,11}) -> {message.MessageChain}".Escape());
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
-                }
-                else if (Environment.GetEnvironmentVariable("RESPONSE") == message.Sender!.Id.ToString())
-                {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
-                }
+                await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
             }
             catch (Exception e)
             {
