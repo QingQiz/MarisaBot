@@ -22,6 +22,8 @@ public class Dialog : MarisaPluginBase
     [MarisaPluginCommand]
     private static MarisaPluginTaskState MessageHandler(Message message)
     {
+        if (message.Sender == null) return MarisaPluginTaskState.NoResponse;
+
         var groupId  = message.GroupInfo?.Id;
         var senderId = message.Sender!.Id;
         lock (Handlers)

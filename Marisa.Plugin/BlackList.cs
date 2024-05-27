@@ -14,6 +14,8 @@ public class BlackList : MarisaPluginBase
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
     private static async Task<MarisaPluginTaskState> Handler(Message message)
     {
+        if (message.Sender == null) return MarisaPluginTaskState.NoResponse;
+
         var u = message.Sender!.Id;
 
         if (!_cacheInitialized)

@@ -89,7 +89,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     /// <summary>
     /// 使用Message去调用Plugin.Method，直到返回CompletedTask
     /// </summary>
-    public async Task<MarisaPluginTaskState?> Invoke(MarisaPluginBase plugin, MethodInfo method, Message message)
+    public async Task<MarisaPluginTaskState> Invoke(MarisaPluginBase plugin, MethodInfo method, Message message)
     {
         return await DependencyInjectInvoke(plugin, method, message);
     }
@@ -163,7 +163,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         return (handler, message);
     }
 
-    private async Task<MarisaPluginTaskState?> DependencyInjectInvoke(MarisaPluginBase plugin, MethodInfo m, Message message)
+    private async Task<MarisaPluginTaskState> DependencyInjectInvoke(MarisaPluginBase plugin, MethodInfo m, Message message)
     {
         var parameters = new List<dynamic>();
 
@@ -199,7 +199,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         catch (Exception e)
         {
             await plugin.ExceptionHandler(e, message);
-            return null;
+            return MarisaPluginTaskState.NoResponse;
         }
     }
 
