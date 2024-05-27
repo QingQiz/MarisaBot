@@ -82,6 +82,11 @@ public class DispatcherTest
             {
                 Type = MessageType.TempMessage
             }, typeof(MaiMaiDx), null).SetName("no temp");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataUnknown()) with
+            {
+                Type = MessageType.GroupMessage
+            }, typeof(EventHandler), null).SetName("no unknown");
         }
     }
 
@@ -89,13 +94,9 @@ public class DispatcherTest
     [TestCaseSource(nameof(TestCaseData1))]
     public void Message_Should_Be_Dispatched(Message message, Type type, string? method)
     {
-        Assert.That(_dispatcher.Dispatch(message).Any(x =>
-            {
-                Console.WriteLine(x.Plugin.GetType().Name + "." + x.Method.Name);
-                return method == null
-                    ? x.Plugin.GetType() == type
-                    : x.Plugin.GetType() == type && x.Method.Name == method;
-            })
+        Assert.That(_dispatcher.Dispatch(message).Any(x => method == null
+            ? x.Plugin.GetType() == type
+            : x.Plugin.GetType() == type && x.Method.Name == method)
         );
     }
 
