@@ -6,6 +6,6 @@ public static class Utils
 {
     public static Assembly Assembly()
     {
-        return AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name!.StartsWith("Marisa.Plugin"));
+        return AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name!.Equals("Marisa.Plugin"));
     }
 }
