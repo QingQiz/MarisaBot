@@ -16,7 +16,9 @@ public class MarisaPluginBase
 
     public virtual Task ExceptionHandler(Exception exception, Message message)
     {
-        LogManager.GetCurrentClassLogger().Error(exception + "\nCasused by message: " + JsonSerializer.Serialize(message));
+        var log = LogManager.GetCurrentClassLogger();
+        
+        log.Error($"{exception}\nCasused by message: {message}");
 
         while (true)
         {

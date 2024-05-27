@@ -21,6 +21,7 @@ public static partial class OsuApi
 {
     private static string? _token;
     private static DateTime? _tokenExpire;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private static string Token
     {
@@ -153,7 +154,7 @@ public static partial class OsuApi
         {
             if (retry != 0) return await GetUserInfoByName(username, mode, retry - 1);
 
-            LogManager.GetCurrentClassLogger().Error(e.ToString());
+            Logger.Error(e.ToString());
             throw new HttpRequestException($"Network Error While Getting User: {e.Message}");
         }
     }
@@ -193,7 +194,7 @@ public static partial class OsuApi
         {
             if (retry != 0) return await GetScores(osuId, type, gameMode, skip, take, includeFails, retry - 1);
 
-            LogManager.GetCurrentClassLogger().Error(e.ToString());
+            Logger.Error(e.ToString());
             throw new HttpRequestException($"Network Error While Retrieving Scores: {e.Message}");
         }
     }

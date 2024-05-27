@@ -80,7 +80,7 @@ public abstract class BotDriver(
                     if (state == MarisaPluginTaskState.CompletedTask) break;
                 }
 
-                logger.Info("Dispatching Message {0} to {1}", m1.ToString(), string.Join(", ", log));
+                logger.Info("Dispatched Message to {1}: {0}", m1.ToString(), string.Join("", log));
             }));
 
             if (tasks.Count < 100) continue;

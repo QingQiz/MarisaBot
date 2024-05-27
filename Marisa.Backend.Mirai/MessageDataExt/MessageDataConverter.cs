@@ -254,8 +254,10 @@ public static class MessageDataConverter
                 };
             }
             case "BotOfflineEventDropped":
+                Logger.Debug("Recieved BotOfflineEventDropped");
                 return new Message(ms, [new MessageDataBotOffline()]);
             case "BotOnlineEvent":
+                Logger.Debug("Recieved BotOnlineEvent");
                 return new Message(ms, [new MessageDataBotOnline()]);
         }
 
@@ -285,6 +287,7 @@ public static class MessageDataConverter
                     msg.Contains("Connection refused", StringComparison.OrdinalIgnoreCase) ||
                     msg.Contains("unidbg-fetch-qsign", StringComparison.OrdinalIgnoreCase))
                 {
+                    Logger.Debug("Recieved SignServerLoseEvent");
                     return new Message(ms, [new MessageDataSignServerLose(msg)]);
                 }
 
