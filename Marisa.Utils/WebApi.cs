@@ -6,9 +6,7 @@ public static class WebApi
 {
     private static IBrowser? _browserInner;
 
-    private static readonly string Frontend = Environment.GetEnvironmentVariable("DEV") == null
-        ? "http://localhost:14311"
-        : "http://localhost:3000";
+    private const string Frontend = "http://localhost:3000";
 
     private static IBrowser Browser
     {

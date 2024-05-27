@@ -54,7 +54,7 @@ public class MarisaPluginTrigger: Attribute
             throw new ArgumentException($"Invalid trigger: {triggerType}.{triggerName}");
         }
 
-        Trigger = (message, provider) => (message.Type & target) != 0 && t(message, provider);
+        Trigger = (message, provider) => ((message.Type & target) != 0 || message.Type == 0) && t(message, provider);
     }
 
     // 这里提供一些常用的 trigger

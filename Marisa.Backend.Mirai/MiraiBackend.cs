@@ -22,11 +22,14 @@ public class MiraiBackend : BotDriver.BotDriver
     private readonly long _id;
 
     public MiraiBackend(
-        IServiceProvider serviceProvider, IEnumerable<MarisaPluginBase> plugins,
-        DictionaryProvider dict, MessageSenderProvider messageSenderProvider, MessageQueueProvider messageQueueProvider,
-        ILogger logger) : base(serviceProvider, plugins, dict, messageSenderProvider, messageQueueProvider)
+        IServiceProvider serviceProvider,
+        IEnumerable<MarisaPluginBase> pluginsAll,
+        DictionaryProvider dict,
+        MessageSenderProvider messageSenderProvider,
+        MessageQueueProvider messageQueueProvider
+    ) : base(serviceProvider, pluginsAll, dict, messageSenderProvider, messageQueueProvider)
     {
-        _logger = logger;
+        _logger = LogManager.GetCurrentClassLogger();
         _id     = dict["QQ"];
 
         string serverAddress = dict["ServerAddress"];

@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marisa.Backend.GoCq", "Mari
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Marisa.Frontend", "Marisa.Frontend\Marisa.Frontend.esproj", "{888869E2-FFE7-4FEE-B668-1A82C0148588}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marisa.BotDriver.Test", "Marisa.BotDriver.Test\Marisa.BotDriver.Test.csproj", "{B848A16D-6E86-4F96-B436-0338525B9CB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{888869E2-FFE7-4FEE-B668-1A82C0148588}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{888869E2-FFE7-4FEE-B668-1A82C0148588}.Release|Any CPU.Build.0 = Release|Any CPU
 		{888869E2-FFE7-4FEE-B668-1A82C0148588}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B848A16D-6E86-4F96-B436-0338525B9CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B848A16D-6E86-4F96-B436-0338525B9CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B848A16D-6E86-4F96-B436-0338525B9CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B848A16D-6E86-4F96-B436-0338525B9CB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +103,6 @@ Global
 		{2A61D282-1CA2-4818-89CF-5E96F94F9CB9} = {B45AC883-5C28-4146-BF83-D86C4BDAB412}
 		{B375AB09-A3E2-4EC5-B11D-6355F16C364D} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
 		{888869E2-FFE7-4FEE-B668-1A82C0148588} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
+		{B848A16D-6E86-4F96-B436-0338525B9CB3} = {B45AC883-5C28-4146-BF83-D86C4BDAB412}
 	EndGlobalSection
 EndGlobal

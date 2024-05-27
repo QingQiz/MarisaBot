@@ -1,85 +1,49 @@
 ﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.Utils;
 
 namespace Marisa.BotDriver.Plugin.Trigger;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
-public class MarisaPluginCommand : Attribute
+public class MarisaPluginCommand(MessageType target, StringComparison comparison, bool strict = false, params string[] prefixes)
+    : Attribute
 {
-    private readonly StringComparison _comparison;
-    private readonly MessageType _target;
-    private readonly bool _strict;
 
     private bool Comparer(string a, string b)
     {
-        return _strict ? string.Equals(a, b, _comparison) : a.StartsWith(b, _comparison);
+        return strict ? string.Equals(a, b, comparison) : a.StartsWith(b, comparison);
     }
 
-    public string[] Commands { get; }
+    public string[] Commands { get; } = prefixes;
 
-    public MarisaPluginCommand(params string[] prefixes)
+    public MarisaPluginCommand(params string[] prefixes) : this((MessageType)0b11, StringComparison.OrdinalIgnoreCase, false, prefixes)
     {
-        _target     = (MessageType)0b11;
-        _comparison = StringComparison.OrdinalIgnoreCase;
-        Commands    = prefixes;
-        _strict     = false;
     }
 
-    public MarisaPluginCommand(bool strict = false, params string[] prefixes)
+    public MarisaPluginCommand(bool strict = false, params string[] prefixes) : this((MessageType)0b11, StringComparison.OrdinalIgnoreCase, strict, prefixes)
     {
-        _target     = (MessageType)0b11;
-        _comparison = StringComparison.OrdinalIgnoreCase;
-        Commands    = prefixes;
-        _strict     = strict;
     }
 
-    public MarisaPluginCommand(MessageType target, bool strict = false, params string[] prefixes)
+    public MarisaPluginCommand(MessageType target, bool strict = false, params string[] prefixes) : this(target, StringComparison.OrdinalIgnoreCase, strict, prefixes)
     {
-        _target     = target;
-        _comparison = StringComparison.OrdinalIgnoreCase;
-        Commands    = prefixes;
-        _strict     = strict;
     }
 
-    public MarisaPluginCommand(
-        MessageType target, StringComparison comparison, bool strict = false, params string[] prefixes)
+    public MarisaPluginCommand(MessageType target, StringComparison comparison, params string[] prefixes) : this(target, comparison, false, prefixes)
     {
-        _target     = target;
-        _comparison = comparison;
-        Commands    = prefixes;
-        _strict     = strict;
     }
 
-    public MarisaPluginCommand(MessageType target, StringComparison comparison, params string[] prefixes)
+    public MarisaPluginCommand(StringComparison comparison, bool strict = false, params string[] prefixes) : this((MessageType)0b11, comparison, strict, prefixes)
     {
-        _target     = target;
-        _comparison = comparison;
-        Commands    = prefixes;
-        _strict     = false;
     }
 
-    public MarisaPluginCommand(StringComparison comparison, bool strict = false, params string[] prefixes)
+    public MarisaPluginCommand(StringComparison comparison, params string[] prefixes) : this((MessageType)0b11, comparison, false, prefixes)
     {
-        _target     = (MessageType)0b11;
-        _comparison = comparison;
-        Commands    = prefixes;
-        _strict     = strict;
-    }
-
-    public MarisaPluginCommand(StringComparison comparison, params string[] prefixes)
-    {
-        _target     = (MessageType)0b11;
-        _comparison = comparison;
-        Commands    = prefixes;
-        _strict     = false;
     }
 
     public bool TryMatch(Message message, out string afterMatch)
     {
         afterMatch = message.Command;
 
-        if ((message.Type & _target) == 0) return false;
-        if (Commands.Length          == 0) return true;
+        if ((message.Type & target) == 0 && message.Type != 0) return false;
+        if (Commands.Length == 0) return true;
 
         afterMatch = afterMatch.Trim();
 

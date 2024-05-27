@@ -235,17 +235,3 @@
         - Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
         - （可选）传入`gocq`字符串则以Go-CQ为框架，否则以Mirai为框架
 
-
-## 备忘
-
-<details>
-<summary> 展开 </summary>
-
-- 环境变量
-  - DEV:
-    - 设置了则前端地址指定为 `http://localhost:3000`
-    - 未设置则前端地址指定为 `https://localhost:14311`
-  - RESPONSE:
-    - 设置了则 bot 只会相应该用户的消息
-
-</details>
