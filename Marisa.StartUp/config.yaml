@@ -1,8 +1,5 @@
 ffmpegPath:     C:\bin\ffmpeg.exe
 
-wordCloud:
-  tempPath:     C:\Users\sofee\Desktop\temp\wordCloud
-
 arcaea:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
   tempPath:     C:\Users\sofee\Desktop\temp\arcaea
