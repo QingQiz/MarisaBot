@@ -162,7 +162,7 @@ public class MiraiBackend : BotDriver.BotDriver
         await Task.WhenAll(taskList);
     }
 
-    public override Task Login()
+    public override async Task Login()
     {
         var toSend = new
         {
@@ -172,14 +172,16 @@ public class MiraiBackend : BotDriver.BotDriver
             {
                 command = new[]
                 {
-                    new MessageDataText("login").ToObject(), new MessageDataText(_id.ToString()).ToObject()
+                    new MessageDataText("/login").ToObject(), new MessageDataText(_id.ToString()).ToObject()
                 }
             }
         };
 
         _wsClient.Send(JsonSerializer.Serialize(toSend));
 
-        return Task.CompletedTask;
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        await _wsClient.Reconnect();
     }
 
     public override async Task Invoke()

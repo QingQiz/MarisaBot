@@ -254,7 +254,8 @@ public static class MessageDataConverter
                 };
             }
             case "BotOfflineEventDropped":
-                Logger.Debug("Recieved BotOfflineEventDropped");
+            case "BotOfflineEventActive":
+                Logger.Debug("Recieved BotOfflineEvent");
                 return new Message(ms, [new MessageDataBotOffline()]);
             case "BotOnlineEvent":
                 Logger.Debug("Recieved BotOnlineEvent");
