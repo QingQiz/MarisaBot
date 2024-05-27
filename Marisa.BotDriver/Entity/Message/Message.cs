@@ -8,7 +8,7 @@ public record Message(string Command)
 {
     // Info
     public GroupInfo? GroupInfo;
-    public SenderInfo? Sender;
+    public SenderInfo Sender = new(-1, "");
 
     public readonly MessageChain? MessageChain;
 
