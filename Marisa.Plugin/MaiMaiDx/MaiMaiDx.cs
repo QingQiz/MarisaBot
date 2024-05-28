@@ -33,15 +33,6 @@ public partial class MaiMaiDx
         Dialog.AddHandler
     );
 
-    public IEnumerable<MaiMaiSong> SongsMissCover()
-    {
-        return _songDb.SongList.Where(s =>
-        {
-            var p = Path.Join(ResourceManager.ResourcePath, "cover", s.Id.ToString());
-            return !(File.Exists(p + ".jpg") || File.Exists(p + ".png") || File.Exists(p + ".jpeg"));
-        });
-    }
-
     public override Task ExceptionHandler(Exception exception, Message message)
     {
         switch (exception)
