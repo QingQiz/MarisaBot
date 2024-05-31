@@ -214,27 +214,43 @@ public class Command : MarisaPluginBase
     [MarisaPluginCommand("reboot", "restart")]
     private static MarisaPluginTaskState Reboot(Message m)
     {
-        if (!Commander.Contains(m.Sender!.Id))
+        if (!Commander.Contains(m.Sender.Id))
         {
             m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            return MarisaPluginTaskState.CompletedTask;
         }
-        else
-        {
-            var proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName        = Environment.GetCommandLineArgs()[0].Replace(".dll", ".exe"),
-                    Arguments       = string.Join(' ', Environment.GetCommandLineArgs().Skip(1)),
-                    UseShellExecute = true,
-                    CreateNoWindow  = true,
-                }
-            };
-            proc.Start();
 
+        var currentProcess = Process.GetCurrentProcess();
+
+        var fileName  = currentProcess.MainModule!.FileName;
+        var arguments = Environment.CommandLine;
+
+        // 创建新的进程启动信息
+        var startInfo = new ProcessStartInfo
+        {
+            FileName        = fileName,
+            Arguments       = arguments,
+            UseShellExecute = false
+        };
+        
+        // 启动新的进程
+        var proc = Process.Start(startInfo);
+
+        if (proc == null)
+        {
+            m.Reply("重启失败");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+        
+        proc.WaitForInputIdle();
+        Thread.Sleep(1000);
+
+        if (!proc.HasExited)
+        {
             Environment.Exit(0);
         }
 
+        m.Reply("重启失败");
         return MarisaPluginTaskState.CompletedTask;
     }
 }
