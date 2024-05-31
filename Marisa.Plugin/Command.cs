@@ -223,33 +223,19 @@ public class Command : MarisaPluginBase
         var currentProcess = Process.GetCurrentProcess();
 
         var fileName  = currentProcess.MainModule!.FileName;
-        var arguments = Environment.CommandLine;
+        var arguments = Environment.GetCommandLineArgs();
 
-        // 创建新的进程启动信息
         var startInfo = new ProcessStartInfo
         {
             FileName        = fileName,
-            Arguments       = arguments,
+            Arguments       = string.Join(' ', arguments.Skip(1)),
             UseShellExecute = false
         };
-        
-        // 启动新的进程
-        var proc = Process.Start(startInfo);
 
-        if (proc == null)
-        {
-            m.Reply("重启失败");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-        
-        Thread.Sleep(2000);
+        Process.Start(startInfo);
 
-        if (!proc.HasExited)
-        {
-            Environment.Exit(0);
-        }
+        Environment.Exit(0);
 
-        m.Reply("重启失败");
         return MarisaPluginTaskState.CompletedTask;
     }
 }
