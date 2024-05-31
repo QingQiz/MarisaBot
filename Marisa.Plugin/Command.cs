@@ -242,8 +242,7 @@ public class Command : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
         
-        proc.WaitForInputIdle();
-        Thread.Sleep(1000);
+        Thread.Sleep(2000);
 
         if (!proc.HasExited)
         {
