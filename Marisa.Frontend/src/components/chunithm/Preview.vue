@@ -1,20 +1,27 @@
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import {
-    cat_rice,
     cat_noodle,
+    cat_rice,
     cat_slide,
-    cat_control,
     Chart,
     GetMaxTick,
     Parse,
-    ScaleTickFrom, SplitChartAt
+    ScaleTickFrom,
 } from "@/components/chunithm/utils/parser";
 import {useRoute} from "vue-router";
 import {context_get} from "@/GlobalVars";
 import axios from "axios";
-import {Beat, Div, Measure, Noodle, Rice, Slide, SpeedVelocity} from "@/components/chunithm/utils/parser_t";
+import BeatmapVisualizer from "@/components/utils/BeatmapVisualizer/BeatmapVisualizer.vue";
+import {
+    Beatmap,
+    BeatmapBeat, BeatmapBpm,
+    BeatmapDiv, BeatmapLn,
+    BeatmapMeasure, BeatmapRice, BeatmapSlide,
+    BeatmapSpeedVelocity
+} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
+import {zip} from "@/utils/list";
 
 const route = useRoute()
 
@@ -22,17 +29,15 @@ let id           = ref(route.query.id)
 let name         = ref(route.query.name)
 let data_fetched = ref(false);
 
-let chart = ref({} as Chart);
-let index = ref([] as number[][]);
-
-const overflow    = 50;
-const pixel_ratio = ref(window.devicePixelRatio);
+let chart  = ref({} as Chart);
+let index  = ref([] as number[]);
+let length = ref(0);
 
 axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
     .then(data => {
         let c = Parse(data.data);
 
-        [chart.value, index.value] = ProcessChart4Display(c);
+        [chart.value, index.value, length.value] = ProcessChart4Display(c);
     })
     .finally(() => data_fetched.value = true);
 
@@ -46,26 +51,26 @@ function GetLaneLength(mid_length: number) {
  * @return，每个切分的起始tick，和这个切分最多 ***可能*** 有多少拍
  */
 function GetMinSplit(chart: Chart) {
-    let measures = chart.BEAT_1 as Measure[];
-    let beats    = new Map<number, Beat[]>();
+    let measures = chart['BEAT_1'] as BeatmapMeasure[];
+    let beats    = new Map<number, BeatmapBeat[]>();
     let split    = [] as [number, number][];
 
-    for (let x of chart.BEAT_2 as Beat[]) {
-        if (!beats.has(x.measure_id)) beats.set(x.measure_id, []);
+    for (let x of chart['BEAT_2'] as BeatmapBeat[]) {
+        if (!beats.has(x.MeasureId)) beats.set(x.MeasureId, []);
 
-        beats.get(x.measure_id)?.push(x);
+        beats.get(x.MeasureId)?.push(x);
     }
 
     beats.forEach((value, _) => {
-        value.sort((a, b) => a.tick - b.tick);
+        value.sort((a, b) => a.Tick - b.Tick);
 
         for (let i = 8; i < value.length; i += 8) {
-            split.push([value[i].tick, 8]);
+            split.push([value[i].Tick, 8]);
         }
     });
 
     for (let i = 0; i < measures.length; i++) {
-        split.push([measures[i].tick, measures[i].met.first]);
+        split.push([measures[i].Tick, measures[i].Met.First]);
     }
 
     return split;
@@ -96,7 +101,7 @@ function GetMeasureMidLength(min_split: [number, number][], max_tick: number) {
     return GetMidValue(res);
 }
 
-function ProcessChart4Display(chart: Chart): [Chart, number[][]] {
+function ProcessChart4Display(chart: Chart): [Chart, number[], number] {
     let max_tick = GetMaxTick(chart);
     let split    = GetMinSplit(chart);
     let mid_len  = GetMeasureMidLength(split, max_tick);
@@ -118,91 +123,68 @@ function ProcessChart4Display(chart: Chart): [Chart, number[][]] {
 
     split_points = split_points.map(x => measure_length_prefix_sum[x]);
 
-    for (let point of split_points) {
-        SplitChartAt(chart, point);
-        if (overflow > 0) SplitChartAt(chart, point + overflow);
-    }
-
-    let range = [[0, split_points[0] + overflow]];
-    for (let i = 0; i < split_points.length; i++) {
-        range.push([Math.floor(split_points[i]), Math.floor(split_points[i + 1] ?? max_tick) + overflow]);
-    }
-
-    return [chart, range];
+    return [chart, split_points, max_tick];
 }
 
-function GetNotes(key: string, tick: number, tick_next: number = 0) {
-    if (!chart.value[key]) return [];
+function Get(cats: string[]) {
+    let res = [] as [Beatmap, string][];
 
-    return chart.value[key].filter(note => note.tick >= tick && note.tick < tick_next);
-}
+    for (let cat of cats) {
+        let c = chart.value[cat];
 
-function listenOnDevicePixelRatio() {
-    function onChange() {
-        pixel_ratio.value = window.devicePixelRatio;
-        listenOnDevicePixelRatio();
+        for (let x of c) {
+            res.push([x, cat]);
+        }
     }
-
-    matchMedia(
-        `(resolution: ${window.devicePixelRatio}dppx)`
-    ).addEventListener("change", onChange, {once: true});
+    return res.length == 0 ? [[], []] : zip(res);
 }
 
-onMounted(listenOnDevicePixelRatio);
+let rices  = computed(() => Get(cat_rice));
+let lns    = computed(() => Get(cat_noodle));
+let slides = computed(() => Get(cat_slide));
 </script>
 
 
 <template>
-    <div v-if="data_fetched" class="config stage-container" :style="`--pixel-ratio: ${pixel_ratio}`">
-        <div class="stage" v-for="i in index"
-             :style="`--tick-min: ${Math.floor(i[0])}; --tick-max: ${Math.floor(i[1])}`">
-            <div v-for="type in cat_slide">
-                <div v-for="note in GetNotes(type, i[0], i[1]) as Slide[]"
-                     :class="`${type} ${typeof note.extra == 'string' ? note.extra : ''}`"
-                     :style="`--tick:${Math.floor(note.tick)}; --cell:${note.cell}; --width:${note.width}; --tick-end:${Math.floor(note.tick_end)}; --target-cell:${note.cell_target}; --target-width:${note.width_target}; `">
-                </div>
-            </div>
-            <div v-for="type in cat_noodle">
-                <div v-for="note in GetNotes(type, i[0], i[1]) as Noodle[]"
-                     :class="type"
-                     :style="`--tick:${Math.floor(note.tick)}; --cell:${note.cell}; --width:${note.width}; --tick-end:${Math.floor(note.tick_end)}`">
-                </div>
-            </div>
-            <div v-for="type in cat_rice">
-                <div v-for="note in GetNotes(type, i[0], i[1]) as Rice[]"
-                     :class="type"
-                     :style="`--tick:${Math.floor(note.tick)}; --cell:${note.cell}; --width:${note.width}`">
-                </div>
-            </div>
-            <div v-for="type in cat_control">
-                <div v-for="note in GetNotes(type, i[0], i[1])"
-                     :class="type"
-                     :style="`--tick:${Math.floor(note.tick)}; --content:'${note}'`">
-                </div>
-            </div>
-            <div>
-                <div v-for="note in (GetNotes('SFL', i[0], i[1]) as SpeedVelocity[]).filter(x => x.velocity != 1)"
-                     class="SFL"
-                     :style="`--tick:${note.tick}; --tick-end: ${note.tick_end}; border-color: ${GetColor(note.velocity)}`">
-                    {{ note.velocity }}
-                </div>
-            </div>
-            <div>
-                <div v-for="note in (GetNotes('DIV', i[0], i[1]) as Div[])"
-                     class="DIV"
-                     :style="`--tick:${Math.floor(note.tick)}; --content:'${note.first}/${note.second}'`">
-                </div>
-            </div>
-        </div>
+    <div v-if="data_fetched">
+        <BeatmapVisualizer
+            :split="index"
+            :measure="chart['BEAT_1'] as BeatmapMeasure[]"
+            :beat="chart['BEAT_2'] as BeatmapBeat[]"
+            :sv="chart['SFL'] as BeatmapSpeedVelocity[]"
+            :div="chart['DIV'] as BeatmapDiv[]"
+            :bpm="chart['BPM'] as BeatmapBpm[]"
+            :rice="rices[0] as BeatmapRice[]"
+            :rice_display="rices[1] as string[]"
+            :ln="lns[0] as BeatmapLn[]"
+            :ln_display="lns[1] as string[]"
+            :slide="slides[0] as BeatmapSlide[]"
+            :slide_display="slides[1] as string[]"
+            :length="length"
+            :overflow="50"
+        >
+            <template v-for="cat in cat_rice" :key="cat" #[cat]>
+                <div class="cat-rice-common" :class="cat"/>
+            </template>
+
+            <template v-for="cat in cat_noodle" :key="cat" #[cat]>
+                <div :class="cat"/>
+            </template>
+
+            <template v-for="cat in cat_slide" :key="cat" #[cat]="{note}">
+                <div :class="[cat, note.Color]"/>
+            </template>
+        </BeatmapVisualizer>
     </div>
 </template>
 
 <style scoped lang="postcss" src="../../assets/css/chunithm/preview.pcss"></style>
+<style scoped lang="postcss" src="../../assets/css/chunithm/preview.rice.pcss"></style>
+<style scoped lang="postcss" src="../../assets/css/chunithm/preview.ln.pcss"></style>
+<style scoped lang="postcss" src="../../assets/css/chunithm/preview.slide.pcss"></style>
 
 
 <script lang="ts">
-import * as d3 from "d3";
-
 /**
  * 使用贪心策略将小节按顺序合并为最接近 `lane_length` 的若干个序列
  * @param arr
@@ -231,15 +213,6 @@ function GetSplitPoint(arr: number[], lane_length: number) {
     }
 
     return res.slice(1);
-}
-
-const SvColor = d3.scaleLinear<string>()
-    .domain([-1, 0, 1, 3, 100, 500])
-    .range(['#ff00f2', '#0000ff', '#00ff00', '#ff0000', "#520101", "#000000"])
-    .interpolate(d3.interpolateRgb.gamma(2.2))
-
-function GetColor(val: number) {
-    return SvColor(val);
 }
 
 function GetMidValue(arr: number[]) {

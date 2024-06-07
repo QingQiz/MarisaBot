@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "npx vite serve",
+    "serve": "npx vite serve --host 127.0.0.1",
     "build": "npx vite build"
   },
   "dependencies": {
