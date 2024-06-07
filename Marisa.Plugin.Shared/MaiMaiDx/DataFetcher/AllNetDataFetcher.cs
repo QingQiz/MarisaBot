@@ -9,6 +9,7 @@ using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -16,15 +17,15 @@ namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
 using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
 
-public class AllNetDataFetcher : DataFetcher
+public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 {
-    public AllNetDataFetcher(MaiSongDb songDb) : base(songDb) {}
-
     public override async Task<DxRating> GetRating(Message message)
     {
         var id = GetAimeId(message);
 
-        var (scores, preview) = await GetScores(id);
+        var (scores, preview) = await Retryable.WithRetryAsync(
+            () => GetScores(id), 10, TimeSpan.FromSeconds(1)
+        );
 
         var group = scores
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
@@ -58,7 +59,11 @@ public class AllNetDataFetcher : DataFetcher
     {
         var id = GetAimeId(message);
 
-        return (await GetScores(id)).Scores;
+        var (scores, _) = await Retryable.WithRetryAsync(
+            () => GetScores(id), 10, TimeSpan.FromSeconds(1)
+        );
+
+        return scores;
     }
 
     public static async Task<bool> Logout(int userId)
@@ -130,9 +135,9 @@ public class AllNetDataFetcher : DataFetcher
         return (ret, preview);
     }
 
-    private int GetAimeId(Message message)
+    private static int GetAimeId(Message message)
     {
-        var qq = message.Sender!.Id;
+        var qq = message.Sender.Id;
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)
