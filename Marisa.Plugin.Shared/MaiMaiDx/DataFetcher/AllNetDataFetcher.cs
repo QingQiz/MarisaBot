@@ -31,21 +31,22 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
             .ToList();
 
-        var b35 = group
-            .First(x => !x.Key)
-            .OrderByDescending(x => x.Value.Rating)
-            .ThenByDescending(x => x.Value.Id)
-            .Take(35)
-            .Select(x => x.Value)
-            .ToList();
+        var b35 = group.FirstOrDefault(x => !x.Key)?
+                      .OrderByDescending(x => x.Value.Rating)
+                      .ThenByDescending(x => x.Value.Id)
+                      .Take(35)
+                      .Select(x => x.Value)
+                      .ToList()
+               ?? [];
 
         var b15 = group
-            .First(x => x.Key)
-            .OrderByDescending(x => x.Value.Rating)
-            .ThenByDescending(x => x.Value.Id)
-            .Take(15)
-            .Select(x => x.Value)
-            .ToList();
+                      .FirstOrDefault(x => x.Key)?
+                      .OrderByDescending(x => x.Value.Rating)
+                      .ThenByDescending(x => x.Value.Id)
+                      .Take(15)
+                      .Select(x => x.Value)
+                      .ToList()
+               ?? [];
 
         return new DxRating
         {
@@ -95,7 +96,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 
         var cache = times.Where(x => x.Time >= preview.LastLogin).ToList();
 
-        if (cache.Any())
+        if (cache.Count != 0)
         {
             var des = JsonConvert.DeserializeObject<Dictionary<(long Id, int LevelIndex), SongScore>>(
                 await File.ReadAllTextAsync(cache.First().Path));
@@ -127,10 +128,14 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             };
         }
 
-        await File.WriteAllTextAsync(
-            Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
-            JsonConvert.SerializeObject(ret)
-        );
+        // 华立有时候会返回一个空的数据，这个时候就不要写入文件了
+        if (ret.Count != 0)
+        {
+            await File.WriteAllTextAsync(
+                Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
+                JsonConvert.SerializeObject(ret)
+            );
+        }
 
         return (ret, preview);
     }
