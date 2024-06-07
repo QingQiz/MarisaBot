@@ -907,15 +907,22 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
                 {
                     var accessCode = next.Command.Trim();
 
-                    var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
+                    try
+                    {
+                        var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
 
-                    await using var dbContext = new BotDbContext();
+                        await using var dbContext = new BotDbContext();
 
-                    dbContext.MaiMaiBinds.Add(new MaiMaiDxBind(next.Sender!.Id, aimeId));
+                        dbContext.MaiMaiBinds.Add(new MaiMaiDxBind(next.Sender.Id, aimeId));
 
-                    await dbContext.SaveChangesAsync();
+                        await dbContext.SaveChangesAsync();
 
-                    message.Reply("好了");
+                        message.Reply("好了");
+                    }
+                    catch (InvalidDataException e)
+                    {
+                        message.Reply($"错误的二维码结果: {e.Message}。会话已关闭");
+                    }
 
                     return MarisaPluginTaskState.CompletedTask;
                 }
