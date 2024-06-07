@@ -46,7 +46,7 @@ public static class WebApi
         await page.GoToAsync(url, new NavigationOptions
         {
             WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load],
-            Timeout   = 30,
+            Timeout   = 30 * 1000,
         });
 
         return await page.ScreenshotBase64Async(ScreenshotOptions);
