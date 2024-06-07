@@ -886,11 +886,11 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
                     {
                         await using var dbContext = new BotDbContext();
 
-                        var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender!.Id);
+                        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
 
                         if (bind != null)
                         {
-                            dbContext.ChunithmBinds.Remove(bind);
+                            dbContext.MaiMaiBinds.Remove(bind);
                             await dbContext.SaveChangesAsync();
                         }
 
@@ -931,7 +931,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 
     #region unlock
 
-    [MarisaPluginDoc("解锁")]
+    [MarisaPluginDoc("逃离小黑屋")]
     [MarisaPluginCommand("unlock", "解锁")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private static async Task<MarisaPluginTaskState> UnLock(Message message)
