@@ -81,7 +81,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
                 .ToList();
 
             // 跳过被删除了的歌
-            if (titles.Any() && !songNameAll.Contains(titles[0]))
+            if (titles.Count != 0 && !songNameAll.Contains(titles[0]))
             {
                 continue;
             }
@@ -164,7 +164,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
     public List<TSong> SearchSong(string m)
     {
-        if (string.IsNullOrEmpty(m)) return new List<TSong>();
+        if (string.IsNullOrEmpty(m)) return [];
 
         m = m.Trim();
 
@@ -187,51 +187,24 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         return search;
     }
 
-    /// <summary>
-    /// 全字匹配歌曲别名
-    /// </summary>
-    /// <param name="alias"></param>
-    /// <returns></returns>
-    private List<TSong>? SearchSongByAliasWholeWord(string alias)
-    {
-        var key = SongAlias.Keys
-            .Where(a => string.Equals(a, alias, StringComparison.OrdinalIgnoreCase)).ToList();
-
-        if (!key.Any())
-        {
-            try
-            {
-                var regex = new Regex(@$"\b{alias}\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-                key = SongAlias.Keys.Where(a => regex.IsMatch(a)).ToList();
-            }
-            catch (RegexParseException) {}
-        }
-
-        if (!key.Any()) return null;
-
-        // 获取完整的标题列表
-        var names = key
-            .Select(k => SongAlias[k])
-            .SelectMany(n => n)
-            .Distinct().ToHashSet();
-
-        var songs = SongList.Where(song => names.Contains(song.Title)).ToList();
-
-        return songs;
-    }
-
     private List<TSong> SearchSongByAlias(string alias)
     {
-        if (string.IsNullOrWhiteSpace(alias)) return new List<TSong>();
+        if (string.IsNullOrWhiteSpace(alias)) return [];
 
-        if (SearchSongByAliasWholeWord(alias) is {} song)
+        IEnumerable<string> key;
+
+        try
         {
-            return song;
+            var regex = new Regex(alias, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            key = SongAlias.Keys.Where(a => regex.IsMatch(a));
+        }
+        catch (RegexParseException)
+        {
+            key = SongAlias.Keys.Where(songNameAlias =>
+                songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase));
         }
 
-        return SongAlias.Keys
-            // 找到别名匹配的
-            .Where(songNameAlias => songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase))
+        return key
             // 找到真实歌曲名
             .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -300,13 +273,13 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
             File.AppendAllText(_tempAliasPath, $"{title}\t{alias}\n");
 
-            if (SongAlias.ContainsKey(alias))
+            if (SongAlias.TryGetValue(alias, out var value))
             {
-                SongAlias[alias].Add(title);
+                value.Add(title);
             }
             else
             {
-                SongAlias[alias] = new List<string> { title };
+                SongAlias[alias] = [title];
             }
 
             return true;
@@ -320,8 +293,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     private async Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
     {
         var dbContext  = new BotDbContext();
-        var senderId   = message.Sender!.Id;
-        var senderName = message.Sender!.Name;
+        var senderId   = message.Sender.Id;
+        var senderName = message.Sender.Name;
 
         var db   = (DbSet<TSongGuess>)dbContext.GetType().GetProperty(_guessDbSetName)!.GetValue(dbContext, null)!;
         var @new = db.Any(u => u.UId == senderId);
@@ -438,8 +411,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
     public bool StartGuess(TSong song, Message message, long qq)
     {
-        var senderId   = message.Sender!.Id;
-        var senderName = message.Sender!.Name;
+        var senderId   = message.Sender.Id;
+        var senderName = message.Sender.Name;
         var groupId    = message.GroupInfo!.Id;
         var now        = DateTime.Now;
         var res        = MessageHandlerAdder(groupId, null, msg => GenGuessDialogHandler(song, now, qq)(msg));
@@ -489,7 +462,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         var cover = song.GetCover();
 
-        var cw = cover.Width  / widthDiv;
+        var cw = cover.Width / widthDiv;
         var ch = cover.Height / widthDiv;
 
         cover.Mutate(i => i.RandomCut(cw, ch));
