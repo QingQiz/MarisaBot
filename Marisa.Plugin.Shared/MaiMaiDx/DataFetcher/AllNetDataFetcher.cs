@@ -71,7 +71,9 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var req = JsonConvert.SerializeObject(new { userId });
 
-        var rep = await MakeMaiRequest("UserLogoutApiMaimaiChn", req, userId);
+        var rep = await Retryable.WithRetryAsync(
+            () => MakeMaiRequest("UserLogoutApiMaimaiChn", req, userId), 10, TimeSpan.FromSeconds(1)
+        );
 
         var res = Encoding.UTF8.GetString(AesDecrypt(await Decompress(rep)));
         return JsonConvert.DeserializeObject<Dictionary<string, int>>(res)!["returnCode"] == 1;
