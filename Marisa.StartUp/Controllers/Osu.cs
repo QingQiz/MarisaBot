@@ -114,4 +114,14 @@ public class Osu : Controller
         var result = await OsuApi.Request($"https://osu.ppy.sh/api/v2/beatmaps/{beatmapId}").GetStringAsync();
         return result;
     }
+    
+    [HttpGet]
+    public async Task<string> GetBeatmapById(long beatmapId)
+    {
+        var info    = await OsuApi.GetBeatmapInfoById(beatmapId);
+
+        var beatmap = OsuApi.GetBeatmapPath(info);
+
+        return await System.IO.File.ReadAllTextAsync(beatmap);
+    }
 }

@@ -205,9 +205,7 @@ onMounted(ListenOnDevicePixelRatio);
             <!--            LN -->
             <div v-for="n in GetLn(i[0], i[1])" class="ln-common" :style="LnStyle(n[0], i)">
                 <slot :name="n[1]" :note="n[0]" :range="i">
-                    <div class="ln">
-                        {{n[1]}}
-                    </div>
+                    <div class="ln"/>
                 </slot>
             </div>
 
@@ -220,14 +218,14 @@ onMounted(ListenOnDevicePixelRatio);
 
             <!--            BPM -->
             <template v-for="b in GetBpm(i[0], i[1])">
-                <div class="bpm" :style="`--y: ${CalcY(b.Tick, i)}; --content: '${b.Bpm}'`"/>
+                <div class="bpm" :style="`--y: ${CalcY(b.Tick, i)}; --content: '${b.Bpm.toFixed(0)}'`"/>
             </template>
 
             <!--            SV -->
             <template v-for="s in GetSv(i[0], i[1])">
                 <div class="sv"
                      :style="`--y: ${CalcY(s.Tick, i)}; --y-end: ${CalcY(s.TickEnd, i)}; border-color: ${GetColor(s.Velocity)}`">
-                    {{ s.Velocity }}
+                    {{ s.Velocity.toFixed(3) }}
                 </div>
             </template>
 

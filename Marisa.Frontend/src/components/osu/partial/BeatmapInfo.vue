@@ -23,7 +23,7 @@
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="postcss">
 .song-info-with-icon {
     @apply flex gap-7 text-[#ffd996] font-bold text-2xl
 }
@@ -41,8 +41,7 @@
 <script setup lang="ts">
 import { BeatmapInfo } from '../Osu.Data';
 
-let prop = defineProps<{ beatmap: BeatmapInfo }>()
-
+defineProps<{ beatmap: BeatmapInfo }>();
 
 function SecondsToTime(seconds: number): string {
     if (seconds > 3600) {

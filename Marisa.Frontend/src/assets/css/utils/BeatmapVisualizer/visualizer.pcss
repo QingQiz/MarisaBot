@@ -19,7 +19,7 @@
 }
 
 .stage {
-    @apply relative mx-11 my-5;
+    @apply relative mx-11 my-5 overflow-y-clip;
 
     --tick-min: 0;
     --tick-max: 1000;
@@ -58,6 +58,7 @@ BPM线
 
     &:before {
         content: var(--content);
+        padding-right: 5px;
     }
 
     width: 40px;
