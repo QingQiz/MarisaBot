@@ -69,7 +69,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         {
             var titles = line
                 .Split('\t')
-                .Select(x => x.Trim().Trim('"').Replace("\"\"", "\""))
+                .Select(x => x.Trim().UnEscapeTsvCell().Replace("\"\"", "\""))
                 .ToList();
 
             titles = titles

@@ -50,33 +50,11 @@ public static class StringExt
 
         return TextMeasurer.Measure(text, option);
     }
-
-    /// <summary>
-    /// 和原始的 string.StartWith 类似，只不过同时检查多个
-    /// </summary>
-    /// <param name="str"></param>
-    /// <param name="prefixes"></param>
-    /// <param name="comparer"></param>
-    /// <returns></returns>
-    public static bool StartWith(
-        this string str, IEnumerable<string> prefixes,
-        StringComparison comparer = StringComparison.Ordinal)
+    
+    public static string UnEscapeTsvCell(this string s)
     {
-        return prefixes.Any(p => str.StartsWith(p, comparer));
-    }
-
-    /// <summary>
-    /// </summary>
-    /// <param name="msg"></param>
-    /// <param name="prefixes"></param>
-    /// <returns>return null if trim nothing</returns>
-    public static string? TrimStart(this string msg, IEnumerable<string> prefixes)
-    {
-        msg = msg.Trim();
-
-        return (from prefix in prefixes
-            where msg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-            select msg[prefix.Length..].Trim()).FirstOrDefault();
+        if (s[0] == '"' && s[^1] == '"') return s[1..^1].Replace("\"\"", "\"");
+        return s;
     }
 
     public static string? TrimStart(this string msg, string prefix)
@@ -96,7 +74,7 @@ public static class StringExt
     {
         try
         {
-            var _ = Regex.Match("", regex);
+            _ = Regex.Match("", regex);
             return true;
         }
         catch (RegexParseException)
@@ -162,20 +140,5 @@ public static class StringExt
         }
 
         return literal.ToString();
-    }
-
-    public static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        var stringChars = new char[length];
-        var random      = new Random();
-
-        for (var i = 0; i < stringChars.Length; i++)
-        {
-            stringChars[i] = chars[random.Next(chars.Length)];
-        }
-
-        return new string(stringChars);
     }
 }
