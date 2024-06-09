@@ -53,6 +53,8 @@ public static class StringExt
     
     public static string UnEscapeTsvCell(this string s)
     {
+        if (s.Length < 2) return s;
+
         if (s[0] == '"' && s[^1] == '"') return s[1..^1].Replace("\"\"", "\"");
         return s;
     }
