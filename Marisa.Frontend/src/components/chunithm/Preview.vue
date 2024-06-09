@@ -16,9 +16,13 @@ import axios from "axios";
 import BeatmapVisualizer from "@/components/utils/BeatmapVisualizer/BeatmapVisualizer.vue";
 import {
     Beatmap,
-    BeatmapBeat, BeatmapBpm,
-    BeatmapDiv, BeatmapLn,
-    BeatmapMeasure, BeatmapRice, BeatmapSlide,
+    BeatmapBeat,
+    BeatmapBpm,
+    BeatmapDiv,
+    BeatmapLn,
+    BeatmapMeasure,
+    BeatmapRice,
+    BeatmapSlide,
     BeatmapSpeedVelocity
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 import {zip} from "@/utils/list";
@@ -32,6 +36,8 @@ let data_fetched = ref(false);
 let chart  = ref({} as Chart);
 let index  = ref([] as number[]);
 let length = ref(0);
+
+let long_measure_split_step = 16;
 
 axios(name.value ? `/assets/chunithm/chart/${name.value}.c2s` : context_get, {params: {id: id.value, name: 'chart'}})
     .then(data => {
@@ -64,8 +70,8 @@ function GetMinSplit(chart: Chart) {
     beats.forEach((value, _) => {
         value.sort((a, b) => a.Tick - b.Tick);
 
-        for (let i = 8; i < value.length; i += 8) {
-            split.push([value[i].Tick, 8]);
+        for (let i = long_measure_split_step - 1; i < value.length; i += long_measure_split_step) {
+            split.push([value[i].Tick, long_measure_split_step]);
         }
     });
 
@@ -98,7 +104,7 @@ function GetMeasureMidLength(min_split: [number, number][], max_tick: number) {
     }
     res.push(max_tick - time[time.length - 1]);
 
-    return GetMidValue(res);
+    return GetAvgValue(res);
 }
 
 function ProcessChart4Display(chart: Chart): [Chart, number[], number] {
@@ -199,15 +205,17 @@ function GetSplitPoint(arr: number[], lane_length: number) {
         prefix_sum[i + 1] = prefix_sum[i] + arr[i];
     }
 
+    let limit = Math.max(lane_length, arr.reduce((a, b) => Math.max(a, b), 0))
+    let over  = limit + limit / 32;
+
     let res = [-1]
 
     for (let i = 0; i < arr.length - 1; i++) {
         let pre = prefix_sum[res[res.length - 1] + 1];
 
-        let current = prefix_sum[i + 1] - pre;
-        let next    = prefix_sum[i + 2] - pre;
+        let next = prefix_sum[i + 2] - pre;
 
-        if (Math.abs(current - lane_length) <= Math.abs(next - lane_length)) {
+        if (next > over) {
             res.push(i);
         }
     }
@@ -215,7 +223,7 @@ function GetSplitPoint(arr: number[], lane_length: number) {
     return res.slice(1);
 }
 
-function GetMidValue(arr: number[]) {
+function GetAvgValue(arr: number[]) {
     let copy   = arr.slice();
     let ignore = 5;
 
