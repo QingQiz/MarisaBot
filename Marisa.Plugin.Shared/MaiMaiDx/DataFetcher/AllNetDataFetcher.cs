@@ -119,17 +119,19 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 
             if (!exist || song == null) continue;
 
-            ret[(data.Id, data.LevelIndex)] = new SongScore
+            var levelIndex = data.LevelIndex - (data.LevelIndex >= 10 ? 10 : 0);
+
+            ret[(data.Id, levelIndex)] = new SongScore
             {
                 Id          = data.Id,
                 Achievement = data.Achievement,
                 Fc          = data.Combo switch { 1 => "fc", 2 => "fcp", 3 => "ap", 4 => "app", _ => "" },
-                LevelIdx    = data.LevelIndex,
+                LevelIdx    = levelIndex,
                 Title       = song.Title,
-                Constant    = song.Constants[data.LevelIndex],
+                Constant    = song.Constants[levelIndex],
                 DxScore     = data.DxScore,
                 Fs          = data.Sync switch { 1 => "fs", 2 => "fsp", 3 => "fsd", 4 => "fsdp", _ => "" },
-                Level       = song.Levels[data.LevelIndex - (data.LevelIndex >= 10 ? 10 : 0)],
+                Level       = song.Levels[levelIndex],
                 Type        = song.Type,
             };
         }
