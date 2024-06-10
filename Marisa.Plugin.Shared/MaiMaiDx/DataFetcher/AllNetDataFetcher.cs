@@ -28,6 +28,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         );
 
         var group = scores
+            .Where(x => x.Value.Id < 100000)
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
             .ToList();
 
