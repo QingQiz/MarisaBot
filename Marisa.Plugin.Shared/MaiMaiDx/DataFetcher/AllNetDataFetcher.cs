@@ -103,7 +103,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             : await GetMusicData(aimeId);
 
         // 华立有时候会返回一个空的数据，这个时候就不要写入文件了
-        if (cache.Count != 0)
+        if (md.Count != 0)
         {
             await File.WriteAllTextAsync(
                 Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
