@@ -129,7 +129,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
                 Constant    = song.Constants[data.LevelIndex],
                 DxScore     = data.DxScore,
                 Fs          = data.Sync switch { 1 => "fs", 2 => "fsp", 3 => "fsd", 4 => "fsdp", _ => "" },
-                Level       = song.Levels[data.LevelIndex],
+                Level       = song.Levels[data.LevelIndex - (data.LevelIndex >= 10 ? 10 : 0)],
                 Type        = song.Type,
             };
         }
