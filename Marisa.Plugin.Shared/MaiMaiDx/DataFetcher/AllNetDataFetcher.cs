@@ -85,7 +85,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         var preview = await GetUserPreview(aimeId);
 
         var tempPath = ConfigurationManager.Configuration.MaiMai.TempPath;
-        var prefix   = $"UserScores-{aimeId}-";
+        var prefix   = $"UserMusicData-{aimeId}-";
 
         var times = Directory.GetFiles(tempPath)
             .Select(x => (Path: x, FileName: Path.GetFileName(x)))
@@ -98,14 +98,18 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 
         var cache = times.Where(x => x.Time >= preview.LastLogin).ToList();
 
+        var md = cache.Count != 0
+            ? JsonConvert.DeserializeObject<List<MusicData>>(await File.ReadAllTextAsync(cache.MaxBy(x => x.Time).Path))!
+            : await GetMusicData(aimeId);
+
+        // 华立有时候会返回一个空的数据，这个时候就不要写入文件了
         if (cache.Count != 0)
         {
-            var des = JsonConvert.DeserializeObject<Dictionary<(long Id, int LevelIndex), SongScore>>(
-                await File.ReadAllTextAsync(cache.First().Path));
-            return (des!, preview);
+            await File.WriteAllTextAsync(
+                Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
+                JsonConvert.SerializeObject(md)
+            );
         }
-
-        var md = await GetMusicData(aimeId);
 
         var ret = new Dictionary<(long Id, int LevelIndex), SongScore>();
 
@@ -128,15 +132,6 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
                 Level       = song.Levels[data.LevelIndex],
                 Type        = song.Type,
             };
-        }
-
-        // 华立有时候会返回一个空的数据，这个时候就不要写入文件了
-        if (ret.Count != 0)
-        {
-            await File.WriteAllTextAsync(
-                Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
-                JsonConvert.SerializeObject(ret)
-            );
         }
 
         return (ret, preview);
