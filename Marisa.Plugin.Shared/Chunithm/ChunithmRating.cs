@@ -47,7 +47,7 @@ public class Records
     [JsonProperty("b30")]
     public ChunithmScore[] B30
     {
-        get => _best ?? Array.Empty<ChunithmScore>();
+        get => _best ?? [];
         set => _best = value;
     }
 
