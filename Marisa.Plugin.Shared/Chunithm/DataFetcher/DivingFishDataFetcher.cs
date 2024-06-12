@@ -1,28 +1,27 @@
 ﻿using Flurl.Http;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Configuration;
-using Org.BouncyCastle.Ocsp;
-using osu.Framework.Graphics.Containers;
-using osu.Game.Replays;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
 using ChunithmSongDb =
-    Util.SongDb.SongDb<ChunithmSong, Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm.ChunithmGuess>;
+    SongDb<ChunithmSong, ChunithmGuess>;
 
 public class DivingFishDataFetcher(ChunithmSongDb songDb) : DataFetcher(songDb)
 {
-    private List<ChunithmSong>? _songList;
-
     /// <summary>
-    /// 中二节奏有一些如删的歌曲，即这些歌在游戏中已经删除，但在公众号中依然被保留，
-    /// 这导致了op计算和rating计算不正确，
-    /// 因此需要手动过滤掉
+    ///     中二节奏有一些如删的歌曲，即这些歌在游戏中已经删除，但在公众号中依然被保留，
+    ///     这导致了op计算和rating计算不正确，
+    ///     因此需要手动过滤掉
     /// </summary>
-    private readonly HashSet<long> _deletedSongs = [
-        1051 , 1001 , 1003 , 1046 , 1049 , 1050 , 1054 , 2007 , 2008 , 2014 , 2016 , 2020 , 2095 , 343 , 156
+    private readonly HashSet<long> _deletedSongs =
+    [
+        1051, 1001, 1003, 1046, 1049, 1050, 1054, 2007, 2008, 2014, 2016, 2020, 2095, 343, 156
     ];
+    private List<ChunithmSong>? _songList;
 
     public override List<ChunithmSong> GetSongList()
     {
