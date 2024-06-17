@@ -48,6 +48,7 @@ public static class WebApi
             WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load],
             Timeout   = 30 * 1000,
         });
+        await page.WaitForTimeoutAsync(3 * 1000);
 
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
