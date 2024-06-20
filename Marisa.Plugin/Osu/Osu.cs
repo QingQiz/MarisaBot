@@ -1,5 +1,4 @@
 ﻿using Flurl.Http;
-using NLog;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
@@ -126,7 +125,7 @@ public partial class Osu
     }
 
     /// <summary>
-    /// 大部分请求都是已经绑定的用户发出的，所以这里直接从数据库里取，不行再请求
+    ///     大部分请求都是已经绑定的用户发出的，所以这里直接从数据库里取，不行再请求
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
@@ -145,7 +144,6 @@ public partial class Osu
 
     public override async Task BackgroundService()
     {
-        // 不要并发，小心ppy给你ban了
         // 1200/minute, with burst capability of up to 200 beyond that
         // > 60/minute, you should probably give peppy a yell
         while (true)
@@ -161,18 +159,16 @@ public partial class Osu
 
             foreach (var bind in db.OsuBinds)
             {
-                if (bind == null) continue;
-
                 tasks.Enqueue((bind.OsuUserName, OsuApi.ModeList.IndexOf(bind.GameMode), bind.OsuUserId));
             }
 
-            while (tasks.Any())
+            while (tasks.Count != 0)
             {
                 var task = tasks.Dequeue();
 
                 try
                 {
-                    var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i, 0);
+                    var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i);
                     await db.OsuUserHistories.AddAsync(new OsuUserHistory
                     {
                         OsuUserName  = task.OsuUserName,
@@ -185,15 +181,12 @@ public partial class Osu
                 }
                 catch (FlurlHttpException e) when (e.StatusCode != 404)
                 {
-                    var log = LogManager.GetCurrentClassLogger();
-                    log.Error("获取用户信息失败: ", e);
-
                     tasks.Enqueue(task);
                 }
-
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
         }
+        // ReSharper disable once FunctionNeverReturns
     }
 
     public override Task ExceptionHandler(Exception exception, Message message)

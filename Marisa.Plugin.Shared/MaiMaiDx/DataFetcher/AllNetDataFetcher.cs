@@ -9,9 +9,11 @@ using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NLog;
+using Polly;
+using Polly.Retry;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
@@ -19,13 +21,27 @@ using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
 
 public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    private static AsyncRetryPolicy GetPolicy(string actionName)
+    {
+        return Policy
+            .Handle<FlurlHttpException>(e => e.StatusCode == 404)
+            .WaitAndRetryAsync(
+                10,
+                _ => TimeSpan.FromSeconds(1),
+                (exception, timeSpan, retryCount, _) =>
+                {
+                    Logger.Error($"Failed: {actionName}, retry: {retryCount}, sleep: {timeSpan.Seconds} seconds, because: {exception.Message}");
+                }
+            );
+    }
+
     public override async Task<DxRating> GetRating(Message message)
     {
         var id = GetAimeId(message);
 
-        var (scores, preview) = await Retryable.WithRetryAsync(
-            () => GetScores(id), 10, TimeSpan.FromSeconds(1)
-        );
+        var (scores, preview) = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
 
         var group = scores
             .Where(x => x.Value.Id < 100000)
@@ -53,7 +69,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         {
             Nickname  = preview.Username,
             OldScores = b35,
-            NewScores = b15,
+            NewScores = b15
         };
     }
 
@@ -61,9 +77,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var id = GetAimeId(message);
 
-        var (scores, _) = await Retryable.WithRetryAsync(
-            () => GetScores(id), 10, TimeSpan.FromSeconds(1)
-        );
+        var (scores, _) = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
 
         return scores;
     }
@@ -72,9 +86,8 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var req = JsonConvert.SerializeObject(new { userId });
 
-        var rep = await Retryable.WithRetryAsync(
-            () => MakeMaiRequest("UserLogoutApiMaimaiChn", req, userId), 10, TimeSpan.FromSeconds(1)
-        );
+        var rep = await GetPolicy("UserLogoutApiMaimaiChn")
+            .ExecuteAsync(async () => await MakeMaiRequest("UserLogoutApiMaimaiChn", req, userId));
 
         var res = Encoding.UTF8.GetString(AesDecrypt(await Decompress(rep)));
         return JsonConvert.DeserializeObject<Dictionary<string, int>>(res)!["returnCode"] == 1;
@@ -133,7 +146,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
                 DxScore     = data.DxScore,
                 Fs          = data.Sync switch { 1 => "fs", 2 => "fsp", 3 => "fsd", 4 => "fsdp", _ => "" },
                 Level       = song.Levels[levelIndex],
-                Type        = song.Type,
+                Type        = song.Type
             };
         }
 
@@ -187,7 +200,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             {
                 Host           = AimeHost,
                 User_Agent     = "WC_AIME_LIB",
-                Content_Length = data.Length,
+                Content_Length = data.Length
             })
             .PostStringAsync(data);
 
@@ -297,7 +310,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 
         var body = await Compress(AesEncrypt(data));
 
-        var httpClient = new HttpClient(new HttpClientHandler()
+        var httpClient = new HttpClient(new HttpClientHandler
         {
             AutomaticDecompression = DecompressionMethods.None
         });
@@ -313,7 +326,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             charset          = "UTF-8",
             Mai_Encoding     = "1.30",
             Content_Encoding = "deflate",
-            Content_Length   = body.Length,
+            Content_Length   = body.Length
         });
 
         var rep = await cli
@@ -386,7 +399,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var req = JsonConvert.SerializeObject(new
         {
-            userId = aimeId,
+            userId = aimeId
         });
 
         var rep = await MakeMaiRequest("GetUserPreviewApiMaimaiChn", req, aimeId);
