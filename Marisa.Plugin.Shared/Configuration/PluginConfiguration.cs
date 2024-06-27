@@ -17,8 +17,6 @@ public class PluginConfiguration
 
     public ArcaeaConfiguration Arcaea { get; set; }
 
-    public RandomPictureConfiguration RandomPicture { get; set; }
-
     public ChunithmConfiguration Chunithm { get; set; }
 
     public OngekiConfiguration Ongeki{ get; set; }
