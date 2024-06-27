@@ -6,6 +6,8 @@ namespace Marisa.Plugin.Shared.Configuration;
 
 public class PluginConfiguration
 {
+    public string[] Chi { get; set; }
+
     public long[] Commander { get; set; }
 
     public TodayFortune Fortune { get; set; }
