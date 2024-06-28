@@ -16,7 +16,8 @@
     <ItemGroup>
         <PackageReference Include="jieba.NET" Version="0.42.2"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3"/>
-        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11"/>
+        <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
@@ -26,13 +27,13 @@
     </Target>
 
     <ItemGroup>
-        <Content Include="config.yaml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
+        <Content Include="config.yaml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"/>
     </ItemGroup>
 
     <Target Name="CopyFiles" AfterTargets="Build">
         <ItemGroup>
             <SourceFiles Include="../Marisa.Frontend/dist/**"/>
-            <DestinationFiles Include="@(SourceFiles->'$(OutputPath)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')" />
+            <DestinationFiles Include="@(SourceFiles->'$(OutputPath)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')"/>
         </ItemGroup>
 
         <Copy SourceFiles="@(SourceFiles)" DestinationFiles="@(DestinationFiles)" SkipUnchangedFiles="true"/>

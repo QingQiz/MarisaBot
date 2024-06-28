@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using NLog.Web;
 using NuGet.Packaging;
 
 namespace Marisa.StartUp;
@@ -23,6 +24,7 @@ public static class Program
         builder.Services.ConfigLogger();
         builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
         builder.WebHost.UseUrls("http://localhost:14311");
+        builder.Host.UseNLog();
 
         var app = builder.Build();
         app.UseSwagger();
