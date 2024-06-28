@@ -14,6 +14,175 @@ namespace Marisa.Plugin.MaiMaiDx;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 {
+
+    #region 查分
+
+    /// <summary>
+    ///     b50
+    /// </summary>
+    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginCommand("best", "b50", "查分")]
+    private async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
+    {
+        var ret = await GetB50Card(message);
+
+        message.Reply(ret);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 搜歌
+
+    /// <summary>
+    ///     搜歌
+    /// </summary>
+    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
+    [MarisaPluginCommand("song", "search", "搜索")]
+    private MarisaPluginTaskState MaiMaiDxSearchSong(Message message)
+    {
+        return _songDb.SearchSong(message);
+    }
+
+    #endregion
+
+    [MarisaPluginNoDoc]
+    [MarisaPluginCommand(true, "nocover")]
+    private MarisaPluginTaskState NoCover(Message message)
+    {
+        var coverPath = ResourceManager.ResourcePath + "/cover";
+
+        var noCover = _songDb.SongList
+            .Where(s => !File.Exists($"{coverPath}/{s.Id}.jpg") && !File.Exists($"{coverPath}/{s.Id}.png"));
+
+        _songDb.MultiPageSelectResult(noCover.ToList(), message);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #region 绑定
+
+    [MarisaPluginDoc("绑定某个查分器")]
+    [MarisaPluginCommand("bind", "绑定")]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    private static Task<MarisaPluginTaskState> Bind(Message message)
+    {
+        var fetchers = new[]
+        {
+            "DivingFish", "Wahlap"
+        };
+
+        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
+            .Select((x, i) => (x, i))
+            .Select(x => $"{x.i}. {x.x}"))
+        );
+
+        /*
+         * 0 -> 检查输入的index，正确时询问access code
+         * 1 -> 检查输入的access code
+         */
+        var stat = 0;
+
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, async next =>
+        {
+            switch (stat)
+            {
+                case 0:
+                {
+                    if (!int.TryParse(next.Command, out var idx) || idx < 0 || idx >= fetchers.Length)
+                    {
+                        next.Reply("错误的序号，会话已关闭");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+
+                    if (idx == 0)
+                    {
+                        await using var dbContext = new BotDbContext();
+
+                        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+
+                        if (bind != null)
+                        {
+                            dbContext.MaiMaiBinds.Remove(bind);
+                            await dbContext.SaveChangesAsync();
+                        }
+
+                        message.Reply("好了");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+
+                    // message.Reply("给出你舞萌在有效期内的二维码的扫描结果（以SGWC开头的字符串）");
+                    // stat = 1;
+                    //
+                    // return MarisaPluginTaskState.ToBeContinued;
+
+                    message.Reply("作者的服务器ip被Aime服务器ban了，暂时无法绑定。你可以使用的电脑获取AimeId，详情联系作者😢");
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+                case 1:
+                {
+                    var accessCode = next.Command.Trim();
+
+                    try
+                    {
+                        var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
+
+                        await using var dbContext = new BotDbContext();
+
+                        dbContext.MaiMaiBinds.Add(new MaiMaiDxBind(next.Sender.Id, aimeId));
+
+                        await dbContext.SaveChangesAsync();
+
+                        message.Reply("好了");
+                    }
+                    catch (InvalidDataException e)
+                    {
+                        message.Reply($"错误的二维码结果: {e.Message}。会话已关闭");
+                    }
+
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+            }
+
+            return MarisaPluginTaskState.CompletedTask;
+        });
+
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    #endregion
+
+    #region unlock
+
+    [MarisaPluginDoc("逃离小黑屋")]
+    [MarisaPluginCommand("unlock", "解锁")]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    private static async Task<MarisaPluginTaskState> UnLock(Message message)
+    {
+        await using var dbContext = new BotDbContext();
+
+        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender!.Id);
+
+        if (bind == null)
+        {
+            message.Reply("你未绑定Wahlap，无法使用该功能");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var res = await AllNetDataFetcher.Logout(bind.AimeId);
+
+        if (!res)
+        {
+            message.Reply("解锁失败。。。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply("妥了，玩吧。");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
     #region 汇总 / summary
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
@@ -270,38 +439,6 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 
     #endregion
 
-    #region 查分
-
-    /// <summary>
-    /// b50
-    /// </summary>
-    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
-    [MarisaPluginCommand("best", "b50", "查分")]
-    private async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
-    {
-        var ret = await GetB50Card(message);
-
-        message.Reply(ret);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
-    #region 搜歌
-
-    /// <summary>
-    /// 搜歌
-    /// </summary>
-    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
-    [MarisaPluginCommand("song", "search", "搜索")]
-    private MarisaPluginTaskState MaiMaiDxSearchSong(Message message)
-    {
-        return _songDb.SearchSong(message);
-    }
-
-    #endregion
-
     #region 打什么歌
 
     [MarisaPluginDoc("如何推分到：参数")]
@@ -335,13 +472,13 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
                 .OrderByDescending(x => x.Item4),
             NewScores = rating.NewScores
                 .Select(x => (_songDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating))
-                .OrderByDescending(x => x.Item4),
+                .OrderByDescending(x => x.Item4)
         };
 
         var recommend = new
         {
             OldScores = old.OrderByDescending(x => x.Item4),
-            NewScores = @new.OrderByDescending(x => x.Item4),
+            NewScores = @new.OrderByDescending(x => x.Item4)
         };
 
         var context = new WebContext();
@@ -355,7 +492,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// mai什么
+    ///     mai什么
     /// </summary>
     [MarisaPluginDoc("随机给出一个歌，参数任意")]
     [MarisaPluginCommand("打什么歌", "打什么", "什么")]
@@ -367,7 +504,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// mai什么推分
+    ///     mai什么推分
     /// </summary>
     [MarisaPluginDoc("随机给出至多 4 首打了以后能推分的歌")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxPlayWhat))]
@@ -395,7 +532,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     #region 随机
 
     /// <summary>
-    /// 随机
+    ///     随机
     /// </summary>
     [MarisaPluginDoc("随机给出一个符合条件的歌曲")]
     [MarisaPluginCommand("random", "rand", "随机")]
@@ -474,7 +611,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     #region 筛选
 
     /// <summary>
-    /// 给出歌曲列表
+    ///     给出歌曲列表
     /// </summary>
     [MarisaPluginDoc("给出符合条件的歌曲，结果过多时回复 p1、p2 等获取额外的信息")]
     [MarisaPluginCommand("list", "ls")]
@@ -553,7 +690,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     #region 猜曲
 
     /// <summary>
-    /// 舞萌猜歌排名
+    ///     舞萌猜歌排名
     /// </summary>
     [MarisaPluginDoc("舞萌猜歌的排名，给出的结果中s,c,w分别是启动猜歌的次数，猜对的次数和猜错的次数")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxGuess))]
@@ -578,7 +715,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 舞萌猜歌
+    ///     舞萌猜歌
     /// </summary>
     [MarisaPluginDoc("舞萌猜歌，看封面猜曲")]
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
@@ -616,7 +753,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     #region 歌曲别名相关
 
     /// <summary>
-    /// 别名处理
+    ///     别名处理
     /// </summary>
     [MarisaPluginDoc("别名设置和查询")]
     [MarisaPluginCommand("alias")]
@@ -628,7 +765,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 获取别名
+    ///     获取别名
     /// </summary>
     [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxSongAlias))]
@@ -657,7 +794,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 设置别名
+    ///     设置别名
     /// </summary>
     [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
     [MarisaPluginSubCommand(nameof(MaiMaiDxSongAlias))]
@@ -686,7 +823,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     #region 分数线 / 容错率
 
     /// <summary>
-    /// 分数线，达到某个达成率rating会上升的线
+    ///     分数线，达到某个达成率rating会上升的线
     /// </summary>
     [MarisaPluginDoc("给出定数对应的所有 rating 或 rating 对应的所有定数，参数为：歌曲定数 或 预期rating")]
     [MarisaPluginCommand("line", "分数线")]
@@ -828,140 +965,6 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         });
 
 
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
-    [MarisaPluginNoDoc]
-    [MarisaPluginCommand(true, "nocover")]
-    private MarisaPluginTaskState NoCover(Message message)
-    {
-        var coverPath = ResourceManager.ResourcePath + "/cover";
-
-        var noCover = _songDb.SongList
-            .Where(s => !File.Exists($"{coverPath}/{s.Id}.jpg") && !File.Exists($"{coverPath}/{s.Id}.png"));
-
-        _songDb.MultiPageSelectResult(noCover.ToList(), message);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #region 绑定
-
-    [MarisaPluginDoc("绑定某个查分器")]
-    [MarisaPluginCommand("bind", "绑定")]
-    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
-    private static Task<MarisaPluginTaskState> Bind(Message message)
-    {
-        var fetchers = new[]
-        {
-            "DivingFish", "Wahlap",
-        };
-
-        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
-            .Select((x, i) => (x, i))
-            .Select(x => $"{x.i}. {x.x}"))
-        );
-
-        /*
-         * 0 -> 检查输入的index，正确时询问access code
-         * 1 -> 检查输入的access code
-         */
-        var stat = 0;
-
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, async next =>
-        {
-            switch (stat)
-            {
-                case 0:
-                {
-                    if (!int.TryParse(next.Command, out var idx) || idx < 0 || idx >= fetchers.Length)
-                    {
-                        next.Reply("错误的序号，会话已关闭");
-                        return MarisaPluginTaskState.CompletedTask;
-                    }
-
-                    if (idx == 0)
-                    {
-                        await using var dbContext = new BotDbContext();
-
-                        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
-
-                        if (bind != null)
-                        {
-                            dbContext.MaiMaiBinds.Remove(bind);
-                            await dbContext.SaveChangesAsync();
-                        }
-
-                        message.Reply("好了");
-                        return MarisaPluginTaskState.CompletedTask;
-                    }
-
-                    message.Reply("给出你舞萌在有效期内的二维码的扫描结果（以SGWC开头的字符串）");
-                    stat = 1;
-
-                    return MarisaPluginTaskState.ToBeContinued;
-                }
-                case 1:
-                {
-                    var accessCode = next.Command.Trim();
-
-                    try
-                    {
-                        var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
-
-                        await using var dbContext = new BotDbContext();
-
-                        dbContext.MaiMaiBinds.Add(new MaiMaiDxBind(next.Sender.Id, aimeId));
-
-                        await dbContext.SaveChangesAsync();
-
-                        message.Reply("好了");
-                    }
-                    catch (InvalidDataException e)
-                    {
-                        message.Reply($"错误的二维码结果: {e.Message}。会话已关闭");
-                    }
-
-                    return MarisaPluginTaskState.CompletedTask;
-                }
-            }
-
-            return MarisaPluginTaskState.CompletedTask;
-        });
-
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    #endregion
-
-    #region unlock
-
-    [MarisaPluginDoc("逃离小黑屋")]
-    [MarisaPluginCommand("unlock", "解锁")]
-    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
-    private static async Task<MarisaPluginTaskState> UnLock(Message message)
-    {
-        await using var dbContext = new BotDbContext();
-
-        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender!.Id);
-
-        if (bind == null)
-        {
-            message.Reply("你未绑定Wahlap，无法使用该功能");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var res = await AllNetDataFetcher.Logout(bind.AimeId);
-
-        if (!res)
-        {
-            message.Reply("解锁失败。。。");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        message.Reply("妥了，玩吧。");
         return MarisaPluginTaskState.CompletedTask;
     }
 
