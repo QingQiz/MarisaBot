@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using NLog.Web;
 using NuGet.Packaging;
 
@@ -23,7 +24,11 @@ public static class Program
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
         builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
-        builder.WebHost.UseUrls("http://localhost:14311");
+        builder.WebHost.UseUrls("http://0.0.0.0:14311");
+
+        // use nLog for logging
+        builder.Logging.ClearProviders();
+        builder.Logging.SetMinimumLevel(LogLevel.Trace);
         builder.Host.UseNLog();
 
         var app = builder.Build();
