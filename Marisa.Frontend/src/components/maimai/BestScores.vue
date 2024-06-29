@@ -2,18 +2,19 @@
     <template v-if="data_fetched">
         <div class="best-body" v-if="err_msg === ''">
             <div :style="`background-image: url('/assets/maimai/pic/UI_UNL_BG.png')`"
-                class="bg-center bg-no-repeat bg-cover w-best">
+                 class="bg-center bg-no-repeat bg-cover w-best">
                 <div class="font-osu-web">
-                    <div class="h-[650px] bg-cover bg-bottom flex items-center justify-center"
-                        :style="`background-image:url('/assets/maimai/pic/Sub.png')`">
-                        <img src="/assets/maimai/pic/name.png" alt="" class="absolute h-[450px]">
-                        <div class="w-[800px] h-[400px] bg-cover pb-[50px] px-[130px] relative">
-                            <div class="text-8xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center break-all"
+                    <div class="h-[650px] bg-cover bg-bottom flex items-center justify-center relative"
+                         :style="`background-image:url('/assets/maimai/pic/Sub.png')`">
+                        <img src="/assets/maimai/pic/name.png" alt="" class="absolute h-[450px] m-auto inset-0">
+                        <div class="w-[800px] h-[400px] pb-[50px] px-[130px] relative">
+                            <div
+                                class="text-6xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center"
                                 :class="{ 'rainbow-text-shadow': ra_old + ra_new >= 15000 }">
                                 {{ json.nickname }}
                             </div>
                             <div class="absolute text-6xl -top-3 left-0 right-0 text-center"
-                                :class="{ 'rainbow-text-shadow': ra_old + ra_new >= 15000 }">
+                                 :class="{ 'rainbow-text-shadow': ra_old + ra_new >= 15000 }">
                                 {{ ra_old + ra_new }}
                             </div>
                             <div class="absolute text-4xl top-12 left-0 right-0 text-center mt-2 font-bold">
@@ -29,7 +30,7 @@
                 </div>
                 <div>
                     <div class="grid grid-cols-5-maimai p-card gap-card">
-                        <score-card v-for="(data, i) in json.charts.sd" v-bind:key="i" :score="data" />
+                        <score-card v-for="(data, i) in json.charts.sd" v-bind:key="i" :score="data"/>
                     </div>
                     <div class="px-[var(--card-padding)]">
                         <div class="h-gap overflow-x-hidden bg-center flex">
@@ -38,7 +39,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-5-maimai p-card gap-card">
-                        <score-card v-for="(data, i) in json.charts.dx" v-bind:key="i" :score="data" />
+                        <score-card v-for="(data, i) in json.charts.dx" v-bind:key="i" :score="data"/>
                     </div>
                 </div>
             </div>
@@ -52,24 +53,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {ref} from 'vue';
 import axios from 'axios';
-import { useRoute } from "vue-router";
+import {useRoute} from "vue-router";
 
 import ScoreCard from "@/components/maimai/partial/ScoreCard.vue"
-import { context_get } from '@/GlobalVars'
+import {context_get} from '@/GlobalVars'
 
-const route   = useRoute()
-let   json    = ref({} as MaiMaiRating)
-let   id      = ref(route.query.id)
-let   err_msg = ref('')
+const route = useRoute()
+let json    = ref({} as MaiMaiRating)
+let id      = ref(route.query.id)
+let err_msg = ref('')
 
 let data_fetched = ref(false)
 
 let ra_old = ref(NaN)
 let ra_new = ref(NaN)
 
-axios.get(context_get, { params: { id: id.value, name: 'b50' } }).then(data => {
+axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
     json.value   = data.data
     ra_old.value = json.value.charts.sd.reduce((ra, cur) => ra + cur.ra, 0);
     ra_new.value = json.value.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
@@ -123,13 +124,13 @@ import {defineComponent} from "vue";
 
 export interface MaiMaiRating {
     additional_rating: number;
-    charts:            Charts;
-    nickname:          string;
-    plate:             string;
-    rating:            number;
-    user_data:         null;
-    user_id:           null;
-    username:          string;
+    charts: Charts;
+    nickname: string;
+    plate: string;
+    rating: number;
+    user_data: null;
+    user_id: null;
+    username: string;
 }
 
 export interface Charts {
@@ -139,18 +140,18 @@ export interface Charts {
 
 export interface Score {
     achievements: number;
-    ds:           number;
-    dxScore:      number;
-    fc:           string;
-    fs:           string;
-    level:        string;
-    level_index:  number;
-    level_label:  string;
-    ra:           number;
-    rate:         string;
-    song_id:      number;
-    title:        string;
-    type:         string;
+    ds: number;
+    dxScore: number;
+    fc: string;
+    fs: string;
+    level: string;
+    level_index: number;
+    level_label: string;
+    ra: number;
+    rate: string;
+    song_id: number;
+    title: string;
+    type: string;
 }
 
 export default defineComponent({

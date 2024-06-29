@@ -1,6 +1,6 @@
 ﻿<template>
-    <img :src="src[srcIndex]" v-if="srcIndex < src.length" @error="srcIndex++" alt v-bind="$attrs" ref="img"/>
-    <img :src="fallback" v-if="fallback != null && srcIndex === src.length" alt v-bind="$attrs" ref="img">
+    <img :src="src[srcIndex]" v-if="srcIndex < src.length" @error="srcIndex++" v-bind="$attrs" ref="img"/>
+    <img :src="fallback" v-if="fallback != null && srcIndex === src.length" v-bind="$attrs" ref="img">
 </template>
 
 <script setup lang="ts">

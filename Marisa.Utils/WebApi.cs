@@ -4,9 +4,9 @@ namespace Marisa.Utils;
 
 public static class WebApi
 {
-    private static IBrowser? _browserInner;
 
     private const string Frontend = "http://localhost:14311";
+    private static IBrowser? _browserInner;
 
     private static IBrowser Browser
     {
@@ -22,17 +22,24 @@ public static class WebApi
 
             lock (Frontend)
             {
-                using var browserFetcher = new BrowserFetcher();
+                var browserFetcher = new BrowserFetcher();
                 browserFetcher.DownloadAsync().Wait();
                 _browserInner = Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
-                    Args     = new[] { "--force-device-scale-factor=1" }
+                    Args     = ["--force-device-scale-factor=1"]
                 }).Result;
                 return _browserInner;
             }
         }
     }
+
+    private static ScreenshotOptions ScreenshotOptions => new()
+    {
+        FullPage = true,
+        Type     = ScreenshotType.Jpeg,
+        Quality  = 90
+    };
 
     private static async Task<string> RenderUrl(string url)
     {
@@ -46,18 +53,11 @@ public static class WebApi
         await page.GoToAsync(url, new NavigationOptions
         {
             WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load],
-            Timeout   = 30 * 1000,
+            Timeout   = 30 * 1000
         });
 
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
-
-    private static ScreenshotOptions ScreenshotOptions => new()
-    {
-        FullPage = true,
-        Type     = ScreenshotType.Jpeg,
-        Quality  = 90
-    };
 
     public static async Task<string> MaiMaiBest(Guid guid)
     {
@@ -67,8 +67,8 @@ public static class WebApi
     public static async Task<string> OsuScore(string name, int modeInt, int? bpRank, bool recent, bool fail)
     {
         return await RenderUrl(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + (bpRank ?? 1) +
-            (recent ? "&recent=" + recent : "") +
-            (fail ? "&fail=" + fail : ""));
+                               (recent ? "&recent=" + recent : "") +
+                               (fail ? "&fail=" + fail : ""));
     }
 
     public static async Task<string> OsuRecommend(Guid contextId)
