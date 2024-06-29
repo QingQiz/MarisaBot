@@ -28,7 +28,7 @@ public static class Program
 
         // use nLog for logging
         builder.Logging.ClearProviders();
-        builder.Logging.SetMinimumLevel(LogLevel.Trace);
+        builder.Logging.SetMinimumLevel(LogLevel.Information);
         builder.Host.UseNLog();
 
         var app = builder.Build();
