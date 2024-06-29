@@ -1,24 +1,37 @@
-﻿namespace Marisa.Utils;
+﻿using System.Collections.Concurrent;
+
+namespace Marisa.Utils;
 
 public class WebContext
 {
-    private static readonly Dictionary<Guid, Dictionary<string, object>> ContextPool = new();
+    private static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<string, object>> ContextPool = new();
 
     public readonly Guid Id = Guid.NewGuid();
 
     public WebContext()
     {
-        ContextPool.Add(Id, new Dictionary<string, object>());
+        ContextPool.TryAdd(Id, new ConcurrentDictionary<string, object>());
     }
 
     public void Put(string name, object obj)
     {
-        ContextPool[Id].Add(name, obj);
+        if (ContextPool.TryGetValue(Id, out var context))
+        {
+            context.TryAdd(name, obj);
+        }
     }
 
     public static object Get(Guid id, string name)
     {
-        return ContextPool[id][name];
+        if (ContextPool.TryGetValue(id, out var context))
+        {
+            if (context.TryGetValue(name, out var value))
+            {
+                return value;
+            }
+            throw new KeyNotFoundException($"{name} not found in context {id}");
+        }
+        throw new KeyNotFoundException($"Context {id} not found");
     }
 
     public object Get(string name)
@@ -28,11 +41,11 @@ public class WebContext
 
     public bool Contains(string name)
     {
-        return ContextPool[Id].ContainsKey(name);
+        return ContextPool.TryGetValue(Id, out var context) && context.ContainsKey(name);
     }
 
     ~WebContext()
     {
-        ContextPool.Remove(Id);
+        ContextPool.TryRemove(Id, out _);
     }
 }
