@@ -23,9 +23,9 @@
                         </div>
                     </div>
                     <div
-                        class="w-[var(--best-width)] h-[calc(var(--best-gap)_*_1.5)] overflow-x-hidden bg-center flex -mt-[100px] z-10">
-                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="">
-                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="">
+                        class="w-[var(--best-width)] h-[calc(var(--best-gap)_*_1.5)] overflow-x-hidden bg-center flex -mt-[100px]">
+                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="" class="z-10">
+                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="" class="z-10">
                     </div>
                 </div>
                 <div>
