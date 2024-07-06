@@ -4,13 +4,16 @@ namespace Marisa.Plugin.Shared.Util.SongDb;
 
 public abstract class Song
 {
+    public readonly List<string> Charters = [];
+    public readonly List<double> Constants = [];
+    /// <summary>
+    ///     14 / 14+ / 15 / ...
+    /// </summary>
+    public readonly List<string> Levels = [];
+    public string Artist = "";
+    public double Bpm;
     public long Id;
     public string Title = "";
-    public string Artist = "";
-    public readonly List<double> Constants = new();
-    public readonly List<string> Levels = new();
-    public readonly List<string> Charters = new();
-    public double Bpm;
     public string Version = "";
 
 

@@ -14,7 +14,6 @@ namespace Marisa.Plugin.MaiMaiDx;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 {
-
     #region 查分
 
     /// <summary>
@@ -183,6 +182,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     }
 
     #endregion
+
     #region 汇总 / summary
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
