@@ -27,25 +27,17 @@ public class WebContext
         {
             if (context.TryGetValue(name, out var value))
             {
+                context.TryRemove(name, out _);
+
+                if (context.IsEmpty)
+                {
+                    ContextPool.TryRemove(id, out _);
+                }
+
                 return value;
             }
             throw new KeyNotFoundException($"{name} not found in context {id}");
         }
         throw new KeyNotFoundException($"Context {id} not found");
-    }
-
-    public object Get(string name)
-    {
-        return Get(Id, name);
-    }
-
-    public bool Contains(string name)
-    {
-        return ContextPool.TryGetValue(Id, out var context) && context.ContainsKey(name);
-    }
-
-    ~WebContext()
-    {
-        ContextPool.TryRemove(Id, out _);
     }
 }
