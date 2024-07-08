@@ -52,7 +52,7 @@ public static class WebApi
 
         await page.GoToAsync(url, new NavigationOptions
         {
-            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Load],
+            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Networkidle2, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded],
             Timeout   = 30 * 1000
         });
 
