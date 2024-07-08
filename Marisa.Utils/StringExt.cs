@@ -32,7 +32,7 @@ public static class StringExt
     }
 
     /// <summary>
-    /// 测量文本大小
+    ///     测量文本大小
     /// </summary>
     /// <param name="text"></param>
     /// <param name="font"></param>
@@ -48,9 +48,9 @@ public static class StringExt
     {
         var option = ImageDraw.GetTextOptions(font);
 
-        return TextMeasurer.Measure(text, option);
+        return TextMeasurer.MeasureAdvance(text, option);
     }
-    
+
     public static string UnEscapeTsvCell(this string s)
     {
         if (s.Length < 2) return s;
@@ -86,7 +86,7 @@ public static class StringExt
     }
 
     /// <summary>
-    /// https://stackoverflow.com/a/14087738/13442887
+    ///     https://stackoverflow.com/a/14087738/13442887
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>

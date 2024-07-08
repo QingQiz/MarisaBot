@@ -33,7 +33,7 @@ public partial class Help : MarisaPluginBase
                 bmRes.DrawImage(im, gap, y);
                 y += im.Height + gap - 1;
                 var y1 = y;
-                bmRes.Mutate(i => i.DrawLines(new Pen(Color.Pink, 2), new PointF(gap, y1), new PointF(bmRes.Width - gap, y1)));
+                bmRes.Mutate(i => i.DrawLine(Color.Pink, 2, new PointF(gap, y1), new PointF(bmRes.Width - gap, y1)));
                 y += gap + 1;
             }
 

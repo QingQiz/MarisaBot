@@ -84,11 +84,10 @@ public static class OsuUserInfoDrawer
         // 把它们拼起来
         var bg = new Image<Rgba32>(ImageWidth, header.Height + nameBanner.Height + userDetail.Height);
 
-        var pen2 = new Pen(Color.FromRgb(37, 30, 34), 1);
         bg.Mutate(i => i
             .DrawImage(header, 0, 0)
             .DrawImage(nameBanner, 0, header.Height)
-            .DrawLines(pen2, new PointF(0, header.Height + nameBanner.Height), new PointF(ImageWidth, header.Height + nameBanner.Height))
+            .DrawLine(Color.FromRgb(37, 30, 34), 1, new PointF(0, header.Height + nameBanner.Height), new PointF(ImageWidth, header.Height + nameBanner.Height))
             .DrawImage(userDetail, 0, header.Height + nameBanner.Height)
         );
 
@@ -183,7 +182,7 @@ public static class OsuUserInfoDrawer
         userDetail.Clear(Color.FromRgb(42, 34, 38));
         pPlusChart.ResizeY(userDetail.Height - 80);
 
-        var pen1 = new Pen(Color.FromRgb(28, 23, 25), 2);
+        var c1 = Color.FromRgb(28, 23, 25);
 
         const int lineGap      = 30;
         const int marginBorder = 10;
@@ -191,14 +190,14 @@ public static class OsuUserInfoDrawer
         var xSummary = userDetail.Width - MarginX - summary.Width;
         var xLine1   = MarginX + Math.Max(rank.Width, Math.Max(chart.Width, counter.Width)) + lineGap;
         var xLine2   = xSummary - lineGap;
-        var xPPlus   = ((xLine2 - lineGap - (xLine1 + lineGap)) - pPlusChart.Width) / 2 + xLine1 + lineGap;
+        var xPPlus   = (xLine2 - lineGap - (xLine1 + lineGap) - pPlusChart.Width) / 2 + xLine1 + lineGap;
 
         userDetail.Mutate(i => i
             .DrawImage(rank, MarginX, marginBorder)
             .DrawImage(chart, MarginX, marginBorder + rank.Height + gap)
             .DrawImage(counter, MarginX, marginBorder + rank.Height + chart.Height + gap + gap)
-            .DrawLines(pen1, new PointF(xLine1, marginBorder), new PointF(xLine1, userDetail.Height - marginBorder))
-            .DrawLines(pen1, new PointF(xLine2, marginBorder), new PointF(xLine2, userDetail.Height - marginBorder))
+            .DrawLine(c1, 2, new PointF(xLine1, marginBorder), new PointF(xLine1, userDetail.Height - marginBorder))
+            .DrawLine(c1, 2, new PointF(xLine2, marginBorder), new PointF(xLine2, userDetail.Height - marginBorder))
             .DrawImageVCenter(pPlusChart, xPPlus)
             .DrawImageVCenter(summary, userDetail.Width - summary.Width - MarginX)
         );
@@ -223,7 +222,7 @@ public static class OsuUserInfoDrawer
             st.ReplaysWatchedByOthers.ToString("N0"),
             st.TotalHits.ToString("N0"),
             st.MaximumCombo.ToString("N0"),
-            st.TotalScore.ToString("N0"),
+            st.TotalScore.ToString("N0")
         };
 
         const int xGap = 20;
@@ -354,8 +353,7 @@ public static class OsuUserInfoDrawer
         var min = history.Min();
         var max = history.Max();
 
-        var points         = new List<PointF>();
-        var rankHistoryPen = new Pen(Color.FromRgb(255, 204, 34), 4);
+        var points = new List<PointF>();
 
         for (var i = 0; i < history.Length; i++)
         {
@@ -366,7 +364,7 @@ public static class OsuUserInfoDrawer
         }
 
         chart.Mutate(i => i
-            .DrawLines(rankHistoryPen, max != min
+            .DrawLine(Color.FromRgb(255, 204, 34), 4, max != min
                 ? points.ToArray()
                 : new[] { new PointF(0, chart.Height / 2), new PointF(chart.Width, chart.Height / 2) })
         );
@@ -555,11 +553,9 @@ public static class OsuUserInfoDrawer
         }, filename, () =>
         {
             Font font;
-            var  pPlusBorderPen = new Pen(Color.Gray, 2);
-            var  penColor       = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
-            var  pPlusChartPen  = new Pen(penColor, 4);
+            var  penColor = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
 
-            var pPlusChart       = new Image<Rgba32>(ImageWidth / 3, (int)Math.Ceiling(Math.Sqrt(3) / 2 * ImageWidth / 3) + (int)pPlusBorderPen.StrokeWidth);
+            var pPlusChart       = new Image<Rgba32>(ImageWidth / 3, (int)Math.Ceiling(Math.Sqrt(3) / 2 * ImageWidth / 3) + 2);
             var pPlusChartCenter = new PointF(pPlusChart.Width / 2, pPlusChart.Height / 2);
 
             var hexagon1 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 6);
@@ -567,14 +563,14 @@ public static class OsuUserInfoDrawer
             var hexagon3 = ShapeDraw.BuildHexagon(pPlusChartCenter, pPlusChart.Width / 2);
 
             pPlusChart.Mutate(i => i
-                .DrawLines(pPlusBorderPen, hexagon3.ToArray())
-                .DrawLines(pPlusBorderPen, hexagon2.ToArray())
-                .DrawLines(pPlusBorderPen, hexagon1.ToArray())
+                .DrawLine(Color.Gray, 2, hexagon3.ToArray())
+                .DrawLine(Color.Gray, 2, hexagon2.ToArray())
+                .DrawLine(Color.Gray, 2, hexagon1.ToArray())
             );
 
             foreach (var i in hexagon1.Zip(hexagon3))
             {
-                pPlusChart.Mutate(im => im.DrawLines(pPlusBorderPen, i.First, i.Second));
+                pPlusChart.Mutate(im => im.DrawLine(penColor, 4, i.First, i.Second));
             }
 
             if (isOsu)
@@ -613,7 +609,7 @@ public static class OsuUserInfoDrawer
                 // 填充雷达图的折线内部
                 var polygon = new Polygon(new LinearLineSegment(dataPoints.ToArray()));
                 pPlusChart.Mutate(i => i
-                    .DrawLines(pPlusChartPen, dataPoints.ToArray())
+                    .DrawLine(penColor, 4, dataPoints.ToArray())
                     .Fill(Color.FromRgba(penColor.R, penColor.G, penColor.B, 50), polygon)
                 );
 
@@ -650,26 +646,23 @@ public static class OsuUserInfoDrawer
                     var ellipsePolygon = new EllipsePolygon(new PointF(dataPoints[idx].X + pPlusChart.Width / 4, dataPoints[idx].Y + 20), 6);
 
                     pPlusChart.Mutate(i => i
-                        .DrawText(option, $"{d.Second}: {d.First:F0}", pPlusChartPen.StrokeFill)
+                        .DrawText(option, $"{d.Second}: {d.First:F0}", penColor)
                         .Fill(penColor, ellipsePolygon)
                     );
 
                     idx += 1;
                 }
             }
-            else
-            {
-                var pPlusDisabled = new Image<Rgba32>(pPlusChart.Width * 3 / 4, 150)
-                    .Clear(Color.FromRgba(0, 0, 0, 200))
-                    .RoundCorners(40);
+            var pPlusDisabled = new Image<Rgba32>(pPlusChart.Width * 3 / 4, 150)
+                .Clear(Color.FromRgba(0, 0, 0, 200))
+                .RoundCorners(40);
 
-                const string text = "PP+数据不可用";
-                font = new Font(OsuDrawerCommon.FontYaHei, 60);
+            const string text = "PP+数据不可用";
+            font = new Font(OsuDrawerCommon.FontYaHei, 60);
 
-                pPlusDisabled.DrawTextCenter(text, font, Color.White);
+            pPlusDisabled.DrawTextCenter(text, font, Color.White);
 
-                pPlusChart.DrawImageCenter(pPlusDisabled);
-            }
+            pPlusChart.DrawImageCenter(pPlusDisabled);
 
             return pPlusChart;
         });

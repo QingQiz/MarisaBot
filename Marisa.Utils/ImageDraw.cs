@@ -1,10 +1,8 @@
 ﻿using SixLabors.Fonts;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
@@ -59,7 +57,7 @@ public static class ImageDraw
     {
         var rgba32 = image.Clone(i => i
             .Crop(rectangle)
-            .Quantize(new OctreeQuantizer(new QuantizerOptions()
+            .Quantize(new OctreeQuantizer(new QuantizerOptions
             {
                 MaxColors = 1
             }))
@@ -111,7 +109,7 @@ public static class ImageDraw
             var c  = Color.FromRgba(colorPixel.R, colorPixel.G, colorPixel.B, (byte)(255 - 255 * (i - rec.Left) / rec.Width));
 
             coverBackground.Mutate(ctx => ctx
-                .DrawLines(new Pen(c, 1), new PointF(i1, 0), new PointF(i1, rec.Height)));
+                .DrawLine(c, 1, new PointF(i1, 0), new PointF(i1, rec.Height)));
         }
 
         // 圆角
@@ -159,7 +157,7 @@ public static class ImageDraw
         if (underLine)
         {
             background.Mutate(i =>
-                i.DrawLines(new Pen(Color.Gray, 2), new PointF(0, height), new PointF(width, height)));
+                i.DrawLine(Color.Gray, 2, new PointF(0, height), new PointF(width, height)));
         }
 
         return background;
@@ -259,9 +257,9 @@ public static class ImageDraw
         return ctx.DrawText(text, fontFamily.CreateFont(fontSize), color, x, y);
     }
 
-    public static TextOptions GetTextOptions(Font font)
+    public static RichTextOptions GetTextOptions(Font font)
     {
-        return new TextOptions(font)
+        return new RichTextOptions(font)
         {
             FallbackFontFamilies = new[]
             {
@@ -271,12 +269,12 @@ public static class ImageDraw
                 SystemFonts.Get("Segoe UI Emoji"),
                 SystemFonts.Get("Segoe UI Historic"),
                 SystemFonts.Get("Segoe UI Symbol"),
-                SystemFonts.Get("Arial Unicode MS"),
-            },
+                SystemFonts.Get("Arial Unicode MS")
+            }
         };
     }
 
-    public static TextOptions GetTextOptions(Font font, PointF location)
+    public static RichTextOptions GetTextOptions(Font font, PointF location)
     {
         var option = GetTextOptions(font);
 
@@ -285,7 +283,7 @@ public static class ImageDraw
         return option;
     }
 
-    public static Image DrawText(this Image image, TextOptions options, string text, Color color)
+    public static Image DrawText(this Image image, RichTextOptions options, string text, Color color)
     {
         image.Mutate(i => i.DrawText(options, text, color));
         return image;
@@ -408,37 +406,15 @@ public static class ImageDraw
 
     #region Converter
 
-    public static System.Drawing.Bitmap ToBitmap<TPixel>(this Image<TPixel> image) where TPixel : unmanaged, IPixel<TPixel>
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            using var memoryStream = new MemoryStream();
-
-            var imageEncoder = image.GetConfiguration().ImageFormatsManager.FindEncoder(PngFormat.Instance);
-            image.Save(memoryStream, imageEncoder);
-
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return new System.Drawing.Bitmap(memoryStream);
-        }
-
-        throw new PlatformNotSupportedException($@"{Environment.OSVersion} is not supported");
-    }
-
     public static Image<TPixel> ToImageSharpImage<TPixel>(this System.Drawing.Bitmap bitmap) where TPixel : unmanaged, IPixel<TPixel>
     {
-        if (OperatingSystem.IsWindows())
-        {
-            using var memoryStream = new MemoryStream();
+        using var memoryStream = new MemoryStream();
 
-            bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
 
-            memoryStream.Seek(0, SeekOrigin.Begin);
+        memoryStream.Seek(0, SeekOrigin.Begin);
 
-            return Image.Load<TPixel>(memoryStream);
-        }
-
-        throw new PlatformNotSupportedException($@"{Environment.OSVersion} is not supported");
+        return Image.Load<TPixel>(memoryStream);
     }
 
     public static string ToB64(this Image image, int quality = 90)

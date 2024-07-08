@@ -8,16 +8,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj" />
-      <ProjectReference Include="..\Marisa.Plugin.Shared.FSharp\Marisa.Plugin.Shared.FSharp.fsproj" />
-      <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj" />
+        <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj"/>
+        <ProjectReference Include="..\Marisa.Plugin.Shared.FSharp\Marisa.Plugin.Shared.FSharp.fsproj"/>
+        <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Flurl" Version="3.0.2" />
-      <PackageReference Include="Flurl.Http" Version="3.2.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
-      <PackageReference Include="Websocket.Client" Version="4.4.43" />
+        <PackageReference Include="Flurl" Version="3.0.2"/>
+        <PackageReference Include="Flurl.Http" Version="3.2.0"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4"/>
+        <PackageReference Include="Websocket.Client" Version="4.4.43"/>
     </ItemGroup>
 
     <PropertyGroup>

@@ -12,22 +12,41 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public class ChunithmSong : Song
 {
+
+    public static readonly Dictionary<string, Color> LevelColor = new()
+    {
+        { "BASIC", MaiMaiSong.LevelColor[0] },
+        { "ADVANCED", MaiMaiSong.LevelColor[1] },
+        { "EXPERT", MaiMaiSong.LevelColor[2] },
+        { "MASTER", MaiMaiSong.LevelColor[3] },
+        { "ULTIMA", Color.Black },
+        { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
+    };
+
+    public static readonly Dictionary<string, string> LevelAlias = new()
+    {
+        { "绿", "BASIC" },
+        { "黄", "ADVANCED" },
+        { "红", "EXPERT" },
+        { "紫", "MASTER" },
+        { "黑", "ULTIMA" },
+        { "we", "WORLD'S END" }
+    };
+    public new readonly string Bpm;
+    public readonly List<string> ChartName = new();
     public readonly string Genre;
     public readonly List<string> LevelName = new();
     public readonly List<long> MaxCombo = new();
-    public new readonly string Bpm;
-    public string BpmNorm => Bpm.Split(' ')[0];
-    public readonly List<string> ChartName = new();
 
     public ChunithmSong(dynamic o, bool fromDivingFish)
     {
-        Id     = o.id;
-        Title = o.title;
-        Artist = o.basic_info.artist;
-        Genre = o.basic_info.genre;
+        Id      = o.id;
+        Title   = o.title;
+        Artist  = o.basic_info.artist;
+        Genre   = o.basic_info.genre;
         Version = o.basic_info.from;
-        Bpm = o.basic_info.bpm.ToString();
-        
+        Bpm     = o.basic_info.bpm.ToString();
+
         for (var i = 0; i < o.level.Count; i++)
         {
             Constants.Add(o.ds[i]);
@@ -75,6 +94,8 @@ public class ChunithmSong : Song
         }
     }
 
+    public string BpmNorm => Bpm.Split(' ')[0];
+
     public static decimal Ra(int achievement, decimal constant)
     {
         var res = achievement switch
@@ -94,7 +115,7 @@ public class ChunithmSong : Song
     }
 
     /// <summary>
-    /// 二分找下一个可以提高rating的达成率
+    ///     二分找下一个可以提高rating的达成率
     /// </summary>
     /// <param name="achievement">当前的达成率</param>
     /// <param name="constant">定数</param>
@@ -123,7 +144,7 @@ public class ChunithmSong : Song
     }
 
     /// <summary>
-    /// 获取最小的达成率使得rating大于<paramref name="minRa"/>
+    ///     获取最小的达成率使得rating大于<paramref name="minRa" />
     /// </summary>
     /// <param name="constant">定数</param>
     /// <param name="minRa">最小的Ra</param>
@@ -155,26 +176,6 @@ public class ChunithmSong : Song
         return ResourceManager.GetCover(Id);
     }
 
-    public static readonly Dictionary<string, Color> LevelColor = new()
-    {
-        { "BASIC", MaiMaiSong.LevelColor[0] },
-        { "ADVANCED", MaiMaiSong.LevelColor[1] },
-        { "EXPERT", MaiMaiSong.LevelColor[2] },
-        { "MASTER", MaiMaiSong.LevelColor[3] },
-        { "ULTIMA", Color.Black },
-        { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
-    };
-
-    public static readonly Dictionary<string, string> LevelAlias = new()
-    {
-        { "绿", "BASIC" },
-        { "黄", "ADVANCED" },
-        { "红", "EXPERT" },
-        { "紫", "MASTER" },
-        { "黑", "ULTIMA" },
-        { "we", "WORLD'S END" },
-    };
-
     public override string GetImage()
     {
         return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
@@ -202,7 +203,7 @@ public class ChunithmSong : Song
                     if (overline)
                     {
                         background.Mutate(i => i
-                            .DrawLines(new Pen(Color.Gray, 1), new PointF(x, y - 1), new PointF(x + totalWidth, y - 1))
+                            .DrawLine(Color.Gray, 1, new PointF(x, y - 1), new PointF(x + totalWidth, y - 1))
                         );
                     }
 

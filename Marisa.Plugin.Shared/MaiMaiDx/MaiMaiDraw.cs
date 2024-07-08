@@ -11,7 +11,7 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 public static class MaiMaiDraw
 {
     /// <summary>
-    /// 画歌曲信息
+    ///     画歌曲信息
     /// </summary>
     /// <param name="song"></param>
     /// <returns></returns>
@@ -40,7 +40,7 @@ public static class MaiMaiDraw
                 if (overline)
                 {
                     background.Mutate(i => i
-                        .DrawLines(new Pen(Color.Gray, 1), new PointF(x, y - 1), new PointF(x + totalWidth, y - 1))
+                        .DrawLine(Color.Gray, 1, new PointF(x, y - 1), new PointF(x + totalWidth, y - 1))
                     );
                 }
 
@@ -164,7 +164,7 @@ public static class MaiMaiDraw
     }
 
     /// <summary>
-    /// 画汇总表
+    ///     画汇总表
     /// </summary>
     public static Image? DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, MaiMaiSong Song)>> groupedSong,
@@ -250,7 +250,7 @@ public static class MaiMaiDraw
                     var font = new Font(consolas, 35, FontStyle.Bold | FontStyle.Italic);
 
                     im.Mutate(ctx => ctx
-                        .DrawLines(new Pen(Color.Black, 40), new PointF(x, y + height - 20), new PointF(x + height, y + height - 20))
+                        .DrawLine(Color.Black, 40, new PointF(x, y + height - 20), new PointF(x + height, y + height - 20))
                     );
 
                     var ach1 = (score.Achievement < 100 ? "0" : "") + achievement[0];
@@ -328,8 +328,7 @@ public static class MaiMaiDraw
 
                 if (imgRank != null)
                 {
-                    imgRank = imgRank.Resize(0.8);
-                    bg.DrawImage(imgRank, (int)(padding - borderWidth + measure.Width + 10), padding);
+                    bg.DrawImage(imgRank, (int)(padding - borderWidth + measure.Width), padding / 2);
                 }
 
                 bg.DrawImage(im, 0, 70);
@@ -337,7 +336,7 @@ public static class MaiMaiDraw
                 imList.Add(bg);
             }
 
-            if (!imList.Any())
+            if (imList.Count == 0)
             {
                 return null;
             }
@@ -360,7 +359,7 @@ public static class MaiMaiDraw
     }
 
     /// <summary>
-    /// 画容错率表
+    ///     画容错率表
     /// </summary>
     /// <param name="tap">单tap分</param>
     /// <param name="bonus">单绝赞bonus总分</param>
@@ -492,7 +491,7 @@ public static class MaiMaiDraw
             var nextA = score.NextRa();
             var nextR = SongScore.Ra(nextA, score.Constant);
 
-            var lvStr   = $"{MaiMaiSong.LevelName[(int)score.LevelIdx]}: {score.Constant}";
+            var lvStr   = $"{MaiMaiSong.LevelName[score.LevelIdx]}: {score.Constant}";
             var measure = lvStr.Measure(fontS);
             bg.DrawText(lvStr, fontS, MaiMaiSong.LevelColor[score.LevelIdx], bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
 
@@ -597,12 +596,12 @@ public static class MaiMaiDraw
 
             var y1 = y;
             bg.Mutate(i => i
-                .DrawLines(new Pen(Color.DarkGray, 2), new Point(0, y1 - 1), new Point(cardWidth, y1 - 1))
+                .DrawLine(Color.DarkGray, 2, new Point(0, y1 - 1), new Point(cardWidth, y1 - 1))
             );
         }
 
         bg.Mutate(i => i
-            .DrawLines(new Pen(Color.DarkGray, 2), new Point(0, 0), new Point(cardWidth, 0))
+            .DrawLine(Color.DarkGray, 2, new Point(0, 0), new Point(cardWidth, 0))
         );
 
         return bg;
