@@ -44,7 +44,6 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         var (scores, preview) = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
 
         var group = scores
-            .Where(x => x.Value.Id < 100000)
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
             .ToList();
 

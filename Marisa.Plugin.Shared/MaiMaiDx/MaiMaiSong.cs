@@ -7,9 +7,56 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 public class MaiMaiSong : Song
 {
-    public readonly string Type;
+    public static readonly Color[] LevelColor =
+    [
+        Color.FromRgb(82, 231, 43),
+        Color.FromRgb(255, 168, 1),
+        Color.FromRgb(255, 90, 102),
+        Color.FromRgb(198, 79, 228),
+        Color.FromRgb(219, 170, 255)
+    ];
+
+    public static readonly string[] Plates =
+    [
+        "maimai",
+        "maimai PLUS",
+        "maimai GreeN",
+        "maimai GreeN PLUS",
+        "maimai ORANGE",
+        "maimai ORANGE PLUS",
+        "maimai PiNK",
+        "maimai PiNK PLUS",
+        "maimai MURASAKi",
+        "maimai MURASAKi PLUS",
+        "maimai MiLK",
+        "MiLK PLUS",
+        "maimai FiNALE",
+        "maimai でらっくす",
+        "maimai でらっくす Splash",
+        "maimai でらっくす UNiVERSE",
+        "maimai でらっくす FESTiVAL"
+    ];
+
+    public static readonly List<string> LevelName =
+    [
+        "Basic",
+        "Advanced",
+        "Expert",
+        "Master",
+        "Re:Master"
+    ];
+
+    public static readonly List<string> LevelNameZh =
+    [
+        "绿",
+        "黄",
+        "红",
+        "紫",
+        "白"
+    ];
     public readonly List<MaiMaiSongChart> Charts = new();
     public readonly MaiMaiSongInfo Info;
+    public readonly string Type;
 
     public MaiMaiSong(dynamic data)
     {
@@ -22,8 +69,8 @@ public class MaiMaiSong : Song
         Bpm     = Info.Bpm;
         Version = Info.From;
 
-        // 好像只能这样写。。。好丑。。。
-        foreach (var c in data.ds) Constants.Add(c);
+        // 宴定数归零
+        foreach (var c in data.ds) Constants.Add(Id > 100000 ? 0 : c);
 
         foreach (var l in data.level) Levels.Add(l);
 
@@ -45,54 +92,6 @@ public class MaiMaiSong : Song
     {
         return Levels.Last();
     }
-
-    public static readonly Color[] LevelColor =
-    {
-        Color.FromRgb(82, 231, 43),
-        Color.FromRgb(255, 168, 1),
-        Color.FromRgb(255, 90, 102),
-        Color.FromRgb(198, 79, 228),
-        Color.FromRgb(219, 170, 255),
-    };
-
-    public static readonly string[] Plates =
-    {
-        "maimai",
-        "maimai PLUS",
-        "maimai GreeN",
-        "maimai GreeN PLUS",
-        "maimai ORANGE",
-        "maimai ORANGE PLUS",
-        "maimai PiNK",
-        "maimai PiNK PLUS",
-        "maimai MURASAKi",
-        "maimai MURASAKi PLUS",
-        "maimai MiLK",
-        "MiLK PLUS",
-        "maimai FiNALE",
-        "maimai でらっくす",
-        "maimai でらっくす Splash",
-        "maimai でらっくす UNiVERSE",
-        "maimai でらっくす FESTiVAL"
-    };
-
-    public static readonly List<string> LevelName = new()
-    {
-        "Basic",
-        "Advanced",
-        "Expert",
-        "Master",
-        "Re:Master"
-    };
-
-    public static readonly List<string> LevelNameZh = new()
-    {
-        "绿",
-        "黄",
-        "红",
-        "紫",
-        "白"
-    };
 
     public (double TapScore, double BonusScore) NoteScore(int levelIdx)
     {
