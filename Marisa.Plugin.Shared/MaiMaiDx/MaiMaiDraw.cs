@@ -183,6 +183,11 @@ public static class MaiMaiDraw
         var borderSs  = ResourceManager.GetImage("border_SS.png");
         var borderS   = ResourceManager.GetImage("border_S.png");
 
+        var rankImages = scores.Values
+            .Select(x => x.Rank.ToLower())
+            .Distinct()
+            .ToDictionary(x => x, x => ResourceManager.GetImage($"rank_{x}.png").ResizeY(60));
+
         foreach (var group in groupedSong)
         {
             var key = group.Key;
@@ -272,7 +277,7 @@ public static class MaiMaiDraw
                     im.DrawText("." + achievement[1], font, fontColor, x + 57, y + height - 26);
 
                     // rank 标志 (SSS+, SSS,...)
-                    var rank = ResourceManager.GetImage($"rank_{score.Rank.ToLower()}.png");
+                    var rank = rankImages[score.Rank.ToLower()];
 
                     im.DrawImage(rank, x + (height - rank.Width) / 2, y + (height - rank.Height - 30) / 2);
                 }
@@ -315,16 +320,7 @@ public static class MaiMaiDraw
                 // 如果全 sss/ss/s 则标记出来
                 var minAch = groupScores.Min(x => x?.Achievement ?? 0);
 
-                var imgRank = minAch switch
-                {
-                    >= 100.5 => ResourceManager.GetImage("rank_sssp.png"),
-                    >= 100   => ResourceManager.GetImage("rank_sss.png"),
-                    >= 99.5  => ResourceManager.GetImage("rank_ssp.png"),
-                    >= 99    => ResourceManager.GetImage("rank_ss.png"),
-                    >= 98    => ResourceManager.GetImage("rank_sp.png"),
-                    >= 97    => ResourceManager.GetImage("rank_s.png"),
-                    _        => null
-                };
+                var imgRank = minAch > 0 ? rankImages[SongScore.CalcRank(minAch).ToLower()] : null;
 
                 if (imgRank != null)
                 {
