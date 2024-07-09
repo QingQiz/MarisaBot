@@ -34,7 +34,8 @@ public class MaiMaiSong : Song
         "maimai でらっくす",
         "maimai でらっくす Splash",
         "maimai でらっくす UNiVERSE",
-        "maimai でらっくす FESTiVAL"
+        "maimai でらっくす FESTiVAL",
+        "maimai でらっくす BUDDiES"
     ];
 
     public static readonly List<string> LevelName =
