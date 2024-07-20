@@ -45,7 +45,7 @@ public static class ResourceManager
 
         var cp = $"{coverPath}/{songId}.png";
 
-        var img = Image.Load(cp)!;
+        var img = Image.Load(cp);
 
         if (resize)
         {

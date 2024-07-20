@@ -11,7 +11,7 @@ public partial class Ongeki
     #region 搜歌
 
     /// <summary>
-    /// 搜歌
+    ///     搜歌
     /// </summary>
     [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
     [MarisaPluginCommand("song", "search", "搜索")]
@@ -22,10 +22,113 @@ public partial class Ongeki
 
     #endregion
 
+    #region 分数线 / 容错率
+
+    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
+    [MarisaPluginCommand("tolerance", "容错率")]
+    private MarisaPluginTaskState FaultTolerance(Message message)
+    {
+        var songName     = message.Command.Trim();
+        var searchResult = _songDb.SearchSong(songName);
+
+        if (searchResult.Count != 1)
+        {
+            message.Reply(_songDb.GetSearchResult(searchResult));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply("难度和预期达成率？");
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        {
+            var command = next.Command.Trim();
+            var song    = searchResult.First();
+
+            var levelName = OngekiSong.LevelAlias.Values.ToList();
+
+            // 全名
+            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+            var levelPrefix = level ?? "";
+            if (level != null) goto RightLabel;
+
+            // 首字母
+            level = levelName.FirstOrDefault(n =>
+                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
+            if (level != null)
+            {
+                levelPrefix = command.Span[0].ToString();
+                goto RightLabel;
+            }
+
+            // 别名
+            level = OngekiSong.LevelAlias.Keys.FirstOrDefault(a =>
+                command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
+            levelPrefix = level ?? "";
+            if (level != null)
+            {
+                level = OngekiSong.LevelAlias[level];
+                goto RightLabel;
+            }
+
+            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+
+            RightLabel:
+            var levelIdx = levelName.IndexOf(level);
+
+            if (levelIdx > song.Charts.Count - 1 ||
+                song.Charts[levelIdx] is null ||
+                song.Charts[levelIdx]!.NoteCount == 0 ||
+                song.Charts[levelIdx]!.BellCount == 0)
+            {
+                next.Reply("暂无该难度的数据");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var parseSuccess = int.TryParse(command.Span.TrimStart(levelPrefix), out var achievement);
+
+            if (!parseSuccess)
+            {
+                next.Reply("错误的达成率格式，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            if (achievement is > 101_0000 or < 0)
+            {
+                next.Reply("你查**呢");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var noteScore = 95_0000m / song.Charts[levelIdx]!.NoteCount;
+            var bellScore = 6_0000m / song.Charts[levelIdx]!.BellCount;
+
+            var @break = 0.1m * noteScore;
+            var hit    = 0.4m * noteScore;
+
+            var tolerance = 101_0000 - achievement;
+
+            next.Reply(
+                new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
+                new MessageDataText($"至多有 {tolerance / @break:F1} 个 break，每个 break 减 {@break:F1} 分\n"),
+                new MessageDataText($"至多有 {tolerance / hit:F1} 个 hit，每个 hit 减 {hit:F1} 分\n"),
+                new MessageDataText($"至多有 {tolerance / noteScore:F1} 个 miss，每个 miss 减 {noteScore:F1} 分\n\n"),
+                new MessageDataText($"每个 bell 有 {bellScore:F1} 分\n"),
+                new MessageDataText($"1 bell 相当于 {bellScore / @break:F1} break\n"),
+                new MessageDataText($"1 bell 相当于 {bellScore / hit:F1} hit\n"),
+                new MessageDataText($"1 bell 相当于 {bellScore / noteScore:F1} miss\n")
+            );
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
     #region 歌曲别名相关
 
     /// <summary>
-    /// 别名处理
+    ///     别名处理
     /// </summary>
     [MarisaPluginDoc("别名设置和查询")]
     [MarisaPluginCommand("alias")]
@@ -37,7 +140,7 @@ public partial class Ongeki
     }
 
     /// <summary>
-    /// 获取别名
+    ///     获取别名
     /// </summary>
     [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
     [MarisaPluginSubCommand(nameof(SongAlias))]
@@ -46,7 +149,7 @@ public partial class Ongeki
     {
         var songName = message.Command;
 
-        if (string.IsNullOrEmpty(songName))
+        if (songName.IsEmpty)
         {
             message.Reply("？");
         }
@@ -66,7 +169,7 @@ public partial class Ongeki
     }
 
     /// <summary>
-    /// 设置别名
+    ///     设置别名
     /// </summary>
     [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
     [MarisaPluginSubCommand(nameof(SongAlias))]
@@ -74,7 +177,7 @@ public partial class Ongeki
     private MarisaPluginTaskState SongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split(":=");
+        var names = param.Split(":=").ToArray();
 
         if (names.Length != 2)
         {
@@ -95,7 +198,7 @@ public partial class Ongeki
     #region 筛选
 
     /// <summary>
-    /// 给出歌曲列表
+    ///     给出歌曲列表
     /// </summary>
     [MarisaPluginDoc("给出符合条件的歌曲，结果过多时回复 p1、p2 等获取额外的信息")]
     [MarisaPluginCommand("list", "ls")]
@@ -156,7 +259,7 @@ public partial class Ongeki
     #region 随机
 
     /// <summary>
-    /// 随机
+    ///     随机
     /// </summary>
     [MarisaPluginDoc("随机给出一个符合条件的歌曲")]
     [MarisaPluginCommand("random", "rand", "随机")]
@@ -217,7 +320,7 @@ public partial class Ongeki
     #region 猜曲
 
     /// <summary>
-    /// 猜歌排名
+    ///     猜歌排名
     /// </summary>
     [MarisaPluginDoc("音击猜歌的排名，给出的结果中s,c,w分别是启动猜歌的次数，猜对的次数和猜错的次数")]
     [MarisaPluginSubCommand(nameof(Guess))]
@@ -242,13 +345,13 @@ public partial class Ongeki
     }
 
     /// <summary>
-    /// 猜歌
+    ///     猜歌
     /// </summary>
     [MarisaPluginDoc("音击猜歌，看封面猜曲")]
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState Guess(Message message, long qq)
     {
-        if (message.Command == "")
+        if (message.Command.IsEmpty)
         {
             _songDb.StartSongCoverGuess(message, qq, 3, null);
         }
@@ -256,109 +359,6 @@ public partial class Ongeki
         {
             message.Reply("错误的命令格式");
         }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
-    #region 分数线 / 容错率
-
-    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
-    [MarisaPluginCommand("tolerance", "容错率")]
-    private MarisaPluginTaskState FaultTolerance(Message message)
-    {
-        var songName     = message.Command.Trim();
-        var searchResult = _songDb.SearchSong(songName);
-
-        if (searchResult.Count != 1)
-        {
-            message.Reply(_songDb.GetSearchResult(searchResult));
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        message.Reply("难度和预期达成率？");
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
-        {
-            var command = next.Command.Trim();
-            var song    = searchResult.First();
-
-            var levelName = OngekiSong.LevelAlias.Values.ToList();
-
-            // 全名
-            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
-            var levelPrefix = level ?? "";
-            if (level != null) goto RightLabel;
-
-            // 首字母
-            level = levelName.FirstOrDefault(n =>
-                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
-            if (level != null)
-            {
-                levelPrefix = command[0].ToString();
-                goto RightLabel;
-            }
-
-            // 别名
-            level = OngekiSong.LevelAlias.Keys.FirstOrDefault(a =>
-                command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
-            levelPrefix = level ?? "";
-            if (level != null)
-            {
-                level = OngekiSong.LevelAlias[level];
-                goto RightLabel;
-            }
-
-            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-
-            RightLabel:
-            var levelIdx = levelName.IndexOf(level);
-
-            if (levelIdx > song.Charts.Count - 1      ||
-                song.Charts[levelIdx] is null         ||
-                song.Charts[levelIdx]!.NoteCount == 0 ||
-                song.Charts[levelIdx]!.BellCount == 0)
-            {
-                next.Reply("暂无该难度的数据");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-
-            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix), out var achievement);
-
-            if (!parseSuccess)
-            {
-                next.Reply("错误的达成率格式，会话已关闭");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-
-            if (achievement is > 101_0000 or < 0)
-            {
-                next.Reply("你查**呢");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-
-            var noteScore = 95_0000m / song.Charts[levelIdx]!.NoteCount;
-            var bellScore = 6_0000m  / song.Charts[levelIdx]!.BellCount;
-
-            var @break = 0.1m * noteScore;
-            var hit = 0.4m * noteScore;
-            
-            var tolerance = 101_0000 - achievement;
-            
-            next.Reply(
-                new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
-                new MessageDataText($"至多有 {tolerance / @break:F1} 个 break，每个 break 减 {@break:F1} 分\n"),
-                new MessageDataText($"至多有 {tolerance / hit:F1} 个 hit，每个 hit 减 {hit:F1} 分\n"),
-                new MessageDataText($"至多有 {tolerance / noteScore:F1} 个 miss，每个 miss 减 {noteScore:F1} 分\n\n"),
-                new MessageDataText($"每个 bell 有 {bellScore:F1} 分\n"),
-                new MessageDataText($"1 bell 相当于 {bellScore / @break:F1} break\n"),
-                new MessageDataText($"1 bell 相当于 {bellScore / hit:F1} hit\n"),
-                new MessageDataText($"1 bell 相当于 {bellScore / noteScore:F1} miss\n")
-            );
-
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
 
         return MarisaPluginTaskState.CompletedTask;
     }

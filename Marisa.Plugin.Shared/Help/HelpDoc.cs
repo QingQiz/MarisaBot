@@ -7,14 +7,14 @@ namespace Marisa.Plugin.Shared.Help;
 
 public class HelpDoc
 {
+    public readonly List<ReadOnlyMemory<char>> Commands;
     public readonly string Help;
-    public readonly List<string> Commands;
-    public List<HelpDoc> SubHelp = new();
+    public List<HelpDoc> SubHelp = [];
 
-    public HelpDoc(string help, List<string> commands)
+    public HelpDoc(string help, List<ReadOnlyMemory<char>> commands)
     {
         Help     = help;
-        Commands = commands.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+        Commands = commands.Where(c => !c.IsWhiteSpace()).ToList();
     }
 
     public Image GetImage(int depth = 1)
@@ -28,13 +28,13 @@ public class HelpDoc
 
         for (var i = 0; i < Commands.Count - 1; i++)
         {
-            sd.Add(Commands[i], font1, Color.DeepPink);
+            sd.Add(Commands[i].ToString(), font1, Color.DeepPink);
             sd.Add("、", font1, Color.Black);
         }
 
-        if (Commands.Any())
+        if (Commands.Count != 0)
         {
-            sd.Add(Commands.Last(), font1, Color.DeepPink);
+            sd.Add(Commands.Last().ToString(), font1, Color.DeepPink);
             sd.Add(font1, Color.Black, "：");
         }
 
@@ -52,7 +52,7 @@ public class HelpDoc
         bm.Clear(Color.White);
 
         sd.Draw(bm);
-        
+
         if (subHelp != null)
         {
             bm.DrawImage(subHelp, subCmdMarginX, (int)(measure.Height + subCmdMarginY));
@@ -67,7 +67,7 @@ public class HelpDoc
 
         var ims = docs.Select(d => d.GetImage()).ToList();
 
-        if (!ims.Any())
+        if (ims.Count == 0)
         {
             return null;
         }

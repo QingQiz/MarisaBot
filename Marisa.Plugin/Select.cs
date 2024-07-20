@@ -9,18 +9,13 @@ public class Select : MarisaPluginBase
     {
         if (message.Command.Any(char.IsPunctuation)) return false;
         if (message.Command.Any(char.IsWhiteSpace)) return false;
-        if (message.Command.Contains("还是"))
-        {
-            return true;
-        }
-
-        return false;
+        return message.Command.Contains("还是");
     };
 
     [MarisaPluginCommand]
     private static MarisaPluginTaskState FriendMessageHandler(Message message)
     {
-        var cmd = message.Command.Split("还是");
+        var cmd = message.Command.Split("还是").ToArray();
         message.Reply($"建议：{cmd.RandomTake()}");
         return MarisaPluginTaskState.CompletedTask;
     }

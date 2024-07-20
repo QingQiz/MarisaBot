@@ -20,11 +20,11 @@ public static class SearchSongInDb
     #region Select Song
 
     /// <summary>
-    /// 从多个筛选结果中随机选一个
+    ///     从多个筛选结果中随机选一个
     /// </summary>
     public static void RandomSelectResult<T>(this List<T> songs, Message message) where T : Song
     {
-        if (!songs.Any())
+        if (songs.Count == 0)
         {
             message.Reply("EMPTY");
             return;
@@ -34,11 +34,54 @@ public static class SearchSongInDb
     }
 
     /// <summary>
-    /// 分页展示多个结果
+    ///     分页展示多个结果
     /// </summary>
     public static void MultiPageSelectResult<T, TG>(this SongDb<T, TG> db, IReadOnlyList<T> songs, Message message)
         where T : Song where TG : SongGuess, new()
     {
+        switch (songs.Count)
+        {
+            case 0:
+                message.Reply("“查无此歌”");
+                return;
+            case 1:
+                message.Reply(new MessageDataText(songs[0].Title), MessageDataImage.FromBase64(songs[0].GetImage()));
+                return;
+        }
+
+        message.Reply(DisplaySong(0));
+
+        db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender.Id, next =>
+        {
+            if (!next.IsPlainText()) return Task.FromResult(MarisaPluginTaskState.Canceled);
+
+            if (next.Command.StartsWith("p", StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(next.Command[1..].Span, out var p))
+                {
+                    message.Reply(DisplaySong(p));
+                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                }
+            }
+
+            if (long.TryParse(next.Command.Span, out var id))
+            {
+                var song = db.GetSongById(id);
+
+                if (song == null)
+                {
+                    message.Reply("查无此歌");
+                }
+                else
+                {
+                    message.Reply(new MessageDataText(song.Title), MessageDataImage.FromBase64(song.GetImage()));
+                }
+            }
+
+            return Task.FromResult(MarisaPluginTaskState.Canceled);
+        });
+        return;
+
         string DisplaySong(int page)
         {
             var p = Math.Max(0, page - 1);
@@ -56,73 +99,32 @@ public static class SearchSongInDb
 
             return ret;
         }
-
-        switch (songs.Count)
-        {
-            case 0:
-                message.Reply("“查无此歌”");
-                return;
-            case 1:
-                message.Reply(new MessageDataText(songs[0].Title), MessageDataImage.FromBase64(songs[0].GetImage()));
-                return;
-        }
-
-        message.Reply(DisplaySong(0));
-
-        db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender?.Id, next =>
-        {
-            if (!next.IsPlainText()) return Task.FromResult(MarisaPluginTaskState.Canceled);
-
-            if (next.Command.StartsWith("p", StringComparison.OrdinalIgnoreCase))
-            {
-                if (int.TryParse(next.Command[1..], out var p))
-                {
-                    message.Reply(DisplaySong(p));
-                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-                }
-            }
-
-            if (long.TryParse(next.Command, out var id))
-            {
-                var song = db.GetSongById(id);
-
-                if (song == null)
-                {
-                    message.Reply("查无此歌");
-                }
-                else
-                {
-                    message.Reply(new MessageDataText(song.Title), MessageDataImage.FromBase64(song.GetImage()));
-                }
-            }
-
-            return Task.FromResult(MarisaPluginTaskState.Canceled);
-        });
     }
 
-    public static List<T> SelectSongByBaseRange<T, TG>(this SongDb<T, TG> db, string baseRange)
+    public static List<T> SelectSongByBaseRange<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> baseRange)
         where T : Song where TG : SongGuess, new()
     {
-        if (baseRange.Contains('-'))
+        if (baseRange.Span.IndexOf('-') != -1)
         {
-            if (double.TryParse(baseRange.Split('-')[0], out var base1) &&
-                double.TryParse(baseRange.Split('-')[1], out var base2))
+            var range = baseRange.Split('-').ToArray();
+            if (double.TryParse(range[0].Span, out var base1) &&
+                double.TryParse(range[1].Span, out var base2))
             {
                 return db.SongList.Where(s => s.Constants.Any(b => b >= base1 && b <= base2)).ToList();
             }
         }
         else
         {
-            if (double.TryParse(baseRange, out var @base))
+            if (double.TryParse(baseRange.Span, out var @base))
             {
                 return db.SongList.Where(s => s.Constants.Contains(@base)).ToList();
             }
         }
 
-        return new List<T>();
+        return [];
     }
 
-    public static List<T> SelectSongByCharter<T, TG>(this SongDb<T, TG> db, string charter)
+    public static List<T> SelectSongByCharter<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> charter)
         where T : Song where TG : SongGuess, new()
     {
         return db.SongList
@@ -130,46 +132,56 @@ public static class SearchSongInDb
             .ToList();
     }
 
-    public static List<T> SelectSongByLevel<T, TG>(this SongDb<T, TG> db, string lv)
+    public static List<T> SelectSongByLevel<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> lv)
         where TG : SongGuess, new() where T : Song
     {
-        return db.SongList.Where(s => s.Levels.Contains(lv)).ToList();
+        return db.SongList.Where(s => s.Levels.Any(l => l.Equals(lv, StringComparison.Ordinal))).ToList();
     }
 
-    public static List<T> SelectSongByBpmRange<T, TG>(this SongDb<T, TG> db, string bpm)
+    public static List<T> SelectSongByBpmRange<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> bpm)
         where T : Song where TG : SongGuess, new()
     {
-        if (bpm.Contains('-'))
+        if (bpm.Span.Contains('-'))
         {
-            if (long.TryParse(bpm.Split('-')[0], out var bpm1) &&
-                long.TryParse(bpm.Split('-')[1], out var bpm2))
+            var range = bpm.Split('-').ToArray();
+
+            if (double.TryParse(range[0].Span, out var bpm1) &&
+                double.TryParse(range[1].Span, out var bpm2))
             {
                 return db.SongList.Where(s => s.Bpm >= bpm1 && s.Bpm <= bpm2).ToList();
             }
         }
         else
         {
-            if (long.TryParse(bpm, out var bpmOut))
+            if (long.TryParse(bpm.Span, out var bpmOut))
             {
                 return db.SongList.Where(s => Math.Abs(s.Bpm - bpmOut) < 0.2).ToList();
             }
         }
 
-        return new List<T>();
+        return [];
     }
 
-    public static List<T> SelectSongByArtist<T, TG>(this SongDb<T, TG> db, string artist)
+    public static List<T> SelectSongByArtist<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> artist)
         where T : Song where TG : SongGuess, new()
     {
-        var regex = new Regex($@"\b{artist}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        try
+        {
+            var regex = new Regex(artist.ToString(), RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        // 全字搜索
-        var res = db.SongList.Where(s => regex.IsMatch(s.Artist)).ToList();
+            var res = db.SongList.Where(s => regex.IsMatch(s.Artist)).ToList();
 
-        return res.Any()
-            ? res.ToList()
-            : db.SongList.Where(
-                s => s.Artist.Contains(artist, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (res.Count != 0)
+                return res.ToList();
+        }
+        catch (RegexParseException)
+        {
+        }
+
+        return db.SongList
+            .Where(s =>
+                s.Artist.Contains(artist, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     #endregion

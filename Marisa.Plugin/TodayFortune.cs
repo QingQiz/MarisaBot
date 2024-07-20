@@ -16,7 +16,7 @@ public class TodayFortune : MarisaPluginBase
     [MarisaPluginCommand(true, "")]
     private static MarisaPluginTaskState Handler(Message message)
     {
-        var sender = message.Sender!.Id;
+        var sender = message.Sender.Id;
         var rand   = new Random(GenRandomSeed(sender));
 
         var config = ConfigurationManager.Configuration.Fortune;

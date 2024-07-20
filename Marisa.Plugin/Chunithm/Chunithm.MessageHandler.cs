@@ -11,7 +11,6 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-
     #region 绑定
 
     [MarisaPluginDoc("绑定某个查分器")]
@@ -47,7 +46,7 @@ public partial class Chunithm
             {
                 case 0:
                 {
-                    if (!int.TryParse(next.Command, out var idx) || idx < 0 || idx >= fetchers.Length)
+                    if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
                     {
                         next.Reply("错误的序号，会话已关闭");
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -57,7 +56,7 @@ public partial class Chunithm
                     {
                         using var dbContext = new BotDbContext();
 
-                        var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender!.Id);
+                        var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
 
                         if (bind != null)
                         {
@@ -88,9 +87,10 @@ public partial class Chunithm
                     var host = next.Command.Trim();
                     try
                     {
-                        if (Dns.GetHostAddresses(host).Any())
+                        var hostStr = host.ToString();
+                        if (Dns.GetHostAddresses(hostStr).Length != 0)
                         {
-                            server = host;
+                            server = hostStr;
                             message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
                             stat = 2;
                             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
@@ -103,7 +103,7 @@ public partial class Chunithm
                 }
                 case 2:
                 {
-                    var accessCode = next.Command.Replace("-", "").Trim();
+                    var accessCode = next.Command.Replace("-", "").Trim().ToString();
 
                     if (accessCode.Length != 20)
                     {
@@ -121,11 +121,11 @@ public partial class Chunithm
 
                     using var dbContext = new BotDbContext();
 
-                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender!.Id);
+                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
 
                     if (bind == null)
                     {
-                        dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender!.Id, server, accessCode));
+                        dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, server, accessCode));
                     }
                     else
                     {
@@ -149,6 +149,7 @@ public partial class Chunithm
     }
 
     #endregion
+
     #region 汇总 / summary
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
@@ -167,7 +168,7 @@ public partial class Chunithm
     {
         var constants = message.Command.Split('-').Select(x =>
         {
-            var res = double.TryParse(x.Trim(), out var c);
+            var res = double.TryParse(x.Trim().Span, out var c);
             return res ? c : -1;
         }).ToList();
 
@@ -219,7 +220,7 @@ public partial class Chunithm
         var genres = fetcher.GetSongList().Select(song => song.Genre).Distinct().ToArray();
 
         var genre = genres.FirstOrDefault(p =>
-            string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+            message.Command.Trim().Equals(p, StringComparison.OrdinalIgnoreCase));
 
         if (genre == null)
         {
@@ -251,9 +252,9 @@ public partial class Chunithm
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
     {
-        var lv = message.Command.Trim();
+        var lv = message.Command.Trim().ToString();
 
-        if (new Regex(@"^[0-9]+\+?$").IsMatch(lv))
+        if (LevelRegex().IsMatch(lv))
         {
             const int maxLv = 15;
             var       lvNr  = lv.EndsWith('+') ? lv[..^1] : lv;
@@ -399,7 +400,7 @@ public partial class Chunithm
         {
             var command = next.Command.Trim();
 
-            if (!int.TryParse(command, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
+            if (!int.TryParse(command.Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
                 next.Reply("错误的选择，请选择前面的编号。会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
@@ -456,7 +457,7 @@ public partial class Chunithm
     {
         var songName = message.Command;
 
-        if (string.IsNullOrEmpty(songName))
+        if (songName.IsEmpty)
         {
             message.Reply("？");
         }
@@ -484,7 +485,7 @@ public partial class Chunithm
     private MarisaPluginTaskState SongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split(":=");
+        var names = param.Split(":=").ToArray();
 
         if (names.Length != 2)
         {
@@ -658,7 +659,7 @@ public partial class Chunithm
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState Guess(Message message, long qq)
     {
-        if (message.Command == "")
+        if (message.Command.IsEmpty)
         {
             _songDb.StartSongCoverGuess(message, qq, 3, null);
         }
@@ -681,7 +682,7 @@ public partial class Chunithm
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState RatingLine(Message message)
     {
-        if (decimal.TryParse(message.Command, out var constant))
+        if (decimal.TryParse(message.Command.Span, out var constant))
         {
             if (constant is <= 16 and >= 1)
             {
@@ -745,7 +746,7 @@ public partial class Chunithm
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix), out var achievement);
+            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix).Span, out var achievement);
 
             if (!parseSuccess)
             {
@@ -784,6 +785,9 @@ public partial class Chunithm
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
+    [GeneratedRegex(@"^[0-9]+\+?$")]
+    private static partial Regex LevelRegex();
 
     #endregion
 }

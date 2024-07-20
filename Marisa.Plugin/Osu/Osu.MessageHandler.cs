@@ -3,6 +3,7 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Microsoft.EntityFrameworkCore;
+using osu.Game.Beatmaps;
 
 namespace Marisa.Plugin.Osu;
 
@@ -18,15 +19,15 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     private static async Task<MarisaPluginTaskState> Bind(Message message, BotDbContext dbContext)
     {
         var name   = message.Command.Trim();
-        var sender = message.Sender!.Id;
+        var sender = message.Sender.Id;
 
-        if (string.IsNullOrEmpty(name))
+        if (name.IsEmpty)
         {
             message.Reply("请给出 osu! 的用户名");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var info = await OsuApi.GetUserInfoByName(name);
+        var info = await OsuApi.GetUserInfoByName(name.ToString());
 
         if (dbContext.OsuBinds.Any(o => o.UserId == sender))
         {
@@ -58,7 +59,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("setMode", "set mode", "mode")]
     private static async Task<MarisaPluginTaskState> SetMode(Message message, BotDbContext db)
     {
-        var sender = message.Sender!.Id;
+        var sender = message.Sender.Id;
         var mode   = message.Command.Trim();
 
         if (!OsuApi.ModeList.Contains(mode))
@@ -74,7 +75,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         }
 
         var o = await db.OsuBinds.FirstAsync(u => u.UserId == sender);
-        o.GameMode = mode;
+        o.GameMode = mode.ToString();
         db.OsuBinds.Update(o);
         await db.SaveChangesAsync();
         message.Reply("好了");
@@ -176,7 +177,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
 
         if (command!.BpRank?.Value?.Item2 == null)
         {
-            message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
+            message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command.Name, command.Mode.Value,
                 command.BpRank?.Value?.Item1, false, false)));
         }
         else
@@ -215,7 +216,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
 
         var db = new BotDbContext().OsuBinds;
 
-        var bind = db.FirstOrDefault(x => x.UserId == message.Sender!.Id);
+        var bind = db.FirstOrDefault(x => x.UserId == message.Sender.Id);
 
         if (bind == null)
         {
@@ -232,10 +233,10 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         // 别人的
         var best2 = (await OsuApi.GetScores(
                 await GetOsuIdByName(command.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
-                100))!
+                100))
             .ToList();
 
-        if (!best2.Any())
+        if (best2.Count == 0)
         {
             message.Reply($"{command.Name} 在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
             return MarisaPluginTaskState.CompletedTask;
@@ -244,10 +245,10 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         // 你的
         var best1 = (await OsuApi.GetScores(
                 await GetOsuIdByName(bind.OsuUserName), OsuApi.OsuScoreType.Best,
-                OsuApi.GetModeName(command.Mode.Value), 0, 100))!
+                OsuApi.GetModeName(command.Mode.Value), 0, 100))
             .ToList();
 
-        if (!best1.Any())
+        if (best1.Count == 0)
         {
             message.Reply($"你在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
             return MarisaPluginTaskState.CompletedTask;
@@ -303,7 +304,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
         }
         else
         {
-            message.Reply(MessageDataImage.FromBase64(recentScores!.GetMiniCards().ToB64(100)));
+            message.Reply(MessageDataImage.FromBase64(recentScores.GetMiniCards().ToB64(100)));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -315,7 +316,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     {
         if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, mode: command.Mode.Value);
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, command.Mode.Value);
 
         var scores =
             (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
@@ -344,13 +345,13 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("view")]
     private async Task<MarisaPluginTaskState> Preview(Message message)
     {
-        osu.Game.Beatmaps.Beatmap? beatmap = null;
+        Beatmap? beatmap = null;
 
-        if (long.TryParse(message.Command.Trim(), out var beatmapId))
+        if (long.TryParse(message.Command.Trim().Span, out var beatmapId))
         {
             beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
         }
-        else if (string.IsNullOrWhiteSpace(message.Command))
+        else if (message.Command.IsWhiteSpace())
         {
             if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 

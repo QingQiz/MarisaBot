@@ -8,7 +8,7 @@ namespace Marisa.Plugin.Osu;
 
 public partial class Osu
 {
-    private static readonly HashSet<string> Debounce = new();
+    private static readonly HashSet<string> Debounce = [];
 
     private static void DebounceCancel(string name)
     {
@@ -61,7 +61,7 @@ public partial class Osu
 
     private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank, bool allowRange)
     {
-        var command = OsuCommandParser.parser(message.Command)?.Value;
+        var command = OsuCommandParser.parser(message.Command.ToArray())?.Value;
 
         if (command == null)
         {
@@ -91,7 +91,7 @@ public partial class Osu
             }
             else
             {
-                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender!.Id);
+                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender.Id);
             }
 
             // 没找到证明不知道查谁的

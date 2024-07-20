@@ -9,6 +9,7 @@ using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -169,9 +170,10 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         return user.AimeId;
     }
 
-    public static async Task<int> GetUserId(string qrCodeResult)
+    public static async Task<int> GetUserId(ReadOnlyMemory<char> qrCodeResult)
     {
-        if (qrCodeResult[..4] != WeChatId || qrCodeResult[4..8] != GameId)
+        if (!qrCodeResult[..4].Equals(WeChatId, StringComparison.Ordinal)
+         || !qrCodeResult[4..8].Equals(GameId, StringComparison.Ordinal))
         {
             throw new InvalidDataException("无效的");
         }

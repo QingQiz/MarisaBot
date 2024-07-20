@@ -132,7 +132,7 @@ public class BlackList : MarisaPluginBase
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
 
         if (at != null) qq = (at as MessageDataAt)!.Target;
-        else if (long.TryParse(message.Command.Trim(), out qq))
+        else if (long.TryParse(message.Command.Trim().Span, out qq))
         {
         }
         else

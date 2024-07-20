@@ -20,7 +20,7 @@ public static class ResourceManager
             cp = $"{coverPath}/0.png";
         }
 
-        var img = Image.Load(cp)!;
+        var img = Image.Load(cp);
 
         if (resize)
         {

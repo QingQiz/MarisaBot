@@ -37,7 +37,7 @@ public partial class Help
         var commands = plugin.GetCustomAttributes<MarisaPluginCommand>()
             .Select(c => c.Commands)
             .SelectMany(c => c)
-            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Where(c => !c.IsWhiteSpace())
             .ToList();
 
         var availableHandler = Filter(plugin.GetMethods(BindingFlags)).ToList();
@@ -63,11 +63,11 @@ public partial class Help
         var commands = method.GetCustomAttributes<MarisaPluginCommand>()
             .Select(c => c.Commands)
             .SelectMany(c => c)
-            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Where(c => !c.IsWhiteSpace())
             .ToList();
 
         // 没有文档也没有命令，那就不显示
-        if (doc == null && !commands.Any())
+        if (doc == null && commands.Count == 0)
         {
             return null;
         }

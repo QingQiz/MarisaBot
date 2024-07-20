@@ -101,7 +101,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     /// <param name="message"></param>
     /// <param name="afterTrigger">触发后的消息剩余什么</param>
     /// <returns>是否被触发</returns>
-    private bool ShouldTrigger(MemberInfo member, Message message, out string afterTrigger)
+    private bool ShouldTrigger(MemberInfo member, Message message, out ReadOnlyMemory<char> afterTrigger)
     {
         afterTrigger = message.Command;
 

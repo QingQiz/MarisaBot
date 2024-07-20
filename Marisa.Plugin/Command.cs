@@ -22,7 +22,7 @@ public class Command : MarisaPluginBase
     [MarisaPluginCommand(MessageType.GroupMessage, true, "remove")]
     private static MarisaPluginTaskState Remove(Message m)
     {
-        if (m.Sender!.Id != 642191352)
+        if (m.Sender.Id != 642191352)
         {
             m.Reply("你没有资格");
             return MarisaPluginTaskState.CompletedTask;
@@ -42,16 +42,16 @@ public class Command : MarisaPluginBase
 
         Dialog.AddHandler(m.GroupInfo?.Id, m.Sender?.Id, next =>
         {
-            if (next.Sender!.Id != m.Sender!.Id)
+            if (next.Sender.Id != m.Sender!.Id)
             {
                 return Task.FromResult(MarisaPluginTaskState.NoResponse);
             }
 
-            var ids = next.Command.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var ids = next.Command.Split(',').Where(x => x.Length != 0);
 
             foreach (var id in ids)
             {
-                if (long.TryParse(next.Command, out var idLong))
+                if (long.TryParse(next.Command.Span, out var idLong))
                 {
                     db.CommandFilters.Remove(db.CommandFilters.First(x => x.Id == idLong));
                 }
@@ -69,7 +69,7 @@ public class Command : MarisaPluginBase
     [MarisaPluginCommand(MessageType.GroupMessage, false, "prefix")]
     private static MarisaPluginTaskState Prefix(Message m)
     {
-        if (m.Sender!.Id != 642191352)
+        if (m.Sender.Id != 642191352)
         {
             m.Reply("你没有资格");
             return MarisaPluginTaskState.CompletedTask;
@@ -77,7 +77,7 @@ public class Command : MarisaPluginBase
 
         var prefix = m.Command.Trim();
 
-        if (string.IsNullOrWhiteSpace(prefix))
+        if (prefix.IsWhiteSpace())
         {
             m.Reply("?");
             return MarisaPluginTaskState.CompletedTask;
@@ -87,7 +87,7 @@ public class Command : MarisaPluginBase
         db.CommandFilters.Add(new CommandFilter
         {
             GroupId = m.GroupInfo!.Id,
-            Prefix  = prefix,
+            Prefix  = prefix.ToString(),
             Type    = "",
         });
         db.SaveChanges();
@@ -101,7 +101,7 @@ public class Command : MarisaPluginBase
     [MarisaPluginCommand(MessageType.GroupMessage, false, "type")]
     private static MarisaPluginTaskState Type(Message m)
     {
-        if (m.Sender!.Id != 642191352)
+        if (m.Sender.Id != 642191352)
         {
             m.Reply("你没有资格");
             return MarisaPluginTaskState.CompletedTask;
@@ -111,7 +111,7 @@ public class Command : MarisaPluginBase
 
         var type = m.Command.Trim();
 
-        if (string.IsNullOrWhiteSpace(type))
+        if (type.IsWhiteSpace())
         {
             m.Reply(string.Join('\n', names));
             return MarisaPluginTaskState.CompletedTask;
@@ -128,7 +128,7 @@ public class Command : MarisaPluginBase
         {
             GroupId = m.GroupInfo!.Id,
             Prefix  = "",
-            Type    = type,
+            Type    = type.ToString(),
         });
         db.SaveChanges();
 
@@ -146,7 +146,7 @@ public class Command : MarisaPluginBase
     [MarisaPluginCommand("shell")]
     private static MarisaPluginTaskState Shell(Message m)
     {
-        if (!Commander.Contains(m.Sender!.Id))
+        if (!Commander.Contains(m.Sender.Id))
         {
             m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
         }
@@ -185,7 +185,7 @@ public class Command : MarisaPluginBase
             {
                 var command = message.Command;
 
-                if (command is "exit")
+                if (command.Span is "exit")
                 {
                     proc.Close();
                     message.Reply("Shell退出了");

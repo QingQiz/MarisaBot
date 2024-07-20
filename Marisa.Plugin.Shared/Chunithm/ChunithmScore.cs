@@ -11,36 +11,36 @@ namespace Marisa.Plugin.Shared.Chunithm;
 #pragma warning disable CS8618
 public class ChunithmScore
 {
-    [JsonProperty("cid", Required = Required.Always)]
+    private decimal? _rating;
+
+    [JsonProperty("cid")]
     public long CId { get; set; }
 
-    [JsonProperty("ds", Required = Required.Always)]
+    [JsonProperty("ds")]
     public decimal Constant { get; set; }
 
-    [JsonProperty("fc", Required = Required.Always)]
+    [JsonProperty("fc")]
     public string Fc { get; set; }
 
     /**
      * 13+,14,...
      */
-    [JsonProperty("level", Required = Required.Always)]
+    [JsonProperty("level")]
     public string Level { get; set; }
 
-    [JsonProperty("level_index", Required = Required.Always)]
+    [JsonProperty("level_index")]
     public long LevelIndex { get; set; }
 
     /**
      * Basic,Advanced,Expert,Master,...
      */
-    [JsonProperty("level_label", Required = Required.Always)]
+    [JsonProperty("level_label")]
     public string LevelLabel { get; set; }
 
-    [JsonProperty("mid", Required = Required.Always)]
+    [JsonProperty("mid")]
     public long Id { get; set; }
 
-    private decimal? _rating;
-
-    [JsonProperty("ra", Required = Required.Always)]
+    [JsonProperty("ra")]
     public decimal Rating
     {
         get => _rating ?? (decimal)(_rating = ChunithmSong.Ra(Achievement, Constant));
@@ -48,11 +48,13 @@ public class ChunithmScore
         set {}
     }
 
-    [JsonProperty("score", Required = Required.Always)]
+    [JsonProperty("score")]
     public int Achievement { get; set; }
 
-    [JsonProperty("title", Required = Required.Always)]
+    [JsonProperty("title")]
     public string Title { get; set; }
+
+    public string Rank => GetRank(Achievement);
 
     public static string GetRank(int achievement)
     {
@@ -75,8 +77,6 @@ public class ChunithmScore
         };
     }
 
-    public string Rank => GetRank(Achievement);
-
     public Image Draw()
     {
         var exo2 = SystemFonts.Get("Exo 2");
@@ -96,7 +96,7 @@ public class ChunithmScore
             PaddingTop  = cornerRadius,
             Width       = levelBarWidth,
             Height      = height - cornerRadius * 2,
-            BorderWidth = 2,
+            BorderWidth = 2
         };
 
         var fontColor = coverDominantColor.SelectFontColor();
@@ -107,7 +107,7 @@ public class ChunithmScore
                 new RectangleF(levelBar.PaddingLeft, levelBar.PaddingTop, levelBar.Width, levelBar.Height))
             .Fill(ChunithmSong.LevelColor[LevelLabel.ToUpper()], new RectangleF(
                 levelBar.PaddingLeft + levelBar.BorderWidth, levelBar.PaddingTop + levelBar.BorderWidth,
-                levelBar.Width       - levelBar.BorderWidth * 2, levelBar.Height - levelBar.BorderWidth * 2))
+                levelBar.Width - levelBar.BorderWidth * 2, levelBar.Height - levelBar.BorderWidth * 2))
         );
 
         var drawX = levelBar.PaddingLeft + levelBar.Width + marginX;
@@ -124,7 +124,7 @@ public class ChunithmScore
 
             var rect1 = new RectangleF(0, 0, 60, 30);
             var rect2 = new RectangleF(ratingBorderWidth, ratingBorderWidth, rect1.Width - ratingBorderWidth * 2,
-                rect1.Height                                                             - ratingBorderWidth * 2);
+                rect1.Height - ratingBorderWidth * 2);
 
             var color1 = Color.ParseHex("#c8c8c8");
             var color2 = ChunithmSong.LevelColor[LevelLabel.ToUpper()];
@@ -179,13 +179,13 @@ public class ChunithmScore
 
             var fcImg = ResourceManager.GetImage(string.IsNullOrEmpty(Fc)
                 ? "icon_blank.png"
-                : $"icon_{Fc.ToLower()}.png", width: 190);
+                : $"icon_{Fc.ToLower()}.png", 190);
 
             var rank = ResourceManager.GetImage($"rank_{Rank.ToLower()}.png").ResizeY(fcImg.Height);
 
             coverBackground
                 .DrawImage(fcImg, drawX, height - cornerRadius - fcImg.Height)
-                .DrawImage(rank, drawX          + fcImg.Width  + marginX, height - cornerRadius - fcImg.Height);
+                .DrawImage(rank, drawX + fcImg.Width + marginX, height - cornerRadius - fcImg.Height);
         }
 
         return coverBackground;

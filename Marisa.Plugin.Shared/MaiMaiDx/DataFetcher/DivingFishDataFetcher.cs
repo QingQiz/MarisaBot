@@ -3,6 +3,8 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
@@ -43,11 +45,11 @@ public class DivingFishDataFetcher : DataFetcher
     private static (string, long) AtOrSelf(Message message, bool qqOnly = false)
     {
         var username = message.Command;
-        var qq       = message.Sender!.Id;
+        var qq       = message.Sender.Id;
 
-        if (qqOnly) username = "";
+        if (qqOnly) username = "".AsMemory();
 
-        if (!string.IsNullOrWhiteSpace(username)) return (username, qq);
+        if (!username.IsWhiteSpace()) return (username.ToString(), qq);
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)
@@ -55,6 +57,6 @@ public class DivingFishDataFetcher : DataFetcher
             qq = (at as MessageDataAt)?.Target ?? qq;
         }
 
-        return (username, qq);
+        return (username.ToString(), qq);
     }
 }

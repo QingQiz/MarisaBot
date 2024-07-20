@@ -32,11 +32,11 @@ public class ChunithmSong : Song
         { "黑", "ULTIMA" },
         { "we", "WORLD'S END" }
     };
-    public new readonly string Bpm;
-    public readonly List<string> ChartName = new();
+    public new readonly ReadOnlyMemory<char> Bpm;
+    public readonly List<string> ChartName = [];
     public readonly string Genre;
-    public readonly List<string> LevelName = new();
-    public readonly List<long> MaxCombo = new();
+    public readonly List<string> LevelName = [];
+    public readonly List<long> MaxCombo = [];
 
     public ChunithmSong(dynamic o, bool fromDivingFish)
     {
@@ -66,7 +66,7 @@ public class ChunithmSong : Song
         Genre   = o.Genre;
         Version = o.Version;
 
-        var bpms = new List<string>();
+        var bpms = new List<ReadOnlyMemory<char>>();
 
         foreach (var i in o.Beatmaps)
         {
@@ -94,7 +94,7 @@ public class ChunithmSong : Song
         }
     }
 
-    public string BpmNorm => Bpm.Split(' ')[0];
+    public ReadOnlyMemory<char> BpmNorm => Bpm.Split(' ').First();
 
     public static decimal Ra(int achievement, decimal constant)
     {
@@ -232,14 +232,14 @@ public class ChunithmSong : Song
                 DrawKeyValuePair("版本", Version, x, y, w, h, background.Width);
 
                 y += h;
-                DrawKeyValuePair("BPM FULL", Bpm, x, y, w, h, background.Width);
+                DrawKeyValuePair("BPM FULL", Bpm.ToString(), x, y, w, h, background.Width);
 
                 y = 3 * h;
                 w = 100;
                 DrawKeyValuePair("ID", Id.ToString(), 0, y, w, h, 3 * padding + 200, true, true);
 
                 y += h;
-                DrawKeyValuePair("BPM", BpmNorm, 0, y, w, h, 3 * padding + 200, true);
+                DrawKeyValuePair("BPM", BpmNorm.ToString(), 0, y, w, h, 3 * padding + 200, true);
 
                 return background;
             }

@@ -29,13 +29,13 @@ public partial class Chunithm
                     : throw new InvalidDataException("无效的服务器名： " + name)
             };
         }
-        catch (Exception  e) when (e is SocketException or ArgumentException)
+        catch (Exception e) when (e is SocketException or ArgumentException)
         {
             throw new InvalidDataException("无效的服务器名： " + name);
         }
     }
 
-    private static (string, int) LevelAlias2Index(string command, IList<string> levels)
+    private static (string, int) LevelAlias2Index(ReadOnlyMemory<char> command, List<string> levels)
     {
         // 全名
         var level       = levels.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
@@ -47,7 +47,7 @@ public partial class Chunithm
             command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
         if (level != null)
         {
-            levelPrefix = command[0].ToString();
+            levelPrefix = command.Span[0].ToString();
             goto RightLabel;
         }
 
@@ -55,13 +55,10 @@ public partial class Chunithm
         level = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a =>
             command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
         levelPrefix = level ?? "";
-        if (level != null)
-        {
-            level = ChunithmSong.LevelAlias[level];
-            goto RightLabel;
-        }
 
-        return ("", -1);
+        if (level == null) return ("", -1);
+
+        level = ChunithmSong.LevelAlias[level];
 
         RightLabel:
         return (levelPrefix, levels.IndexOf(level));
@@ -70,12 +67,12 @@ public partial class Chunithm
     private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
     {
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
-        if (allowUsername && !string.IsNullOrWhiteSpace(message.Command))
+        if (allowUsername && !message.Command.IsWhiteSpace())
         {
             return GetDataFetcher("DivingFish");
         }
 
-        var qq = message.Sender!.Id;
+        var qq = message.Sender.Id;
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)

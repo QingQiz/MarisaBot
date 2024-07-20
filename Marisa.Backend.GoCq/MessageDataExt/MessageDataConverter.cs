@@ -4,6 +4,7 @@ using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
+using Marisa.Utils;
 using Newtonsoft.Json;
 using NLog;
 using Websocket.Client;
@@ -12,7 +13,7 @@ namespace Marisa.Backend.GoCq.MessageDataExt;
 
 public static class MessageDataConverter
 {
-    private static string EscapePar(this string s)
+    private static ReadOnlyMemory<char> EscapePar(this ReadOnlyMemory<char> s)
     {
         return s.Replace("[", "&#91;").Replace("]", "&#93;");
     }
@@ -140,7 +141,7 @@ public static class MessageDataConverter
     }
 
     /// <summary>
-    /// Mirai `Message` 类型的消息转化为 <see cref="Message"/>
+    ///     Mirai `Message` 类型的消息转化为 <see cref="Message" />
     /// </summary>
     /// <param name="m"></param>
     /// <param name="ms"></param>
@@ -192,7 +193,7 @@ public static class MessageDataConverter
                         new Message(ms, new MessageDataNudge(m.target_id, m.user_id))
                         {
                             Type   = d.ContainsKey("group_id") ? MessageType.GroupMessage : MessageType.FriendMessage,
-                            Sender = new SenderInfo(m.user_id, null, null, null),
+                            Sender = new SenderInfo(m.user_id, null, null, null)
                         };
 
                     if (message.Type == MessageType.GroupMessage)
@@ -224,7 +225,7 @@ public static class MessageDataConverter
                     var message = new Message(ms, md)
                     {
                         Type      = MessageType.GroupMessage,
-                        Sender    = new SenderInfo(md.Id, "", null, null),
+                        Sender    = new SenderInfo(md.Id, ""),
                         GroupInfo = new GroupInfo(m.group_id, "", null)
                     };
                     return message;
@@ -236,7 +237,7 @@ public static class MessageDataConverter
                     var message = new Message(ms, md)
                     {
                         Type      = MessageType.GroupMessage,
-                        Sender    = new SenderInfo(md.Id, "", null, null),
+                        Sender    = new SenderInfo(md.Id, ""),
                         GroupInfo = new GroupInfo(m.group_id, "", null)
                     };
                     return message;
@@ -275,7 +276,7 @@ public static class MessageDataConverter
     }
 
     /// <summary>
-    /// 将 websocket 的接收消息转化为 <see cref="Message"/>
+    ///     将 websocket 的接收消息转化为 <see cref="Message" />
     /// </summary>
     /// <param name="msgIn"></param>
     /// <param name="ms"></param>

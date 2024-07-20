@@ -17,16 +17,17 @@ public record MessageChain
     }
 
     public bool CanBeReferenced => Messages.All(m => m.Type is not (
-        MessageDataType.Voice or
-        MessageDataType.Nudge or
-        MessageDataType.NewMember or
-        MessageDataType.MemberLeave
+        MessageDataType.Voice or MessageDataType.Nudge or MessageDataType.NewMember or MessageDataType.MemberLeave
         )
+    );
+
+    public string Text => string.Join(' ',
+        Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text)
     );
 
     public static MessageChain FromText(string text)
     {
-        return new MessageChain(new MessageDataText(text));
+        return new MessageChain(new MessageDataText(text.AsMemory()));
     }
 
     public static MessageChain FromImageB64(string b64)
@@ -45,13 +46,9 @@ public record MessageChain
         {
             return m.Type switch
             {
-                MessageDataType.Text => (m as MessageDataText)!.Text,
+                MessageDataType.Text => (m as MessageDataText)!.Text.ToString(),
                 _                    => $"[:{m.Type.ToString()}:]"
             };
         }));
     }
-
-    public string Text => string.Join(' ',
-        Messages.Where(m => m.Type == MessageDataType.Text).Select(m => (m as MessageDataText)!.Text)
-    );
 }

@@ -14,24 +14,6 @@ namespace Marisa.Plugin.MaiMaiDx;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 {
-    #region 查分
-
-    /// <summary>
-    ///     b50
-    /// </summary>
-    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
-    [MarisaPluginCommand("best", "b50", "查分")]
-    private async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
-    {
-        var ret = await GetB50Card(message);
-
-        message.Reply(ret);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
     #region 搜歌
 
     /// <summary>
@@ -83,13 +65,13 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
          */
         var stat = 0;
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, async next =>
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, async next =>
         {
             switch (stat)
             {
                 case 0:
                 {
-                    if (!int.TryParse(next.Command, out var idx) || idx < 0 || idx >= fetchers.Length)
+                    if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
                     {
                         next.Reply("错误的序号，会话已关闭");
                         return MarisaPluginTaskState.CompletedTask;
@@ -161,7 +143,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     {
         await using var dbContext = new BotDbContext();
 
-        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender!.Id);
+        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender.Id);
 
         if (bind == null)
         {
@@ -178,6 +160,55 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         }
 
         message.Reply("妥了，玩吧。");
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 查分
+
+    /// <summary>
+    ///     b50
+    /// </summary>
+    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginCommand("best", "b50", "查分")]
+    private async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
+    {
+        var fetcher = GetDataFetcher(message, true);
+
+        var b50 = await fetcher.GetRating(message);
+
+        var context = new WebContext();
+
+        context.Put("b50", b50.ToJson());
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     rating 排名
+    /// </summary>
+    [MarisaPluginDoc("查询 rating排名，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginCommand("rank", "排名")]
+    private async Task<MarisaPluginTaskState> RatingRank(Message message)
+    {
+        var fetcher = GetDataFetcher(message, true);
+
+        var b50  = await fetcher.GetRating(message);
+        var rank = ((DivingFishDataFetcher)GetDataFetcher(DataFetcherType.DivingFish)).GetRaRank();
+
+        var context = new WebContext();
+
+        context.Put("rank", new
+        {
+            ra = b50.Rating,
+            rank
+        });
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiRank(context.Id)));
+
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -252,7 +283,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     {
         var constants = message.Command.Split('-').Select(x =>
         {
-            var res = double.TryParse(x.Trim(), out var c);
+            var res = double.TryParse(x.Trim().Span, out var c);
             return res ? c : -1;
         }).ToList();
 
@@ -308,7 +339,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         var genres = _songDb.SongList.Select(song => song.Info.Genre).Distinct().ToArray();
 
         var genre = genres.FirstOrDefault(p =>
-            string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+            p.Equals(message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (genre == null)
         {
@@ -343,16 +374,16 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     private async Task<MarisaPluginTaskState> MaiMaiSummaryVersion(Message message)
     {
         var version = MaiMaiSong.Plates.FirstOrDefault(p =>
-            string.Equals(p, message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+            p.Equals(message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (version == null)
         {
             var v = ConfigurationManager.Configuration.MaiMai.Version
                 .Where(x => x.Value
-                    .Contains(message.Command.Trim(), StringComparer.OrdinalIgnoreCase))
+                    .Contains(message.Command.Trim(), StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            if (!v.Any())
+            if (v.Count == 0)
             {
                 message.Reply("可用的版本号有：\n" + string.Join('\n', MaiMaiSong.Plates) + "\n（或者你也可以用一些别名）");
                 return MarisaPluginTaskState.CompletedTask;
@@ -390,12 +421,12 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     {
         var lv = message.Command.Trim();
 
-        if (new Regex(@"^[0-9]+\+?$").IsMatch(lv))
+        if (LvRegex().IsMatch(lv.ToString()))
         {
-            var maxLv = lv.EndsWith('+') ? 14 : 15;
-            var lvNr  = lv.EndsWith('+') ? lv[..^1] : lv;
+            var maxLv = lv.Span[^1] == '+' ? 14 : 15;
+            var lvNr  = lv.Span[^1] == '+' ? lv[..^1] : lv;
 
-            if (int.TryParse(lvNr, out var i))
+            if (int.TryParse(lvNr.Span, out var i))
             {
                 if (!(1 <= i && i <= maxLv))
                 {
@@ -419,7 +450,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
-            .Where(data => data.song.Levels[data.i] == lv)
+            .Where(data => data.song.Levels[data.i].Equals(lv, StringComparison.Ordinal))
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
@@ -445,7 +476,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("howto", "how to")]
     private async Task<MarisaPluginTaskState> MaiMaiDxHowTo(Message message)
     {
-        if (!int.TryParse(message.Command, out var target))
+        if (!int.TryParse(message.Command.Span, out var target))
         {
             message.Reply("参数不是数字");
             return MarisaPluginTaskState.CompletedTask;
@@ -454,7 +485,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         var fetcher = GetDataFetcher(message);
         var rating = await fetcher.GetRating(message with
         {
-            Command = ""
+            Command = "".AsMemory()
         });
 
         var (old, @new, success) = GetRecommend(rating, target);
@@ -721,22 +752,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState MaiMaiDxGuess(Message message, long qq)
     {
-        if (message.Command.StartsWith("c:", StringComparison.OrdinalIgnoreCase))
-        {
-            var reg = message.Command[2..];
-
-            if (!reg.IsRegex())
-            {
-                message.Reply("错误的正则表达式：" + reg);
-            }
-            else
-            {
-                _songDb.StartSongCoverGuess(message, qq, 3, song =>
-                    new Regex(reg, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace)
-                        .IsMatch(song.Info.Genre));
-            }
-        }
-        else if (message.Command == "")
+        if (message.Command.IsEmpty)
         {
             _songDb.StartSongCoverGuess(message, qq, 3, null);
         }
@@ -774,7 +790,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     {
         var songName = message.Command;
 
-        if (string.IsNullOrEmpty(songName))
+        if (songName.IsEmpty)
         {
             message.Reply("？");
         }
@@ -802,7 +818,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     private MarisaPluginTaskState MaiMaiDxSongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split(":=");
+        var names = param.Split(":=").ToArray();
 
         if (names.Length != 2)
         {
@@ -829,54 +845,55 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState MaiMaiDxRatingLine(Message message)
     {
-        if (double.TryParse(message.Command, out var constant))
+        if (double.TryParse(message.Command.Span, out var constant))
         {
-            if (constant is <= 15.0 and >= 1)
+            switch (constant)
             {
-                var a   = 96.9999;
-                var ret = "达成率 -> Rating";
-
-                while (a < 100.5)
+                case <= 15.0 and >= 1:
                 {
-                    a = SongScore.NextRa(a, constant);
-                    var ra = SongScore.Ra(a, constant);
-                    ret = $"{ret}\n{a:000.0000} -> {ra}";
-                }
+                    var a   = 96.9999;
+                    var ret = "达成率 -> Rating";
 
-                message.Reply(ret);
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
-            if (constant > 15)
-            {
-                var result = new List<(double Constant, double Achievement)>();
-                var ret    = "定数 -> 达成率 -> rating\n";
-
-                Enumerable.Range(1, 150)
-                    .Where(rat =>
-                        SongScore.Ra(100.5, rat / 10.0) >= constant && SongScore.Ra(50, rat / 10.0) <= constant)
-                    .ToList()
-                    .ForEach(rat =>
+                    while (a < 100.5)
                     {
-                        var a = 49.0;
-                        while (a < 100.5)
-                        {
-                            a = SongScore.NextRa(a, rat / 10.0);
-                            var ra = SongScore.Ra(a, rat / 10.0);
+                        a = SongScore.NextRa(a, constant);
+                        var ra = SongScore.Ra(a, constant);
+                        ret = $"{ret}\n{a:000.0000} -> {ra}";
+                    }
 
-                            if (ra == (int)constant)
+                    message.Reply(ret);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+                case > 15:
+                {
+                    var result = new List<(double Constant, double Achievement)>();
+                    var ret    = "定数 -> 达成率 -> rating\n";
+
+                    Enumerable.Range(1, 150)
+                        .Where(rat =>
+                            SongScore.Ra(100.5, rat / 10.0) >= constant && SongScore.Ra(50, rat / 10.0) <= constant)
+                        .ToList()
+                        .ForEach(rat =>
+                        {
+                            var a = 49.0;
+                            while (a < 100.5)
                             {
+                                a = SongScore.NextRa(a, rat / 10.0);
+                                var ra = SongScore.Ra(a, rat / 10.0);
+
+                                if (ra != (int)constant) continue;
+
                                 result.Add((rat / 10.0, a));
                                 break;
                             }
-                        }
-                    });
+                        });
 
-                ret += string.Join('\n',
-                    result.Select(x => $"{x.Constant:00.0} -> {x.Achievement:000.0000} -> {(int)constant}"));
+                    ret += string.Join('\n',
+                        result.Select(x => $"{x.Constant:00.0} -> {x.Achievement:000.0000} -> {(int)constant}"));
 
-                message.Reply(ret);
-                return MarisaPluginTaskState.CompletedTask;
+                    message.Reply(ret);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
             }
         }
 
@@ -898,7 +915,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         }
 
         message.Reply("难度和预期达成率？");
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
 
@@ -911,7 +928,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
                 command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
-                levelPrefix = command[0].ToString();
+                levelPrefix = command.Span[0].ToString();
                 goto RightLabel;
             }
 
@@ -919,7 +936,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
             RightLabel:
-            var parseSuccess = double.TryParse(command.TrimStart(levelPrefix), out var achievement);
+            var parseSuccess = double.TryParse(command.TrimStart(levelPrefix).Span, out var achievement);
 
             if (!parseSuccess)
             {
@@ -967,6 +984,9 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
+    [GeneratedRegex(@"^[0-9]+\+?$")]
+    private static partial Regex LvRegex();
 
     #endregion
 }

@@ -11,10 +11,8 @@ public static class StringExt
     {
         if (string.IsNullOrEmpty(text)) return string.Empty;
 
-        using var sha = MD5.Create();
-
         var textData = Encoding.UTF8.GetBytes(text);
-        var hash     = sha.ComputeHash(textData);
+        var hash     = MD5.HashData(textData);
 
         return BitConverter.ToString(hash).Replace("-", string.Empty);
     }
@@ -49,14 +47,6 @@ public static class StringExt
         var option = ImageDraw.GetTextOptions(font);
 
         return TextMeasurer.MeasureAdvance(text, option);
-    }
-
-    public static string UnEscapeTsvCell(this string s)
-    {
-        if (s.Length < 2) return s;
-
-        if (s[0] == '"' && s[^1] == '"') return s[1..^1].Replace("\"\"", "\"");
-        return s;
     }
 
     public static string? TrimStart(this string msg, string prefix)

@@ -83,7 +83,7 @@ public class StringDrawer
         // 新创建一行
         if (_newLine)
         {
-            _textCache.Add(new List<(string Text, Font Font, Color Color)>());
+            _textCache.Add([]);
             _newLine = false;
         }
 

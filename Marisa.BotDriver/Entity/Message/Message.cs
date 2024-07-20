@@ -4,32 +4,54 @@ using Marisa.BotDriver.Entity.MessageSender;
 
 namespace Marisa.BotDriver.Entity.Message;
 
-public record Message(string Command)
+public record Message
 {
+    private readonly MessageSenderProvider _sender;
+
+    public readonly MessageChain? MessageChain;
+
+    public ReadOnlyMemory<char> Command;
     // Info
     public GroupInfo? GroupInfo;
     public SenderInfo Sender = new(-1, "");
 
-    public readonly MessageChain? MessageChain;
-
     // Control
     public MessageType Type;
-    private readonly MessageSenderProvider _sender;
 
-    public Message(MessageChain chain, MessageSenderProvider sender) : this(chain.Text.Trim())
+    private Message(ReadOnlyMemory<char> command)
+    {
+        Command = command;
+        _sender = null!;
+    }
+
+    public Message(MessageChain chain, MessageSenderProvider sender) : this(chain.Text.Trim().AsMemory())
     {
         MessageChain = chain;
         _sender      = sender;
     }
 
     public Message(MessageSenderProvider sender, params MessageData.MessageData[] md)
-        : this(new MessageChain(md), sender) {}
+        : this(new MessageChain(md), sender)
+    {
+    }
 
     public MessageDataId MessageId =>
         (MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.Id) as MessageDataId)!;
 
     /// <summary>
-    /// 判断消息是否 AT 某人
+    ///     消息在哪，群或者私聊
+    /// </summary>
+    public long Location => Type switch
+    {
+        MessageType.GroupMessage    => GroupInfo!.Id,
+        MessageType.FriendMessage   => Sender.Id,
+        MessageType.TempMessage     => Sender.Id,
+        MessageType.StrangerMessage => Sender.Id,
+        _                           => throw new ArgumentOutOfRangeException()
+    };
+
+    /// <summary>
+    ///     判断消息是否 AT 某人
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
@@ -46,7 +68,7 @@ public record Message(string Command)
     }
 
     /// <summary>
-    /// 判断是否是纯文本消息
+    ///     判断是否是纯文本消息
     /// </summary>
     /// <returns></returns>
     public bool IsPlainText()
@@ -55,29 +77,17 @@ public record Message(string Command)
                MessageChain!.Messages.Any(m => m.Type == MessageDataType.Text);                         // 确保至少存在一条数据
     }
 
-    /// <summary>
-    /// 消息在哪，群或者私聊
-    /// </summary>
-    public long Location => Type switch
-    {
-        MessageType.GroupMessage    => GroupInfo!.Id,
-        MessageType.FriendMessage   => Sender!.Id,
-        MessageType.TempMessage     => Sender!.Id,
-        MessageType.StrangerMessage => Sender!.Id,
-        _                           => throw new ArgumentOutOfRangeException()
-    };
-
     public override string ToString()
     {
         return GroupInfo == null
-            ? $"[{Type}] {Sender?.Name ?? "Unknown"} ({Sender?.Id ?? 0}) => {MessageChain}"
-            : $"[{Type}] {Sender?.Name ?? "Unknown"} ({Sender?.Id ?? 0}) -> {GroupInfo?.Name ?? "Unknown"} ({GroupInfo?.Id ?? 0}) => {MessageChain}";
+            ? $"[{Type}] {Sender.Name} ({Sender.Id}) => {MessageChain}"
+            : $"[{Type}] {Sender.Name} ({Sender.Id}) -> {GroupInfo?.Name ?? "Unknown"} ({GroupInfo?.Id ?? 0}) => {MessageChain}";
     }
 
     #region Reply
 
     /// <summary>
-    /// 通过接收到的消息发送复杂消息到接收处
+    ///     通过接收到的消息发送复杂消息到接收处
     /// </summary>
     public void Reply(MessageChain message, bool quote = true)
     {
@@ -100,9 +110,12 @@ public record Message(string Command)
     }
 
     /// <summary>
-    /// 通过接收到的消息发送纯文本消息到接收处
+    ///     通过接收到的消息发送纯文本消息到接收处
     /// </summary>
-    public void Reply(string text, bool quote = true) => Reply(MessageChain.FromText(text), quote);
+    public void Reply(string text, bool quote = true)
+    {
+        Reply(MessageChain.FromText(text), quote);
+    }
 
     #endregion
 }

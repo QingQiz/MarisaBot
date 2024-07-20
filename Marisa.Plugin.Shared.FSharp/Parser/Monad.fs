@@ -1,9 +1,10 @@
 ﻿namespace Marisa.Plugin.Shared.FSharp.Parser
+
 #nowarn "40"
 
 
 module Monad =
-    type Parser<'T> = Parser of (string -> int -> 'T option * int)
+    type Parser<'T> = Parser of (char[] -> int -> 'T option * int)
 
     let parse (Parser p) input pos = p input pos
 
@@ -49,9 +50,7 @@ module Monad =
 
     /// one or more
     let some pa =
-        let rec pElse =
-            pa
-            >>= fun a -> (pElse <|> ret []) >>= fun l -> ret <| a :: l
+        let rec pElse = pa >>= fun a -> (pElse <|> ret []) >>= fun l -> ret <| a :: l
 
         pElse
 

@@ -21,7 +21,7 @@ public partial class MaiMaiDx
 
     #endregion
 
-    #region rating
+    #region recommend
 
     private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool)
         GetRecommend(DxRating rating, int targetRating)
@@ -50,13 +50,13 @@ public partial class MaiMaiDx
         while (true)
         {
             if (raOld + raNew >= targetRating) break;
-            if (fails         == 0) break;
+            if (fails == 0) break;
 
             int r;
             do
             {
                 r = rand.Next(4);
-            } while (((1 << r) & fails) == 0);
+            } while ((1 << r & fails) == 0);
 
             switch (r)
             {
@@ -107,8 +107,8 @@ public partial class MaiMaiDx
                     // 你妈逼的浮点误差，14.7 -> 14.699999999999999
                     .Any(c =>
                         !idSet.Contains((s.Id, c.i))
-                        && c.c                      <= maxConst + 0.15
-                        && SongScore.Ra(100.5, c.c) > minRa
+                     && c.c <= maxConst + 0.15
+                     && SongScore.Ra(100.5, c.c) > minRa
                     )
                 )
                 .ToList();
@@ -172,19 +172,6 @@ public partial class MaiMaiDx
         }
     }
 
-    private async Task<MessageChain> GetB50Card(Message message)
-    {
-        var fetcher = GetDataFetcher(message, true);
-
-        var b50 = await fetcher.GetRating(message);
-
-        var context = new WebContext();
-
-        context.Put("b50", b50.ToJson());
-
-        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id));
-    }
-
     #endregion
 
     #region Select Song
@@ -201,18 +188,17 @@ public partial class MaiMaiDx
 
     #endregion
 
-
-    private readonly Dictionary<string, DataFetcher> _dataFetchers = new();
+    #region data fetcher
 
     private DataFetcher GetDataFetcher(Message message, bool allowUsername = false)
     {
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
-        if (allowUsername && !string.IsNullOrWhiteSpace(message.Command))
+        if (allowUsername && !message.Command.IsWhiteSpace())
         {
-            return GetDataFetcher("DivingFish");
+            return GetDataFetcher(DataFetcherType.DivingFish);
         }
 
-        var qq = message.Sender!.Id;
+        var qq = message.Sender.Id;
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)
@@ -224,18 +210,28 @@ public partial class MaiMaiDx
 
         var bind = db.MaiMaiBinds.FirstOrDefault(x => x.UId == qq);
 
-        return GetDataFetcher(bind == null ? "DivingFish" : "Wahlap");
+        return GetDataFetcher(bind == null ? DataFetcherType.DivingFish : DataFetcherType.Wahlap);
     }
 
-    private DataFetcher GetDataFetcher(string name)
-    {
-        if (_dataFetchers.TryGetValue(name, out var fetcher)) return fetcher;
+    private readonly Dictionary<DataFetcherType, DataFetcher> _dataFetchers = new();
 
-        return _dataFetchers[name] = name switch
+    private DataFetcher GetDataFetcher(DataFetcherType type)
+    {
+        if (_dataFetchers.TryGetValue(type, out var fetcher)) return fetcher;
+
+        return _dataFetchers[type] = type switch
         {
-            "DivingFish" => new DivingFishDataFetcher(_songDb),
-            "Wahlap"     => new AllNetDataFetcher(_songDb),
-            _            => throw new ArgumentOutOfRangeException(nameof(name), name, null)
+            DataFetcherType.DivingFish => new DivingFishDataFetcher(_songDb),
+            DataFetcherType.Wahlap     => new AllNetDataFetcher(_songDb),
+            _                          => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
+
+    private enum DataFetcherType
+    {
+        DivingFish,
+        Wahlap
+    }
+
+    #endregion
 }

@@ -39,7 +39,7 @@ public class Chi : MarisaPluginBase
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private MarisaPluginTaskState Proc(Message message)
     {
-        var sender = message.Sender!.Id;
+        var sender = message.Sender.Id;
 
         message.Reply(ChiSha(sender));
 

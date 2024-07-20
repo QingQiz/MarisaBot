@@ -4,6 +4,7 @@ using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -60,7 +61,7 @@ public class DivingFishDataFetcher(ChunithmSongDb songDb) : DataFetcher(songDb)
     {
         var (username, qq) = AtOrSelf(message, qqOnly);
 
-        var uri = string.IsNullOrWhiteSpace(username)
+        var uri = username.IsWhiteSpace()
             ? $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?qq={qq}"
             : $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?username={username}";
 
@@ -72,7 +73,7 @@ public class DivingFishDataFetcher(ChunithmSongDb songDb) : DataFetcher(songDb)
         {
             if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
 
-            r.Id = SongDb.SongList.First(s => s.Title == r.Title).Id;
+            r.Id = SongDb.SongList.First(s => s.Title.Equals(r.Title, StringComparison.Ordinal)).Id;
         }
 
         response.Records.Best = response.Records.Best.Where(x => !_deletedSongs.Contains(x.Id)).ToArray();
@@ -80,14 +81,14 @@ public class DivingFishDataFetcher(ChunithmSongDb songDb) : DataFetcher(songDb)
         return response;
     }
 
-    private static (string, long) AtOrSelf(Message message, bool qqOnly = false)
+    private static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly = false)
     {
         var username = message.Command;
         var qq       = message.Sender.Id;
 
-        if (qqOnly) username = "";
+        if (qqOnly) username = "".AsMemory();
 
-        if (!string.IsNullOrWhiteSpace(username)) return (username, qq);
+        if (username.IsEmpty) return (username, qq);
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)

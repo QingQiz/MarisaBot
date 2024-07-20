@@ -6,13 +6,12 @@ namespace Marisa.BotDriver.Plugin.Trigger;
 public class MarisaPluginCommand(MessageType target, StringComparison comparison, bool strict = false, params string[] prefixes)
     : Attribute
 {
-
-    private bool Comparer(string a, string b)
+    private bool Comparer(ReadOnlyMemory<char> a, ReadOnlyMemory<char> b)
     {
-        return strict ? string.Equals(a, b, comparison) : a.StartsWith(b, comparison);
+        return strict ? a.Span.Equals(b.Span, comparison) : a.Span.StartsWith(b.Span, comparison);
     }
 
-    public string[] Commands { get; } = prefixes;
+    public ReadOnlyMemory<char>[] Commands { get; } = prefixes.Select(p => p.AsMemory()).ToArray();
 
     public MarisaPluginCommand(params string[] prefixes) : this((MessageType)0b11, StringComparison.OrdinalIgnoreCase, false, prefixes)
     {
@@ -38,7 +37,7 @@ public class MarisaPluginCommand(MessageType target, StringComparison comparison
     {
     }
 
-    public bool TryMatch(Message message, out string afterMatch)
+    public bool TryMatch(Message message, out ReadOnlyMemory<char> afterMatch)
     {
         afterMatch = message.Command;
 

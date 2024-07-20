@@ -8,28 +8,19 @@ using Flurl.Http;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-using ChunithmSongDb =
-    Util.SongDb.SongDb<ChunithmSong, Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm.ChunithmGuess>;
+using ChunithmSongDb = SongDb<ChunithmSong, ChunithmGuess>;
 
-public class AllNetBasedNetDataFetcher : DataFetcher
+public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, string keyChipId) : DataFetcher(songDb)
 {
     private string? _serverUri;
-    private string Host { get; }
-    private string KeyChipId { get; }
+    private string Host { get; } = host;
+    private string KeyChipId { get; } = keyChipId;
     private string ServerUri => _serverUri ??= GetServerUri(KeyChipId).Result;
-
-    public AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, string keyChipId) : base(songDb)
-    {
-        Host      = host;
-        KeyChipId = keyChipId;
-    }
-
-    private record MusicData(int Id, int Index, int Score, bool Fc, bool Aj, bool FullChain);
-
-    private record RecentData(int Id, int Index, int Score);
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
@@ -70,7 +61,7 @@ public class AllNetBasedNetDataFetcher : DataFetcher
                 LevelIndex  = data.Index,
                 LevelLabel  = song.LevelName[data.Index],
                 Title       = song.Title,
-                Constant    = (decimal)song.Constants[data.Index],
+                Constant    = (decimal)song.Constants[data.Index]
             });
         }
 
@@ -150,18 +141,22 @@ public class AllNetBasedNetDataFetcher : DataFetcher
                 LevelIndex  = data.Index,
                 LevelLabel  = song.LevelName[data.Index],
                 Title       = song.Title,
-                Constant    = (decimal)song.Constants[data.Index],
+                Constant    = (decimal)song.Constants[data.Index]
             };
         }
 
         return ret;
     }
 
+    private record MusicData(int Id, int Index, int Score, bool Fc, bool Aj, bool FullChain);
+
+    private record RecentData(int Id, int Index, int Score);
+
     #region Helper
 
     private async Task<int> GetAimeId(Message message)
     {
-        var qq = message.Sender!.Id;
+        var qq = message.Sender.Id;
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)
@@ -173,8 +168,8 @@ public class AllNetBasedNetDataFetcher : DataFetcher
 
         var user = db.ChunithmBinds.First(x => x.UId == qq);
 
-        var aimeId = AccessCodeToAimeId(user!.AccessCode, KeyChipId);
-        
+        var aimeId = AccessCodeToAimeId(user.AccessCode, KeyChipId);
+
         if (aimeId < 0) throw new InvalidDataException("该卡尚未在该服务器注册");
 
         return aimeId;

@@ -48,7 +48,7 @@ public static class ResourceManager
             return GetCover(0, resize);
         }
 
-        var img = Image.Load(cp)!;
+        var img = Image.Load(cp);
 
         if (resize)
         {

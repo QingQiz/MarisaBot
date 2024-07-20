@@ -8,7 +8,7 @@ namespace Marisa.Plugin.Arcaea;
 public partial class Arcaea : MarisaPluginBaseWithHelpCommand
 {
     /// <summary>
-    /// 搜歌
+    ///     搜歌
     /// </summary>
     [MarisaPluginDoc("搜歌，参数为：歌名")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "song", "search", "搜索")]
@@ -22,7 +22,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 猜歌排名
+    ///     猜歌排名
     /// </summary>
     [MarisaPluginDoc("Arcaea 猜歌的排名，给出的结果中s,c,w分别是启动猜歌的次数，猜对的次数和猜错的次数")]
     [MarisaPluginSubCommand(nameof(ArcaeaGuess))]
@@ -47,13 +47,13 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 猜歌
+    ///     猜歌
     /// </summary>
     [MarisaPluginDoc("Arcaea 猜歌，看封面猜曲")]
     [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
     private MarisaPluginTaskState ArcaeaGuess(Message message, long qq)
     {
-        if (string.IsNullOrEmpty(message.Command))
+        if (message.Command.IsEmpty)
         {
             _songDb.StartSongCoverGuess(message, qq, 4, null);
         }
@@ -62,7 +62,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 听歌猜曲
+    ///     听歌猜曲
     /// </summary>
     [MarisaPluginDoc("Arcaea 猜歌，听歌猜曲")]
     [MarisaPluginSubCommand(nameof(ArcaeaGuess))]
@@ -75,7 +75,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 别名处理
+    ///     别名处理
     /// </summary>
     [MarisaPluginDoc("别名设置和查询")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "alias")]
@@ -87,7 +87,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 获取别名
+    ///     获取别名
     /// </summary>
     [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
     [MarisaPluginSubCommand(nameof(ArcaeaSongAlias))]
@@ -96,7 +96,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     {
         var songName = message.Command;
 
-        if (string.IsNullOrEmpty(songName))
+        if (songName.IsEmpty)
         {
             message.Reply("？");
         }
@@ -116,7 +116,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    /// 设置别名
+    ///     设置别名
     /// </summary>
     [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
     [MarisaPluginSubCommand(nameof(ArcaeaSongAlias))]
@@ -124,7 +124,7 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     private MarisaPluginTaskState ArcaeaSongAliasSet(Message message)
     {
         var param = message.Command;
-        var names = param.Split(":=");
+        var names = param.Split(":=").ToArray();
 
         if (names.Length != 2)
         {
