@@ -13,7 +13,14 @@ using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
 
 public class DivingFishDataFetcher : DataFetcher
 {
-    public DivingFishDataFetcher(MaiSongDb songDb) : base(songDb) {}
+    private readonly Dictionary<int, List<DiffData?>> _diffDict;
+    private readonly List<Rank> _raRankList;
+
+    public DivingFishDataFetcher(MaiSongDb songDb) : base(songDb)
+    {
+        _diffDict   = FetchDiffData().Result;
+        _raRankList = FetchRaRankList().Result.OrderByDescending(x => x.Ra).ToList();
+    }
 
     public override async Task<DxRating> GetRating(Message message)
     {
@@ -42,6 +49,30 @@ public class DivingFishDataFetcher : DataFetcher
             .ToDictionary(ss => (ss!.Id, ss.LevelIdx))!;
     }
 
+    public DiffData GetFitDiff(int songId, int levelIdx)
+    {
+        return _diffDict[songId][levelIdx] ?? throw new KeyNotFoundException("No data found for this song and level.");
+    }
+
+    public List<int> GetRaRank()
+    {
+        return _raRankList.Select(x => x.Ra).ToList();
+    }
+
+    private async Task<List<Rank>> FetchRaRankList()
+    {
+        var json = await "https://www.diving-fish.com/api/maimaidxprober/rating_ranking".GetStringAsync();
+
+        return JArray.Parse(json).Select(x => x.ToObject<Rank>()).ToList()!;
+    }
+
+    private async Task<Dictionary<int, List<DiffData?>>> FetchDiffData()
+    {
+        var json = await "https://www.diving-fish.com/api/maimaidxprober/chart_stats".GetStringAsync();
+
+        return JObject.Parse(json).SelectToken("$.charts")!.ToObject<Dictionary<int, List<DiffData?>>>()!;
+    }
+
     private static (string, long) AtOrSelf(Message message, bool qqOnly = false)
     {
         var username = message.Command;
@@ -59,4 +90,16 @@ public class DivingFishDataFetcher : DataFetcher
 
         return (username.ToString(), qq);
     }
+
+    private record Rank([JsonProperty("username")] string Username, [JsonProperty("ra")] int Ra);
+
+    public record DiffData(
+        [JsonProperty("cnt")] int PlayCount,
+        [JsonProperty("fit_diff")] double FitDiff,
+        [JsonProperty("avg")] double AvgAchievement,
+        [JsonProperty("avg_dx")] double AvgDxScore,
+        [JsonProperty("std_dev")] double Std,
+        [JsonProperty("dist")] int[] RankCount,
+        [JsonProperty("fc_dist")] int[] FcCount
+    );
 }
