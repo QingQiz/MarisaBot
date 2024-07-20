@@ -193,12 +193,12 @@ public static class MessageDataConverter
                         new Message(ms, new MessageDataNudge(m.target_id, m.user_id))
                         {
                             Type   = d.ContainsKey("group_id") ? MessageType.GroupMessage : MessageType.FriendMessage,
-                            Sender = new SenderInfo(m.user_id, null, null, null)
+                            Sender = new SenderInfo(m.user_id, "", null, null)
                         };
 
                     if (message.Type == MessageType.GroupMessage)
                     {
-                        message.GroupInfo = new GroupInfo(m.group_id, null, null);
+                        message.GroupInfo = new GroupInfo(m.group_id, "", "");
                     }
 
                     return message;
@@ -284,8 +284,8 @@ public static class MessageDataConverter
     public static Message? ToMessage(this ResponseMessage msgIn, MessageSenderProvider ms)
     {
         var mExpando = JsonConvert.DeserializeObject<ExpandoObject>(msgIn.Text);
-        var m        = mExpando as dynamic;
-        var d        = mExpando as IDictionary<string, object>;
+        var m        = (mExpando as dynamic)!;
+        var d        = (mExpando as IDictionary<string, object>)!;
 
         var logger = LogManager.GetCurrentClassLogger();
 

@@ -167,12 +167,12 @@ public static class MessageDataConverter
                             "Friend" => MessageType.FriendMessage,
                             _        => throw new ArgumentOutOfRangeException()
                         },
-                        Sender = new SenderInfo(m.fromId, null, null, null),
+                        Sender = new SenderInfo(m.fromId, "", null, null),
                     };
 
                 if (message.Type == MessageType.GroupMessage)
                 {
-                    message.GroupInfo = new GroupInfo(m.subject.id, null, null);
+                    message.GroupInfo = new GroupInfo(m.subject.id, "", null);
                 }
 
                 return message;

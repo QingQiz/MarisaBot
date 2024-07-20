@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 
@@ -29,7 +30,7 @@ public class DxRating
     public List<SongScore> OldScores
     {
         get => _charts.OldScores;
-        set => _charts.OldScores = value;
+        init => _charts.OldScores = value;
     }
 
     [JsonProperty("nickname")]

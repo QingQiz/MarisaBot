@@ -61,7 +61,7 @@ public partial class Osu
 
     private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank, bool allowRange)
     {
-        var command = OsuCommandParser.parser(message.Command.ToArray())?.Value;
+        var command = OsuCommandParser.parser(message.Command.ToString())?.Value;
 
         if (command == null)
         {

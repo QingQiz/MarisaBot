@@ -4,7 +4,7 @@
 
 
 module Monad =
-    type Parser<'T> = Parser of (char[] -> int -> 'T option * int)
+    type Parser<'T> = Parser of (string -> int -> 'T option * int)
 
     let parse (Parser p) input pos = p input pos
 

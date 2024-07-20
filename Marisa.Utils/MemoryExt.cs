@@ -110,19 +110,16 @@ public static class MemoryExt
     {
         var last = 0;
 
-        var span    = input.Span;
-        var valSpan = val.Span;
-
         while (true)
         {
-            var at = span[last..].IndexOf(valSpan);
+            var at = input.Span[last..].IndexOf(val.Span);
             if (at < 0)
             {
                 yield return input[last..];
                 yield break;
             }
             yield return input.Slice(last, at);
-            last += at + valSpan.Length;
+            last += at + val.Span.Length;
         }
     }
 
