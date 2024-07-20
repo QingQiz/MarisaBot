@@ -43,7 +43,15 @@ public partial class MaiMaiDx
         var newSongList = _songDb.SongList.Where(s => s.Info.IsNew).ToList();
         var oldSongList = _songDb.SongList.Where(s => !s.Info.IsNew).ToList();
 
-        var maxConst = Math.Max(rating.NewScores.Max(x => x.Constant), rating.OldScores.Max(x => x.Constant));
+        double maxConst = 0;
+
+        try
+        {
+            maxConst = Math.Max(rating.NewScores.Max(x => x.Constant), rating.OldScores.Max(x => x.Constant));
+        }
+        catch (InvalidOperationException)
+        {
+        }
 
         var fails = 0b1111;
         var rand  = new Random();
