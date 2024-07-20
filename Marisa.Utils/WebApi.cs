@@ -4,8 +4,8 @@ namespace Marisa.Utils;
 
 public static class WebApi
 {
-
-    private const string Frontend = "http://localhost:14311";
+    // private const string Frontend = "http://localhost:14311";
+    private const string Frontend = "http://localhost:5173";
     private static IBrowser? _browserInner;
 
     private static IBrowser Browser
@@ -62,6 +62,11 @@ public static class WebApi
     public static async Task<string> MaiMaiBest(Guid guid)
     {
         return await RenderUrl(Frontend + "/maimai/best?id=" + guid);
+    }
+
+    public static async Task<string> MaiMaiRank(Guid guid)
+    {
+        return await RenderUrl(Frontend + "/maimai/rank?id=" + guid);
     }
 
     public static async Task<string> OsuScore(string name, int modeInt, int? bpRank, bool recent, bool fail)

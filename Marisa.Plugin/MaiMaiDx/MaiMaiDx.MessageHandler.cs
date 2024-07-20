@@ -190,6 +190,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     /// <summary>
     ///     rating 排名
     /// </summary>
+    [MarisaPluginNoDoc]
     [MarisaPluginDoc("查询 rating排名，参数为：查分器的账号名 或 @某人 或 留空")]
     [MarisaPluginCommand("rank", "排名")]
     private async Task<MarisaPluginTaskState> RatingRank(Message message)
