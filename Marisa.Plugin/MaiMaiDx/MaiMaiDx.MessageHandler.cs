@@ -225,31 +225,6 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("旧谱的成绩汇总，无参数")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
-    [MarisaPluginCommand("old", "旧谱")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryOld(Message message)
-    {
-        var fetcher = GetDataFetcher(message);
-        // 旧谱的操作和新谱的一样，所以直接复制了，为这两个抽象一层有点不值
-        var groupedSong = _songDb.SongList
-            .Where(song => !song.Info.IsNew)
-            .Select(song => song.Constants
-                .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s)
-            .Where(data => data.i >= 2)
-            .OrderByDescending(x => x.constant)
-            .GroupBy(x => x.song.Levels[x.i]);
-
-        var scores = await fetcher.GetScores(message);
-
-        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
-        // 一定不是空的
-        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     [MarisaPluginDoc("新谱的成绩汇总，无参数")]
     [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
     [MarisaPluginCommand("new", "新谱")]
