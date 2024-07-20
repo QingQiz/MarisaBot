@@ -14,7 +14,7 @@ public static class MessageDataConverter
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// 将 <see cref="MessageData"/> 转换成 MiraiHttp 发送消息所需要的数据格式，方便后续转换为 json
+    ///     将 <see cref="MessageData" /> 转换成 MiraiHttp 发送消息所需要的数据格式，方便后续转换为 json
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -27,7 +27,7 @@ public static class MessageDataConverter
                 return new
                 {
                     type = "Plain",
-                    text = (data as MessageDataText)!.Text
+                    text = (data as MessageDataText)!.Text.ToString()
                 };
             case MessageDataType.At:
             {
@@ -86,7 +86,7 @@ public static class MessageDataConverter
     }
 
     /// <summary>
-    /// Mirai `Message` 类型的消息转化为 <see cref="Message"/>
+    ///     Mirai `Message` 类型的消息转化为 <see cref="Message" />
     /// </summary>
     /// <param name="m"></param>
     /// <param name="ms"></param>
@@ -146,7 +146,7 @@ public static class MessageDataConverter
     }
 
     /// <summary>
-    /// Mirai `Event`类型的消息转化为 <see cref="Message"/>
+    ///     Mirai `Event`类型的消息转化为 <see cref="Message" />
     /// </summary>
     /// <param name="m"></param>
     /// <param name="ms"></param>
@@ -167,7 +167,7 @@ public static class MessageDataConverter
                             "Friend" => MessageType.FriendMessage,
                             _        => throw new ArgumentOutOfRangeException()
                         },
-                        Sender = new SenderInfo(m.fromId, "", null, null),
+                        Sender = new SenderInfo(m.fromId, "", null, null)
                     };
 
                 if (message.Type == MessageType.GroupMessage)
@@ -266,7 +266,7 @@ public static class MessageDataConverter
     }
 
     /// <summary>
-    /// 将 websocket 的接收消息转化为 <see cref="Message"/>
+    ///     将 websocket 的接收消息转化为 <see cref="Message" />
     /// </summary>
     /// <param name="msgIn"></param>
     /// <param name="ms"></param>
@@ -323,5 +323,4 @@ public static class MessageDataConverter
 
         return null;
     }
-
 }
