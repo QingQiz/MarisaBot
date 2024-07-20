@@ -66,14 +66,14 @@ public class ChunithmSong : Song
         Genre   = o.Genre;
         Version = o.Version;
 
-        var bpms = new List<ReadOnlyMemory<char>>();
+        var bpms = new List<string>();
 
         foreach (var i in o.Beatmaps)
         {
             bpms.Add(i.Bpm);
         }
 
-        Bpm = bpms.MaxBy(x => x.Length)!;
+        Bpm = bpms.MaxBy(x => x.Length).AsMemory();
 
         foreach (var i in o.Beatmaps)
         {
