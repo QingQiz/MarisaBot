@@ -14,7 +14,7 @@ public static class MemoryExt
 
         public int GetHashCode(ReadOnlyMemory<char> obj)
         {
-            return obj.GetHashCode();
+            return string.GetHashCode(obj.Span, comparer);
         }
     }
 
