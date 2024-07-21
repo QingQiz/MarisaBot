@@ -111,7 +111,10 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
         }
         catch (FileNotFoundException) {}
 
-        var songNameAll = SongList.Select(s => s.Title.AsMemory()).Distinct().ToHashSet(new MemoryExt.ReadOnlyMemoryCharComparer());
+        var songNameAll = SongList
+            .Select(s => s.Title.AsMemory())
+            .Distinct(StringComparison.Ordinal)
+            .ToHashSet(new MemoryExt.ReadOnlyMemoryCharComparer());
 
         foreach (var line in lines)
         {
@@ -242,9 +245,8 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
     /// <returns>别名列表</returns>
     public IEnumerable<ReadOnlyMemory<char>> GetSongAliasesByName(string name)
     {
-        var memory = name.AsMemory();
         var aliases = SongAlias
-            .Where(k /* alias: [song title] */ => k.Value.Contains(memory))
+            .Where(k /* alias: [song title] */ => k.Value.Contains(name))
             .Select(k => k.Key);
         return aliases.ToList();
     }
