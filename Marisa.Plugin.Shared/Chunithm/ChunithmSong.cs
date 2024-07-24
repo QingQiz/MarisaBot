@@ -45,7 +45,7 @@ public class ChunithmSong : Song
         Artist  = o.basic_info.artist;
         Genre   = o.basic_info.genre;
         Version = o.basic_info.from;
-        Bpm     = o.basic_info.bpm.ToString();
+        Bpm     = ((string)o.basic_info.bpm.ToString()).AsMemory();
 
         for (var i = 0; i < o.level.Count; i++)
         {
