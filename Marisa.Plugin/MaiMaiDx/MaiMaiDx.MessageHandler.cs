@@ -32,10 +32,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand(true, "nocover")]
     private MarisaPluginTaskState NoCover(Message message)
     {
-        var coverPath = ResourceManager.ResourcePath + "/cover";
-
-        var noCover = _songDb.SongList
-            .Where(s => !File.Exists($"{coverPath}/{s.Id}.jpg") && !File.Exists($"{coverPath}/{s.Id}.png"));
+        var noCover = _songDb.SongList.Where(s => s.NoCover);
 
         _songDb.MultiPageSelectResult(noCover.ToList(), message);
 
