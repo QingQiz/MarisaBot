@@ -35,6 +35,9 @@ public class ChunithmSong : Song
     public new readonly ReadOnlyMemory<char> Bpm;
     public readonly List<string> ChartName = [];
     public readonly string Genre;
+    /// <summary>
+    ///     13, 13+, 14, 14+, ...
+    /// </summary>
     public readonly List<string> LevelName = [];
     public readonly List<long> MaxCombo = [];
 

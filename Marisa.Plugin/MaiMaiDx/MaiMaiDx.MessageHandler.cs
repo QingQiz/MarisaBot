@@ -892,7 +892,8 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
         {
             var command = next.Command.Trim();
 
-            var levelName   = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
+            var levelName = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
+            // TODO FIXME master1无法被识别
             var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
             var levelPrefix = level ?? "";
             if (level != null) goto RightLabel;

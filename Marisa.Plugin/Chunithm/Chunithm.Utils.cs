@@ -35,15 +35,15 @@ public partial class Chunithm
         }
     }
 
-    private static (string, int) LevelAlias2Index(ReadOnlyMemory<char> command, List<string> levels)
+    private static (string, int) LevelAlias2Index(ReadOnlyMemory<char> command, List<string> diffs)
     {
         // 全名
-        var level       = levels.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
+        var level       = diffs.FirstOrDefault(d => command.StartsWith(d, StringComparison.OrdinalIgnoreCase));
         var levelPrefix = level ?? "";
         if (level != null) goto RightLabel;
 
         // 首字母
-        level = levels.FirstOrDefault(n =>
+        level = diffs.FirstOrDefault(n =>
             command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
         if (level != null)
         {
@@ -61,7 +61,7 @@ public partial class Chunithm
         level = ChunithmSong.LevelAlias[level];
 
         RightLabel:
-        return (levelPrefix, levels.IndexOf(level));
+        return (levelPrefix, diffs.IndexOf(level));
     }
 
     private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)

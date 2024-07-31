@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Configuration;
 using NUnit.Framework;
@@ -59,11 +60,22 @@ public class ChunithmTest
             LevelIndex  = 3,
             LevelLabel  = "Expert",
             Achievement = 1009000,
-            Title       = "这是个名字名字名字名字名字名字名字名字名字名字",
+            Title       = "这是个名字名字名字名字名字名字名字名字名字名字"
         };
 
         score.Draw().Show();
 
         Assert.Pass();
+    }
+
+    [Test]
+    [TestCase("master", "MASTER", 3)]
+    public void Level_Should_Be_Parsed(string inp, string prefix, int index)
+    {
+        var func = typeof(Chunithm.Chunithm).GetMethod("LevelAlias2Index", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        var res = ((string, int))func.Invoke(null, [inp.AsMemory(), ChunithmSong.LevelAlias.Values.ToList()])!;
+
+        Assert.AreEqual((prefix, index), res);
     }
 }

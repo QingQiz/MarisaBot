@@ -730,9 +730,9 @@ public partial class Chunithm
             var command = next.Command.Trim();
             var song    = searchResult.First();
 
-            var levelName = song.LevelName;
+            var diffName = ChunithmSong.LevelColor.Keys.ToList();
 
-            var (levelPrefix, levelIdx) = LevelAlias2Index(command, levelName);
+            var (levelPrefix, levelIdx) = LevelAlias2Index(command, diffName);
 
             if (levelIdx == -1)
             {
@@ -774,7 +774,7 @@ public partial class Chunithm
             var grayRemaining  = tolerance - grayCount * noteScore;
 
             next.Reply(
-                new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
+                new MessageDataText($"[{diffName[levelIdx]}] {song.Title} => {achievement}\n"),
                 new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"每个绿减 {v绿减分:F2}，每个灰减 {noteScore:F2}，每小减 {v小p减分:F2}")
