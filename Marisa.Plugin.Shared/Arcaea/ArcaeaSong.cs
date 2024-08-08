@@ -8,38 +8,19 @@ namespace Marisa.Plugin.Shared.Arcaea;
 
 public class ArcaeaSong : Song
 {
-    public readonly string SongPack;
-    private readonly string _coverFileName;
-    public new readonly string Bpm;
-
-    public string CoverFileName
-    {
-        get
-        {
-            if (Levels[^1] == "/") return _coverFileName;
-
-            var byd = _coverFileName.Replace(".", "_byd.");
-
-            if (File.Exists(byd))
-            {
-                return new Random().Next(2) == 0
-                    ? byd
-                    : _coverFileName;
-            }
-
-            return _coverFileName;
-        }
-    }
+    private readonly string _bpm;
+    private readonly List<string> _diffNames = [];
+    private readonly string _songPack;
 
     public ArcaeaSong(dynamic d)
     {
-        Id             = d.id;
-        Title          = d.title;
-        Artist         = d.artist;
-        Bpm            = d.bpm;
-        Version        = d.version;
-        SongPack       = d.song_pack;
-        _coverFileName = d.cover_name;
+        Id            = d.id;
+        Title         = d.title;
+        Artist        = d.artist;
+        _bpm          = d.bpm;
+        Version       = d.version;
+        _songPack     = d.song_pack;
+        CoverFileName = d.cover_name;
 
         foreach (var l in d.level) Levels.Add(l);
         foreach (var l in d.constant)
@@ -53,11 +34,17 @@ public class ArcaeaSong : Song
                 Constants.Add(-1);
             }
         }
+        foreach (var l in d.level_name)
+        {
+            _diffNames.Add(l);
+        }
     }
+
+    private string CoverFileName { get; }
 
     public override string MaxLevel()
     {
-        return Levels.Last(l => l != "/");
+        return Levels.Zip(Constants).MaxBy(x => x.Second).First;
     }
 
     public override Image GetCover()
@@ -80,6 +67,29 @@ public class ArcaeaSong : Song
 
             var background = new Image<Rgba32>(1300, h * 6 + padding * 2);
 
+            background.DrawImage(cover, padding, padding);
+
+            const int x = 3 * padding + h * 6;
+            const int w = 200;
+
+            var y = 0;
+
+            DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("演唱/作曲", Artist, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("BPM", _bpm, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("曲包", _songPack, x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("难度", string.Join(", ", _diffNames.Zip(Levels).Select(l => $"{l.First}: {l.Second}")), x, y, w, h, background.Width);
+            y += h;
+            DrawKeyValuePair("定数",
+                string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
+                x, y, w, h, background.Width);
+
+            return background.ToB64();
+
             void DrawKeyValuePair(
                 string key, string value, int x, int y, int keyWidth, int height, int totalWidth,
                 bool center = true)
@@ -92,29 +102,6 @@ public class ArcaeaSong : Song
                         center: center),
                     x + keyWidth, y);
             }
-
-            background.DrawImage(cover, padding, padding);
-
-            const int x = 3 * padding + h * 6;
-            const int w = 200;
-
-            var y = 0;
-
-            DrawKeyValuePair("乐曲名", Title, x, y, w, h, background.Width);
-            y += h;
-            DrawKeyValuePair("演唱/作曲", Artist, x, y, w, h, background.Width);
-            y += h;
-            DrawKeyValuePair("BPM", Bpm, x, y, w, h, background.Width);
-            y += h;
-            DrawKeyValuePair("曲包", SongPack, x, y, w, h, background.Width);
-            y += h;
-            DrawKeyValuePair("难度", string.Join(", ", Levels), x, y, w, h, background.Width);
-            y += h;
-            DrawKeyValuePair("定数",
-                string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),
-                x, y, w, h, background.Width);
-
-            return background.ToB64();
         }).Value;
     }
 

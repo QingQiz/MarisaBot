@@ -62,19 +62,6 @@ public partial class Arcaea : MarisaPluginBaseWithHelpCommand
     }
 
     /// <summary>
-    ///     听歌猜曲
-    /// </summary>
-    [MarisaPluginDoc("Arcaea 猜歌，听歌猜曲")]
-    [MarisaPluginSubCommand(nameof(ArcaeaGuess))]
-    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, true, "v2")]
-    private MarisaPluginTaskState ArcaeaGuessV2(Message message, long qq)
-    {
-        message.Reply("死了的功能");
-        // StartSongSoundGuess(message, qq);
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
     ///     别名处理
     /// </summary>
     [MarisaPluginDoc("别名设置和查询")]
