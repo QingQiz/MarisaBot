@@ -69,12 +69,13 @@ public class ChunithmTest
     }
 
     [Test]
-    [TestCase("master", "MASTER", 3)]
+    [TestCase("master1", "MASTER", 3)]
+    [TestCase(" master1\n", "MASTER", 3)]
     public void Level_Should_Be_Parsed(string inp, string prefix, int index)
     {
         var func = typeof(Chunithm.Chunithm).GetMethod("LevelAlias2Index", BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        var res = ((string, int))func.Invoke(null, [inp.AsMemory(), ChunithmSong.LevelAlias.Values.ToList()])!;
+        var res = ((string, int))func.Invoke(null, [inp.AsMemory().Trim(), ChunithmSong.LevelAlias.Values.ToList()])!;
 
         Assert.AreEqual((prefix, index), res);
     }

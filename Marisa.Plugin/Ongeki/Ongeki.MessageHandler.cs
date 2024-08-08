@@ -84,7 +84,7 @@ public partial class Ongeki
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command.Span.TrimStart(levelPrefix), out var achievement);
+            var parseSuccess = int.TryParse(command[levelPrefix.Length..].Span, out var achievement);
 
             if (!parseSuccess)
             {

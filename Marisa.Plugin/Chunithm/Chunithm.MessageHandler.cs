@@ -746,7 +746,7 @@ public partial class Chunithm
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix).Span, out var achievement);
+            var parseSuccess = int.TryParse(command[levelPrefix.Length..].Span, out var achievement);
 
             if (!parseSuccess)
             {

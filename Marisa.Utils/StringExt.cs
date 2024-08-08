@@ -1,6 +1,5 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using SixLabors.Fonts;
 
 namespace Marisa.Utils;
@@ -47,32 +46,6 @@ public static class StringExt
         var option = ImageDraw.GetTextOptions(font);
 
         return TextMeasurer.MeasureAdvance(text, option);
-    }
-
-    public static string? TrimStart(this string msg, string prefix)
-    {
-        msg = msg.Trim();
-
-        return msg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? msg[prefix.Length..] : null;
-    }
-
-    public static IEnumerable<(string Prefix, int Index)> CheckPrefix(this string msg, IEnumerable<string> prefixes)
-    {
-        return prefixes.Select((p, i) => (p, i))
-            .Where(x => msg.StartsWith(x.p, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public static bool IsRegex(this string regex)
-    {
-        try
-        {
-            _ = Regex.Match("", regex);
-            return true;
-        }
-        catch (RegexParseException)
-        {
-            return false;
-        }
     }
 
     /// <summary>

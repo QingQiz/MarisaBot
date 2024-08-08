@@ -910,7 +910,7 @@ public partial class MaiMaiDx : MarisaPluginBaseWithHelpCommand
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
             RightLabel:
-            var parseSuccess = double.TryParse(command.TrimStart(levelPrefix).Span, out var achievement);
+            var parseSuccess = double.TryParse(command[levelPrefix.Length..].Span, out var achievement);
 
             if (!parseSuccess)
             {
