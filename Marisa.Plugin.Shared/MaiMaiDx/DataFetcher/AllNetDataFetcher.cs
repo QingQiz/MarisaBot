@@ -325,7 +325,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             Host             = MaiHost,
             User_Agent       = $"{entry}#{aimeId}",
             charset          = "UTF-8",
-            Mai_Encoding     = "1.30",
+            Mai_Encoding     = "1.40",
             Content_Encoding = "deflate",
             Content_Length   = body.Length
         });
