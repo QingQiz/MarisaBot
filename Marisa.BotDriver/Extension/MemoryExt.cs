@@ -1,10 +1,9 @@
 ﻿using System.Text;
 
-namespace Marisa.Backend.Shared;
+namespace Marisa.BotDriver.Extension;
 
 public static class MemoryExt
 {
-
     /// <summary>
     ///     https://stackoverflow.com/a/14087738/13442887
     /// </summary>

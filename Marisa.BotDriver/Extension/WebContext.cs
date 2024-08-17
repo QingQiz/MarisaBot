@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Marisa.Backend.Shared;
+namespace Marisa.BotDriver.Extension;
 
 public class WebContext
 {

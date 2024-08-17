@@ -65,7 +65,7 @@ public class WebContext : Controller
             return output;
         }
 
-        var obj = Backend.Shared.WebContext.Get(id, name);
+        var obj = BotDriver.Extension.WebContext.Get(id, name);
         var str = obj is string ? obj.ToString()! : JsonConvert.SerializeObject(obj);
 
         Task.Run(() => WriteHistory(id, name, str));

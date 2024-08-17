@@ -1,10 +1,10 @@
 ﻿using System.Dynamic;
 using System.Text;
-using Marisa.Backend.Shared;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
+using Marisa.BotDriver.Extension;
 using Newtonsoft.Json;
 using NLog;
 using Websocket.Client;

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Extension;
 using Marisa.BotDriver.Plugin;
 using Marisa.BotDriver.Plugin.Trigger;
 
@@ -12,13 +13,6 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     private static Dictionary<MarisaPluginBase, List<MethodInfo>>? _commands;
     private static Dictionary<MarisaPluginBase, List<(string ParentName, MethodInfo MethodInfo)>>? _subCommands;
 
-    private const BindingFlags BindingFlags =
-        System.Reflection.BindingFlags.Default
-      | System.Reflection.BindingFlags.NonPublic
-      | System.Reflection.BindingFlags.Instance
-      | System.Reflection.BindingFlags.Static
-      | System.Reflection.BindingFlags.Public;
-
     /**
      * 从所有注册的插件中获取有触发器的插件
      */
@@ -28,12 +22,12 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
             p.GetType().GetCustomAttributes<MarisaPluginCommand>().Any()).ToList();
 
     /// <summary>
-    /// 获取所有 有触发器的插件 的 所有命令，<b>不</b> 包括子命令
+    ///     获取所有 有触发器的插件 的 所有命令，<b>不</b> 包括子命令
     /// </summary>
     private Dictionary<MarisaPluginBase, List<MethodInfo>> Commands => _commands ??=
         Plugins
             .Select(p => (p, p.GetType()
-                .GetMethods(BindingFlags)
+                .GetAllMethods()
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
@@ -44,12 +38,12 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
-    /// 获取所有 有触发器的插件 的 所有<b>子</b>命令
+    ///     获取所有 有触发器的插件 的 所有<b>子</b>命令
     /// </summary>
     private Dictionary<MarisaPluginBase, List<(string ParentName, MethodInfo MethodInfo)>> SubCommands => _subCommands ??=
         Plugins
             .Select(p => (p, p.GetType()
-                .GetMethods(BindingFlags)
+                .GetAllMethods()
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
@@ -62,7 +56,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
-    /// 分发消息到各个插件
+    ///     分发消息到各个插件
     /// </summary>
     /// <param name="message"></param>
     public IEnumerable<(MarisaPluginBase Plugin, MethodInfo Method, Message Message)> Dispatch(Message message)
@@ -87,7 +81,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     }
 
     /// <summary>
-    /// 使用Message去调用Plugin.Method，直到返回CompletedTask
+    ///     使用Message去调用Plugin.Method，直到返回CompletedTask
     /// </summary>
     public async Task<MarisaPluginTaskState> Invoke(MarisaPluginBase plugin, MethodInfo method, Message message)
     {
@@ -95,7 +89,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     }
 
     /// <summary>
-    /// <paramref name="message"/>是否应该被<paramref name="member"/>触发
+    ///     <paramref name="message" />是否应该被<paramref name="member" />触发
     /// </summary>
     /// <param name="member"></param>
     /// <param name="message"></param>
@@ -129,17 +123,17 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     }
 
     /// <summary>
-    /// 一个插件中的哪个方法会被触发，触发这个方法的message是什么
+    ///     一个插件中的哪个方法会被触发，触发这个方法的message是什么
     /// </summary>
     /// <param name="plugin"></param>
     /// <param name="handler"></param>
     /// <param name="message">触发前的message</param>
     /// <returns>
-    /// 元组
-    /// <list type="MethodInfo">
-    /// <item>1. 哪个方法会被触发，为<paramref name="handler"/>或其子命令</item>
-    /// <item>2. 触发后的message（可能只有Command不同）</item>
-    /// </list>
+    ///     元组
+    ///     <list type="MethodInfo">
+    ///         <item>1. 哪个方法会被触发，为<paramref name="handler" />或其子命令</item>
+    ///         <item>2. 触发后的message（可能只有Command不同）</item>
+    ///     </list>
     /// </returns>
     private (MethodInfo witch, Message what) WhichMethodShouldBeTriggeredByWhat(MarisaPluginBase plugin, MethodInfo handler, Message message)
     {
@@ -202,5 +196,4 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
             return MarisaPluginTaskState.NoResponse;
         }
     }
-
 }

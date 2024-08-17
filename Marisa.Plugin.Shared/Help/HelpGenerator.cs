@@ -4,13 +4,6 @@ namespace Marisa.Plugin.Shared.Help;
 
 public static class HelpGenerator
 {
-    private const BindingFlags BindingFlags =
-        System.Reflection.BindingFlags.Default
-      | System.Reflection.BindingFlags.NonPublic
-      | System.Reflection.BindingFlags.Instance
-      | System.Reflection.BindingFlags.Static
-      | System.Reflection.BindingFlags.Public;
-
     private static IEnumerable<T> Filter<T>(IEnumerable<T> list) where T : MemberInfo
     {
         return list
@@ -39,7 +32,7 @@ public static class HelpGenerator
             .Where(c => !c.IsWhiteSpace())
             .ToList();
 
-        var availableHandler = Filter(plugin.GetMethods(BindingFlags)).ToList();
+        var availableHandler = Filter(plugin.GetAllMethods()).ToList();
 
         // 可用的处理器，要求不是子命令
         var handlers = availableHandler

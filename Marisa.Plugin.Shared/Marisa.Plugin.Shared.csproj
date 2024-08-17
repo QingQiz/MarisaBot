@@ -30,7 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Marisa.Backend.Shared\Marisa.Backend.Shared.csproj"/>
         <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj"/>
     </ItemGroup>
 

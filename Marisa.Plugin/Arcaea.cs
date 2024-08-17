@@ -17,7 +17,6 @@ public class Arcaea :
     IMarisaPluginWithRetrieve<ArcaeaSong, ArcaeaGuess>,
     IMarisaPluginWithCoverGuess<ArcaeaSong, ArcaeaGuess>
 {
-
     public Arcaea()
     {
         SongDb = new SongDb<ArcaeaSong, ArcaeaGuess>(
