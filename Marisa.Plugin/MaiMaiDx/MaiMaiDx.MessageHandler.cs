@@ -152,6 +152,27 @@ public partial class MaiMaiDx
 
     #region 查分
 
+    [MarisaPluginDoc("从华丽服务前拉一次分，下一个该命令之前一直使用这次拉下来的分，避免重复请求")]
+    [MarisaPluginCommand("fetch")]
+    private async Task<MarisaPluginTaskState> Fetch(Message message)
+    {
+        await using var dbContext = new BotDbContext();
+
+        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender.Id);
+
+        if (bind == null)
+        {
+            message.Reply("你未绑定Wahlap，无法使用该功能");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        await AllNetDataFetcher.Fetch(bind.AimeId);
+
+        message.Reply("1");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     /// <summary>
     ///     b50
     /// </summary>
