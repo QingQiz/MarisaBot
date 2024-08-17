@@ -14,18 +14,6 @@ public partial class MaiMaiDx
 {
     #region 搜歌
 
-    /// <summary>
-    ///     搜歌
-    /// </summary>
-    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
-    [MarisaPluginCommand("song", "search", "搜索")]
-    private MarisaPluginTaskState MaiMaiDxSearchSong(Message message)
-    {
-        return SongDb.SearchSong(message);
-    }
-
-    #endregion
-
     [MarisaPluginNoDoc]
     [MarisaPluginCommand(true, "nocover")]
     private MarisaPluginTaskState NoCover(Message message)
@@ -36,6 +24,8 @@ public partial class MaiMaiDx
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
+    #endregion
 
     #region 绑定
 
@@ -167,7 +157,7 @@ public partial class MaiMaiDx
     /// </summary>
     [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
     [MarisaPluginCommand("best", "b50", "查分")]
-    private async Task<MarisaPluginTaskState> MaiMaiDxB50(Message message)
+    private async Task<MarisaPluginTaskState> B50(Message message)
     {
         var fetcher = GetDataFetcher(message, true);
 
@@ -214,7 +204,7 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
     [MarisaPluginCommand("summary", "sum")]
-    private static async Task<MarisaPluginTaskState> MaiMaiSummary(Message message)
+    private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
         message.Reply("错误的命令格式");
 
@@ -222,9 +212,9 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("新谱的成绩汇总，无参数")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("new", "新谱")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryNew(Message message)
+    private async Task<MarisaPluginTaskState> SummaryNew(Message message)
     {
         var fetcher = GetDataFetcher(message);
 
@@ -248,9 +238,9 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2 或 定数")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("base", "b")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryBase(Message message)
+    private async Task<MarisaPluginTaskState> SummaryBase(Message message)
     {
         var constants = message.Command.Split('-').Select(x =>
         {
@@ -303,9 +293,9 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("获取类别的成绩汇总，参数为：类别")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("genre", "type")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryGenre(Message message)
+    private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
     {
         var genres = SongDb.SongList.Select(song => song.Info.Genre).Distinct().ToArray();
 
@@ -340,9 +330,9 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("获取版本的成绩汇总，参数为：版本名")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryVersion(Message message)
+    private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
         var version = MaiMaiSong.Plates.FirstOrDefault(p =>
             p.Equals(message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -386,9 +376,9 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]
-    [MarisaPluginSubCommand(nameof(MaiMaiSummary))]
+    [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("level", "lv")]
-    private async Task<MarisaPluginTaskState> MaiMaiSummaryLevel(Message message)
+    private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
     {
         var lv = message.Command.Trim();
 
@@ -445,7 +435,7 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("如何推分到：参数")]
     [MarisaPluginCommand("howto", "how to")]
-    private async Task<MarisaPluginTaskState> MaiMaiDxHowTo(Message message)
+    private async Task<MarisaPluginTaskState> HowTo(Message message)
     {
         if (!int.TryParse(message.Command.Span, out var target))
         {
@@ -498,7 +488,7 @@ public partial class MaiMaiDx
     /// </summary>
     [MarisaPluginDoc("随机给出一个歌，参数任意")]
     [MarisaPluginCommand("打什么歌", "打什么", "什么")]
-    private MarisaPluginTaskState MaiMaiDxPlayWhat(Message message)
+    private MarisaPluginTaskState PlayWhat(Message message)
     {
         message.Reply(MessageDataImage.FromBase64(SongDb.SongList.RandomTake().GetImage()));
 
@@ -509,9 +499,9 @@ public partial class MaiMaiDx
     ///     mai什么推分
     /// </summary>
     [MarisaPluginDoc("随机给出至多 4 首打了以后能推分的歌")]
-    [MarisaPluginSubCommand(nameof(MaiMaiDxPlayWhat))]
+    [MarisaPluginSubCommand(nameof(PlayWhat))]
     [MarisaPluginCommand(true, "推分", "恰分", "上分", "加分")]
-    private async Task<MarisaPluginTaskState> MaiMaiDxPlayWhatToUp(Message message)
+    private async Task<MarisaPluginTaskState> PlayWhatToUp(Message message)
     {
         var fetcher   = GetDataFetcher(message);
         var rating    = await fetcher.GetRating(message);
@@ -538,7 +528,7 @@ public partial class MaiMaiDx
     /// </summary>
     [MarisaPluginDoc("给出定数对应的所有 rating 或 rating 对应的所有定数，参数为：歌曲定数 或 预期rating")]
     [MarisaPluginCommand("line", "分数线")]
-    private static MarisaPluginTaskState MaiMaiDxRatingLine(Message message)
+    private static MarisaPluginTaskState RatingLine(Message message)
     {
         if (double.TryParse(message.Command.Span, out var constant))
         {
@@ -598,7 +588,7 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
     [MarisaPluginCommand("tolerance", "容错率")]
-    private MarisaPluginTaskState MaiMaiFaultTolerance(Message message)
+    private MarisaPluginTaskState FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
@@ -614,8 +604,7 @@ public partial class MaiMaiDx
         {
             var command = next.Command.Trim();
 
-            var levelName = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
-            // TODO FIXME master1无法被识别
+            var levelName   = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
             var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
             var levelPrefix = level ?? "";
             if (level != null) goto RightLabel;
