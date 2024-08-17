@@ -1,14 +1,10 @@
 ﻿using Flurl.Http;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-using ChunithmSongDb =
-    SongDb<ChunithmSong, ChunithmGuess>;
-
-public class DivingFishDataFetcher(ChunithmSongDb songDb) : DataFetcher(songDb)
+public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 {
     /// <summary>
     ///     中二节奏有一些如删的歌曲，即这些歌在游戏中已经删除，但在公众号中依然被保留，

@@ -5,17 +5,12 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-using ChunithmSongDb = SongDb<ChunithmSong, ChunithmGuess>;
-
-public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, string keyChipId) : DataFetcher(songDb)
+public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string host, string keyChipId) : DataFetcher(songDb)
 {
     private string? _serverUri;
     private string Host { get; } = host;

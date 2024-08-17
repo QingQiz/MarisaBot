@@ -4,7 +4,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
@@ -15,9 +14,7 @@ using Polly.Retry;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
-using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
-
-public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
+public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

@@ -6,6 +6,7 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Util.SongGuessMaker;
 using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Chunithm;
@@ -17,12 +18,12 @@ namespace Marisa.Plugin.Chunithm;
 public partial class Chunithm :
     MarisaPluginBase,
     IMarisaPluginWithHelp,
-    IMarisaPluginWithRetrieve<ChunithmSong, ChunithmGuess>,
+    IMarisaPluginWithRetrieve<ChunithmSong>,
     IMarisaPluginWithCoverGuess<ChunithmSong, ChunithmGuess>
 {
     public Chunithm()
     {
-        SongDb = new SongDb<ChunithmSong, ChunithmGuess>(
+        SongDb = new SongDb<ChunithmSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/ChunithmSongAliasTemp.txt",
             () =>
@@ -32,12 +33,15 @@ public partial class Chunithm :
                 ) as dynamic[];
                 return data!.Select(d => new ChunithmSong(d)).ToList();
             },
-            nameof(BotDbContext.ChunithmGuesses),
             Dialog.AddHandler
         );
+
+        SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));
     }
 
-    public SongDb<ChunithmSong, ChunithmGuess> SongDb { get; set; }
+    public SongGuessMaker<ChunithmSong, ChunithmGuess> SongGuessMaker { get; }
+
+    public SongDb<ChunithmSong> SongDb { get; }
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {

@@ -3,8 +3,8 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Ongeki;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Util.SongGuessMaker;
 using Newtonsoft.Json;
-using ResourceManager = Marisa.Plugin.Shared.Ongeki.ResourceManager;
 
 namespace Marisa.Plugin.Ongeki;
 
@@ -14,12 +14,12 @@ namespace Marisa.Plugin.Ongeki;
 public partial class Ongeki :
     MarisaPluginBase,
     IMarisaPluginWithHelp,
-    IMarisaPluginWithRetrieve<OngekiSong, OngekiGuess>,
+    IMarisaPluginWithRetrieve<OngekiSong>,
     IMarisaPluginWithCoverGuess<OngekiSong, OngekiGuess>
 {
     public Ongeki()
     {
-        SongDb = new SongDb<OngekiSong, OngekiGuess>(
+        SongDb = new SongDb<OngekiSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/OngekiSongAliasTemp.txt",
             () =>
@@ -29,10 +29,13 @@ public partial class Ongeki :
                 ) as dynamic[];
                 return data!.Select(d => new OngekiSong(d)).ToList();
             },
-            nameof(BotDbContext.OngekiGuesses),
             Dialog.AddHandler
         );
+
+        SongGuessMaker = new SongGuessMaker<OngekiSong, OngekiGuess>(SongDb, nameof(BotDbContext.OngekiGuesses));
     }
 
-    public SongDb<OngekiSong, OngekiGuess> SongDb { get; }
+    public SongGuessMaker<OngekiSong, OngekiGuess> SongGuessMaker { get; }
+
+    public SongDb<OngekiSong> SongDb { get; }
 }

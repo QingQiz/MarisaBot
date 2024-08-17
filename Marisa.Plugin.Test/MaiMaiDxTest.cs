@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageSender;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
@@ -16,9 +15,9 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiDxTest
 {
-    private SongDb<MaiMaiSong, MaiMaiDxGuess> _songDb;
     private AllNetDataFetcher _allNet;
     private MaiMaiDx.MaiMaiDx _maiMaiDx;
+    private SongDb<MaiMaiSong> _songDb;
 
     [SetUp]
     public void Setup()
@@ -31,7 +30,7 @@ public class MaiMaiDxTest
 
         var field = typeof(MaiMaiDx.MaiMaiDx).GetField("_songDb", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
-        _songDb = (SongDb<MaiMaiSong, MaiMaiDxGuess>)field.GetValue(_maiMaiDx)!;
+        _songDb = (SongDb<MaiMaiSong>)field.GetValue(_maiMaiDx)!;
         _allNet = new AllNetDataFetcher(_songDb);
     }
 
@@ -55,7 +54,7 @@ public class MaiMaiDxTest
     {
         var m = new Message(null!, [])
         {
-            Sender = new SenderInfo(qq, "test"),
+            Sender = new SenderInfo(qq, "test")
         };
 
         var res = await _allNet.GetRating(m);

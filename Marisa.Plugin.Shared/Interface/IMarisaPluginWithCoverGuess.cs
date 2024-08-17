@@ -1,12 +1,13 @@
 ﻿using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Util.SongGuessMaker;
 
 namespace Marisa.Plugin.Shared.Interface;
 
 public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
 {
-    SongDb<TSong, TSongGuess> SongDb { get; }
+    SongGuessMaker<TSong, TSongGuess> SongGuessMaker { get; }
 
     /// <summary>
     ///     猜歌排名
@@ -42,7 +43,7 @@ public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : So
     {
         if (message.Command.IsEmpty)
         {
-            SongDb.StartSongCoverGuess(message, qq, 3, null);
+            SongGuessMaker.StartSongCoverGuess(message, qq, 3, null);
         }
         else
         {

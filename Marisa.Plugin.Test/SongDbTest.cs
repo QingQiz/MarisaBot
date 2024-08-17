@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -15,7 +13,7 @@ namespace Marisa.Plugin.Test;
 
 public class SongDbTest
 {
-    private SongDb<MaiMaiSong, MaiMaiDxGuess> _songDb;
+    private SongDb<MaiMaiSong> _songDb;
 
     [SetUp]
     public void SetUp()
@@ -24,7 +22,7 @@ public class SongDbTest
 
         ConfigurationManager.SetConfigFilePath(configPath);
 
-        _songDb = new SongDb<MaiMaiSong, MaiMaiDxGuess>(
+        _songDb = new SongDb<MaiMaiSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt",
             () =>
@@ -33,7 +31,6 @@ public class SongDbTest
 
                 return data.Select(d => new MaiMaiSong(d)).ToList();
             },
-            nameof(BotDbContext.MaiMaiDxGuesses),
             Dialog.AddHandler
         );
     }

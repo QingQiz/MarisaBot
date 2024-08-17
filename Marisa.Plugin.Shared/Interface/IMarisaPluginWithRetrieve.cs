@@ -1,12 +1,11 @@
-﻿using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
-using Marisa.Plugin.Shared.Util;
+﻿using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Interface;
 
-public interface IMarisaPluginWithRetrieve<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
+public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 {
-    SongDb<TSong, TSongGuess> SongDb { get; }
+    SongDb<TSong> SongDb { get; }
 
     #region Search
 

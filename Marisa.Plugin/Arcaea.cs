@@ -4,6 +4,7 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using Marisa.Plugin.Shared.Arcaea;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Util.SongGuessMaker;
 using Newtonsoft.Json;
 
 namespace Marisa.Plugin;
@@ -14,12 +15,12 @@ namespace Marisa.Plugin;
 public class Arcaea :
     MarisaPluginBase,
     IMarisaPluginWithHelp,
-    IMarisaPluginWithRetrieve<ArcaeaSong, ArcaeaGuess>,
+    IMarisaPluginWithRetrieve<ArcaeaSong>,
     IMarisaPluginWithCoverGuess<ArcaeaSong, ArcaeaGuess>
 {
     public Arcaea()
     {
-        SongDb = new SongDb<ArcaeaSong, ArcaeaGuess>(
+        SongDb = new SongDb<ArcaeaSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/ArcaeaSongAliasTemp.txt",
             () =>
@@ -30,10 +31,13 @@ public class Arcaea :
 
                 return data!.Select(d => new ArcaeaSong(d)).ToList();
             },
-            nameof(BotDbContext.ArcaeaGuesses),
             Dialog.AddHandler
         );
+
+        SongGuessMaker = new SongGuessMaker<ArcaeaSong, ArcaeaGuess>(SongDb, nameof(BotDbContext.ArcaeaGuesses));
     }
 
-    public SongDb<ArcaeaSong, ArcaeaGuess> SongDb { get; }
+    public SongGuessMaker<ArcaeaSong, ArcaeaGuess> SongGuessMaker { get; }
+
+    public SongDb<ArcaeaSong> SongDb { get; }
 }

@@ -5,6 +5,7 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Util.SongGuessMaker;
 using Newtonsoft.Json;
 
 namespace Marisa.Plugin.MaiMaiDx;
@@ -15,13 +16,13 @@ namespace Marisa.Plugin.MaiMaiDx;
 public partial class MaiMaiDx :
     MarisaPluginBase,
     IMarisaPluginWithHelp,
-    IMarisaPluginWithRetrieve<MaiMaiSong, MaiMaiDxGuess>,
+    IMarisaPluginWithRetrieve<MaiMaiSong>,
     IMarisaPluginWithCoverGuess<MaiMaiSong, MaiMaiDxGuess>
 
 {
     public MaiMaiDx()
     {
-        SongDb = new SongDb<MaiMaiSong, MaiMaiDxGuess>(
+        SongDb = new SongDb<MaiMaiSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt",
             () =>
@@ -40,12 +41,16 @@ public partial class MaiMaiDx :
                     return data!.Select(d => new MaiMaiSong(d)).ToList();
                 }
             },
-            nameof(BotDbContext.MaiMaiDxGuesses),
             Dialog.AddHandler
         );
+
+        SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, nameof(BotDbContext.MaiMaiDxGuesses));
     }
 
-    public SongDb<MaiMaiSong, MaiMaiDxGuess> SongDb { get; }
+    public SongGuessMaker<MaiMaiSong, MaiMaiDxGuess> SongGuessMaker { get; }
+
+
+    public SongDb<MaiMaiSong> SongDb { get; }
 
 
     public override Task ExceptionHandler(Exception exception, Message message)
