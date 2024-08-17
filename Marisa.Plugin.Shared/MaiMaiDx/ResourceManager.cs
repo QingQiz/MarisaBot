@@ -1,6 +1,6 @@
 ﻿using Marisa.Plugin.Shared.Configuration;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
+using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
@@ -68,7 +68,7 @@ public static class ResourceManager
             () => GetCover(songId).GetCoverBackground()
         );
 
-        var ret = image.Value;
+        var ret   = image.Value;
         var color = Color.ParseHex(Path.GetFileNameWithoutExtension(image.CacheFilePath)!.Split('-').Last());
         return (ret, color);
     }

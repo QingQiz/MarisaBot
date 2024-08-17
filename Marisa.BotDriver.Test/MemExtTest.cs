@@ -1,8 +1,7 @@
-﻿using System;
-using Marisa.Utils;
+﻿using Marisa.Backend.Shared;
 using NUnit.Framework;
 
-namespace Marisa.Plugin.Test;
+namespace Marisa.BotDriver.Test;
 
 public class MemExtTest
 {
@@ -12,6 +11,6 @@ public class MemExtTest
     public void Test_StartsWith(string s1, string s2, StringComparison cmp, bool res)
     {
         var oup = s1.AsMemory().StartsWith(s2, cmp);
-        Assert.AreEqual(res, oup);
+        Assert.That(res == oup);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Marisa.Utils;
+﻿using Marisa.Plugin.Shared.Util;
 using Newtonsoft.Json;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;

@@ -7,14 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj" />
+        <ProjectReference Include="..\Marisa.Backend.Shared\Marisa.Backend.Shared.csproj"/>
+        <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="NLog" Version="5.3.2" />
-        <PackageReference Include="Flurl" Version="3.0.2" />
-        <PackageReference Include="Flurl.Http" Version="3.2.0" />
-        <PackageReference Include="Websocket.Client" Version="4.4.43" />
+        <PackageReference Include="NLog" Version="5.3.2"/>
+        <PackageReference Include="Flurl" Version="3.0.2"/>
+        <PackageReference Include="Flurl.Http" Version="3.2.0"/>
+        <PackageReference Include="Websocket.Client" Version="4.4.43"/>
     </ItemGroup>
 
     <PropertyGroup>

@@ -1,26 +1,15 @@
-﻿namespace Marisa.Utils.Cacheable;
+﻿namespace Marisa.Plugin.Shared.Util.Cacheable;
 
 public abstract class Cacheable<T>
 {
-    protected abstract T LoadCache(string path);
-    protected abstract void SaveCache(string path, T t);
-
-    private Func<T> Get { get; }
-    private Func<string?> GetCacheFile { get; }
-
     private T? _value;
-
-    public T Value => _value ??= Get();
-    public bool Available => GetCacheFile() is not null;
-
-    public string? CacheFilePath { get; private set; }
 
     protected Cacheable(string cacheFilePath, Func<T> create)
     {
         GetCacheFile = () => File.Exists(cacheFilePath) ? cacheFilePath : null;
         Get = () =>
         {
-            if (GetCacheFile() is { } s)
+            if (GetCacheFile() is {} s)
             {
                 CacheFilePath = s;
                 return LoadCache(s);
@@ -40,7 +29,7 @@ public abstract class Cacheable<T>
         GetCacheFile = () => Directory.GetFiles(cachePath, "*.*", SearchOption.TopDirectoryOnly).FirstOrDefault(useCacheCondition);
         Get = () =>
         {
-            if (GetCacheFile() is { } s)
+            if (GetCacheFile() is {} s)
             {
                 CacheFilePath = s;
                 return LoadCache(s);
@@ -59,4 +48,14 @@ public abstract class Cacheable<T>
         : this(cachePath, useCacheCondition, _ => otherwiseCreate, create)
     {
     }
+
+    private Func<T> Get { get; }
+    private Func<string?> GetCacheFile { get; }
+
+    public T Value => _value ??= Get();
+    public bool Available => GetCacheFile() is not null;
+
+    public string? CacheFilePath { get; private set; }
+    protected abstract T LoadCache(string path);
+    protected abstract void SaveCache(string path, T t);
 }

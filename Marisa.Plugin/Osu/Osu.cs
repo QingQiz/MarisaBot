@@ -2,11 +2,16 @@
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Osu;
+using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Osu;
 
-public partial class Osu
+[MarisaPlugin(PluginPriority.Osu)]
+[MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
+[MarisaPluginCommand("osu!", "osu！", "osu", "o", "!", "！")]
+public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
 {
     private static readonly HashSet<string> Debounce = [];
 

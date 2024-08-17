@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
+using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -18,13 +19,13 @@ public partial class Chunithm
         {
             return _dataFetchers[name] = name switch
             {
-                "DivingFish" => new DivingFishDataFetcher(_songDb),
-                "RinNET" => new AllNetBasedNetDataFetcher(_songDb, "aqua.naominet.live",
+                "DivingFish" => new DivingFishDataFetcher(SongDb),
+                "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "aqua.naominet.live",
                     ConfigurationManager.Configuration.Chunithm.RinNetKeyChip),
-                "Aqua" => new AllNetBasedNetDataFetcher(_songDb, "aqua.msm.moe",
+                "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "aqua.msm.moe",
                     ConfigurationManager.Configuration.Chunithm.AllNetKeyChip),
-                _ => Dns.GetHostAddresses(name).Any()
-                    ? new AllNetBasedNetDataFetcher(_songDb, name,
+                _ => Dns.GetHostAddresses(name).Length != 0
+                    ? new AllNetBasedNetDataFetcher(SongDb, name,
                         ConfigurationManager.Configuration.Chunithm.AllNetKeyChip)
                     : throw new InvalidDataException("无效的服务器名： " + name)
             };

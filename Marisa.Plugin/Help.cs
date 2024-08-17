@@ -1,13 +1,15 @@
-﻿using SixLabors.ImageSharp;
+﻿using Marisa.Plugin.Shared.Help;
+using Marisa.Plugin.Shared.Util;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace Marisa.Plugin.Help;
+namespace Marisa.Plugin;
 
 [MarisaPluginDoc("给出该文档，无参数")]
 [MarisaPluginCommand(true, "help", "帮助")]
-public partial class Help : MarisaPluginBase
+public class Help : MarisaPluginBase
 {
     private Image? _image;
 
@@ -18,7 +20,7 @@ public partial class Help : MarisaPluginBase
         {
             const int gap = 15;
 
-            var helpDocs = GetHelp(plugins);
+            var helpDocs = HelpGenerator.GetHelp(plugins);
 
             var ims = helpDocs.Select(d => d.GetImage()).ToList();
 

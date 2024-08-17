@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Marisa.Utils;
+using Marisa.Backend.Shared;
+using Marisa.Plugin.Shared.Util;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;

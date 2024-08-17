@@ -3,12 +3,12 @@ using System.Reflection;
 using System.Text.Json;
 using Flurl;
 using Marisa.Backend.Mirai.MessageDataExt;
+using Marisa.Backend.Shared;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
-using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Websocket.Client;
@@ -17,9 +17,9 @@ namespace Marisa.Backend.Mirai;
 
 public class MiraiBackend : BotDriver.BotDriver
 {
-    private readonly WebsocketClient _wsClient;
-    private readonly Logger _logger;
     private readonly long _id;
+    private readonly Logger _logger;
+    private readonly WebsocketClient _wsClient;
 
     public MiraiBackend(
         IServiceProvider serviceProvider,
@@ -41,7 +41,7 @@ public class MiraiBackend : BotDriver.BotDriver
                 .SetQueryParam("verifyKey", authKey)
                 .SetQueryParam("qq", _id)))
         {
-            ReconnectTimeout = TimeSpan.MaxValue,
+            ReconnectTimeout = TimeSpan.MaxValue
         };
 
         _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnection happened"); });

@@ -1,10 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
-using Marisa.Utils;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp.Processing;
 using static Marisa.Plugin.Shared.Dialog.Dialog;
@@ -113,7 +109,7 @@ public class SongDb<TSong, TSongGuess> where TSong : Song where TSongGuess : Son
 
         var songNameAll = SongList
             .Select(s => s.Title.AsMemory())
-            .Distinct(StringComparison.Ordinal)
+            .Distinct()
             .ToHashSet(new MemoryExt.ReadOnlyMemoryCharComparer());
 
         foreach (var line in lines)

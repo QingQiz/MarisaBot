@@ -2,36 +2,51 @@
 using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
-public partial class MaiMaiDx
-{
-    private readonly SongDb<MaiMaiSong, MaiMaiDxGuess> _songDb = new(
-        ResourceManager.ResourcePath + "/aliases.tsv",
-        ResourceManager.TempPath     + "/MaiMaiSongAliasTemp.txt",
-        () =>
-        {
-            try
-            {
-                var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
+[MarisaPluginDoc("音游 maimai DX 的相关功能")]
+[MarisaPlugin(PluginPriority.MaiMaiDx)]
+[MarisaPluginCommand("maimai", "mai", "舞萌")]
+public partial class MaiMaiDx :
+    MarisaPluginBase,
+    IMarisaPluginWithHelp,
+    IMarisaPluginWithRetrieve<MaiMaiSong, MaiMaiDxGuess>,
+    IMarisaPluginWithCoverGuess<MaiMaiSong, MaiMaiDxGuess>
 
-                return data.Select(d => new MaiMaiSong(d)).ToList();
-            }
-            catch
+{
+    public MaiMaiDx()
+    {
+        SongDb = new SongDb<MaiMaiSong, MaiMaiDxGuess>(
+            ResourceManager.ResourcePath + "/aliases.tsv",
+            ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt",
+            () =>
             {
-                var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
-                    File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
-                ) as dynamic[];
-                return data!.Select(d => new MaiMaiSong(d)).ToList();
-            }
-        },
-        nameof(BotDbContext.MaiMaiDxGuesses),
-        Dialog.AddHandler
-    );
+                try
+                {
+                    var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
+
+                    return data.Select(d => new MaiMaiSong(d)).ToList();
+                }
+                catch
+                {
+                    var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
+                        File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
+                    ) as dynamic[];
+                    return data!.Select(d => new MaiMaiSong(d)).ToList();
+                }
+            },
+            nameof(BotDbContext.MaiMaiDxGuesses),
+            Dialog.AddHandler
+        );
+    }
+
+    public SongDb<MaiMaiSong, MaiMaiDxGuess> SongDb { get; }
+
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {

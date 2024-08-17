@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Marisa.Utils;
+namespace Marisa.Backend.Shared;
 
 public class WebContext
 {

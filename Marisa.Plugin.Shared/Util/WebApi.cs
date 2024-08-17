@@ -1,6 +1,6 @@
 ﻿using PuppeteerSharp;
 
-namespace Marisa.Utils;
+namespace Marisa.Plugin.Shared.Util;
 
 public static class WebApi
 {

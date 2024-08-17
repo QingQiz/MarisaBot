@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Marisa.Utils;
+﻿namespace Marisa.Plugin.Shared.Util;
 
 public static class ListExt
 {
@@ -20,7 +18,7 @@ public static class ListExt
     {
         return list[rand.Next(list.Count)];
     }
-    
+
     public static T RandomTake<T>(this T[] list, Random rand)
     {
         return list[rand.Next(list.Length)];

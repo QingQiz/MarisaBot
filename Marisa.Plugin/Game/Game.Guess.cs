@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.MaiMaiDx;
+using Marisa.Plugin.Shared.Util;
 using Newtonsoft.Json;
 using osu.Game.Extensions;
 using ResourceManager = Marisa.Plugin.Shared.Chunithm.ResourceManager;

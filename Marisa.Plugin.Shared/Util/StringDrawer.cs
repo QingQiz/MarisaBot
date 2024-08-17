@@ -2,25 +2,19 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
-namespace Marisa.Utils;
+namespace Marisa.Plugin.Shared.Util;
 
-public class StringDrawer
+public class StringDrawer(float lineSpace = 0)
 {
-    private readonly float _lineSpace;
+    private readonly List<(float X, float Y)> _position = [];
 
-    public StringDrawer(float lineSpace = 0)
-    {
-        _lineSpace = lineSpace;
-    }
-
-    private readonly List<List<(string Text, Font Font, Color Color )>> _textCache = new();
-    private List<List<FontRectangle>>? _textMeasure;
-    private readonly List<(float X, float Y)> _position = new();
+    private readonly List<List<(string Text, Font Font, Color Color )>> _textCache = [];
 
     private bool _newLine = true;
+    private List<List<FontRectangle>>? _textMeasure;
 
     /// <summary>
-    /// 添加一堆各不相同的字符串
+    ///     添加一堆各不相同的字符串
     /// </summary>
     /// <param name="strings"></param>
     public void Add(params (string, Font, Color)[] strings)
@@ -32,7 +26,7 @@ public class StringDrawer
     }
 
     /// <summary>
-    /// 添加一堆相同字体和颜色的字符串
+    ///     添加一堆相同字体和颜色的字符串
     /// </summary>
     /// <param name="f"></param>
     /// <param name="b"></param>
@@ -46,7 +40,7 @@ public class StringDrawer
     }
 
     /// <summary>
-    /// 添加一堆相同字体不同颜色的字符串
+    ///     添加一堆相同字体不同颜色的字符串
     /// </summary>
     /// <param name="f"></param>
     /// <param name="strings"></param>
@@ -59,7 +53,7 @@ public class StringDrawer
     }
 
     /// <summary>
-    /// 添加一堆相同颜色不同字体的字符串
+    ///     添加一堆相同颜色不同字体的字符串
     /// </summary>
     /// <param name="b"></param>
     /// <param name="strings"></param>
@@ -72,7 +66,7 @@ public class StringDrawer
     }
 
     /// <summary>
-    /// 添加一个字符串
+    ///     添加一个字符串
     /// </summary>
     /// <param name="t"></param>
     /// <param name="f"></param>
@@ -134,7 +128,7 @@ public class StringDrawer
         var emptyLineCount = _textMeasure.Count(ms => !ms.Any());
 
         var avgH = noneEmptyLineHeights.Average();
-        var h    = noneEmptyLineHeights.Sum() + emptyLineCount * avgH + _lineSpace * (_textCache.Count - 1);
+        var h    = noneEmptyLineHeights.Sum() + emptyLineCount * avgH + lineSpace * (_textCache.Count - 1);
 
         return new SizeF(noneEmptyLineWidth, h);
     }
@@ -159,7 +153,7 @@ public class StringDrawer
             float x = 0;
             if (!line.Any())
             {
-                y += avgH + _lineSpace;
+                y += avgH + lineSpace;
                 continue;
             }
 
@@ -182,7 +176,7 @@ public class StringDrawer
             }
 
             // update y to next line
-            y += lineH + _lineSpace;
+            y += lineH + lineSpace;
         }
     }
 }

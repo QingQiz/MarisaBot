@@ -2,15 +2,13 @@
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
+using Marisa.Plugin.Shared.Util;
 using Microsoft.EntityFrameworkCore;
 using osu.Game.Beatmaps;
 
 namespace Marisa.Plugin.Osu;
 
-[MarisaPlugin(PluginPriority.Osu)]
-[MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
-[MarisaPluginCommand("osu!", "osu！", "osu", "o", "!", "！")]
-public partial class Osu : MarisaPluginBaseWithHelpCommand
+public partial class Osu
 {
     #region 绑定 / help
 
@@ -210,53 +208,9 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginDoc("将 *你的* bp 和别人的 bp 进行比较")]
     [MarisaPluginSubCommand(nameof(BestPerformance))]
     [MarisaPluginCommand("compare", "cmp")]
-    private async Task<MarisaPluginTaskState> BpCmp(Message message)
+    private MarisaPluginTaskState BpCmp(Message message)
     {
-        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var db = new BotDbContext().OsuBinds;
-
-        var bind = db.FirstOrDefault(x => x.UserId == message.Sender.Id);
-
-        if (bind == null)
-        {
-            message.Reply("您未绑定");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        if (bind.OsuUserName == command!.Name)
-        {
-            message.Reply("你不能和自己比较");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        // 别人的
-        var best2 = (await OsuApi.GetScores(
-                await GetOsuIdByName(command.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
-                100))
-            .ToList();
-
-        if (best2.Count == 0)
-        {
-            message.Reply($"{command.Name} 在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        // 你的
-        var best1 = (await OsuApi.GetScores(
-                await GetOsuIdByName(bind.OsuUserName), OsuApi.OsuScoreType.Best,
-                OsuApi.GetModeName(command.Mode.Value), 0, 100))
-            .ToList();
-
-        if (best1.Count == 0)
-        {
-            message.Reply($"你在 {OsuApi.ModeList[command.Mode.Value]} 上没有成绩");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var im = best1.ToArray().CompareWith(best2.ToArray());
-
-        message.Reply(MessageDataImage.FromBase64(im.ToB64()));
+        message.Reply("Disabled");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -264,23 +218,9 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginDoc("统计某人的 bp 分布")]
     [MarisaPluginSubCommand(nameof(BestPerformance))]
     [MarisaPluginCommand("distribution", "dist")]
-    private async Task<MarisaPluginTaskState> BpDistribution(Message message)
+    private MarisaPluginTaskState BpDistribution(Message message)
     {
-        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var best = await OsuApi.GetScores(
-            await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
-            100
-        );
-
-        if (!(best?.Any() ?? false))
-        {
-            message.Reply("您无 bp");
-        }
-        else
-        {
-            message.Reply(MessageDataImage.FromBase64(best.Distribution().ToB64(100)));
-        }
+        message.Reply("Disabled");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -312,32 +252,9 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
 
     [MarisaPluginDoc("查询打 rank 图奖励的 pp (bonus pp)")]
     [MarisaPluginCommand("bns")]
-    private async Task<MarisaPluginTaskState> BonusPp(Message message)
+    private static MarisaPluginTaskState BonusPp(Message message)
     {
-        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
-
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, command.Mode.Value);
-
-        var scores =
-            (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
-                100))?.ToArray();
-
-        if (scores == null || !scores.Any())
-        {
-            message.Reply("无");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var bns = userInfo.BonusPp(scores);
-
-        var img = OsuUserInfoDrawer.BonusPp(bns.bonusPp, bns.scorePp);
-
-        message.Reply(
-            new MessageDataText(
-                $"总pp：{bns.scorePp + bns.bonusPp:F2}，原始pp：{bns.scorePp:F2}，bonus pp：{bns.bonusPp:F2}，成绩总数：{bns.rankedScores}\n"),
-            MessageDataImage.FromBase64(img.ToB64(100))
-        );
-
+        message.Reply("Disabled");
         return MarisaPluginTaskState.CompletedTask;
     }
 

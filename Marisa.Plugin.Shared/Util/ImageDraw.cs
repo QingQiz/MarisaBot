@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 
-namespace Marisa.Utils;
+namespace Marisa.Plugin.Shared.Util;
 
 public static class ImageDraw
 {
@@ -146,8 +146,8 @@ public static class ImageDraw
 
         var measure = text.Measure(font);
 
-        var x = center ? (int)((width - measure.Width) / 2) : paddingLeft;
-        var y = (int)(height - measure.Height) / 2;
+        var x = center ? (width - measure.Width) / 2 : paddingLeft;
+        var y = (height - measure.Height) / 2;
 
         background.Mutate(i => i
             .Fill(bgColor)
@@ -405,17 +405,6 @@ public static class ImageDraw
     #endregion
 
     #region Converter
-
-    public static Image<TPixel> ToImageSharpImage<TPixel>(this System.Drawing.Bitmap bitmap) where TPixel : unmanaged, IPixel<TPixel>
-    {
-        using var memoryStream = new MemoryStream();
-
-        bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-
-        memoryStream.Seek(0, SeekOrigin.Begin);
-
-        return Image.Load<TPixel>(memoryStream);
-    }
 
     public static string ToB64(this Image image, int quality = 90)
     {

@@ -8,12 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj" />
+        <ProjectReference Include="..\Marisa.Backend.Shared\Marisa.Backend.Shared.csproj"/>
+        <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="NLog" Version="5.3.2" />
-      <PackageReference Include="Websocket.Client" Version="4.4.43" />
+        <PackageReference Include="NLog" Version="5.3.2"/>
+        <PackageReference Include="Websocket.Client" Version="4.4.43"/>
     </ItemGroup>
 
 </Project>

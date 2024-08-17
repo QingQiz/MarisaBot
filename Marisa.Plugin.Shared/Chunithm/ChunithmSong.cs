@@ -1,7 +1,7 @@
 ﻿using Marisa.Plugin.Shared.MaiMaiDx;
+using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
 using Microsoft.CSharp.RuntimeBinder;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;

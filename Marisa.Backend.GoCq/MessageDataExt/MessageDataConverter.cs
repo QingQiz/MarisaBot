@@ -1,10 +1,10 @@
 ﻿using System.Dynamic;
 using System.Text;
+using Marisa.Backend.Shared;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
-using Marisa.Utils;
 using Newtonsoft.Json;
 using NLog;
 using Websocket.Client;
@@ -18,7 +18,7 @@ public static class MessageDataConverter
         return s.Replace("[", "&#91;").Replace("]", "&#93;");
     }
 
-    private static string Escape(this string s)
+    public static string Escape(this string s)
     {
         return s.Replace("&", "&#38;").Replace("[", "&#91;").Replace("]", "&#93;").Replace(",", "&#44;");
     }

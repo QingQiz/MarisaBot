@@ -1,4 +1,4 @@
-﻿using Marisa.Utils;
+﻿using Marisa.Plugin.Shared.Util;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -324,7 +324,7 @@ public static class MaiMaiDraw
 
                 if (imgRank != null)
                 {
-                    bg.DrawImage(imgRank, (int)(padding - borderWidth + measure.Width), padding / 2);
+                    bg.DrawImage(imgRank, padding - borderWidth + (int)measure.Width, padding / 2);
                 }
 
                 bg.DrawImage(im, 0, 70);

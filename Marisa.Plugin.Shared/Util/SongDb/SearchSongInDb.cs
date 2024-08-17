@@ -1,9 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
@@ -95,7 +91,7 @@ public static class SearchSongInDb
             if (songs.Count <= SongDbConfig.PageSize) return ret;
 
             var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}";
+            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}，输入 p1、p2 等进行换页";
 
             return ret;
         }

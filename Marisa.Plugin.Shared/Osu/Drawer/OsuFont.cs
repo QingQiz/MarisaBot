@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using SharpFNT;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -13,6 +13,8 @@ public static class OsuFont
 
     private static BitmapFont? _font;
     private static readonly Dictionary<int, Image> FontImage = new();
+
+    public static int BorderChar => 57418;
 
     public static Image GetCharacter(int c)
     {
@@ -71,8 +73,6 @@ public static class OsuFont
             _    => (0, 0)
         };
     }
-
-    public static int BorderChar => 57418;
 
     private static void Export(string exportPath)
     {

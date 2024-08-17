@@ -1,9 +1,6 @@
 ﻿using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

@@ -1,4 +1,6 @@
-﻿namespace Marisa.Plugin;
+﻿using Marisa.Plugin.Shared.Util;
+
+namespace Marisa.Plugin;
 
 [MarisaPluginDoc("魔理沙对你进行恶臭算命，得到你今天的音游运势")]
 [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.Ordinal, "今日运势", "jrys")]
@@ -9,8 +11,8 @@ public class TodayFortune : MarisaPluginBase
         var now = DateTime.Now;
 
         // 四个常数分别是：Prime[114514]、Prime[1919810]、Prime[114514 ^ 1919810]、Prime[114514 + 1919810]
-        return (int)((((now.Year * now.Day * id) ^ 1504831) + ((now.Month * now.Day * id) ^ 31066753) +
-            ((now.Day * now.Day * id) ^ 30680207)) % 33046393);
+        return (int)(((now.Year * now.Day * id ^ 1504831) + (now.Month * now.Day * id ^ 31066753) +
+                      (now.Day * now.Day * id ^ 30680207)) % 33046393);
     }
 
     [MarisaPluginCommand(true, "")]
@@ -43,7 +45,7 @@ public class TodayFortune : MarisaPluginBase
             >= 9  => "🍂",
             >= 6  => "☀️",
             >= 3  => "🌸",
-            _     => "⛄",
+            _     => "⛄"
         };
 
         var header =

@@ -1,7 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 
-namespace Marisa.Utils;
+namespace Marisa.Plugin.Shared.Util;
 
 public static class ShapeDraw
 {

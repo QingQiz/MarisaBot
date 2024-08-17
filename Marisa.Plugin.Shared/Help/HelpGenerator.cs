@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
-using Marisa.Plugin.Shared.Help;
 
-namespace Marisa.Plugin.Help;
+namespace Marisa.Plugin.Shared.Help;
 
-public partial class Help
+public static class HelpGenerator
 {
     private const BindingFlags BindingFlags =
         System.Reflection.BindingFlags.Default
@@ -26,7 +25,7 @@ public partial class Help
             );
     }
 
-    private static List<HelpDoc> GetHelp(IEnumerable<MarisaPluginBase> plugins)
+    public static List<HelpDoc> GetHelp(IEnumerable<MarisaPluginBase> plugins)
     {
         return Filter(plugins.Select(p => p.GetType())).Select(GetHelp).ToList();
     }

@@ -1,10 +1,7 @@
 ﻿using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
