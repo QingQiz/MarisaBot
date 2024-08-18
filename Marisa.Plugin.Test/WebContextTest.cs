@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Marisa.Utils;
+using Marisa.BotDriver.Extension;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;

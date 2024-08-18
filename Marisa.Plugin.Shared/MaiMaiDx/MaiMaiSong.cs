@@ -1,6 +1,6 @@
-﻿using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
+﻿using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
+using Marisa.Plugin.Shared.Util.SongDb;
 using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -120,7 +120,7 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = NoCover 
+        var path = NoCover
             ? Path.Join(ResourceManager.TempPath, "Detail-NC-") + Id + ".b64"
             : Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64";
 

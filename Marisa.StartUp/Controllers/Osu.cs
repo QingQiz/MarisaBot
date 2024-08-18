@@ -1,7 +1,7 @@
 ﻿using Flurl.Http;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using Microsoft.AspNetCore.Mvc;
 using Image = SixLabors.ImageSharp.Image;
 
@@ -42,7 +42,7 @@ public class Osu : Controller
     [HttpGet]
     public FileStreamResult GetAccRing(double acc, int modeInt)
     {
-        var ring = OsuScoreDrawer.GetAccRing("", acc, modeInt, withText: false);
+        var ring = OsuScoreDrawer.GetAccRing("", acc, modeInt, false);
         return new FileStreamResult(ring.ToStream(), "image/png");
     }
 
@@ -85,7 +85,7 @@ public class Osu : Controller
     [HttpGet]
     public async Task<string> GetRecent(long userId, int modeInt, int bpRank = 1, bool fail = false)
     {
-        var recentScores = await OsuApi.GetScores(userId, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(modeInt), bpRank - 1, 1, includeFails: fail);
+        var recentScores = await OsuApi.GetScores(userId, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(modeInt), bpRank - 1, 1, fail);
 
         if (!(recentScores?.Any() ?? false))
         {

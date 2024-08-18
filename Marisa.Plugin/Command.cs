@@ -88,7 +88,7 @@ public class Command : MarisaPluginBase
         {
             GroupId = m.GroupInfo!.Id,
             Prefix  = prefix.ToString(),
-            Type    = "",
+            Type    = ""
         });
         db.SaveChanges();
 
@@ -128,7 +128,7 @@ public class Command : MarisaPluginBase
         {
             GroupId = m.GroupInfo!.Id,
             Prefix  = "",
-            Type    = type.ToString(),
+            Type    = type.ToString()
         });
         db.SaveChanges();
 
@@ -138,7 +138,7 @@ public class Command : MarisaPluginBase
     }
 
     /// <summary>
-    /// start an interactive shell
+    ///     start an interactive shell
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
@@ -160,8 +160,8 @@ public class Command : MarisaPluginBase
                     UseShellExecute        = false,
                     RedirectStandardInput  = true,
                     RedirectStandardOutput = true,
-                    RedirectStandardError  = true,
-                },
+                    RedirectStandardError  = true
+                }
             };
             var output = "";
 
@@ -206,7 +206,7 @@ public class Command : MarisaPluginBase
     }
 
     /// <summary>
-    /// restart bot
+    ///     restart bot
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>

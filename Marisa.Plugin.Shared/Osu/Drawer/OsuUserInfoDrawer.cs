@@ -1,18 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Marisa.Plugin.Shared.Osu.Entity.PPlus;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
-using ScottPlot;
+using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment;
 using Path = System.IO.Path;
-using VerticalAlignment = SixLabors.Fonts.VerticalAlignment;
 
 namespace Marisa.Plugin.Shared.Osu.Drawer;
 
@@ -23,24 +18,6 @@ public static class OsuUserInfoDrawer
     private const int MarginX = 50;
 
     private static readonly Color FontColor = Color.FromRgb(240, 219, 228);
-
-    private static readonly TimeSpan PPlusUpdateInterval = TimeSpan.FromHours(24 * 30);
-
-    public static Image BonusPp(double bonus, double origin)
-    {
-        const int pieSize = 400;
-
-        var plt = new Plot(pieSize, pieSize);
-
-        var pie = plt.AddPie(new[] { origin, bonus });
-        pie.SliceLabels     = new[] { "origin", "bonus" };
-        pie.ShowLabels      = true;
-        pie.ShowPercentages = true;
-
-        plt.Legend();
-
-        return plt.GetBitmap().ToImageSharpImage<Rgba32>();
-    }
 
     public static async Task<Image> GetImage(this OsuUserInfo info)
     {
@@ -65,7 +42,7 @@ public static class OsuUserInfoDrawer
         var summary = GetUserSummary(info.Statistics, rank.Height + chart.Height + counter.Height + 40);
 
         // PP+
-        var pPlusChart = GetPPlusChart(info.RankHistory!.Mode, info.Id);
+        var pPlusChart = GetPPlusChart();
 
         // 把上面几个小卡片拼接起来
         var userDetail = CombineUserDetailCard(summary, rank, chart, counter, pPlusChart);
@@ -286,7 +263,7 @@ public static class OsuUserInfoDrawer
             var w = s.Measure(font1).Width;
             counter.DrawText(s, font3, Color.White, rankX + (iconWidth - w) / 2, iconHeight);
 
-            rankX -= (int)Math.Max(w, iconWidth) + 5;
+            rankX -= Math.Max((int)w, iconWidth) + 5;
         }
 
         return counter;
@@ -415,7 +392,7 @@ public static class OsuUserInfoDrawer
         var regionIcon = OsuDrawerCommon.GetIcon(info.Region.Code.ToLower())
             .ResizeY(50)
             .RoundCorners(12);
-        nameCard.DrawImage(regionIcon, 2, (int)(nameHeight + 12));
+        nameCard.DrawImage(regionIcon, 2, (int)nameHeight + 12);
 
         // region name
         font = new Font(OsuDrawerCommon.FontExo2, 32, FontStyle.Bold);
@@ -526,34 +503,14 @@ public static class OsuUserInfoDrawer
         return badges;
     }
 
-    private static Image GetPPlusChart(string mode, long osuId)
+    private static Image GetPPlusChart()
     {
-        const bool isOsu = false;
-        // var isOsu = mode == "osu";
+        const string prefix   = "pp+cache-disabled";
+        const string filename = $"{prefix}.png";
 
-        var prefix   = isOsu ? $"pp+cache-{osuId}-" : "pp+cache-disabled";
-        var filename = isOsu ? $"{prefix}{DateTime.Now:yyyy-MM-dd}.png" : $"{prefix}.png";
-
-        var image = new CacheableImage(OsuDrawerCommon.TempPath, f =>
+        var image = new CacheableImage(OsuDrawerCommon.TempPath, f => Path.GetFileName(f) == filename, filename, () =>
         {
-            // 当不是 osu 模式时 文件名是确定的，直接比较就完事了
-            if (!isOsu)
-            {
-                return Path.GetFileName(f) == filename;
-            }
-
-            // 是 osu 模式时，需要确定前缀和日期
-            if (!f.EndsWith(".png")) return false;
-
-            var fn = Path.GetFileNameWithoutExtension(f);
-            if (!fn.StartsWith(prefix)) return false;
-
-            var date = Convert.ToDateTime(fn[prefix.Length..]);
-            return DateTime.Now - date <= PPlusUpdateInterval;
-        }, filename, () =>
-        {
-            Font font;
-            var  penColor = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
+            var penColor = Color.FromRgb(255, 204, 51).ToPixel<Rgba32>();
 
             var pPlusChart       = new Image<Rgba32>(ImageWidth / 3, (int)Math.Ceiling(Math.Sqrt(3) / 2 * ImageWidth / 3) + 2);
             var pPlusChartCenter = new PointF(pPlusChart.Width / 2, pPlusChart.Height / 2);
@@ -573,92 +530,13 @@ public static class OsuUserInfoDrawer
                 pPlusChart.Mutate(im => im.DrawLine(penColor, 4, i.First, i.Second));
             }
 
-            if (isOsu)
-            {
-                var ppData = GetPPlus(osuId).UserData;
-                var ppType = new[] { "acc", "flow", "jump", "pre", "speed", "sta" };
-                var data = new List<double>
-                {
-                    ppData.AccuracyTotal,
-                    ppData.FlowAimTotal,
-                    ppData.JumpAimTotal,
-                    ppData.PrecisionTotal,
-                    ppData.SpeedTotal,
-                    ppData.StaminaTotal
-                };
-
-                const int maxData = 1100;
-                var       multi   = new[] { 122.25, 113.35, 106.03, 120.09, 115.45, 116.31 };
-
-                // 让数据差距不至于太大，Log[data] * multi
-                var convertedData = data.Zip(multi)
-                    .Select(d => d.Second * Math.Log(d.First))
-                    .Select(d => d < 0 ? 0 : d)
-                    .ToList();
-
-                var deg        = 0.0;
-                var dataPoints = new List<PointF>();
-                foreach (var length in convertedData.Select(d => d / maxData * (pPlusChart.Width / 2)))
-                {
-                    dataPoints.Add(new PointF((float)(length * Math.Cos(deg) + pPlusChartCenter.X), (float)(length * Math.Sin(deg) + pPlusChartCenter.Y)));
-                    deg += Math.PI / 3;
-                }
-
-                dataPoints.Add(dataPoints[0]);
-
-                // 填充雷达图的折线内部
-                var polygon = new Polygon(new LinearLineSegment(dataPoints.ToArray()));
-                pPlusChart.Mutate(i => i
-                    .DrawLine(penColor, 4, dataPoints.ToArray())
-                    .Fill(Color.FromRgba(penColor.R, penColor.G, penColor.B, 50), polygon)
-                );
-
-                // 画顶点、画 pp+ 的类型和值
-                var idx = 0;
-                font = new Font(OsuDrawerCommon.FontExo2, 50);
-
-                //扩展一下图片，防止文本画出边界
-                pPlusChart = new Image<Rgba32>(pPlusChart.Width * 2, pPlusChart.Height + 40)
-                    .DrawImage(pPlusChart, pPlusChart.Width / 2, 20)
-                    .CloneAs<Rgba32>();
-
-                foreach (var d in data.Zip(ppType))
-                {
-                    var location = new PointF(
-                        20 * (float)Math.Cos(Math.PI * idx / 3) + dataPoints[idx].X + pPlusChart.Width / 4,
-                        20 * (float)Math.Sin(Math.PI * idx / 3) + dataPoints[idx].Y + 20);
-
-                    var option = ImageDraw.GetTextOptions(font, location);
-
-                    if (idx is 2 or 3 or 4)
-                    {
-                        option.HorizontalAlignment = HorizontalAlignment.Right;
-                    }
-
-                    option.VerticalAlignment = idx switch
-                    {
-                        1 or 2 => VerticalAlignment.Top,
-                        0 or 3 => VerticalAlignment.Center,
-                        4 or 5 => VerticalAlignment.Bottom,
-                        _      => option.VerticalAlignment
-                    };
-
-                    var ellipsePolygon = new EllipsePolygon(new PointF(dataPoints[idx].X + pPlusChart.Width / 4, dataPoints[idx].Y + 20), 6);
-
-                    pPlusChart.Mutate(i => i
-                        .DrawText(option, $"{d.Second}: {d.First:F0}", penColor)
-                        .Fill(penColor, ellipsePolygon)
-                    );
-
-                    idx += 1;
-                }
-            }
             var pPlusDisabled = new Image<Rgba32>(pPlusChart.Width * 3 / 4, 150)
                 .Clear(Color.FromRgba(0, 0, 0, 200))
                 .RoundCorners(40);
 
             const string text = "PP+数据不可用";
-            font = new Font(OsuDrawerCommon.FontYaHei, 60);
+
+            var font = new Font(OsuDrawerCommon.FontYaHei, 60);
 
             pPlusDisabled.DrawTextCenter(text, font, Color.White);
 
@@ -670,26 +548,7 @@ public static class OsuUserInfoDrawer
         return image.Value;
     }
 
-    private static PPlus GetPPlus(long uid)
-    {
-        var prefix   = $"pp+cache-{uid}-";
-        var filename = $"{prefix}{DateTime.Now:yyyy-MM-dd}.json";
-
-        var json = new CacheableText(OsuDrawerCommon.TempPath, f =>
-        {
-            if (!f.EndsWith(".json")) return false;
-
-            var fn = Path.GetFileNameWithoutExtension(f);
-            if (!fn.StartsWith(prefix)) return false;
-
-            var date = Convert.ToDateTime(fn[prefix.Length..]);
-            return DateTime.Now - date <= PPlusUpdateInterval;
-        }, filename, () => OsuApi.GetPPlusJsonById(uid).Result);
-
-        return PPlus.FromJson(json.Value);
-    }
-
-    private static Image GetMode(string mode)
+    private static Image<Rgba32> GetMode(string mode)
     {
         return Image.Load(Path.Join(OsuDrawerCommon.ResourcePath, $"mode-{mode}.png")).CloneAs<Rgba32>();
     }

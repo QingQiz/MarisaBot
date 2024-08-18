@@ -1,5 +1,5 @@
-﻿using Marisa.Utils;
-using Marisa.Utils.Cacheable;
+﻿using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -51,7 +51,7 @@ public static class OsuModDrawer
 
                 var m = mod.Measure(font);
 
-                var imgText = new Image<Rgba32>((int)(m.Width + 15), (int)(m.Height + 10)).Clear(color.Item2);
+                var imgText = new Image<Rgba32>((int)m.Width + 15, (int)m.Height + 10).Clear(color.Item2);
                 imgText.DrawTextCenter(mod.ToUpper(), font, color.Item1, withSpace: false);
 
                 border.DrawImageCenter(imgText.RoundCorners(imgText.Height / 2 + 1), offsetY: 17);
@@ -103,5 +103,4 @@ public static class OsuModDrawer
             return border;
         }).Value;
     }
-
 }

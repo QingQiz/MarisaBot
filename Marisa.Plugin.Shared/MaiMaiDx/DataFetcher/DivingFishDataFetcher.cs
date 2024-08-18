@@ -1,22 +1,16 @@
 ﻿using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
-
-using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
 
 public class DivingFishDataFetcher : DataFetcher
 {
     private readonly Dictionary<int, List<DiffData?>> _diffDict;
     private readonly List<Rank> _raRankList;
 
-    public DivingFishDataFetcher(MaiSongDb songDb) : base(songDb)
+    public DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : base(songDb)
     {
         _diffDict   = FetchDiffData().Result;
         _raRankList = FetchRaRankList().Result.OrderByDescending(x => x.Ra).ToList();

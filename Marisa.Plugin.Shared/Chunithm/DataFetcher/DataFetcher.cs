@@ -1,19 +1,10 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
-using Marisa.Plugin.Shared.Util.SongDb;
+﻿using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-using ChunithmSongDb = SongDb<ChunithmSong, ChunithmGuess>;
-
-public abstract class DataFetcher
+public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
 {
-    protected DataFetcher(ChunithmSongDb songDb)
-    {
-        SongDb = songDb;
-    }
-
-    protected ChunithmSongDb SongDb { get; }
+    protected SongDb<ChunithmSong> SongDb { get; } = songDb;
 
     public virtual List<ChunithmSong> GetSongList()
     {

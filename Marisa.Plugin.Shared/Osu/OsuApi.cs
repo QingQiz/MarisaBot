@@ -8,7 +8,7 @@ using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using Microsoft.Win32;
 using NLog;
 using osu.Game.Beatmaps.Formats;

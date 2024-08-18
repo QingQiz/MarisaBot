@@ -1,11 +1,13 @@
-﻿namespace Marisa.Plugin;
+﻿using Marisa.Plugin.Shared.Util;
+
+namespace Marisa.Plugin;
 
 [MarisaPluginDoc("这是一个用来解决「中午吃什么」这一人生 N 大难题之一的功能")]
 [MarisaPluginCommand(true, "吃啥", "吃什么")]
 public class Chi : MarisaPluginBase
 {
-    private readonly Dictionary<long, (DateTime, int)> _cache = new();
     private const int Times = 5;
+    private readonly Dictionary<long, (DateTime, int)> _cache = new();
 
     private bool Zuo(long id)
     {

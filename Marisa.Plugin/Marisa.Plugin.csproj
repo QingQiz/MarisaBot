@@ -16,7 +16,6 @@
     <ItemGroup>
         <PackageReference Include="Flurl" Version="3.0.2"/>
         <PackageReference Include="Flurl.Http" Version="3.2.0"/>
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4"/>
         <PackageReference Include="Websocket.Client" Version="4.4.43"/>
     </ItemGroup>
 

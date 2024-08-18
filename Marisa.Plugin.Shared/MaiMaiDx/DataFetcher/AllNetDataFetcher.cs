@@ -3,13 +3,9 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
 using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -18,9 +14,7 @@ using Polly.Retry;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
-using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
-
-public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
+public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -42,7 +36,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var id = GetAimeId(message);
 
-        var (scores, preview) = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
+        var scores = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
 
         var group = scores
             .GroupBy(x => SongDb.SongIndexer[x.Key.Id].Info.IsNew)
@@ -67,7 +61,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
 
         return new DxRating
         {
-            Nickname  = preview.Username,
+            Nickname  = (await GetUserPreview(id)).Username,
             OldScores = b35,
             NewScores = b15
         };
@@ -77,9 +71,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
     {
         var id = GetAimeId(message);
 
-        var (scores, _) = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
-
-        return scores;
+        return await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
     }
 
     public static async Task<bool> Logout(int userId)
@@ -93,37 +85,23 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
         return JsonConvert.DeserializeObject<Dictionary<string, int>>(res)!["returnCode"] == 1;
     }
 
-    private async Task<(Dictionary<(long Id, int LevelIndex), SongScore> Scores, UserPreview Preview)>
-        GetScores(int aimeId)
+    public static async Task Fetch(int aimeId)
     {
-        var preview = await GetUserPreview(aimeId);
+        var md = await GetMusicData(aimeId);
 
-        var tempPath = ConfigurationManager.Configuration.MaiMai.TempPath;
-        var prefix   = $"UserMusicData-{aimeId}-";
+        await File.WriteAllTextAsync(
+            Path.Join(ConfigurationManager.Configuration.MaiMai.TempPath, $"UserMusicData-{aimeId}.json"),
+            JsonConvert.SerializeObject(md)
+        );
+    }
 
-        var times = Directory.GetFiles(tempPath)
-            .Select(x => (Path: x, FileName: Path.GetFileName(x)))
-            .Where(x => x.FileName.StartsWith(prefix))
-            .Select(x => (
-                Time: DateTime.ParseExact(x.FileName[prefix.Length..^5], "yyyy-MM-dd_hh-mm-ss", null),
-                x.Path
-            ))
-            .ToList();
+    private async Task<Dictionary<(long Id, int LevelIndex), SongScore>> GetScores(int aimeId)
+    {
+        var cache = Path.Join(ConfigurationManager.Configuration.MaiMai.TempPath, $"UserMusicData-{aimeId}.json");
 
-        var cache = times.Where(x => x.Time >= preview.LastLogin).ToList();
+        if (!File.Exists(cache)) await Fetch(aimeId);
 
-        var md = cache.Count != 0
-            ? JsonConvert.DeserializeObject<List<MusicData>>(await File.ReadAllTextAsync(cache.MaxBy(x => x.Time).Path))!
-            : await GetMusicData(aimeId);
-
-        // 华立有时候会返回一个空的数据，这个时候就不要写入文件了
-        if (md.Count != 0)
-        {
-            await File.WriteAllTextAsync(
-                Path.Join(tempPath, $"{prefix}{preview.LastLogin:yyyy-MM-dd_hh-mm-ss}.json"),
-                JsonConvert.SerializeObject(md)
-            );
-        }
+        var md = JsonConvert.DeserializeObject<List<MusicData>>(await File.ReadAllTextAsync(Path.Join(cache)))!;
 
         var ret = new Dictionary<(long Id, int LevelIndex), SongScore>();
 
@@ -150,7 +128,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             };
         }
 
-        return (ret, preview);
+        return ret;
     }
 
     private static int GetAimeId(Message message)
@@ -325,7 +303,7 @@ public class AllNetDataFetcher(MaiSongDb songDb) : DataFetcher(songDb)
             Host             = MaiHost,
             User_Agent       = $"{entry}#{aimeId}",
             charset          = "UTF-8",
-            Mai_Encoding     = "1.30",
+            Mai_Encoding     = "1.40",
             Content_Encoding = "deflate",
             Content_Length   = body.Length
         });

@@ -1,19 +1,10 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
-using Marisa.Plugin.Shared.Util.SongDb;
+﻿using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
-using MaiSongDb = SongDb<MaiMaiSong, MaiMaiDxGuess>;
-
-public abstract class DataFetcher
+public abstract class DataFetcher(SongDb<MaiMaiSong> songDb)
 {
-    protected DataFetcher(MaiSongDb songDb)
-    {
-        SongDb = songDb;
-    }
-
-    protected MaiSongDb SongDb { get; }
+    protected SongDb<MaiMaiSong> SongDb { get; } = songDb;
 
     public virtual List<MaiMaiSong> GetSongList()
     {
