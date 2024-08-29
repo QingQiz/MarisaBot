@@ -74,20 +74,19 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         return response;
     }
 
-    private static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly = false)
+    public static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly = false)
     {
-        var username = message.Command;
+        var username = "".AsMemory();
         var qq       = message.Sender.Id;
-
-        if (qqOnly) username = "".AsMemory();
-
-        if (username.IsEmpty) return (username, qq);
 
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
         if (at != null)
         {
             qq = (at as MessageDataAt)?.Target ?? qq;
+            return (username, qq);
         }
+
+        if (!qqOnly) username = message.Command;
 
         return (username, qq);
     }

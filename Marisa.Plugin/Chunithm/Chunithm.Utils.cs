@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using Marisa.EntityFrameworkCore;
+using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -11,7 +12,7 @@ public partial class Chunithm
 {
     private readonly Dictionary<string, DataFetcher> _dataFetchers = new();
 
-    private DataFetcher GetDataFetcher(string name)
+    private DataFetcher GetDataFetcher(string name, ChunithmBind? bind)
     {
         if (_dataFetchers.TryGetValue(name, out var fetcher)) return fetcher;
 
@@ -21,12 +22,12 @@ public partial class Chunithm
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "aqua.naominet.live",
-                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip),
+                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, bind!),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "aqua.msm.moe",
-                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip),
+                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!),
                 _ => Dns.GetHostAddresses(name).Length != 0
                     ? new AllNetBasedNetDataFetcher(SongDb, name,
-                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip)
+                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!)
                     : throw new InvalidDataException("无效的服务器名： " + name)
             };
         }
@@ -70,7 +71,7 @@ public partial class Chunithm
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
         if (allowUsername && !message.Command.IsWhiteSpace())
         {
-            return GetDataFetcher("DivingFish");
+            return GetDataFetcher("DivingFish", null);
         }
 
         var qq = message.Sender.Id;
@@ -85,7 +86,9 @@ public partial class Chunithm
 
         var bind = db.ChunithmBinds.FirstOrDefault(x => x.UId == qq);
 
-        return GetDataFetcher(bind == null ? "DivingFish" : bind.ServerName);
+        return bind == null
+            ? GetDataFetcher("DivingFish", null)
+            : GetDataFetcher(bind.ServerName, bind);
     }
 
     private async Task<MessageChain> GetB30Card(Message message)
