@@ -60,18 +60,26 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
         var response = await uri
             .WithHeader("Developer-Token", ConfigurationManager.Configuration.Chunithm.DevToken)
-            .GetJsonAsync<ChunithmRating>();
+            .AllowHttpStatus("403")
+            .GetAsync();
 
-        foreach (var r in response.Records.Best.Concat(response.Records.R10))
+        if (response.StatusCode == 403)
+        {
+            var rep = await response.GetJsonAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, "403: " + rep.message);
+        }
+
+        var json = await response.GetJsonAsync<ChunithmRating>();
+        foreach (var r in json.Records.Best.Concat(json.Records.R10))
         {
             if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
 
             r.Id = SongDb.SongList.First(s => s.Title.Equals(r.Title, StringComparison.Ordinal)).Id;
         }
 
-        response.Records.Best = response.Records.Best.Where(x => !_deletedSongs.Contains(x.Id)).ToArray();
+        json.Records.Best = json.Records.Best.Where(x => !_deletedSongs.Contains(x.Id)).ToArray();
 
-        return response;
+        return json;
     }
 
     public static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly = false)
