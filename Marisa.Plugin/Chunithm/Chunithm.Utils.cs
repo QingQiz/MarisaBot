@@ -10,15 +10,11 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-    private readonly Dictionary<string, DataFetcher> _dataFetchers = new();
-
     private DataFetcher GetDataFetcher(string name, ChunithmBind? bind)
     {
-        if (_dataFetchers.TryGetValue(name, out var fetcher)) return fetcher;
-
         try
         {
-            return _dataFetchers[name] = name switch
+            return name switch
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "aqua.naominet.live",
