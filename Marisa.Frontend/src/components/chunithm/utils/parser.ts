@@ -3,7 +3,7 @@ import {
     BeatmapBeat, BeatmapBpm,
     BeatmapDiv, BeatmapLn,
     BeatmapMeasure,
-    BeatmapMet, BeatmapRice, BeatmapSlide, BeatmapSpeedVelocity
+    BeatmapMet, BeatmapRice, BeatmapSlideUnit, BeatmapSpeedVelocity
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 
 export type Chart = { [key: string]: Beatmap[] };
@@ -81,7 +81,7 @@ export function Parse(chart_string: string): Chart {
         ParseLine(chart, line);
     }
 
-    UpdateSldHead(chart);
+    UpdateSlide(chart);
     MakeBeatLine(chart);
     MakeNoteGapLine(chart);
 
@@ -175,20 +175,43 @@ function MakeBeatLine(chart: Chart) {
     }
 }
 
-function UpdateSldHead(chart: Chart) {
-    let sld_end: { [key: string]: boolean } = {};
+/**
+ * 更新 Slide， 包括设置 Slide 起点的 Note 和 SlideUnit 的百分比
+ * @param chart
+ */
+function UpdateSlide(chart: Chart) {
+    let sld_end: { [key: string]: []} = {};
+    let sld_beg: { [key: string]: []} = {};
 
-    let slides = [...chart["SLD"], ...chart["SLC"], ...chart["SXD"], ...chart["SXC"]] as BeatmapSlide[]
+    let slides = [...chart["SLD"], ...chart["SLC"], ...chart["SXD"], ...chart["SXC"]] as BeatmapSlideUnit[]
     let keys   = [...chart["SLD"].map(_ => "SLD"), ...chart["SLC"].map(_ => "SLC"), ...chart["SXD"].map(_ => "SXD"), ...chart["SXC"].map(_ => "SXC")]
 
-    for (const slide of slides) {
+    for (let i = 0; i < slides.length; i++){
+        const slide      = slides[i];
         let tick_end     = slide.TickEnd;
         let target_cell  = slide.XEnd;
         let target_width = slide.WidthEnd;
 
-        sld_end[[tick_end, target_cell, target_width].toString()] = true;
+        let key = [tick_end, target_cell, target_width].toString();
+        if (!sld_end[key]) {
+            sld_end[key] = [];
+        }
+        sld_end[key].push(i);
     }
 
+    for (let i = 0; i < slides.length; i++){
+        const slide      = slides[i];
+        let tick     = slide.Tick;
+        let cell     = slide.X;
+        let width    = slide.Width;
+        let key = [tick, cell, width].toString();
+        if (!sld_beg[key]) {
+            sld_beg[key] = [];
+        }
+        sld_beg[key].push(i);
+    }
+
+    let slide_head = new Set<number>();
     for (let i = 0; i < slides.length; i++) {
         const slide = slides[i];
         let tick    = slide.Tick;
@@ -199,7 +222,53 @@ function UpdateSldHead(chart: Chart) {
             continue;
         }
 
+        // 补全 slide 头
         chart[keys[i][1] == 'X' ? 'CHR' : 'SLD_H'].push(new BeatmapRice(slide.Tick, cell, width));
+        slide_head.add(i);
+    }
+
+    // SLD 结尾是新 slide 的开头
+    let visit = new Set<number>();
+    for (let i = 0; i < slides.length; i++) {
+        if (keys[i][2] == 'D') {
+            let key = [slides[i].TickEnd, slides[i].XEnd, slides[i].WidthEnd].toString();
+            if (!sld_beg[key]) continue;
+
+            for (let j of sld_beg[key]) {
+                if (visit.has(j)) continue;
+                slide_head.add(j);
+                visit.add(j);
+            }
+        }
+    }
+
+    let full_slide = [];
+    for (let h of slide_head) {
+        let current = [];
+
+        let current_slide_idx = h;
+        while (current_slide_idx != undefined) {
+            let current_slide = slides[current_slide_idx];
+            let tick_end      = current_slide.TickEnd;
+            let target_cell   = current_slide.XEnd;
+            let target_width  = current_slide.WidthEnd;
+            let key = [tick_end, target_cell, target_width].toString();
+            current.push(current_slide_idx);
+            if (!sld_beg[key]) break;
+            current_slide_idx = sld_beg[key].shift();
+            if (slide_head.has(current_slide_idx)) break;
+        }
+        full_slide.push(current);
+    }
+
+    for (let slide of full_slide) {
+        let tick_min = Math.min(...slide.map(x => slides[x].Tick));
+        let tick_max = Math.max(...slide.map(x => slides[x].TickEnd));
+        for (let i of slide) {
+            let slide_unit = slides[i];
+            slide_unit.UnitStart = (slide_unit.Tick - tick_min) / (tick_max - tick_min);
+            slide_unit.UnitEnd = (slide_unit.TickEnd - tick_min) / (tick_max - tick_min);
+        }
     }
 }
 
@@ -377,7 +446,7 @@ function ParseSld(chart: Chart, data: SldData) {
         chart['SLD_T'].push(new BeatmapRice(tick_end, d.target_cell / cell_count, d.target_width / cell_count));
     }
 
-    chart[data[0]].push(new BeatmapSlide(
+    chart[data[0]].push(new BeatmapSlideUnit(
         tick, tick_end, d.cell / cell_count, d.target_cell / cell_count, d.width / cell_count, d.target_width / cell_count,
     ));
 }
@@ -409,7 +478,7 @@ function ParseAirSld(chart: Chart, data: AirSldData) {
     }
 
     chart[data[0]].push({
-        ...new BeatmapSlide(tick, tick_end, d.cell / cell_count, d.target_cell / cell_count, d.width / cell_count, d.target_width / cell_count),
+        ...new BeatmapSlideUnit(tick, tick_end, d.cell / cell_count, d.target_cell / cell_count, d.width / cell_count, d.target_width / cell_count),
         ...{Color: d.color}
     });
 }
@@ -434,7 +503,7 @@ function ParseAld(chart: Chart, data: AldData) {
 
     if (d.color != 'NON') {
         chart[data[0]].push({
-            ...new BeatmapSlide(tick, tick_end, d.cell / cell_count, d.target_cell / cell_count, d.width / cell_count, d.target_width / cell_count),
+            ...new BeatmapSlideUnit(tick, tick_end, d.cell / cell_count, d.target_cell / cell_count, d.width / cell_count, d.target_width / cell_count),
             ...{Color: d.color}
         });
     }

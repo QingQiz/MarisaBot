@@ -3,14 +3,16 @@ slide, air line
  */
 .SLC, .SLD, .ASC, .ASD, .ALD {
     z-index: var(--sld-z-index);
+    --background: '';
     /*
     slide body
      */
 
     &:before {
-        @apply absolute inset-0 bg-blue-400 opacity-40;
+        @apply absolute inset-0 bg-blue-400 opacity-80;
         content: '';
         z-index: var(--sld-z-index);
+        background: var(--background);
     }
 
     /*
@@ -18,7 +20,9 @@ slide, air line
      */
 
     &:after {
-        @apply absolute inset-0 bg-blue-400;
+        @apply absolute inset-0;
+
+        background-color: #00ffff;
 
         --clip-b: calc((var(--clip-lb) + var(--clip-rb)) / 2);
         --clip-t: calc((var(--clip-lt) + var(--clip-rt)) / 2);

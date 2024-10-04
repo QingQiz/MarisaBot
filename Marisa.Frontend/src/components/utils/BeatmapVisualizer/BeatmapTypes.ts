@@ -32,10 +32,15 @@ export class BeatmapLn extends BeatmapNoteCommon {
     }
 }
 
-export class BeatmapSlide extends BeatmapLn {
+// SlideUnit， 一个 Slide 由多个首尾相连的 SlideUnit 组成
+export class BeatmapSlideUnit extends BeatmapLn {
     XEnd: number;
     WidthEnd: number;
     Color?: string;
+    // 在整个slide中的位置百分比
+    UnitStart: number;
+    // 在整个slide中的结束位置百分比
+    UnitEnd: number;
 
     private readonly _border: number[];
 

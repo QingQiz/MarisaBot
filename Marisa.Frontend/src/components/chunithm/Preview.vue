@@ -22,7 +22,7 @@ import {
     BeatmapLn,
     BeatmapMeasure,
     BeatmapRice,
-    BeatmapSlide,
+    BeatmapSlideUnit,
     BeatmapSpeedVelocity
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 import {zip} from "@/utils/list";
@@ -164,7 +164,7 @@ let slides = computed(() => Get(cat_slide));
             :rice_display="rices[1] as string[]"
             :ln="lns[0] as BeatmapLn[]"
             :ln_display="lns[1] as string[]"
-            :slide="slides[0] as BeatmapSlide[]"
+            :slide="slides[0] as BeatmapSlideUnit[]"
             :slide_display="slides[1] as string[]"
             :length="length"
             :overflow="50"
@@ -178,7 +178,7 @@ let slides = computed(() => Get(cat_slide));
             </template>
 
             <template v-for="cat in cat_slide" :key="cat" #[cat]="{note}">
-                <div :class="[cat, note.Color]"/>
+                <div :class="[cat, note.Color]" :style="[...GetSlideColor(cat, note)]"/>
             </template>
         </BeatmapVisualizer>
     </div>
@@ -191,6 +191,8 @@ let slides = computed(() => Get(cat_slide));
 
 
 <script lang="ts">
+import {BeatmapSlideUnit} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
+
 /**
  * 使用贪心策略将小节按顺序合并为最接近 `lane_length` 的若干个序列
  * @param arr
@@ -230,5 +232,23 @@ function GetAvgValue(arr: number[]) {
     copy.sort((a, b) => a - b);
 
     return copy.slice(ignore, copy.length - 2 * ignore).reduce((a, b) => a + b, 0) / (copy.length - 2 * ignore);
+}
+
+
+import * as d3 from "d3";
+
+const SlideColor = d3.scaleLinear<string>()
+    .domain([0, 0.15, 0.85, 1])
+    .range(['#fd5cf5', '#00ffff', '#00ffff', '#fd5cf5'])
+
+function GetSlideColor(cat: string, note: BeatmapSlideUnit) {
+    let tick = d3.scaleLinear([note.UnitStart, note.UnitEnd], [note.UnitStart, note.UnitEnd]).ticks(10).reverse();
+    if (cat[0] == 'S') {
+        return [
+            `--background: linear-gradient(${tick.map(SlideColor).join(', ')})`,
+        ]
+    }
+    return [];
+
 }
 </script>

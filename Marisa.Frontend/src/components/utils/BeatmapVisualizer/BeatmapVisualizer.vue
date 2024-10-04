@@ -5,7 +5,7 @@ import {
     BeatmapBpm,
     BeatmapLn,
     BeatmapRice,
-    BeatmapSlide, BeatmapSpeedVelocity, BeatmapDiv, BeatmapMeasure
+    BeatmapSlideUnit, BeatmapSpeedVelocity, BeatmapDiv, BeatmapMeasure
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 import {computed, onMounted, ref} from "vue";
 import {range, zip} from "@/utils/list";
@@ -25,7 +25,7 @@ let props = defineProps({
         required: true
     },
     slide        : {
-        type    : Array as () => BeatmapSlide[],
+        type    : Array as () => BeatmapSlideUnit[],
         required: true
     },
     rice_display : {
@@ -99,7 +99,7 @@ let ln = computed(() => zip([props.ln, range(props.ln.length)])
 );
 
 let slide = computed(() => zip([props.slide, range(props.slide.length)])
-    .map(x => [x[0], props.slide_display ? props.slide_display[x[1]] : "slide"] as [BeatmapSlide, string])
+    .map(x => [x[0], props.slide_display ? props.slide_display[x[1]] : "slide"] as [BeatmapSlideUnit, string])
 )
 
 let pixel_ratio = ref(window.devicePixelRatio);
@@ -123,7 +123,7 @@ function GetLn(l: number, r: number) {
 
 function GetSlide(l: number, r: number) {
     return GetAndSplit(slide.value.map(x => ({...x[0], ext: x[1]})), l, r, props.cut)
-        .map(x => [x as unknown as BeatmapSlide, x.ext] as [BeatmapSlide, string])
+        .map(x => [x as unknown as BeatmapSlideUnit, x.ext] as [BeatmapSlideUnit, string])
 }
 
 function GetBpm(l: number, r: number) {
@@ -174,7 +174,7 @@ function LnStyle(l: BeatmapLn, i: number[]) {
     }
 }
 
-function SlideStyle(s: BeatmapSlide, i: number[]) {
+function SlideStyle(s: BeatmapSlideUnit, i: number[]) {
     return {
         '--x'        : `${s.Border()[0] * 100}%`,
         '--width'    : `${(s.Border()[1] - s.Border()[0]) * 100}%`,
