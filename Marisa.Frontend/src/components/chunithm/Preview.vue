@@ -97,12 +97,12 @@ function GetMeasureLength(split_tick: number[], max_tick: number) {
 
 function GetMeasureMidLength(min_split: [number, number][], max_tick: number) {
     let res  = [] as number[];
-    let time = min_split.filter(x => x[1] != 1).map(x => x[0]);
+    let time = min_split.filter(x => x[1] != 1).map(x => [x[0], x[1]]);
 
     for (let i = 0; i < time.length - 1; i++) {
-        res.push(time[i + 1] - time[i]);
+        res.push((time[i + 1][0] - time[i][0]) / time[i][1] * 4);
     }
-    res.push(max_tick - time[time.length - 1]);
+    res.push(max_tick - time[time.length - 1][0]);
 
     return GetAvgValue(res);
 }

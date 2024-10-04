@@ -11,17 +11,43 @@ using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
 using Marisa.Utils;
+using Microsoft.Win32;
 using NLog;
-using osu.Game.Beatmaps.Formats;
-using osu.Game.IO;
 
 namespace Marisa.Plugin.Shared.Osu;
 
 public static partial class OsuApi
 {
+
+    public enum OsuScoreType
+    {
+        Recent,
+        Best
+    }
+
+    private const string ApiUriBase = "https://osu.ppy.sh/api/v2";
+    private const string TokenUri = "https://osu.ppy.sh/oauth/token";
+    private const string UserInfoUri = $"{ApiUriBase}/users";
+
+    private const string FakeUserAgent =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private static string? _token;
     private static DateTime? _tokenExpire;
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    public static readonly List<string> ModeList = new()
+    {
+        "osu", "taiko", "fruit", "mania"
+    };
+
+    private static readonly HttpClient HttpClient = new(new HttpClientHandler
+    {
+        AutomaticDecompression                    = DecompressionMethods.All,
+        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+    })
+    {
+        Timeout = TimeSpan.FromMinutes(2)
+    };
 
     private static string Token
     {
@@ -36,26 +62,8 @@ public static partial class OsuApi
         }
     }
 
-    private const string ApiUriBase = "https://osu.ppy.sh/api/v2";
-    private const string TokenUri = "https://osu.ppy.sh/oauth/token";
-    private const string UserInfoUri = $"{ApiUriBase}/users";
-
-    private const string FakeUserAgent =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
-
-    public static readonly List<string> ModeList = new()
-    {
-        "osu", "taiko", "fruit", "mania"
-    };
-
-    public enum OsuScoreType
-    {
-        Recent,
-        Best
-    }
-
     /// <summary>
-    /// 更新 token
+    ///     更新 token
     /// </summary>
     private static async Task RenewToken()
     {
@@ -94,15 +102,6 @@ public static partial class OsuApi
             _ => "mania"
         };
     }
-
-    private static readonly HttpClient HttpClient = new(new HttpClientHandler
-    {
-        AutomaticDecompression                    = DecompressionMethods.All,
-        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-    })
-    {
-        Timeout = TimeSpan.FromMinutes(2)
-    };
 
     public static bool TryGetBeatmapCover(string beatmapPath, out string? coverPath)
     {
@@ -201,6 +200,17 @@ public static partial class OsuApi
 
     #endregion
 
+    #region beatmap
+
+    public static async Task<Beatmap> GetBeatmapInfoById(long beatmapId)
+    {
+        return await $"{ApiUriBase}/beatmaps/{beatmapId}"
+            .WithOAuthBearerToken(Token)
+            .GetJsonAsync<Beatmap>();
+    }
+
+    #endregion
+
     #region Beatmap Downloader
 
     private static readonly Dictionary<long, object> BeatmapDownloaderLocker = new();
@@ -234,7 +244,7 @@ public static partial class OsuApi
 
             var filename = (HttpUtility.ParseQueryString(request.RequestUri!.Query).Get("filename") ??
                             beatmapSetId.ToString()) + ".osz";
-            
+
             if (filename.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
             {
                 filename = beatmapSetId + ".osz";
@@ -285,7 +295,7 @@ public static partial class OsuApi
         }
 
         // 如果是 windows 的话，检查是否已经安装过 osu
-        var reg = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes\osu\DefaultIcon");
+        var reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Classes\osu\DefaultIcon");
 
         var osuPath = reg?.GetValue(string.Empty) as string;
 
@@ -537,34 +547,6 @@ public static partial class OsuApi
             current          = 1,
             pageSize         = 20
         }).WithHeader("uid", uid).GetStringAsync();
-    }
-
-    #endregion
-
-    #region beatmap
-
-    public static async Task<Beatmap> GetBeatmapInfoById(long beatmapId)
-    {
-        return await $"{ApiUriBase}/beatmaps/{beatmapId}"
-            .WithOAuthBearerToken(Token)
-            .GetJsonAsync<Beatmap>();
-    }
-
-    public static async Task<osu.Game.Beatmaps.Beatmap> GetBeatmapNotesById(long beatmapId)
-    {
-        var info    = await GetBeatmapInfoById(beatmapId);
-
-        if (info.ModeInt != 3)
-        {
-            throw new UnSupportedBeatmapException("only support osu!mania beatmap");
-        }
-
-        var beatmap = GetBeatmapPath(info);
-
-        var fs      = File.OpenRead(beatmap);
-        var stream  = new LineBufferedReader(fs);
-        var decoder = Decoder.GetDecoder<osu.Game.Beatmaps.Beatmap>(stream);
-        return decoder.Decode(stream)!;
     }
 
     #endregion

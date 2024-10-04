@@ -315,7 +315,7 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     {
         if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, mode: command.Mode.Value);
+        var userInfo = await OsuApi.GetUserInfoByName(command!.Name, command.Mode.Value);
 
         var scores =
             (await OsuApi.GetScores(userInfo.Id, OsuApi.OsuScoreType.Best, OsuApi.GetModeName(command.Mode.Value), 0,
@@ -344,13 +344,12 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
     [MarisaPluginCommand("view")]
     private async Task<MarisaPluginTaskState> Preview(Message message)
     {
-        osu.Game.Beatmaps.Beatmap? beatmap = null;
-
         if (long.TryParse(message.Command.Trim(), out var beatmapId))
         {
-            beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
+            goto result;
         }
-        else if (string.IsNullOrWhiteSpace(message.Command))
+
+        if (string.IsNullOrWhiteSpace(message.Command))
         {
             if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
@@ -359,25 +358,28 @@ public partial class Osu : MarisaPluginBaseWithHelpCommand
                 id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0, 1, true
             );
 
-            if (scores.Any())
+            if (scores.Length != 0)
             {
-                beatmap = await OsuApi.GetBeatmapNotesById(scores.First().Beatmap.Id);
+                beatmapId = scores.First().Beatmap.Id;
+                goto result;
             }
         }
 
-        if (beatmap == null)
+        message.Reply("错误的命令格式");
+        return MarisaPluginTaskState.CompletedTask;
+
+        result:
+
+        var info = await OsuApi.GetBeatmapInfoById(beatmapId);
+        if (info.ModeInt != 3)
         {
-            message.Reply("错误的命令格式");
+            message.Reply("只支持 osu!mania");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var context = new WebContext();
-
-        context.Put("beatmap", beatmap);
-
         message.Reply(
-            new MessageDataText(beatmap.Metadata.TitleUnicode),
-            MessageDataImage.FromBase64(await WebApi.OsuPreview(context.Id))
+            new MessageDataText(info.Beatmapset?.TitleUnicode ?? ""),
+            MessageDataImage.FromBase64(await WebApi.OsuPreview(beatmapId))
         );
 
         return MarisaPluginTaskState.CompletedTask;

@@ -29,14 +29,14 @@ const scale = 2;
 export function parse(beatmap_string: string) {
     let beatmap = extractTiming_HitObj(beatmap_string);
 
-    console.log('parsing hit objects')
+    // console.log('parsing hit objects')
     let [rice, ln] = generateHitObj(beatmap.hitObjects, beatmap.keyCount)
 
     let length = findBeatmapLength(rice, ln);
 
-    console.log('parsing control')
+    // console.log('parsing control')
     let [sv, bpm, measure, beat] = generateControl(beatmap.timings, length)
-    console.log('done')
+    // console.log('done')
 
     return {
         rice, ln, sv, bpm, measure, beat, length,
@@ -45,31 +45,32 @@ export function parse(beatmap_string: string) {
 }
 
 function extractTiming_HitObj(beatmap_string: string) {
+    enum ParseState {TimingPoints, HitObjects, Metadata, Skip}
+
     let timings    = [];
     let hitObjects = [];
     let keyCount   = 0;
 
     let lines = beatmap_string.split("\n");
 
-    let timingPoint = false;
-    let hitObject   = false;
+    let stat = ParseState.Skip;
 
     for (let line of lines) {
         if (line.startsWith("[TimingPoints]")) {
-            timingPoint = true;
-            hitObject   = false;
+            stat = ParseState.TimingPoints;
             continue;
         } else if (line.startsWith("[HitObjects]")) {
-            timingPoint = false;
-            hitObject   = true;
-
+            stat = ParseState.HitObjects;
+            continue;
+        } else if (line.startsWith("[Metadata]")) {
+            stat = ParseState.Metadata;
             continue;
         }
 
         if (line.startsWith("//")) continue;
         if (NullOrWhitespace(line)) continue;
 
-        if (timingPoint) {
+        if (stat == ParseState.TimingPoints) {
             let timing = line.split(",");
             timings.push({
                 offset   : Math.floor(parseFloat(timing[0]) / scale),
@@ -78,7 +79,7 @@ function extractTiming_HitObj(beatmap_string: string) {
                 inherited: !parseInt(timing[6]),
                 kiai     : !!parseInt(timing[7]),
             } as TimingPoint);
-        } else if (hitObject) {
+        } else if (stat == ParseState.HitObjects) {
             let hit = line.split(",");
             hitObjects.push({
                 x     : parseInt(hit[0]),
@@ -212,7 +213,7 @@ function generateControl(timingPoints: TimingPoint[], length: number) {
 
         for (let j = offset; j < next && j < length; j += measure_length) {
             measure_res.push(new BeatmapMeasure(j, ++measure_id, new BeatmapMet(offset, t[i].meter, 4)));
-            for (let k = j + beat_length; k < j + measure_length && k < length; k += beat_length) {
+            for (let k = j + beat_length; k < j + measure_length && k < length && k < next; k += beat_length) {
                 beat_res.push(new BeatmapBeat(k, measure_id - 1));
             }
         }

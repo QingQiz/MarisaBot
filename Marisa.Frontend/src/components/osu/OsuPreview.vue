@@ -1,32 +1,24 @@
 <script setup lang="ts">
 import {
-    context_get,
     osu_beatmapCover_builder,
     osu_beatmapInfo,
     GetDiffColor,
     GetDiffTextColor,
-    host
 } from '@/GlobalVars'
 import axios from 'axios'
 import {computed, ref} from 'vue'
-import {useRoute} from 'vue-router'
 import BeatmapInfo from './partial/BeatmapInfo.vue';
 import {BeatmapInfo as BeatmapInfoT} from './Osu.Data';
 import {parse} from "@/components/osu/utils/beatmap_parser";
 import BeatmapVisualizer from "@/components/utils/BeatmapVisualizer/BeatmapVisualizer.vue";
-import {
-    BeatmapBeat, BeatmapBpm,
-    BeatmapDiv, BeatmapLn,
-    BeatmapMeasure, BeatmapRice, BeatmapSlide,
-    BeatmapSpeedVelocity
-} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 import {range} from "@/utils/list";
-import {color} from "d3-color";
+import {useRoute} from "vue-router";
 
 const data_fetched = ref(false)
+const route        = useRoute()
+const beatmapId    = ref(route.query.id)
 
-let info     = ref({} as BeatmapInfoT)
-let max_time = ref(0)
+let info = ref({} as BeatmapInfoT)
 
 let d       = ref("");
 let beatmap = ref({} as ReturnType<typeof parse>);
@@ -51,15 +43,15 @@ let color_map = computed(() => {
     return color[key_count - 1].split('').map(x => cm[x as keyof typeof cm]);
 })
 
-const beatmapId=  3469849
-
-axios.get("http://localhost:14311/Api/Osu/GetBeatmapById", {params: {beatmapId: beatmapId}})
+axios.get("http://localhost:14311/Api/Osu/GetBeatmapById", {params: {beatmapId: beatmapId.value}})
     .then(data => {
         d.value       = data.data;
         beatmap.value = parse(data.data);
     })
-    .then(_ => axios.get(osu_beatmapInfo, { params: { beatmapId: beatmapId } }))
-    .then(data => { info.value = data.data })
+    .then(_ => axios.get(osu_beatmapInfo, {params: {beatmapId: beatmapId.value}}))
+    .then(data => {
+        info.value = data.data
+    })
     .finally(() => data_fetched.value = true)
 
 function GetSplit() {
@@ -103,6 +95,13 @@ function GetSplit() {
 
     return idx.map(x => measure_prefix_sum[x]);
 }
+
+let cover_url = computed(() => {
+    if (data_fetched.value == false) return ''
+    let url = osu_beatmapCover_builder(info.value.beatmapset_id, info.value.checksumm, info.value.id);
+    return `url(${url})`;
+});
+
 </script>
 
 <template>
@@ -135,7 +134,7 @@ function GetSplit() {
                 </div>
             </template>
         </BeatmapVisualizer>
-        <div class="info-container gap-12">
+        <div class="info-container gap-12" :style="`--bg-img: ${cover_url}`">
             <div class="title-container gap-8">
                 <!-- title -->
                 <div class="title">
@@ -163,11 +162,29 @@ function GetSplit() {
                     </div>
                 </div>
             </div>
-            <beatmap-info :beatmap="info" class="osu-preview-beatmap-info" />
+            <beatmap-info :beatmap="info" class="osu-preview-beatmap-info"/>
         </div>
     </template>
 </template>
 
 <style scoped>
+.info-container {
+    --bg-img: '';
+    @apply relative text-white font-osu-web flex flex-col p-5 justify-around;
+    @apply bg-center bg-cover;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), var(--bg-img);
+}
 
+.title-container {
+    text-orientation: mixed;
+    @apply flex flex-col justify-start items-start;
+}
+
+.title-container .title {
+    @apply text-9xl;
+}
+
+.title-container .artist {
+    @apply text-5xl mt-5 text-gray-200;
+}
 </style>

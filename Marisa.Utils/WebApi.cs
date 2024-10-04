@@ -4,9 +4,8 @@ namespace Marisa.Utils;
 
 public static class WebApi
 {
-    private static IBrowser? _browserInner;
-
     private const string Frontend = "http://localhost:14311";
+    private static IBrowser? _browserInner;
 
     private static IBrowser Browser
     {
@@ -48,15 +47,6 @@ public static class WebApi
         }
     }
 
-    private static async Task<string> RenderUrl(string url)
-    {
-        await using var page = Page;
-
-        await page.GoToAsync(url);
-        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
-        return await page.ScreenshotBase64Async(ScreenshotOptions);
-    }
-
     private static WaitForNetworkIdleOptions NetworkIdleOptions => new()
     {
         Timeout  = 0,
@@ -69,6 +59,15 @@ public static class WebApi
         Type     = ScreenshotType.Jpeg,
         Quality  = 90
     };
+
+    private static async Task<string> RenderUrl(string url)
+    {
+        await using var page = Page;
+
+        await page.GoToAsync(url);
+        await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
+        return await page.ScreenshotBase64Async(ScreenshotOptions);
+    }
 
     public static async Task<string> MaiMaiBest(Guid guid)
     {
@@ -85,8 +84,8 @@ public static class WebApi
         await using var page = Page;
 
         await page.GoToAsync(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + (bpRank ?? 1) +
-            (recent ? "&recent=" + recent : "") +
-            (fail ? "&fail=" + fail : ""));
+                             (recent ? "&recent=" + recent : "") +
+                             (fail ? "&fail=" + fail : ""));
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
@@ -100,11 +99,11 @@ public static class WebApi
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
 
-    public static async Task<string> OsuPreview(Guid contextId)
+    public static async Task<string> OsuPreview(long beatmapId)
     {
         await using var page = Page;
 
-        await page.GoToAsync(Frontend + "/osu/preview?id=" + contextId);
+        await page.GoToAsync(Frontend + "/osu/preview?id=" + beatmapId);
         await page.WaitForNetworkIdleAsync(NetworkIdleOptions);
         return await page.ScreenshotBase64Async(ScreenshotOptions);
     }
