@@ -81,9 +81,9 @@ public static class WebApi
         return await RenderUrl(Frontend + "/osu/recommend?id=" + contextId);
     }
 
-    public static async Task<string> OsuPreview(Guid contextId)
+    public static async Task<string> OsuPreview(long beatmapId)
     {
-        return await RenderUrl(Frontend + "/osu/preview?id=" + contextId);
+        return await RenderUrl(Frontend + "/osu/preview?id=" + beatmapId);
     }
 
     public static async Task<string> MaiMaiRecommend(Guid contextId)

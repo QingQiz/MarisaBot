@@ -4,7 +4,6 @@ using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Util;
 using Microsoft.EntityFrameworkCore;
-using osu.Game.Beatmaps;
 
 namespace Marisa.Plugin.Osu;
 
