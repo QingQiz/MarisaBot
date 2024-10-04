@@ -1,0 +1,33 @@
+/*
+hold body
+ */
+.HLD_B {
+    @apply bg-orange-300 opacity-80;
+
+    z-index: var(--hld-body-z-index);
+}
+
+/*
+air hold body
+ */
+.AHD_B {
+    @apply flex place-content-center;
+
+    z-index: var(--air-sld-z-index);
+
+    &:before {
+        @apply bg-green-400 opacity-5 w-full absolute;
+
+        content: '';
+        height: 100%;
+    }
+
+    &:after {
+        @apply bg-green-800 opacity-60 absolute;
+
+        content: '';
+
+        width: var(--air-hold-width);
+        height: 100%;
+    }
+}
