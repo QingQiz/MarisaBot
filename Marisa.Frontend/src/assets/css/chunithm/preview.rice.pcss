@@ -32,6 +32,16 @@
     z-index: var(--hld-t-z-index);
 }
 
+.HLD_H:after {
+    content: '';
+    @apply absolute rounded-full;
+    right: 3px;
+    left: 3px;
+    top: 50%;
+    height: 1px;
+    background-color: #f6c393;
+}
+
 /*
 SLIDE头，SLIDE尾
  */
@@ -39,6 +49,16 @@ SLIDE头，SLIDE尾
     background-color: #265df3;
 
     z-index: var(--sld-t-z-index);
+}
+
+.SLD_H:after {
+    content: '';
+    @apply absolute rounded-full;
+    right: 3px;
+    left: 3px;
+    top: 50%;
+    height: 1px;
+    background-color: #6289f4;
 }
 
 /*
