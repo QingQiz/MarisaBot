@@ -54,7 +54,7 @@ export const cat_rice   = [
     "AIR", "AUR", "AUL", "ADW", "ADR", "ADL",
 ];
 export const cat_noodle = ["HLD_B", "AHD_B"];
-export const cat_slide  = ["SLC", "SLD", "ASC", "ASD", "ALD"];
+export const cat_slide  = ["SLC", "SLD", "SXD", "SXC", "ASC", "ASD", "ALD"];
 
 export const resolution = 384;
 const cell_count        = 16;

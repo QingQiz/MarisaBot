@@ -1,15 +1,16 @@
 /*
 slide, air line
  */
-.SLC, .SLD, .ASC, .ASD, .ALD {
+.SLC, .SLD, .SXC, .SXD, .ASC, .ASD, .ALD {
     z-index: var(--sld-z-index);
     --background: '';
     /*
     slide body
      */
 
+    mix-blend-mode: lighten;
     &:before {
-        @apply absolute inset-0 bg-blue-400 opacity-80;
+        @apply absolute inset-0 opacity-90;
         content: '';
         z-index: var(--sld-z-index);
         background: var(--background);
@@ -42,6 +43,7 @@ slide, air line
 air line不需要body，只有线
  */
 .ASC, .ASD, .ALD {
+    mix-blend-mode: unset;
     &:before {
         @apply bg-green-400 opacity-5;
     }
