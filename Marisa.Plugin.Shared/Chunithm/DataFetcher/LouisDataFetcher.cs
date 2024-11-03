@@ -94,7 +94,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         var data = json.Select(x =>
         {
             ChunithmSong song  = SongDb.SongIndexer[long.Parse(x.idx)];
-            int          level = int.Parse(x.level_index);
+            var          level = (int)x.level_index;
             return new ChunithmScore
             {
                 CId         = 0,
@@ -104,7 +104,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
                 LevelIndex  = level,
                 LevelLabel  = ChunithmSong.LevelLabel[level],
                 Id          = song.Id,
-                Achievement = x.highscore,
+                Achievement = (int)x.highscore,
                 Title       = song.Title
             };
         });
