@@ -67,7 +67,9 @@ public partial class Chunithm
                         }
                         else
                         {
-                            dbContext.ChunithmBinds.Update(new ChunithmBind(bind.UId, fetchers[idx]));
+                            bind.ServerName = fetchers[idx];
+                            bind.AccessCode = "";
+                            dbContext.ChunithmBinds.Update(bind);
                         }
                         dbContext.SaveChanges();
 
