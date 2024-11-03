@@ -34,7 +34,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     {
         var (username, qq) = DivingFishDataFetcher.AtOrSelf(message);
 
-        var response = await "http://43.139.107.206:8083/api/chunithm/"
+        var response = await "http://43.139.107.206:8083/api/chunithm/basic_info"
             .AllowHttpStatus("400")
             .PostJsonAsync(username.IsWhiteSpace()
                 ? new { qq }
