@@ -3,18 +3,26 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
 
 public class ChunithmTest
 {
+    private Chunithm.Chunithm _chunithm;
+    private SongDb<ChunithmSong> _songDb;
+
     [SetUp]
     public void SetUp()
     {
         var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
         ConfigurationManager.SetConfigFilePath(configPath);
+
+        _chunithm = new Chunithm.Chunithm();
+        _songDb   = _chunithm.SongDb;
     }
 
     [Test]
@@ -78,5 +86,28 @@ public class ChunithmTest
         var res = ((string, int))func.Invoke(null, [inp.AsMemory().Trim(), ChunithmSong.LevelAlias.Values.ToList()])!;
 
         Assert.AreEqual((prefix, index), res);
+    }
+
+    [Test]
+    public void Should_Fetch_Scores_From_Louis()
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            await fetcher.ReqScores(new
+            {
+                qq = 920759985
+            });
+        });
+    }
+
+    [Test]
+    public void Should_Fetch_Song_List_From_Louis()
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        Assert.DoesNotThrow(() =>
+        {
+            fetcher.GetSongList();
+        });
     }
 }

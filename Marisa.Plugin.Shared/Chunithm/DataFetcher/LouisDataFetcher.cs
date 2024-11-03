@@ -63,11 +63,16 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     {
         var (username, qq) = DivingFishDataFetcher.AtOrSelf(message, true);
 
+        return await ReqScores(username.IsWhiteSpace()
+            ? new { qq, constant       = "0-16" }
+            : new { username, constant = "0-16" });
+    }
+
+    public async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> ReqScores(object req)
+    {
         var response = await "http://43.139.107.206:8083/api/chunithm/filtered_info"
             .AllowHttpStatus("400")
-            .PostJsonAsync(username.IsWhiteSpace()
-                ? new { qq, constant       = "0-16" }
-                : new { username, constant = "0-16" });
+            .PostJsonAsync(req);
 
         if (response.StatusCode == 400)
         {

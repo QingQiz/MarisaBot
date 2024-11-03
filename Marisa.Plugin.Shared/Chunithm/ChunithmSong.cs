@@ -82,10 +82,8 @@ public class ChunithmSong : Song
                 Genre   = o.genre;
                 Version = o.from;
 
-                foreach (var key in new[] { "basic", "advanced", "expert", "master", "ultima", "worldsend" })
+                foreach (var chart in new[] { o.charts.basic, o.charts.advanced, o.charts.expert, o.charts.master, o.charts.ultima, o.charts.worldsend })
                 {
-                    if (!o.charts.ContainsKey(key)) continue;
-                    var chart = o.charts[key];
                     if (!chart.enabled) continue;
 
                     Constants.Add(chart.constant);
