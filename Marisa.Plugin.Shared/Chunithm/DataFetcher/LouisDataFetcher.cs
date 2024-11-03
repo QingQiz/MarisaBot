@@ -109,6 +109,8 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
             };
         });
 
-        return data.ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
+        return data
+            .DistinctBy(x => (x.Id, (int)x.LevelIndex))
+            .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
 }
