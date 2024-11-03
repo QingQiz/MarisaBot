@@ -17,6 +17,7 @@ public partial class Chunithm
             return name switch
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
+                "Louis"      => new LouisDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "aqua.naominet.live",
                     ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, bind!),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "aqua.msm.moe",
@@ -64,7 +65,8 @@ public partial class Chunithm
 
     private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
     {
-        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
+        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查。
+        // NOTE Louis也能用用户名查，但现在还是默认水鱼吧
         if (allowUsername && !message.Command.IsWhiteSpace())
         {
             return GetDataFetcher("DivingFish", null);
@@ -83,7 +85,7 @@ public partial class Chunithm
         var bind = db.ChunithmBinds.FirstOrDefault(x => x.UId == qq);
 
         return bind == null
-            ? GetDataFetcher("DivingFish", null)
+            ? GetDataFetcher("DivingFish", null) // 默认水鱼
             : GetDataFetcher(bind.ServerName, bind);
     }
 

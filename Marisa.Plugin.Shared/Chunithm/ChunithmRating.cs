@@ -30,7 +30,7 @@ public partial class ChunithmRating
     [JsonProperty("records", Required = Required.Always)]
     public Records Records { get; set; }
 
-    [JsonProperty("username", Required = Required.Always)]
+    [JsonProperty("nickname")]
     public string Username { get; set; }
 
     public decimal B30 => Math.Round(Records.Best.Sum(s => s.Rating) / 30, 2, MidpointRounding.ToZero);
