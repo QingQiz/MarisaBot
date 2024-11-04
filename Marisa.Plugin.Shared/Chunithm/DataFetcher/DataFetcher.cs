@@ -12,7 +12,7 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     protected readonly HashSet<long> DeletedSongs =
     [
         156, 343, 1046, 1049, 1050, 1051, 1054, 2007, 2008, 2014, 2016, 2020, 2021,
-        2027, 2039, 2075, 2076, 2095, 2141, 2166, 2169, 2173, 2174, 2177, 2211, 2212, 2213
+        2027, 2039, 2075, 2076, 2095, 2141, 2211, 2212, 2213
     ];
 
     protected SongDb<ChunithmSong> SongDb { get; } = songDb;
