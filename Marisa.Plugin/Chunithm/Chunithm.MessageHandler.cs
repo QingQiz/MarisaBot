@@ -1,14 +1,16 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text.RegularExpressions;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
-using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils.Cacheable;
+using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 
 namespace Marisa.Plugin.Chunithm;
 
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class Chunithm
 {
     #region 绑定
@@ -21,6 +23,7 @@ public partial class Chunithm
         var fetchers = new[]
         {
             "DivingFish",
+            "Louis",
             "RinNET",
             "Aqua",
             "其它基于AllNet/Aqua/Chusan的服务"
@@ -40,7 +43,7 @@ public partial class Chunithm
         var stat   = 0;
         var server = "";
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             switch (stat)
             {
@@ -52,17 +55,23 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    if (idx == 0)
+                    if (idx is 0 or 1)
                     {
                         using var dbContext = new BotDbContext();
 
                         var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
 
-                        if (bind != null)
+                        if (bind == null)
                         {
-                            dbContext.ChunithmBinds.Remove(bind);
-                            dbContext.SaveChanges();
+                            dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, fetchers[idx]));
                         }
+                        else
+                        {
+                            bind.ServerName = fetchers[idx];
+                            bind.AccessCode = "";
+                            dbContext.ChunithmBinds.Update(bind);
+                        }
+                        dbContext.SaveChanges();
 
                         message.Reply("好了");
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -111,7 +120,21 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    var fetcher = GetDataFetcher(server);
+                    using var dbContext = new BotDbContext();
+
+                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+
+                    if (bind == null)
+                    {
+                        bind = new ChunithmBind(next.Sender.Id, server, accessCode);
+                    }
+                    else
+                    {
+                        bind.ServerName = server;
+                        bind.AccessCode = accessCode;
+                    }
+
+                    var fetcher = GetDataFetcher(server, bind);
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
@@ -119,21 +142,7 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    using var dbContext = new BotDbContext();
-
-                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
-
-                    if (bind == null)
-                    {
-                        dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, server, accessCode));
-                    }
-                    else
-                    {
-                        bind.ServerName = server;
-                        bind.AccessCode = accessCode;
-                        dbContext.ChunithmBinds.Update(bind);
-                    }
-
+                    dbContext.ChunithmBinds.InsertOrUpdate(bind);
                     dbContext.SaveChanges();
 
                     message.Reply("好了");
@@ -146,6 +155,69 @@ public partial class Chunithm
         });
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    #endregion
+
+    #region 搜歌
+
+    /// <summary>
+    ///     谱面预览
+    /// </summary>
+    [MarisaPluginDoc("谱面预览，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
+    [MarisaPluginCommand("preview", "view", "谱面", "预览")]
+    private MarisaPluginTaskState PreviewSong(Message message)
+    {
+        var songName     = message.Command.Trim();
+        var searchResult = SongDb.SearchSong(songName);
+
+        if (searchResult.Count != 1)
+        {
+            message.Reply(SongDb.GetSearchResult(searchResult));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var song = searchResult.First();
+
+        message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
+            .Select((l, i) =>
+                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
+            ).ToList())
+        }");
+
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        {
+            var command = next.Command.Trim();
+
+            if (!int.TryParse(command.Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
+            {
+                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
+
+            if (string.IsNullOrEmpty(song.ChartName[levelIdx]))
+            {
+                next.Reply("暂无该难度的数据");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var chartName = song.ChartName[levelIdx];
+            var cacheName = Path.Join(ResourceManager.TempPath, $"Preview-{chartName}.b64");
+            var img = new CacheableText(cacheName, () =>
+            {
+                var ctx = new WebContext();
+                ctx.Put("chart", File.ReadAllText(
+                    Path.Join(ResourceManager.ResourcePath, "chart", chartName + ".c2s")
+                ));
+                return WebApi.ChunithmPreview(ctx.Id).Result;
+            });
+
+            message.Reply(MessageDataImage.FromBase64(img.Value));
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     #endregion
@@ -360,319 +432,6 @@ public partial class Chunithm
 
     #endregion
 
-    #region 搜歌
-
-    /// <summary>
-    ///     搜歌
-    /// </summary>
-    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
-    [MarisaPluginCommand("song", "search", "搜索")]
-    private MarisaPluginTaskState SearchSong(Message message)
-    {
-        return _songDb.SearchSong(message);
-    }
-
-    /// <summary>
-    ///     谱面预览
-    /// </summary>
-    [MarisaPluginDoc("谱面预览，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
-    [MarisaPluginCommand("preview", "view", "谱面", "预览")]
-    private MarisaPluginTaskState PreviewSong(Message message)
-    {
-        var songName     = message.Command.Trim();
-        var searchResult = _songDb.SearchSong(songName);
-
-        if (searchResult.Count != 1)
-        {
-            message.Reply(_songDb.GetSearchResult(searchResult));
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var song = searchResult.First();
-
-        message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
-            .Select((l, i) =>
-                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
-            ).ToList())
-        }");
-
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
-        {
-            var command = next.Command.Trim();
-
-            if (!int.TryParse(command.Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
-            {
-                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
-                return Task.FromResult(MarisaPluginTaskState.Canceled);
-            }
-
-            if (string.IsNullOrEmpty(song.ChartName[levelIdx]))
-            {
-                next.Reply("暂无该难度的数据");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-
-            var chartName = song.ChartName[levelIdx];
-            var cacheName = Path.Join(ResourceManager.TempPath, $"Preview-{chartName}.b64");
-            var img = new CacheableText(cacheName, () =>
-            {
-                var ctx = new WebContext();
-                ctx.Put("chart", File.ReadAllText(
-                    Path.Join(ResourceManager.ResourcePath, "chart", chartName + ".c2s")
-                ));
-                return WebApi.ChunithmPreview(ctx.Id).Result;
-            });
-
-            message.Reply(MessageDataImage.FromBase64(img.Value));
-
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
-    #region 歌曲别名相关
-
-    /// <summary>
-    ///     别名处理
-    /// </summary>
-    [MarisaPluginDoc("别名设置和查询")]
-    [MarisaPluginCommand("alias")]
-    private static MarisaPluginTaskState SongAlias(Message message)
-    {
-        message.Reply("错误的命令格式");
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
-    ///     获取别名
-    /// </summary>
-    [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
-    [MarisaPluginSubCommand(nameof(SongAlias))]
-    [MarisaPluginCommand("get")]
-    private MarisaPluginTaskState SongAliasGet(Message message)
-    {
-        var songName = message.Command;
-
-        if (songName.IsEmpty)
-        {
-            message.Reply("？");
-        }
-
-        var songList = _songDb.SearchSong(songName);
-
-        if (songList.Count == 1)
-        {
-            message.Reply($"当前歌在录的别名有：{string.Join('、', _songDb.GetSongAliasesByName(songList[0].Title))}");
-        }
-        else
-        {
-            message.Reply(_songDb.GetSearchResult(songList));
-        }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
-    ///     设置别名
-    /// </summary>
-    [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
-    [MarisaPluginSubCommand(nameof(SongAlias))]
-    [MarisaPluginCommand("set")]
-    private MarisaPluginTaskState SongAliasSet(Message message)
-    {
-        var param = message.Command;
-        var names = param.Split(":=").ToArray();
-
-        if (names.Length != 2)
-        {
-            message.Reply("错误的命令格式");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var name  = names[0].Trim();
-        var alias = names[1].Trim();
-
-        message.Reply(_songDb.SetSongAlias(name, alias) ? "Success" : $"不存在的歌曲：{name}");
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
-    #region 筛选
-
-    /// <summary>
-    ///     给出歌曲列表
-    /// </summary>
-    [MarisaPluginDoc("给出符合条件的歌曲，结果过多时回复 p1、p2 等获取额外的信息")]
-    [MarisaPluginCommand("list", "ls")]
-    private async Task<MarisaPluginTaskState> ListSong(Message message)
-    {
-        message.Reply("错误的命令格式");
-        return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
-    [MarisaPluginSubCommand(nameof(ListSong))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx.MaiMaiDx), nameof(MaiMaiDx.MaiMaiDx.ListBaseTrigger))]
-    [MarisaPluginCommand("base", "b", "定数")]
-    private Task<MarisaPluginTaskState> ListSongBase(Message message)
-    {
-        _songDb.MultiPageSelectResult(_songDb.SelectSongByBaseRange(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("给出符合指定谱师约束的歌，参数为：谱师")]
-    [MarisaPluginSubCommand(nameof(ListSong))]
-    [MarisaPluginCommand("charter", "谱师")]
-    private Task<MarisaPluginTaskState> ListSongCharter(Message message)
-    {
-        _songDb.MultiPageSelectResult(_songDb.SelectSongByCharter(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("给出符合指定等级约束的歌，参数为：等级")]
-    [MarisaPluginSubCommand(nameof(ListSong))]
-    [MarisaPluginCommand("level", "lv", "等级")]
-    private Task<MarisaPluginTaskState> ListSongLevel(Message message)
-    {
-        _songDb.MultiPageSelectResult(_songDb.SelectSongByLevel(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
-    [MarisaPluginSubCommand(nameof(ListSong))]
-    [MarisaPluginCommand("bpm")]
-    private Task<MarisaPluginTaskState> ListSongBpm(Message message)
-    {
-        _songDb.MultiPageSelectResult(_songDb.SelectSongByBpmRange(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("给出符合指定曲师约束的歌，参数为：曲师")]
-    [MarisaPluginSubCommand(nameof(ListSong))]
-    [MarisaPluginCommand("artist", "a")]
-    private Task<MarisaPluginTaskState> ListSongArtist(Message message)
-    {
-        _songDb.MultiPageSelectResult(_songDb.SelectSongByArtist(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    #endregion
-
-    #region 随机
-
-    /// <summary>
-    ///     随机
-    /// </summary>
-    [MarisaPluginDoc("随机给出一个符合条件的歌曲")]
-    [MarisaPluginCommand("random", "rand", "随机")]
-    private async Task<MarisaPluginTaskState> RandomSong(Message message)
-    {
-        message.Reply("错误的命令格式");
-        return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("随机给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
-    [MarisaPluginSubCommand(nameof(RandomSong))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx.MaiMaiDx), nameof(MaiMaiDx.MaiMaiDx.ListBaseTrigger))]
-    [MarisaPluginCommand("base", "b", "定数")]
-    private Task<MarisaPluginTaskState> RandomSongBase(Message message)
-    {
-        _songDb.SelectSongByBaseRange(message.Command).RandomSelectResult(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("随机给出符合指定谱师约束的歌，参数为：谱师")]
-    [MarisaPluginSubCommand(nameof(RandomSong))]
-    [MarisaPluginCommand("charter", "谱师")]
-    private Task<MarisaPluginTaskState> RandomSongCharter(Message message)
-    {
-        _songDb.SelectSongByCharter(message.Command).RandomSelectResult(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("随机给出符合指定等级约束的歌，参数为：等级")]
-    [MarisaPluginSubCommand(nameof(RandomSong))]
-    [MarisaPluginCommand("level", "lv", "等级")]
-    private Task<MarisaPluginTaskState> RandomSongLevel(Message message)
-    {
-        _songDb.SelectSongByLevel(message.Command).RandomSelectResult(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("随机给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
-    [MarisaPluginSubCommand(nameof(RandomSong))]
-    [MarisaPluginCommand("bpm")]
-    private Task<MarisaPluginTaskState> RandomSongBpm(Message message)
-    {
-        _songDb.SelectSongByBpmRange(message.Command).RandomSelectResult(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    [MarisaPluginDoc("随机给出符合指定曲师约束的歌，参数为：曲师")]
-    [MarisaPluginSubCommand(nameof(RandomSong))]
-    [MarisaPluginCommand("artist", "a")]
-    private Task<MarisaPluginTaskState> RandomSongArtist(Message message)
-    {
-        _songDb.SelectSongByArtist(message.Command).RandomSelectResult(message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-    }
-
-    #endregion
-
-    #region 猜曲
-
-    /// <summary>
-    ///     猜歌排名
-    /// </summary>
-    [MarisaPluginDoc("中二猜歌的排名，给出的结果中s,c,w分别是启动猜歌的次数，猜对的次数和猜错的次数")]
-    [MarisaPluginSubCommand(nameof(Guess))]
-    [MarisaPluginCommand(true, "排名")]
-    private MarisaPluginTaskState GuessRank(Message message)
-    {
-        using var dbContext = new BotDbContext();
-
-        var res = dbContext.ChunithmGuesses
-            .OrderByDescending(g => g.TimesCorrect)
-            .ThenBy(g => g.TimesWrong)
-            .ThenBy(g => g.TimesStart)
-            .Take(10)
-            .ToList();
-
-        if (!res.Any()) message.Reply("None");
-
-        message.Reply(string.Join('\n', res.Select((guess, i) =>
-            $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")));
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
-    ///     猜歌
-    /// </summary>
-    [MarisaPluginDoc("中二猜歌，看封面猜曲")]
-    [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.OrdinalIgnoreCase, "猜歌", "猜曲", "guess")]
-    private MarisaPluginTaskState Guess(Message message, long qq)
-    {
-        if (message.Command.IsEmpty)
-        {
-            _songDb.StartSongCoverGuess(message, qq, 3, null);
-        }
-        else
-        {
-            message.Reply("错误的命令格式");
-        }
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
     #region 分数线 / 容错率
 
     /// <summary>
@@ -716,11 +475,11 @@ public partial class Chunithm
     private MarisaPluginTaskState FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
-        var searchResult = _songDb.SearchSong(songName);
+        var searchResult = SongDb.SearchSong(songName);
 
         if (searchResult.Count != 1)
         {
-            message.Reply(_songDb.GetSearchResult(searchResult));
+            message.Reply(SongDb.GetSearchResult(searchResult));
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -730,9 +489,9 @@ public partial class Chunithm
             var command = next.Command.Trim();
             var song    = searchResult.First();
 
-            var levelName = song.LevelName;
+            var diffName = ChunithmSong.LevelColor.Keys.ToList();
 
-            var (levelPrefix, levelIdx) = LevelAlias2Index(command, levelName);
+            var (levelPrefix, levelIdx) = LevelAlias2Index(command, diffName);
 
             if (levelIdx == -1)
             {
@@ -746,7 +505,7 @@ public partial class Chunithm
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command.TrimStart(levelPrefix).Span, out var achievement);
+            var parseSuccess = int.TryParse(command[levelPrefix.Length..].Span, out var achievement);
 
             if (!parseSuccess)
             {
@@ -774,7 +533,7 @@ public partial class Chunithm
             var grayRemaining  = tolerance - grayCount * noteScore;
 
             next.Reply(
-                new MessageDataText($"[{levelName[levelIdx]}] {song.Title} => {achievement}\n"),
+                new MessageDataText($"[{diffName[levelIdx]}] {song.Title} => {achievement}\n"),
                 new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"每个绿减 {v绿减分:F2}，每个灰减 {noteScore:F2}，每小减 {v小p减分:F2}")

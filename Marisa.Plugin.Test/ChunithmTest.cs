@@ -1,19 +1,28 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
 
 public class ChunithmTest
 {
+    private Chunithm.Chunithm _chunithm;
+    private SongDb<ChunithmSong> _songDb;
+
     [SetUp]
     public void SetUp()
     {
         var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
         ConfigurationManager.SetConfigFilePath(configPath);
+
+        _chunithm = new Chunithm.Chunithm();
+        _songDb   = _chunithm.SongDb;
     }
 
     [Test]
@@ -59,11 +68,46 @@ public class ChunithmTest
             LevelIndex  = 3,
             LevelLabel  = "Expert",
             Achievement = 1009000,
-            Title       = "这是个名字名字名字名字名字名字名字名字名字名字",
+            Title       = "这是个名字名字名字名字名字名字名字名字名字名字"
         };
 
         score.Draw().Show();
 
         Assert.Pass();
+    }
+
+    [Test]
+    [TestCase("master1", "MASTER", 3)]
+    [TestCase(" master1\n", "MASTER", 3)]
+    public void Level_Should_Be_Parsed(string inp, string prefix, int index)
+    {
+        var func = typeof(Chunithm.Chunithm).GetMethod("LevelAlias2Index", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        var res = ((string, int))func.Invoke(null, [inp.AsMemory().Trim(), ChunithmSong.LevelAlias.Values.ToList()])!;
+
+        Assert.AreEqual((prefix, index), res);
+    }
+
+    [Test]
+    public void Should_Fetch_Scores_From_Louis()
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            await fetcher.ReqScores(new
+            {
+                qq = 920759985
+            });
+        });
+    }
+
+    [Test]
+    public void Should_Fetch_Song_List_From_Louis()
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        Assert.DoesNotThrow(() =>
+        {
+            fetcher.GetSongList();
+        });
     }
 }

@@ -5,17 +5,12 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-using ChunithmSongDb = SongDb<ChunithmSong, ChunithmGuess>;
-
-public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, string keyChipId) : DataFetcher(songDb)
+public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string host, string keyChipId, ChunithmBind bind) : DataFetcher(songDb)
 {
     private string? _serverUri;
     private string Host { get; } = host;
@@ -24,7 +19,7 @@ public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, strin
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var aimeId = await GetAimeId(message);
+        var aimeId = GetAimeId();
 
         var scores = await GetScores(aimeId);
 
@@ -87,7 +82,7 @@ public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, strin
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        var aimeId = await GetAimeId(message);
+        var aimeId = GetAimeId();
         return await GetScores(aimeId);
     }
 
@@ -154,21 +149,9 @@ public class AllNetBasedNetDataFetcher(ChunithmSongDb songDb, string host, strin
 
     #region Helper
 
-    private async Task<int> GetAimeId(Message message)
+    private int GetAimeId()
     {
-        var qq = message.Sender.Id;
-
-        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
-        {
-            qq = (at as MessageDataAt)?.Target ?? qq;
-        }
-
-        await using var db = new BotDbContext();
-
-        var user = db.ChunithmBinds.First(x => x.UId == qq);
-
-        var aimeId = AccessCodeToAimeId(user.AccessCode, KeyChipId);
+        var aimeId = AccessCodeToAimeId(bind.AccessCode, KeyChipId);
 
         if (aimeId < 0) throw new InvalidDataException("该卡尚未在该服务器注册");
 

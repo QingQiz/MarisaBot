@@ -1,7 +1,7 @@
 ﻿using Marisa.Plugin.Shared.MaiMaiDx;
+using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
 using Microsoft.CSharp.RuntimeBinder;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -12,6 +12,12 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public class ChunithmSong : Song
 {
+    public enum DataSource
+    {
+        DivingFish,
+        Louis,
+        Default
+    }
 
     public static readonly Dictionary<string, Color> LevelColor = new()
     {
@@ -32,65 +38,101 @@ public class ChunithmSong : Song
         { "黑", "ULTIMA" },
         { "we", "WORLD'S END" }
     };
+
+    public static readonly List<string> LevelLabel = ["BASIC", "ADVANCED", "EXPERT", "MASTER", "ULTIMA", "WORLD'S END"];
+
     public new readonly ReadOnlyMemory<char> Bpm;
     public readonly List<string> ChartName = [];
     public readonly string Genre;
+    /// <summary>
+    ///     13, 13+, 14, 14+, ...
+    /// </summary>
     public readonly List<string> LevelName = [];
     public readonly List<long> MaxCombo = [];
 
-    public ChunithmSong(dynamic o, bool fromDivingFish)
+    public ChunithmSong(dynamic o, DataSource source = DataSource.Default)
     {
-        Id      = o.id;
-        Title   = o.title;
-        Artist  = o.basic_info.artist;
-        Genre   = o.basic_info.genre;
-        Version = o.basic_info.from;
-        Bpm     = ((string)o.basic_info.bpm.ToString()).AsMemory();
-
-        for (var i = 0; i < o.level.Count; i++)
+        switch (source)
         {
-            Constants.Add(o.ds[i]);
-            Charters.Add(o.charts[i].charter);
-            Levels.Add(o.level[i]);
-            LevelName.Add(o.level[i]);
-            MaxCombo.Add(o.charts[i].combo);
-            ChartName.Add("");
-        }
-    }
-
-    public ChunithmSong(dynamic o)
-    {
-        Id      = o.Id;
-        Title   = o.Title;
-        Artist  = o.Artist;
-        Genre   = o.Genre;
-        Version = o.Version;
-
-        var bpms = new List<string>();
-
-        foreach (var i in o.Beatmaps)
-        {
-            bpms.Add(i.Bpm);
-        }
-
-        Bpm = bpms.MaxBy(x => x.Length).AsMemory();
-
-        foreach (var i in o.Beatmaps)
-        {
-            Constants.Add(i.Constant);
-            Charters.Add(i.Charter);
-            Levels.Add(i.LevelStr);
-            LevelName.Add(i.LevelName);
-            ChartName.Add(i.ChartName);
-
-            try
+            case DataSource.DivingFish:
             {
-                MaxCombo.Add(i.MaxCombo);
+                Id      = o.id;
+                Title   = o.title;
+                Artist  = o.basic_info.artist;
+                Genre   = o.basic_info.genre;
+                Version = o.basic_info.from;
+                Bpm     = ((string)o.basic_info.bpm.ToString()).AsMemory();
+
+                for (var i = 0; i < o.level.Count; i++)
+                {
+                    Constants.Add(o.ds[i]);
+                    Charters.Add(o.charts[i].charter);
+                    Levels.Add(o.level[i]);
+                    LevelName.Add(o.level[i]);
+                    MaxCombo.Add(o.charts[i].combo);
+                    ChartName.Add("");
+                }
+                break;
             }
-            catch (RuntimeBinderException)
+            case DataSource.Louis:
             {
-                MaxCombo.Add(0);
+                Id      = o.musicID;
+                Title   = o.title;
+                Artist  = o.artist;
+                Genre   = o.genre;
+                Version = o.from;
+
+                foreach (var chart in new[] { o.charts.basic, o.charts.advanced, o.charts.expert, o.charts.master, o.charts.ultima, o.charts.worldsend })
+                {
+                    if (!chart.enabled) continue;
+
+                    Constants.Add(chart.constant);
+                    Charters.Add(chart.charter);
+                    Levels.Add(chart.level);
+                    LevelName.Add(chart.level);
+                    MaxCombo.Add(0);
+                    ChartName.Add("");
+                }
+                break;
             }
+            case DataSource.Default:
+            {
+                Id      = o.Id;
+                Title   = o.Title;
+                Artist  = o.Artist;
+                Genre   = o.Genre;
+                Version = o.Version;
+
+                var bpms = new List<string>();
+
+                foreach (var i in o.Beatmaps)
+                {
+                    bpms.Add(i.Bpm);
+                }
+
+                Bpm = bpms.MaxBy(x => x.Length).AsMemory();
+
+                foreach (var i in o.Beatmaps)
+                {
+                    Constants.Add(i.Constant);
+                    Charters.Add(i.Charter);
+                    Levels.Add(i.LevelStr);
+                    LevelName.Add(i.LevelName);
+                    ChartName.Add(i.ChartName);
+
+                    try
+                    {
+                        MaxCombo.Add(i.MaxCombo);
+                    }
+                    catch (RuntimeBinderException)
+                    {
+                        MaxCombo.Add(0);
+                    }
+                }
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(source), source, null);
         }
     }
 

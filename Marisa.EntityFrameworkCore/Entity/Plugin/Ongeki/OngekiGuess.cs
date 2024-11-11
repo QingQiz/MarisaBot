@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki;
 
 [Table("Ongeki.Guess")]
-[Index(nameof(UId))]
 public class OngekiGuess : SongGuess
 {
     [Key]

@@ -1,6 +1,6 @@
 ﻿using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

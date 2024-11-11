@@ -1,4 +1,4 @@
-﻿using Marisa.Utils;
+﻿using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Shared.Chunithm;
 

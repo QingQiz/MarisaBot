@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 
 [Table("MaiMaiDx.Guess")]
-[Index(nameof(UId))]
 public class MaiMaiDxGuess : SongGuess
 {
     [Key] public long Id { get; set; }

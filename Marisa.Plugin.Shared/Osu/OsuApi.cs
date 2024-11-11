@@ -8,14 +8,11 @@ using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Osu.Entity.AlphaOsu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using Microsoft.Win32;
 using NLog;
-using osu.Game.Beatmaps.Formats;
-using osu.Game.IO;
 using Polly;
 using Polly.Retry;
-using Beatmap = osu.Game.Beatmaps.Beatmap;
 
 namespace Marisa.Plugin.Shared.Osu;
 
@@ -198,23 +195,11 @@ public static partial class OsuApi
 
     #region beatmap
 
-    public static async Task<Beatmap> GetBeatmapNotesById(long beatmapId)
+    public static async Task<Beatmap> GetBeatmapInfoById(long beatmapId)
     {
-        var info = await $"{ApiUriBase}/beatmaps/{beatmapId}"
+        return await $"{ApiUriBase}/beatmaps/{beatmapId}"
             .WithOAuthBearerToken(Token)
-            .GetJsonAsync<Entity.Score.Beatmap>();
-
-        if (info.ModeInt != 3)
-        {
-            throw new UnSupportedBeatmapException("only support osu!mania beatmap");
-        }
-
-        var beatmap = GetBeatmapPath(info);
-
-        var fs      = File.OpenRead(beatmap);
-        var stream  = new LineBufferedReader(fs);
-        var decoder = Decoder.GetDecoder<Beatmap>(stream);
-        return decoder.Decode(stream)!;
+            .GetJsonAsync<Beatmap>();
     }
 
     #endregion
@@ -459,7 +444,7 @@ public static partial class OsuApi
     }
 
     // 从 beatmap 获取 beatmap 的路径
-    public static string GetBeatmapPath(Entity.Score.Beatmap beatmap, bool retry = true)
+    public static string GetBeatmapPath(Beatmap beatmap, bool retry = true)
     {
         return GetBeatmapPath(beatmap.BeatmapsetId, beatmap.Checksum, beatmap.Id, retry);
     }

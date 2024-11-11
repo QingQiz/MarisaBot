@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Numerics;
-using Marisa.Utils;
+using Marisa.Plugin.Shared.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using SixLabors.Fonts;
@@ -24,20 +24,17 @@ public partial class ChunithmRating
             return Math.Round((r10 + b30) / 40, 2, MidpointRounding.ToZero);
         }
         // ReSharper disable once ValueParameterNotUsed
-        set { }
+        set {}
     }
 
     [JsonProperty("records", Required = Required.Always)]
     public Records Records { get; set; }
 
-    [JsonProperty("username", Required = Required.Always)]
+    [JsonProperty("nickname")]
     public string Username { get; set; }
 
     public decimal B30 => Math.Round(Records.Best.Sum(s => s.Rating) / 30, 2, MidpointRounding.ToZero);
     public decimal R10 => Math.Round(Records.R10.Sum(s => s.Rating) / 10, 2, MidpointRounding.ToZero);
-
-    public static ChunithmRating FromJson(string json) => JsonConvert.DeserializeObject<ChunithmRating>(json, Converter.Settings)!;
-    public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
 }
 
 public class Records
@@ -71,7 +68,7 @@ internal static class Converter
         Converters =
         {
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-        },
+        }
     };
 }
 

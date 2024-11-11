@@ -1,6 +1,6 @@
-﻿using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
+﻿using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
+using Marisa.Plugin.Shared.Util.SongDb;
 using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.Ongeki;
@@ -80,7 +80,7 @@ public class OngekiSong : Song
         Levels.AddRange(d.Charts
             .Where(c => c != null)
             .Cast<OngekiChartRecord>()
-            .Select(x => $"{(int)x.Const}{(x.Const - (int)x.Const >= 0.5 ? "+" : "")}"));
+            .Select(x => $"{(int)x.Const}{(x.Const - (int)x.Const >= 0.7 ? "+" : "")}"));
 
         Charters.AddRange(d.Charts
             .Where(c => c is not null)

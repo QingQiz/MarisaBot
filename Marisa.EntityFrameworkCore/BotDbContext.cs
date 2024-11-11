@@ -5,7 +5,6 @@ using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Marisa.EntityFrameworkCore;
@@ -31,7 +30,7 @@ public class BotDbContext : DbContext
 
 public static class DbContextExt
 {
-    public static void InsertOrUpdate<T>(this DbSet<T> context, T value) where T : SongGuess
+    public static void InsertOrUpdate<T>(this DbSet<T> context, T value) where T : HaveUId
     {
         if (!context.Any(t => t.UId == value.UId))
         {

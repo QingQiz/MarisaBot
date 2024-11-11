@@ -1,16 +1,10 @@
 ﻿using System.Text.RegularExpressions;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
-using Marisa.Utils;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
 public static class SearchSongInDb
 {
-    public static MarisaPluginTaskState SearchSong<T, TSongGuess>(this SongDb<T, TSongGuess> songDb, Message message)
-        where T : Song where TSongGuess : SongGuess, new()
+    public static MarisaPluginTaskState SearchSong<T>(this SongDb<T> songDb, Message message) where T : Song
     {
         MultiPageSelectResult(songDb, songDb.SearchSong(message.Command), message);
 
@@ -36,8 +30,7 @@ public static class SearchSongInDb
     /// <summary>
     ///     分页展示多个结果
     /// </summary>
-    public static void MultiPageSelectResult<T, TG>(this SongDb<T, TG> db, IReadOnlyList<T> songs, Message message)
-        where T : Song where TG : SongGuess, new()
+    public static void MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message) where T : Song
     {
         switch (songs.Count)
         {
@@ -95,15 +88,13 @@ public static class SearchSongInDb
             if (songs.Count <= SongDbConfig.PageSize) return ret;
 
             var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}";
+            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}，输入 p1、p2 等进行换页";
 
             return ret;
         }
     }
 
-    public static List<T> SelectSongByBaseRange<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> baseRange)
-        where T : Song where TG : SongGuess, new()
-    {
+    public static List<T> SelectSongByBaseRange<T>(this SongDb<T> db, ReadOnlyMemory<char> baseRange) where T : Song {
         if (baseRange.Span.IndexOf('-') != -1)
         {
             var range = baseRange.Split('-').ToArray();
@@ -124,22 +115,19 @@ public static class SearchSongInDb
         return [];
     }
 
-    public static List<T> SelectSongByCharter<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> charter)
-        where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByCharter<T>(this SongDb<T> db, ReadOnlyMemory<char> charter) where T : Song
     {
         return db.SongList
             .Where(s => s.Charters.Any(c => c.Contains(charter, StringComparison.OrdinalIgnoreCase)))
             .ToList();
     }
 
-    public static List<T> SelectSongByLevel<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> lv)
-        where TG : SongGuess, new() where T : Song
+    public static List<T> SelectSongByLevel<T>(this SongDb<T> db, ReadOnlyMemory<char> lv) where T : Song
     {
         return db.SongList.Where(s => s.Levels.Any(l => l.Equals(lv, StringComparison.Ordinal))).ToList();
     }
 
-    public static List<T> SelectSongByBpmRange<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> bpm)
-        where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByBpmRange<T>(this SongDb<T> db, ReadOnlyMemory<char> bpm) where T : Song
     {
         if (bpm.Span.Contains('-'))
         {
@@ -162,8 +150,7 @@ public static class SearchSongInDb
         return [];
     }
 
-    public static List<T> SelectSongByArtist<T, TG>(this SongDb<T, TG> db, ReadOnlyMemory<char> artist)
-        where T : Song where TG : SongGuess, new()
+    public static List<T> SelectSongByArtist<T>(this SongDb<T> db, ReadOnlyMemory<char> artist) where T : Song
     {
         try
         {

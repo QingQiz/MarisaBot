@@ -1,6 +1,6 @@
-﻿using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Utils;
-using Marisa.Utils.Cacheable;
+﻿using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.Cacheable;
+using Marisa.Plugin.Shared.Util.SongDb;
 using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -84,6 +84,10 @@ public class MaiMaiSong : Song
         }
     }
 
+    public bool NoCover =>
+        !File.Exists($"{ResourceManager.ResourcePath}/cover/{Id}.jpg") &&
+        !File.Exists($"{ResourceManager.ResourcePath}/cover/{Id}.png");
+
     public int Ra(int idx, double achievement)
     {
         return SongScore.Ra(achievement, Constants[idx]);
@@ -116,7 +120,9 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64";
+        var path = NoCover
+            ? Path.Join(ResourceManager.TempPath, "Detail-NC-") + Id + ".b64"
+            : Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64";
 
         return new CacheableText(path, () => this.Draw().ToB64()).Value;
     }

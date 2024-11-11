@@ -1,13 +1,7 @@
 ﻿namespace Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
 
-public class SongGuess
+public class SongGuess : HaveUId
 {
-    public long UId { get; set; }
-    public string Name { get; set; }
-    public int TimesStart { get; set; }
-    public int TimesCorrect { get; set; }
-    public int TimesWrong { get; set; }
-
     public SongGuess()
     {
     }
@@ -19,6 +13,11 @@ public class SongGuess
         TimesStart = TimesCorrect = TimesWrong = 0;
     }
 
+    public string Name { get; set; }
+    public int TimesStart { get; set; }
+    public int TimesCorrect { get; set; }
+    public int TimesWrong { get; set; }
+
     public T CastTo<T>() where T : SongGuess, new()
     {
         return new T
@@ -27,7 +26,7 @@ public class SongGuess
             Name         = Name,
             TimesStart   = TimesStart,
             TimesCorrect = TimesCorrect,
-            TimesWrong   = TimesWrong,
+            TimesWrong   = TimesWrong
         };
     }
 }

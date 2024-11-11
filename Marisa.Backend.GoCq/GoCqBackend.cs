@@ -6,7 +6,6 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
-using Marisa.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Websocket.Client;
@@ -15,8 +14,8 @@ namespace Marisa.Backend.GoCq;
 
 public class GoCqBackend : BotDriver.BotDriver
 {
-    private readonly WebsocketClient _wsClient;
     private readonly Logger _logger;
+    private readonly WebsocketClient _wsClient;
 
     public GoCqBackend(
         IServiceProvider serviceProvider,
@@ -28,12 +27,10 @@ public class GoCqBackend : BotDriver.BotDriver
     {
         _logger = LogManager.GetCurrentClassLogger();
         string serverAddress = dict["ServerAddress"];
-        long   id            = dict["QQ"];
-        string authKey       = dict["AuthKey"];
 
         _wsClient = new WebsocketClient(new Uri($"{serverAddress}"))
         {
-            ReconnectTimeout = TimeSpan.MaxValue,
+            ReconnectTimeout = TimeSpan.MaxValue
         };
 
         _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnection happened"); });
@@ -41,7 +38,7 @@ public class GoCqBackend : BotDriver.BotDriver
 
     public new static IServiceCollection Config(Assembly pluginAssembly)
     {
-        var sc = Marisa.BotDriver.BotDriver.Config(pluginAssembly);
+        var sc = BotDriver.BotDriver.Config(pluginAssembly);
         sc.AddScoped(typeof(BotDriver.BotDriver), typeof(GoCqBackend));
         return sc;
     }

@@ -1,36 +1,23 @@
 ﻿using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
+using Marisa.Plugin.Shared.Util;
 using osu.Game.Extensions;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
-    #region triggers
-
-    public static MarisaPluginTrigger.PluginTrigger ListBaseTrigger => (message, _) =>
-    {
-        if (message.Command.StartsWith("b", StringComparison.OrdinalIgnoreCase))
-        {
-            return !message.Command.StartsWith("bpm", StringComparison.OrdinalIgnoreCase);
-        }
-
-        return true;
-    };
-
-    #endregion
-
     #region recommend
 
     private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool)
         GetRecommend(DxRating rating, int targetRating)
     {
         var listOld = rating.OldScores
-            .Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .Select(score => (SongDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
             .ToList();
         var listNew = rating.NewScores
-            .Select(score => (_songDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .Select(score => (SongDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
             .ToList();
 
         var raOld = rating.OldScores.Sum(s => s.Ra());
@@ -40,8 +27,8 @@ public partial class MaiMaiDx
         idSet.AddRange(rating.OldScores.Select(s => (s.Id, s.LevelIdx)));
         idSet.AddRange(rating.NewScores.Select(s => (s.Id, s.LevelIdx)));
 
-        var newSongList = _songDb.SongList.Where(s => s.Info.IsNew).ToList();
-        var oldSongList = _songDb.SongList.Where(s => !s.Info.IsNew).ToList();
+        var newSongList = SongDb.SongList.Where(s => s.Info.IsNew).ToList();
+        var oldSongList = SongDb.SongList.Where(s => !s.Info.IsNew).ToList();
 
         double maxConst = 0;
 
@@ -131,7 +118,7 @@ public partial class MaiMaiDx
 
             var songs = GetAvailableSongs(songList, oldRa);
 
-            if (!songs.Any())
+            if (songs.Count == 0)
             {
                 // revert change
                 idSet.Add((oldSong.Id, oldIdx));
@@ -182,20 +169,6 @@ public partial class MaiMaiDx
 
     #endregion
 
-    #region Select Song
-
-    private List<MaiMaiSong> SelectSongWhenNew()
-    {
-        return _songDb.SongList.Where(s => s.Info.IsNew).ToList();
-    }
-
-    private List<MaiMaiSong> SelectSongWhenOld()
-    {
-        return _songDb.SongList.Where(s => !s.Info.IsNew).ToList();
-    }
-
-    #endregion
-
     #region data fetcher
 
     private DataFetcher GetDataFetcher(Message message, bool allowUsername = false)
@@ -229,8 +202,8 @@ public partial class MaiMaiDx
 
         return _dataFetchers[type] = type switch
         {
-            DataFetcherType.DivingFish => new DivingFishDataFetcher(_songDb),
-            DataFetcherType.Wahlap     => new AllNetDataFetcher(_songDb),
+            DataFetcherType.DivingFish => new DivingFishDataFetcher(SongDb),
+            DataFetcherType.Wahlap     => new AllNetDataFetcher(SongDb),
             _                          => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

@@ -1,4 +1,6 @@
-﻿namespace Marisa.Plugin;
+﻿using Marisa.Plugin.Shared.Util;
+
+namespace Marisa.Plugin;
 
 [MarisaPluginDoc("解决选择困难症的功能，参数为：A还是B还是C")]
 [MarisaPluginCommand("请问")]

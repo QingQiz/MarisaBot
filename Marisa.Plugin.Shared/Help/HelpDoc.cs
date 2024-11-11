@@ -1,4 +1,4 @@
-﻿using Marisa.Utils;
+﻿using Marisa.Plugin.Shared.Util;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -7,14 +7,14 @@ namespace Marisa.Plugin.Shared.Help;
 
 public class HelpDoc
 {
-    public readonly List<ReadOnlyMemory<char>> Commands;
-    public readonly string Help;
+    private readonly List<ReadOnlyMemory<char>> _commands;
+    private readonly string _help;
     public List<HelpDoc> SubHelp = [];
 
     public HelpDoc(string help, List<ReadOnlyMemory<char>> commands)
     {
-        Help     = help;
-        Commands = commands.Where(c => !c.IsWhiteSpace()).ToList();
+        _help     = help;
+        _commands = commands.Where(c => !c.IsWhiteSpace()).ToList();
     }
 
     public Image GetImage(int depth = 1)
@@ -26,19 +26,19 @@ public class HelpDoc
 
         var sd = new StringDrawer(5);
 
-        for (var i = 0; i < Commands.Count - 1; i++)
+        for (var i = 0; i < _commands.Count - 1; i++)
         {
-            sd.Add(Commands[i].ToString(), font1, Color.DeepPink);
+            sd.Add(_commands[i].ToString(), font1, Color.DeepPink);
             sd.Add("、", font1, Color.Black);
         }
 
-        if (Commands.Count != 0)
+        if (_commands.Count != 0)
         {
-            sd.Add(Commands.Last().ToString(), font1, Color.DeepPink);
+            sd.Add(_commands.Last().ToString(), font1, Color.DeepPink);
             sd.Add(font1, Color.Black, "：");
         }
 
-        sd.Add(Help, font1, Color.Black);
+        sd.Add(_help, font1, Color.Black);
 
         var subHelp = DrawHelpList(SubHelp);
 
@@ -61,7 +61,7 @@ public class HelpDoc
         return bm;
     }
 
-    public static Image? DrawHelpList(IEnumerable<HelpDoc> docs)
+    private static Image<Rgba32>? DrawHelpList(IEnumerable<HelpDoc> docs)
     {
         const int padding = 15;
 
