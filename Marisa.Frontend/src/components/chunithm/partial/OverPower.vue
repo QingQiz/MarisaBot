@@ -18,19 +18,22 @@ let props = defineProps({
     }
 })
 
+/**
+ * @param score
+ * @return op * 10000
+ */
 function OverPower(score: Score) {
     if (score.score == 0) return 0;
 
-    let s = score.score <= 100_7500 ? score.ra : score.ds + 2;
-    let r = score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2' ? 0.5 : 0;
+    let s = score.score <= 100_7500 ? score.ra * 10000 : parseInt((score.ds * 10000).toString()) + 20000;
+    let r = score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2' ? 5000 : 0;
 
-    if (score.fc == 'alljustice') r = 1.0;
-    if (score.score == 101_0000) r = 1.25;
+    if (score.fc == 'alljustice') r = 10000;
+    if (score.score == 101_0000) r = 12500;
 
-    let e = score.score <= 100_7500 ? 0 : (score.score - 100_7500) * 0.0015;
+    let e = score.score <= 100_7500 ? 0 : (score.score - 100_7500) * 15;
 
-    let op = s * 5 + r + e;
-    return parseInt((op * 100 * 2).toString()) / 200.0;
+    return s * 5 + r + e;
 }
 
 function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
@@ -86,11 +89,11 @@ function GroupOverPower(group: GroupSongInfo[], scores: Score[]) {
         } else {
             groupOp[4] += 1
         }
-        opAll += (constant) * 5 + 15;
+        opAll += ((constant) * 5 + 15) * 10000;
     }
 
-    groupOp[-1] = opAll;
-    groupOp[-2] = opSum;
+    groupOp[-1] = opAll / 10000.;
+    groupOp[-2] = opSum / 10000.;
     return groupOp
 }
 
