@@ -1,0 +1,161 @@
+/*
+slide, air line
+ */
+.SLC, .SLD, .SXC, .SXD, .ASC, .ASD, .ALD {
+    z-index: var(--sld-z-index);
+    --background: '';
+    /*
+    slide body
+     */
+
+    mix-blend-mode: lighten;
+    &:before {
+        @apply absolute inset-0 opacity-90;
+        content: '';
+        z-index: var(--sld-z-index);
+        background: var(--background);
+    }
+
+    /*
+    slide 中间的线
+     */
+
+    &:after {
+        @apply absolute inset-0;
+
+        background-color: #00ffff;
+
+        --clip-b: calc((var(--clip-lb) + var(--clip-rb)) / 2);
+        --clip-t: calc((var(--clip-lt) + var(--clip-rt)) / 2);
+
+        content: '';
+        z-index: var(--sld-z-index);
+        clip-path: polygon(
+                calc(var(--clip-b) - var(--air-hold-width) / 2) 100%,
+                calc(var(--clip-b) + var(--air-hold-width) / 2) 100%,
+                calc(var(--clip-t) + var(--air-hold-width) / 2) 0%,
+                calc(var(--clip-t) - var(--air-hold-width) / 2) 0%
+        );
+    }
+}
+
+/*
+air line不需要body，只有线
+ */
+.ASC, .ASD, .ALD {
+    mix-blend-mode: unset;
+    &:before {
+        @apply bg-green-400 opacity-5;
+    }
+
+    &:after {
+        @apply bg-green-800 opacity-60;
+
+    }
+
+    z-index: var(--air-sld-z-index);
+}
+
+.ALD {
+    &:before {
+        all: initial;
+    }
+
+    &:after {
+        @apply bg-pink-500;
+    }
+}
+
+/*
+颜色
+"AQA", "BLK", "BLU", "CYN", "DEF", "DGR", "GRN", "GRY", "LIM", "NON", "ORG", "PNK", "PPL", "RED", "VLT", "YEL"
+ */
+.ALD.GRY, .ASC.GRY {
+    &:after {
+        @apply bg-gray-400;
+    }
+}
+
+.ALD.NON, .ASC.NON {
+    &:after {
+        @apply opacity-0;
+    }
+}
+
+.ALD.AQA, .ASC.AQA {
+    &:after {
+        background-color: rgb(0 255 255);
+    }
+}
+
+.ALD.CYN, .ASC.CYN {
+    &:after {
+        background-color: rgb(0 180 180);
+    }
+}
+
+.ALD.BLK, .ASC.BLK {
+    &:after {
+        background-color: rgb(0 0 0);
+    }
+}
+
+.ALD.BLU, .ASC.BLU {
+    &:after {
+        background-color: rgb(0 0 255);
+    }
+}
+
+.ALD.DGR, .ASC.DGR {
+    &:after {
+        background-color: rgb(8, 174, 226);
+    }
+}
+
+.ALD.GRN, .ASC.GRN {
+    &:after {
+        background-color: rgb(0 128 0);
+    }
+}
+
+.ALD.LIM, .ASC.LIM {
+    &:after {
+        background-color: rgb(50 205 50);
+    }
+}
+
+.ALD.ORN, .ASC.ORN {
+    &:after {
+        background-color: rgb(255 165 0);
+    }
+}
+
+.ALD.PNK, .ASC.PNK {
+    &:after {
+        background-color: rgb(255 192 203);
+    }
+}
+
+.ALD.PPL, .ASC.PPL {
+    &:after {
+        background-color: rgb(128 0 128);
+    }
+}
+
+.ALD.RED, .ASC.RED {
+    &:after {
+        background-color: rgb(255 0 0);
+    }
+}
+
+.ALD.VLT, .ASC.VLT {
+    &:after {
+        background-color: rgb(238 130 238);
+    }
+}
+
+.ALD.YEL, .ASC.YEL {
+    &:after {
+        background-color: rgb(255 255 0);
+    }
+}

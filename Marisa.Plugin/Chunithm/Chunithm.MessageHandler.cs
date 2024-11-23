@@ -23,6 +23,7 @@ public partial class Chunithm
         var fetchers = new[]
         {
             "DivingFish",
+            "Louis",
             "RinNET",
             "Aqua",
             "其它基于AllNet/Aqua/Chusan的服务"
@@ -54,17 +55,23 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    if (idx == 0)
+                    if (idx is 0 or 1)
                     {
                         using var dbContext = new BotDbContext();
 
                         var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
 
-                        if (bind != null)
+                        if (bind == null)
                         {
-                            dbContext.ChunithmBinds.Remove(bind);
-                            dbContext.SaveChanges();
+                            dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, fetchers[idx]));
                         }
+                        else
+                        {
+                            bind.ServerName = fetchers[idx];
+                            bind.AccessCode = "";
+                            dbContext.ChunithmBinds.Update(bind);
+                        }
+                        dbContext.SaveChanges();
 
                         message.Reply("好了");
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -113,7 +120,21 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    var fetcher = GetDataFetcher(server);
+                    using var dbContext = new BotDbContext();
+
+                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+
+                    if (bind == null)
+                    {
+                        bind = new ChunithmBind(next.Sender.Id, server, accessCode);
+                    }
+                    else
+                    {
+                        bind.ServerName = server;
+                        bind.AccessCode = accessCode;
+                    }
+
+                    var fetcher = GetDataFetcher(server, bind);
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
@@ -121,21 +142,7 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    using var dbContext = new BotDbContext();
-
-                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
-
-                    if (bind == null)
-                    {
-                        dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, server, accessCode));
-                    }
-                    else
-                    {
-                        bind.ServerName = server;
-                        bind.AccessCode = accessCode;
-                        dbContext.ChunithmBinds.Update(bind);
-                    }
-
+                    dbContext.ChunithmBinds.InsertOrUpdate(bind);
                     dbContext.SaveChanges();
 
                     message.Reply("好了");

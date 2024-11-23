@@ -1,0 +1,130 @@
+.cat-rice-common {
+    border-radius: 4px;
+    bottom: calc(var(--y) - var(--note-height) / 2 + 1px);
+
+    height: var(--note-height);
+
+    z-index: var(--tap-z-index);
+}
+
+.TAP {
+    @apply bg-red-400;
+}
+
+.CHR {
+    @apply bg-yellow-400;
+}
+
+.FLK {
+    @apply bg-blue-300;
+}
+
+.MNE {
+    @apply bg-blue-700;
+}
+
+/*
+面头，面尾
+ */
+.HLD_H, .HLD_T {
+    @apply bg-orange-400;
+
+    z-index: var(--hld-t-z-index);
+}
+
+.HLD_H:after {
+    content: '';
+    @apply absolute rounded-full;
+    right: 3px;
+    left: 3px;
+    top: 50%;
+    height: 1px;
+    background-color: #f6c393;
+}
+
+/*
+SLIDE头，SLIDE尾
+ */
+.SLD_T, .SLD_H {
+    background-color: #265df3;
+
+    z-index: var(--sld-t-z-index);
+}
+
+.SLD_H:after {
+    content: '';
+    @apply absolute rounded-full;
+    right: 3px;
+    left: 3px;
+    top: 50%;
+    height: 1px;
+    background-color: #6289f4;
+}
+
+/*
+AIR UP
+AHD头，ASD头，ASC头
+ */
+.AIR, .AUR, .AUL, .AHD_H, .ASD_H, .ASC_H, .ADW, .ADR, .ADL{
+    z-index: var(--air-z-index);
+    height: var(--air-height);
+
+    bottom: var(--y);
+
+    &:after {
+        @apply bg-green-300 absolute inset-0;
+
+        content: '';
+        transform-origin: 50% 100%;
+        clip-path: polygon(20% 100%, 80% 100%, 80% 40%, 50% 0%, 20% 40%);
+    }
+
+    &:before {
+        @apply bg-green-400 opacity-20 absolute inset-0;
+
+        content: '';
+        transform-origin: 50% 100%;
+    }
+}
+
+/*
+AIR DOWN
+ */
+.ADW, .ADR, .ADL {
+    &:after {
+        @apply bg-pink-400;
+
+        clip-path: polygon(20% 0%, 80% 0%, 80% 60%, 50% 100%, 20% 60%);
+    }
+
+    &:before {
+        @apply bg-pink-500;
+    }
+}
+
+.AUR:after, .AUR:before {
+    transform: skewX(-35deg);
+}
+
+.AUL:after, .AUL:before {
+    transform: skewX(35deg);
+}
+
+.ADR:after, .ADR:before {
+    transform: skewX(35deg);
+}
+
+.ADL:after, .ADL:before {
+    transform: skewX(-35deg);
+}
+
+/*
+air hold尾
+ */
+.AHD_T, .ASD_T, .ALD_T {
+    @apply bg-purple-400;
+
+    bottom: calc(var(--y) - var(--note-height) / 4 + 1px);
+    z-index: var(--ahd-z-index);
+    height: calc(var(--note-height) / 2);
+}

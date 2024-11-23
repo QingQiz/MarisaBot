@@ -60,13 +60,13 @@ public partial class EventHandler : MarisaPluginBase
             //     Logger.Warn("Bot online successfully.");
             //     BotLoginDebounce.Cancel();
             //     break;
-            case MessageDataType.Unknown when msg is MessageDataSignServerLose e:
-            {
-                Logger.Warn($"Lose connection to SingServer: {e.Text}");
-
-                SignServerKillerDebounce.Execute(KillSignServer);
-                break;
-            }
+            // case MessageDataType.Unknown when msg is MessageDataSignServerLose e:
+            // {
+            //     Logger.Warn($"Lose connection to SingServer: {e.Text}");
+            //
+            //     SignServerKillerDebounce.Execute(KillSignServer);
+            //     break;
+            // }
         }
 
         return MarisaPluginTaskState.CompletedTask;

@@ -18,10 +18,10 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        var (username, qq) = AtOrSelf(message);
+        var (username, qq) = Chunithm.DataFetcher.DivingFishDataFetcher.AtOrSelf(message, true);
 
         var rep = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
-            string.IsNullOrEmpty(username)
+            username.IsWhiteSpace()
                 ? new { qq, b50       = true }
                 : new { username, b50 = true });
         return DxRating.FromJson(await rep.GetStringAsync());
@@ -29,7 +29,7 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var (_, qq) = AtOrSelf(message, true);
+        var (_, qq) = Chunithm.DataFetcher.DivingFishDataFetcher.AtOrSelf(message, true);
 
         var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
         {
@@ -65,24 +65,6 @@ public class DivingFishDataFetcher : DataFetcher
         var json = await "https://www.diving-fish.com/api/maimaidxprober/chart_stats".GetStringAsync();
 
         return JObject.Parse(json).SelectToken("$.charts")!.ToObject<Dictionary<int, List<DiffData?>>>()!;
-    }
-
-    private static (string, long) AtOrSelf(Message message, bool qqOnly = false)
-    {
-        var username = message.Command;
-        var qq       = message.Sender.Id;
-
-        if (qqOnly) username = "".AsMemory();
-
-        if (!username.IsWhiteSpace()) return (username.ToString(), qq);
-
-        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
-        {
-            qq = (at as MessageDataAt)?.Target ?? qq;
-        }
-
-        return (username.ToString(), qq);
     }
 
     private record Rank([JsonProperty("username")] string Username, [JsonProperty("ra")] int Ra);

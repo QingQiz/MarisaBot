@@ -4,7 +4,6 @@ using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Util;
 using Microsoft.EntityFrameworkCore;
-using osu.Game.Beatmaps;
 
 namespace Marisa.Plugin.Osu;
 
@@ -262,13 +261,12 @@ public partial class Osu
     [MarisaPluginCommand("view")]
     private async Task<MarisaPluginTaskState> Preview(Message message)
     {
-        Beatmap? beatmap = null;
-
-        if (long.TryParse(message.Command.Trim().Span, out var beatmapId))
+        if (long.TryParse(message.Command.Span.Trim(), out var beatmapId))
         {
-            beatmap = await OsuApi.GetBeatmapNotesById(beatmapId);
+            goto result;
         }
-        else if (message.Command.IsWhiteSpace())
+
+        if (message.Command.IsWhiteSpace())
         {
             if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
@@ -277,25 +275,28 @@ public partial class Osu
                 id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0, 1, true
             );
 
-            if (scores.Any())
+            if (scores.Length != 0)
             {
-                beatmap = await OsuApi.GetBeatmapNotesById(scores.First().Beatmap.Id);
+                beatmapId = scores.First().Beatmap.Id;
+                goto result;
             }
         }
 
-        if (beatmap == null)
+        message.Reply("错误的命令格式");
+        return MarisaPluginTaskState.CompletedTask;
+
+        result:
+
+        var info = await OsuApi.GetBeatmapInfoById(beatmapId);
+        if (info.ModeInt != 3)
         {
-            message.Reply("错误的命令格式");
+            message.Reply("只支持 osu!mania");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var context = new WebContext();
-
-        context.Put("beatmap", beatmap);
-
         message.Reply(
-            new MessageDataText(beatmap.Metadata.TitleUnicode),
-            MessageDataImage.FromBase64(await WebApi.OsuPreview(context.Id))
+            new MessageDataText(info.Beatmapset?.TitleUnicode ?? ""),
+            MessageDataImage.FromBase64(await WebApi.OsuPreview(beatmapId))
         );
 
         return MarisaPluginTaskState.CompletedTask;
