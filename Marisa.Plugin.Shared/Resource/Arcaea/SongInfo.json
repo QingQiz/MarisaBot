@@ -9841,7 +9841,12 @@
             "Cam_Library_702_12_29"
         ],
         "song_pack": "Collaboration Chapter 2",
-        "cover_name": "ii.jpg"
+        "cover_name": "ii.jpg",
+        "constant": [
+            "5.0",
+            "8.9",
+            "10.8"
+        ]
     },
     {
         "id": 334,
