@@ -17,6 +17,7 @@ namespace Marisa.Plugin.Chunithm;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class Chunithm :
     MarisaPluginBase,
+    ICanReset,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<ChunithmSong>,
     IMarisaPluginWithCoverGuess<ChunithmSong, ChunithmGuess>
@@ -37,6 +38,11 @@ public partial class Chunithm :
         );
 
         SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));
+    }
+
+    public void Reset()
+    {
+        SongDb.Reset();
     }
 
     public SongGuessMaker<ChunithmSong, ChunithmGuess> SongGuessMaker { get; }

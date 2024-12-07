@@ -1,9 +1,10 @@
 ﻿using System.Text.RegularExpressions;
+using Marisa.Plugin.Shared.Interface;
 using static Marisa.Plugin.Shared.Dialog.Dialog;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
-public class SongDb<TSong> where TSong : Song
+public class SongDb<TSong> : ICanReset where TSong : Song
 {
     private readonly string _aliasFilePath;
 
@@ -76,6 +77,11 @@ public class SongDb<TSong> where TSong : Song
 
             return _songAlias;
         }
+    }
+
+    public void Reset()
+    {
+        _songList = null;
     }
 
     private Dictionary<ReadOnlyMemory<char>, List<ReadOnlyMemory<char>>> GetSongAliases()
