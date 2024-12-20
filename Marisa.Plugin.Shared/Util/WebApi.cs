@@ -7,29 +7,20 @@ public static class WebApi
     private const string Frontend = "http://localhost:14311";
     // private const string Frontend = "http://localhost:5173";
     private static IBrowser? _browserInner;
+    private static readonly object BrowserLock = new();
 
     private static IBrowser Browser
     {
         get
         {
-            if (_browserInner is not null)
+            lock (BrowserLock)
             {
-                if (!_browserInner.IsClosed) return _browserInner;
-
-                _browserInner = null;
-                return Browser;
-            }
-
-            lock (Frontend)
-            {
-                var browserFetcher = new BrowserFetcher();
-                browserFetcher.DownloadAsync().Wait();
-                _browserInner = Puppeteer.LaunchAsync(new LaunchOptions
+                if (_browserInner is { IsClosed: false })
                 {
-                    Headless = true,
-                    Args     = ["--force-device-scale-factor=1"]
-                }).Result;
-                return _browserInner;
+                    return _browserInner;
+                }
+
+                return _browserInner = CreateBrowser().GetAwaiter().GetResult();
             }
         }
     }
@@ -40,6 +31,18 @@ public static class WebApi
         Type     = ScreenshotType.Jpeg,
         Quality  = 90
     };
+
+    private static async Task<IBrowser> CreateBrowser()
+    {
+        var browserFetcher = new BrowserFetcher();
+        await browserFetcher.DownloadAsync();
+
+        return await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless = true,
+            Args     = ["--force-device-scale-factor=1"]
+        });
+    }
 
     private static async Task<string> RenderUrl(string url)
     {
