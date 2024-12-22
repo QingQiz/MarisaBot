@@ -15,6 +15,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
 public partial class MaiMaiDx :
     MarisaPluginBase,
+    ICanReset,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<MaiMaiSong>,
     IMarisaPluginWithCoverGuess<MaiMaiSong, MaiMaiDxGuess>
@@ -45,6 +46,12 @@ public partial class MaiMaiDx :
         );
 
         SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, nameof(BotDbContext.MaiMaiDxGuesses));
+    }
+
+    public void Reset()
+    {
+        SongDb.Reset();
+        _dataFetchers.Clear();
     }
 
     public SongGuessMaker<MaiMaiSong, MaiMaiDxGuess> SongGuessMaker { get; }

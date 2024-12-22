@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity;
+using Marisa.Plugin.Shared.Interface;
 
 namespace Marisa.Plugin;
 
@@ -236,6 +237,33 @@ public class Command : MarisaPluginBase
 
         Environment.Exit(0);
 
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     reset bot cache
+    /// </summary>
+    [MarisaPluginNoDoc]
+    [MarisaPluginCommand("reset")]
+    private static MarisaPluginTaskState Reset(Message m, IEnumerable<MarisaPluginBase> plugins)
+    {
+        if (!Commander.Contains(m.Sender.Id))
+        {
+            m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var filtered =
+            from plugin in plugins
+            where plugin.GetType().IsSubclassOf(typeof(ICanReset))
+            select plugin as ICanReset;
+
+        foreach (var canReset in filtered)
+        {
+            canReset.Reset();
+        }
+
+        m.Reply("Done.");
         return MarisaPluginTaskState.CompletedTask;
     }
 }
