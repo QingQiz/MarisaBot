@@ -1067,6 +1067,15 @@
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "146.00",
         "ChartName": "0035_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1655,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "Piercing Blade",
+        "Bpm": "146.00",
+        "ChartName": "0035_04"
       }
     ]
   },
@@ -10571,6 +10580,15 @@
         "Charter": "スピード設定にほんっとに注意してね！",
         "Bpm": "212 (212.00 - 424.00)",
         "ChartName": "8045_04"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2971,
+        "LevelStr": "跳",
+        "Constant": 0.0,
+        "Charter": "ズッ跳",
+        "Bpm": "212.00",
+        "ChartName": "8288_05"
       }
     ]
   },
@@ -18077,6 +18095,15 @@
         "Charter": "天才☆ロシェちゃんのお悩み相談室",
         "Bpm": "200.00",
         "ChartName": "0405_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2202,
+        "LevelStr": "？",
+        "Constant": 0.0,
+        "Charter": "あぁーー！",
+        "Bpm": "200.00",
+        "ChartName": "8291_05"
       }
     ]
   },
@@ -19922,6 +19949,15 @@
         "Charter": "吸きや鬼奉行",
         "Bpm": "175.00",
         "ChartName": "0455_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2712,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "TwinDeaD LighT@Revenge Bash",
+        "Bpm": "175 (25.00 - 8750.00)",
+        "ChartName": "0455_04"
       }
     ]
   },
@@ -27070,6 +27106,15 @@
         "ChartName": "0628_03"
       },
       {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2381,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00",
+        "ChartName": "0628_04"
+      },
+      {
         "LevelName": "WORLD'S END",
         "MaxCombo": 1933,
         "LevelStr": "弾",
@@ -30839,6 +30884,15 @@
         "Charter": "ミストルティン",
         "Bpm": "150.00",
         "ChartName": "0720_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1818,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "生き抜き撃ち抜くペンギン",
+        "Bpm": "150.00",
+        "ChartName": "0720_04"
       },
       {
         "LevelName": "WORLD'S END",
@@ -51962,6 +52016,15 @@
         "Charter": "Redarrow",
         "Bpm": "185.00",
         "ChartName": "2092_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 4213,
+        "LevelStr": "翔",
+        "Constant": 0.0,
+        "Charter": "Like the storm in the sea",
+        "Bpm": "185.00",
+        "ChartName": "8287_05"
       }
     ]
   },
@@ -57173,6 +57236,15 @@
         "Charter": "ETARTSIGAM",
         "Bpm": "144.00",
         "ChartName": "2208_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 1777,
+        "LevelStr": "半",
+        "Constant": 0.0,
+        "Charter": "ＥＴＡＲＴＳＩＧＡＭ",
+        "Bpm": "144.00",
+        "ChartName": "8290_05"
       }
     ]
   },
@@ -66884,6 +66956,15 @@
         "Charter": "音楽的同位体　檸檬",
         "Bpm": "192.00",
         "ChartName": "2435_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 5555,
+        "LevelStr": "翔",
+        "Constant": 0.0,
+        "Charter": "もう知らないわ",
+        "Bpm": "192.00",
+        "ChartName": "8286_05"
       }
     ]
   },
@@ -69188,6 +69269,15 @@
         "Charter": "ジャコレモサンバ",
         "Bpm": "133.20",
         "ChartName": "2493_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2679,
+        "LevelStr": "狂",
+        "Constant": 0.0,
+        "Charter": "光る汗が弾け飛ぶ",
+        "Bpm": "133.20",
+        "ChartName": "8289_05"
       }
     ]
   },
@@ -73890,6 +73980,51 @@
     ]
   },
   {
+    "Id": 2605,
+    "Title": "優勝Princess♡",
+    "Artist": "高瀬一矢 feat.R.I.N.A",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 434,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00",
+        "ChartName": "2605_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 703,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "140.00",
+        "ChartName": "2605_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1103,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "140.00",
+        "ChartName": "2605_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1360,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "アミノハバキリ",
+        "Bpm": "140.00",
+        "ChartName": "2605_03"
+      }
+    ]
+  },
+  {
     "Id": 2606,
     "Title": "リ・フィクション・O",
     "Artist": "sasakure.UK feat.ピリオ",
@@ -74250,6 +74385,96 @@
     ]
   },
   {
+    "Id": 2618,
+    "Title": "ReCoda",
+    "Artist": "TRUE「響け！ユーフォニアム３」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 348,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "142.00",
+        "ChartName": "2618_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 526,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "142.00",
+        "ChartName": "2618_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 800,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ミストルティン",
+        "Bpm": "142.00",
+        "ChartName": "2618_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1101,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "みそかつ侍＠北宇治の3年間をありがとう！",
+        "Bpm": "142.00",
+        "ChartName": "2618_03"
+      }
+    ]
+  },
+  {
+    "Id": 2619,
+    "Title": "Presence",
+    "Artist": "小仏 凪(CV:佐倉 薫)",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 397,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "142 (96.00 - 142.00)",
+        "ChartName": "2619_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 597,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "142 (96.00 - 142.00)",
+        "ChartName": "2619_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1271,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "142 (96.00 - 142.00)",
+        "ChartName": "2619_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1326,
+        "LevelStr": "12+",
+        "Constant": 12.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "142 (96.00 - 142.00)",
+        "ChartName": "2619_03"
+      }
+    ]
+  },
+  {
     "Id": 2620,
     "Title": "チューリングの跡",
     "Artist": "Frums",
@@ -74291,6 +74516,546 @@
         "Charter": "Remnants of Blade",
         "Bpm": "180 (135.00 - 180.00)",
         "ChartName": "2620_03"
+      }
+    ]
+  },
+  {
+    "Id": 2621,
+    "Title": "NIGHTWAVE FRAGMENTS",
+    "Artist": "DJ Noriken",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 592,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2621_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 911,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "190.00",
+        "ChartName": "2621_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1500,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2621_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2071,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "Mystery Blade",
+        "Bpm": "190.00",
+        "ChartName": "2621_03"
+      }
+    ]
+  },
+  {
+    "Id": 2622,
+    "Title": "Joe Fight",
+    "Artist": "DJ Myosuke",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 695,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00",
+        "ChartName": "2622_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1036,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "ミニミライト",
+        "Bpm": "175.00",
+        "ChartName": "2622_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2299,
+        "LevelStr": "12",
+        "Constant": 12.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00",
+        "ChartName": "2622_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1876,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "Otoware Lemon",
+        "Bpm": "175.00",
+        "ChartName": "2622_03"
+      }
+    ]
+  },
+  {
+    "Id": 2623,
+    "Title": "Poppin' Dream",
+    "Artist": "P*Light",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 456,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "175.00",
+        "ChartName": "2623_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 724,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "175.00",
+        "ChartName": "2623_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 962,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "175.00",
+        "ChartName": "2623_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1415,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "ミニミライト",
+        "Bpm": "175.00",
+        "ChartName": "2623_03"
+      }
+    ]
+  },
+  {
+    "Id": 2624,
+    "Title": "Make Up Your World feat. キョンシーのCiちゃん & らっぷびと",
+    "Artist": "t+pazolite & Srav3R",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 551,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180.00",
+        "ChartName": "2624_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 833,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "180.00",
+        "ChartName": "2624_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1333,
+        "LevelStr": "10+",
+        "Constant": 10.7,
+        "Charter": "ミニミライト",
+        "Bpm": "180.00",
+        "ChartName": "2624_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2029,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "180.00",
+        "ChartName": "2624_03"
+      }
+    ]
+  },
+  {
+    "Id": 2625,
+    "Title": "Latent Kingdom",
+    "Artist": "Laur vs 大国奏音",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 775,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "201.00",
+        "ChartName": "2625_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1303,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミニミライト",
+        "Bpm": "201.00",
+        "ChartName": "2625_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2066,
+        "LevelStr": "13",
+        "Constant": 13.4,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "201.00",
+        "ChartName": "2625_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2788,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "みぞれヤナギ vs じゃこレモン",
+        "Bpm": "201.00",
+        "ChartName": "2625_03"
+      }
+    ]
+  },
+  {
+    "Id": 2629,
+    "Title": "壱雫空",
+    "Artist": "MyGO!!!!!",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 349,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "204.00",
+        "ChartName": "2629_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 435,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "204.00",
+        "ChartName": "2629_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 860,
+        "LevelStr": "10+",
+        "Constant": 10.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "204.00",
+        "ChartName": "2629_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1282,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "犬は！　必死にやるしか出来ない！",
+        "Bpm": "204.00",
+        "ChartName": "2629_03"
+      }
+    ]
+  },
+  {
+    "Id": 2630,
+    "Title": "迷星叫",
+    "Artist": "MyGO!!!!!",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 648,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2630_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1026,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "190.00",
+        "ChartName": "2630_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1500,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミニミライト",
+        "Bpm": "190.00",
+        "ChartName": "2630_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1751,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "だって、犬の譜面は、心の叫びだから！",
+        "Bpm": "190.00",
+        "ChartName": "2630_03"
+      }
+    ]
+  },
+  {
+    "Id": 2631,
+    "Title": "スコーピオンガールの貴重な捕食シーン",
+    "Artist": "STEAKA",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 453,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "152.00",
+        "ChartName": "2631_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 673,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "152.00",
+        "ChartName": "2631_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1111,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "じゃこレモン",
+        "Bpm": "152.00",
+        "ChartName": "2631_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1816,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "Moon Strixの貴重な捕食シーン",
+        "Bpm": "152.00",
+        "ChartName": "2631_03"
+      }
+    ]
+  },
+  {
+    "Id": 2632,
+    "Title": "ずんだパーリナイ",
+    "Artist": "なみぐる feat.ずんだもん",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 572,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "150 (150.00 - 170.00)",
+        "ChartName": "2632_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 895,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "150 (150.00 - 170.00)",
+        "ChartName": "2632_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1258,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "150 (150.00 - 170.00)",
+        "ChartName": "2632_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1967,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "ずんだライト",
+        "Bpm": "150 (75.00 - 300.00)",
+        "ChartName": "2632_03"
+      }
+    ]
+  },
+  {
+    "Id": 2633,
+    "Title": "Rhythmic Ride",
+    "Artist": "明坂 芹菜(CV:新田 恵海)",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 521,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "230.00",
+        "ChartName": "2633_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 927,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "230.00",
+        "ChartName": "2633_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1206,
+        "LevelStr": "10",
+        "Constant": 10.1,
+        "Charter": "ミストルティン",
+        "Bpm": "230.00",
+        "ChartName": "2633_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1745,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "230.00",
+        "ChartName": "2633_03"
+      }
+    ]
+  },
+  {
+    "Id": 2634,
+    "Title": "Dramatic…?",
+    "Artist": "曲：Kijibato／歌：星咲 あかり(CV：赤尾 ひかる)、珠洲島 有栖(CV：長縄 まりあ)、日向 千夏(CV：岡咲 美保)、皇城 セツナ(CV：八巻 アンナ)",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 611,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "184.00",
+        "ChartName": "2634_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 989,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "184.00",
+        "ChartName": "2634_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1381,
+        "LevelStr": "11",
+        "Constant": 11.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "184.00",
+        "ChartName": "2634_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2141,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "ミニミライト",
+        "Bpm": "184.00",
+        "ChartName": "2634_03"
+      }
+    ]
+  },
+  {
+    "Id": 2635,
+    "Title": "X.Y.Z.",
+    "Artist": "Len feat.SHIKI",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 388,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "128.00",
+        "ChartName": "2635_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 640,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "128.00",
+        "ChartName": "2635_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 871,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "128.00",
+        "ChartName": "2635_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1424,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "J.K.L.",
+        "Bpm": "128.00",
+        "ChartName": "2635_03"
       }
     ]
   },
@@ -74340,6 +75105,501 @@
     ]
   },
   {
+    "Id": 2637,
+    "Title": "乙女戦士☆あーし。",
+    "Artist": "A4。 feat.yamada.",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 666,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "105.00",
+        "ChartName": "2637_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1229,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "105.00",
+        "ChartName": "2637_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1393,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "105.00",
+        "ChartName": "2637_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2263,
+        "LevelStr": "13+",
+        "Constant": 13.7,
+        "Charter": "ロシェ＠裏新宿",
+        "Bpm": "105.00",
+        "ChartName": "2637_03"
+      }
+    ]
+  },
+  {
+    "Id": 2638,
+    "Title": "おしゃまなプリンセス",
+    "Artist": "Shu feat. 七海うらら",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 595,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00",
+        "ChartName": "2638_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1075,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "200.00",
+        "ChartName": "2638_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1512,
+        "LevelStr": "11",
+        "Constant": 11.4,
+        "Charter": "ミニミライト",
+        "Bpm": "200.00",
+        "ChartName": "2638_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2245,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ミストルティン",
+        "Bpm": "200.00",
+        "ChartName": "2638_03"
+      }
+    ]
+  },
+  {
+    "Id": 2639,
+    "Title": "ソーシャルワンダーランド",
+    "Artist": "テヅカ x Aoi feat.すずしろ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 553,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "212.00",
+        "ChartName": "2639_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1049,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "212.00",
+        "ChartName": "2639_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1314,
+        "LevelStr": "11",
+        "Constant": 11.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "212.00",
+        "ChartName": "2639_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2114,
+        "LevelStr": "14+",
+        "Constant": 14.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "212.00",
+        "ChartName": "2639_03"
+      }
+    ]
+  },
+  {
+    "Id": 2641,
+    "Title": "マシンガンポエムドール",
+    "Artist": "cosMo＠暴走P「プロジェクトセカイ カラフルステージ！ feat. 初音ミク」",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 568,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "220.00",
+        "ChartName": "2641_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1077,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ミニミライト",
+        "Bpm": "220.00",
+        "ChartName": "2641_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1646,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "サファ太",
+        "Bpm": "220.00",
+        "ChartName": "2641_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2339,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "POETIC LEMON",
+        "Bpm": "220.00",
+        "ChartName": "2641_03"
+      }
+    ]
+  },
+  {
+    "Id": 2642,
+    "Title": "壊れた人形のマーチ",
+    "Artist": "少女理論観測所",
+    "Genre": "東方Project",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 428,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132 (132.00 - 198.00)",
+        "ChartName": "2642_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 650,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "132 (132.00 - 198.00)",
+        "ChartName": "2642_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1098,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "じゃこレモン",
+        "Bpm": "132 (132.00 - 198.00)",
+        "ChartName": "2642_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1676,
+        "LevelStr": "12",
+        "Constant": 12.2,
+        "Charter": "ミストルティン",
+        "Bpm": "132 (132.00 - 198.00)",
+        "ChartName": "2642_03"
+      }
+    ]
+  },
+  {
+    "Id": 2643,
+    "Title": "ヒトリシズカ(Arranged: Iceon)",
+    "Artist": "幽閉サテライト(direction:嵯峨飛鳥)",
+    "Genre": "東方Project",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 237,
+        "LevelStr": "1",
+        "Constant": 1.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "126.00",
+        "ChartName": "2643_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 378,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "126.00",
+        "ChartName": "2643_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 608,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "126.00",
+        "ChartName": "2643_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 836,
+        "LevelStr": "11+",
+        "Constant": 11.9,
+        "Charter": "そらいろカリン",
+        "Bpm": "126.00",
+        "ChartName": "2643_03"
+      }
+    ]
+  },
+  {
+    "Id": 2644,
+    "Title": "Death Doll",
+    "Artist": "SHIKI",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 467,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "184.00",
+        "ChartName": "2644_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 841,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "184.00",
+        "ChartName": "2644_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1136,
+        "LevelStr": "11",
+        "Constant": 11.0,
+        "Charter": "ミニミライト",
+        "Bpm": "184.00",
+        "ChartName": "2644_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1963,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "Meteian",
+        "Bpm": "184.00",
+        "ChartName": "2644_03"
+      }
+    ]
+  },
+  {
+    "Id": 2645,
+    "Title": "Lovely Lovely Lover",
+    "Artist": "EmoCosine",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 471,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2645_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 747,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "160.00",
+        "ChartName": "2645_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1183,
+        "LevelStr": "11+",
+        "Constant": 11.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2645_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1524,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "Clematis",
+        "Bpm": "160.00",
+        "ChartName": "2645_03"
+      }
+    ]
+  },
+  {
+    "Id": 2646,
+    "Title": "Fire Engine73",
+    "Artist": "AJURIKA",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 452,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00",
+        "ChartName": "2646_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 873,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "155.00",
+        "ChartName": "2646_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1450,
+        "LevelStr": "12",
+        "Constant": 12.4,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "155.00",
+        "ChartName": "2646_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1573,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "透明絵具",
+        "Bpm": "155.00",
+        "ChartName": "2646_03"
+      }
+    ]
+  },
+  {
+    "Id": 2647,
+    "Title": "LibrariA",
+    "Artist": "ルゼ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 605,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2647_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1111,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "190.00",
+        "ChartName": "2647_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1785,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "ミストルティン",
+        "Bpm": "190.00",
+        "ChartName": "2647_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2280,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "アミノハバキリ vs じゃこレモン",
+        "Bpm": "190.00",
+        "ChartName": "2647_03"
+      }
+    ]
+  },
+  {
+    "Id": 2648,
+    "Title": "Tuatha Dé Danann",
+    "Artist": "深淵を覗きし者\"Gram\"",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 808,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "234.00",
+        "ChartName": "2648_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1290,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "そらいろカリン",
+        "Bpm": "234.00",
+        "ChartName": "2648_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2243,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "アミノハバキリ",
+        "Bpm": "234.00",
+        "ChartName": "2648_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3194,
+        "LevelStr": "15",
+        "Constant": 15.3,
+        "Charter": "Emperor vs Ataraxia",
+        "Bpm": "234.00",
+        "ChartName": "2648_03"
+      }
+    ]
+  },
+  {
     "Id": 2650,
     "Title": "MeteorSnow",
     "Artist": "あず♪",
@@ -74381,6 +75641,186 @@
         "Charter": "Ragnarok vs Violetta",
         "Bpm": "220.00",
         "ChartName": "2650_03"
+      }
+    ]
+  },
+  {
+    "Id": 2651,
+    "Title": "Acid God",
+    "Artist": "Yuta Imai",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 500,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2651_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 886,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00",
+        "ChartName": "2651_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1428,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "160.00",
+        "ChartName": "2651_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2332,
+        "LevelStr": "15",
+        "Constant": 15.2,
+        "Charter": "Monster -FINAL JUDGMENT-",
+        "Bpm": "160.00",
+        "ChartName": "2651_03"
+      }
+    ]
+  },
+  {
+    "Id": 2652,
+    "Title": "Forsaken Tale",
+    "Artist": "t+pazolite",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 838,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "209 (203.00 - 261.00)",
+        "ChartName": "2652_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1539,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "209 (203.00 - 261.00)",
+        "ChartName": "2652_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2300,
+        "LevelStr": "14+",
+        "Constant": 14.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "209 (203.00 - 261.00)",
+        "ChartName": "2652_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 4000,
+        "LevelStr": "15+",
+        "Constant": 15.5,
+        "Charter": "譜面ボーイズからの挑戦状",
+        "Bpm": "209 (53.25 - 372.75)",
+        "ChartName": "2652_03"
+      }
+    ]
+  },
+  {
+    "Id": 2653,
+    "Title": "Sleep Walking Orchestra",
+    "Artist": "BUMP OF CHICKEN",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 228,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "127.00",
+        "ChartName": "2653_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 405,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "127.00",
+        "ChartName": "2653_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 613,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "127.00",
+        "ChartName": "2653_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 782,
+        "LevelStr": "11+",
+        "Constant": 11.8,
+        "Charter": "Luxizhel",
+        "Bpm": "127.00",
+        "ChartName": "2653_03"
+      }
+    ]
+  },
+  {
+    "Id": 2654,
+    "Title": "Here the Our MIRAI!",
+    "Artist": "イロドリミドリ",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 565,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2654_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1111,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "190.00",
+        "ChartName": "2654_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1601,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "190.00",
+        "ChartName": "2654_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2077,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "190.00",
+        "ChartName": "2654_03"
       }
     ]
   },
@@ -74520,6 +75960,231 @@
     ]
   },
   {
+    "Id": 2660,
+    "Title": "What's up? Pop!",
+    "Artist": "Capchii",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 648,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190 (170.00 - 230.00)",
+        "ChartName": "2660_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1116,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "ミニミライト",
+        "Bpm": "190 (170.00 - 230.00)",
+        "ChartName": "2660_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1709,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "じゃこレモン",
+        "Bpm": "190 (170.00 - 230.00)",
+        "ChartName": "2660_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3090,
+        "LevelStr": "15",
+        "Constant": 15.1,
+        "Charter": "ミニミライト vs ミストルティン",
+        "Bpm": "190 (170.00 - 230.00)",
+        "ChartName": "2660_03"
+      }
+    ]
+  },
+  {
+    "Id": 2661,
+    "Title": "まにまに",
+    "Artist": "r-906",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 653,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "174.00",
+        "ChartName": "2661_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 992,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "174.00",
+        "ChartName": "2661_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1329,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "サファ太",
+        "Bpm": "174.00",
+        "ChartName": "2661_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2056,
+        "LevelStr": "13+",
+        "Constant": 13.5,
+        "Charter": "ミストルティン",
+        "Bpm": "174.00",
+        "ChartName": "2661_03"
+      }
+    ]
+  },
+  {
+    "Id": 2663,
+    "Title": "Flower",
+    "Artist": "曲：白戸佑輔(Dream Monster)／歌：ASTERISM [星咲 あかり(CV：赤尾 ひかる)、藤沢 柚子(CV：久保田 梨沙)、三角 葵(CV：春野 杏)]",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 610,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "168.00",
+        "ChartName": "2663_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1173,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "168.00",
+        "ChartName": "2663_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1547,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミニミライト",
+        "Bpm": "168.00",
+        "ChartName": "2663_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1902,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "168.00",
+        "ChartName": "2663_03"
+      }
+    ]
+  },
+  {
+    "Id": 2665,
+    "Title": "超熊猫的周遊記（ワンダーパンダートラベラー）",
+    "Artist": "FANTAGIRAFF",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 472,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "121 (103.50 - 158.00)",
+        "ChartName": "2665_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 632,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "121 (103.50 - 158.00)",
+        "ChartName": "2665_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1288,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "じゃこレモン",
+        "Bpm": "121 (103.50 - 158.00)",
+        "ChartName": "2665_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2062,
+        "LevelStr": "14+",
+        "Constant": 14.6,
+        "Charter": "超サファ的譜面記",
+        "Bpm": "121 (103.50 - 158.00)",
+        "ChartName": "2665_03"
+      }
+    ]
+  },
+  {
+    "Id": 2670,
+    "Title": "自称、音楽愛好家",
+    "Artist": "卯花ロク",
+    "Genre": "niconico",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 413,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "154.00",
+        "ChartName": "2670_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 601,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "154.00",
+        "ChartName": "2670_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1205,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミストルティン",
+        "Bpm": "154.00",
+        "ChartName": "2670_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1284,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "154.00",
+        "ChartName": "2670_03"
+      }
+    ]
+  },
+  {
     "Id": 2671,
     "Title": "デビルじゃないもん",
     "Artist": "DECO*27, ピノキオピー",
@@ -74561,6 +76226,375 @@
         "Charter": "みぞれ堕ナギ",
         "Bpm": "154.00",
         "ChartName": "2671_03"
+      }
+    ]
+  },
+  {
+    "Id": 2673,
+    "Title": "ハッピータイフーン",
+    "Artist": "KiRaRe「Re:ステージ！プリズムステップ」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 352,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "152.00",
+        "ChartName": "2673_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 562,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "152.00",
+        "ChartName": "2673_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1050,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "152.00",
+        "ChartName": "2673_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1533,
+        "LevelStr": "12",
+        "Constant": 12.4,
+        "Charter": "嵐を呼ぶみーちゃん",
+        "Bpm": "152.00",
+        "ChartName": "2673_03"
+      }
+    ]
+  },
+  {
+    "Id": 2674,
+    "Title": "M.L.V.G",
+    "Artist": "テトラルキア「Re:ステージ！プリズムステップ」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 427,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2674_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 713,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "190.00",
+        "ChartName": "2674_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1260,
+        "LevelStr": "11",
+        "Constant": 11.0,
+        "Charter": "ミストルティン",
+        "Bpm": "190.00",
+        "ChartName": "2674_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1948,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "ミニミリーダー",
+        "Bpm": "190.00",
+        "ChartName": "2674_03"
+      }
+    ]
+  },
+  {
+    "Id": 2675,
+    "Title": "トゥッティ！",
+    "Artist": "北宇治カルテット [黄前久美子 (CV.黒沢ともよ)、加藤葉月 (CV.朝井彩加)、川島緑輝 (CV.豊田萌絵)、高坂麗奈 (CV.安済知佳)]「響け！ユーフォニアム」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 671,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "194.00",
+        "ChartName": "2675_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1099,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "194.00",
+        "ChartName": "2675_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1378,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "みそかつ侍",
+        "Bpm": "194.00",
+        "ChartName": "2675_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2046,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "ミストルティン／さよならコンクール",
+        "Bpm": "194.00",
+        "ChartName": "2675_03"
+      }
+    ]
+  },
+  {
+    "Id": 2676,
+    "Title": "ハートサーモグラフィー",
+    "Artist": "周防パトラ",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 605,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180.00",
+        "ChartName": "2676_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 970,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "180.00",
+        "ChartName": "2676_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1227,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミニミライト",
+        "Bpm": "180.00",
+        "ChartName": "2676_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1888,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "180.00",
+        "ChartName": "2676_03"
+      }
+    ]
+  },
+  {
+    "Id": 2677,
+    "Title": "モンダイナイトリッパー！",
+    "Artist": "名取さな",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 537,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180 (160.00 - 180.00)",
+        "ChartName": "2677_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 837,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "180 (160.00 - 180.00)",
+        "ChartName": "2677_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1337,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "180 (160.00 - 180.00)",
+        "ChartName": "2677_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1837,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "そらいろカリン",
+        "Bpm": "180 (160.00 - 180.00)",
+        "ChartName": "2677_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2337,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "アミノハバキリ",
+        "Bpm": "180 (160.00 - 180.00)",
+        "ChartName": "2677_04"
+      }
+    ]
+  },
+  {
+    "Id": 2679,
+    "Title": "特者生存ワンダラダー!!",
+    "Artist": "天音かなた（ホロライブ）",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 471,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "216.00",
+        "ChartName": "2679_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 652,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "216.00",
+        "ChartName": "2679_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1243,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "216.00",
+        "ChartName": "2679_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1637,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "216.00",
+        "ChartName": "2679_03"
+      }
+    ]
+  },
+  {
+    "Id": 2680,
+    "Title": "NAGAREBOSHI☆ROCKET",
+    "Artist": "梅干茶漬け",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 506,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "216.00",
+        "ChartName": "2680_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 950,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "216.00",
+        "ChartName": "2680_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1377,
+        "LevelStr": "12",
+        "Constant": 12.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "216.00",
+        "ChartName": "2680_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1835,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "ミニミライト",
+        "Bpm": "216.00",
+        "ChartName": "2680_03"
+      }
+    ]
+  },
+  {
+    "Id": 2681,
+    "Title": "群青シグナル",
+    "Artist": "テヅカ feat. 獅子神レオナ",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 613,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "206.00",
+        "ChartName": "2681_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 935,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "206.00",
+        "ChartName": "2681_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1358,
+        "LevelStr": "10",
+        "Constant": 10.1,
+        "Charter": "アミノハバキリ",
+        "Bpm": "206.00",
+        "ChartName": "2681_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1977,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "206.00",
+        "ChartName": "2681_03"
       }
     ]
   }
