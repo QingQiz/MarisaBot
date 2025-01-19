@@ -141,7 +141,7 @@ public static class PerformanceCalculator
                 { HitResult.Miss, cMiss }
             },
             Mods       = mods2,
-            TotalScore = score,
+            TotalScore = score
         }, difficultyAttributes);
 
         return ppAttributes!.Total;
@@ -193,7 +193,7 @@ internal class ProcessorWorkingBeatmap : WorkingBeatmap
     private readonly Beatmap _beatmap;
 
     /// <summary>
-    /// Constructs a new <see cref="ProcessorWorkingBeatmap"/> from a .osu file.
+    ///     Constructs a new <see cref="ProcessorWorkingBeatmap" /> from a .osu file.
     /// </summary>
     /// <param name="file">The .osu file.</param>
     /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
@@ -225,9 +225,12 @@ internal class ProcessorWorkingBeatmap : WorkingBeatmap
         return new ProcessorWorkingBeatmap(file);
     }
 
-    protected override IBeatmap GetBeatmap() => _beatmap;
+    protected override IBeatmap GetBeatmap()
+    {
+        return _beatmap;
+    }
 
-    protected override Texture GetBackground()
+    public override Texture GetBackground()
     {
         throw new NotImplementedException();
     }
@@ -263,8 +266,9 @@ internal static class LegacyHelper
     }
 
     /// <summary>
-    /// Transforms a given <see cref="Mod"/> combination into one which is applicable to legacy scores.
-    /// This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get considered.
+    ///     Transforms a given <see cref="Mod" /> combination into one which is applicable to legacy scores.
+    ///     This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get
+    ///     considered.
     /// </summary>
     public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
     {
@@ -305,15 +309,30 @@ internal static class LegacyHelper
         {
         }
 
-        protected override IBeatmap GetBeatmap() => throw new NotImplementedException();
+        protected override IBeatmap GetBeatmap()
+        {
+            throw new NotImplementedException();
+        }
 
-        protected override Texture GetBackground() => throw new NotImplementedException();
+        public override Texture GetBackground()
+        {
+            throw new NotImplementedException();
+        }
 
-        protected override Track GetBeatmapTrack() => throw new NotImplementedException();
+        protected override Track GetBeatmapTrack()
+        {
+            throw new NotImplementedException();
+        }
 
-        protected override ISkin GetSkin() => throw new NotImplementedException();
+        protected override ISkin GetSkin()
+        {
+            throw new NotImplementedException();
+        }
 
-        public override Stream GetStream(string storagePath) => throw new NotImplementedException();
+        public override Stream GetStream(string storagePath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

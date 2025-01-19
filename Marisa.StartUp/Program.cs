@@ -1,13 +1,14 @@
 ﻿using Marisa.Backend.GoCq;
 using Marisa.Backend.Mirai;
 using Marisa.BotDriver.DI;
+using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using NuGet.Packaging;
+using osu.Game.Extensions;
 
 namespace Marisa.StartUp;
 
@@ -23,7 +24,7 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
-        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Plugin.Utils.Assembly()) : GoCqBackend.Config(Plugin.Utils.Assembly()));
+        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Utils.Assembly()) : GoCqBackend.Config(Utils.Assembly()));
         builder.WebHost.UseUrls("http://0.0.0.0:14311");
 
         // use nLog for logging
