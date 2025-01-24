@@ -23,14 +23,7 @@ public class Arcaea :
         SongDb = new SongDb<ArcaeaSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/ArcaeaSongAliasTemp.txt",
-            () =>
-            {
-                var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
-                    File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
-                ) as dynamic[];
-
-                return data!.Select(d => new ArcaeaSong(d)).ToList();
-            },
+            SongListGen,
             Dialog.AddHandler
         );
 
@@ -40,4 +33,11 @@ public class Arcaea :
     public SongGuessMaker<ArcaeaSong, ArcaeaGuess> SongGuessMaker { get; }
 
     public SongDb<ArcaeaSong> SongDb { get; }
+
+    public static List<ArcaeaSong> SongListGen()
+    {
+        var data = JsonConvert.DeserializeObject<ExpandoObject[]>(File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")) as dynamic[];
+
+        return data!.Select(d => new ArcaeaSong(d)).ToList();
+    }
 }
