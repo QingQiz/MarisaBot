@@ -11,4 +11,8 @@
         <Compile Include="Osu\OsuCommandParser.fs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="9.0.101" />
+    </ItemGroup>
+
 </Project>
