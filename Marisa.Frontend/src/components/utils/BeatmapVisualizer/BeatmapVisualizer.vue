@@ -122,7 +122,7 @@ function GetLn(l: number, r: number) {
 }
 
 function GetSlide(l: number, r: number) {
-    return GetAndSplit(slide.value.map(x => ({...x[0], ext: x[1]})), l, r, props.cut)
+    return GetAndSplitAndScale(slide.value.map(x => ({...x[0], ext: x[1]})), l, r, props.cut)
         .map(x => [x as unknown as BeatmapSlideUnit, x.ext] as [BeatmapSlideUnit, string])
 }
 
@@ -253,6 +253,7 @@ onMounted(ListenOnDevicePixelRatio);
 
 <script lang="ts">
 import * as d3 from "d3";
+import {BeatmapSlideUnit} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 
 const SvColor = d3.scaleLinear<string>()
     .domain([-1, 0, 1, 3, 100, 500])
@@ -263,18 +264,24 @@ function GetColor(val: number) {
     return SvColor(val);
 }
 
+/**
+ * @param arr note数组，包括ln、slide、sv等
+ * @param l stage 起始tick
+ * @param r stage 结束tick
+ * @param cut 是否直接裁剪超出stage的部分
+ */
 function GetAndSplit<T extends { Tick: number, TickEnd: number }>(arr: T[], l: number, r: number, cut: boolean = true) {
-    //     |-----|
-    // |----------------|
+    // NOTE :   |-----|
+    // STAGE: |----------------|
     let a = arr.filter(x => (x.Tick >= l && x.TickEnd < r));
-    // |-----|
-    //     |----------------|
+    // NOTE : |-----|
+    // STAGE:    |----------------|
     let b = arr.filter(x => (x.Tick < l && x.TickEnd >= l && x.TickEnd < r));
-    // |----------------|
-    //     |-----|
+    // NOTE : |----------------|
+    // STAGE:    |-----|
     let c = arr.filter(x => (x.Tick < l && x.TickEnd >= r));
-    //              |-----|
-    // |----------------|
+    // NOTE :              |-----|
+    // STAGE: |----------------|
     let d = arr.filter(x => (x.Tick >= l && x.Tick < r && x.TickEnd >= r));
 
     return cut
@@ -285,6 +292,56 @@ function GetAndSplit<T extends { Tick: number, TickEnd: number }>(arr: T[], l: n
             ...d.map(x => ({...x, TickEnd: r})),
         ]
         : [...a, ...b, ...c, ...d];
+}
+
+/**
+ * 对于Slide来说，不仅需要裁剪，而且需要缩放他的X和Width
+ * @param arr
+ * @param l
+ * @param r
+ * @param cut
+ * @constructor
+ */
+function GetAndSplitAndScale<T extends BeatmapSlideUnit>(arr: T[], l: number, r: number, cut: boolean = true) {
+    // 这里不裁剪，我们手动你裁剪并改变他的X和Width
+    let filtered = GetAndSplit(arr, l, r, false);
+    if (!cut) {
+        return filtered;
+    }
+
+    let scale = function (x: T) {
+        let xNew         = x.X, xEndNew = x.XEnd, widthNew = x.Width, widthEndNew = x.WidthEnd;
+        let tickNew      = x.Tick, tickEndNew = x.TickEnd;
+        let unitStartNew = x.UnitStart, unitEndNew = x.UnitEnd;
+
+        if (x.Tick < l) {
+            let ratio    = (l - x.Tick) / (x.TickEnd - x.Tick);
+            xNew         = x.X + ratio * (x.XEnd - x.X);
+            widthNew     = x.Width + ratio * (x.WidthEnd - x.Width);
+            tickNew      = l;
+            unitStartNew = x.UnitStart + ratio * (x.UnitEnd - x.UnitStart);
+        }
+        if (x.TickEnd > r) {
+            let ratio   = (r - x.Tick) / (x.TickEnd - x.Tick);
+            xEndNew     = x.X + ratio * (x.XEnd - x.X);
+            widthEndNew = x.Width + ratio * (x.WidthEnd - x.Width);
+            tickEndNew  = r;
+            unitEndNew  = x.UnitStart + ratio * (x.UnitEnd - x.UnitStart);
+        }
+        return {
+            ...x,
+            X        : xNew,
+            XEnd     : xEndNew,
+            Width    : widthNew,
+            WidthEnd : widthEndNew,
+            Tick     : tickNew,
+            TickEnd  : tickEndNew,
+            UnitStart: unitStartNew,
+            UnitEnd  : unitEndNew
+        };
+    }
+
+    return filtered.map(x => scale(x));
 }
 
 function CalcY(tick: number, range: number[]) {

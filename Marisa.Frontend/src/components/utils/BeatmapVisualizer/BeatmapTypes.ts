@@ -26,6 +26,12 @@ export class BeatmapRice extends BeatmapNoteCommon {
 export class BeatmapLn extends BeatmapNoteCommon {
     TickEnd: number;
 
+    /**
+     * @param Tick 起始时间
+     * @param TickEnd 结束时间
+     * @param X 起始位置（百分比）
+     * @param Width 宽度（百分比）
+     */
     constructor(Tick: number, TickEnd: number, X: number, Width: number) {
         super(X, Tick, Width);
         this.TickEnd = TickEnd;
@@ -51,6 +57,7 @@ export class BeatmapSlideUnit extends BeatmapLn {
         this._border = [Math.min(this.X, this.XEnd), Math.max(this.X + this.Width, this.XEnd + this.WidthEnd)]
     }
 
+    // 最小的能包裹slide的矩形
     Border = () => this._border;
 }
 
