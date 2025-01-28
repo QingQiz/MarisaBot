@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2019",
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
@@ -23,6 +23,7 @@
       ]
     },
     "lib": [
+      "ES2019",
       "esnext",
       "dom",
       "dom.iterable",

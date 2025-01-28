@@ -145,12 +145,25 @@ function GetGroupMinRank(group: any[]) {
 <template>
     <div class="config" v-if="data_fetched">
         <div class="group">
+            <div class="flex gap-10">
+                <div class="justify-center flex items-center">
+                    <div class="text-[100px]">
+                        SUMMARY
+                    </div>
+                </div>
+                <OverPower
+                    :group="grouped.flatMap((g: GroupSongInfo[]) => g)"
+                    :scores="grouped.flatMap((g: GroupSongInfo[]) => g).map((s: GroupSongInfo) => GetScore(s.Item3.Id, s.Item2))"
+                    :detail="true"
+                    class="justify-self-end"/>
+            </div>
             <div v-for="group in grouped">
                 <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(group), '#000000')}`">
                     {{ group[0].Item1 }}
                     <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
                          onerror="this.style.opacity=0">
-                    <OverPower :group="group" :scores="group.map(s => GetScore(s.Item3.Id, s.Item2))" class="justify-self-end"/>
+                    <OverPower :group="group" :scores="group.map((s: GroupSongInfo) => GetScore(s.Item3.Id, s.Item2))"
+                               class="justify-self-end"/>
                 </div>
                 <div class="row">
                     <template v-for="song in group">
