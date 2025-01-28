@@ -50,13 +50,15 @@ function GetConstRange(): [number, number, string][] {
     <div v-if="data_fetched" class="container">
         <div class="op-container">
             <div>ALL</div>
-            <OverPower :scores="songs.map(x => GetScore(x.Item3.Id, x.Item2))" :group="songs" :detail="true"/>
+            <OverPower :scores="songs.map((x: GroupSongInfo) => GetScore(x.Item3.Id, x.Item2))" :group="songs"
+                       :detail="true"/>
         </div>
         <template v-for="range in GetConstRange()">
             <template v-for="s in [GetSongsByConstRange(range[0], range[1])]">
                 <div v-if="s.length != 0" class="op-container">
                     <div>{{ range[2] }}</div>
-                    <OverPower :scores="s.map(x => GetScore(x.Item3.Id, x.Item2))" :group="s" :detail="true"/>
+                    <OverPower :scores="s.map((x: GroupSongInfo) => GetScore(x.Item3.Id, x.Item2))" :group="s"
+                               :detail="true"/>
                 </div>
             </template>
         </template>
