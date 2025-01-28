@@ -106,34 +106,6 @@ let cover_url = computed(() => {
 
 <template>
     <template v-if="data_fetched">
-        <BeatmapVisualizer
-            :split="GetSplit()"
-            :measure="beatmap.measure"
-            :beat="beatmap.beat"
-            :sv="beatmap.sv"
-            :div="[]"
-            :bpm="beatmap.bpm"
-            :rice="beatmap.rice.map(x => ({...x, X:  x.X / beatmap.key_count}))"
-            :rice_display="beatmap.rice.map(x => `rice-${x.X}`)"
-            :ln="beatmap.ln.map(x => ({...x, X: x.X / beatmap.key_count}))"
-            :ln_display="beatmap.ln.map(x => `ln-${x.X}`)"
-            :slide="[]"
-            :length="beatmap.length"
-            :overflow="50"
-            :cut="false"
-        >
-            <template v-for="i in range(beatmap.key_count)" :key="`rice-${i}`" #[`rice-${i}`]>
-                <div class="z-20">
-                    <div :style="`background-color: ${color_map[i]}`" class="h-3 mx-[1px] rounded-[2px]"></div>
-                </div>
-            </template>
-
-            <template v-for="i in range(beatmap.key_count)" :key="`ln-${i}`" #[`ln-${i}`]>
-                <div class="z-10 overflow-hidden">
-                    <div class="mx-1 h-full rounded-t-full" :style="`background-color: ${color_map[i]}`"></div>
-                </div>
-            </template>
-        </BeatmapVisualizer>
         <div class="info-container gap-12" :style="`--bg-img: ${cover_url}`">
             <div class="title-container gap-8">
                 <!-- title -->
@@ -164,6 +136,34 @@ let cover_url = computed(() => {
             </div>
             <beatmap-info :beatmap="info" class="osu-preview-beatmap-info"/>
         </div>
+        <BeatmapVisualizer
+            :split="GetSplit()"
+            :measure="beatmap.measure"
+            :beat="beatmap.beat"
+            :sv="beatmap.sv"
+            :div="[]"
+            :bpm="beatmap.bpm"
+            :rice="beatmap.rice.map(x => ({...x, X:  x.X / beatmap.key_count}))"
+            :rice_display="beatmap.rice.map(x => `rice-${x.X}`)"
+            :ln="beatmap.ln.map(x => ({...x, X: x.X / beatmap.key_count}))"
+            :ln_display="beatmap.ln.map(x => `ln-${x.X}`)"
+            :slide="[]"
+            :length="beatmap.length"
+            :overflow="50"
+            :cut="false"
+        >
+            <template v-for="i in range(beatmap.key_count)" :key="`rice-${i}`" #[`rice-${i}`]>
+                <div class="z-20">
+                    <div :style="`background-color: ${color_map[i]}`" class="h-3 mx-[1px] rounded-[2px]"></div>
+                </div>
+            </template>
+
+            <template v-for="i in range(beatmap.key_count)" :key="`ln-${i}`" #[`ln-${i}`]>
+                <div class="z-10 overflow-hidden">
+                    <div class="mx-1 h-full rounded-t-full" :style="`background-color: ${color_map[i]}`"></div>
+                </div>
+            </template>
+        </BeatmapVisualizer>
     </template>
 </template>
 
