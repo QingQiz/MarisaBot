@@ -1,7 +1,8 @@
-﻿using Marisa.Plugin.Shared.Util.SongDb;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher.Entities;
+
+using IndexerT = Dictionary<long, ChunithmSong>;
 
 public record BestScoreLouis
 {
@@ -20,9 +21,9 @@ public record BestScoreLouis
     public long LastModified { get; set; }
 #pragma warning restore CS8618
 
-    public ChunithmScore ToChunithmScore(SongDb<ChunithmSong> db)
+    public ChunithmScore ToChunithmScore(IndexerT indexer)
     {
-        var song = db.SongIndexer[MusicId];
+        var song = indexer[MusicId];
 
         return new ChunithmScore
         {
@@ -55,11 +56,11 @@ public record RecentScoreLouis
     public string ChainStatus { get; set; }
 #pragma warning restore CS8618
 
-    public ChunithmScore ToChunithmScore(SongDb<ChunithmSong> db)
+    public ChunithmScore ToChunithmScore(IndexerT indexer)
     {
         char[] x = ['b', 'a', 'e', 'm', 'u', 'w'];
 
-        var song       = db.SongIndexer[MusicId];
+        var song       = indexer[MusicId];
         var levelIndex = Array.IndexOf(x, Difficulty[0]);
 
         return new ChunithmScore

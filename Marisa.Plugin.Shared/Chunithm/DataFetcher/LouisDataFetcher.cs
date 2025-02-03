@@ -15,6 +15,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     private static string ScoresUri => $"{Uri}/open/chunithm/filtered-info";
     private static string Token => ConfigurationManager.Configuration.Chunithm.TokenLouis;
     private static List<ChunithmSong>? _songList;
+    private static readonly Dictionary<long, ChunithmSong> Indexer = new();
     private readonly object _songListLocker = new();
 
     public override List<ChunithmSong> GetSongList()
@@ -28,7 +29,12 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
                 .Result
                 .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
 
-            return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+            _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+            foreach (var song in _songList)
+            {
+                Indexer[song.Id] = song;
+            }
+            return _songList;
         }
     }
 
@@ -72,9 +78,9 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 #pragma warning disable CS8602
 #pragma warning disable CS8604
                 B30 = json["records"]["b30"].ToObject<BestScoreLouis[]>()
-                    .Select(x => x.ToChunithmScore(SongDb)).ToArray(),
+                    .Select(x => x.ToChunithmScore(Indexer)).ToArray(),
                 R10 = json["records"]["r10"].ToObject<RecentScoreLouis[]>()
-                    .Select(x => x.ToChunithmScore(SongDb)).ToArray()
+                    .Select(x => x.ToChunithmScore(Indexer)).ToArray()
 #pragma warning restore CS8604
 #pragma warning restore CS8602
             }
@@ -107,7 +113,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
         var json = await response.GetJsonAsync<BestScoreLouis[]>();
 
-        return json.Select(x => x.ToChunithmScore(SongDb))
+        return json.Select(x => x.ToChunithmScore(Indexer))
             .DistinctBy(x => (x.Id, (int)x.LevelIndex))
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
@@ -117,6 +123,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         lock (_songListLocker)
         {
             _songList = null;
+            Indexer.Clear();
         }
     }
 }
