@@ -17,7 +17,8 @@ osu:
 chunithm:
   resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\chunithm
   tempPath:     C:\Users\sofee\Desktop\temp\chunithm
-  devToken:     
+  devToken:
+  tokenLouis:
   rinNetKeyChip: 
   allNetKeyChip: 
   

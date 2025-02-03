@@ -60,7 +60,6 @@ public class ChunithmTest
         var score = new ChunithmScore
         {
             Id          = 335,
-            CId         = 335,
             Constant    = 13.9m,
             Rating      = 16.0m,
             Fc          = "",
@@ -89,14 +88,26 @@ public class ChunithmTest
     }
 
     [Test]
-    public void Should_Fetch_Scores_From_Louis()
+    [TestCase("", 920759985)]
+    public void Should_Fetch_Rating_From_Louis(string username, long qq)
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        Assert.DoesNotThrowAsync(async () =>
+        {
+            await fetcher.ReqRating(username.AsMemory(), qq);
+        });
+    }
+
+    [Test]
+    [TestCase(920759985)]
+    public void Should_Fetch_Scores_From_Louis(long qq)
     {
         var fetcher = new LouisDataFetcher(_songDb);
         Assert.DoesNotThrowAsync(async () =>
         {
             await fetcher.ReqScores(new
             {
-                qq = 920759985
+                qq
             });
         });
     }

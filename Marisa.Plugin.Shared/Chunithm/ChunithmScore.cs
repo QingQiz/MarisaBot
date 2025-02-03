@@ -13,9 +13,6 @@ public class ChunithmScore
 {
     private decimal? _rating;
 
-    [JsonProperty("cid")]
-    public long CId { get; set; }
-
     [JsonProperty("ds")]
     public decimal Constant { get; set; }
 
