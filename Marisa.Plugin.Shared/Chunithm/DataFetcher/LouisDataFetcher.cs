@@ -14,17 +14,21 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     private static string ScoresUri => $"{Uri}/open/chunithm/filtered-info";
     private static string Token => ConfigurationManager.Configuration.Chunithm.TokenLouis;
     private static List<ChunithmSong>? _songList;
+    private readonly object _songListLocker = new();
 
     public override List<ChunithmSong> GetSongList()
     {
-        if (_songList != null) return _songList;
+        lock (_songListLocker)
+        {
+            if (_songList != null) return _songList;
 
-        var list = MusicListUri
-            .GetJsonListAsync()
-            .Result
-            .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
+            var list = MusicListUri
+                .GetJsonListAsync()
+                .Result
+                .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
 
-        return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+            return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+        }
     }
 
     public override async Task<ChunithmRating> GetRating(Message message)

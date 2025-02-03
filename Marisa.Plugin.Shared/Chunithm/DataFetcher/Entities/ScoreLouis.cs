@@ -31,7 +31,7 @@ public record BestScoreLouis
             Achievement = Score,
             Constant    = (decimal)song.Constants[LevelIndex],
             // aj则aj，否则优先为fullchain
-            Fc         = JudgeStatus.Contains("justice") ? "alljustice" : string.IsNullOrEmpty(ChainStatus) ? ChainStatus : JudgeStatus,
+            Fc         = JudgeStatus.Contains("justice") ? "alljustice" : string.IsNullOrEmpty(ChainStatus) ? JudgeStatus : ChainStatus,
             Level      = song.Levels[LevelIndex],
             LevelLabel = ChunithmSong.LevelLabel[LevelIndex],
             Title      = song.Title
@@ -66,7 +66,7 @@ public record RecentScoreLouis
             LevelIndex  = levelIndex,
             Achievement = Score,
             Constant    = (decimal)song.Constants[levelIndex],
-            Fc          = JudgeStatus.Contains("justice") ? "alljustice" : string.IsNullOrEmpty(ChainStatus) ? ChainStatus : JudgeStatus,
+            Fc          = JudgeStatus.Contains("justice") ? "alljustice" : string.IsNullOrEmpty(ChainStatus) ? JudgeStatus : ChainStatus,
             Level       = song.Levels[levelIndex],
             LevelLabel  = ChunithmSong.LevelLabel[levelIndex],
             Title       = song.Title
