@@ -7,6 +7,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
+using IndexerT = Dictionary<long, ChunithmSong>;
+
 public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private const string Uri = "http://43.139.107.206:8998/api";
@@ -15,8 +17,20 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     private static string ScoresUri => $"{Uri}/open/chunithm/filtered-info";
     private static string Token => ConfigurationManager.Configuration.Chunithm.TokenLouis;
     private static List<ChunithmSong>? _songList;
-    private static readonly Dictionary<long, ChunithmSong> Indexer = new();
+    private static IndexerT? _indexer;
     private readonly object _songListLocker = new();
+    private readonly object _songIndexerLocker = new();
+
+    private IndexerT Indexer
+    {
+        get
+        {
+            lock (_songIndexerLocker)
+            {
+                return _indexer ??= GetSongList().ToDictionary(x => x.Id);
+            }
+        }
+    }
 
     public override List<ChunithmSong> GetSongList()
     {
@@ -29,12 +43,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
                 .Result
                 .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
 
-            _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
-            foreach (var song in _songList)
-            {
-                Indexer[song.Id] = song;
-            }
-            return _songList;
+            return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
         }
     }
 
