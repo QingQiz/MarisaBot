@@ -4,6 +4,7 @@ using Flurl.Http;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Plugin.Shared.Util.SongGuessMaker;
@@ -43,6 +44,8 @@ public partial class Chunithm :
     public void Reset()
     {
         SongDb.Reset();
+        new DivingFishDataFetcher(SongDb).Reset();
+        new LouisDataFetcher(SongDb).Reset();
     }
 
     public SongGuessMaker<ChunithmSong, ChunithmGuess> SongGuessMaker { get; }

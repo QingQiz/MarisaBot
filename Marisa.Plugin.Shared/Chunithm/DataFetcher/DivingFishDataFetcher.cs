@@ -1,10 +1,11 @@
 ﻿using Flurl.Http;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
+public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private static List<ChunithmSong>? _songList;
 
@@ -71,5 +72,10 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         json.Records.Best = json.Records.Best.Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
 
         return json;
+    }
+
+    public void Reset()
+    {
+        _songList = null;
     }
 }

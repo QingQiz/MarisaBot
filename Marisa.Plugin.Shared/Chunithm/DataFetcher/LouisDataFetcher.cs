@@ -1,12 +1,13 @@
 ﻿using Flurl.Http;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher.Entities;
 using Marisa.Plugin.Shared.Configuration;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
+public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private const string Uri = "http://43.139.107.206:8998/api";
     private static string MusicListUri => $"{Uri}/resource/chunithm/song-list";
@@ -109,5 +110,13 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         return json.Select(x => x.ToChunithmScore(SongDb))
             .DistinctBy(x => (x.Id, (int)x.LevelIndex))
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
+    }
+
+    public void Reset()
+    {
+        lock (_songListLocker)
+        {
+            _songList = null;
+        }
     }
 }
