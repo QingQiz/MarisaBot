@@ -57,8 +57,10 @@ public record RecentScoreLouis
 
     public ChunithmScore ToChunithmScore(SongDb<ChunithmSong> db)
     {
+        char[] x = ['b', 'a', 'e', 'm', 'u', 'w'];
+
         var song       = db.SongIndexer[MusicId];
-        var levelIndex = ChunithmSong.LevelLabel.IndexOf(Difficulty.ToUpper());
+        var levelIndex = Array.IndexOf(x, Difficulty[0]);
 
         return new ChunithmScore
         {
