@@ -100,6 +100,7 @@ public class ChunithmTest
 
     [Test]
     [TestCase(920759985)]
+    [TestCase(2661036521)]
     public void Should_Fetch_Scores_From_Louis(long qq)
     {
         var fetcher = new LouisDataFetcher(_songDb);

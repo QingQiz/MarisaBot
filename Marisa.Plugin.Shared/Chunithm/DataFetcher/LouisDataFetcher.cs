@@ -132,7 +132,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         lock (_songListLocker)
         {
             _songList = null;
-            Indexer.Clear();
+            _indexer  = null;
         }
     }
 }
