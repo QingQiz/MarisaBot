@@ -53,8 +53,6 @@ function GetLevelColor(level: number) {
 function GetBorder(rank: string) {
     function fallback() {
         switch (rank) {
-            case 'sp':
-                return 's'
             case 'ssp':
                 return 'ss';
             default:
