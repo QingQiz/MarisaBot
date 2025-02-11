@@ -2,6 +2,7 @@
 using Marisa.Plugin.Shared.Chunithm.DataFetcher.Entities;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Interface;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json.Linq;
 
@@ -81,7 +82,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         var json = JObject.Parse(await response.GetStringAsync());
         var data = new ChunithmRating
         {
-            Username = json["nickname"]?.Value<string>() ?? "",
+            Username = json["nickname"]?.Value<string>()?.ToHalfWidth() ?? "",
             Records = new Records
             {
 #pragma warning disable CS8602

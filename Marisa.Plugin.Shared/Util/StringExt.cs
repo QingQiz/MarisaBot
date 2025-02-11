@@ -47,4 +47,22 @@ public static class StringExt
 
         return TextMeasurer.MeasureAdvance(text, option);
     }
+
+    public static string ToHalfWidth(this string input)
+    {
+        var result = new char[input.Length];
+        for (var i = 0; i < input.Length; i++)
+        {
+            var c = input[i] switch
+            {
+                // 处理全角大写英文字母, 处理全角小写英文字母, 处理全角数字  
+                >= 'Ａ' and <= 'Ｚ' or >= 'ａ' and <= 'ｚ' or >= '０' and <= '９' => (char)(input[i] - 0xFEE0),
+                // 处理全角空格  
+                '　' => ' ',
+                _   => input[i]
+            };
+            result[i] = c;
+        }
+        return new string(result);
+    }
 }
