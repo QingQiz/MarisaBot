@@ -1,6 +1,6 @@
 ﻿<template>
-    <img :src="src[srcIndex]" v-if="srcIndex < src.length" @error="srcIndex++" v-bind="$attrs" ref="img"/>
-    <img :src="fallback" v-if="fallback != null && srcIndex === src.length" v-bind="$attrs" ref="img">
+    <img :src="prefix + src[srcIndex]" v-if="srcIndex < src.length" @error="srcIndex++" v-bind="$attrs" ref="img"/>
+    <img :src="prefix + fallback" v-if="fallback != null && srcIndex === src.length" v-bind="$attrs" ref="img">
 </template>
 
 <script setup lang="ts">
@@ -8,6 +8,7 @@ import {computed, PropType, ref} from 'vue';
 
 const props = defineProps({
     src: {type: Array as PropType<string[]>, required: true},
+    prefix: {type: String, required: false, default: ''},
     fallback: String,
 });
 
