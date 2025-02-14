@@ -88,7 +88,7 @@ function reduce_bpm(): number[] {
             </div>
         </div>
         <div class="chart">
-            <template v-for="c, i in song.Charts">
+            <template v-for="(c, i) in song.Charts">
                 <div v-if="i == 0" class="chart-header">
                     <div>难度</div>
                     <div>定数</div>
