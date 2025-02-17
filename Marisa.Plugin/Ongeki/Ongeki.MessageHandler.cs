@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Marisa.Plugin.Shared.Ongeki;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Ongeki;
 
@@ -10,14 +11,14 @@ public partial class Ongeki
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
     [MarisaPluginCommand("tolerance", "容错率")]
-    private MarisaPluginTaskState FaultTolerance(Message message)
+    private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
-        if (searchResult.Count != 1)
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false);
+        if (song == null)
         {
-            message.Reply(SongDb.GetSearchResult(searchResult));
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -25,7 +26,6 @@ public partial class Ongeki
         Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
-            var song    = searchResult.First();
 
             var levelName = OngekiSong.LevelAlias.Values.ToList();
 

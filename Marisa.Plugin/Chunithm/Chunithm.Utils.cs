@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
-using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util;
 
@@ -32,35 +31,6 @@ public partial class Chunithm
         {
             throw new InvalidDataException("无效的服务器名： " + name);
         }
-    }
-
-    private static (string, int) LevelAlias2Index(ReadOnlyMemory<char> command, List<string> diffs)
-    {
-        // 全名
-        var level       = diffs.FirstOrDefault(d => command.StartsWith(d, StringComparison.OrdinalIgnoreCase));
-        var levelPrefix = level ?? "";
-        if (level != null) goto RightLabel;
-
-        // 首字母
-        level = diffs.FirstOrDefault(n =>
-            command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
-        if (level != null)
-        {
-            levelPrefix = command.Span[0].ToString();
-            goto RightLabel;
-        }
-
-        // 别名
-        level = ChunithmSong.LevelAlias.Keys.FirstOrDefault(a =>
-            command.StartsWith(a, StringComparison.OrdinalIgnoreCase));
-        levelPrefix = level ?? "";
-
-        if (level == null) return ("", -1);
-
-        level = ChunithmSong.LevelAlias[level];
-
-        RightLabel:
-        return (levelPrefix, diffs.IndexOf(level));
     }
 
     private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)

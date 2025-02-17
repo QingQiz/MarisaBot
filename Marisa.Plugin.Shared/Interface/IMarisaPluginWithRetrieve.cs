@@ -14,9 +14,9 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     /// </summary>
     [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
     [MarisaPluginCommand("song", "search", "搜索")]
-    MarisaPluginTaskState SearchSong(Message message)
+    async Task<MarisaPluginTaskState> SearchSong(Message message)
     {
-        return SongDb.SearchSong(message);
+        return await SongDb.SearchSong(message);
     }
 
     #endregion
@@ -108,46 +108,46 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginTrigger(typeof(Triggers), nameof(Triggers.ListBaseTrigger))]
     [MarisaPluginCommand("base", "b", "定数")]
-    Task<MarisaPluginTaskState> ListSongBase(Message message)
+    async Task<MarisaPluginTaskState> ListSongBase(Message message)
     {
-        SongDb.MultiPageSelectResult(SongDb.SelectSongByBaseRange(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        await SongDb.MultiPageSelectResult(SongDb.SelectSongByBaseRange(message.Command), message);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("给出符合指定谱师约束的歌，参数为：谱师")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("charter", "谱师")]
-    Task<MarisaPluginTaskState> ListSongCharter(Message message)
+    async Task<MarisaPluginTaskState> ListSongCharter(Message message)
     {
-        SongDb.MultiPageSelectResult(SongDb.SelectSongByCharter(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        await SongDb.MultiPageSelectResult(SongDb.SelectSongByCharter(message.Command), message);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("给出符合指定等级约束的歌，参数为：等级")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("level", "lv", "等级")]
-    Task<MarisaPluginTaskState> ListSongLevel(Message message)
+    async Task<MarisaPluginTaskState> ListSongLevel(Message message)
     {
-        SongDb.MultiPageSelectResult(SongDb.SelectSongByLevel(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        await SongDb.MultiPageSelectResult(SongDb.SelectSongByLevel(message.Command), message);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("bpm")]
-    Task<MarisaPluginTaskState> ListSongBpm(Message message)
+    async Task<MarisaPluginTaskState> ListSongBpm(Message message)
     {
-        SongDb.MultiPageSelectResult(SongDb.SelectSongByBpmRange(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        await SongDb.MultiPageSelectResult(SongDb.SelectSongByBpmRange(message.Command), message);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("给出符合指定曲师约束的歌，参数为：曲师")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("artist", "a")]
-    Task<MarisaPluginTaskState> ListSongArtist(Message message)
+    async Task<MarisaPluginTaskState> ListSongArtist(Message message)
     {
-        SongDb.MultiPageSelectResult(SongDb.SelectSongByArtist(message.Command), message);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        await SongDb.MultiPageSelectResult(SongDb.SelectSongByArtist(message.Command), message);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     #endregion

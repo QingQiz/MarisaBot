@@ -7,6 +7,7 @@ using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -166,18 +167,16 @@ public partial class Chunithm
     /// </summary>
     [MarisaPluginDoc("谱面预览，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
     [MarisaPluginCommand("preview", "view", "谱面", "预览")]
-    private MarisaPluginTaskState PreviewSong(Message message)
+    private async Task<MarisaPluginTaskState> PreviewSong(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
-        if (searchResult.Count != 1)
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false);
+        if (song == null)
         {
-            message.Reply(SongDb.GetSearchResult(searchResult));
             return MarisaPluginTaskState.CompletedTask;
         }
-
-        var song = searchResult.First();
 
         message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
             .Select((l, i) =>
@@ -472,47 +471,45 @@ public partial class Chunithm
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
     [MarisaPluginCommand("tolerance", "容错率")]
-    private MarisaPluginTaskState FaultTolerance(Message message)
+    private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
-        if (searchResult.Count != 1)
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false);
+        if (song == null)
         {
-            message.Reply(SongDb.GetSearchResult(searchResult));
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply("难度和预期达成率？");
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        message.Reply($"序号和预期达成率？\n\n{string.Join('\n', song.Levels
+            .Select((l, i) =>
+                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
+            ).ToList())
+        }");
+
+        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
-            var song    = searchResult.First();
 
-            var diffName = ChunithmSong.LevelColor.Keys.ToList();
-
-            var (levelPrefix, levelIdx) = LevelAlias2Index(command, diffName);
-
-            if (levelIdx == -1)
+            // 第一位是idx，后面是预期达成率
+            if (!int.TryParse(command[..1].Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
-                next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
-
             if (song.MaxCombo[levelIdx] == 0)
             {
                 next.Reply("暂无该难度的数据");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var parseSuccess = int.TryParse(command[levelPrefix.Length..].Span, out var achievement);
-
+            var parseSuccess = int.TryParse(command[1..].Trim().Span, out var achievement);
             if (!parseSuccess)
             {
                 next.Reply("错误的达成率格式，会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
-
             if (achievement is > 101_0000 or < 0)
             {
                 next.Reply("你查**呢");
@@ -533,7 +530,7 @@ public partial class Chunithm
             var grayRemaining  = tolerance - grayCount * noteScore;
 
             next.Reply(
-                new MessageDataText($"[{diffName[levelIdx]}] {song.Title} => {achievement}\n"),
+                new MessageDataText($"[{song.Levels[levelIdx]}] {song.Title} => {achievement}\n"),
                 new MessageDataText($"至多绿 {greenCount} 个 + {(int)(greenRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"至多灰 {grayCount} 个 + {(int)(grayRemaining / v小p减分)} 小\n"),
                 new MessageDataText($"每个绿减 {v绿减分:F2}，每个灰减 {noteScore:F2}，每小减 {v小p减分:F2}")

@@ -4,9 +4,9 @@ namespace Marisa.Plugin.Shared.Util.SongDb;
 
 public static class SearchSongInDb
 {
-    public static MarisaPluginTaskState SearchSong<T>(this SongDb<T> songDb, Message message) where T : Song
+    public static async Task<MarisaPluginTaskState> SearchSong<T>(this SongDb<T> songDb, Message message) where T : Song
     {
-        MultiPageSelectResult(songDb, songDb.SearchSong(message.Command), message);
+        _ = await MultiPageSelectResult(songDb, songDb.SearchSong(message.Command), message);
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -28,25 +28,38 @@ public static class SearchSongInDb
     }
 
     /// <summary>
-    ///     分页展示多个结果
+    /// 分页展示搜索结果
     /// </summary>
-    public static void MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message) where T : Song
+    /// <param name="db"></param>
+    /// <param name="songs"></param>
+    /// <param name="message"></param>
+    /// <param name="reply">是否回复歌曲详细信息（图片）</param>
+    /// <typeparam name="T">TSong</typeparam>
+    /// <returns></returns>
+    public static Task<T?> MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message, bool reply = true) where T : Song
     {
+        var result = new TaskCompletionSource<T?>();
         switch (songs.Count)
         {
             case 0:
+                result.SetResult(null);
                 message.Reply("“查无此歌”");
-                return;
+                return result.Task;
             case 1:
-                message.Reply(new MessageDataText(songs[0].Title), MessageDataImage.FromBase64(songs[0].GetImage()));
-                return;
+                result.SetResult(songs[0]);
+                if (reply) message.Reply(new MessageDataText(songs[0].Title), MessageDataImage.FromBase64(songs[0].GetImage()));
+                return result.Task;
         }
 
         message.Reply(DisplaySong(0));
 
         db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
-            if (!next.IsPlainText()) return Task.FromResult(MarisaPluginTaskState.Canceled);
+            if (!next.IsPlainText())
+            {
+                result.SetResult(null);
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
 
             if (next.Command.StartsWith("p", StringComparison.OrdinalIgnoreCase))
             {
@@ -64,16 +77,18 @@ public static class SearchSongInDb
                 if (song == null)
                 {
                     message.Reply("查无此歌");
+                    result.SetResult(null);
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                 }
-                else
-                {
-                    message.Reply(new MessageDataText(song.Title), MessageDataImage.FromBase64(song.GetImage()));
-                }
+                if (reply) message.Reply(new MessageDataText(song.Title), MessageDataImage.FromBase64(song.GetImage()));
+                result.SetResult(song);
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
+            result.SetResult(null);
             return Task.FromResult(MarisaPluginTaskState.Canceled);
         });
-        return;
+        return result.Task;
 
         string DisplaySong(int page)
         {
@@ -88,13 +103,14 @@ public static class SearchSongInDb
             if (songs.Count <= SongDbConfig.PageSize) return ret;
 
             var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}，输入 p1、p2 等进行换页";
+            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}\n发送 p1、p2 等进行换页，发送歌曲 id 获取详情";
 
             return ret;
         }
     }
 
-    public static List<T> SelectSongByBaseRange<T>(this SongDb<T> db, ReadOnlyMemory<char> baseRange) where T : Song {
+    public static List<T> SelectSongByBaseRange<T>(this SongDb<T> db, ReadOnlyMemory<char> baseRange) where T : Song
+    {
         if (baseRange.Span.IndexOf('-') != -1)
         {
             var range = baseRange.Split('-').ToArray();

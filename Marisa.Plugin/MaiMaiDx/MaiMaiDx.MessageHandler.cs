@@ -16,11 +16,11 @@ public partial class MaiMaiDx
 
     [MarisaPluginNoDoc]
     [MarisaPluginCommand(true, "nocover")]
-    private MarisaPluginTaskState NoCover(Message message)
+    private async Task<MarisaPluginTaskState> NoCover(Message message)
     {
         var noCover = SongDb.SongList.Where(s => s.NoCover);
 
-        SongDb.MultiPageSelectResult(noCover.ToList(), message);
+        await SongDb.MultiPageSelectResult(noCover.ToList(), message);
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -189,32 +189,6 @@ public partial class MaiMaiDx
         context.Put("b50", b50.ToJson());
 
         message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    /// <summary>
-    ///     rating 排名
-    /// </summary>
-    [MarisaPluginNoDoc]
-    [MarisaPluginDoc("查询 rating排名，参数为：查分器的账号名 或 @某人 或 留空")]
-    [MarisaPluginCommand("rank", "排名")]
-    private async Task<MarisaPluginTaskState> RatingRank(Message message)
-    {
-        var fetcher = GetDataFetcher(message, true);
-
-        var b50  = await fetcher.GetRating(message);
-        var rank = ((DivingFishDataFetcher)GetDataFetcher(DataFetcherType.DivingFish)).GetRaRank();
-
-        var context = new WebContext();
-
-        context.Put("rank", new
-        {
-            ra = b50.Rating,
-            rank
-        });
-
-        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiRank(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -609,14 +583,14 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
     [MarisaPluginCommand("tolerance", "容错率")]
-    private MarisaPluginTaskState FaultTolerance(Message message)
+    private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
-        if (searchResult.Count != 1)
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false);
+        if (song == null)
         {
-            message.Reply(SongDb.GetSearchResult(searchResult));
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -655,8 +629,6 @@ public partial class MaiMaiDx
                 next.Reply("你查**呢");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
-
-            var song = searchResult.First();
 
             var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelName.Count;
             var (x, y) = song.NoteScore(levelIdx);
