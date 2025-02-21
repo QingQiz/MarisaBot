@@ -185,29 +185,6 @@ public class ChunithmSong : Song
         return Ra(l - 1, constant) > currentRa ? l - 1 : r + 1;
     }
 
-    /// <summary>
-    ///     获取最小的达成率使得rating大于<paramref name="minRa" />
-    /// </summary>
-    /// <param name="constant">定数</param>
-    /// <param name="minRa">最小的Ra</param>
-    /// <returns>达成率</returns>
-    public static int NextRa(decimal constant, decimal minRa)
-    {
-        var a = 0;
-
-        while (a < 100_9000)
-        {
-            a = NextRa(a, constant);
-
-            if (Ra(a, constant) > minRa)
-            {
-                return a;
-            }
-        }
-
-        return -1;
-    }
-
     public override string MaxLevel()
     {
         return Levels[Constants.Select((c, i) => (c, i)).MaxBy(x => x.c).i];

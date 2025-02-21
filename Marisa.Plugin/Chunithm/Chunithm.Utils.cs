@@ -63,6 +63,9 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message, true);
 
-        return MessageChain.FromImageB64((await fetcher.GetRating(message)).Draw().ToB64());
+        var ctx = new WebContext();
+        ctx.Put("rating", await fetcher.GetRating(message));
+
+        return MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id));
     }
 }

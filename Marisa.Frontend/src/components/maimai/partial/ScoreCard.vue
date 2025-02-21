@@ -48,7 +48,8 @@
 import {computed, ref} from "vue";
 import FallbackImage from "@/components/utils/FallbackImage.vue";
 import {maimai_alternativeCover, maimai_levelColors} from "@/GlobalVars";
-import {Score as MaiScore} from "@/components/maimai/BestScores.vue";
+import {Score as MaiScore} from "@/components/maimai/utils/best_t";
+import {GetContrastingTextColor, MakeRgba} from "@/utils/color";
 
 const props = defineProps<{ score: MaiScore }>();
 const imgEl = ref<typeof FallbackImage | null>(null);
@@ -58,13 +59,7 @@ let img_color = ref({r: -1, g: -1, b: -1})
 let level_color = computed(() => maimai_levelColors[props.score.level_index ?? 0])
 
 let text_color = computed(() => {
-    let {r, g, b} = img_color.value
-    if (r * 0.299 + g * 0.587 + b * 0.114 > 186) {
-        return '#000000'
-    } else {
-        return '#ffffff';
-
-    }
+    return GetContrastingTextColor(img_color.value);
 });
 
 let bg_color = computed(() => {
@@ -76,12 +71,4 @@ let available_cover = computed(() => maimai_alternativeCover(props.score.song_id
 function UpdateColor() {
     img_color.value = imgEl.value?.GetAverageRGB(0, 0, 12, 200)
 }
-
-function MakeRgba(rgb: { r: number, g: number, b: number }, a ?: number) {
-    if (a == undefined) {
-        return `rgb(${rgb.r},${rgb.g},${rgb.b})`
-    }
-    return `rgba(${rgb.r},${rgb.g},${rgb.b},${a})`
-}
-
 </script>

@@ -59,6 +59,7 @@ import {useRoute} from "vue-router";
 
 import ScoreCard from "@/components/maimai/partial/ScoreCard.vue"
 import {context_get} from '@/GlobalVars'
+import {MaiMaiRating} from "@/components/maimai/utils/best_t";
 
 const route = useRoute()
 let json    = ref({} as MaiMaiRating)
@@ -118,43 +119,3 @@ axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
     text-shadow: 1px 0 #f48fb1, 2px 0 #7e57c2, 3px 0 #2196f3, 4px 0 #26c6da, 5px 0 #43a047, -1px 0 #f48fb1, -2px 0 #7e57c2, -3px 0 #2196f3, -4px 0 #26c6da, -5px 0 #43a047;
 }
 </style>
-
-<script lang="ts">
-import {defineComponent} from "vue";
-
-export interface MaiMaiRating {
-    additional_rating: number;
-    charts: Charts;
-    nickname: string;
-    plate: string;
-    rating: number;
-    user_data: null;
-    user_id: null;
-    username: string;
-}
-
-export interface Charts {
-    dx: Score[];
-    sd: Score[];
-}
-
-export interface Score {
-    achievements: number;
-    ds: number;
-    dxScore: number;
-    fc: string;
-    fs: string;
-    level: string;
-    level_index: number;
-    level_label: string;
-    ra: number;
-    rate: string;
-    song_id: number;
-    title: string;
-    type: string;
-}
-
-export default defineComponent({
-    name: 'BestScores',
-})
-</script>

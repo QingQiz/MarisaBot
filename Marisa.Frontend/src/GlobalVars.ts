@@ -12,9 +12,7 @@ export const osu_beatmapCover = host + '/Osu/GetCover'
 export const osu_recent       = host + '/Osu/GetRecent'
 export const osu_best         = host + '/Osu/GetBest'
 export const osu_beatmapInfo  = host + '/Osu/GetBeatmapInfo'
-export const osu_getRecommend = host + '/Osu/GetRecommend'
 export const osu_getImage     = host + '/Osu/GetImage'
-export const wordcloud_get    = host + '/WordCloud'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {
     return `${osu_accRing}?acc=${acc}&modeInt=${modeInt}`;
@@ -53,6 +51,14 @@ export const maimai_levelColors = [
     '#ff5a66',
     '#c64fe4',
     '#dbaaff'
+]
+
+export const chunithm_levelColors = [
+    '#52e72b',
+    '#ffa801',
+    '#ff5a66',
+    '#c64fe4',
+    '#000000'
 ]
 
 export function maimai_alternativeCover(id: number) {

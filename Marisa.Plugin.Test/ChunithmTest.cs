@@ -55,27 +55,6 @@ public class ChunithmTest
     }
 
     [Test]
-    public void Should_Draw_Score_Card()
-    {
-        var score = new ChunithmScore
-        {
-            Id          = 335,
-            Constant    = 13.9m,
-            Rating      = 16.0m,
-            Fc          = "",
-            Level       = "13+",
-            LevelIndex  = 3,
-            LevelLabel  = "Expert",
-            Achievement = 1009000,
-            Title       = "这是个名字名字名字名字名字名字名字名字名字名字"
-        };
-
-        score.Draw().Show();
-
-        Assert.Pass();
-    }
-
-    [Test]
     [TestCase("master1", "MASTER", 3)]
     [TestCase(" master1\n", "MASTER", 3)]
     public void Level_Should_Be_Parsed(string inp, string prefix, int index)

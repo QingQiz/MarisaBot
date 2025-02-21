@@ -45,3 +45,22 @@ export function zip<
         range(maxLength).map(() => [])
     );
 }
+
+export function shuffle<T>(array: T[]): T[] {
+    // 创建原数组的副本，以避免修改原数组
+    const shuffledArray = array.slice(0);
+
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+        // 生成一个0到i之间的随机整数
+        const j = Math.floor(Math.random() * (i + 1));
+
+        // 交换元素
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+
+    return shuffledArray;
+}
+
+export function choice<T>(array: T[]): T {
+    return array[Math.floor(Math.random() * array.length)]
+}

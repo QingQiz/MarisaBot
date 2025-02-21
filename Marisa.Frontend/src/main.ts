@@ -5,7 +5,8 @@ import '@/assets/css/tailwind.css'
 import '@/ExtensionMethods'
 
 import App from '@/App.vue'
-import BestScores from "@/components/maimai/BestScores.vue";
+import ChuBestScores from "@/components/chunithm/BestScores.vue";
+import MaiBestScores from "@/components/maimai/BestScores.vue";
 import OngekiSong from "@/components/ongeki/OngekiSong.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
@@ -19,8 +20,9 @@ import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
 
 const routes = [
     {path: '/', component: NotFound},
-    {path: '/maimai/best', component: BestScores},
+    {path: '/maimai/best', component: MaiBestScores},
     {path: '/maimai/recommend', component: Recommend},
+    {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},
     {path: '/chunithm/preview', component: ChunithmPreview},
