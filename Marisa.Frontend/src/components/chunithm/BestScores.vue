@@ -6,6 +6,7 @@ import ScoreCard from "@/components/chunithm/partial/ScoreCard.vue";
 import {range} from "@/utils/list";
 import {shuffle} from "d3";
 import {useRoute} from "vue-router";
+import {ToFixedNoRound} from "@/utils/str";
 
 const route = useRoute()
 const id    = ref(route.query.id)
@@ -52,11 +53,11 @@ function GetR10Ra() {
                             </div>
                             <div class="flex gap-2 font-console">
                                 <div class="my-1 w-[15px] bg-gray-500"></div>
-                                <div class="text-[33px]">B30: {{ GetB30Ra().toFixed(2) }}</div>
+                                <div class="text-[33px]">B30: {{ ToFixedNoRound(GetB30Ra(), 2) }}</div>
                             </div>
                             <div class="flex gap-2 font-console">
                                 <div class="my-1 w-[15px] bg-gray-500"></div>
-                                <div class="text-[33px]">R10: {{ GetR10Ra().toFixed(2) }}</div>
+                                <div class="text-[33px]">R10: {{ ToFixedNoRound(GetR10Ra(), 2) }}</div>
                             </div>
                         </div>
                     </div>
