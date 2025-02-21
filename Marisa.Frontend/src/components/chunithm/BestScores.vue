@@ -112,7 +112,7 @@ function GetR10Ra() {
 }
 
 .info-card-detail {
-    @apply text-white my-12 flex flex-col place-content-between;
+    @apply text-white my-12 flex flex-col place-content-between mr-12;
     @apply font-osu-web;
     max-width: 1600px;
 
