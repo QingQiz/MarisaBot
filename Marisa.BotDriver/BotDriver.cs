@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Threading.Channels;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Plugin;
@@ -6,6 +7,7 @@ using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using Msg = Marisa.BotDriver.Entity.Message.Message;
 
 namespace Marisa.BotDriver;
 
@@ -59,38 +61,41 @@ public abstract class BotDriver(
     {
         var dispatcher = new MessageDispatcher(pluginsAll, serviceProvider, dict);
         var logger     = LogManager.GetCurrentClassLogger();
+        var channel    = Channel.CreateBounded<Msg>(32);
 
-        var tasks = new List<Task>();
+        // Background task to process messages from the channel
+        var processingTask = HandleChannel(channel, async m => await MsgProcTask(dispatcher, m, logger));
 
-        while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
-        {
-            var messageRecv = MessageQueueProvider.RecvQueue.Reader.ReadAllAsync();
+        await HandleChannel(MessageQueueProvider.RecvQueue, async m => await channel.Writer.WriteAsync(m));
 
-            tasks.Add(Parallel.ForEachAsync(messageRecv, async (m1, _) =>
-            {
-                var toInvoke = dispatcher.Dispatch(m1);
-                var log      = new List<string>();
-
-                foreach (var (plugin, method, m2) in toInvoke)
-                {
-                    log.Add($"[{plugin.GetType().Name}.{method.Name}]");
-
-                    var state = await dispatcher.Invoke(plugin, method, m2);
-
-                    if (state == MarisaPluginTaskState.CompletedTask) break;
-                }
-
-                logger.Info("Dispatched Message to {1}: {0}", m1.ToString(), string.Join("", log));
-            }));
-
-            if (tasks.Count < 100) continue;
-
-            await Task.WhenAll();
-            tasks.Clear();
-        }
-
-        await Task.WhenAll(tasks);
+        channel.Writer.Complete();
+        await processingTask;
     }
+
+    private static async Task HandleChannel<T>(Channel<T> channel, Func<T, Task> handler)
+    {
+        while (await channel.Reader.WaitToReadAsync())
+        {
+            await foreach (var data in channel.Reader.ReadAllAsync())
+            {
+                await handler(data);
+            }
+        }
+    }
+
+    private static async Task MsgProcTask(MessageDispatcher dispatcher, Msg m, Logger logger)
+    {
+        logger.Info("{0}", m.ToString());
+        var toInvoke = dispatcher.Dispatch(m);
+
+        foreach (var (plugin, method, m2) in toInvoke)
+        {
+            var state = await dispatcher.Invoke(plugin, method, m2);
+
+            if (state == MarisaPluginTaskState.CompletedTask) break;
+        }
+    }
+
 
     /// <summary>
     /// 从服务器拉取消息并更新接收队列
