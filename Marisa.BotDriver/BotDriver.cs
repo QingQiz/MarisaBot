@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Threading.Channels;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Plugin;
@@ -62,18 +61,33 @@ public abstract class BotDriver(
         var dispatcher = new MessageDispatcher(pluginsAll, serviceProvider, dict);
         var logger     = LogManager.GetCurrentClassLogger();
 
-        await HandleChannel(MessageQueueProvider.RecvQueue, MsgProcTask);
+        while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
+        {
+            var m = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
+
+            _ = Task.Run(async () =>
+            {
+                var cancel = new CancellationTokenSource();
+
+                var handlerTask = MsgProcTask(m);
+                var timeoutTask = Task.Delay(TimeSpan.FromMinutes(5), cancel.Token);
+
+                var completedTask = await Task.WhenAny(handlerTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    logger.Error("Handler timed out. Caused by message: {0}", m);
+                    // 无法取消，先记录日志
+                }
+                else
+                {
+                    await Task.WhenAll(cancel.CancelAsync(), handlerTask);
+                }
+            });
+        }
 
         logger.Fatal("Message processing task exited unexpectedly");
         return;
-
-        async Task HandleChannel<T>(Channel<T> channel, Func<T, Task> handler)
-        {
-            while (await channel.Reader.WaitToReadAsync())
-            {
-                await handler(await channel.Reader.ReadAsync());
-            }
-        }
 
         async Task MsgProcTask(Msg m)
         {
