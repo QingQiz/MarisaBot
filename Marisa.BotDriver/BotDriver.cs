@@ -61,41 +61,33 @@ public abstract class BotDriver(
     {
         var dispatcher = new MessageDispatcher(pluginsAll, serviceProvider, dict);
         var logger     = LogManager.GetCurrentClassLogger();
-        var channel    = Channel.CreateBounded<Msg>(32);
 
-        // Background task to process messages from the channel
-        var processingTask = HandleChannel(channel, async m => await MsgProcTask(dispatcher, m, logger));
+        await HandleChannel(MessageQueueProvider.RecvQueue, MsgProcTask);
 
-        await HandleChannel(MessageQueueProvider.RecvQueue, async m => await channel.Writer.WriteAsync(m));
+        logger.Fatal("Message processing task exited unexpectedly");
+        return;
 
-        channel.Writer.Complete();
-        await processingTask;
-    }
-
-    private static async Task HandleChannel<T>(Channel<T> channel, Func<T, Task> handler)
-    {
-        while (await channel.Reader.WaitToReadAsync())
+        async Task HandleChannel<T>(Channel<T> channel, Func<T, Task> handler)
         {
-            await foreach (var data in channel.Reader.ReadAllAsync())
+            while (await channel.Reader.WaitToReadAsync())
             {
-                await handler(data);
+                await handler(await channel.Reader.ReadAsync());
+            }
+        }
+
+        async Task MsgProcTask(Msg m)
+        {
+            logger.Info("{0}", m.ToString());
+            var toInvoke = dispatcher.Dispatch(m);
+
+            foreach (var (plugin, method, m2) in toInvoke)
+            {
+                var state = await dispatcher.Invoke(plugin, method, m2);
+
+                if (state == MarisaPluginTaskState.CompletedTask) break;
             }
         }
     }
-
-    private static async Task MsgProcTask(MessageDispatcher dispatcher, Msg m, Logger logger)
-    {
-        logger.Info("{0}", m.ToString());
-        var toInvoke = dispatcher.Dispatch(m);
-
-        foreach (var (plugin, method, m2) in toInvoke)
-        {
-            var state = await dispatcher.Invoke(plugin, method, m2);
-
-            if (state == MarisaPluginTaskState.CompletedTask) break;
-        }
-    }
-
 
     /// <summary>
     /// 从服务器拉取消息并更新接收队列
@@ -122,7 +114,7 @@ public abstract class BotDriver(
     public virtual async Task Invoke()
     {
         await Task.WhenAll(
-            Parallel.ForEachAsync(pluginsAll, async (p, _) => await p.BackgroundService()),
+            Task.WhenAll(pluginsAll.Select(p => p.BackgroundService())),
             RecvMessage(), SendMessage(), ProcMessage()
         );
     }
