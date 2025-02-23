@@ -195,11 +195,11 @@ function GetWidth<T extends OpStatistic | RkStatistic>(
 }
 
 .ssp {
-    @apply bg-amber-500;
+    @apply bg-sky-300;
 }
 
 .ss {
-    @apply bg-amber-600;
+    @apply bg-blue-400;
 }
 
 .fc {
@@ -227,11 +227,11 @@ function GetWidth<T extends OpStatistic | RkStatistic>(
 }
 
 .t-ssp {
-    @apply text-amber-500;
+    @apply text-sky-300;
 }
 
 .t-ss {
-    @apply text-amber-600;
+    @apply text-blue-400;
 }
 
 .t-fc {
