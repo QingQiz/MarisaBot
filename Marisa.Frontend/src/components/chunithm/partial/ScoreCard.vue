@@ -4,6 +4,7 @@ import FallbackImage from "@/components/utils/FallbackImage.vue";
 import {computed, ref} from "vue";
 import {chunithm_levelColors} from "@/GlobalVars";
 import {GetContrastingTextColor, MakeRgba} from "@/utils/color";
+import {ToFixedNoRound} from "@/utils/str";
 
 let props = defineProps<{ score: ChuScore }>();
 
@@ -37,9 +38,9 @@ function UpdateColor() {
                 <div class="text-3xl flex w-fit justify-center items-center"
                      :style="`background-color: ${level_color}`">
                     <div class="text-center bg-gray-400 text-black font-bold w-[75px] m-[1.5px] px-[5px]">
-                        {{ score.ds.toFixed(1) }}
+                        {{ ToFixedNoRound(score.ds, 1) }}
                     </div>
-                    <div class="text-center w-[75px] text-white pl-[2.5px] px-[5px] font-bold">{{ score.ra }}</div>
+                    <div class="text-center w-[75px] text-white pl-[2.5px] px-[5px] font-bold">{{ ToFixedNoRound(score.ra, 2) }}</div>
                 </div>
                 <!-- title -->
                 <div class="tracking-wider pb-2 text-4xl w-400 whitespace-nowrap overflow-hidden overflow-ellipsis">

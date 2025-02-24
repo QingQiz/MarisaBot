@@ -49,7 +49,7 @@ function GetR10Ra() {
                         <div class="flex flex-col gap-1">
                             <div class="flex gap-2">
                                 <div class="my-2 w-[15px] bg-black"></div>
-                                <div class="text-[50px]">RATING: {{ best.rating }}</div>
+                                <div class="text-[50px]">RATING: {{ ToFixedNoRound(best.rating, 2) }}</div>
                             </div>
                             <div class="flex gap-2 font-console">
                                 <div class="my-1 w-[15px] bg-gray-500"></div>
