@@ -100,11 +100,13 @@ public static class SearchSongInDb
                     .OrderBy(x => x.Id)
                     .Select(song => $"[ID:{song.Id}, Lv:{song.MaxLevel()}] -> {song.Title}"));
 
-            if (songs.Count <= SongDbConfig.PageSize) return ret;
+            if (songs.Count > SongDbConfig.PageSize)
+            {
+                var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
+                ret += $"\n一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}，发送 p1、p2 等进行换页";
+            }
 
-            var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-            ret += "\n" + $"一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}\n发送 p1、p2 等进行换页，发送歌曲 id 获取详情";
-
+            ret += "\n发送歌曲 id 进一步选择";
             return ret;
         }
     }
