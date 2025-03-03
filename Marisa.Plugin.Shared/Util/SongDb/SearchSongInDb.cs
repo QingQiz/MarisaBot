@@ -103,7 +103,7 @@ public static class SearchSongInDb
             if (songs.Count > SongDbConfig.PageSize)
             {
                 var pageAll = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-                ret += $"\n一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}，发送 p1、p2 等进行换页";
+                ret += $"\n一共有 {songs.Count} 个结果，当前页 {p + 1}/{pageAll}\n发送 p1、p2 等进行换页";
             }
 
             ret += "\n发送歌曲 id 进一步选择";
