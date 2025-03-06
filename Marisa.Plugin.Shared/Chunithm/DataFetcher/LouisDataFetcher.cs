@@ -5,6 +5,7 @@ using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json.Linq;
+using Polly;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -39,11 +40,12 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         {
             if (_songList != null) return _songList;
 
-            var list = MusicListUri
-                .GetJsonListAsync()
-                .Result
-                .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
+            var listLouis = Policy.Handle<Exception>(_ => true).WaitAndRetryAsync(10,
+                _ => TimeSpan.FromSeconds(1)
+            ).ExecuteAsync(async () => await MusicListUri.GetJsonListAsync()).Result;
 
+            var list = listLouis
+                .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
             return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
         }
     }
