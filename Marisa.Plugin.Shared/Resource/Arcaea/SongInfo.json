@@ -13152,5 +13152,265 @@
             "8.0",
             "9.8"
         ]
+    },
+    {
+        "id": 443,
+        "title": "Aether Crest: Astral",
+        "artist": "void (Mournfinale) × 水野健治",
+        "bpm": "180",
+        "version": "6.2",
+        "level": [
+            "6",
+            "8+",
+            "10",
+            "11"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "Nitro",
+            "Empyrean",
+            "M理論 《Quintessence》",
+            "夜浪 × 絶滅「αἴθων」"
+        ],
+        "song_pack": "Collaboration Chapter 4",
+        "cover_name": "aethercrest.jpg",
+        "constant": [
+            "6.0",
+            "8.9",
+            "10.6",
+            "11.5"
+        ]
+    },
+    {
+        "id": 444,
+        "title": "Heartache",
+        "artist": "Toby Fox",
+        "bpm": "239",
+        "version": "6.3",
+        "level": [
+            "1",
+            "4",
+            "7",
+            "8+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "sidewaves",
+            "sidewaves",
+            "sidewaves",
+            "sidewaves"
+        ],
+        "song_pack": "UNDERTALE",
+        "cover_name": "heartache.jpg",
+        "constant": [
+            "1.0",
+            "4.0",
+            "7.0",
+            "8.7"
+        ]
+    },
+    {
+        "id": 445,
+        "title": "Death By Glamour",
+        "artist": "Toby Fox",
+        "bpm": "148",
+        "version": "6.3",
+        "level": [
+            "2",
+            "5",
+            "7+",
+            "9"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "RYCT QUIZ SHOW",
+            "RYCT COOKING",
+            "RYCT NEWS",
+            "RYCT THE MUSICAL"
+        ],
+        "song_pack": "UNDERTALE",
+        "cover_name": "deathbyglamour.jpg",
+        "constant": [
+            "2.0",
+            "5.0",
+            "7.0",
+            "9.4"
+        ]
+    },
+    {
+        "id": 446,
+        "title": "Your Best Nightmare",
+        "artist": "Toby Fox",
+        "bpm": "190",
+        "version": "6.3",
+        "level": [
+            "3",
+            "6",
+            "8+",
+            "10"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Beyond"
+        ],
+        "charter": [
+            "Nitro",
+            "Nitro",
+            "Arcaea Charting Team【The Six Souls】",
+            "Arcaea Charting Team【The Six Souls】"
+        ],
+        "song_pack": "UNDERTALE",
+        "cover_name": "yourbestnightmare.jpg",
+        "constant": [
+            "3.0",
+            "6.0",
+            "8.9",
+            "10.2"
+        ]
+    },
+    {
+        "id": 447,
+        "title": "Last Goodbye",
+        "artist": "Toby Fox",
+        "bpm": "180",
+        "version": "6.3",
+        "level": [
+            "2",
+            "6",
+            "8",
+            "9+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "Luxance",
+            "Luxance",
+            "Luxance",
+            "Good night."
+        ],
+        "song_pack": "UNDERTALE",
+        "cover_name": "lastgoodbye.jpg",
+        "constant": [
+            "2.0",
+            "6.0",
+            "8.2",
+            "9.7"
+        ]
+    },
+    {
+        "id": 448,
+        "title": "MEGALOVANIA",
+        "artist": "Toby Fox",
+        "bpm": "240",
+        "version": "6.3",
+        "level": [
+            "4",
+            "7",
+            "9",
+            "10"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "瑞獣 ＬＶ３",
+            "瑞獣 ＬＶ８",
+            "瑞獣 ＬＶ１５",
+            "瑞獣 ＬＶ１９"
+        ],
+        "song_pack": "UNDERTALE",
+        "cover_name": "megalovania.jpg",
+        "constant": [
+            "4.0",
+            "7.0",
+            "9.5",
+            "10.5"
+        ]
+    },
+    {
+        "id": 449,
+        "title": "MEGALOVANIA (Camellia Remix)",
+        "artist": "Camellia",
+        "bpm": "242",
+        "version": "6.3",
+        "level": [
+            "5",
+            "8",
+            "9+",
+            "10+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "M理論",
+            "M理論",
+            "M理論",
+            "* do you wanna have a bad time?"
+        ],
+        "song_pack": "Memory Archive",
+        "cover_name": "megalovaniarmx.jpg",
+        "constant": [
+            "5.0",
+            "8.4",
+            "9.8",
+            "10.9"
+        ]
+    },
+    {
+        "id": 450,
+        "title": "Placebo♥Battler",
+        "artist": "OSTER project",
+        "bpm": "270",
+        "version": "6.3",
+        "level": [
+            "5",
+            "8",
+            "10"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future"
+        ],
+        "charter": [
+            "絶滅【再構築】",
+            "絶滅【再構築】",
+            "絶滅【再構築】"
+        ],
+        "song_pack": "Memory Archive",
+        "cover_name": "placebobattler.jpg",
+        "constant": [
+            "5.0",
+            "8.3",
+            "10.4"
+        ]
     }
 ]
