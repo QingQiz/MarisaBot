@@ -24,7 +24,7 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
-        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Utils.Assembly()) : GoCqBackend.Config(Utils.Assembly()));
+        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Utils.Assembly().GetTypes()) : GoCqBackend.Config(Utils.Assembly().GetTypes()));
         builder.WebHost.UseUrls("http://0.0.0.0:14311");
 
         // use nLog for logging
