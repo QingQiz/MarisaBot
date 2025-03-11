@@ -1,5 +1,6 @@
 ﻿using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp.Processing;
@@ -135,7 +136,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, string gues
         var senderName = message.Sender.Name;
         var groupId    = message.GroupInfo!.Id;
         var now        = DateTime.Now;
-        var res        = songDb.MessageHandlerAdder(groupId, null, msg => GenGuessDialogHandler(song, now, qq)(msg));
+        var res        = DialogManager.TryAddDialog((groupId, null), msg => GenGuessDialogHandler(song, now, qq)(msg));
 
         if (!res)
         {

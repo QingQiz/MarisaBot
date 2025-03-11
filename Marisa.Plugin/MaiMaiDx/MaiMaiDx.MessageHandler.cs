@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -51,7 +52,7 @@ public partial class MaiMaiDx
          */
         var stat = 0;
 
-        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, async next =>
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), async next =>
         {
             switch (stat)
             {
@@ -598,7 +599,7 @@ public partial class MaiMaiDx
         }
 
         message.Reply("难度和预期达成率？");
-        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             var command = next.Command.Trim();
 

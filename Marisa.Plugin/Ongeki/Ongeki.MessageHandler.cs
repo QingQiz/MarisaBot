@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Ongeki;
 using Marisa.Plugin.Shared.Util.SongDb;
 
@@ -23,7 +24,7 @@ public partial class Ongeki
         }
 
         message.Reply("难度和预期达成率？");
-        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             var command = next.Command.Trim();
 

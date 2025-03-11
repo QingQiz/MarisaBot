@@ -34,8 +34,7 @@ public partial class Chunithm :
                     File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
                 ) as dynamic[];
                 return data!.Select(d => new ChunithmSong(d)).ToList();
-            },
-            Dialog.TryAddHandler
+            }
         );
 
         SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));

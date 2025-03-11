@@ -5,6 +5,7 @@ using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -44,7 +45,7 @@ public partial class Chunithm
         var stat   = 0;
         var server = "";
 
-        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             switch (stat)
             {
@@ -184,7 +185,7 @@ public partial class Chunithm
             ).ToList())
         }");
 
-        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             var command = next.Command.Trim();
 
@@ -471,7 +472,7 @@ public partial class Chunithm
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
     [MarisaPluginCommand("tol", "tolerance", "容错率")]
-    private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
+    protected async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
@@ -488,7 +489,7 @@ public partial class Chunithm
             ).ToList())
         }");
 
-        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             var command = next.Command.Trim();
 

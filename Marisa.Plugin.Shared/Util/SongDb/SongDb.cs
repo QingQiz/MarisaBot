@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Marisa.Plugin.Shared.Interface;
-using static Marisa.Plugin.Shared.Dialog.Dialog;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
@@ -11,7 +10,6 @@ public class SongDb<TSong> : ICanReset where TSong : Song
     private readonly Func<List<TSong>> _songListGen;
     private readonly string _tempAliasPath;
 
-    public readonly MessageHandlerAdder MessageHandlerAdder;
     private Dictionary<ReadOnlyMemory<char>, List<ReadOnlyMemory<char>>>? _songAlias;
 
     /// <summary>
@@ -26,16 +24,12 @@ public class SongDb<TSong> : ICanReset where TSong : Song
     /// <param name="aliasFilePath">歌曲的别名文件路径，格式是tsv</param>
     /// <param name="tempAliasPath">歌曲临时别名的存放路径</param>
     /// <param name="songListGen">读取歌曲列表的函数</param>
-    /// <param name="messageHandlerAdder">添加猜曲结果处理器的函数</param>
-    public SongDb(
-        string aliasFilePath, string tempAliasPath, Func<List<TSong>> songListGen, MessageHandlerAdder messageHandlerAdder)
+    public SongDb(string aliasFilePath, string tempAliasPath, Func<List<TSong>> songListGen)
     {
         _aliasFilePath = aliasFilePath;
         _tempAliasPath = tempAliasPath;
 
         _songListGen = songListGen;
-
-        MessageHandlerAdder = messageHandlerAdder;
     }
 
     public List<TSong> SongList => _songList ??= _songListGen();

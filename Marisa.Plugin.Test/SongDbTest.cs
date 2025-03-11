@@ -30,8 +30,7 @@ public class SongDbTest
                 var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
 
                 return data.Select(d => new MaiMaiSong(d)).ToList();
-            },
-            Dialog.TryAddHandler
+            }
         );
     }
 

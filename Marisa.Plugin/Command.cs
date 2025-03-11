@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Interface;
 
 namespace Marisa.Plugin;
@@ -41,7 +42,7 @@ public class Command : MarisaPluginBase
 
         m.Reply(reply);
 
-        Dialog.TryAddHandler(m.GroupInfo?.Id, m.Sender?.Id, next =>
+        DialogManager.TryAddDialog((m.GroupInfo?.Id, m.Sender.Id), next =>
         {
             if (next.Sender.Id != m.Sender!.Id)
             {
@@ -182,7 +183,7 @@ public class Command : MarisaPluginBase
             proc.BeginOutputReadLine();
             proc.BeginErrorReadLine();
 
-            Dialog.TryAddHandler(m.GroupInfo?.Id, m.Sender.Id, message =>
+            DialogManager.TryAddDialog((m.GroupInfo?.Id, m.Sender.Id), message =>
             {
                 var command = message.Command;
 

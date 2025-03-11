@@ -28,8 +28,7 @@ public partial class Ongeki :
                     File.ReadAllText(ResourceManager.ResourcePath + "/ongeki.json")
                 ) as dynamic[];
                 return data!.Select(d => new OngekiSong(d)).ToList();
-            },
-            Dialog.TryAddHandler
+            }
         );
 
         SongGuessMaker = new SongGuessMaker<OngekiSong, OngekiGuess>(SongDb, nameof(BotDbContext.OngekiGuesses));

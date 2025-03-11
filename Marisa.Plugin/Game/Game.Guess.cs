@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util;
 using Newtonsoft.Json;
@@ -70,7 +71,7 @@ public partial class Game
 
         var res = new HashSet<ReadOnlyMemory<char>>([], new MemoryExt.ReadOnlyMemoryCharComparer(StringComparison.OrdinalIgnoreCase));
 
-        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, mNext =>
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), mNext =>
         {
             switch (mNext.Command.Span)
             {
@@ -125,7 +126,7 @@ public partial class Game
         var cooldown       = new Dictionary<long, DateTime>();
         var cooldownGlobal = DateTime.MinValue;
 
-        var res = Dialog.TryAddHandler(message.GroupInfo?.Id, null, mNext =>
+        var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), mNext =>
         {
             if (mNext.Command.Span is "结束游戏")
             {

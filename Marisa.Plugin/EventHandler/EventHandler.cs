@@ -1,17 +1,10 @@
-﻿using NLog;
-
-namespace Marisa.Plugin.EventHandler;
+﻿namespace Marisa.Plugin.EventHandler;
 
 [MarisaPlugin]
 [MarisaPluginNoDoc]
 [MarisaPluginTrigger(typeof(EventHandler), nameof(Trigger))]
 public partial class EventHandler : MarisaPluginBase
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-    private static readonly Debounce SignServerKillerDebounce = new(1000, 5000);
-    private static readonly Debounce BotLoginDebounce = new(5000, 1000);
-
     public static MarisaPluginTrigger.PluginTrigger Trigger => (message, _) =>
     {
         return message.MessageChain!.Messages.Any(m =>
@@ -52,21 +45,6 @@ public partial class EventHandler : MarisaPluginBase
             case MessageDataType.BotMute:
                 InvokeHandler(BotMuteHandler);
                 break;
-            // case MessageDataType.BotOffline:
-            //     Logger.Warn("Bot offline unexpectedly, try to login again.");
-            //     BotLoginDebounce.Execute(() => driver.Login().Wait());
-            //     break;
-            // case MessageDataType.BotOnline:
-            //     Logger.Warn("Bot online successfully.");
-            //     BotLoginDebounce.Cancel();
-            //     break;
-            // case MessageDataType.Unknown when msg is MessageDataSignServerLose e:
-            // {
-            //     Logger.Warn($"Lose connection to SingServer: {e.Text}");
-            //
-            //     SignServerKillerDebounce.Execute(KillSignServer);
-            //     break;
-            // }
         }
 
         return MarisaPluginTaskState.CompletedTask;

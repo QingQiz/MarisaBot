@@ -41,8 +41,7 @@ public partial class MaiMaiDx :
                     ) as dynamic[];
                     return data!.Select(d => new MaiMaiSong(d)).ToList();
                 }
-            },
-            Dialog.TryAddHandler
+            }
         );
 
         SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, nameof(BotDbContext.MaiMaiDxGuesses));

@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Marisa.Plugin.Shared.Dialog;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
@@ -53,7 +54,7 @@ public static class SearchSongInDb
 
         message.Reply(DisplaySong(0));
 
-        db.MessageHandlerAdder(message.GroupInfo?.Id, message.Sender.Id, next =>
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
             if (!next.IsPlainText())
             {
