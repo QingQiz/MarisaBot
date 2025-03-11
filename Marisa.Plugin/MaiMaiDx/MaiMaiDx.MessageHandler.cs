@@ -29,6 +29,7 @@ public partial class MaiMaiDx
 
     #region 绑定
 
+    [MarisaPluginDisabled]
     [MarisaPluginDoc("绑定某个查分器")]
     [MarisaPluginCommand("bind", "绑定")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
@@ -121,6 +122,7 @@ public partial class MaiMaiDx
 
     #region unlock
 
+    [MarisaPluginDisabled]
     [MarisaPluginDoc("逃离小黑屋")]
     [MarisaPluginCommand("unlock", "解锁")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
@@ -152,6 +154,7 @@ public partial class MaiMaiDx
 
     #region 查分
 
+    [MarisaPluginDisabled]
     [MarisaPluginDoc("从华丽服务前拉一次分，下一个该命令之前一直使用这次拉下来的分，避免重复请求")]
     [MarisaPluginCommand("fetch")]
     private async Task<MarisaPluginTaskState> Fetch(Message message)

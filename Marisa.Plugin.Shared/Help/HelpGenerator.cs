@@ -10,6 +10,8 @@ public static class HelpGenerator
             .Where(m =>
                 // 把不允许给出文档的方法去掉
                 !m.GetCustomAttributes<MarisaPluginNoDocAttribute>().Any() &&
+                // 把禁用的方法去掉
+                !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any() &&
                 // 有触发命令，或者没有触发命令但有文档的
                 (
                     m.GetCustomAttributes<MarisaPluginCommand>().Any() ||

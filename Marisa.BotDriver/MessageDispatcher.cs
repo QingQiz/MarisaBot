@@ -3,6 +3,7 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Extension;
 using Marisa.BotDriver.Plugin;
+using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.BotDriver.Plugin.Trigger;
 
 namespace Marisa.BotDriver;
@@ -28,13 +29,14 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         Plugins
             .Select(p => (p, p.GetType()
                 .GetAllMethods()
+                // 未被禁用
+                .Where(m => !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any())
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
                     m.GetCustomAttributes<MarisaPluginCommand>().Any())
-                // 过滤 subcommand
-                .Where(m =>
-                    !m.GetCustomAttributes<MarisaPluginSubCommand>().Any())))
+                // 不是 subcommand
+                .Where(m => !m.GetCustomAttributes<MarisaPluginSubCommand>().Any())))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
@@ -44,15 +46,15 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         Plugins
             .Select(p => (p, p.GetType()
                 .GetAllMethods()
+                // 未被禁用
+                .Where(m => !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any())
                 // 选择出含有这两个属性的方法
                 .Where(m =>
                     m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
                     m.GetCustomAttributes<MarisaPluginCommand>().Any())
-                // 包含 subcommand
-                .Where(m =>
-                    m.GetCustomAttributes<MarisaPluginSubCommand>().Any())
-                .Select(m =>
-                    (ParentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, MethodInfo: m))))
+                // 是 subcommand
+                .Where(m => m.GetCustomAttributes<MarisaPluginSubCommand>().Any())
+                .Select(m => (ParentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, MethodInfo: m))))
             .ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
