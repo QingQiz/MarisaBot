@@ -212,7 +212,10 @@ public partial class Chunithm
                 return WebApi.ChunithmPreview(ctx.Id).Result;
             });
 
-            message.Reply(MessageDataImage.FromBase64(img.Value));
+            message.Reply(
+                new MessageDataText($"[{song.LevelName[levelIdx]}] {song.Title}"),
+                MessageDataImage.FromBase64(img.Value)
+            );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         });

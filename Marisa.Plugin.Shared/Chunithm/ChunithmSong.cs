@@ -45,7 +45,7 @@ public class ChunithmSong : Song
     public readonly List<string> ChartName = [];
     public readonly string Genre;
     /// <summary>
-    ///     13, 13+, 14, 14+, ...
+    ///     BASIC, ADVANCED, EXPERT, MASTER, ULTIMA, ...
     /// </summary>
     public readonly List<string> LevelName = [];
     public readonly List<long> MaxCombo = [];
