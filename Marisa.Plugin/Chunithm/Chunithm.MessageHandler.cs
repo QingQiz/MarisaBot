@@ -471,7 +471,7 @@ public partial class Chunithm
     }
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
-    [MarisaPluginCommand("tol", "tolerance", "容错率")]
+    [MarisaPluginCommand("tolerance", "tol", "容错率")]
     protected async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
