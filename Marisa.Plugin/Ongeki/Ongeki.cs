@@ -29,7 +29,7 @@ public partial class Ongeki :
                 ) as dynamic[];
                 return data!.Select(d => new OngekiSong(d)).ToList();
             },
-            Dialog.AddHandler
+            Dialog.TryAddHandler
         );
 
         SongGuessMaker = new SongGuessMaker<OngekiSong, OngekiGuess>(SongDb, nameof(BotDbContext.OngekiGuesses));

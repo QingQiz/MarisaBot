@@ -51,7 +51,7 @@ public partial class MaiMaiDx
          */
         var stat = 0;
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, async next =>
+        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, async next =>
         {
             switch (stat)
             {
@@ -585,7 +585,7 @@ public partial class MaiMaiDx
     }
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
-    [MarisaPluginCommand("tolerance", "容错率")]
+    [MarisaPluginCommand("tol", "tolerance", "容错率")]
     private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
@@ -598,7 +598,7 @@ public partial class MaiMaiDx
         }
 
         message.Reply("难度和预期达成率？");
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
 

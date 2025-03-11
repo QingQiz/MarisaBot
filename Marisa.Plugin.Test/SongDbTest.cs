@@ -31,7 +31,7 @@ public class SongDbTest
 
                 return data.Select(d => new MaiMaiSong(d)).ToList();
             },
-            Dialog.AddHandler
+            Dialog.TryAddHandler
         );
     }
 

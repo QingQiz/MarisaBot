@@ -42,7 +42,7 @@ public partial class MaiMaiDx :
                     return data!.Select(d => new MaiMaiSong(d)).ToList();
                 }
             },
-            Dialog.AddHandler
+            Dialog.TryAddHandler
         );
 
         SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, nameof(BotDbContext.MaiMaiDxGuesses));

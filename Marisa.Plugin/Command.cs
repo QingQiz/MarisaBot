@@ -41,7 +41,7 @@ public class Command : MarisaPluginBase
 
         m.Reply(reply);
 
-        Dialog.AddHandler(m.GroupInfo?.Id, m.Sender?.Id, next =>
+        Dialog.TryAddHandler(m.GroupInfo?.Id, m.Sender?.Id, next =>
         {
             if (next.Sender.Id != m.Sender!.Id)
             {
@@ -182,7 +182,7 @@ public class Command : MarisaPluginBase
             proc.BeginOutputReadLine();
             proc.BeginErrorReadLine();
 
-            Dialog.AddHandler(m.GroupInfo?.Id, m.Sender.Id, message =>
+            Dialog.TryAddHandler(m.GroupInfo?.Id, m.Sender.Id, message =>
             {
                 var command = message.Command;
 

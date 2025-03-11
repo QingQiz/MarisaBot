@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.DI.Message;
+using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
 using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.EntityFrameworkCore;
@@ -26,9 +27,9 @@ public abstract class BotDriver(
     /// <summary>
     /// 配置依赖注入
     /// </summary>
-    /// <param name="pluginAssembly"></param>
+    /// <param name="types">一堆插件的类型</param>
     /// <returns>ServiceCollection</returns>
-    protected static IServiceCollection Config(Assembly pluginAssembly)
+    protected static IServiceCollection Config(Type[] types)
     {
         var sc = new ServiceCollection()
             .AddScoped(p => p)
@@ -39,7 +40,7 @@ public abstract class BotDriver(
             // db context
             .AddScoped(_ => new BotDbContext());
 
-        var plugins = pluginAssembly.GetTypes()
+        var plugins = types
             .Where(t => t.GetCustomAttribute<MarisaPluginAttribute>(true) is not null)
             .Where(t => t.GetCustomAttribute<MarisaPluginDisabledAttribute>(false) is null)
             .OrderByDescending(t => t.GetCustomAttribute<MarisaPluginAttribute>()!.Priority);
@@ -63,16 +64,15 @@ public abstract class BotDriver(
     {
         while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
         {
-            _ = ProcMessageStep();
+            var message = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
+            _ = ProcMessageStep(message);
         }
 
         Logger.Fatal("Message processing task exited unexpectedly");
     }
 
-    protected async Task ProcMessageStep()
+    protected async Task ProcMessageStep(Message message)
     {
-        var message = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
-
         var res = await Policy.TimeoutAsync(TimeSpan.FromMinutes(10), TimeoutStrategy.Pessimistic).ExecuteAndCaptureAsync(async () =>
         {
             Logger.Info("{0}", message.ToString());

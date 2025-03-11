@@ -35,7 +35,7 @@ public partial class Chunithm :
                 ) as dynamic[];
                 return data!.Select(d => new ChunithmSong(d)).ToList();
             },
-            Dialog.AddHandler
+            Dialog.TryAddHandler
         );
 
         SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));

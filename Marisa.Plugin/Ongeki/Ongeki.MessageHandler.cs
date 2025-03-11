@@ -23,7 +23,7 @@ public partial class Ongeki
         }
 
         message.Reply("难度和预期达成率？");
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
 

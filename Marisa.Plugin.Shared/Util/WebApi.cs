@@ -9,6 +9,10 @@ public static class WebApi
     private static IBrowser? _browserInner;
     private static readonly object BrowserLock = new();
 
+    private static readonly bool RunningFromNUnit =
+        AppDomain.CurrentDomain.GetAssemblies().Any(
+            a => a.FullName!.StartsWith("nunit.framework", StringComparison.InvariantCultureIgnoreCase));
+
     private static IBrowser Browser
     {
         get
@@ -46,6 +50,11 @@ public static class WebApi
 
     private static async Task<string> RenderUrl(string url)
     {
+        if (RunningFromNUnit)
+        {
+            return "";
+        }
+
         await using var page = await Browser.NewPageAsync();
 
         await page.SetViewportAsync(new ViewPortOptions

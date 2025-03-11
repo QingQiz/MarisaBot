@@ -14,7 +14,6 @@ namespace Marisa.Plugin.Game;
 
 public partial class Game
 {
-
     private static readonly List<string> GuessDbName = new List<string>
     {
         "maimai",
@@ -71,7 +70,7 @@ public partial class Game
 
         var res = new HashSet<ReadOnlyMemory<char>>([], new MemoryExt.ReadOnlyMemoryCharComparer(StringComparison.OrdinalIgnoreCase));
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, mNext =>
+        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, mNext =>
         {
             switch (mNext.Command.Span)
             {
@@ -126,7 +125,7 @@ public partial class Game
         var cooldown       = new Dictionary<long, DateTime>();
         var cooldownGlobal = DateTime.MinValue;
 
-        var res = Dialog.AddHandler(message.GroupInfo?.Id, null, mNext =>
+        var res = Dialog.TryAddHandler(message.GroupInfo?.Id, null, mNext =>
         {
             if (mNext.Command.Span is "结束游戏")
             {

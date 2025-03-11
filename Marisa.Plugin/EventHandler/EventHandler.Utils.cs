@@ -77,7 +77,7 @@ public partial class EventHandler
         var now = DateTime.Now;
         var log = LogManager.GetCurrentClassLogger();
 
-        Dialog.AddHandler(m.GroupId, null, message1 =>
+        Dialog.TryAddHandler(m.GroupId, null, message1 =>
         {
             // 超过了禁言时间
             if (DateTime.Now - now > m.Time)

@@ -44,7 +44,7 @@ public partial class Chunithm
         var stat   = 0;
         var server = "";
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        Dialog.TryAddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             switch (stat)
             {
@@ -184,7 +184,7 @@ public partial class Chunithm
             ).ToList())
         }");
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender?.Id, next =>
+        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender?.Id, next =>
         {
             var command = next.Command.Trim();
 
@@ -470,7 +470,7 @@ public partial class Chunithm
     }
 
     [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
-    [MarisaPluginCommand("tolerance", "容错率")]
+    [MarisaPluginCommand("tol", "tolerance", "容错率")]
     private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
         var songName     = message.Command.Trim();
@@ -488,7 +488,7 @@ public partial class Chunithm
             ).ToList())
         }");
 
-        Dialog.AddHandler(message.GroupInfo?.Id, message.Sender.Id, next =>
+        await Dialog.AddHandlerAsync(message.GroupInfo?.Id, message.Sender.Id, next =>
         {
             var command = next.Command.Trim();
 

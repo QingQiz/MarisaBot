@@ -3,6 +3,7 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
+using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
@@ -23,7 +24,7 @@ public class DispatcherTest
 
         ConfigurationManager.SetConfigFilePath(configPath);
 
-        var sc = MiraiBackend.Config(Marisa.Plugin.Utils.Assembly());
+        var sc = MiraiBackend.Config(Utils.Assembly().GetTypes());
 
         var provider = sc.BuildServiceProvider();
 

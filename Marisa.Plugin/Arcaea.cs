@@ -24,7 +24,7 @@ public class Arcaea :
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/ArcaeaSongAliasTemp.txt",
             SongListGen,
-            Dialog.AddHandler
+            Dialog.TryAddHandler
         );
 
         SongGuessMaker = new SongGuessMaker<ArcaeaSong, ArcaeaGuess>(SongDb, nameof(BotDbContext.ArcaeaGuesses));

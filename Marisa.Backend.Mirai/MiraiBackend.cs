@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Reflection;
 using System.Text.Json;
 using Flurl;
 using Marisa.Backend.Mirai.MessageDataExt;
@@ -47,9 +46,9 @@ public class MiraiBackend : BotDriver.BotDriver
         _wsClient.ReconnectionHappened.Subscribe(_ => { _logger.Warn("Reconnection happened"); });
     }
 
-    public new static IServiceCollection Config(Assembly pluginAssembly)
+    public new static IServiceCollection Config(Type[] types)
     {
-        var sc = BotDriver.BotDriver.Config(pluginAssembly);
+        var sc = BotDriver.BotDriver.Config(types);
         sc.AddScoped(typeof(BotDriver.BotDriver), typeof(MiraiBackend));
         return sc;
     }
