@@ -180,8 +180,8 @@ function MakeBeatLine(chart: Chart) {
  * @param chart
  */
 function UpdateSlide(chart: Chart) {
-    let sld_end: { [key: string]: []} = {};
-    let sld_beg: { [key: string]: []} = {};
+    let sld_end: { [key: string]: number[]} = {};
+    let sld_beg: { [key: string]: number[]} = {};
 
     let slides = [...chart["SLD"], ...chart["SLC"], ...chart["SXD"], ...chart["SXC"]] as BeatmapSlideUnit[]
     let keys   = [...chart["SLD"].map(_ => "SLD"), ...chart["SLC"].map(_ => "SLC"), ...chart["SXD"].map(_ => "SXD"), ...chart["SXC"].map(_ => "SXC")]
@@ -255,7 +255,7 @@ function UpdateSlide(chart: Chart) {
             let key = [tick_end, target_cell, target_width].toString();
             current.push(current_slide_idx);
             if (!sld_beg[key]) break;
-            current_slide_idx = sld_beg[key].shift();
+            current_slide_idx = sld_beg[key].shift() as number;
             if (slide_head.has(current_slide_idx)) break;
         }
         full_slide.push(current);
@@ -438,6 +438,10 @@ function ParseSld(chart: Chart, data: SldData) {
         target_cell : data[6],
         target_width: data[7]
     };
+
+    if (isNaN(d.target_width)) {
+        d.target_width = d.width
+    }
 
     let tick     = ToTick(d.measure, d.offset);
     let tick_end = tick + d.duration;

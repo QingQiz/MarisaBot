@@ -191,8 +191,6 @@ let slides = computed(() => Get(cat_slide));
 
 
 <script lang="ts">
-import {BeatmapSlideUnit} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
-
 /**
  * 使用贪心策略将小节按顺序合并为最接近 `lane_length` 的若干个序列
  * @param arr
