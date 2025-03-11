@@ -6,7 +6,8 @@ using Marisa.BotDriver.Plugin.Attributes;
 using Marisa.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using Msg = Marisa.BotDriver.Entity.Message.Message;
+using Polly;
+using Polly.Timeout;
 
 namespace Marisa.BotDriver;
 
@@ -19,6 +20,8 @@ public abstract class BotDriver(
 {
     protected readonly MessageSenderProvider MessageSenderProvider = messageSenderProvider;
     protected readonly MessageQueueProvider MessageQueueProvider = messageQueueProvider;
+    protected readonly MessageDispatcher MessageDispatcher = new(pluginsAll, serviceProvider, dict);
+    protected readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 配置依赖注入
@@ -58,49 +61,35 @@ public abstract class BotDriver(
     /// <exception cref="Exception"></exception>
     protected virtual async Task ProcMessage()
     {
-        var dispatcher = new MessageDispatcher(pluginsAll, serviceProvider, dict);
-        var logger     = LogManager.GetCurrentClassLogger();
-
         while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
         {
-            var m = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
-
-            _ = Task.Run(async () =>
-            {
-                var cancel = new CancellationTokenSource();
-
-                var handlerTask = MsgProcTask(m);
-                var timeoutTask = Task.Delay(TimeSpan.FromMinutes(5), cancel.Token);
-
-                var completedTask = await Task.WhenAny(handlerTask, timeoutTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    logger.Error("Handler timed out. Caused by message: {0}", m);
-                    // 无法取消，先记录日志
-                }
-                else
-                {
-                    await Task.WhenAll(cancel.CancelAsync(), handlerTask);
-                }
-            });
+            _ = ProcMessageStep();
         }
 
-        logger.Fatal("Message processing task exited unexpectedly");
-        return;
+        Logger.Fatal("Message processing task exited unexpectedly");
+    }
 
-        async Task MsgProcTask(Msg m)
+    protected async Task ProcMessageStep()
+    {
+        var message = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
+
+        var res = await Policy.TimeoutAsync(TimeSpan.FromMinutes(10), TimeoutStrategy.Pessimistic).ExecuteAndCaptureAsync(async () =>
         {
-            logger.Info("{0}", m.ToString());
-            var toInvoke = dispatcher.Dispatch(m);
+            Logger.Info("{0}", message.ToString());
+            var toInvoke = MessageDispatcher.Dispatch(message);
 
             foreach (var (plugin, method, m2) in toInvoke)
             {
-                var state = await dispatcher.Invoke(plugin, method, m2);
+                var state = await MessageDispatcher.Invoke(plugin, method, m2);
 
                 if (state == MarisaPluginTaskState.CompletedTask) break;
             }
-        }
+        });
+
+        if (res.Outcome != OutcomeType.Failure) return;
+
+        message.Reply("Cancelled due to timeout (10min)");
+        Logger.Error("Handler timed out. Caused by message: {0}", message);
     }
 
     /// <summary>
