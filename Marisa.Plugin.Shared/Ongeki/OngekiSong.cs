@@ -99,9 +99,7 @@ public class OngekiSong : Song
 
     public override string GetImage()
     {
-        return new CacheableText(
-            Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64",
-            () => WebApi.OngekiSong((int)Id).Result
-        ).Value;
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        return new CacheableText(path, () => WebApi.OngekiSong((int)Id).Result).Value;
     }
 }

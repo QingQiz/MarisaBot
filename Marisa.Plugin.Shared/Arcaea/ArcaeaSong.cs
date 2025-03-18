@@ -56,7 +56,8 @@ public class ArcaeaSong : Song
 
     public override string GetImage()
     {
-        return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        return new CacheableText(path, () =>
         {
             var       bgColor1 = Color.FromRgb(237, 237, 237);
             var       bgColor2 = Color.FromRgb(250, 250, 250);

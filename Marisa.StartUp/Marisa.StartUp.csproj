@@ -14,7 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="jieba.NET" Version="0.42.2"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3"/>
         <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11"/>
         <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11"/>

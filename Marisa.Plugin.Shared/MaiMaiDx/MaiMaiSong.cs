@@ -120,10 +120,7 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = NoCover
-            ? Path.Join(ResourceManager.TempPath, "Detail-NC-") + Id + ".b64"
-            : Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64";
-
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
         return new CacheableText(path, () => this.Draw().ToB64()).Value;
     }
 }

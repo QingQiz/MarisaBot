@@ -197,7 +197,8 @@ public class ChunithmSong : Song
 
     public override string GetImage()
     {
-        return new CacheableText(Path.Join(ResourceManager.TempPath, "Detail-") + Id + ".b64", () =>
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        return new CacheableText(path, () =>
         {
             const int cardFontSize = 31;
             const int padding      = 10;

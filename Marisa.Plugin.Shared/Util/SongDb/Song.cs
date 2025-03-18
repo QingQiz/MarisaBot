@@ -1,4 +1,7 @@
-﻿using SixLabors.ImageSharp;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
+using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.Util.SongDb;
 
@@ -21,4 +24,11 @@ public abstract class Song
     public abstract string GetImage();
 
     public abstract Image GetCover();
+
+    public virtual string Hash()
+    {
+        var serialized = JsonConvert.SerializeObject(this);
+        var hashed     = MD5.HashData(Encoding.UTF8.GetBytes(serialized));
+        return BitConverter.ToString(hashed).Replace("-", "");
+    }
 }
