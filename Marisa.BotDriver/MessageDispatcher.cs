@@ -26,36 +26,39 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     ///     获取所有 有触发器的插件 的 所有命令，<b>不</b> 包括子命令
     /// </summary>
     private Dictionary<MarisaPluginBase, List<MethodInfo>> Commands => _commands ??=
-        Plugins
-            .Select(p => (p, p.GetType()
-                .GetAllMethods()
+        (from plugin in Plugins
+            select (
+                plugin,
+                from m in plugin.GetType().GetAllMethods()
                 // 未被禁用
-                .Where(m => !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any())
+                where !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any()
                 // 选择出含有这两个属性的方法
-                .Where(m =>
-                    m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
-                    m.GetCustomAttributes<MarisaPluginCommand>().Any())
+                where m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
+                      m.GetCustomAttributes<MarisaPluginCommand>().Any()
                 // 不是 subcommand
-                .Where(m => !m.GetCustomAttributes<MarisaPluginSubCommand>().Any())))
-            .ToDictionary(x => x.Item1, x => x.Item2.ToList());
+                where !m.GetCustomAttributes<MarisaPluginSubCommand>().Any()
+                select m
+            )
+        ).ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
     ///     获取所有 有触发器的插件 的 所有<b>子</b>命令
     /// </summary>
     private Dictionary<MarisaPluginBase, List<(string ParentName, MethodInfo MethodInfo)>> SubCommands => _subCommands ??=
-        Plugins
-            .Select(p => (p, p.GetType()
-                .GetAllMethods()
+        (from plugin in Plugins
+            select (
+                plugin,
+                from m in plugin.GetType().GetAllMethods()
                 // 未被禁用
-                .Where(m => !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any())
+                where !m.GetCustomAttributes<MarisaPluginDisabledAttribute>().Any()
                 // 选择出含有这两个属性的方法
-                .Where(m =>
-                    m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
-                    m.GetCustomAttributes<MarisaPluginCommand>().Any())
+                where m.GetCustomAttributes<MarisaPluginTrigger>().Any() ||
+                      m.GetCustomAttributes<MarisaPluginCommand>().Any()
                 // 是 subcommand
-                .Where(m => m.GetCustomAttributes<MarisaPluginSubCommand>().Any())
-                .Select(m => (ParentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, MethodInfo: m))))
-            .ToDictionary(x => x.Item1, x => x.Item2.ToList());
+                where m.GetCustomAttributes<MarisaPluginSubCommand>().Any()
+                select (ParentName: m.GetCustomAttribute<MarisaPluginSubCommand>()!.Name, MethodInfo: m)
+            )
+        ).ToDictionary(x => x.Item1, x => x.Item2.ToList());
 
     /// <summary>
     ///     分发消息到各个插件
