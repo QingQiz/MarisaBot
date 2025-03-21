@@ -43,7 +43,7 @@ function GetR10Ra() {
                     <div class="avatar">
                         <img :src="`/assets/chunithm/pic/logo.png`" alt="avatar">
                     </div>
-                    <div class="info-card-detail shrink relative">
+                    <div class="info-card-detail shrink">
                         <div class="nickname font-osu-web">
                             {{ best.nickname }}
                         </div>
@@ -52,19 +52,23 @@ function GetR10Ra() {
                                 <div class="my-2 w-[15px] bg-black"></div>
                                 <div class="text-[50px]">RATING: {{ ToFixedNoRound(best.rating, 2) }}</div>
                             </div>
-                            <div class="flex gap-2 font-console">
-                                <div class="my-1 w-[15px] bg-gray-500"></div>
-                                <div class="text-[33px]">B30: {{ ToFixedNoRound(GetB30Ra(), 2) }}</div>
-                            </div>
-                            <div class="flex gap-2 font-console">
-                                <div class="my-1 w-[15px] bg-gray-500"></div>
-                                <div class="text-[33px]">
-                                    {{ b50 ? "N20" : "R10" }}: {{ ToFixedNoRound(GetR10Ra(), 2) }}
+                            <div class="flex gap-5">
+                                <div class="w-[210px] min-w-[210px]">
+                                    <div class="flex gap-2 font-console">
+                                        <div class="my-1 w-[15px] bg-gray-500"></div>
+                                        <div class="text-[33px]">B30: {{ ToFixedNoRound(GetB30Ra(), 2) }}</div>
+                                    </div>
+                                    <div class="flex gap-2 font-console">
+                                        <div class="my-1 w-[15px] bg-gray-500"></div>
+                                        <div class="text-[33px]">
+                                            {{ b50 ? "N20" : "R10" }}: {{ ToFixedNoRound(GetR10Ra(), 2) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="datasource" v-if="best.DataSource">
+                                    {{ best.DataSource }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="datasource" v-if="best.DataSource">
-                            {{ best.DataSource }}
                         </div>
                     </div>
                 </div>
@@ -106,8 +110,9 @@ function GetR10Ra() {
 }
 
 .datasource {
-    @apply absolute font-arial right-0 bottom-0 italic text-gray-400 text-opacity-50;
-    font-size: 60px;
+    @apply font-arial italic text-gray-400 text-opacity-40;
+    @apply overflow-hidden overflow-ellipsis text-nowrap;
+    font-size: 70px;
     font-weight: bolder;
 }
 
