@@ -452,14 +452,13 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B50Sum(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-        var rating  = await fetcher.GetRating(message);
+        var rating = await GetRating(message, true);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
         var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
 
-        message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R20}\n\n" +
-                      $"推分剩余: 0.{50 - (bSum + rSum) % 50:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{20 - rSum % 20:00}");
+        message.Reply($"{rating.Username} ({rating.Rating})\nOld : {rating.B30}\nNew: {rating.R20}\n\n" +
+                      $"推分剩余: 0.{50 - (bSum + rSum) % 50:00}\nOld 推分剩余: 0.{30 - bSum % 30:00}\nNew 推分剩余: 0.{20 - rSum % 20:00}");
 
         return MarisaPluginTaskState.CompletedTask;
     }
