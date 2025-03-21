@@ -127,8 +127,12 @@ public static class WebApi
         return await RenderUrl(Frontend + "/chunithm/preview?id=" + contextId);
     }
 
-    public static async Task<string> ChunithmBest(Guid contextId)
+    public static async Task<string> ChunithmBest(Guid contextId, bool b50)
     {
-        return await RenderUrl(Frontend + "/chunithm/best?id=" + contextId);
+        if (b50)
+        {
+            return await RenderUrl(Frontend + $"/chunithm/best?id={contextId}&b50=1");
+        }
+        return await RenderUrl(Frontend + $"/chunithm/best?id={contextId}");
     }
 }

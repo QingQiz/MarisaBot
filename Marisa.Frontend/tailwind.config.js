@@ -8,6 +8,7 @@ module.exports = {
             'fangSong': 'Torus,FangSong'.split(','),
             'osu-rank': 'Venera',
             'console': 'Consolas,monospace',
+            'arial': 'Arial',
         }
     },
     variants: {

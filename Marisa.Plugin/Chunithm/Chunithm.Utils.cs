@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using Marisa.EntityFrameworkCore;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util;
 
@@ -17,12 +18,12 @@ public partial class Chunithm
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "Louis"      => new LouisDataFetcher(SongDb),
-                "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "aqua.naominet.live",
+                "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "RinNET", "aqua.naominet.live",
                     ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, bind!),
-                "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "aqua.msm.moe",
+                "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "Aqua", "aqua.msm.moe",
                     ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!),
                 _ => Dns.GetHostAddresses(name).Length != 0
-                    ? new AllNetBasedNetDataFetcher(SongDb, name,
+                    ? new AllNetBasedNetDataFetcher(SongDb, name, name,
                         ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!)
                     : throw new InvalidDataException("无效的服务器名： " + name)
             };
@@ -59,13 +60,34 @@ public partial class Chunithm
             : GetDataFetcher(bind.ServerName, bind);
     }
 
-    private async Task<MessageChain> GetB30Card(Message message)
+    private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)
     {
         var fetcher = await GetDataFetcher(message, true);
+        if (!b50) return await fetcher.GetRating(message);
 
+        var rating = await fetcher.GetRating(message);
+        var scores = await fetcher.GetScores(message);
+        rating.IsB50 = true;
+
+        var newestV = fetcher is AllNetBasedNetDataFetcher ? "CHUNITHM VERSE" : "CHUNITHM LUMINOUS";
+
+        var div = scores.Select(x => x.Value).GroupBy(x => SongDb.GetSongById(x.Id)!.Version == newestV).ToList();
+
+        var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];
+        var b = div.FirstOrDefault(x => !x.Key)?.Select(x => x) ?? [];
+        r = r.OrderByDescending(x => x.Rating).Take(20);
+        b = b.OrderByDescending(x => x.Rating).Take(30);
+
+        rating.Records.Best   = b.ToArray();
+        rating.Records.Recent = r.ToArray();
+        return rating;
+    }
+
+    private async Task<MessageChain> GetRatingImg(Message message, bool b50 = false)
+    {
         var ctx = new WebContext();
-        ctx.Put("rating", await fetcher.GetRating(message));
+        ctx.Put("rating", await GetRating(message, b50));
 
-        return MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id));
+        return MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id, b50));
     }
 }

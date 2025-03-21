@@ -6,13 +6,17 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public class ChunithmRating
 {
+    public bool IsB50;
+    public string DataSource;
+
     [JsonProperty("rating", Required = Required.Always)]
     public decimal Rating
     {
         get
         {
-            var (r10, b30) = (Records.Best.Sum(s => s.Rating), Records.R10.Sum(s => s.Rating));
-            return Math.Round((r10 + b30) / 40, 2, MidpointRounding.ToZero);
+            var r = Records.Best.Sum(s => s.Rating);
+            var b = Records.Recent.Sum(s => s.Rating);
+            return Math.Round((r + b) / (IsB50 ? 50 : 40), 2, MidpointRounding.ToZero);
         }
         // ReSharper disable once ValueParameterNotUsed
         set {}
@@ -25,7 +29,8 @@ public class ChunithmRating
     public string Username { get; set; }
 
     public decimal B30 => Math.Round(Records.Best.Sum(s => s.Rating) / 30, 2, MidpointRounding.ToZero);
-    public decimal R10 => Math.Round(Records.R10.Sum(s => s.Rating) / 10, 2, MidpointRounding.ToZero);
+    public decimal R10 => Math.Round(Records.Recent.Take(10).Sum(s => s.Rating) / 10, 2, MidpointRounding.ToZero);
+    public decimal R20 => Math.Round(Records.Recent.Take(20).Sum(s => s.Rating) / 20, 2, MidpointRounding.ToZero);
 }
 
 public class Records
@@ -47,5 +52,5 @@ public class Records
     }
 
     [JsonProperty("r10", Required = Required.Always)]
-    public ChunithmScore[] R10 { get; set; }
+    public ChunithmScore[] Recent { get; set; }
 }

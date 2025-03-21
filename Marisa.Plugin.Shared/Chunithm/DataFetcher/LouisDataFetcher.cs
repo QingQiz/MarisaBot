@@ -105,14 +105,15 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 #pragma warning disable CS8604
                 B30 = json["records"]["b30"].ToObject<BestScoreLouis[]>()
                     .Select(x => x.ToChunithmScore(Indexer)).ToArray(),
-                R10 = json["records"]["r10"].ToObject<RecentScoreLouis[]>()
+                Recent = json["records"]["r10"].ToObject<RecentScoreLouis[]>()
                     .Select(x => x.ToChunithmScore(Indexer)).ToArray()
 #pragma warning restore CS8604
 #pragma warning restore CS8602
-            }
+            },
+            DataSource = "Louis"
         };
 
-        foreach (var r in data.Records.Best.Concat(data.Records.R10))
+        foreach (var r in data.Records.Best.Concat(data.Records.Recent))
         {
             if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
 

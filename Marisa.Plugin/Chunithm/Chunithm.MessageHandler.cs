@@ -409,7 +409,7 @@ public partial class Chunithm
     [MarisaPluginCommand("b30", "查分")]
     private async Task<MarisaPluginTaskState> B30(Message message)
     {
-        var ret = await GetB30Card(message);
+        var ret = await GetRatingImg(message);
 
         message.Reply(ret);
 
@@ -425,10 +425,41 @@ public partial class Chunithm
         var rating  = await fetcher.GetRating(message);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
-        var rSum = rating.Records.R10.Sum(x => x.Rating) * 100;
+        var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
 
         message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
                       $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     b50
+    /// </summary>
+    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginCommand("b50")]
+    private async Task<MarisaPluginTaskState> B50(Message message)
+    {
+        var ret = await GetRatingImg(message, true);
+
+        message.Reply(ret);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("b50的汇总情况，具体的试一试命令就知道了（懒）")]
+    [MarisaPluginSubCommand(nameof(B50))]
+    [MarisaPluginCommand("sum")]
+    private async Task<MarisaPluginTaskState> B50Sum(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+        var rating  = await fetcher.GetRating(message);
+
+        var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
+        var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
+
+        message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R20}\n\n" +
+                      $"推分剩余: 0.{50 - (bSum + rSum) % 50:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{20 - rSum % 20:00}");
 
         return MarisaPluginTaskState.CompletedTask;
     }

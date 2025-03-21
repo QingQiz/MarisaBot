@@ -10,7 +10,7 @@ using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string host, string keyChipId, ChunithmBind bind) : DataFetcher(songDb)
+public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string shortname, string host, string keyChipId, ChunithmBind bind) : DataFetcher(songDb)
 {
     private string? _serverUri;
     private string Host { get; } = host;
@@ -71,11 +71,12 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string host,
 
         return new ChunithmRating
         {
-            Username = username,
+            Username   = username,
+            DataSource = shortname,
             Records = new Records
             {
-                B30 = b30.ToArray(),
-                R10 = r10.ToArray()
+                B30    = b30.ToArray(),
+                Recent = r10.ToArray()
             }
         };
     }

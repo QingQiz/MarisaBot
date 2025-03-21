@@ -10,6 +10,7 @@ import {ToFixedNoRound} from "@/utils/str";
 
 const route = useRoute()
 const id    = ref(route.query.id)
+const b50   = ref(route.query.b50)
 
 let best         = ref({} as any)
 let data_fetched = ref(false);
@@ -25,7 +26,7 @@ function GetB30Ra() {
 }
 
 function GetR10Ra() {
-    return (best.value.records.r10 as []).reduce((ra, cur: { ra: number }) => ra + cur.ra, 0) / 10;
+    return (best.value.records.r10 as []).reduce((ra, cur: { ra: number }) => ra + cur.ra, 0) / (b50.value ? 20 : 10);
 }
 </script>
 
@@ -42,7 +43,7 @@ function GetR10Ra() {
                     <div class="avatar">
                         <img :src="`/assets/chunithm/pic/logo.png`" alt="avatar">
                     </div>
-                    <div class="info-card-detail shrink">
+                    <div class="info-card-detail shrink relative">
                         <div class="nickname font-osu-web">
                             {{ best.nickname }}
                         </div>
@@ -57,8 +58,13 @@ function GetR10Ra() {
                             </div>
                             <div class="flex gap-2 font-console">
                                 <div class="my-1 w-[15px] bg-gray-500"></div>
-                                <div class="text-[33px]">R10: {{ ToFixedNoRound(GetR10Ra(), 2) }}</div>
+                                <div class="text-[33px]">
+                                    {{ b50 ? "N20" : "R10" }}: {{ ToFixedNoRound(GetR10Ra(), 2) }}
+                                </div>
                             </div>
+                        </div>
+                        <div class="datasource" v-if="best.DataSource">
+                            {{ best.DataSource }}
                         </div>
                     </div>
                 </div>
@@ -97,6 +103,12 @@ function GetR10Ra() {
         height: 100%;
         object-fit: cover;
     }
+}
+
+.datasource {
+    @apply absolute font-arial right-0 bottom-0 italic text-gray-400 text-opacity-50;
+    font-size: 60px;
+    font-weight: bolder;
 }
 
 .nickname {

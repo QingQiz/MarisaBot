@@ -62,13 +62,13 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         }
 
         var json = await response.GetJsonAsync<ChunithmRating>();
-        foreach (var r in json.Records.Best.Concat(json.Records.R10))
+        foreach (var r in json.Records.Best.Concat(json.Records.Recent))
         {
             if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
 
             r.Id = SongDb.SongList.First(s => s.Title.Equals(r.Title, StringComparison.Ordinal)).Id;
         }
-
+        json.DataSource   = "DivingFish";
         json.Records.Best = json.Records.Best.Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
 
         return json;
