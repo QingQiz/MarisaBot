@@ -16,6 +16,7 @@ import Recommend from "@/components/maimai/Recommend.vue";
 import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
 import OverPowerAll from "@/components/chunithm/OverPowerAll.vue";
 import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
+import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
 
 
 const routes = [
@@ -26,6 +27,7 @@ const routes = [
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},
     {path: '/chunithm/preview', component: ChunithmPreview},
+    {path: '/chunithm/song', component: ChunithmSong},
     {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},

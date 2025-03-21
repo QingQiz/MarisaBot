@@ -46,7 +46,21 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
             var list = listLouis
                 .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
-            return _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+
+            _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
+
+            foreach (var song in _songList)
+            {
+                var songNew = SongDb.SongIndexer[song.Id];
+                for (var i = 0; i < song.Constants.Count; i++)
+                {
+                    var j = songNew.LevelName.FindIndex(x => x == song.LevelName[i]);
+
+                    if (j != -1) songNew.ConstantOld[j] = song.Constants[i];
+                }
+            }
+
+            return _songList;
         }
     }
 

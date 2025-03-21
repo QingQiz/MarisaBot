@@ -9,9 +9,7 @@ public static class WebApi
     private static IBrowser? _browserInner;
     private static readonly object BrowserLock = new();
 
-    private static readonly bool RunningFromNUnit =
-        AppDomain.CurrentDomain.GetAssemblies().Any(
-            a => a.FullName!.StartsWith("nunit.framework", StringComparison.InvariantCultureIgnoreCase));
+    public static bool DisableWebApi { get; set; }
 
     private static IBrowser Browser
     {
@@ -50,7 +48,7 @@ public static class WebApi
 
     private static async Task<string> RenderUrl(string url)
     {
-        if (RunningFromNUnit)
+        if (DisableWebApi)
         {
             return "";
         }
@@ -107,6 +105,11 @@ public static class WebApi
     public static async Task<string> OngekiSong(int id)
     {
         return await RenderUrl(Frontend + $"/ongeki/song/{id}");
+    }
+
+    public static async Task<string> ChunithmSong(Guid id)
+    {
+        return await RenderUrl(Frontend + "/chunithm/song?id=" + id);
     }
 
     public static async Task<string> ChunithmSummary(Guid contextId)

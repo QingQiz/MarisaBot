@@ -38,6 +38,8 @@ public partial class Chunithm :
         );
 
         SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));
+        // make sure constant old is initialized
+        Task.Run(() => new LouisDataFetcher(SongDb).GetSongList());
     }
 
     public void Reset()
