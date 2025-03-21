@@ -156,7 +156,7 @@ public class SongDb<TSong> : ICanReset where TSong : Song
     public List<TSong> SearchSong(ReadOnlyMemory<char> input)
     {
         var m = input.Span;
-        if (m.IsEmpty) return [];
+        if (m.IsEmpty) return SongList;
 
         m = m.Trim();
 

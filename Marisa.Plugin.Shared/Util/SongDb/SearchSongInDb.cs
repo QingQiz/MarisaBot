@@ -5,13 +5,6 @@ namespace Marisa.Plugin.Shared.Util.SongDb;
 
 public static class SearchSongInDb
 {
-    public static async Task<MarisaPluginTaskState> SearchSong<T>(this SongDb<T> songDb, Message message) where T : Song
-    {
-        _ = await MultiPageSelectResult(songDb, songDb.SearchSong(message.Command), message);
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     #region Select Song
 
     /// <summary>

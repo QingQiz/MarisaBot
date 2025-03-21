@@ -51,7 +51,8 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
             foreach (var song in _songList)
             {
-                var songNew = SongDb.SongIndexer[song.Id];
+                if (!SongDb.SongIndexer.TryGetValue(song.Id, out var songNew)) continue;
+
                 for (var i = 0; i < song.Constants.Count; i++)
                 {
                     var j = songNew.LevelName.FindIndex(x => x == song.LevelName[i]);

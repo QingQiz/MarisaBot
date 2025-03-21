@@ -12,11 +12,11 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     /// <summary>
     ///     搜歌
     /// </summary>
-    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
+    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id 或表达式（例如const>10）")]
     [MarisaPluginCommand("song", "search", "搜索")]
     async Task<MarisaPluginTaskState> SearchSong(Message message)
     {
-        return await SongDb.SearchSong(message);
+        return await SearchSong(SongDb, message);
     }
 
     #endregion
@@ -209,6 +209,201 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     {
         SongDb.SelectSongByArtist(message.Command).RandomSelectResult(message);
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private static Func<Song, bool> GetConstraint(Message message, List<ReadOnlyMemory<char>> expr)
+    {
+        List<Func<Song, int, bool>> diffConstraint = [];
+        List<Func<Song, bool>>      songConstraint = [];
+
+        foreach (var e in expr)
+        {
+            var key = "";
+            var op  = "";
+            var val = "";
+
+            var s = e.Span;
+            for (var i = 0; i < s.Length; i++)
+            {
+                switch (s[i])
+                {
+                    case '>':
+                    case '<':
+                        key = e[..i].ToString();
+                        if (i + 1 < s.Length && s[i + 1] == '=')
+                        {
+                            op = e.Slice(i, 2).ToString();
+                            i++;
+                        }
+                        else
+                        {
+                            op = e.Slice(i, 1).ToString();
+                        }
+                        break;
+                    case '=':
+                        key = e[..i].ToString();
+                        op  = "=";
+                        break;
+                    default:
+                        continue;
+                }
+                val = e[(i + 1)..].ToString();
+                break;
+            }
+
+            var available = new List<string> { "Charter", "Constant", "Bpm", "Artist", "Title", "Version", "Id", "Index" };
+
+            switch (available.FindIndex(x => x.StartsWith(key, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                case -1:
+                    message.Reply($"{key}不是可用的约束条件，可用的：{string.Join('、', available)}。可用非共同前缀替代。");
+                    throw new ArgumentOutOfRangeException();
+                case 0: // Charter
+                    if (op != "=")
+                    {
+                        message.Reply("该约束可用操作符：=");
+                        throw new ArgumentOutOfRangeException();
+                    }
+                    diffConstraint.Add((song, levelIdx) => song.Charters[levelIdx].Equals(val, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case 1: // Constant
+                    if (double.TryParse(val, out var constant))
+                    {
+                        var result = constant;
+                        diffConstraint.Add((song, levelIdx) => GetComparer<double>(op)(song.Constants[levelIdx], result));
+                        break;
+                    }
+                    message.Reply("Constant 只能为数字");
+                    throw new ArgumentOutOfRangeException();
+                case 2: // Bpm
+                    if (double.TryParse(val, out var bpm))
+                    {
+                        var result = bpm;
+                        songConstraint.Add(song => GetComparer<double>(op)(song.Bpm, result));
+                        break;
+                    }
+                    message.Reply("Bpm 只能为数字");
+                    throw new ArgumentOutOfRangeException();
+                case 3: // Artist
+                    songConstraint.Add(song => song.Artist.Contains(val, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case 4: // Title
+                    songConstraint.Add(song => song.Title.Contains(val, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case 5:
+                    songConstraint.Add(song => song.Version.Contains(val, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case 6:
+                    if (long.TryParse(val, out var id))
+                    {
+                        var result = id;
+                        songConstraint.Add(song => GetComparer<long>(op)(song.Id, result));
+                        break;
+                    }
+                    message.Reply("Id 只能为数字");
+                    throw new ArgumentOutOfRangeException();
+                case 7:
+                    if (int.TryParse(val, out var index))
+                    {
+                        var result = index;
+                        diffConstraint.Add((_, levelIdx) => GetComparer<int>(op)(levelIdx, result));
+                        break;
+                    }
+                    message.Reply("LevelIndex 只能为数字");
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        return song =>
+        {
+            var diffRes = false;
+            if (diffConstraint.Any())
+                for (var i = 0; i < song.Constants.Count; i++)
+                {
+                    diffRes |= diffConstraint.All(f => f(song, i));
+                }
+            else
+                diffRes = true;
+            return diffRes && songConstraint.All(f => f(song));
+        };
+
+        Func<T, T, bool> GetComparer<T>(string op)
+        {
+            return op switch
+            {
+                ">=" => (x, y) => Comparer<T>.Default.Compare(x, y) >= 0,
+                "<=" => (x, y) => Comparer<T>.Default.Compare(x, y) <= 0,
+                "="  => (x, y) => Comparer<T>.Default.Compare(x, y) == 0,
+                ">"  => (x, y) => Comparer<T>.Default.Compare(x, y) > 0,
+                "<"  => (x, y) => Comparer<T>.Default.Compare(x, y) < 0,
+                _    => throw new ArgumentOutOfRangeException()
+            };
+        }
+    }
+
+    private static List<ReadOnlyMemory<char>> GetExpressions(ReadOnlyMemory<char> search)
+    {
+        var s   = search.Span;
+        var res = new List<ReadOnlyMemory<char>>();
+        for (var idx = 0; idx < s.Length; idx++)
+        {
+            switch (s[idx])
+            {
+                case '>':
+                case '<':
+                case '=':
+                    var i = idx;
+                    for (; i >= 0; i--)
+                    {
+                        if (s[i] != ' ') continue;
+                        i++;
+                        break;
+                    }
+                    i = i < 0 ? 0 : i;
+
+                    var j     = idx;
+                    var quote = false;
+                    for (; j < s.Length; j++)
+                    {
+                        if (!quote && s[j] == ' ') break;
+                        if (s[j] == '"') quote = !quote;
+                    }
+                    res.Add(search.Slice(i, j - i));
+                    break;
+                default:
+                    continue;
+            }
+        }
+        return res;
+    }
+
+    private static ReadOnlyMemory<char> GetKeyword(ReadOnlyMemory<char> search, List<ReadOnlyMemory<char>> expr)
+    {
+        return expr.Aggregate(search, (current, e) => current.Replace(e, ReadOnlyMemory<char>.Empty));
+    }
+
+    private static async Task<MarisaPluginTaskState> SearchSong<T>(SongDb<T> songDb, Message message) where T : Song
+    {
+        try
+        {
+            var expr       = GetExpressions(message.Command);
+            var keyword    = GetKeyword(message.Command, expr);
+            var constraint = GetConstraint(message, expr);
+
+            var searchRes = songDb.SearchSong(keyword.Trim());
+
+            _ = await songDb.MultiPageSelectResult(searchRes.Where(x => constraint(x)).ToList(), message);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     #endregion

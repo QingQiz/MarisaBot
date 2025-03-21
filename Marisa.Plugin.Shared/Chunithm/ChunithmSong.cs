@@ -112,7 +112,8 @@ public class ChunithmSong : Song
                     bpms.Add(i.Bpm);
                 }
 
-                Bpm = bpms.MaxBy(x => x.Length).AsMemory();
+                base.Bpm = bpms.Select(x => double.Parse(x.Split(' ').First())).Max();
+                Bpm      = bpms.MaxBy(x => x.Length).AsMemory();
 
                 foreach (var i in o.Beatmaps)
                 {
