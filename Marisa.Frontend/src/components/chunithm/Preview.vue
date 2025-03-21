@@ -229,7 +229,7 @@ function GetAvgValue(arr: number[]) {
 
     copy.sort((a, b) => a - b);
 
-    return copy.slice(ignore, copy.length - 2 * ignore).reduce((a, b) => a + b, 0) / (copy.length - 2 * ignore);
+    return copy.slice(ignore, copy.length - ignore).reduce((a, b) => a + b, 0) / (copy.length - 2 * ignore);
 }
 
 

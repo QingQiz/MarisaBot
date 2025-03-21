@@ -74,21 +74,25 @@ export class BeatmapSpeedVelocity extends Beatmap {
 
 export class BeatmapBeat extends Beatmap {
     MeasureId: number;
+    TickEnd: number;
 
-    constructor(Tick: number, MeasureId: number) {
+    constructor(Tick: number, MeasureId: number, TickEnd: number) {
         super(Tick);
         this.MeasureId = MeasureId;
+        this.TickEnd = TickEnd;
     }
 }
 
 export class BeatmapMeasure extends Beatmap {
     Id: number;
-    Met: BeatmapMet
+    Met: BeatmapMet;
+    TickEnd: number;
 
-    constructor(Tick: number, Id: number, Met: BeatmapMet) {
+    constructor(Tick: number, Id: number, Met: BeatmapMet, TickEnd: number) {
         super(Tick);
         this.Id = Id;
         this.Met = Met;
+        this.TickEnd = TickEnd;
     }
 }
 

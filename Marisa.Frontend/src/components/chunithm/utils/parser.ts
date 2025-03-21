@@ -167,10 +167,10 @@ function MakeBeatLine(chart: Chart) {
 
         for (let j = met[i].Tick; j < next_tick; j += measure_length) {
             for (let k = j + beat_length; k < j + measure_length && k < next_tick; k += beat_length) {
-                chart["BEAT_2"].push(new BeatmapBeat(k, measure_id));
+                chart["BEAT_2"].push(new BeatmapBeat(k, measure_id, k + beat_length));
             }
 
-            chart["BEAT_1"].push(new BeatmapMeasure(j, measure_id++, met[i]))
+            chart["BEAT_1"].push(new BeatmapMeasure(j, measure_id++, met[i], measure_length + j))
         }
     }
 }
@@ -286,7 +286,7 @@ export function GetMaxTick(chart: Chart) {
                 tick_max = Math.max(tick_max, (note as BeatmapLn).TickEnd);
             }
 
-            if (key == "SFL") {
+            if (key == "SFL" || key == "BEAT_1" || key == "BEAT_2") {
                 tick_max = Math.max(tick_max, (note as BeatmapSpeedVelocity).TickEnd);
             }
         }
