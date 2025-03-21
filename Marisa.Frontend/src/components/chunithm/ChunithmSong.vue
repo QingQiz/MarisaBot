@@ -93,6 +93,7 @@ function reduce_bpm(): [number, number[]] {
             <template v-for="(c, i) in song.Beatmaps">
                 <div v-if="i == 0" class="chart-header">
                     <div>难度</div>
+                    <div>等级</div>
                     <div>定数</div>
                     <div>
                         <div class="bg-green-200 rounded-full px-3">定数VERSE</div>
@@ -104,6 +105,7 @@ function reduce_bpm(): [number, number[]] {
                     <div :style="`background-color: ${level_idx_color_map[c['LevelName']]};`" class="text-white">
                         {{ c['LevelName'] }}
                     </div>
+                    <div>{{ c['LevelStr'] }}</div>
                     <div>{{ c.ConstantOld == 0 ? '' : c.ConstantOld }}</div>
                     <div>
                         {{ c.Constant == 0 ? '' : c.Constant }}
@@ -166,20 +168,25 @@ function reduce_bpm(): [number, number[]] {
 }
 
 .chart > div > div:nth-child(2) {
-    width: 100px;
-    max-width: 100px;
+    width: 70px;
+    max-width: 70px;
 }
 
 .chart > div > div:nth-child(3) {
-    width: 150px;
-    max-width: 150px;
+    width: 70px;
+    max-width: 70px;
 }
+
 .chart > div > div:nth-child(4) {
+    width: 120px;
+    max-width: 120px;
+}
+.chart > div > div:nth-child(5) {
     width: 100px;
     max-width: 100px;
 }
 
-.chart > div > div:nth-child(5) {
+.chart > div > div:nth-child(6) {
     min-width: 500px;
 }
 
