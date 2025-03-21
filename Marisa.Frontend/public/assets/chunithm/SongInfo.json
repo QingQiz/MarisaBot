@@ -666,8 +666,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2429,
-        "LevelStr": "14+",
-        "Constant": 14.7,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Taboo \"Forbidden Notes\"",
         "Bpm": "180.00",
         "ChartName": "0020_04"
@@ -1072,7 +1072,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1655,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "Piercing Blade",
         "Bpm": "146.00",
         "ChartName": "0035_04"
@@ -1467,8 +1467,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 1741,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "ぴちネコ@taterenda lovers",
         "Bpm": "256 (106.00 - 256.00)",
         "ChartName": "0045_04"
@@ -2287,7 +2287,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1730,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ぴちネコ",
         "Bpm": "165.00",
         "ChartName": "0061_03"
@@ -2386,7 +2386,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1932,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "128.00",
         "ChartName": "0063_03"
@@ -2394,8 +2394,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2455,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Techno Kitchen",
         "Bpm": "128.00",
         "ChartName": "0063_04"
@@ -2790,8 +2790,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1821,
-        "LevelStr": "13",
-        "Constant": 13.3,
+        "LevelStr": "13+",
+        "Constant": 13.5,
         "Charter": "Revo@LC cooperated with 譜面-100号",
         "Bpm": "136.00",
         "ChartName": "0070_03"
@@ -3871,7 +3871,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1372,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Op.-C",
         "Bpm": "118.00",
         "ChartName": "0090_03"
@@ -4195,7 +4195,7 @@
   },
   {
     "Id": 97,
-    "Title": "Help me, ERINNNNNN!!",
+    "Title": "Help me, ERINNNNNN!!（Band ver.）",
     "Artist": "ビートまりお",
     "Genre": "東方Project",
     "Version": "CHUNITHM",
@@ -4285,7 +4285,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1696,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "AMN feat.空色かりん",
         "Bpm": "170.00",
         "ChartName": "0098_04"
@@ -4339,7 +4339,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1895,
         "LevelStr": "14",
-        "Constant": 14.1,
+        "Constant": 14.3,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "150.00",
         "ChartName": "0099_04"
@@ -4446,8 +4446,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1806,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "Techno Kitchen",
         "Bpm": "152.00",
         "ChartName": "0101_03"
@@ -4536,8 +4536,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2277,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Revo@LC",
         "Bpm": "257.00",
         "ChartName": "0103_03"
@@ -4689,8 +4689,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3594,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "おもしロシェ",
         "Bpm": "175 (175.00 - 260.00)",
         "ChartName": "0106_03"
@@ -4744,7 +4744,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2050,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "Queen P.H.X.",
         "Bpm": "160.00",
         "ChartName": "0107_04"
@@ -5320,7 +5320,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2048,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Redarrow",
         "Bpm": "260.00",
         "ChartName": "0118_04"
@@ -6012,8 +6012,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2000,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "ぴちネコ",
         "Bpm": "167 (83.50 - 167.00)",
         "ChartName": "0134_03"
@@ -6067,7 +6067,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1462,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Jack",
         "Bpm": "180 (90.00 - 180.00)",
         "ChartName": "0135_03"
@@ -6156,8 +6156,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1925,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Revo@LC",
         "Bpm": "170.00",
         "ChartName": "0137_03"
@@ -6491,7 +6491,7 @@
         "MaxCombo": 1404,
         "LevelStr": "光",
         "Constant": 0.0,
-        "Charter": "後光荒神+",
+        "Charter": "【Ex】後光荒神+",
         "Bpm": "98 (48.00 - 196.00)",
         "ChartName": "8241_05"
       },
@@ -6940,7 +6940,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2716,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "ぴちネコ（帝国軍したっぱ）",
         "Bpm": "156.00",
         "ChartName": "0152_04"
@@ -7237,7 +7237,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1799,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "チャン@DP皆伝からのメリークリスマス",
         "Bpm": "90 (90.00 - 100.00)",
         "ChartName": "0159_03"
@@ -7245,8 +7245,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2512,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "SEGA Fumen Unit[B.]",
         "Bpm": "90 (90.00 - 100.00)",
         "ChartName": "0159_04"
@@ -7259,6 +7259,15 @@
         "Charter": "フリックの音が鈴の音に聞こえる",
         "Bpm": "90 (90.00 - 100.00)",
         "ChartName": "8058_04"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 1752,
+        "LevelStr": "改",
+        "Constant": 0.0,
+        "Charter": "ジン☆グルEDIT",
+        "Bpm": "90 (90.00 - 100.00)",
+        "ChartName": "8292_05"
       }
     ]
   },
@@ -7614,8 +7623,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2113,
-        "LevelStr": "14+",
-        "Constant": 14.7,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "前方不注意ヤナギ",
         "Bpm": "155.00",
         "ChartName": "0167_04"
@@ -7894,7 +7903,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2070,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "ぴちネコ",
         "Bpm": "95.5 (40.00 - 191.00)",
         "ChartName": "0173_03"
@@ -7902,8 +7911,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2821,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "MinimiLight -RENAISSANCE-",
         "Bpm": "95.5 (40.00 - 191.00)",
         "ChartName": "0173_04"
@@ -8087,6 +8096,15 @@
         "Charter": "三十代身の丈知った犬",
         "Bpm": "160.00",
         "ChartName": "0179_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1780,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "みぞれやなぎ",
+        "Bpm": "160.00",
+        "ChartName": "0179_04"
       }
     ]
   },
@@ -8118,8 +8136,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 2000,
-        "LevelStr": "13+",
-        "Constant": 13.9,
+        "LevelStr": "14",
+        "Constant": 14.0,
         "Charter": "Jack",
         "Bpm": "200.00",
         "ChartName": "0180_02"
@@ -8128,7 +8146,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3000,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.4,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "200.00",
         "ChartName": "0180_03"
@@ -8451,8 +8469,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 1832,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "緑譜面が許されるのはMASTERまでだよねー",
         "Bpm": "200.00",
         "ChartName": "0187_04"
@@ -8829,8 +8847,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2222,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "FREEDOM CAT!",
         "Bpm": "222.22",
         "ChartName": "0196_03"
@@ -9082,7 +9100,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2262,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "243.00",
         "ChartName": "0201_03"
@@ -10000,7 +10018,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2816,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "譜百ボーイズからの挑戦状",
         "Bpm": "130.00",
         "ChartName": "0219_03"
@@ -10287,8 +10305,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1800,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "maimai譜面ボーイズ",
         "Bpm": "256.00",
         "ChartName": "0226_03"
@@ -10566,8 +10584,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2270,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "dj JAKO meets DJ REDARROW",
         "Bpm": "212.00",
         "ChartName": "0232_04"
@@ -10639,7 +10657,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1346,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "Piercing Blade",
         "Bpm": "144.00",
         "ChartName": "0233_04"
@@ -10692,8 +10710,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2247,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Techno Kitchen vs ぴちネコ",
         "Bpm": "160.00",
         "ChartName": "0234_03"
@@ -11151,8 +11169,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2195,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Die Kuche",
         "Bpm": "180.00",
         "ChartName": "0248_03"
@@ -11620,7 +11638,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3175,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.3,
         "Charter": "CODE:CatastroPhe",
         "Bpm": "215.00",
         "ChartName": "0258_03"
@@ -13474,7 +13492,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2079,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "通信売百号",
         "Bpm": "128 (119.00 - 123001.55)",
         "ChartName": "0298_04"
@@ -14373,8 +14391,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 3210,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "Air -INSANITY-",
         "Bpm": "178.00",
         "ChartName": "0317_04"
@@ -14608,7 +14626,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2016,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ぴちネコ",
         "Bpm": "161.00",
         "ChartName": "0322_03"
@@ -14671,7 +14689,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2315,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Techno Kitchen",
         "Bpm": "192 (96.00 - 384.00)",
         "ChartName": "0323_04"
@@ -14895,8 +14913,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1907,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "チャン＠ちっちゃなドキドキ皆伝",
         "Bpm": "200.00",
         "ChartName": "0328_03"
@@ -15058,7 +15076,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2087,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "紅き鳳凰伝説を語り継ぎしカタストロフィ",
         "Bpm": "189 (126.00 - 252.00)",
         "ChartName": "0331_04"
@@ -15107,6 +15125,15 @@
         "Charter": "†ロシェ＠チュウニ病†",
         "Bpm": "186.00",
         "ChartName": "0332_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1939,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "†ミニミ＠チュウニ病†",
+        "Bpm": "186.00",
+        "ChartName": "0332_04"
       }
     ]
   },
@@ -15156,8 +15183,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2390,
-        "LevelStr": "14+",
-        "Constant": 14.7,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "じゃこみるく & れもしゃま",
         "Bpm": "190.00",
         "ChartName": "0333_04"
@@ -17317,7 +17344,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1580,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "with Phoenix",
         "Bpm": "185.00",
         "ChartName": "0385_04"
@@ -17361,8 +17388,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3390,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Revo2LC  -CODENAME : AIRPLUS-",
         "Bpm": "210.00",
         "ChartName": "0386_03"
@@ -17595,8 +17622,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1513,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "チャン@16kf.゜ω゜",
         "Bpm": "155.00",
         "ChartName": "0393_03"
@@ -18189,8 +18216,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2800,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "240 (90.00 - 240.00)",
         "ChartName": "0407_03"
@@ -18252,8 +18279,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1377,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "Techno Kitchen [Spherical]",
         "Bpm": "178.00",
         "ChartName": "0409_03"
@@ -18919,7 +18946,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1659,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "Phoenix",
         "Bpm": "125 (125.00 - 400.00)",
         "ChartName": "0428_03"
@@ -18928,7 +18955,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 1519,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "Welcome to mathworld.",
         "Bpm": "125 (125.00 - 400.00)",
         "ChartName": "0428_04"
@@ -19256,6 +19283,15 @@
         "Charter": "Techno Kitchen vs wonder*",
         "Bpm": "160.00",
         "ChartName": "0435_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2229,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "Redarrow",
+        "Bpm": "160.00",
+        "ChartName": "0435_04"
       }
     ]
   },
@@ -19522,7 +19558,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3600,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "FREEDOM CAT TRAIN 222形（大鳥居行き）",
         "Bpm": "220.00",
         "ChartName": "0441_03"
@@ -19566,8 +19602,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2700,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "FREEDOM \"over-Over-OVERDRIVE\" CAT!!!!!",
         "Bpm": "235.79",
         "ChartName": "0442_03"
@@ -19953,8 +19989,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 2712,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "TwinDeaD LighT@Revenge Bash",
         "Bpm": "175 (25.00 - 8750.00)",
         "ChartName": "0455_04"
@@ -20331,8 +20367,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3000,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "170.00",
         "ChartName": "0464_03"
@@ -20377,7 +20413,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3085,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "CatastroPhe\"-UNIVERSE-\"",
         "Bpm": "300 (42.00 - 320.00)",
         "ChartName": "0465_03"
@@ -20439,8 +20475,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2411,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "MTO-XXX:Luna Nemesis",
         "Bpm": "170.00",
         "ChartName": "0466_03"
@@ -20583,8 +20619,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2585,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Jack Assault X",
         "Bpm": "176 (176.00 - 740.00)",
         "ChartName": "0469_03"
@@ -20719,7 +20755,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2214,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ascribable ALL it",
         "Bpm": "185.00",
         "ChartName": "0472_03"
@@ -21853,7 +21889,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2370,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "maimai譜面ボーイズからの挑戦ﾝl犬",
         "Bpm": "190 (110.00 - 190.00)",
         "ChartName": "0499_03"
@@ -22078,7 +22114,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2328,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ぴちネコ",
         "Bpm": "200.00",
         "ChartName": "0504_03"
@@ -22168,7 +22204,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1995,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "_ す き や き 奉 行",
         "Bpm": "153.00",
         "ChartName": "0506_03"
@@ -23635,7 +23671,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1879,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "⊥∀K∀И∀2HI2∀И",
         "Bpm": "280 (140.00 - 280.00)",
         "ChartName": "0548_03"
@@ -23770,7 +23806,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1850,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": ".357 Sukiyaki",
         "Bpm": "357.00",
         "ChartName": "0551_03"
@@ -23815,7 +23851,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2805,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "208.00",
         "ChartName": "0552_03"
@@ -24148,7 +24184,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2603,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "MSИ-00100",
         "Bpm": "210 (210.00 - 240.00)",
         "ChartName": "0559_03"
@@ -24643,7 +24679,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1993,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "lAbilabI wAndeRing iN tHe NighTmARe",
         "Bpm": "188.00",
         "ChartName": "0570_03"
@@ -26550,8 +26586,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2170,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "ミストルティン -アポートル-",
         "Bpm": "145.00",
         "ChartName": "0617_03"
@@ -26604,8 +26640,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3500,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "譜面ボーイズからの挑戦状 -新約譜面創世記-",
         "Bpm": "190 (120.00 - 3244.00)",
         "ChartName": "0618_03"
@@ -26649,8 +26685,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1714,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "すきやき奉行 supported by ぴちネコ",
         "Bpm": "180 (120.00 - 180.00)",
         "ChartName": "0619_03"
@@ -27109,7 +27145,7 @@
         "LevelName": "ULTIMA",
         "MaxCombo": 2381,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "みぞれヤナギ",
         "Bpm": "200.00",
         "ChartName": "0628_04"
@@ -27208,7 +27244,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2839,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ぴちネコの激唱",
         "Bpm": "200.00",
         "ChartName": "0631_03"
@@ -28774,7 +28810,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2065,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Baa Deb Fee Hot Silk Nil Tor",
         "Bpm": "188.00",
         "ChartName": "0669_03"
@@ -28819,7 +28855,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2209,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "Moon StriGX-04",
         "Bpm": "205.00",
         "ChartName": "0670_03"
@@ -29098,7 +29134,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2530,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": ".__. .. __.. __.. .. _._. ._ _",
         "Bpm": "174.59",
         "ChartName": "0676_03"
@@ -29962,7 +29998,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2000,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "すきやき奉行",
         "Bpm": "200.00",
         "ChartName": "0697_03"
@@ -30106,7 +30142,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1952,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "pizziCAT -RED Insanity-",
         "Bpm": "290 (270.00 - 310.00)",
         "ChartName": "0700_03"
@@ -30205,7 +30241,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2398,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Moon Strix -Judgement-",
         "Bpm": "252 (189.00 - 252.00)",
         "ChartName": "0702_03"
@@ -30618,8 +30654,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3070,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "pizziCAT -FINAL ROUND-",
         "Bpm": "190.00",
         "ChartName": "0712_03"
@@ -30664,7 +30700,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2292,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "202.00",
         "ChartName": "0713_03"
@@ -30988,7 +31024,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2377,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "じゃこレモンスター",
         "Bpm": "220.00",
         "ChartName": "0722_03"
@@ -31303,7 +31339,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2088,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ぴちネコ",
         "Bpm": "195.00",
         "ChartName": "0730_03"
@@ -31491,8 +31527,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2573,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "NeKOTECH NYANJA",
         "Bpm": "165.00",
         "ChartName": "0734_03"
@@ -32000,15 +32036,6 @@
         "Charter": "【CHUNITHM】譜人エメーラ【Emerald】",
         "Bpm": "168.00",
         "ChartName": "0745_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 2196,
-        "LevelStr": "布",
-        "Constant": 0.0,
-        "Charter": "真・タオルの準備はOK？",
-        "Bpm": "168.00",
-        "ChartName": "8177_04"
       }
     ]
   },
@@ -32054,6 +32081,15 @@
         "Charter": "Techno Kitchen",
         "Bpm": "195.00",
         "ChartName": "0746_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2993,
+        "LevelStr": "翔",
+        "Constant": 0.0,
+        "Charter": "Ever AIR Never end",
+        "Bpm": "195.00",
+        "ChartName": "8294_05"
       }
     ]
   },
@@ -32230,7 +32266,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2472,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Anomaly Labyrinth",
         "Bpm": "210.00",
         "ChartName": "0751_03"
@@ -32725,7 +32761,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2138,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Panther vs Pizzicat",
         "Bpm": "148.00",
         "ChartName": "0762_03"
@@ -33174,8 +33210,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1983,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "じゃンこラボックス",
         "Bpm": "170.00",
         "ChartName": "0773_03"
@@ -33364,7 +33400,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2572,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.3,
         "Charter": "CODE:SacrIfIce",
         "Bpm": "200.00",
         "ChartName": "0777_03"
@@ -33687,8 +33723,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2280,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "奏坂学園 音撃譜面部からの挑戦状",
         "Bpm": "270.00",
         "ChartName": "0784_03"
@@ -33822,8 +33858,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2196,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "【Fires】 Gt:ミストルティン Dr:すきやき",
         "Bpm": "144.00",
         "ChartName": "0787_03"
@@ -33868,7 +33904,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2600,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "チュウニ譜面ボーイズの反逆",
         "Bpm": "250.00",
         "ChartName": "0788_03"
@@ -34552,7 +34588,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1500,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "小鳥遊さん ～Phoenix～",
         "Bpm": "180.00",
         "ChartName": "0806_03"
@@ -34605,8 +34641,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 1881,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "\"Beyond The Future\"",
         "Bpm": "180.00",
         "ChartName": "0807_04"
@@ -35307,8 +35343,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2169,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "SacrIfIce",
         "Bpm": "175.00",
         "ChartName": "0823_03"
@@ -35352,8 +35388,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2777,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "PIZ2ICAT  -CODENAME : CRYSTAL-",
         "Bpm": "210.00",
         "ChartName": "0824_03"
@@ -35632,7 +35668,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2976,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "ロシアンブラック",
         "Bpm": "180.00",
         "ChartName": "0830_03"
@@ -35866,7 +35902,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2303,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "すきやき奉行",
         "Bpm": "217.00",
         "ChartName": "0835_03"
@@ -37162,7 +37198,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1310,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "サファ太",
         "Bpm": "160.00",
         "ChartName": "0863_03"
@@ -37207,7 +37243,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2462,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "じゃこレモン vs. すきやき奉行",
         "Bpm": "194.00",
         "ChartName": "0865_03"
@@ -37899,8 +37935,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2863,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "ロシアンブラック",
         "Bpm": "187.00",
         "ChartName": "0880_03"
@@ -37945,7 +37981,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2710,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "ZONE:SaFaRi vs. CODE:Ragnarok",
         "Bpm": "155.00",
         "ChartName": "0881_03"
@@ -38241,8 +38277,8 @@
       {
         "LevelName": "ULTIMA",
         "MaxCombo": 1866,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Techno Kitchen SC",
         "Bpm": "200.00",
         "ChartName": "0887_04"
@@ -38529,8 +38565,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1774,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Яussianblack",
         "Bpm": "152 (57.00 - 163.50)",
         "ChartName": "0893_03"
@@ -39313,7 +39349,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2444,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Яussianblack VS écologie",
         "Bpm": "190.00",
         "ChartName": "0911_03"
@@ -39636,8 +39672,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2811,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "六次元モーター vs Moon Strix",
         "Bpm": "180 (170.00 - 180.00)",
         "ChartName": "0918_03"
@@ -40041,8 +40077,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1714,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "羅破々斬",
         "Bpm": "140.00",
         "ChartName": "0927_03"
@@ -41490,8 +41526,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2300,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Under Construction",
         "Bpm": "256.00",
         "ChartName": "0959_03"
@@ -42004,7 +42040,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2424,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "ハードコア大好き！じゃこレモン",
         "Bpm": "180 (180.00 - 190.00)",
         "ChartName": "0970_03"
@@ -42049,7 +42085,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2237,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "羅破々斬 + écologie",
         "Bpm": "175.00",
         "ChartName": "0971_03"
@@ -42094,7 +42130,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2572,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "SacrIfIce vs Ragnarok",
         "Bpm": "189.00",
         "ChartName": "0972_03"
@@ -42363,8 +42399,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2420,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "アミノハバキリ vs サファ太",
         "Bpm": "100 (95.00 - 200.00)",
         "ChartName": "0978_03"
@@ -42498,8 +42534,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1582,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Little Devil Arrow",
         "Bpm": "183 (75.00 - 300.00)",
         "ChartName": "0981_03"
@@ -42543,8 +42579,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3500,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.7,
         "Charter": "CatastroPhe VS Damnation",
         "Bpm": "190 (175.00 - 190.00)",
         "ChartName": "0982_03"
@@ -43003,7 +43039,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2060,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "RussianB1ack",
         "Bpm": "164.00",
         "ChartName": "0993_03"
@@ -43183,7 +43219,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2525,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "écologie affected by \"Arcaea\"",
         "Bpm": "202.00",
         "ChartName": "0999_03"
@@ -43633,7 +43669,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2020,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "SukiyakY fused with HABaKURO",
         "Bpm": "162.00",
         "ChartName": "1009_03"
@@ -43677,8 +43713,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3440,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Panther+Black",
         "Bpm": "218.00",
         "ChartName": "1010_03"
@@ -43732,7 +43768,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2072,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "t+phoenix",
         "Bpm": "240.00",
         "ChartName": "1011_03"
@@ -43966,7 +44002,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2056,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "A Lucidness",
         "Bpm": "168.00",
         "ChartName": "1016_03"
@@ -44020,7 +44056,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3390,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "Magistrate -for KoP2020-",
         "Bpm": "110 (110.00 - 2020.00)",
         "ChartName": "1017_03"
@@ -44793,8 +44829,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 4208,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "死ぬ気で食い止めろ！おもしロシェ",
         "Bpm": "120 (120.00 - 300.00)",
         "ChartName": "1035_03"
@@ -45172,7 +45208,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2171,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "The Magistrate vs SUKIYAKI",
         "Bpm": "185.00",
         "ChartName": "1043_03"
@@ -45217,7 +45253,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2369,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "羅破々斬 -焔乱撃鱗-",
         "Bpm": "200.00",
         "ChartName": "1044_03"
@@ -45630,8 +45666,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1986,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "羅波露斯",
         "Bpm": "200.00",
         "ChartName": "1055_03"
@@ -45766,7 +45802,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2000,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "PhOEnIx",
         "Bpm": "240.00",
         "ChartName": "1058_03"
@@ -45811,7 +45847,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1831,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "ロシェ＠ペンギン＆ミストルティン",
         "Bpm": "185.00",
         "ChartName": "1059_03"
@@ -46125,8 +46161,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2164,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Rainbow:Arrow",
         "Bpm": "165.00",
         "ChartName": "1066_03"
@@ -46621,7 +46657,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2596,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ぴちネコ VS ロシェ＠ペンギン",
         "Bpm": "204 (204.00 - 216.00)",
         "ChartName": "1077_03"
@@ -46666,7 +46702,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1948,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "すきやき奉行",
         "Bpm": "163.00",
         "ChartName": "1078_03"
@@ -46720,7 +46756,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3010,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "[<>I7&:]\\/[<><\\>57&12",
         "Bpm": "180.00",
         "ChartName": "1079_03"
@@ -46990,7 +47026,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2723,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "ゲキ*チュウマイ Fumen Team",
         "Bpm": "200.00",
         "ChartName": "1085_03"
@@ -47034,8 +47070,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 4444,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.7,
         "Charter": "譜面ボーイズからの祈り -Pray for \"JUSTICE\"-",
         "Bpm": "219 (152.00 - 219.00)",
         "ChartName": "1086_03"
@@ -47305,7 +47341,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1932,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "羅破々斬　★★",
         "Bpm": "160.00",
         "ChartName": "1092_03"
@@ -47934,8 +47970,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2526,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "ミストルティン vs アミノハバキリ",
         "Bpm": "222 (222.00 - 333.00)",
         "ChartName": "1106_03"
@@ -47979,8 +48015,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2231,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Mistilteinn -starry-",
         "Bpm": "210.00",
         "ChartName": "1107_03"
@@ -48929,6 +48965,15 @@
         "Charter": "みそかつ侍",
         "Bpm": "260.00",
         "ChartName": "2024_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1645,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "260.00",
+        "ChartName": "2024_04"
       }
     ]
   },
@@ -49374,8 +49419,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2143,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Revo2LC -ENDLESS CIRCULATION-",
         "Bpm": "186.00",
         "ChartName": "2034_03"
@@ -49564,7 +49609,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1618,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "Techno Kitchen MX",
         "Bpm": "149.00",
         "ChartName": "2038_03"
@@ -49609,7 +49654,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2693,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "|v|0/V0<[_0<|X",
         "Bpm": "225.00",
         "ChartName": "2039_03"
@@ -49663,7 +49708,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1717,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "じゃこレモン vs アミノハバキリ",
         "Bpm": "180.00",
         "ChartName": "2040_03"
@@ -49852,7 +49897,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1484,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "小鳥遊さん VERYHARD",
         "Bpm": "168.00",
         "ChartName": "2044_03"
@@ -49942,7 +49987,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1707,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "168.00",
         "ChartName": "2046_03"
@@ -50085,8 +50130,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2507,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Phoenix vs Redarrow",
         "Bpm": "145.00",
         "ChartName": "2049_03"
@@ -50130,8 +50175,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3092,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "大振檸檬",
         "Bpm": "200 (160.00 - 200.00)",
         "ChartName": "2050_03"
@@ -50221,7 +50266,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2287,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "Mistilteinn -Phoenix-",
         "Bpm": "256.00",
         "ChartName": "2053_03"
@@ -50536,7 +50581,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2381,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "Techno Kitchen <―> Redarrow <―>",
         "Bpm": "180.00",
         "ChartName": "2060_03"
@@ -51373,7 +51418,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1478,
         "LevelStr": "11+",
-        "Constant": 11.8,
+        "Constant": 11.7,
         "Charter": "Techno Kitchen",
         "Bpm": "138.00",
         "ChartName": "2078_03"
@@ -51643,7 +51688,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1750,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "小鳥遊さん",
         "Bpm": "187.00",
         "ChartName": "2084_03"
@@ -51867,8 +51912,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2029,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "最後に勝つのはやっぱり奉行よね！",
         "Bpm": "200.00",
         "ChartName": "2089_03"
@@ -52336,7 +52381,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3070,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "Don't Fight Chuni Fumen Boys",
         "Bpm": "195 (25.00 - 1950.00)",
         "ChartName": "2099_03"
@@ -53200,7 +53245,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2561,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "ミストルティン vs 譜面-100号",
         "Bpm": "197 (101.00 - 229.00)",
         "ChartName": "2119_03"
@@ -53290,7 +53335,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3426,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "Techno Kitchen -+- Moon Strix",
         "Bpm": "190 (150.00 - 190.00)",
         "ChartName": "2121_03"
@@ -53515,7 +53560,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1403,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "habakiri-Psychedelic-",
         "Bpm": "148.00",
         "ChartName": "2126_03"
@@ -54054,8 +54099,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1451,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "Redarrow",
         "Bpm": "151.00",
         "ChartName": "2138_03"
@@ -54144,8 +54189,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1730,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "Op.hx",
         "Bpm": "185 (165.00 - 188.00)",
         "ChartName": "2140_03"
@@ -54239,15 +54284,6 @@
         "Charter": "[チュウニ学園] フェニックスレッド",
         "Bpm": "114.5 (91.50 - 170.00)",
         "ChartName": "2142_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 2277,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "ADVANCED/EXPERT",
-        "Bpm": "114.5 (91.50 - 170.00)",
-        "ChartName": "8276_05"
       }
     ]
   },
@@ -54434,7 +54470,7 @@
         "MaxCombo": 2122,
         "LevelStr": "撃",
         "Constant": 0.0,
-        "Charter": "千夏ふるぱわーーー！",
+        "Charter": "【Ex】千夏ふるぱわーーー！",
         "Bpm": "130.00",
         "ChartName": "8251_05"
       }
@@ -54478,10 +54514,19 @@
         "LevelName": "MASTER",
         "MaxCombo": 2253,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "冬の窓辺に、じゃこ一尾",
         "Bpm": "180.00",
         "ChartName": "2147_03"
+      },
+      {
+        "LevelName": "WORLD'S END",
+        "MaxCombo": 2400,
+        "LevelStr": "撃",
+        "Constant": 0.0,
+        "Charter": "respect for 一ノ瀬 リズ",
+        "Bpm": "180.00",
+        "ChartName": "8293_05"
       }
     ]
   },
@@ -55063,7 +55108,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2808,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "SHOW ME YOUR \"POTENTIAL\" -For KoP The 3rd-",
         "Bpm": "200 (150.00 - 200.00)",
         "ChartName": "2161_03"
@@ -55386,8 +55431,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 999,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "アミノハバキリ",
         "Bpm": "147.00",
         "ChartName": "2168_03"
@@ -55521,8 +55566,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2918,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Redarrow -LIFE STREAM-",
         "Bpm": "212.00",
         "ChartName": "2171_03"
@@ -56044,7 +56089,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2539,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "ぴちネコ",
         "Bpm": "240.00",
         "ChartName": "2182_03"
@@ -56134,7 +56179,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2512,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "ROCHER GALACTIC STRIKE",
         "Bpm": "220 (110.00 - 880.00)",
         "ChartName": "2184_03"
@@ -56188,7 +56233,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2168,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "たけなしさん",
         "Bpm": "150 (10.00 - 375.00)",
         "ChartName": "2185_03"
@@ -56602,7 +56647,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1906,
         "LevelStr": "14",
-        "Constant": 14.3,
+        "Constant": 14.4,
         "Charter": "すきやき奉行",
         "Bpm": "195.00",
         "ChartName": "2194_03"
@@ -56826,8 +56871,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1900,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Redarrow",
         "Bpm": "180.00",
         "ChartName": "2199_03"
@@ -57141,8 +57186,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1850,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "羅・ハBぁ斬i",
         "Bpm": "185.00",
         "ChartName": "2206_03"
@@ -57231,8 +57276,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1777,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "ETARTSIGAM",
         "Bpm": "144.00",
         "ChartName": "2208_03"
@@ -57330,8 +57375,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2202,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "Curse\"Mistilteinn\"G.O.D",
         "Bpm": "130.00",
         "ChartName": "2210_03"
@@ -57350,7 +57395,7 @@
         "MaxCombo": 533,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "アミノハバキリ",
+        "Charter": "【Ex】アミノハバキリ",
         "Bpm": "194.00",
         "ChartName": "2211_00"
       },
@@ -57359,7 +57404,7 @@
         "MaxCombo": 822,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "rioN",
+        "Charter": "【Ex】rioN",
         "Bpm": "194.00",
         "ChartName": "2211_01"
       },
@@ -57395,7 +57440,7 @@
         "MaxCombo": 372,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "アミノハバキリ",
+        "Charter": "【Ex】アミノハバキリ",
         "Bpm": "240.00",
         "ChartName": "2212_00"
       },
@@ -57404,7 +57449,7 @@
         "MaxCombo": 573,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "rioN",
+        "Charter": "【Ex】rioN",
         "Bpm": "240.00",
         "ChartName": "2212_01"
       },
@@ -57440,7 +57485,7 @@
         "MaxCombo": 478,
         "LevelStr": "3",
         "Constant": 3.0,
-        "Charter": "アミノハバキリ",
+        "Charter": "【Ex】アミノハバキリ",
         "Bpm": "225.00",
         "ChartName": "2213_00"
       },
@@ -57449,7 +57494,7 @@
         "MaxCombo": 899,
         "LevelStr": "6",
         "Constant": 6.0,
-        "Charter": "rioN",
+        "Charter": "【Ex】rioN",
         "Bpm": "225.00",
         "ChartName": "2213_01"
       },
@@ -57575,7 +57620,7 @@
         "MaxCombo": 499,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "アミノハバキリ",
+        "Charter": "【Ex】アミノハバキリ",
         "Bpm": "135.00",
         "ChartName": "2216_00"
       },
@@ -57584,7 +57629,7 @@
         "MaxCombo": 851,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "rioN",
+        "Charter": "【Ex】rioN",
         "Bpm": "135.00",
         "ChartName": "2216_01"
       },
@@ -57620,7 +57665,7 @@
         "MaxCombo": 454,
         "LevelStr": "2",
         "Constant": 2.0,
-        "Charter": "アミノハバキリ",
+        "Charter": "【Ex】アミノハバキリ",
         "Bpm": "140.00",
         "ChartName": "2217_00"
       },
@@ -57629,7 +57674,7 @@
         "MaxCombo": 756,
         "LevelStr": "5",
         "Constant": 5.0,
-        "Charter": "rioN",
+        "Charter": "【Ex】rioN",
         "Bpm": "140.00",
         "ChartName": "2217_01"
       },
@@ -57690,8 +57735,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2160,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Re:vo@LC vs. ミストルティン",
         "Bpm": "212.00",
         "ChartName": "2218_03"
@@ -57781,7 +57826,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2206,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "Techno Kitchen",
         "Bpm": "136 (136.00 - 181.00)",
         "ChartName": "2220_03"
@@ -58185,8 +58230,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1874,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "ミストルティン vs じゃこレモン",
         "Bpm": "257 (257.00 - 290.00)",
         "ChartName": "2229_03"
@@ -58231,7 +58276,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2716,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "#FR33D0MP1221C4T",
         "Bpm": "210.00",
         "ChartName": "2230_03"
@@ -58365,8 +58410,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2928,
-        "LevelStr": "15",
-        "Constant": 15.2,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "redarrow Vs habakiri",
         "Bpm": "163.00",
         "ChartName": "2233_03"
@@ -58635,8 +58680,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1822,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "SAMBA MASTER 小鳥遊",
         "Bpm": "150.00",
         "ChartName": "2239_03"
@@ -58689,8 +58734,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3234,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "譜面ボーイズからの挑戦状 -Legends-",
         "Bpm": "197 (197.00 - 227.00)",
         "ChartName": "2240_03"
@@ -58734,8 +58779,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3898,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "譜面ボーイズからの挑戦状 -Revolutions-",
         "Bpm": "111 (111.00 - 222.00)",
         "ChartName": "2241_03"
@@ -59504,15 +59549,6 @@
         "Charter": "Techno Kitchen",
         "Bpm": "125.00",
         "ChartName": "2259_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 1289,
-        "LevelStr": "光",
-        "Constant": 0.0,
-        "Charter": "なにやってもうまくいかない",
-        "Bpm": "125.00",
-        "ChartName": "8262_05"
       }
     ]
   },
@@ -60003,8 +60039,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2216,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Redarrow",
         "Bpm": "160.00",
         "ChartName": "2270_03"
@@ -60048,8 +60084,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2355,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "Hi-EnergeTech Lemon",
         "Bpm": "160.00",
         "ChartName": "2271_03"
@@ -60417,8 +60453,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2299,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "Techno Kitchen",
         "Bpm": "165 (50.00 - 230.00)",
         "ChartName": "2279_03"
@@ -60786,8 +60822,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2323,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "210.00",
         "ChartName": "2288_03"
@@ -60832,7 +60868,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1802,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ミストルティン＠漢字2文字変えたら田中",
         "Bpm": "186.00",
         "ChartName": "2289_03"
@@ -61101,8 +61137,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2784,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Phoenix",
         "Bpm": "228.00",
         "ChartName": "2295_03"
@@ -61236,8 +61272,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2447,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "煽り耐性ゼロペンギン",
         "Bpm": "222 (222.00 - 350.00)",
         "ChartName": "2298_03"
@@ -61326,8 +61362,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2443,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "mizoRequiem...",
         "Bpm": "200.00",
         "ChartName": "2300_03"
@@ -61822,7 +61858,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2438,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "カードゲーマー†レモン",
         "Bpm": "200 (200.00 - 274.00)",
         "ChartName": "2311_03"
@@ -62092,7 +62128,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2010,
         "LevelStr": "13+",
-        "Constant": 13.6,
+        "Constant": 13.7,
         "Charter": "一ノ瀬 リズ",
         "Bpm": "220.00",
         "ChartName": "2317_03"
@@ -62227,7 +62263,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2213,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Redarrow",
         "Bpm": "186.00",
         "ChartName": "2320_03"
@@ -62321,15 +62357,6 @@
         "Charter": "レッドアロー隊長",
         "Bpm": "175.00",
         "ChartName": "2322_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 2773,
-        "LevelStr": "両",
-        "Constant": 0.0,
-        "Charter": "EXPERT+ / ADVANCED+",
-        "Bpm": "175.00",
-        "ChartName": "8266_05"
       }
     ]
   },
@@ -62875,7 +62902,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2906,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "じゃこレモン vs Redarrow",
         "Bpm": "218.00",
         "ChartName": "2336_03"
@@ -62965,7 +62992,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3474,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "CODE:Violetta",
         "Bpm": "230 (230.00 - 400.00)",
         "ChartName": "2338_03"
@@ -63009,8 +63036,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3375,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "Pizzicat a.k.a. Russianblack",
         "Bpm": "204 (176.00 - 204.00)",
         "ChartName": "2339_03"
@@ -63054,8 +63081,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2859,
-        "LevelStr": "15",
-        "Constant": 15.2,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "Redarrow -For KOP4th-",
         "Bpm": "212.00",
         "ChartName": "2340_03"
@@ -63550,7 +63577,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1972,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "185.00",
         "ChartName": "2351_03"
@@ -63639,8 +63666,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2032,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "cotelette samurai",
         "Bpm": "160 (20.00 - 206.00)",
         "ChartName": "2353_03"
@@ -63689,15 +63716,6 @@
         "Charter": "Opus Negativus Centum",
         "Bpm": "86 (14.00 - 136.00)",
         "ChartName": "2354_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 466,
-        "LevelStr": "蔵",
-        "Constant": 0.0,
-        "Charter": "蔵の光",
-        "Bpm": "86 (14.00 - 136.00)",
-        "ChartName": "8269_05"
       }
     ]
   },
@@ -63847,7 +63865,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1901,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "watch?v=HiSAVRDX3c0",
         "Bpm": "41 (41.00 - 9600.00)",
         "ChartName": "2358_03"
@@ -64819,7 +64837,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2323,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "XXX:THE MONSTER",
         "Bpm": "260.00",
         "ChartName": "2384_03"
@@ -64864,7 +64882,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2182,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "堕天使《月梟》†vs† 熾天使《月梟》",
         "Bpm": "246.00",
         "ChartName": "2385_03"
@@ -65134,7 +65152,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1436,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "Devil Arrow",
         "Bpm": "150 (136.00 - 292.00)",
         "ChartName": "2391_03"
@@ -65403,8 +65421,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2499,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "ぴちネコ",
         "Bpm": "199.00",
         "ChartName": "2398_03"
@@ -65449,7 +65467,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1854,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "羅雷切",
         "Bpm": "165.00",
         "ChartName": "2399_03"
@@ -65494,7 +65512,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3000,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.3,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "199.00",
         "ChartName": "2400_03"
@@ -65539,7 +65557,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1993,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "Redarrow",
         "Bpm": "260.00",
         "ChartName": "2401_03"
@@ -65584,7 +65602,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1759,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "142.00",
         "ChartName": "2403_03"
@@ -65763,8 +65781,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2389,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "MONSTER vs Violetta",
         "Bpm": "270 (202.50 - 270.00)",
         "ChartName": "2407_03"
@@ -65858,15 +65876,6 @@
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "180.00",
         "ChartName": "2409_03"
-      },
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 1894,
-        "LevelStr": "跳",
-        "Constant": 0.0,
-        "Charter": "↓",
-        "Bpm": "180.00",
-        "ChartName": "8279_05"
       }
     ]
   },
@@ -65908,7 +65917,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2323,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "FRANTIC LEMON",
         "Bpm": "245.00",
         "ChartName": "2410_03"
@@ -66232,7 +66241,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1749,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ミストルティン",
         "Bpm": "137.00",
         "ChartName": "2417_03"
@@ -66281,51 +66290,6 @@
         "Charter": "ミニミライト",
         "Bpm": "132.00",
         "ChartName": "2418_03"
-      }
-    ]
-  },
-  {
-    "Id": 2419,
-    "Title": "ゴー・トゥ・大都会",
-    "Artist": "月裏, ニャン・トンロン",
-    "Genre": "niconico",
-    "Version": "CHUNITHM SUN PLUS",
-    "Beatmaps": [
-      {
-        "LevelName": "BASIC",
-        "MaxCombo": 352,
-        "LevelStr": "3",
-        "Constant": 3.0,
-        "Charter": "アミノハバキリ",
-        "Bpm": "128.00",
-        "ChartName": "2419_00"
-      },
-      {
-        "LevelName": "ADVANCED",
-        "MaxCombo": 661,
-        "LevelStr": "6",
-        "Constant": 6.0,
-        "Charter": "そらいろカリン",
-        "Bpm": "128.00",
-        "ChartName": "2419_01"
-      },
-      {
-        "LevelName": "EXPERT",
-        "MaxCombo": 1455,
-        "LevelStr": "11",
-        "Constant": 11.3,
-        "Charter": "ロシェ＠ペンギン",
-        "Bpm": "128.00",
-        "ChartName": "2419_02"
-      },
-      {
-        "LevelName": "MASTER",
-        "MaxCombo": 1870,
-        "LevelStr": "14",
-        "Constant": 14.1,
-        "Charter": "ゴー・トゥ・大崎",
-        "Bpm": "128.00",
-        "ChartName": "2419_03"
       }
     ]
   },
@@ -66592,7 +66556,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2236,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "216 (155.00 - 216.00)",
         "ChartName": "2427_03"
@@ -66637,7 +66601,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2114,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "M■o◆ S■r◆x",
         "Bpm": "106.00",
         "ChartName": "2428_03"
@@ -66772,7 +66736,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2190,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "Piercing Blade 'Sharp Eyes'",
         "Bpm": "167.00",
         "ChartName": "2431_03"
@@ -66816,8 +66780,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1969,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "habakiri -Ignited-",
         "Bpm": "205.00",
         "ChartName": "2432_03"
@@ -67186,7 +67150,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2776,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "ぴちネコ",
         "Bpm": "195.00",
         "ChartName": "2440_03"
@@ -67231,7 +67195,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2084,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "habakiri -Fugaku-",
         "Bpm": "138.00",
         "ChartName": "2441_03"
@@ -67276,7 +67240,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2564,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "CODE:Twinrook vs CODE:Ragnarok",
         "Bpm": "202.00",
         "ChartName": "2442_03"
@@ -67365,8 +67329,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2049,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.0,
         "Charter": "ミストルティン",
         "Bpm": "175.00",
         "ChartName": "2444_03"
@@ -67460,51 +67424,6 @@
         "Charter": "ミストルティン#あくあ色に染まれ！！！",
         "Bpm": "156.00",
         "ChartName": "2446_03"
-      }
-    ]
-  },
-  {
-    "Id": 2447,
-    "Title": "いつかオトナになれるといいね。",
-    "Artist": "ツユ",
-    "Genre": "niconico",
-    "Version": "CHUNITHM SUN PLUS",
-    "Beatmaps": [
-      {
-        "LevelName": "BASIC",
-        "MaxCombo": 387,
-        "LevelStr": "3",
-        "Constant": 3.0,
-        "Charter": "アミノハバキリ",
-        "Bpm": "176.00",
-        "ChartName": "2447_00"
-      },
-      {
-        "LevelName": "ADVANCED",
-        "MaxCombo": 817,
-        "LevelStr": "6",
-        "Constant": 6.0,
-        "Charter": "そらいろカリン",
-        "Bpm": "176.00",
-        "ChartName": "2447_01"
-      },
-      {
-        "LevelName": "EXPERT",
-        "MaxCombo": 1185,
-        "LevelStr": "9+",
-        "Constant": 9.5,
-        "Charter": "じゃこレモン",
-        "Bpm": "176.00",
-        "ChartName": "2447_02"
-      },
-      {
-        "LevelName": "MASTER",
-        "MaxCombo": 1612,
-        "LevelStr": "12+",
-        "Constant": 12.8,
-        "Charter": "ハバキリ@春時雨",
-        "Bpm": "176.00",
-        "ChartName": "2447_03"
       }
     ]
   },
@@ -67635,8 +67554,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1643,
-        "LevelStr": "13+",
-        "Constant": 13.9,
+        "LevelStr": "14",
+        "Constant": 14.0,
         "Charter": "合作だよ",
         "Bpm": "148.00",
         "ChartName": "2450_03"
@@ -68139,8 +68058,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3550,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Lemon possessed by MONSTER",
         "Bpm": "215.00",
         "ChartName": "2461_03"
@@ -68499,8 +68418,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3000,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "Chaotic Blade vs Blanc=diLLe",
         "Bpm": "165.00",
         "ChartName": "2475_03"
@@ -68590,7 +68509,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2750,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.3,
         "Charter": "One øf Chuni Fumen Boys",
         "Bpm": "199 (99.50 - 199.00)",
         "ChartName": "2477_03"
@@ -68725,7 +68644,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2023,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "ぴちネコ",
         "Bpm": "150.00",
         "ChartName": "2480_03"
@@ -68904,8 +68823,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2574,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "みぞれヤナギ",
         "Bpm": "200.00",
         "ChartName": "2485_03"
@@ -69040,7 +68959,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1853,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "Moon Strix",
         "Bpm": "182.00",
         "ChartName": "2488_03"
@@ -69544,7 +69463,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2316,
         "LevelStr": "13+",
-        "Constant": 13.8,
+        "Constant": 13.9,
         "Charter": "ものくろっく",
         "Bpm": "160 (120.00 - 200.00)",
         "ChartName": "2499_03"
@@ -69723,8 +69642,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2790,
-        "LevelStr": "13+",
-        "Constant": 13.7,
+        "LevelStr": "14",
+        "Constant": 14.0,
         "Charter": "LOVE ぴちネコ FOREVER",
         "Bpm": "185.00",
         "ChartName": "2503_03"
@@ -69931,7 +69850,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2206,
         "LevelStr": "14",
-        "Constant": 14.2,
+        "Constant": 14.3,
         "Charter": "せかせかレモン",
         "Bpm": "220.00",
         "ChartName": "2507_03"
@@ -69976,7 +69895,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1618,
         "LevelStr": "13+",
-        "Constant": 13.5,
+        "Constant": 13.7,
         "Charter": "そらいろカリン",
         "Bpm": "151 (22.87 - 151.00)",
         "ChartName": "2508_03"
@@ -70434,51 +70353,6 @@
     ]
   },
   {
-    "Id": 2520,
-    "Title": "アンダーキッズ",
-    "Artist": "ツユ",
-    "Genre": "niconico",
-    "Version": "CHUNITHM LUMINOUS",
-    "Beatmaps": [
-      {
-        "LevelName": "BASIC",
-        "MaxCombo": 731,
-        "LevelStr": "4",
-        "Constant": 4.0,
-        "Charter": "みぞれヤナギ",
-        "Bpm": "225.00",
-        "ChartName": "2520_00"
-      },
-      {
-        "LevelName": "ADVANCED",
-        "MaxCombo": 1065,
-        "LevelStr": "7",
-        "Constant": 7.0,
-        "Charter": "そらいろカリン",
-        "Bpm": "225.00",
-        "ChartName": "2520_01"
-      },
-      {
-        "LevelName": "EXPERT",
-        "MaxCombo": 1651,
-        "LevelStr": "9",
-        "Constant": 9.0,
-        "Charter": "ロシェ＠ペンギン",
-        "Bpm": "225.00",
-        "ChartName": "2520_02"
-      },
-      {
-        "LevelName": "MASTER",
-        "MaxCombo": 2077,
-        "LevelStr": "13+",
-        "Constant": 13.5,
-        "Charter": "ハバキリ@革命前線",
-        "Bpm": "225.00",
-        "ChartName": "2520_03"
-      }
-    ]
-  },
-  {
     "Id": 2521,
     "Title": "flos",
     "Artist": "R Sound Design",
@@ -70696,7 +70570,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1632,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "Blade of Justice",
         "Bpm": "150.00",
         "ChartName": "2525_03"
@@ -70876,7 +70750,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2247,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.6,
         "Charter": "片翼のペンギン",
         "Bpm": "185.00",
         "ChartName": "2530_03"
@@ -70920,8 +70794,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2172,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "SEGA Fumen Man",
         "Bpm": "160.00",
         "ChartName": "2531_03"
@@ -70966,7 +70840,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2062,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.6,
         "Charter": "透明絵具",
         "Bpm": "200.00",
         "ChartName": "2532_03"
@@ -71010,8 +70884,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3182,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "Violetta + ω",
         "Bpm": "120 (120.00 - 240.00)",
         "ChartName": "2533_03"
@@ -71190,8 +71064,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3133,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "ミニミライト",
         "Bpm": "210.00",
         "ChartName": "2537_03"
@@ -71334,24 +71208,6 @@
     ]
   },
   {
-    "Id": 2541,
-    "Title": "【ゆっくり実況】ゆっくりペンギンが怒槌をやってみた！ Part1",
-    "Artist": "ゲキ！チュウマイ公式ちゃんねる",
-    "Genre": "ORIGINAL",
-    "Version": "CHUNITHM LUMINOUS",
-    "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 2615,
-        "LevelStr": "嘘",
-        "Constant": 0.0,
-        "Charter": "ゲキ！チュウマイ公式ちゃんねる",
-        "Bpm": "200 (150.00 - 800.00)",
-        "ChartName": "8273_05"
-      }
-    ]
-  },
-  {
     "Id": 2542,
     "Title": "Burn it All",
     "Artist": "Cosmograph「勝利の女神：NIKKE」",
@@ -71379,8 +71235,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1481,
-        "LevelStr": "11+",
-        "Constant": 11.6,
+        "LevelStr": "12",
+        "Constant": 12.0,
         "Charter": "ミニミライト",
         "Bpm": "219.00",
         "ChartName": "2542_02"
@@ -71389,7 +71245,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2138,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Mistilteinn -Burn Apocalypse-",
         "Bpm": "219.00",
         "ChartName": "2542_03"
@@ -71523,8 +71379,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1736,
-        "LevelStr": "13",
-        "Constant": 13.4,
+        "LevelStr": "13+",
+        "Constant": 13.7,
         "Charter": "譜面戦士サフ",
         "Bpm": "175.00",
         "ChartName": "2545_03"
@@ -71614,7 +71470,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2999,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "\"Fire Vampires\"Lemon",
         "Bpm": "213.00",
         "ChartName": "2547_03"
@@ -71757,24 +71613,6 @@
     ]
   },
   {
-    "Id": 2551,
-    "Title": "ラストバトル ～サシュウとの戦い～",
-    "Artist": "「IRODORIMIDORI FANTASY VII ～悠久のマイガハラント～」より",
-    "Genre": "イロドリミドリ",
-    "Version": "CHUNITHM LUMINOUS",
-    "Beatmaps": [
-      {
-        "LevelName": "WORLD'S END",
-        "MaxCombo": 2897,
-        "LevelStr": "嘘",
-        "Constant": 0.0,
-        "Charter": "©2024 CHUNITHM",
-        "Bpm": "134 (134.00 - 189.00)",
-        "ChartName": "8274_05"
-      }
-    ]
-  },
-  {
     "Id": 2552,
     "Title": "ALL I WANNA DO",
     "Artist": "月鈴 白奈(CV:高野 麻里佳)",
@@ -71901,8 +71739,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2500,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "Twinrook.",
         "Bpm": "198.22",
         "ChartName": "2554_03"
@@ -71947,7 +71785,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1897,
         "LevelStr": "14+",
-        "Constant": 14.6,
+        "Constant": 14.7,
         "Charter": "みぞれヤナギ",
         "Bpm": "145.00",
         "ChartName": "2555_03"
@@ -71991,8 +71829,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2379,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Piercing Blade -For KOP5th-",
         "Bpm": "155.00",
         "ChartName": "2556_03"
@@ -72037,7 +71875,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2045,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "アミノハバキリ",
         "Bpm": "160.00",
         "ChartName": "2557_03"
@@ -72262,7 +72100,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2097,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "Piercing Blade",
         "Bpm": "202.00",
         "ChartName": "2563_03"
@@ -72297,8 +72135,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1312,
-        "LevelStr": "12",
-        "Constant": 12.0,
+        "LevelStr": "11+",
+        "Constant": 11.9,
         "Charter": "ミストルティン",
         "Bpm": "172.00",
         "ChartName": "2564_02"
@@ -72342,8 +72180,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1388,
-        "LevelStr": "11+",
-        "Constant": 11.9,
+        "LevelStr": "12",
+        "Constant": 12.0,
         "Charter": "ミニミライト",
         "Bpm": "176.00",
         "ChartName": "2565_02"
@@ -72352,7 +72190,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2014,
         "LevelStr": "14+",
-        "Constant": 14.5,
+        "Constant": 14.6,
         "Charter": "habakiri -Testament-",
         "Bpm": "176.00",
         "ChartName": "2565_03"
@@ -72577,7 +72415,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2913,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "CODE:Emperor",
         "Bpm": "234 (220.00 - 238.00)",
         "ChartName": "2570_03"
@@ -72712,7 +72550,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1611,
         "LevelStr": "13",
-        "Constant": 13.4,
+        "Constant": 13.2,
         "Charter": "じゃこレモン",
         "Bpm": "174.00",
         "ChartName": "2573_03"
@@ -72756,8 +72594,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1575,
-        "LevelStr": "13",
-        "Constant": 13.4,
+        "LevelStr": "13+",
+        "Constant": 13.5,
         "Charter": "Moon Strix",
         "Bpm": "131.00",
         "ChartName": "2574_03"
@@ -72973,7 +72811,7 @@
         "LevelName": "EXPERT",
         "MaxCombo": 1911,
         "LevelStr": "14",
-        "Constant": 14.1,
+        "Constant": 14.3,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "280.00",
         "ChartName": "2579_02"
@@ -72981,8 +72819,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2939,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "Mistilteinn vs Mizore respect for Finalists and \"Endmark\"",
         "Bpm": "280.00",
         "ChartName": "2579_03"
@@ -73071,8 +72909,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1924,
-        "LevelStr": "14",
-        "Constant": 14.4,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "Redarrow",
         "Bpm": "154.00",
         "ChartName": "2581_03"
@@ -73107,8 +72945,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1716,
-        "LevelStr": "14+",
-        "Constant": 14.5,
+        "LevelStr": "14",
+        "Constant": 14.4,
         "Charter": "ミニミライト",
         "Bpm": "270.00",
         "ChartName": "2582_02"
@@ -73116,8 +72954,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3210,
-        "LevelStr": "15",
-        "Constant": 15.4,
+        "LevelStr": "15+",
+        "Constant": 15.6,
         "Charter": "Violetta vs MONSTER",
         "Bpm": "270.00",
         "ChartName": "2582_03"
@@ -73251,8 +73089,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1152,
-        "LevelStr": "13",
-        "Constant": 13.0,
+        "LevelStr": "13+",
+        "Constant": 13.5,
         "Charter": "ミストルティン＠エゴイスト",
         "Bpm": "195.00",
         "ChartName": "2585_03"
@@ -73341,8 +73179,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1933,
-        "LevelStr": "12",
-        "Constant": 12.3,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "ペンギンは有罪",
         "Bpm": "170.00",
         "ChartName": "2587_03"
@@ -73387,7 +73225,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2511,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "xmxoxnxoxcxlxoxcxkx",
         "Bpm": "115 (112.00 - 400.00)",
         "ChartName": "2589_03"
@@ -73512,8 +73350,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1508,
-        "LevelStr": "12",
-        "Constant": 12.3,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "ミニミライト",
         "Bpm": "190.00",
         "ChartName": "2593_02"
@@ -73521,8 +73359,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1992,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "VIoletta",
         "Bpm": "190.00",
         "ChartName": "2593_03"
@@ -73567,7 +73405,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2252,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.9,
         "Charter": "ミニミライト respect for Lycoris",
         "Bpm": "158.00",
         "ChartName": "2594_03"
@@ -73611,8 +73449,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 1842,
-        "LevelStr": "12+",
-        "Constant": 12.9,
+        "LevelStr": "13",
+        "Constant": 13.0,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "205.00",
         "ChartName": "2596_03"
@@ -73657,7 +73495,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2675,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.3,
         "Charter": "Ragnarok",
         "Bpm": "164.00",
         "ChartName": "2597_03"
@@ -73782,8 +73620,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1431,
-        "LevelStr": "12",
-        "Constant": 12.1,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "ミニミライト",
         "Bpm": "183.00",
         "ChartName": "2600_02"
@@ -73791,8 +73629,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2384,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "柳の枝に霙なし",
         "Bpm": "183.00",
         "ChartName": "2600_03"
@@ -73872,8 +73710,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1442,
-        "LevelStr": "11+",
-        "Constant": 11.9,
+        "LevelStr": "11",
+        "Constant": 11.3,
         "Charter": "ミニミライト",
         "Bpm": "210.00",
         "ChartName": "2602_02"
@@ -73882,7 +73720,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2699,
         "LevelStr": "14+",
-        "Constant": 14.8,
+        "Constant": 14.9,
         "Charter": "くっころペンギン",
         "Bpm": "210.00",
         "ChartName": "2602_03"
@@ -74053,7 +73891,7 @@
         "LevelName": "EXPERT",
         "MaxCombo": 1522,
         "LevelStr": "13+",
-        "Constant": 13.6,
+        "Constant": 13.8,
         "Charter": "みぞれヤナギ",
         "Bpm": "244.00",
         "ChartName": "2606_02"
@@ -74062,7 +73900,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2600,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "ミニミライト",
         "Bpm": "244.00",
         "ChartName": "2606_03"
@@ -74187,8 +74025,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1267,
-        "LevelStr": "11+",
-        "Constant": 11.7,
+        "LevelStr": "12+",
+        "Constant": 12.5,
         "Charter": "ロシェ＠ペンギン",
         "Bpm": "134 (67.00 - 134.00)",
         "ChartName": "2612_02"
@@ -74287,7 +74125,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2619,
         "LevelStr": "14+",
-        "Constant": 14.7,
+        "Constant": 14.8,
         "Charter": "Twinrook",
         "Bpm": "213 (35.00 - 237.00)",
         "ChartName": "2614_03"
@@ -74376,8 +74214,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2453,
-        "LevelStr": "14+",
-        "Constant": 14.8,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Ataraxia",
         "Bpm": "250 (83.33 - 300.00)",
         "ChartName": "2616_03"
@@ -74511,8 +74349,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2058,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "Remnants of Blade",
         "Bpm": "180 (135.00 - 180.00)",
         "ChartName": "2620_03"
@@ -74736,8 +74574,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2788,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "みぞれヤナギ vs じゃこレモン",
         "Bpm": "201.00",
         "ChartName": "2625_03"
@@ -75186,8 +75024,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2245,
-        "LevelStr": "14",
-        "Constant": 14.3,
+        "LevelStr": "14+",
+        "Constant": 14.5,
         "Charter": "ミストルティン",
         "Bpm": "200.00",
         "ChartName": "2638_03"
@@ -75267,8 +75105,8 @@
       {
         "LevelName": "EXPERT",
         "MaxCombo": 1646,
-        "LevelStr": "14",
-        "Constant": 14.0,
+        "LevelStr": "13+",
+        "Constant": 13.8,
         "Charter": "サファ太",
         "Bpm": "220.00",
         "ChartName": "2641_02"
@@ -75276,8 +75114,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2339,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.1,
         "Charter": "POETIC LEMON",
         "Bpm": "220.00",
         "ChartName": "2641_03"
@@ -75546,8 +75384,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 2280,
-        "LevelStr": "14+",
-        "Constant": 14.9,
+        "LevelStr": "15",
+        "Constant": 15.2,
         "Charter": "アミノハバキリ vs じゃこレモン",
         "Bpm": "190.00",
         "ChartName": "2647_03"
@@ -75591,8 +75429,8 @@
       {
         "LevelName": "MASTER",
         "MaxCombo": 3194,
-        "LevelStr": "15",
-        "Constant": 15.3,
+        "LevelStr": "15+",
+        "Constant": 15.5,
         "Charter": "Emperor vs Ataraxia",
         "Bpm": "234.00",
         "ChartName": "2648_03"
@@ -75637,7 +75475,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2742,
         "LevelStr": "15",
-        "Constant": 15.0,
+        "Constant": 15.2,
         "Charter": "Ragnarok vs Violetta",
         "Bpm": "220.00",
         "ChartName": "2650_03"
@@ -75682,7 +75520,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 2332,
         "LevelStr": "15",
-        "Constant": 15.2,
+        "Constant": 15.4,
         "Charter": "Monster -FINAL JUDGMENT-",
         "Bpm": "160.00",
         "ChartName": "2651_03"
@@ -75727,7 +75565,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 4000,
         "LevelStr": "15+",
-        "Constant": 15.5,
+        "Constant": 15.7,
         "Charter": "譜面ボーイズからの挑戦状",
         "Bpm": "209 (53.25 - 372.75)",
         "ChartName": "2652_03"
@@ -75952,7 +75790,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 1568,
         "LevelStr": "13+",
-        "Constant": 13.8,
+        "Constant": 13.9,
         "Charter": "じゃこレモン",
         "Bpm": "160 (120.00 - 160.00)",
         "ChartName": "2659_03"
@@ -75997,7 +75835,7 @@
         "LevelName": "MASTER",
         "MaxCombo": 3090,
         "LevelStr": "15",
-        "Constant": 15.1,
+        "Constant": 15.3,
         "Charter": "ミニミライト vs ミストルティン",
         "Bpm": "190 (170.00 - 230.00)",
         "ChartName": "2660_03"
@@ -76595,6 +76433,2130 @@
         "Charter": "みぞれヤナギ",
         "Bpm": "206.00",
         "ChartName": "2681_03"
+      }
+    ]
+  },
+  {
+    "Id": 2683,
+    "Title": "On your mark (104期 Ver.)",
+    "Artist": "蓮ノ空女学院スクールアイドルクラブ「Link！Like！ラブライブ！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 504,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "154.00",
+        "ChartName": "2683_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 780,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "154.00",
+        "ChartName": "2683_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1262,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミストルティン",
+        "Bpm": "154.00",
+        "ChartName": "2683_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1567,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "154.00",
+        "ChartName": "2683_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1849,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "Revo＠充電切れ",
+        "Bpm": "154.00",
+        "ChartName": "2683_04"
+      }
+    ]
+  },
+  {
+    "Id": 2684,
+    "Title": "晴る",
+    "Artist": "ヨルシカ",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 352,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "204.00",
+        "ChartName": "2684_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 527,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "204.00",
+        "ChartName": "2684_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 675,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "204.00",
+        "ChartName": "2684_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1027,
+        "LevelStr": "11+",
+        "Constant": 11.9,
+        "Charter": "ミストルティン／晴れに晴れ 花よ咲け",
+        "Bpm": "204.00",
+        "ChartName": "2684_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1119,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "ミストルティン／泣きに泣け 空よ泣け",
+        "Bpm": "204.00",
+        "ChartName": "2684_04"
+      }
+    ]
+  },
+  {
+    "Id": 2686,
+    "Title": "ビビデバ",
+    "Artist": "星街すいせい（ホロライブ）",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 424,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "120.00",
+        "ChartName": "2686_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 745,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "120.00",
+        "ChartName": "2686_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1055,
+        "LevelStr": "10+",
+        "Constant": 10.7,
+        "Charter": "アミノハバキリ",
+        "Bpm": "120.00",
+        "ChartName": "2686_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1674,
+        "LevelStr": "12+",
+        "Constant": 12.9,
+        "Charter": "ものくろっく",
+        "Bpm": "120.00",
+        "ChartName": "2686_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1700,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "今夜に明日など無いレモン",
+        "Bpm": "120.00",
+        "ChartName": "2686_04"
+      }
+    ]
+  },
+  {
+    "Id": 2687,
+    "Title": "愛包ダンスホール",
+    "Artist": "HIMEHINA",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 380,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "141.00",
+        "ChartName": "2687_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 625,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "141.00",
+        "ChartName": "2687_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1081,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "141.00",
+        "ChartName": "2687_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1532,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "ハバキリ＠涙の薫りがする",
+        "Bpm": "141.00",
+        "ChartName": "2687_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 1801,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "141.00",
+        "ChartName": "2687_04"
+      }
+    ]
+  },
+  {
+    "Id": 2688,
+    "Title": "VERSE",
+    "Artist": "KMNZ",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 323,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "127.00",
+        "ChartName": "2688_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 580,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "127.00",
+        "ChartName": "2688_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 951,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "127.00",
+        "ChartName": "2688_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1287,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "MIZ",
+        "Bpm": "127.00",
+        "ChartName": "2688_03"
+      }
+    ]
+  },
+  {
+    "Id": 2689,
+    "Title": "メズマライザー",
+    "Artist": "サツキ feat.初音ミク・重音テト",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 546,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "185.00",
+        "ChartName": "2689_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1079,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "185.00",
+        "ChartName": "2689_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1556,
+        "LevelStr": "10+",
+        "Constant": 10.9,
+        "Charter": "サファ太",
+        "Bpm": "185.00",
+        "ChartName": "2689_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1887,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "185.00",
+        "ChartName": "2689_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2234,
+        "LevelStr": "14+",
+        "Constant": 14.5,
+        "Charter": "ミニミライト(^^♪",
+        "Bpm": "185.00",
+        "ChartName": "2689_04"
+      }
+    ]
+  },
+  {
+    "Id": 2690,
+    "Title": "絶対敵対メチャキライヤー",
+    "Artist": "メドミア",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 619,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "190.00",
+        "ChartName": "2690_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1013,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "190.00",
+        "ChartName": "2690_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1416,
+        "LevelStr": "10",
+        "Constant": 10.4,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "190.00",
+        "ChartName": "2690_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2128,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "レモンとじゃこ",
+        "Bpm": "190.00",
+        "ChartName": "2690_03"
+      }
+    ]
+  },
+  {
+    "Id": 2691,
+    "Title": "好きな惣菜発表ドラゴン",
+    "Artist": "ンバヂ",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 425,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2691_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 538,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00",
+        "ChartName": "2691_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 792,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "夕凪アロエ",
+        "Bpm": "160.00",
+        "ChartName": "2691_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1601,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "Moon Strix「イカゲソ天」",
+        "Bpm": "160.00",
+        "ChartName": "2691_03"
+      }
+    ]
+  },
+  {
+    "Id": 2692,
+    "Title": "有頂天ドリーマーズ",
+    "Artist": "森羅万象",
+    "Genre": "東方Project",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 444,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "188 (160.00 - 188.00)",
+        "ChartName": "2692_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 720,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "188 (160.00 - 188.00)",
+        "ChartName": "2692_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1070,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "188 (160.00 - 188.00)",
+        "ChartName": "2692_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1592,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "剣技「気炎万丈の刃」",
+        "Bpm": "188 (160.00 - 188.00)",
+        "ChartName": "2692_03"
+      }
+    ]
+  },
+  {
+    "Id": 2693,
+    "Title": "inkar-usi",
+    "Artist": "DIA「Arcaea」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 458,
+        "LevelStr": "1",
+        "Constant": 1.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "102.00",
+        "ChartName": "2693_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 859,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "102.00",
+        "ChartName": "2693_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1268,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "102.00",
+        "ChartName": "2693_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1628,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "夕凪アロエ",
+        "Bpm": "102.00",
+        "ChartName": "2693_03"
+      }
+    ]
+  },
+  {
+    "Id": 2694,
+    "Title": "Tie me down gently",
+    "Artist": "溝口ゆうま feat. 大瀬良あい「Arcaea」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 536,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "191.00",
+        "ChartName": "2694_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 831,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "191.00",
+        "ChartName": "2694_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1201,
+        "LevelStr": "10+",
+        "Constant": 10.9,
+        "Charter": "アミノハバキリ",
+        "Bpm": "191.00",
+        "ChartName": "2694_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2043,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "191.00",
+        "ChartName": "2694_03"
+      }
+    ]
+  },
+  {
+    "Id": 2695,
+    "Title": "Ringed Genesis",
+    "Artist": "Edelritter「Arcaea」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 459,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2695_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 695,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "160.00",
+        "ChartName": "2695_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1175,
+        "LevelStr": "11",
+        "Constant": 11.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "160.00",
+        "ChartName": "2695_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1816,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "Adverse Light",
+        "Bpm": "160.00",
+        "ChartName": "2695_03"
+      }
+    ]
+  },
+  {
+    "Id": 2696,
+    "Title": "Tempestissimo",
+    "Artist": "t+pazolite「Arcaea」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 722,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "231.00",
+        "ChartName": "2696_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1166,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "231.00",
+        "ChartName": "2696_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1622,
+        "LevelStr": "13+",
+        "Constant": 13.9,
+        "Charter": "サファ太",
+        "Bpm": "231.00",
+        "ChartName": "2696_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2540,
+        "LevelStr": "15",
+        "Constant": 15.1,
+        "Charter": "The Tempest Blade",
+        "Bpm": "231.00",
+        "ChartName": "2696_03"
+      }
+    ]
+  },
+  {
+    "Id": 2697,
+    "Title": "Igallta",
+    "Artist": "Se-U-Ra「Phigros」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 579,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "230.00",
+        "ChartName": "2697_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 958,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "230.00",
+        "ChartName": "2697_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1250,
+        "LevelStr": "11+",
+        "Constant": 11.6,
+        "Charter": "じゃこレモン",
+        "Bpm": "230.00",
+        "ChartName": "2697_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2003,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "Clematis",
+        "Bpm": "230.00",
+        "ChartName": "2697_03"
+      }
+    ]
+  },
+  {
+    "Id": 2698,
+    "Title": "Synthesis.",
+    "Artist": "tn-shi",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 590,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180.00",
+        "ChartName": "2698_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 988,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "180.00",
+        "ChartName": "2698_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1597,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "ミニミライト",
+        "Bpm": "180.00",
+        "ChartName": "2698_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2555,
+        "LevelStr": "15",
+        "Constant": 15.0,
+        "Charter": "みぞれヤナギ vs ミストルティン",
+        "Bpm": "180.00",
+        "ChartName": "2698_03"
+      }
+    ]
+  },
+  {
+    "Id": 2699,
+    "Title": "Chronomia",
+    "Artist": "Lime",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 584,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "227.00",
+        "ChartName": "2699_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1059,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "227.00",
+        "ChartName": "2699_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1385,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "アミノハバキリ",
+        "Bpm": "227.00",
+        "ChartName": "2699_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2080,
+        "LevelStr": "14+",
+        "Constant": 14.9,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "227.00",
+        "ChartName": "2699_03"
+      }
+    ]
+  },
+  {
+    "Id": 2700,
+    "Title": "カモンゴー！",
+    "Artist": "HaNaMiNa",
+    "Genre": "イロドリミドリ",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 459,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "200.00",
+        "ChartName": "2700_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 574,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "200.00",
+        "ChartName": "2700_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1094,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "200.00",
+        "ChartName": "2700_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1482,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "ミストルティン",
+        "Bpm": "200.00",
+        "ChartName": "2700_03"
+      }
+    ]
+  },
+  {
+    "Id": 2702,
+    "Title": "イルミネーション",
+    "Artist": "曲：央海加亥／歌：柏木 咲姫(CV：石見 舞菜香)",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 438,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "131.00",
+        "ChartName": "2702_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 799,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "131.00",
+        "ChartName": "2702_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 966,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "131.00",
+        "ChartName": "2702_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1647,
+        "LevelStr": "12+",
+        "Constant": 12.9,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "131.00",
+        "ChartName": "2702_03"
+      }
+    ]
+  },
+  {
+    "Id": 2703,
+    "Title": "Ai C",
+    "Artist": "Feryquitous",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 537,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "191.00",
+        "ChartName": "2703_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 752,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "191.00",
+        "ChartName": "2703_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1438,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "191.00",
+        "ChartName": "2703_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2222,
+        "LevelStr": "14+",
+        "Constant": 14.7,
+        "Charter": "ミニミライト",
+        "Bpm": "191.00",
+        "ChartName": "2703_03"
+      }
+    ]
+  },
+  {
+    "Id": 2704,
+    "Title": "≠彡\"/了→",
+    "Artist": "水野健治",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 645,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "222.00",
+        "ChartName": "2704_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 945,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "222.00",
+        "ChartName": "2704_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1588,
+        "LevelStr": "13",
+        "Constant": 13.4,
+        "Charter": "サファ太",
+        "Bpm": "222.00",
+        "ChartName": "2704_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2424,
+        "LevelStr": "15",
+        "Constant": 15.0,
+        "Charter": "ι″ャ⊇∠E･/",
+        "Bpm": "222.00",
+        "ChartName": "2704_03"
+      }
+    ]
+  },
+  {
+    "Id": 2705,
+    "Title": "メッちゅう殴打",
+    "Artist": "STEAKA feat.山田じぇみ子",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 478,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "178.00",
+        "ChartName": "2705_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 748,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "178.00",
+        "ChartName": "2705_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1133,
+        "LevelStr": "11+",
+        "Constant": 11.9,
+        "Charter": "アミノハバキリ",
+        "Bpm": "178.00",
+        "ChartName": "2705_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1916,
+        "LevelStr": "14",
+        "Constant": 14.1,
+        "Charter": "地雷系ペンギン",
+        "Bpm": "178.00",
+        "ChartName": "2705_03"
+      }
+    ]
+  },
+  {
+    "Id": 2706,
+    "Title": "ドリームケッチャー",
+    "Artist": "OUTLOUD feat.NG。",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 532,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "164.00",
+        "ChartName": "2706_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 939,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "164.00",
+        "ChartName": "2706_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1314,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "164.00",
+        "ChartName": "2706_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1780,
+        "LevelStr": "12",
+        "Constant": 12.3,
+        "Charter": "夕凪アロエ",
+        "Bpm": "164.00",
+        "ChartName": "2706_03"
+      }
+    ]
+  },
+  {
+    "Id": 2707,
+    "Title": "ラブリージャッジメント",
+    "Artist": "いるかアイス feat.ちょこ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 438,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "288.00",
+        "ChartName": "2707_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 777,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "ミニミライト",
+        "Bpm": "288.00",
+        "ChartName": "2707_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1082,
+        "LevelStr": "10+",
+        "Constant": 10.5,
+        "Charter": "ミニミライト",
+        "Bpm": "288.00",
+        "ChartName": "2707_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1600,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "じゃこレモン裁判長",
+        "Bpm": "288.00",
+        "ChartName": "2707_03"
+      }
+    ]
+  },
+  {
+    "Id": 2708,
+    "Title": "房総★ミラクル☆てんたくる!?",
+    "Artist": "MOSAIC.WAV",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 490,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00",
+        "ChartName": "2708_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 955,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "ミニミライト",
+        "Bpm": "155.00",
+        "ChartName": "2708_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1309,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "夕凪アロエ",
+        "Bpm": "155.00",
+        "ChartName": "2708_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2072,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "ロシェ＠九十九里浜",
+        "Bpm": "155.00",
+        "ChartName": "2708_03"
+      }
+    ]
+  },
+  {
+    "Id": 2709,
+    "Title": "Crystallize",
+    "Artist": "Lime",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 413,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "148.00",
+        "ChartName": "2709_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 678,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "148.00",
+        "ChartName": "2709_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1207,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "ミストルティン",
+        "Bpm": "148.00",
+        "ChartName": "2709_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1600,
+        "LevelStr": "14",
+        "Constant": 14.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "148.00",
+        "ChartName": "2709_03"
+      }
+    ]
+  },
+  {
+    "Id": 2710,
+    "Title": "Oracle",
+    "Artist": "DJ Noriken",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 594,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "205.00",
+        "ChartName": "2710_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1050,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "205.00",
+        "ChartName": "2710_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1641,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "205.00",
+        "ChartName": "2710_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2304,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "アミノハバキリ",
+        "Bpm": "205.00",
+        "ChartName": "2710_03"
+      }
+    ]
+  },
+  {
+    "Id": 2711,
+    "Title": "The Devil Incarnate",
+    "Artist": "Laur",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 626,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "250.00",
+        "ChartName": "2711_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1034,
+        "LevelStr": "10",
+        "Constant": 10.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "250.00",
+        "ChartName": "2711_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1718,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "250.00",
+        "ChartName": "2711_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2900,
+        "LevelStr": "15",
+        "Constant": 15.2,
+        "Charter": "CODE:Violetta",
+        "Bpm": "250.00",
+        "ChartName": "2711_03"
+      }
+    ]
+  },
+  {
+    "Id": 2712,
+    "Title": "Theatore Creatore",
+    "Artist": "Toby Fox & かめりあ",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 610,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "185.00",
+        "ChartName": "2712_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1003,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "185.00",
+        "ChartName": "2712_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1555,
+        "LevelStr": "12+",
+        "Constant": 12.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "185.00",
+        "ChartName": "2712_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2097,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "ミストルティン & 透明絵具",
+        "Bpm": "185.00",
+        "ChartName": "2712_03"
+      },
+      {
+        "LevelName": "ULTIMA",
+        "MaxCombo": 2889,
+        "LevelStr": "15",
+        "Constant": 15.3,
+        "Charter": "ミニミライト & みぞれヤナギ",
+        "Bpm": "185.00",
+        "ChartName": "2712_04"
+      }
+    ]
+  },
+  {
+    "Id": 2713,
+    "Title": "ジョハリ",
+    "Artist": "Nornis",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 516,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "167.00",
+        "ChartName": "2713_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 867,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "167.00",
+        "ChartName": "2713_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1381,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "167.00",
+        "ChartName": "2713_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1959,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "167.00",
+        "ChartName": "2713_03"
+      }
+    ]
+  },
+  {
+    "Id": 2714,
+    "Title": "眩耀夜行（104期Ver.）",
+    "Artist": "スリーズブーケ[日野下花帆(CV.楡井希実)、乙宗 梢(CV.花宮初奈)、百生吟子(CV.櫻井陽菜)]「Link！Like！ラブライブ！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 576,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "158.00",
+        "ChartName": "2714_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 879,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "158.00",
+        "ChartName": "2714_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1226,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミニミライト",
+        "Bpm": "158.00",
+        "ChartName": "2714_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1651,
+        "LevelStr": "13",
+        "Constant": 13.0,
+        "Charter": "Revo@LC",
+        "Bpm": "158.00",
+        "ChartName": "2714_03"
+      }
+    ]
+  },
+  {
+    "Id": 2715,
+    "Title": "KNOT（104期Ver.）",
+    "Artist": "DOLLCHESTRA[村野さやか(CV.野中ここな)、夕霧綴理(CV.佐々木琴子)、徒町小鈴(CV.葉山風花)]「Link！Like！ラブライブ！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 481,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "174.00",
+        "ChartName": "2715_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 845,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "174.00",
+        "ChartName": "2715_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1279,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ミストルティン",
+        "Bpm": "174.00",
+        "ChartName": "2715_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1969,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "アミノハバキリ",
+        "Bpm": "174.00",
+        "ChartName": "2715_03"
+      }
+    ]
+  },
+  {
+    "Id": 2716,
+    "Title": "アイデンティティ（104期NEW Ver.）",
+    "Artist": "みらくらぱーく！[大沢瑠璃乃(CV.菅 叶和)、藤島 慈(CV.月音こな)、安養寺姫芽(CV.来栖りん)]「Link！Like！ラブライブ！」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 506,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "202.00",
+        "ChartName": "2716_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 888,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "202.00",
+        "ChartName": "2716_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1240,
+        "LevelStr": "10+",
+        "Constant": 10.9,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "202.00",
+        "ChartName": "2716_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2130,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "じゃこレモン",
+        "Bpm": "202.00",
+        "ChartName": "2716_03"
+      }
+    ]
+  },
+  {
+    "Id": 2722,
+    "Title": "激烈!!!!ファミレスガールは帰しま1000!!!!",
+    "Artist": "南ノ南 feat.9Lana",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 500,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "201.00",
+        "ChartName": "2722_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1000,
+        "LevelStr": "7",
+        "Constant": 7.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "201.00",
+        "ChartName": "2722_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2000,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "アミノハバキリ",
+        "Bpm": "201.00",
+        "ChartName": "2722_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3000,
+        "LevelStr": "14",
+        "Constant": 14.3,
+        "Charter": "残業!!!!譜面ボーイは帰れま1000!!!!",
+        "Bpm": "201.00",
+        "ChartName": "2722_03"
+      }
+    ]
+  },
+  {
+    "Id": 2735,
+    "Title": "あいのうた",
+    "Artist": "大漠波新",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 441,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "139.00",
+        "ChartName": "2735_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 794,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "139.00",
+        "ChartName": "2735_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1193,
+        "LevelStr": "10",
+        "Constant": 10.4,
+        "Charter": "ミニミライト",
+        "Bpm": "139.00",
+        "ChartName": "2735_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1947,
+        "LevelStr": "13+",
+        "Constant": 13.6,
+        "Charter": "ミストルティン",
+        "Bpm": "139.00",
+        "ChartName": "2735_03"
+      }
+    ]
+  },
+  {
+    "Id": 2736,
+    "Title": "夜もすがら君想ふ (10th Anniv.)",
+    "Artist": "TOKOTOKO（西沢さんP）",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 439,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "148.00",
+        "ChartName": "2736_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 614,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "148.00",
+        "ChartName": "2736_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1191,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "148.00",
+        "ChartName": "2736_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1730,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "じゃこレモン",
+        "Bpm": "148.00",
+        "ChartName": "2736_03"
+      }
+    ]
+  },
+  {
+    "Id": 2737,
+    "Title": "ジェヘナ",
+    "Artist": "wotaku",
+    "Genre": "niconico",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 400,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "128.00",
+        "ChartName": "2737_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 575,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "128.00",
+        "ChartName": "2737_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 962,
+        "LevelStr": "10",
+        "Constant": 10.3,
+        "Charter": "アミノハバキリ",
+        "Bpm": "128.00",
+        "ChartName": "2737_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1629,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "みぞれヤナギ(笑)(笑)(笑)(笑)(笑)",
+        "Bpm": "128.00",
+        "ChartName": "2737_03"
+      }
+    ]
+  },
+  {
+    "Id": 2738,
+    "Title": "Lostwizz",
+    "Artist": "s-don",
+    "Genre": "ゲキマイ",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 471,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "155.00",
+        "ChartName": "2738_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 801,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "155.00",
+        "ChartName": "2738_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1348,
+        "LevelStr": "12+",
+        "Constant": 12.7,
+        "Charter": "ミストルティン",
+        "Bpm": "155.00",
+        "ChartName": "2738_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1857,
+        "LevelStr": "14",
+        "Constant": 14.0,
+        "Charter": "サファ太",
+        "Bpm": "155.00",
+        "ChartName": "2738_03"
+      }
+    ]
+  },
+  {
+    "Id": 2739,
+    "Title": "Aether Crest: Celestial",
+    "Artist": "void (Mournfinale) × 水野健治",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 645,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180.00",
+        "ChartName": "2739_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1209,
+        "LevelStr": "8+",
+        "Constant": 8.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "180.00",
+        "ChartName": "2739_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 2466,
+        "LevelStr": "14",
+        "Constant": 14.4,
+        "Charter": "アミノハバキリ",
+        "Bpm": "180.00",
+        "ChartName": "2739_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3000,
+        "LevelStr": "15",
+        "Constant": 15.3,
+        "Charter": "Lemon -Arced for the Ace-",
+        "Bpm": "180.00",
+        "ChartName": "2739_03"
+      }
+    ]
+  },
+  {
+    "Id": 2744,
+    "Title": "Crush the Dystopia",
+    "Artist": "MintJam vs Masahiro \"Godspeed\" Aoki",
+    "Genre": "ORIGINAL",
+    "Version": "CHUNITHM LUMINOUS PLUS",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 667,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "205.00",
+        "ChartName": "2744_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1222,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "205.00",
+        "ChartName": "2744_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1788,
+        "LevelStr": "13",
+        "Constant": 13.3,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "205.00",
+        "ChartName": "2744_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2832,
+        "LevelStr": "15",
+        "Constant": 15.2,
+        "Charter": "Mistilteinn -For KOP6th-",
+        "Bpm": "205.00",
+        "ChartName": "2744_03"
+      }
+    ]
+  },
+  {
+    "Id": 2793,
+    "Title": "Not On The Sidelines - Street Fighter 6 Main Theme",
+    "Artist": "Rocco808,Randy Marx,GRP,寺山善也「ストリートファイター6」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 504,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "180.00",
+        "ChartName": "2793_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 722,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "180.00",
+        "ChartName": "2793_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1074,
+        "LevelStr": "10",
+        "Constant": 10.1,
+        "Charter": "アミノハバキリ",
+        "Bpm": "180.00",
+        "ChartName": "2793_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2053,
+        "LevelStr": "13",
+        "Constant": 13.1,
+        "Charter": "ミストルティン VS 夕凪アロエ",
+        "Bpm": "180.00",
+        "ChartName": "2793_03"
+      }
+    ]
+  },
+  {
+    "Id": 2796,
+    "Title": "Black MInD",
+    "Artist": "COSIO「グルーヴコースター」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 460,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "192.00",
+        "ChartName": "2796_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1045,
+        "LevelStr": "7+",
+        "Constant": 7.5,
+        "Charter": "そらいろカリン",
+        "Bpm": "192.00",
+        "ChartName": "2796_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1371,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "じゃこレモン",
+        "Bpm": "192.00",
+        "ChartName": "2796_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 2061,
+        "LevelStr": "14+",
+        "Constant": 14.8,
+        "Charter": "Black CaT Darkside",
+        "Bpm": "192.00",
+        "ChartName": "2796_03"
+      }
+    ]
+  },
+  {
+    "Id": 2797,
+    "Title": "It's a pit world",
+    "Artist": "Shohei Tsuchiya(ZUNTATA)「グルーヴコースター」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 408,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "140.00",
+        "ChartName": "2797_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 582,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "140.00",
+        "ChartName": "2797_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 949,
+        "LevelStr": "9",
+        "Constant": 9.0,
+        "Charter": "アミノハバキリ",
+        "Bpm": "140.00",
+        "ChartName": "2797_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1316,
+        "LevelStr": "13",
+        "Constant": 13.2,
+        "Charter": "夕凪アロエ",
+        "Bpm": "140.00",
+        "ChartName": "2797_03"
+      }
+    ]
+  },
+  {
+    "Id": 2798,
+    "Title": "VOLT",
+    "Artist": "aran「グルーヴコースター」",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 373,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "174.00",
+        "ChartName": "2798_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 745,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "174.00",
+        "ChartName": "2798_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1151,
+        "LevelStr": "10+",
+        "Constant": 10.7,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "174.00",
+        "ChartName": "2798_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1393,
+        "LevelStr": "13+",
+        "Constant": 13.8,
+        "Charter": "じゃこレモン",
+        "Bpm": "174.00",
+        "ChartName": "2798_03"
+      }
+    ]
+  },
+  {
+    "Id": 2799,
+    "Title": "キミとボクへの葬送歌",
+    "Artist": "ROKINA",
+    "Genre": "VARIETY",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 611,
+        "LevelStr": "4",
+        "Constant": 4.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "220.00",
+        "ChartName": "2799_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 1215,
+        "LevelStr": "8",
+        "Constant": 8.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "220.00",
+        "ChartName": "2799_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1853,
+        "LevelStr": "13+",
+        "Constant": 13.9,
+        "Charter": "アミノハバキリ",
+        "Bpm": "220.00",
+        "ChartName": "2799_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 3000,
+        "LevelStr": "15",
+        "Constant": 15.2,
+        "Charter": "Twinrook Xrodiena",
+        "Bpm": "220.00",
+        "ChartName": "2799_03"
+      }
+    ]
+  },
+  {
+    "Id": 2806,
+    "Title": "Campus mode!!",
+    "Artist": "歌：初星学園 作詞作曲：田淵智也 編曲：滝澤俊輔（TRYTONELABO）「学園アイドルマスター」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 508,
+        "LevelStr": "3",
+        "Constant": 3.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "183.00",
+        "ChartName": "2806_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 836,
+        "LevelStr": "6",
+        "Constant": 6.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "183.00",
+        "ChartName": "2806_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 1219,
+        "LevelStr": "9+",
+        "Constant": 9.5,
+        "Charter": "ミニミライト",
+        "Bpm": "183.00",
+        "ChartName": "2806_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1942,
+        "LevelStr": "12+",
+        "Constant": 12.6,
+        "Charter": "Luxizhel",
+        "Bpm": "183.00",
+        "ChartName": "2806_03"
+      }
+    ]
+  },
+  {
+    "Id": 2807,
+    "Title": "Fighting My Way",
+    "Artist": "歌：花海咲季 (CV. 長月あおい) 作詞：HIROMI　作曲・編曲：Giga「学園アイドルマスター」",
+    "Genre": "POPS & ANIME",
+    "Version": "CHUNITHM VERSE",
+    "Beatmaps": [
+      {
+        "LevelName": "BASIC",
+        "MaxCombo": 397,
+        "LevelStr": "2",
+        "Constant": 2.0,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132.00",
+        "ChartName": "2807_00"
+      },
+      {
+        "LevelName": "ADVANCED",
+        "MaxCombo": 552,
+        "LevelStr": "5",
+        "Constant": 5.0,
+        "Charter": "そらいろカリン",
+        "Bpm": "132.00",
+        "ChartName": "2807_01"
+      },
+      {
+        "LevelName": "EXPERT",
+        "MaxCombo": 850,
+        "LevelStr": "10",
+        "Constant": 10.2,
+        "Charter": "みぞれヤナギ",
+        "Bpm": "132.00",
+        "ChartName": "2807_02"
+      },
+      {
+        "LevelName": "MASTER",
+        "MaxCombo": 1546,
+        "LevelStr": "13+",
+        "Constant": 13.9,
+        "Charter": "ロシェ＠ペンギン",
+        "Bpm": "132.00",
+        "ChartName": "2807_03"
       }
     ]
   }
