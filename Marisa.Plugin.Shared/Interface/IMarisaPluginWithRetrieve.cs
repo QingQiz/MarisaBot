@@ -263,8 +263,8 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
             switch (available.FindIndex(x => x.StartsWith(key, StringComparison.InvariantCultureIgnoreCase)))
             {
                 case -1:
-                    var doc = string.Join("\n", available.Zip(docs).Select(x => $"{x.First} （{x.Second}"));
-                    message.Reply($"{key}不是可用的约束条件，可用的：\n{doc}。\n可用命令的非共同前缀替代。");
+                    var doc = string.Join("\n", available.Zip(docs).Select(x => $"- {x.First} （{x.Second}）"));
+                    message.Reply($"{key}不是可用的约束条件，可用的：\n{doc}\n可用命令的非共同前缀替代。");
                     throw new ArgumentOutOfRangeException();
                 case 0: // Charter
                     CheckOp(op);
