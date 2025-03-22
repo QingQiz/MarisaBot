@@ -403,7 +403,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
             var searchRes = songDb.SearchSong(keyword.Trim());
 
-            _ = await songDb.MultiPageSelectResult(searchRes.Where(x => constraint(x)).ToList(), message);
+            await songDb.MultiPageSelectResult(searchRes.Where(x => constraint(x)).ToList(), message);
         }
         catch (ArgumentOutOfRangeException)
         {

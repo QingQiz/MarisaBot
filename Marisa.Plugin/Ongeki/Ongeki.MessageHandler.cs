@@ -17,7 +17,7 @@ public partial class Ongeki
         var songName     = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
-        var song = await SongDb.MultiPageSelectResult(searchResult, message, false);
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false, true);
         if (song == null)
         {
             return MarisaPluginTaskState.CompletedTask;

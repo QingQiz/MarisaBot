@@ -28,11 +28,13 @@ public static class SearchSongInDb
     /// <param name="songs"></param>
     /// <param name="message"></param>
     /// <param name="reply">是否回复歌曲详细信息（图片）</param>
+    /// <param name="waitRes">是否等待查询结果</param>
     /// <typeparam name="T">TSong</typeparam>
     /// <returns></returns>
-    public static Task<T?> MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message, bool reply = true) where T : Song
+    public static Task<T?> MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message, bool reply = true, bool waitRes = false) where T : Song
     {
         var result = new TaskCompletionSource<T?>();
+
         switch (songs.Count)
         {
             case 0:
@@ -82,7 +84,7 @@ public static class SearchSongInDb
             result.SetResult(null);
             return Task.FromResult(MarisaPluginTaskState.Canceled);
         });
-        return result.Task;
+        return waitRes ? result.Task : Task.FromResult<T?>(null);
 
         string DisplaySong(int page)
         {
