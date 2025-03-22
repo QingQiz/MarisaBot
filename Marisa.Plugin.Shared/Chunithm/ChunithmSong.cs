@@ -1,4 +1,5 @@
-﻿using Marisa.Plugin.Shared.MaiMaiDx;
+﻿using System.Text.RegularExpressions;
+using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -7,7 +8,7 @@ using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.Chunithm;
 
-public class ChunithmSong : Song
+public partial class ChunithmSong : Song
 {
     public enum DataSource
     {
@@ -38,7 +39,6 @@ public class ChunithmSong : Song
 
     public static readonly List<string> LevelLabel = ["BASIC", "ADVANCED", "EXPERT", "MASTER", "ULTIMA", "WORLD'S END"];
 
-    public new readonly ReadOnlyMemory<char> Bpm;
     public readonly List<string> ChartName = [];
     public readonly string Genre;
     /// <summary>
@@ -47,6 +47,19 @@ public class ChunithmSong : Song
     public readonly List<string> LevelName = [];
     public readonly List<long> MaxCombo = [];
     public readonly List<double> ConstantOld = [];
+
+    private readonly List<string> _bpms = [];
+    private List<double>? _bpmList;
+
+    public List<double> BpmList => _bpmList ??= (
+        from bpm in _bpms
+        select DoubleRegex().Matches(bpm)
+        into matches
+        from match in matches
+        select double.Parse(match.Value)
+        into bpm
+        select bpm
+    ).ToList();
 
     public ChunithmSong(dynamic o, DataSource source = DataSource.Default)
     {
@@ -59,7 +72,6 @@ public class ChunithmSong : Song
                 Artist  = o.basic_info.artist;
                 Genre   = o.basic_info.genre;
                 Version = o.basic_info.from;
-                Bpm     = ((string)o.basic_info.bpm.ToString()).AsMemory();
 
                 for (var i = 0; i < o.level.Count; i++)
                 {
@@ -70,6 +82,7 @@ public class ChunithmSong : Song
                     LevelName.Add(o.level[i]);
                     MaxCombo.Add(o.charts[i].combo);
                     ChartName.Add("");
+                    _bpms.Add(o.basic_info.bpm.ToString());
                 }
                 break;
             }
@@ -105,16 +118,6 @@ public class ChunithmSong : Song
                 Genre   = o.Genre;
                 Version = o.Version;
 
-                var bpms = new List<string>();
-
-                foreach (var i in o.Beatmaps)
-                {
-                    bpms.Add(i.Bpm);
-                }
-
-                base.Bpm = bpms.Select(x => double.Parse(x.Split(' ').First())).Max();
-                Bpm      = bpms.MaxBy(x => x.Length).AsMemory();
-
                 foreach (var i in o.Beatmaps)
                 {
                     Constants.Add(i.Constant);
@@ -123,6 +126,7 @@ public class ChunithmSong : Song
                     Levels.Add(i.LevelStr);
                     LevelName.Add(i.LevelName);
                     ChartName.Add(i.ChartName);
+                    _bpms.Add(i.Bpm);
 
                     try
                     {
@@ -139,8 +143,6 @@ public class ChunithmSong : Song
                 throw new ArgumentOutOfRangeException(nameof(source), source, null);
         }
     }
-
-    public ReadOnlyMemory<char> BpmNorm => Bpm.Split(' ').First();
 
     public static decimal Ra(int achievement, decimal constant)
     {
@@ -216,7 +218,7 @@ public class ChunithmSong : Song
                     Constant    = Constants[i],
                     ConstantOld = ConstantOld[i],
                     Charter     = Charters[i],
-                    Bpm         = Bpm.ToString(),
+                    Bpm         = _bpms[i],
                     ChartName   = ChartName[i]
                 });
             }
@@ -226,4 +228,7 @@ public class ChunithmSong : Song
             return WebApi.ChunithmSong(ctx.Id).Result;
         }).Value;
     }
+
+    [GeneratedRegex(@"[\d.]+")]
+    private static partial Regex DoubleRegex();
 }

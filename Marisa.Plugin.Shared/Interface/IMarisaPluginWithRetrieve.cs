@@ -1,4 +1,5 @@
-﻿using Marisa.Plugin.Shared.Util;
+﻿using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Interface;
@@ -283,7 +284,13 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                     if (double.TryParse(val, out var bpm))
                     {
                         var result = bpm;
-                        songConstraint.Add(song => GetComparer<double>(op)(song.Bpm, result));
+                        songConstraint.Add(typeof(TSong) == typeof(ChunithmSong)
+                            ? song =>
+                            {
+                                var cmp = GetComparer<double>(op);
+                                return (song as ChunithmSong)!.BpmList.Any(b => cmp(b, result));
+                            }
+                            : song => GetComparer<double>(op)(song.Bpm, result));
                         break;
                     }
                     message.Reply("Bpm 只能为数字");
@@ -294,10 +301,10 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                 case 4: // Title
                     songConstraint.Add(song => song.Title.Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
-                case 5:
+                case 5: // Version
                     songConstraint.Add(song => song.Version.Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
-                case 6:
+                case 6: // Id
                     if (long.TryParse(val, out var id))
                     {
                         var result = id;
@@ -306,7 +313,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                     }
                     message.Reply("Id 只能为数字");
                     throw new ArgumentOutOfRangeException();
-                case 7:
+                case 7: // Index
                     if (int.TryParse(val, out var index))
                     {
                         var result = index;
