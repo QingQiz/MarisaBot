@@ -256,19 +256,18 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                 break;
             }
 
-            var available = new List<string> { "Charter", "Constant", "Bpm", "Artist", "Title", "Version", "Id", "Index" };
+            var available = new List<string> { "Charter", "Constant", "Bpm", "Artist", "Title", "Version", "Id", "Index", "DiffName", "Level" };
+
+            string[] docs = ["谱师", "定数", "BPM", "艺术家", "标题", "版本", "ID", "难度索引", "难度名，如：Master，future", "等级如：14，14+"];
 
             switch (available.FindIndex(x => x.StartsWith(key, StringComparison.InvariantCultureIgnoreCase)))
             {
                 case -1:
-                    message.Reply($"{key}不是可用的约束条件，可用的：{string.Join('、', available)}。可用非共同前缀替代。");
+                    var doc = string.Join("\n", available.Zip(docs).Select(x => $"{x.First} （{x.Second}"));
+                    message.Reply($"{key}不是可用的约束条件，可用的：\n{doc}。\n可用命令的非共同前缀替代。");
                     throw new ArgumentOutOfRangeException();
                 case 0: // Charter
-                    if (op != "=")
-                    {
-                        message.Reply("该约束可用操作符：=");
-                        throw new ArgumentOutOfRangeException();
-                    }
+                    CheckOp(op);
                     diffConstraint.Add((song, levelIdx) => song.Charters[levelIdx].Equals(val, StringComparison.OrdinalIgnoreCase));
                     break;
                 case 1: // Constant
@@ -284,24 +283,32 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                     if (double.TryParse(val, out var bpm))
                     {
                         var result = bpm;
-                        songConstraint.Add(typeof(TSong) == typeof(ChunithmSong)
-                            ? song =>
+                        if (typeof(TSong) == typeof(ChunithmSong))
+                        {
+                            diffConstraint.Add((song, i) =>
                             {
                                 var cmp = GetComparer<double>(op);
-                                return (song as ChunithmSong)!.BpmList.Any(b => cmp(b, result));
-                            }
-                            : song => GetComparer<double>(op)(song.Bpm, result));
+                                return (song as ChunithmSong)!.BpmList[i].Any(b => cmp(b, result));
+                            });
+                        }
+                        else
+                        {
+                            songConstraint.Add(song => GetComparer<double>(op)(song.Bpm, result));
+                        }
                         break;
                     }
                     message.Reply("Bpm 只能为数字");
                     throw new ArgumentOutOfRangeException();
                 case 3: // Artist
+                    CheckOp(op);
                     songConstraint.Add(song => song.Artist.Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
                 case 4: // Title
+                    CheckOp(op);
                     songConstraint.Add(song => song.Title.Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
                 case 5: // Version
+                    CheckOp(op);
                     songConstraint.Add(song => song.Version.Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
                 case 6: // Id
@@ -322,6 +329,13 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                     }
                     message.Reply("LevelIndex 只能为数字");
                     throw new ArgumentOutOfRangeException();
+                case 8: // DiffName
+                    CheckOp(op);
+                    diffConstraint.Add((song, levelIdx) => song.DiffNames[levelIdx].Contains(val, StringComparison.OrdinalIgnoreCase));
+                    break;
+                case 9: // Level
+                    diffConstraint.Add((song, levelIdx) => LevelComparer(song.Levels[levelIdx], val, op));
+                    break;
             }
         }
 
@@ -349,6 +363,28 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                 "<"  => (x, y) => Comparer<T>.Default.Compare(x, y) < 0,
                 _    => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        bool LevelComparer(string a, string b, string op)
+        {
+            var cmp  = GetComparer<int>(op);
+            var aInt = a.Last() == '+' ? int.Parse(a[..^1]) : int.Parse(a);
+            var bInt = b.Last() == '+' ? int.Parse(b[..^1]) : int.Parse(b);
+            if (aInt != bInt)
+            {
+                return cmp(aInt, bInt);
+            }
+            if (a.Length == b.Length) return cmp(0, 0);
+            return a.Last() == '+' ? cmp(1, 0) : cmp(0, 1);
+        }
+
+        void CheckOp(string op)
+        {
+            if (op != "=")
+            {
+                message.Reply("该约束可用操作符：=");
+                throw new ArgumentOutOfRangeException();
+            }
         }
     }
 
