@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -29,7 +30,7 @@ public class SongScore
     [JsonProperty("level_label")]
     public string LevelLabel
     {
-        get => MaiMaiSong.LevelName[LevelIdx];
+        get => MaiMaiSong.LevelNameAll[LevelIdx];
         // ReSharper disable once ValueParameterNotUsed
         set {}
     }
@@ -66,9 +67,15 @@ public class SongScore
     [JsonProperty("type")]
     public string Type { get; set; }
 
-    public static DxRating FromJson(string json) => JsonConvert.DeserializeObject<DxRating>(json, Converter.Settings)!;
+    public static DxRating FromJson(string json)
+    {
+        return JsonConvert.DeserializeObject<DxRating>(json, Converter.Settings)!;
+    }
 
-    public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
+    public string ToJson()
+    {
+        return JsonConvert.SerializeObject(this, Converter.Settings);
+    }
 
     public static int B50Ra(decimal achievement, decimal constant)
     {
@@ -177,7 +184,7 @@ public class SongScore
     /// <returns>达成率</returns>
     public static double NextAchievement(double constant, long minRa)
     {
-        if (minRa >= SongScore.Ra(100.5, constant)) return -1;
+        if (minRa >= Ra(100.5, constant)) return -1;
 
         var a = 0.0;
 

@@ -26,7 +26,7 @@ export interface GroupSongInfo {
 
 export interface SongInfo {
     Genre: string;
-    LevelName: string[];
+    DiffNames: string[];
     MaxCombo: number[];
     Bpm: string;
     Id: number;
@@ -36,5 +36,4 @@ export interface SongInfo {
     Levels: string[];
     Charters: string[];
     Version: string;
-    BpmNorm: string;
 }

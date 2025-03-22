@@ -13,6 +13,12 @@ public abstract class Song
     ///     14 / 14+ / 15 / ...
     /// </summary>
     public readonly List<string> Levels = [];
+    /// <summary>
+    ///     BASIC, ADVANCED, EXPERT, MASTER, ULTIMA, ...
+    /// or
+    ///     future, past, present, ...
+    /// </summary>
+    public readonly List<string> DiffNames = [];
     public string Artist = "";
     public double Bpm;
     public long Id;

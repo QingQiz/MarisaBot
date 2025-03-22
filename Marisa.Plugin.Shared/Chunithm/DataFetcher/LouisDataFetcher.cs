@@ -55,7 +55,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
                 for (var i = 0; i < song.Constants.Count; i++)
                 {
-                    var j = songNew.LevelName.FindIndex(x => x == song.LevelName[i]);
+                    var j = songNew.DiffNames.FindIndex(x => x == song.DiffNames[i]);
 
                     if (j != -1) songNew.ConstantOld[j] = song.Constants[i];
                 }

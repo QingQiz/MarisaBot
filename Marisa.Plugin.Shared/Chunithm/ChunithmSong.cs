@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -17,49 +16,21 @@ public partial class ChunithmSong : Song
         Default
     }
 
-    public static readonly Dictionary<string, Color> LevelColor = new()
-    {
-        { "BASIC", MaiMaiSong.LevelColor[0] },
-        { "ADVANCED", MaiMaiSong.LevelColor[1] },
-        { "EXPERT", MaiMaiSong.LevelColor[2] },
-        { "MASTER", MaiMaiSong.LevelColor[3] },
-        { "ULTIMA", Color.Black },
-        { "WORLD'S END", MaiMaiSong.LevelColor.Last() }
-    };
-
-    public static readonly Dictionary<string, string> LevelAlias = new()
-    {
-        { "绿", "BASIC" },
-        { "黄", "ADVANCED" },
-        { "红", "EXPERT" },
-        { "紫", "MASTER" },
-        { "黑", "ULTIMA" },
-        { "we", "WORLD'S END" }
-    };
-
     public static readonly List<string> LevelLabel = ["BASIC", "ADVANCED", "EXPERT", "MASTER", "ULTIMA", "WORLD'S END"];
 
     public readonly List<string> ChartName = [];
     public readonly string Genre;
-    /// <summary>
-    ///     BASIC, ADVANCED, EXPERT, MASTER, ULTIMA, ...
-    /// </summary>
-    public readonly List<string> LevelName = [];
     public readonly List<long> MaxCombo = [];
     public readonly List<double> ConstantOld = [];
 
     private readonly List<string> _bpms = [];
-    private List<double>? _bpmList;
+    private List<List<double>>? _bpmList;
 
-    public List<double> BpmList => _bpmList ??= (
-        from bpm in _bpms
-        select DoubleRegex().Matches(bpm)
-        into matches
-        from match in matches
-        select double.Parse(match.Value)
-        into bpm
-        select bpm
-    ).ToList();
+    public List<List<double>> BpmList => _bpmList ??= _bpms
+        .Select(x => DoubleRegex().Matches(x))
+        .Select(m => m
+            .Select(x => double.Parse(x.Value)).ToList()
+        ).ToList();
 
     public ChunithmSong(dynamic o, DataSource source = DataSource.Default)
     {
@@ -79,7 +50,7 @@ public partial class ChunithmSong : Song
                     ConstantOld.Add(0);
                     Charters.Add(o.charts[i].charter);
                     Levels.Add(o.level[i]);
-                    LevelName.Add(o.level[i]);
+                    DiffNames.Add(o.level[i]);
                     MaxCombo.Add(o.charts[i].combo);
                     ChartName.Add("");
                     _bpms.Add(o.basic_info.bpm.ToString());
@@ -104,7 +75,7 @@ public partial class ChunithmSong : Song
                     ConstantOld.Add(0);
                     Charters.Add(chart.charter);
                     Levels.Add(chart.level);
-                    LevelName.Add(LevelLabel[i]);
+                    DiffNames.Add(LevelLabel[i]);
                     MaxCombo.Add(0);
                     ChartName.Add("");
                 }
@@ -124,7 +95,7 @@ public partial class ChunithmSong : Song
                     ConstantOld.Add(0);
                     Charters.Add(i.Charter);
                     Levels.Add(i.LevelStr);
-                    LevelName.Add(i.LevelName);
+                    DiffNames.Add(i.LevelName);
                     ChartName.Add(i.ChartName);
                     _bpms.Add(i.Bpm);
 
@@ -212,7 +183,7 @@ public partial class ChunithmSong : Song
             {
                 beatmaps.Add(new
                 {
-                    LevelName   = LevelName[i],
+                    LevelName   = DiffNames[i],
                     MaxCombo    = MaxCombo[i],
                     LevelStr    = Levels[i],
                     Constant    = Constants[i],

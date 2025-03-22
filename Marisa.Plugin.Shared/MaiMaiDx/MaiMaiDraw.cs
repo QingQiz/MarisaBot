@@ -487,7 +487,7 @@ public static class MaiMaiDraw
             var nextA = score.NextRa();
             var nextR = SongScore.Ra(nextA, score.Constant);
 
-            var lvStr   = $"{MaiMaiSong.LevelName[score.LevelIdx]}: {score.Constant}";
+            var lvStr   = $"{MaiMaiSong.LevelNameAll[score.LevelIdx]}: {score.Constant}";
             var measure = lvStr.Measure(fontS);
             bg.DrawText(lvStr, fontS, MaiMaiSong.LevelColor[score.LevelIdx], bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);
 
@@ -537,7 +537,7 @@ public static class MaiMaiDraw
             var nextA = SongScore.NextAchievement(constant, minRating);
             var nextR = SongScore.Ra(nextA, constant);
 
-            var lvStr   = $"{MaiMaiSong.LevelName[constantIndex]}: {constant}";
+            var lvStr   = $"{MaiMaiSong.LevelNameAll[constantIndex]}: {constant}";
             var measure = lvStr.Measure(fontS);
 
             bg.DrawText(lvStr, fontS, MaiMaiSong.LevelColor[constantIndex], bg.Width - padding - measure.Width, bg.Height - padding - measure.Height);

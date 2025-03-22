@@ -603,7 +603,7 @@ public partial class MaiMaiDx
         {
             var command = next.Command.Trim();
 
-            var levelName   = MaiMaiSong.LevelName.Concat(MaiMaiSong.LevelNameZh).ToList();
+            var levelName   = MaiMaiSong.LevelNameAll.Concat(MaiMaiSong.LevelNameZh).ToList();
             var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
             var levelPrefix = level ?? "";
             if (level != null) goto RightLabel;
@@ -634,7 +634,7 @@ public partial class MaiMaiDx
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelName.Count;
+            var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelNameAll.Count;
             var (x, y) = song.NoteScore(levelIdx);
 
             var tolerance = (int)((101 - achievement) / (0.2 * x));
@@ -648,7 +648,7 @@ public partial class MaiMaiDx
                 .ToArray();
 
             next.Reply(
-                new MessageDataText($"[{MaiMaiSong.LevelName[levelIdx]}] {song.Title} => {achievement:F4}\n"),
+                new MessageDataText($"[{MaiMaiSong.LevelNameAll[levelIdx]}] {song.Title} => {achievement:F4}\n"),
                 new MessageDataText($"至多粉 {tolerance} 个 TAP，每个减 {0.2 * x:F4}%\n"),
                 new MessageDataText($"绝赞 50 落相当于粉 {0.25 * y / (0.2 * x):F4} 个 TAP，每 50 落减 {0.25 * y:F4}%\n"),
                 new MessageDataText($"\nDX分：{dxScore}\n"),

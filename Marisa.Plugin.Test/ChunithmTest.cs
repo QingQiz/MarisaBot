@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Configuration;
@@ -52,18 +50,6 @@ public class ChunithmTest
     {
         var actual = ChunithmSong.NextRa(ach, constant);
         Assert.AreEqual(nextAch, actual);
-    }
-
-    [Test]
-    [TestCase("master1", "MASTER", 3)]
-    [TestCase(" master1\n", "MASTER", 3)]
-    public void Level_Should_Be_Parsed(string inp, string prefix, int index)
-    {
-        var func = typeof(Chunithm.Chunithm).GetMethod("LevelAlias2Index", BindingFlags.NonPublic | BindingFlags.Static)!;
-
-        var res = ((string, int))func.Invoke(null, [inp.AsMemory().Trim(), ChunithmSong.LevelAlias.Values.ToList()])!;
-
-        Assert.AreEqual((prefix, index), res);
     }
 
     [Test]

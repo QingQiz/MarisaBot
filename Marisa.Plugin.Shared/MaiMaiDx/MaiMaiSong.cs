@@ -38,7 +38,7 @@ public class MaiMaiSong : Song
         "maimai でらっくす BUDDiES"
     ];
 
-    public static readonly List<string> LevelName =
+    public static readonly List<string> LevelNameAll =
     [
         "Basic",
         "Advanced",
@@ -73,7 +73,15 @@ public class MaiMaiSong : Song
         // 宴定数归零
         foreach (var c in data.ds) Constants.Add(Id > 100000 ? 0 : c);
 
-        foreach (var l in data.level) Levels.Add(l);
+        foreach (var l in data.level)
+        {
+            Levels.Add(l);
+        }
+
+        for (var i = 0; i < Levels.Count; i++)
+        {
+            DiffNames.Add(LevelNameAll[i]);
+        }
 
         foreach (var c in data.charts)
         {

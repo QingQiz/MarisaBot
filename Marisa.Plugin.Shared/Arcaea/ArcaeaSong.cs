@@ -9,7 +9,6 @@ namespace Marisa.Plugin.Shared.Arcaea;
 public class ArcaeaSong : Song
 {
     private readonly string _bpm;
-    private readonly List<string> _diffNames = [];
     private readonly string _songPack;
 
     public ArcaeaSong(dynamic d)
@@ -36,7 +35,7 @@ public class ArcaeaSong : Song
         }
         foreach (var l in d.level_name)
         {
-            _diffNames.Add(l);
+            DiffNames.Add(l);
         }
     }
 
@@ -83,7 +82,7 @@ public class ArcaeaSong : Song
             y += h;
             DrawKeyValuePair("曲包", _songPack, x, y, w, h, background.Width);
             y += h;
-            DrawKeyValuePair("难度", string.Join(", ", _diffNames.Zip(Levels).Select(l => $"{l.First}: {l.Second}")), x, y, w, h, background.Width);
+            DrawKeyValuePair("难度", string.Join(", ", DiffNames.Zip(Levels).Select(l => $"{l.First}: {l.Second}")), x, y, w, h, background.Width);
             y += h;
             DrawKeyValuePair("定数",
                 string.Join(", ", Constants.Select(c => c <= 0 ? "/" : c.ToString("F1"))),

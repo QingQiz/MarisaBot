@@ -54,7 +54,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
                 Fc          = "",
                 Level       = song.Levels[data.Index],
                 LevelIndex  = data.Index,
-                LevelLabel  = song.LevelName[data.Index],
+                LevelLabel  = song.DiffNames[data.Index],
                 Title       = song.Title,
                 Constant    = (decimal)song.Constants[data.Index]
             });
@@ -135,7 +135,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
                 Fc          = data.Aj ? "alljustice" : data.FullChain ? "fullchain" : data.Fc ? "fullcombo" : "",
                 Level       = song.Levels[data.Index],
                 LevelIndex  = data.Index,
-                LevelLabel  = song.LevelName[data.Index],
+                LevelLabel  = song.DiffNames[data.Index],
                 Title       = song.Title,
                 Constant    = (decimal)song.Constants[data.Index]
             };

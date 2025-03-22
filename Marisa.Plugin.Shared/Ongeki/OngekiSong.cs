@@ -43,6 +43,10 @@ public class OngekiSong : Song
         { "紫", "MASTER" },
         { "白", "Lunatic" }
     };
+    private static readonly string[] LevelNameAll =
+    [
+        "BASIC", "ADVANCED", "EXPERT", "MASTER", "Lunatic"
+    ];
     private string BossCard;
     private int BossLevel;
     public List<OngekiChartRecord?> Charts;
@@ -85,6 +89,12 @@ public class OngekiSong : Song
         Charters.AddRange(d.Charts
             .Where(c => c is not null)
             .Select(c => c!.Creator));
+
+        for (var i = 0; i < d.Charts.Count; i++)
+        {
+            if (d.Charts[i] != null)
+                DiffNames.Add(LevelNameAll[i]);
+        }
     }
 
     public override string MaxLevel()

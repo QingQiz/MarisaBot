@@ -181,7 +181,7 @@ public partial class Chunithm
 
         message.Reply($"哪个？\n\n{string.Join('\n', song.Levels
             .Select((l, i) =>
-                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
+                $"{i}. [{song.DiffNames[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
             ).ToList())
         }");
 
@@ -213,7 +213,7 @@ public partial class Chunithm
             });
 
             message.Reply(
-                new MessageDataText($"[{song.LevelName[levelIdx]}] {song.Title}"),
+                new MessageDataText($"[{song.DiffNames[levelIdx]}] {song.Title}"),
                 MessageDataImage.FromBase64(img.Value)
             );
 
@@ -518,7 +518,7 @@ public partial class Chunithm
 
         message.Reply($"序号和预期达成率？\n\n{string.Join('\n', song.Levels
             .Select((l, i) =>
-                $"{i}. [{song.LevelName[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
+                $"{i}. [{song.DiffNames[i]}] {l}{(string.IsNullOrEmpty(song.ChartName[i]) ? " 无数据" : "")}"
             ).ToList())
         }");
 
