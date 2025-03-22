@@ -100,7 +100,7 @@ function group_bpm() {
                         {{ domain }}
                         <template v-if="x.length > 1">({{ x.join('-') }})</template>
                         <template v-for="res in [group_bpm()]">
-                            <div v-for="bpm in Object.keys(res)" class="flex text-gray-400">
+                            <div v-if="Object.keys(res).length > 1" v-for="bpm in Object.keys(res)" class="flex text-gray-400">
                                 {{ bpm }}
                                 <div class="text-sm text-green-300">{{ res[bpm].join(',') }}</div>
                             </div>
