@@ -50,6 +50,19 @@ function reduce_bpm(): [number, number[]] {
     return [domainBpm, bpms];
 }
 
+function group_bpm() {
+    let res = {} as { [key: string]: number[] };
+    for (let i = 0; i < song.value.Beatmaps.length; i++) {
+        if (song.value.Beatmaps[i].Bpm in res) {
+            res[song.value.Beatmaps[i].Bpm].push(i);
+        } else {
+            res[song.value.Beatmaps[i].Bpm] = [i];
+        }
+    }
+    console.log(res)
+    return res;
+}
+
 
 </script>
 
@@ -83,7 +96,16 @@ function reduce_bpm(): [number, number[]] {
                 </div>
                 <div>{{ song.Artist }}</div>
                 <template v-for="[domain, x] in [reduce_bpm()]">
-                    <div >{{ domain }} <template v-if="x.length > 1">({{ x.join('-') }})</template></div>
+                    <div class="flex gap-4">
+                        {{ domain }}
+                        <template v-if="x.length > 1">({{ x.join('-') }})</template>
+                        <template v-for="res in [group_bpm()]">
+                            <div v-for="bpm in Object.keys(res)" class="flex text-gray-400">
+                                {{ bpm }}
+                                <div class="text-sm text-green-300">{{ res[bpm].join(',') }}</div>
+                            </div>
+                        </template>
+                    </div>
                 </template>
                 <div>{{ song.Genre }}</div>
                 <div>{{ song.Version }}</div>
@@ -112,10 +134,10 @@ function reduce_bpm(): [number, number[]] {
                         <div v-if="c.ConstantOld != 0 && c.Constant != c.ConstantOld && c.Constant != 0" class="text-sm">
                             <template v-for="x in [c.Constant - c.ConstantOld]">
                                 <div v-if="x > 0" class="text-green-600">
-                                    +{{ x.toFixed(2) }}
+                                    +{{ x.toFixed(1) }}
                                 </div>
                                 <div v-else class="text-red-500">
-                                    {{ x.toFixed(2) }}
+                                    {{ x.toFixed(1) }}
                                 </div>
                             </template>
                         </div>
@@ -181,6 +203,7 @@ function reduce_bpm(): [number, number[]] {
     width: 120px;
     max-width: 120px;
 }
+
 .chart > div > div:nth-child(5) {
     width: 100px;
     max-width: 100px;
