@@ -268,7 +268,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                     throw new ArgumentOutOfRangeException();
                 case 0: // Charter
                     CheckOp(op);
-                    diffConstraint.Add((song, levelIdx) => song.Charters[levelIdx].Equals(val, StringComparison.OrdinalIgnoreCase));
+                    diffConstraint.Add((song, levelIdx) => song.Charters[levelIdx].Contains(val, StringComparison.OrdinalIgnoreCase));
                     break;
                 case 1: // Constant
                     if (double.TryParse(val, out var constant))
