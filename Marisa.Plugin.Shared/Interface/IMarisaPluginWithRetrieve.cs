@@ -1,6 +1,7 @@
 ﻿using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Markdig.Helpers;
 
 namespace Marisa.Plugin.Shared.Interface;
 
@@ -342,7 +343,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return song =>
         {
             var diffRes = false;
-            if (diffConstraint.Any())
+            if (diffConstraint.Count != 0)
                 for (var i = 0; i < song.Constants.Count; i++)
                 {
                     diffRes |= diffConstraint.All(f => f(song, i));
@@ -367,6 +368,13 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         bool LevelComparer(string a, string b, string op)
         {
+            if (a.Length == 0 || b.Length == 0) return false;
+
+            if (!b[0].IsDigit() || !a[0].IsDigit())
+            {
+                return op == "=" && a.Contains(b, StringComparison.OrdinalIgnoreCase);
+            }
+
             var cmp  = GetComparer<int>(op);
             var aInt = a.Last() == '+' ? int.Parse(a[..^1]) : int.Parse(a);
             var bInt = b.Last() == '+' ? int.Parse(b[..^1]) : int.Parse(b);
@@ -380,11 +388,10 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         void CheckOp(string op)
         {
-            if (op != "=")
-            {
-                message.Reply("该约束可用操作符：=");
-                throw new ArgumentOutOfRangeException();
-            }
+            if (op == "=") return;
+
+            message.Reply("该约束可用操作符：=");
+            throw new ArgumentOutOfRangeException();
         }
     }
 
