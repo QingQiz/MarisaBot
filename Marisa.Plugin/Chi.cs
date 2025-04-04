@@ -92,7 +92,7 @@ public class Chi : MarisaPluginBase
     }
 
     [MarisaPluginDoc("现有可用的地点")]
-    [MarisaPluginCommand(true, "mealplace")]
+    [MarisaPluginCommand(true, "listplace")]
     private MarisaPluginTaskState Place(Message message, BotDbContext dbContext)
     {
         lock (_data)
@@ -112,6 +112,12 @@ public class Chi : MarisaPluginBase
     {
         var place = message.Command.ToString();
 
+        if (place.Any(char.IsPunctuation))
+        {
+            message.Reply("sb");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         message.Reply("吃什么？");
 
         DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
@@ -127,10 +133,89 @@ public class Chi : MarisaPluginBase
                 dbContext.Meals.Add(new Meal(place, meal));
                 dbContext.SaveChanges();
             });
+            message.Reply($"{place} 已添加菜品 {meal}");
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         });
 
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("删除吃啥的可选项。参数：地点")]
+    [MarisaPluginCommand("delmeal")]
+    private MarisaPluginTaskState DeleteMeal(Message message, BotDbContext dbContext)
+    {
+        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        {
+            message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var place = message.Command.ToString();
+
+        lock (_data)
+        {
+            if (!_data.ContainsKey(place))
+            {
+                message.Reply("无");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+        }
+
+        lock (_data)
+        {
+            message.Reply($"删什么？ \n{string.Join('\n', _data[place])}");
+        }
+
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
+        {
+            var meal = next.Command.ToString();
+            lock (_data)
+            {
+                _data[place].Remove(meal);
+            }
+
+            Task.Run(() =>
+            {
+                dbContext.Meals.RemoveRange(dbContext.Meals.Where(x => x.Place == place && x.Name == meal));
+                dbContext.SaveChanges();
+            });
+            message.Reply($"{place} 已删除菜品 {meal}");
+
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        });
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("删除吃啥的地点。参数：地点")]
+    [MarisaPluginCommand("delplace")]
+    private MarisaPluginTaskState DeletePlace(Message message, BotDbContext dbContext)
+    {
+        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        {
+            message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var place = message.Command.ToString();
+
+        lock (_data)
+        {
+            if (!_data.ContainsKey(place))
+            {
+                message.Reply("无");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+            _data[place] = [];
+        }
+
+        Task.Run(() =>
+        {
+            dbContext.Meals.RemoveRange(dbContext.Meals.Where(x => x.Place == place));
+            dbContext.SaveChanges();
+        });
+        message.Reply("删完了");
         return MarisaPluginTaskState.CompletedTask;
     }
 
