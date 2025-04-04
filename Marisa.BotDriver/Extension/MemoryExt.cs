@@ -132,6 +132,11 @@ public static class MemoryExt
         return input.Span.StartsWith(val, comparison);
     }
 
+    public static bool EndsWith(this ReadOnlyMemory<char> input, string val, StringComparison comparison = StringComparison.Ordinal)
+    {
+        return input.Span.EndsWith(val, comparison);
+    }
+
     #endregion
 
     #region linq

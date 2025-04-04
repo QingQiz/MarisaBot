@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Marisa.EntityFrameworkCore.Entity;
+using Marisa.EntityFrameworkCore.Entity.Plugin;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
 using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
@@ -21,6 +22,7 @@ public class BotDbContext : DbContext
     public DbSet<BlackList> BlackLists { get; set; }
     public DbSet<OsuBind> OsuBinds { get; set; }
     public DbSet<OsuUserHistory> OsuUserHistories { get; set; }
+    public DbSet<Meal> Meals { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
