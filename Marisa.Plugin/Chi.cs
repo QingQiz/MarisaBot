@@ -91,7 +91,22 @@ public class Chi : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("参数：地点")]
+    [MarisaPluginDoc("现有可用的地点")]
+    [MarisaPluginCommand(true, "mealplace")]
+    private MarisaPluginTaskState Place(Message message, BotDbContext dbContext)
+    {
+        lock (_data)
+        {
+            var places = _data.Keys.ToList();
+            var reply  = "现有可用的地点：\n" + string.Join("\n", places);
+            message.Reply(reply);
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+
+    [MarisaPluginDoc("添加吃啥的可选项。参数：地点")]
     [MarisaPluginCommand("addmeal")]
     private MarisaPluginTaskState Add(Message message, BotDbContext dbContext)
     {
