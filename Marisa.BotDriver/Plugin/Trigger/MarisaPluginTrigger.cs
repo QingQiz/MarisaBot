@@ -6,13 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Marisa.BotDriver.Plugin.Trigger;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
-public class MarisaPluginTrigger: Attribute
+public class MarisaPluginTrigger : Attribute
 {
     public delegate bool PluginTrigger(Message message, IServiceProvider provider);
 
     public readonly PluginTrigger Trigger;
 
 
+    /// <summary>
+    /// !!!只有使用预定义的触发器时才会使用这个构造函数!!!
+    /// </summary>
+    /// <param name="triggerName"></param>
+    /// <param name="target"></param>
     public MarisaPluginTrigger(string triggerName, MessageType target = (MessageType)0b11) : this(typeof(MarisaPluginTrigger), triggerName, target)
     {
     }
@@ -27,7 +32,7 @@ public class MarisaPluginTrigger: Attribute
     {
         PluginTrigger t;
         const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
-                                          BindingFlags.Static  | BindingFlags.Public;
+                                          BindingFlags.Static | BindingFlags.Public;
 
         if (triggerType.GetField(triggerName, bindingFlags) != null)
         {
