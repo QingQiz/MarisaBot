@@ -88,8 +88,15 @@ public abstract class BotDriver(
 
         if (res.Outcome != OutcomeType.Failure) return;
 
-        message.Reply("Cancelled due to timeout (10min)");
-        Logger.Error("Handler timed out. Caused by message: {0}", message);
+        if (res.FinalException is TimeoutRejectedException)
+        {
+            message.Reply("Cancelled due to timeout (10min)");
+            Logger.Error("Handler timed out. Caused by message: {0}", message);
+        }
+        else
+        {
+            throw res.FinalException;
+        }
     }
 
     /// <summary>

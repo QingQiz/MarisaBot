@@ -185,6 +185,23 @@ namespace Marisa.EntityFrameworkCore.Migrations
                     b.ToTable("MaiMaiDx.Guess");
                 });
 
+            modelBuilder.Entity("Marisa.EntityFrameworkCore.Entity.Plugin.Meal", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Place")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Meal");
+                });
+
             modelBuilder.Entity("Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki.OngekiGuess", b =>
                 {
                     b.Property<long>("Id")
