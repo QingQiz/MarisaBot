@@ -13,15 +13,18 @@ export interface Score {
 }
 
 export interface GroupSongInfo {
-    /**
-     * 定数
-     */
-    Item1: number;
-    /**
-     * Level Index
-     */
-    Item2: number;
-    Item3: SongInfo;
+    Key: string;
+    x: [{
+        /**
+         * 定数
+         */
+        Item1: number;
+        /**
+         * Level Index
+         */
+        Item2: number;
+        Item3: SongInfo;
+    }]
 }
 
 export interface SongInfo {

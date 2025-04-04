@@ -11,7 +11,7 @@ const id    = ref(route.query.id)
 
 const data_fetched = ref(false)
 
-const grouped = ref([] as GroupSongInfo[][])
+const grouped = ref([] as GroupSongInfo[])
 const scores  = ref({} as { [key: string]: Score })
 
 
@@ -23,7 +23,7 @@ axios.all([
     scores.value  = data[1].data
 
     for (let i = 0; i < grouped.value.length; i++) {
-        grouped.value[i].sort((a, b) => {
+        grouped.value[i].x.sort((a, b) => {
             if (a.Item2 != b.Item2) return a.Item2 - b.Item2;
             return a.Item3.Id - b.Item3.Id;
         }).reverse()
@@ -150,17 +150,17 @@ function GetGroupMinRank(group: any[]) {
                     </div>
                 </div>
                 <OverPower
-                    :group="grouped.flatMap((g: GroupSongInfo[]) => g)"
-                    :scores="grouped.flatMap((g: GroupSongInfo[]) => g).map((s: GroupSongInfo) => GetScore(s.Item3.Id, s.Item2))"
+                    :group="grouped.flatMap((g: GroupSongInfo) => g.x)"
+                    :scores="grouped.flatMap((g: GroupSongInfo) => g.x).map((s: typeof GroupSongInfo.x) => GetScore(s.Item3.Id, s.Item2))"
                     :detail="true"
                     class="justify-self-end"/>
             </div>
-            <div v-for="group in grouped">
+            <div v-for="{Key: key, x: group} in grouped">
                 <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(group), '#000000')}`">
-                    {{ group[0].Item1 }}
+                    {{ key }}
                     <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
                          onerror="this.style.opacity=0">
-                    <OverPower :group="group" :scores="group.map((s: GroupSongInfo) => GetScore(s.Item3.Id, s.Item2))"
+                    <OverPower :group="group" :scores="group.map((s: typeof s.x) => GetScore(s.Item3.Id, s.Item2))"
                                class="justify-self-end"/>
                 </div>
                 <div class="row">

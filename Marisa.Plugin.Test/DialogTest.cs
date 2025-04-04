@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.MessageData;
+using Marisa.BotDriver.Extension;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util;
 using NUnit.Framework;
@@ -18,6 +19,7 @@ public class DialogTest
     public void SetUp()
     {
         WebApi.DisableWebApi = true;
+        WebContext.DumpOnPut = true;
         var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
         ConfigurationManager.SetConfigFilePath(configPath);
 

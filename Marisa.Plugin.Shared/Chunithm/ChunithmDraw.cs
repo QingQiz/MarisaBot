@@ -9,7 +9,7 @@ public static class ChunithmDraw
         IReadOnlyDictionary<(long SongId, int LevelIdx), ChunithmScore> scores)
     {
         var ctx = new WebContext();
-        ctx.Put("GroupedSongs", groupedSong);
+        ctx.Put("GroupedSongs", groupedSong.Select(x => new { x.Key, x }).ToArray());
         ctx.Put("Scores", scores);
 
         return await WebApi.ChunithmSummary(ctx.Id);

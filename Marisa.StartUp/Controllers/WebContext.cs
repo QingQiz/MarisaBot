@@ -14,16 +14,6 @@ public class WebContext : Controller
         Directory.CreateDirectory(path);
     }
 
-    private static void WriteHistory(Guid id, string name, string str)
-    {
-        var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
-
-        Directory.CreateDirectory(path);
-
-        var file = Path.Join(path, $"{name}.{id}");
-        System.IO.File.WriteAllText(file, str);
-    }
-
     private static bool TryReadHistory(Guid id, string name, out string output)
     {
         var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
@@ -68,7 +58,7 @@ public class WebContext : Controller
         var obj = BotDriver.Extension.WebContext.Get(id, name);
         var str = obj is string ? obj.ToString()! : JsonConvert.SerializeObject(obj);
 
-        Task.Run(() => WriteHistory(id, name, str));
+        Task.Run(() => BotDriver.Extension.WebContext.Dump(id, name, str));
 
         return str;
     }

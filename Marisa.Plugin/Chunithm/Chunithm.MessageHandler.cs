@@ -250,37 +250,36 @@ public partial class Chunithm
         if (constants.Count is > 2 or < 1 || constants.Any(c => c < 1) || constants.Any(c => c > 16))
         {
             message.Reply("错误的命令格式");
+            return MarisaPluginTaskState.CompletedTask;
         }
-        else
+
+        if (constants.Count == 1)
         {
-            if (constants.Count == 1)
-            {
-                constants.Add(constants[0]);
-            }
-
-            // 太大的话画图会失败，所以给判断一下
-            if (constants[1] - constants[0] > 2)
-            {
-                message.Reply("过大的跨度，最多是2");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
-            var fetcher = await GetDataFetcher(message);
-
-            var scores = await fetcher.GetScores(message);
-
-            var groupedSong = fetcher.GetSongList()
-                .Select(song => song.Constants
-                    .Select((constant, i) => (constant, i, song)))
-                .SelectMany(s => s)
-                .Where(x => x.constant >= constants[0] && x.constant <= constants[1])
-                .OrderByDescending(x => x.constant)
-                .GroupBy(x => x.constant.ToString("F1"));
-
-            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
-
-            message.Reply(MessageDataImage.FromBase64(im));
+            constants.Add(constants[0]);
         }
+
+        // 太大的话画图会失败，所以给判断一下
+        if (constants[1] - constants[0] > 2)
+        {
+            message.Reply("过大的跨度，最多是2");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var fetcher = await GetDataFetcher(message);
+
+        var scores = await fetcher.GetScores(message);
+
+        var groupedSong = fetcher.GetSongList()
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(x => x.constant >= constants[0] && x.constant <= constants[1])
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.constant.ToString("F1"));
+
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+
+        message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -300,24 +299,59 @@ public partial class Chunithm
         if (genre == null)
         {
             message.Reply("可用的类别有：\n" + string.Join('\n', genres));
+            return MarisaPluginTaskState.CompletedTask;
         }
-        else
+
+        var scores = await fetcher.GetScores(message);
+
+        var groupedSong = fetcher.GetSongList()
+            .Where(song => song.Genre == genre)
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.song.Levels[x.i]);
+
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+
+        message.Reply(MessageDataImage.FromBase64(im));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取版本的成绩汇总，参数为：版本名")]
+    [MarisaPluginSubCommand(nameof(Summary))]
+    [MarisaPluginCommand("version", "ver")]
+    private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+
+        var versions = fetcher.GetSongList().Select(song => song.Version).Distinct().ToArray();
+
+        var version = versions.FirstOrDefault(p =>
+            message.Command.Trim().Equals(p, StringComparison.OrdinalIgnoreCase));
+
+        if (version == null)
         {
-            var scores = await fetcher.GetScores(message);
-
-            var groupedSong = fetcher.GetSongList()
-                .Where(song => song.Genre == genre)
-                .Select(song => song.Constants
-                    .Select((constant, i) => (constant, i, song)))
-                .SelectMany(s => s)
-                .Where(data => data.i >= 2)
-                .OrderByDescending(x => x.constant)
-                .GroupBy(x => x.song.Levels[x.i]);
-
-            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
-
-            message.Reply(MessageDataImage.FromBase64(im));
+            message.Reply("可用的版本有：\n" + string.Join('\n', versions));
+            return MarisaPluginTaskState.CompletedTask;
         }
+
+        var scores = await fetcher.GetScores(message);
+
+        var groupedSong = fetcher.GetSongList()
+            .Where(song => song.Version == version)
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
+            .OrderByDescending(x => x.constant)
+            .GroupBy(x => x.song.Levels[x.i]);
+
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+
+        message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
     }
