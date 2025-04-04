@@ -23,7 +23,7 @@ public class DialogTest
         var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
         ConfigurationManager.SetConfigFilePath(configPath);
 
-        _driver = TestBackend.Create(typeof(Chunithm.Chunithm), typeof(Dialog));
+        _driver = TestBackend.Create(typeof(Chi), typeof(Chunithm.Chunithm), typeof(Dialog));
 
         _ = _driver.Invoke();
     }
@@ -83,6 +83,22 @@ public class DialogTest
     }
 
     [Test]
+    public async Task Chu_()
+    {
+        await _driver.SetMessage(920759985, 0, "chusumgenrevariety");
+        _driver.Finish();
+        await _driver.ProcAll();
+
+        var m = await _driver.GetAllSend();
+
+        foreach (var x in m)
+        {
+            Console.WriteLine(x.MessageChain.ToString());
+        }
+        Assert.Fail();
+    }
+
+    [Test]
     public async Task Chu_Bind_Should_not_Be_Repeated()
     {
         await _driver.SetMessage(0, 0, "chu bind");
@@ -95,6 +111,22 @@ public class DialogTest
         Assert.AreEqual(m.Count, 2);
         AssertMessageContainsText(m[0], "diving");
         AssertMessageContainsText(m[1], "错误");
+    }
+
+    [Test]
+    public async Task xxx()
+    {
+        await _driver.SetMessage(0, 0, "111");
+        // await _driver.SetMessage(0, 0, "111");
+        // await _driver.SetMessage(0, 0, "111");
+        // await _driver.SetMessage(0, 0, "111");
+        // await _driver.SetMessage(0, 0, "111");
+        _driver.Finish();
+        await _driver.ProcAll();
+
+        var m = await _driver.GetAllSend();
+
+        Assert.Fail();
     }
 
 

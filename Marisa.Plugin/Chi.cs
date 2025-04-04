@@ -70,7 +70,7 @@ public class Chi : MarisaPluginBase
 
         lock (_data)
         {
-            if (!string.IsNullOrWhiteSpace(place) && _data.TryGetValue(place, out var value))
+            if (!string.IsNullOrWhiteSpace(place) && _data.TryGetValue(place, out var value) && value.Count > 0)
             {
                 return value.RandomTake(1).First();
             }
@@ -97,8 +97,11 @@ public class Chi : MarisaPluginBase
     {
         lock (_data)
         {
-            var places = _data.Keys.ToList();
-            var reply  = "现有可用的地点：\n" + string.Join("\n", places);
+            var places = _data
+                .Where(x => x.Value.Count != 0)
+                .Select(x => x.Key)
+                .ToList();
+            var reply = "现有可用的地点：\n" + string.Join("\n", places);
             message.Reply(reply);
         }
 
