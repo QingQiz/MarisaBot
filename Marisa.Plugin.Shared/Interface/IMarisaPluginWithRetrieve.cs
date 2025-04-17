@@ -408,7 +408,9 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         bool MakeEqConstraint(string op, string songProp, string val)
         {
-            return (x => op == "!=" ? !x : x)(songProp.Contains(val, StringComparison.OrdinalIgnoreCase));
+            return Neg(songProp.Contains(val, StringComparison.OrdinalIgnoreCase));
+
+            bool Neg(bool x) => op == "!=" ? !x : x;
         }
     }
 
