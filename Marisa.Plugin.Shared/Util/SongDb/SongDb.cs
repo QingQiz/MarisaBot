@@ -183,27 +183,31 @@ public class SongDb<TSong> : ICanReset where TSong : Song
     {
         if (alias.IsWhiteSpace()) return [];
 
-        IEnumerable<ReadOnlyMemory<char>> key;
+        var key = SongAlias.Keys.Where(songNameAlias =>
+            songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (key.Count != 0) return Result();
 
         try
         {
             var regex = new Regex(alias.ToString(), RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            key = SongAlias.Keys.Where(a => regex.IsMatch(a.Span));
+            key = SongAlias.Keys.Where(a => regex.IsMatch(a.Span)).ToList();
         }
-        catch (RegexParseException)
-        {
-            key = SongAlias.Keys.Where(songNameAlias =>
-                songNameAlias.Contains(alias, StringComparison.OrdinalIgnoreCase));
-        }
+        catch (RegexParseException) {}
 
-        return key
-            // 找到真实歌曲名
-            .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
-            .Distinct(StringComparison.OrdinalIgnoreCase)
-            // 找到歌曲
-            .Select(songName => SongList.Where(s => s.Title.Equals(songName, StringComparison.Ordinal)))
-            .SelectMany(s => s)
-            .ToList();
+        return Result();
+
+        List<TSong> Result()
+        {
+            return key
+                // 找到真实歌曲名
+                .SelectMany(songNameAlias => SongAlias[songNameAlias] /*song name*/)
+                .Distinct(StringComparison.OrdinalIgnoreCase)
+                // 找到歌曲
+                .Select(songName => SongList.Where(s => s.Title.Equals(songName, StringComparison.Ordinal)))
+                .SelectMany(s => s)
+                .ToList();
+        }
     }
 
     public MessageChain GetSearchResult(IReadOnlyList<TSong> songs)
