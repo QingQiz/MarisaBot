@@ -40566,6 +40566,80 @@
     }
   },
   {
+    "id": "10535",
+    "title": "色は匂へど散りぬるを",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.5,
+      9.0,
+      12.7
+    ],
+    "level": [
+      "3",
+      "6",
+      "9",
+      "12+"
+    ],
+    "cids": [
+      8535,
+      8536,
+      8537,
+      8538
+    ],
+    "charts": [
+      {
+        "notes": [
+          127,
+          10,
+          6,
+          7,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          178,
+          14,
+          10,
+          24,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          186,
+          54,
+          32,
+          16,
+          23
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          258,
+          36,
+          75,
+          42,
+          15
+        ],
+        "charter": "はっぴー"
+      }
+    ],
+    "basic_info": {
+      "title": "色は匂へど散りぬるを",
+      "artist": "幽閉サテライト",
+      "genre": "东方Project",
+      "bpm": 138,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
     "id": "10536",
     "title": "月に叢雲華に風",
     "type": "DX",
@@ -72920,6 +72994,302 @@
     }
   },
   {
+    "id": "11534",
+    "title": "The Great Banquet",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.0,
+      11.5,
+      14.2
+    ],
+    "level": [
+      "4",
+      "8",
+      "11",
+      "14"
+    ],
+    "cids": [
+      8539,
+      8540,
+      8541,
+      8542
+    ],
+    "charts": [
+      {
+        "notes": [
+          205,
+          15,
+          7,
+          11,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          306,
+          29,
+          2,
+          28,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          338,
+          75,
+          50,
+          12,
+          43
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          715,
+          52,
+          131,
+          10,
+          45
+        ],
+        "charter": "Luxizhel"
+      }
+    ],
+    "basic_info": {
+      "title": "The Great Banquet",
+      "artist": "Iris",
+      "genre": "舞萌",
+      "bpm": 170,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11535",
+    "title": "Redemption",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.8,
+      11.8,
+      13.9
+    ],
+    "level": [
+      "4",
+      "7+",
+      "11+",
+      "13+"
+    ],
+    "cids": [
+      8543,
+      8544,
+      8545,
+      8546
+    ],
+    "charts": [
+      {
+        "notes": [
+          132,
+          9,
+          10,
+          24,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          244,
+          29,
+          9,
+          30,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          320,
+          50,
+          48,
+          26,
+          15
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          686,
+          6,
+          49,
+          36,
+          36
+        ],
+        "charter": "はっぴー"
+      }
+    ],
+    "basic_info": {
+      "title": "Redemption",
+      "artist": "XinG、10lulu",
+      "genre": "舞萌",
+      "bpm": 175,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11536",
+    "title": "Ether Second",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.8,
+      11.8,
+      13.9
+    ],
+    "level": [
+      "4",
+      "7+",
+      "11+",
+      "13+"
+    ],
+    "cids": [
+      8547,
+      8548,
+      8549,
+      8550
+    ],
+    "charts": [
+      {
+        "notes": [
+          138,
+          22,
+          4,
+          8,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          242,
+          18,
+          6,
+          30,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          337,
+          82,
+          55,
+          42,
+          3
+        ],
+        "charter": "はっぴー"
+      },
+      {
+        "notes": [
+          636,
+          75,
+          59,
+          24,
+          61
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "Ether Second",
+      "artist": "Akira Complex",
+      "genre": "舞萌",
+      "bpm": 150,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11537",
+    "title": "Straight into the lights",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.5,
+      12.5,
+      14.8
+    ],
+    "level": [
+      "4",
+      "8",
+      "12",
+      "14+"
+    ],
+    "cids": [
+      8551,
+      8552,
+      8553,
+      8554
+    ],
+    "charts": [
+      {
+        "notes": [
+          158,
+          30,
+          4,
+          19,
+          9
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          286,
+          27,
+          7,
+          22,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          310,
+          81,
+          40,
+          40,
+          51
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          777,
+          62,
+          87,
+          121,
+          64
+        ],
+        "charter": "Jack"
+      }
+    ],
+    "basic_info": {
+      "title": "Straight into the lights",
+      "artist": "Cosmograph",
+      "genre": "舞萌",
+      "bpm": 90,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
     "id": "11538",
     "title": "アンバークロニクル",
     "type": "DX",
@@ -79175,6 +79545,228 @@
     }
   },
   {
+    "id": "11626",
+    "title": "Ring",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.5,
+      9.8,
+      12.8
+    ],
+    "level": [
+      "2",
+      "6",
+      "9+",
+      "12+"
+    ],
+    "cids": [
+      8555,
+      8556,
+      8557,
+      8558
+    ],
+    "charts": [
+      {
+        "notes": [
+          135,
+          13,
+          4,
+          6,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          202,
+          28,
+          6,
+          16,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          299,
+          65,
+          47,
+          12,
+          7
+        ],
+        "charter": "はっぴー"
+      },
+      {
+        "notes": [
+          501,
+          39,
+          77,
+          24,
+          14
+        ],
+        "charter": "Jack"
+      }
+    ],
+    "basic_info": {
+      "title": "Ring",
+      "artist": "R Sound Design feat.向日葵",
+      "genre": "音击&中二节奏",
+      "bpm": 132,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11627",
+    "title": "インパアフェクシオン・ホワイトガアル",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.9,
+      11.5,
+      14.2
+    ],
+    "level": [
+      "4",
+      "7+",
+      "11",
+      "14"
+    ],
+    "cids": [
+      8559,
+      8560,
+      8561,
+      8562
+    ],
+    "charts": [
+      {
+        "notes": [
+          165,
+          20,
+          8,
+          11,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          352,
+          36,
+          4,
+          19,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          457,
+          82,
+          39,
+          19,
+          62
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          818,
+          39,
+          172,
+          11,
+          27
+        ],
+        "charter": "ミニミライト"
+      }
+    ],
+    "basic_info": {
+      "title": "インパアフェクシオン・ホワイトガアル",
+      "artist": "ツミキ feat.月乃",
+      "genre": "音击&中二节奏",
+      "bpm": 207,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11628",
+    "title": "WE'RE BACK!!",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.0,
+      12.2,
+      14.0
+    ],
+    "level": [
+      "4",
+      "8",
+      "12",
+      "14"
+    ],
+    "cids": [
+      8563,
+      8564,
+      8565,
+      8566
+    ],
+    "charts": [
+      {
+        "notes": [
+          158,
+          14,
+          6,
+          16,
+          14
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          306,
+          16,
+          6,
+          28,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          489,
+          47,
+          56,
+          26,
+          30
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          730,
+          78,
+          89,
+          32,
+          32
+        ],
+        "charter": "Luxizhel"
+      }
+    ],
+    "basic_info": {
+      "title": "WE'RE BACK!!",
+      "artist": "Zekk",
+      "genre": "音击&中二节奏",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
     "id": "11629",
     "title": "熱異常",
     "type": "DX",
@@ -80903,6 +81495,376 @@
     }
   },
   {
+    "id": "11656",
+    "title": "HANIPAGANDA",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.2,
+      11.8,
+      13.6
+    ],
+    "level": [
+      "4",
+      "7",
+      "11+",
+      "13"
+    ],
+    "cids": [
+      8567,
+      8568,
+      8569,
+      8570
+    ],
+    "charts": [
+      {
+        "notes": [
+          141,
+          9,
+          8,
+          20,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          246,
+          28,
+          6,
+          28,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          353,
+          63,
+          30,
+          30,
+          32
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          557,
+          85,
+          92,
+          26,
+          82
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "HANIPAGANDA",
+      "artist": "暁Records",
+      "genre": "东方Project",
+      "bpm": 181,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11657",
+    "title": "Rush-Hour",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.7,
+      12.5,
+      13.8
+    ],
+    "level": [
+      "4",
+      "8+",
+      "12",
+      "13+"
+    ],
+    "cids": [
+      8571,
+      8572,
+      8573,
+      8574
+    ],
+    "charts": [
+      {
+        "notes": [
+          142,
+          23,
+          4,
+          16,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          305,
+          31,
+          6,
+          12,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          392,
+          48,
+          37,
+          56,
+          58
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          578,
+          83,
+          106,
+          95,
+          32
+        ],
+        "charter": "鳩ホルダー"
+      }
+    ],
+    "basic_info": {
+      "title": "Rush-Hour",
+      "artist": "litmus*",
+      "genre": "其他游戏",
+      "bpm": 224,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11658",
+    "title": "QUEEN",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.5,
+      10.0,
+      12.8
+    ],
+    "level": [
+      "3",
+      "6",
+      "10",
+      "12+"
+    ],
+    "cids": [
+      8575,
+      8576,
+      8577,
+      8578
+    ],
+    "charts": [
+      {
+        "notes": [
+          134,
+          7,
+          4,
+          16,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          203,
+          37,
+          4,
+          41,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          410,
+          33,
+          32,
+          16,
+          19
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          555,
+          59,
+          116,
+          35,
+          12
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "QUEEN",
+      "artist": "Kanaria",
+      "genre": "niconico & VOCALOID",
+      "bpm": 170,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11659",
+    "title": "天使の翼。",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.2,
+      9.8,
+      12.9
+    ],
+    "level": [
+      "2",
+      "6",
+      "9+",
+      "12+"
+    ],
+    "cids": [
+      8579,
+      8580,
+      8581,
+      8582
+    ],
+    "charts": [
+      {
+        "notes": [
+          117,
+          10,
+          6,
+          8,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          201,
+          15,
+          6,
+          8,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          252,
+          49,
+          45,
+          18,
+          40
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          517,
+          23,
+          87,
+          20,
+          56
+        ],
+        "charter": "カマボコ君"
+      }
+    ],
+    "basic_info": {
+      "title": "天使の翼。",
+      "artist": "A4。",
+      "genre": "niconico & VOCALOID",
+      "bpm": 125,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11660",
+    "title": "さよならプリンセス",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.2,
+      10.8,
+      13.0
+    ],
+    "level": [
+      "4",
+      "7",
+      "10+",
+      "13"
+    ],
+    "cids": [
+      8583,
+      8584,
+      8585,
+      8586
+    ],
+    "charts": [
+      {
+        "notes": [
+          128,
+          15,
+          4,
+          16,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          248,
+          13,
+          8,
+          46,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          418,
+          55,
+          23,
+          40,
+          36
+        ],
+        "charter": "みそかつ侍"
+      },
+      {
+        "notes": [
+          496,
+          61,
+          89,
+          14,
+          45
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "さよならプリンセス",
+      "artist": "Kai",
+      "genre": "niconico & VOCALOID",
+      "bpm": 195,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": true
+    }
+  },
+  {
     "id": "11661",
     "title": "Apollo",
     "type": "DX",
@@ -81846,6 +82808,41 @@
     }
   },
   {
+    "id": "110114",
+    "title": "[耐]Space Harrier Main Theme [Reborn]",
+    "type": "DX",
+    "ds": [
+      14.7
+    ],
+    "level": [
+      "14+?"
+    ],
+    "cids": [
+      8587
+    ],
+    "charts": [
+      {
+        "notes": [
+          1476,
+          0,
+          7,
+          0,
+          7
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[耐]Space Harrier Main Theme [Reborn]",
+      "artist": "佐野 信義「スペースハリアー」",
+      "genre": "宴会場",
+      "bpm": 125,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": false
+    }
+  },
+  {
     "id": "110579",
     "title": "[協]ポップミュージックは僕のもの",
     "type": "DX",
@@ -81878,6 +82875,76 @@
       "release_date": "",
       "from": "maimai でらっくす BUDDiES",
       "is_new": true
+    }
+  },
+  {
+    "id": "110606",
+    "title": "[右]The wheel to the right",
+    "type": "DX",
+    "ds": [
+      14.7
+    ],
+    "level": [
+      "14+?"
+    ],
+    "cids": [
+      8588
+    ],
+    "charts": [
+      {
+        "notes": [
+          603,
+          20,
+          185,
+          0,
+          200
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[右]The wheel to the right",
+      "artist": "Sampling Masters MEGA",
+      "genre": "宴会場",
+      "bpm": 200,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": false
+    }
+  },
+  {
+    "id": "110631",
+    "title": "[逆]KING is BACK!!",
+    "type": "DX",
+    "ds": [
+      13.7
+    ],
+    "level": [
+      "13+?"
+    ],
+    "cids": [
+      8589
+    ],
+    "charts": [
+      {
+        "notes": [
+          777,
+          24,
+          138,
+          0,
+          96
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[逆]KING is BACK!!",
+      "artist": "A-One",
+      "genre": "宴会場",
+      "bpm": 176,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": false
     }
   },
   {
@@ -82009,6 +83076,41 @@
       "release_date": "",
       "from": "maimai でらっくす BUDDiES",
       "is_new": true
+    }
+  },
+  {
+    "id": "111513",
+    "title": "[回]回る空うさぎ",
+    "type": "DX",
+    "ds": [
+      11.0
+    ],
+    "level": [
+      "11?"
+    ],
+    "cids": [
+      8590
+    ],
+    "charts": [
+      {
+        "notes": [
+          0,
+          0,
+          32,
+          221,
+          1
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[回]回る空うさぎ",
+      "artist": "Orangestar",
+      "genre": "宴会場",
+      "bpm": 120,
+      "release_date": "",
+      "from": "maimai でらっくす BUDDiES",
+      "is_new": false
     }
   },
   {
