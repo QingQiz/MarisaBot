@@ -3,8 +3,10 @@ import {
     BeatmapBeat, BeatmapBpm,
     BeatmapDiv, BeatmapLn,
     BeatmapMeasure,
-    BeatmapMet, BeatmapRice, BeatmapSlideUnit, BeatmapSpeedVelocity
+    BeatmapMet, BeatmapRice, BeatmapSlideUnit,
+    BeatmapSpeedVelocity, BeatmapSpeedVelocity2
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
+import {group} from "d3";
 
 export type Chart = { [key: string]: Beatmap[] };
 /**
@@ -27,6 +29,14 @@ type AirSldData = [string, number, number, number, number, string, number, numbe
  * [measure, offset, cell, width, interval, height, duration, target_cell, target_width, target_height, color]
  */
 type AldData = [string, number, number, number, number, number, number, number, number, number, number, string];
+/**
+ * [measure, offset, duration, velocity, sv2_list_id]
+ */
+type Sv2ListData = [string, number, number, number, number, number];
+/**
+ * [measure, offset, cell, width, duration, sv2_list_id]
+ */
+type Sv2AreaData = [string, number, number, number, number, number, number];
 
 const available_prefix = [
     // 控制的
@@ -34,7 +44,9 @@ const available_prefix = [
     // 固有的
     "TAP", "CHR", "HLD", "SLD", "SLC", "FLK", "AIR", "AUR", "AUL", "AHD", "ADW", "ADR", "ADL", "MNE",
     // NEW
-    "ASC", "ASD", "ALD", "HXD", "SXD", "AHX", "SXC"
+    "ASC", "ASD", "ALD", "HXD", "SXD", "AHX", "SXC",
+    // SV2
+    "SLP", "SLA"
 ];
 
 const alias_prefix = [
@@ -46,6 +58,8 @@ const self_defined = [
     "HLD_H", "HLD_T", "HLD_B", "AHD_H", "AHD_T", "AHD_B", "SLD_H", "SLD_T", "ASD_H", "ASC_H", "ASD_T", "ALD_T",
     //
     "BEAT_1", "BEAT_2", "DIV",
+    //
+    "SV2"
 ];
 
 export const cat_rice   = [
@@ -62,13 +76,14 @@ const cell_count        = 16;
 
 export function Parse(chart_string: string): Chart {
     // read chart string and parse it to chart data
-    let data = chart_string
+    let dataAll = chart_string
         .split("\n")
-        .map(Line2Event)
-        .filter(x => {
-            let key = x[0].toString()
-            return available_prefix.indexOf(key) != -1 || alias_prefix.indexOf(key) != -1
-        });
+        .map(Line2Event);
+
+    let data = dataAll.filter(x => {
+        let key = x[0].toString();
+        return available_prefix.indexOf(key) != -1 || alias_prefix.indexOf(key) != -1
+    });
 
     // parse chart data to chart
     let chart: Chart = {};
@@ -81,6 +96,7 @@ export function Parse(chart_string: string): Chart {
         ParseLine(chart, line);
     }
 
+    GenerateSv2(chart);
     UpdateSlide(chart);
     MakeBeatLine(chart);
     MakeNoteGapLine(chart);
@@ -91,6 +107,11 @@ export function Parse(chart_string: string): Chart {
 }
 
 
+/**
+ * 计算 note 的间隔，用 a/b 表示，比如 1/16 表示 16 分音符
+ * @param chart
+ * @constructor
+ */
 function MakeNoteGapLine(chart: Chart) {
     function gcd(a: number, b: number): number {
         if (b == 0) return a;
@@ -150,6 +171,11 @@ function MakeNoteGapLine(chart: Chart) {
     }
 }
 
+/**
+ * 生成小节线、拍子线
+ * @param chart
+ * @constructor
+ */
 function MakeBeatLine(chart: Chart) {
     let max_tick = GetMaxTick(chart);
 
@@ -180,13 +206,13 @@ function MakeBeatLine(chart: Chart) {
  * @param chart
  */
 function UpdateSlide(chart: Chart) {
-    let sld_end: { [key: string]: number[]} = {};
-    let sld_beg: { [key: string]: number[]} = {};
+    let sld_end: { [key: string]: number[] } = {};
+    let sld_beg: { [key: string]: number[] } = {};
 
     let slides = [...chart["SLD"], ...chart["SLC"], ...chart["SXD"], ...chart["SXC"]] as BeatmapSlideUnit[]
     let keys   = [...chart["SLD"].map(_ => "SLD"), ...chart["SLC"].map(_ => "SLC"), ...chart["SXD"].map(_ => "SXD"), ...chart["SXC"].map(_ => "SXC")]
 
-    for (let i = 0; i < slides.length; i++){
+    for (let i = 0; i < slides.length; i++) {
         const slide      = slides[i];
         let tick_end     = slide.TickEnd;
         let target_cell  = slide.XEnd;
@@ -199,12 +225,12 @@ function UpdateSlide(chart: Chart) {
         sld_end[key].push(i);
     }
 
-    for (let i = 0; i < slides.length; i++){
-        const slide      = slides[i];
-        let tick     = slide.Tick;
-        let cell     = slide.X;
-        let width    = slide.Width;
-        let key = [tick, cell, width].toString();
+    for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        let tick    = slide.Tick;
+        let cell    = slide.X;
+        let width   = slide.Width;
+        let key     = [tick, cell, width].toString();
         if (!sld_beg[key]) {
             sld_beg[key] = [];
         }
@@ -252,7 +278,7 @@ function UpdateSlide(chart: Chart) {
             let tick_end      = current_slide.TickEnd;
             let target_cell   = current_slide.XEnd;
             let target_width  = current_slide.WidthEnd;
-            let key = [tick_end, target_cell, target_width].toString();
+            let key           = [tick_end, target_cell, target_width].toString();
             current.push(current_slide_idx);
             if (!sld_beg[key]) break;
             current_slide_idx = sld_beg[key].shift() as number;
@@ -265,9 +291,9 @@ function UpdateSlide(chart: Chart) {
         let tick_min = Math.min(...slide.map(x => slides[x].Tick));
         let tick_max = Math.max(...slide.map(x => slides[x].TickEnd));
         for (let i of slide) {
-            let slide_unit = slides[i];
+            let slide_unit       = slides[i];
             slide_unit.UnitStart = (slide_unit.Tick - tick_min) / (tick_max - tick_min);
-            slide_unit.UnitEnd = (slide_unit.TickEnd - tick_min) / (tick_max - tick_min);
+            slide_unit.UnitEnd   = (slide_unit.TickEnd - tick_min) / (tick_max - tick_min);
         }
     }
 }
@@ -383,11 +409,66 @@ function ParseLine(chart: Chart, data: any) {
             }
 
             break;
+        case "SLP":
+            ParseSV2List(chart, data);
+            break;
+        case "SLA":
+            ParseSV2Area(chart, data);
+            break;
         default:
             chart[key].push(
                 new BeatmapRice(ToTick(data[1] as number, data[2] as number), data[3] as number / cell_count, data[4] as number / cell_count)
             );
             break;
+    }
+}
+
+function ParseSV2Area(chart: Chart, data: Sv2AreaData) {
+    let d = {
+        measure: data[1], offset: data[2], cell: data[3], width: data[4], duration: data[5], sv2_list_id: data[6]
+    }
+
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
+    let ln = new BeatmapLn(tick, tick_end, d.cell / cell_count, d.width / cell_count);
+    chart[data[0]].push(({...ln, Id: d.sv2_list_id} as Beatmap));
+}
+
+function ParseSV2List(chart: Chart, data: Sv2ListData) {
+    let d = {
+        measure: data[1], offset: data[2], duration: data[3], velocity: data[4], sv2_list_id: data[5]
+    }
+
+    let tick     = ToTick(d.measure, d.offset);
+    let tick_end = tick + d.duration;
+
+    let sv = new BeatmapSpeedVelocity(tick, tick_end, d.velocity);
+    chart[data[0]].push(({...sv, Id: d.sv2_list_id} as Beatmap))
+}
+
+function GenerateSv2(chart: Chart) {
+    let sv2_list = group(chart["SLP"], x => GetIdFromBeatmap(x));
+    let sv2_area = group(chart["SLA"], x => GetIdFromBeatmap(x));
+
+    for (let [key, value] of sv2_area) {
+        for (let v of value) {
+            let area    = v as BeatmapLn;
+            let matched = sv2_list.get(key) as BeatmapSpeedVelocity[];
+            if (!matched) continue;
+
+            let tick_max = Math.max(...matched.map(x => (x as BeatmapSpeedVelocity).TickEnd));
+            let tick_min = Math.min(...matched.map(x => (x as BeatmapSpeedVelocity).Tick));
+
+            if (tick_max < area.TickEnd) {
+                matched.push(new BeatmapSpeedVelocity(tick_max, area.TickEnd, 1));
+            }
+            chart['SV2'].push(new BeatmapSpeedVelocity2(tick_min, area.TickEnd, area.X, area.Width, matched));
+        }
+    }
+
+    function GetIdFromBeatmap(x: Beatmap): number {
+        return (x as any).Id as number;
     }
 }
 

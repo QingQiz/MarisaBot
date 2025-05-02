@@ -64,3 +64,14 @@ export function shuffle<T>(array: T[]): T[] {
 export function choice<T>(array: T[]): T {
     return array[Math.floor(Math.random() * array.length)]
 }
+
+export function Distinct<T>(arr: T[], cmp: (a: T, b: T) => boolean) {
+    let res = [] as T[];
+    for (let i = 0; i < arr.length; i++) {
+        if (!res.some(x => cmp(arr[i], x))) {
+            res.push(arr[i]);
+        }
+    }
+    return res;
+}
+

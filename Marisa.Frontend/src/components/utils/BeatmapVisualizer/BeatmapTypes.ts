@@ -72,6 +72,22 @@ export class BeatmapSpeedVelocity extends Beatmap {
     }
 }
 
+export class BeatmapSpeedVelocity2 extends BeatmapLn {
+    SVs: BeatmapSpeedVelocity[];
+
+    /**
+     * @param Tick 起始时间
+     * @param TickEnd 结束时间
+     * @param X 起始位置（百分比）
+     * @param Width 宽度（百分比）
+     * @param SVs
+     */
+    constructor(Tick: number, TickEnd: number, X: number, Width: number, SVs: BeatmapSpeedVelocity[]) {
+        super(Tick, TickEnd, X, Width);
+        this.SVs = SVs.filter(x => x.Tick <= TickEnd);
+    }
+}
+
 export class BeatmapBeat extends Beatmap {
     MeasureId: number;
     TickEnd: number;

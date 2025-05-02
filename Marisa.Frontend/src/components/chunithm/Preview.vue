@@ -23,7 +23,7 @@ import {
     BeatmapMeasure,
     BeatmapRice,
     BeatmapSlideUnit,
-    BeatmapSpeedVelocity
+    BeatmapSpeedVelocity, BeatmapSpeedVelocity2
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 import {zip} from "@/utils/list";
 
@@ -158,6 +158,7 @@ let slides = computed(() => Get(cat_slide));
             :measure="chart['BEAT_1'] as BeatmapMeasure[]"
             :beat="chart['BEAT_2'] as BeatmapBeat[]"
             :sv="chart['SFL'] as BeatmapSpeedVelocity[]"
+            :sv2="chart['SV2'] as BeatmapSpeedVelocity2[]"
             :div="chart['DIV'] as BeatmapDiv[]"
             :bpm="chart['BPM'] as BeatmapBpm[]"
             :rice="rices[0] as BeatmapRice[]"

@@ -106,11 +106,13 @@ note在多少分音上
     @apply absolute text-gray-400 text-center text-sm;
     @apply flex items-center;
 
+    --idx: 0;
+
     bottom: var(--y);
     top: calc(100% - var(--y-end));
 
     width: 30px;
-    left: -30px;
+    left: calc(-30px - 4px * (var(--idx)));
 
     @apply border-r-4;
     @apply justify-end pr-1;
@@ -200,6 +202,22 @@ hold body
     @apply bg-orange-300 opacity-80;
 
     z-index: 2;
+}
+
+/*
+sv2
+ */
+.sv2 {
+    position: absolute;
+    left: var(--x);
+    bottom: var(--y);
+    width: var(--width);
+    top: calc(100% - var(--y-end));
+
+    --color: '';
+    background-color: var(--color);
+    z-index: 1;
+    @apply opacity-10 mix-blend-screen;
 }
 
 .slide-common {

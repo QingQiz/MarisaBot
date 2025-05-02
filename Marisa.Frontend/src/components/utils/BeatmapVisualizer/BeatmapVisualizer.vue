@@ -5,79 +5,105 @@ import {
     BeatmapBpm,
     BeatmapLn,
     BeatmapRice,
-    BeatmapSlideUnit, BeatmapSpeedVelocity, BeatmapDiv, BeatmapMeasure
+    BeatmapSlideUnit, BeatmapSpeedVelocity, BeatmapDiv, BeatmapMeasure, BeatmapSpeedVelocity2
 } from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
-import {computed, onMounted, ref} from "vue";
-import {range, zip} from "@/utils/list";
+import {computed, onMounted, ref, toRaw} from "vue";
+import {Distinct, range, zip} from "@/utils/list";
 
 
 let props = defineProps({
-    length       : {
+    length: {
         type    : Number,
         required: true
     },
-    rice         : {
+
+    rice: {
         type    : Array as () => BeatmapRice[],
         required: true
     },
-    ln           : {
+
+    ln: {
         type    : Array as () => BeatmapLn[],
         required: true
     },
-    slide        : {
+
+    slide: {
         type    : Array as () => BeatmapSlideUnit[],
         required: true
     },
-    rice_display : {
+
+    /**
+     * 长条的名字，默认是 ln，如果给出了定义，则定义的槽名字为这个值
+     */
+    rice_display: {
         type    : Array as () => string[],
         required: false,
         default : undefined
     },
-    ln_display   : {
+
+    ln_display: {
         type    : Array as () => string[],
         required: false,
         default : undefined
     },
+
     slide_display: {
         type    : Array as () => string[],
         required: false,
         default : undefined
     },
-    bpm          : {
+
+    bpm: {
         type    : Array as () => BeatmapBpm[],
         required: false,
         default : []
     },
-    sv           : {
+
+    sv: {
         type    : Array as () => BeatmapSpeedVelocity[],
         required: false,
         default : []
     },
-    beat         : {
+
+    /**
+     * 基于区域的 SV
+     */
+    sv2: {
+        type    : Array as () => BeatmapSpeedVelocity2[],
+        required: false,
+        default : []
+    },
+
+    beat: {
         type    : Array as () => BeatmapBeat[],
         required: false,
         default : []
     },
-    measure      : {
+
+    measure: {
         type    : Array as () => BeatmapMeasure[],
         required: false,
         default : []
     },
-    div          : {
+
+    div: {
         type    : Array as () => BeatmapDiv[],
         required: false,
         default : []
     },
-    split        : {
+
+    split: {
         type    : Array as () => number[],
         required: false,
         default : []
     },
-    overflow     : {
+
+    overflow: {
         type    : Number,
         required: false,
         default : 0
     },
+
     /**
      * 是否裁剪超出stage的部分，
      * true:  调整长条的Tick/TickEnd，让其不超出stage。NOTE: 会破坏长条的完整性，例如当长条从下到上是渐变的话，会重置渐变
@@ -122,8 +148,9 @@ function GetLn(l: number, r: number) {
 }
 
 function GetSlide(l: number, r: number) {
-    return GetAndSplitAndScale(slide.value.map(x => ({...x[0], ext: x[1]})), l, r, props.cut)
-        .map(x => [x as unknown as BeatmapSlideUnit, x.ext] as [BeatmapSlideUnit, string])
+    return GetAndSplitAndScale(
+        slide.value.map(x => ({...x[0], ext: x[1]})) as any as BeatmapSlideUnit[], l, r, props.cut
+    ).map(x => [x as unknown as BeatmapSlideUnit, (x as any).ext] as [BeatmapSlideUnit, string])
 }
 
 function GetBpm(l: number, r: number) {
@@ -132,6 +159,20 @@ function GetBpm(l: number, r: number) {
 
 function GetSv(l: number, r: number) {
     return GetAndSplit(props.sv, l, r);
+}
+
+function GetSv2(l: number, r: number) {
+    let res = GetAndSplit(toRaw(props.sv2), l, r);
+    for (let sv2 of res) {
+        sv2.SVs = GetAndSplit(sv2.SVs, l, r, props.cut);
+    }
+    return res;
+}
+
+function GetAllSv2Velocity() {
+    let res = Distinct(props.sv2.flatMap(x => x.SVs).map(x => x.Velocity), (x, y) => x == y);
+    res.sort((a, b) => b - a);
+    return res;
 }
 
 function GetBeat(l: number, r: number) {
@@ -174,6 +215,26 @@ function LnStyle(l: BeatmapLn, i: number[]) {
     }
 }
 
+function SvStyle(sv: BeatmapSpeedVelocity, range: number[], idx: number = 0) {
+    return {
+        '--y'         : CalcY(sv.Tick, range),
+        '--y-end'     : CalcY(sv.TickEnd, range),
+        'border-color': GetColor(sv.Velocity),
+        '--idx'       : idx
+    }
+}
+
+
+function Sv2Style(sv2: BeatmapSpeedVelocity2, sv: BeatmapSpeedVelocity, range: number[]) {
+    return {
+        '--width': `${sv2.Width * 100}%`,
+        '--x'    : `${sv2.X * 100}%`,
+        '--y'    : `${CalcY(sv.Tick, range)}`,
+        '--y-end': `${CalcY(sv.TickEnd, range)}`,
+        '--color': `${GetColor(sv.Velocity)}`,
+    }
+}
+
 function SlideStyle(s: BeatmapSlideUnit, i: number[]) {
     return {
         '--x'        : `${s.Border()[0] * 100}%`,
@@ -194,54 +255,75 @@ onMounted(ListenOnDevicePixelRatio);
 
 <template>
     <div class="config stage-container" :style="`--pixel-ratio: ${pixel_ratio}`">
-        <div class="stage" v-for="i in GetRange()" :style="`--tick-min: ${i[0]}; --tick-max: ${i[1]}`">
+        <template v-for="vs in [GetAllSv2Velocity()]">
+            <div v-if="vs.length != 0" class="my-5 mx-3 flex text-xl">
+                <div class="" style="writing-mode: sideways-lr">
+                    SV2 Color Index
+                </div>
+                <div style="background-color: var(--stage-color)">
+                    <div class="w-[60px] h-[60px] flex items-center justify-center text-gray-200"
+                         :style="`background-color: ${GetColor(x)}`" v-for="x in vs">
+                        x{{ x }}
+                    </div>
+                </div>
+            </div>
+        </template>
+        <div class="stage" v-for="sRange in GetRange()" :style="`--tick-min: ${sRange[0]}; --tick-max: ${sRange[1]}`">
             <!--            RICE -->
-            <div v-for="n in GetRice(i[0], i[1])" class="note-common" :style="RiceStyle(n[0], i)">
-                <slot :name="n[1]" :note="n[0]" :range="i">
+            <div v-for="n in GetRice(sRange[0], sRange[1])" class="note-common" :style="RiceStyle(n[0], sRange)">
+                <slot :name="n[1]" :note="n[0]" :range="sRange">
                     <div class="rice"/>
                 </slot>
             </div>
 
             <!--            LN -->
-            <div v-for="n in GetLn(i[0], i[1])" class="ln-common" :style="LnStyle(n[0], i)">
-                <slot :name="n[1]" :note="n[0]" :range="i">
+            <div v-for="n in GetLn(sRange[0], sRange[1])" class="ln-common" :style="LnStyle(n[0], sRange)">
+                <slot :name="n[1]" :note="n[0]" :range="sRange">
                     <div class="ln"/>
                 </slot>
             </div>
 
             <!--            SLIDE -->
-            <div v-for="n in GetSlide(i[0], i[1])" class="slide-common" :style="SlideStyle(n[0], i)">
-                <slot :name="n[1]" :note="n[0]" :range="i">
+            <div v-for="n in GetSlide(sRange[0], sRange[1])" class="slide-common" :style="SlideStyle(n[0], sRange)">
+                <slot :name="n[1]" :note="n[0]" :range="sRange">
                     <div class="slide"/>
                 </slot>
             </div>
 
             <!--            BPM -->
-            <template v-for="b in GetBpm(i[0], i[1])">
-                <div class="bpm" :style="`--y: ${CalcY(b.Tick, i)}; --content: '${b.Bpm.toFixed(0)}'`"/>
+            <template v-for="b in GetBpm(sRange[0], sRange[1])">
+                <div class="bpm" :style="`--y: ${CalcY(b.Tick, sRange)}; --content: '${b.Bpm.toFixed(0)}'`"/>
             </template>
 
             <!--            SV -->
-            <template v-for="s in GetSv(i[0], i[1])">
-                <div class="sv"
-                     :style="`--y: ${CalcY(s.Tick, i)}; --y-end: ${CalcY(s.TickEnd, i)}; border-color: ${GetColor(s.Velocity)}`">
-                    {{ s.Velocity.toFixed(3) }}
+            <template v-for="sv in GetSv(sRange[0], sRange[1])">
+                <div class="sv" :style="SvStyle(sv, sRange)">
+                    {{ sv.Velocity.toFixed(2) }}
                 </div>
             </template>
 
+            <!--            SV2 -->
+            <template v-for="sv2s in [GetSv2(sRange[0], sRange[1])]">
+                <template v-for="sv2 in sv2s">
+                    <template v-for="sv in sv2.SVs">
+                        <div class="sv2" :style="Sv2Style(sv2, sv, sRange)"></div>
+                    </template>
+                </template>
+            </template>
+
             <!--            BEAT -->
-            <template v-for="b in GetBeat(i[0], i[1])">
-                <div class="beat" :style="`--y: ${CalcY(b.Tick, i)}`"/>
+            <template v-for="b in GetBeat(sRange[0], sRange[1])">
+                <div class="beat" :style="`--y: ${CalcY(b.Tick, sRange)}`"/>
             </template>
 
             <!--            MEASURE -->
-            <template v-for="m in GetMeasure(i[0], i[1])">
-                <div class="met" :style="`--y: ${CalcY(m.Tick, i)}; --content:'#${m.Id}'`"/>
+            <template v-for="m in GetMeasure(sRange[0], sRange[1])">
+                <div class="met" :style="`--y: ${CalcY(m.Tick, sRange)}; --content:'#${m.Id}'`"/>
             </template>
 
             <!--            DIV -->
-            <template v-for="d in GetDiv(i[0], i[1])">
-                <div class="div" :style="`--y: ${CalcY(d.Tick, i)}; --content:'${d.First}/${d.Second}'`"/>
+            <template v-for="d in GetDiv(sRange[0], sRange[1])">
+                <div class="div" :style="`--y: ${CalcY(d.Tick, sRange)}; --content:'${d.First}/${d.Second}'`"/>
             </template>
         </div>
     </div>
@@ -253,11 +335,15 @@ onMounted(ListenOnDevicePixelRatio);
 
 <script lang="ts">
 import * as d3 from "d3";
-import {BeatmapSlideUnit} from "@/components/utils/BeatmapVisualizer/BeatmapTypes";
 
 const SvColor = d3.scaleLinear<string>()
-    .domain([-1, 0, 1, 3, 100, 500])
-    .range(['#ff00f2', '#0000ff', '#6B7280', '#ff0000', "#520101", "#000000"])
+    .domain([-10, -1, 0, 1, 3, 100, 500])
+    .range([
+        '#ff00f2',
+        '#ff82f9', '#0000ff',
+        '#6B7280', '#ff0000',
+        "#520101", "#000000"
+    ])
     .interpolate(d3.interpolateRgb.gamma(2.2))
 
 function GetColor(val: number) {
