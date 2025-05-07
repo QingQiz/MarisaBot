@@ -314,24 +314,28 @@
         "level": [
             "2",
             "5",
-            "8"
+            "8",
+            "9+"
         ],
         "level_name": [
             "Past",
             "Present",
-            "Future"
+            "Future",
+            "Beyond"
         ],
         "charter": [
             "Toaster",
             "Toaster",
-            "Toaster"
+            "Toaster",
+            "én + Nitro"
         ],
         "song_pack": "Arcaea",
         "cover_name": "snowwhite.jpg",
         "constant": [
             "2.5",
             "5.0",
-            "8.4"
+            "8.4",
+            "9.7"
         ]
     },
     {
@@ -657,24 +661,28 @@
         "level": [
             "2",
             "6",
-            "9"
+            "9",
+            "9+"
         ],
         "level_name": [
             "Past",
             "Present",
-            "Future"
+            "Future",
+            "Beyond"
         ],
         "charter": [
             "Toaster",
             "Toaster",
-            "Toaster"
+            "Toaster",
+            "Astral Luxance"
         ],
         "song_pack": "Arcaea",
         "cover_name": "anokumene.jpg",
         "constant": [
             "2.5",
             "6.5",
-            "9.2"
+            "9.2",
+            "9.9"
         ]
     },
     {
@@ -2805,24 +2813,28 @@
         "level": [
             "3",
             "6",
-            "9+"
+            "9+",
+            "10+"
         ],
         "level_name": [
             "Past",
             "Present",
-            "Future"
+            "Future",
+            "Beyond"
         ],
         "charter": [
             "Nitro「Katastrophe」",
             "Nitro「Katastrophe」",
-            "Nitro「Katastrophe」"
+            "Nitro「Katastrophe」",
+            "零下 -descent-"
         ],
         "song_pack": "Arcaea",
         "cover_name": "nhelv.jpg",
         "constant": [
             "3.0",
             "6.5",
-            "9.9"
+            "9.9",
+            "10.9"
         ]
     },
     {
@@ -4825,24 +4837,28 @@
         "level": [
             "2",
             "5",
-            "9+"
+            "9+",
+            "10"
         ],
         "level_name": [
             "Past",
             "Present",
-            "Future"
+            "Future",
+            "Beyond"
         ],
         "charter": [
             "Kurorak",
             "Kurorak",
-            "Kurorak"
+            "Kurorak",
+            "nora::neko << fantasy"
         ],
         "song_pack": "Memory Archive",
         "cover_name": "altale.jpg",
         "constant": [
             "2.5",
             "5.5",
-            "9.8"
+            "9.8",
+            "10.0"
         ]
     },
     {
@@ -6953,24 +6969,28 @@
         "level": [
             "3",
             "7",
-            "9"
+            "9",
+            "10"
         ],
         "level_name": [
             "Past",
             "Present",
-            "Future"
+            "Future",
+            "Beyond"
         ],
         "charter": [
             "POWER NITRO",
             "POWER NITRO",
-            "POWER NITRO"
+            "POWER NITRO",
+            "白亜紀と古第三紀の間の大量絶滅"
         ],
         "song_pack": "Extend Archive 1",
         "cover_name": "energysynergymatrix.jpg",
         "constant": [
             "3.5",
             "7.0",
-            "9.6"
+            "9.6",
+            "10.3"
         ]
     },
     {
@@ -13213,9 +13233,9 @@
         "song_pack": "UNDERTALE",
         "cover_name": "heartache.jpg",
         "constant": [
-            "1.0",
-            "4.0",
-            "7.0",
+            "1.5",
+            "4.5",
+            "7.5",
             "8.7"
         ]
     },
@@ -13246,9 +13266,9 @@
         "song_pack": "UNDERTALE",
         "cover_name": "deathbyglamour.jpg",
         "constant": [
-            "2.0",
+            "2.5",
             "5.0",
-            "7.0",
+            "7.8",
             "9.4"
         ]
     },
@@ -13279,8 +13299,8 @@
         "song_pack": "UNDERTALE",
         "cover_name": "yourbestnightmare.jpg",
         "constant": [
-            "3.0",
-            "6.0",
+            "3.5",
+            "6.5",
             "8.9",
             "10.2"
         ]
@@ -13312,8 +13332,8 @@
         "song_pack": "UNDERTALE",
         "cover_name": "lastgoodbye.jpg",
         "constant": [
-            "2.0",
-            "6.0",
+            "2.5",
+            "6.5",
             "8.2",
             "9.7"
         ]
@@ -13345,8 +13365,8 @@
         "song_pack": "UNDERTALE",
         "cover_name": "megalovania.jpg",
         "constant": [
-            "4.0",
-            "7.0",
+            "4.5",
+            "7.5",
             "9.5",
             "10.5"
         ]
@@ -13378,7 +13398,7 @@
         "song_pack": "Memory Archive",
         "cover_name": "megalovaniarmx.jpg",
         "constant": [
-            "5.0",
+            "5.5",
             "8.4",
             "9.8",
             "10.9"
@@ -13408,9 +13428,162 @@
         "song_pack": "Memory Archive",
         "cover_name": "placebobattler.jpg",
         "constant": [
-            "5.0",
+            "5.5",
             "8.3",
             "10.4"
+        ]
+    },
+    {
+        "id": 451,
+        "title": "Black Mirror on the Wall",
+        "artist": "暁Records",
+        "bpm": "130",
+        "version": "6.3",
+        "level": [
+            "3",
+            "6",
+            "8",
+            "9+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "Nitro",
+            "Nitro",
+            "Nitro",
+            "KLMNOP"
+        ],
+        "song_pack": "World Extend 3",
+        "cover_name": "blackmirror.jpg",
+        "constant": [
+            "3.5",
+            "6.5",
+            "8.6",
+            "9.7"
+        ]
+    },
+    {
+        "id": 452,
+        "title": "Shinchoku Doudesuka?",
+        "artist": "sumijun feat. ななひら",
+        "bpm": "199",
+        "version": "6.3",
+        "level": [
+            "3",
+            "7",
+            "8+",
+            "9+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future",
+            "Eternal"
+        ],
+        "charter": [
+            "明日から頑張る",
+            "今からやります",
+            "もう少し待っててね",
+            "進捗ダメです"
+        ],
+        "song_pack": "Memory Archive",
+        "cover_name": "shinchoku.jpg",
+        "constant": [
+            "3.5",
+            "7.5",
+            "8.8",
+            "9.9"
+        ]
+    },
+    {
+        "id": 453,
+        "title": "TRPNO",
+        "artist": "Nauts",
+        "bpm": "150",
+        "version": "6.3",
+        "level": [
+            "4",
+            "7+",
+            "10"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future"
+        ],
+        "charter": [
+            "raycast",
+            "raycast",
+            "raycast"
+        ],
+        "song_pack": "World Extend 3",
+        "cover_name": "trpno.jpg",
+        "constant": [
+            "4.5",
+            "7.8",
+            "10.0"
+        ]
+    },
+    {
+        "id": 454,
+        "title": "τ (tau)",
+        "artist": "Wooden",
+        "bpm": "155",
+        "version": "6.4",
+        "level": [
+            "4",
+            "7+",
+            "9+"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future"
+        ],
+        "charter": [
+            "ə (exschwasion)",
+            "ə (exschwasion)",
+            "ə (exschwasion)"
+        ],
+        "song_pack": "World Extend 3",
+        "cover_name": "tau.jpg",
+        "constant": [
+            "4.5",
+            "7.8",
+            "9.7"
+        ]
+    },
+    {
+        "id": 455,
+        "title": "Dull Blade",
+        "artist": "stuv",
+        "bpm": "128-160",
+        "version": "6.4",
+        "level": [
+            "4",
+            "8",
+            "10"
+        ],
+        "level_name": [
+            "Past",
+            "Present",
+            "Future"
+        ],
+        "charter": [
+            "NITRO",
+            "NITRO",
+            "NITRO"
+        ],
+        "song_pack": "Memory Archive",
+        "cover_name": "dullblade.jpg",
+        "constant": [
+            "4.5",
+            "8.0",
+            "10.5"
         ]
     }
 ]
