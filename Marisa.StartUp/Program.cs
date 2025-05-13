@@ -1,5 +1,5 @@
-﻿using Marisa.Backend.GoCq;
-using Marisa.Backend.Mirai;
+﻿
+using Marisa.Backend.Lagrange;
 using Marisa.BotDriver.DI;
 using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +24,7 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
-        builder.Services.AddRange(useMirai ? MiraiBackend.Config(Utils.Assembly().GetTypes()) : GoCqBackend.Config(Utils.Assembly().GetTypes()));
+        builder.Services.AddRange(LagrangeBackend.Config(Utils.Assembly().GetTypes()));
         builder.WebHost.UseUrls("http://0.0.0.0:14311");
 
         // use nLog for logging
