@@ -52,7 +52,6 @@ public class LagrangeBackend : BotDriver.BotDriver
     {
         _bot.Invoker.OnFriendMessageReceived += async (_, msg) =>
         {
-            _logger.Info(msg.Chain.ToPreviewString());
             var m = MessageChainConverter(msg.Chain);
 
             if (m is not null)
@@ -63,7 +62,6 @@ public class LagrangeBackend : BotDriver.BotDriver
 
         _bot.Invoker.OnGroupMessageReceived += async (_, msg) =>
         {
-            _logger.Info(msg.Chain.ToPreviewString());
             var m = MessageChainConverter(msg.Chain);
 
             if (m is not null)
@@ -213,7 +211,7 @@ public class LagrangeBackend : BotDriver.BotDriver
         {
             var builder = MessageBuilder.Group((uint)target);
             var chain   = ConstructChain(quote, builder, message);
-            _logger.Info(chain.ToPreviewString());
+            _logger.Info($"{target} <= {chain.ToPreviewString()}");
             _ = await _bot.SendMessage(chain);
         }
 
@@ -221,7 +219,7 @@ public class LagrangeBackend : BotDriver.BotDriver
         {
             var builder = MessageBuilder.Friend((uint)target);
             var chain   = ConstructChain(quote, builder, message);
-            _logger.Info(chain.ToPreviewString());
+            _logger.Info($"{target} <- {chain.ToPreviewString()}");
             _ = await _bot.SendMessage(chain);
         }
 
