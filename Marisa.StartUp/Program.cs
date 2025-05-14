@@ -1,6 +1,5 @@
 ﻿
 using Marisa.Backend.Lagrange;
-using Marisa.BotDriver.DI;
 using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,8 +15,6 @@ public static class Program
 {
     private static async Task Main(string[] args)
     {
-        var useMirai = !(args.Length > 3 && args[3] == "gocq");
-
         // asp dotnet
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers();
@@ -46,11 +43,6 @@ public static class Program
             FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
             RequestPath  = ""
         });
-
-        app.Services.GetService<DictionaryProvider>()!
-            .Add("QQ", long.Parse(args[1]))
-            .Add("ServerAddress", args[0])
-            .Add("AuthKey", args[2]);
 
         app.MapGet("/", ctx =>
         {

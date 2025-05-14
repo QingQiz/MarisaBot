@@ -28,11 +28,6 @@ public class DispatcherTest
 
         var provider = sc.BuildServiceProvider();
 
-        provider.GetService<DictionaryProvider>()!
-            .Add("QQ", 0)
-            .Add("ServerAddress", "")
-            .Add("AuthKey", "");
-
         _dispatcher = new MessageDispatcher(provider.GetServices<MarisaPluginBase>(), provider, provider.GetService<DictionaryProvider>()!);
     }
 

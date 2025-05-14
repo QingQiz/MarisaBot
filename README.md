@@ -191,26 +191,6 @@
     - 下载 ffmpeg.exe
     - 安装 Node.js
     - 安装`Marisa.Plugin.Shared\Resource\Font`下的所有字体
-- 选择一个QQ机器人框架，如Mirai/Go-CQ，以Mirai为例
-    - 依照Mirai的[官方文档](https://github.com/mamoe/mirai/blob/dev/docs/ConsoleTerminal.md)部署Mirai
-    - 安装Mirai的[HTTP插件](https://github.com/project-mirai/mirai-api-http)
-    - 配置Mirai的HTTP插件，这里给出一个例子
-      ```yaml
-      adapters:
-        - ws
-      enableVerify: true
-      ## 用于验证的 key，填你自己的Key
-      verifyKey: KEY
-      debug: false
-      singleMode: false
-      cacheSize: 4096
-      adapterSettings:
-        ws:
-          host: localhost
-          port: 18080
-          reservedSyncId: -1
-      ```
-- 在 Mirai 里登陆 bot
 - 改项目的配置文件`Marisa.StartUp/config.yaml`
     - 需要修改里面的各种路径，
         - 其中`resourcePath`中的资源为源码中自带的，只需要改前缀
@@ -229,9 +209,6 @@
     - `dotnet build -c Release`
 - 运行
     - `cd bin/Release/net8.0/`
-    - 运行 `Marisa.StartUp.exe` 命令行参数如下（顺序敏感）：
-        - [Mirai-API-http](https://github.com/project-mirai/mirai-api-http) 的服务地址，如 `ws://127.0.0.1:18080`
-        - bot的QQ账号，如 `123456789`
-        - Mirai-API-http 的认证密钥，如 <https://github.com/project-mirai/mirai-api-http#settingyml%E6%A8%A1%E6%9D%BF> 中的 `verifyKey`
-        - （可选）传入`gocq`字符串则以Go-CQ为框架，否则以Mirai为框架
+    - 运行 `Marisa.StartUp.exe`
+- 当日志输出 `qrcode dumped` 的时候，在 bot 目录下找一个叫 `qrcode.png`的文件，扫码登录
 

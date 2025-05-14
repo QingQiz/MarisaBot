@@ -37,8 +37,9 @@ public class LagrangeBackend : BotDriver.BotDriver
         MessageQueueProvider messageQueueProvider
     ) : base(serviceProvider, pluginsAll, dict, messageSenderProvider, messageQueueProvider)
     {
-        _logger = LogManager.GetCurrentClassLogger();
-        _bot    = BotFactory.Create(_config, _deviceInfo, _keyStore);
+        _logger    = LogManager.GetCurrentClassLogger();
+        _bot       = BotFactory.Create(_config, _deviceInfo, _keyStore);
+        dict["QQ"] = _bot.BotUin;
     }
 
     public new static IServiceCollection Config(Type[] types)
