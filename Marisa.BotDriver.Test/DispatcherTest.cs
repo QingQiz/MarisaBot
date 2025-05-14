@@ -1,4 +1,4 @@
-﻿using Marisa.Backend.Mirai;
+﻿using Marisa.Backend.Lagrange;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -24,7 +24,7 @@ public class DispatcherTest
 
         ConfigurationManager.SetConfigFilePath(configPath);
 
-        var sc = MiraiBackend.Config(Utils.Assembly().GetTypes());
+        var sc = LagrangeBackend.Config(Utils.Assembly().GetTypes());
 
         var provider = sc.BuildServiceProvider();
 

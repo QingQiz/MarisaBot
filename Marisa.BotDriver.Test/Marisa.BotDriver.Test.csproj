@@ -5,11 +5,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
         <PackageReference Include="NUnit" Version="4.1.0"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Marisa.Backend.Mirai\Marisa.Backend.Mirai.csproj"/>
-        <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
+        <ProjectReference Include="..\Marisa.Backend.Lagrange\Marisa.Backend.Lagrange.csproj"/>
+        <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj"/>
     </ItemGroup>
 </Project>
