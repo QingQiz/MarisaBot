@@ -1,5 +1,4 @@
-﻿
-using Marisa.Backend.Lagrange;
+﻿using Marisa.Backend.Lagrange;
 using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -53,5 +52,6 @@ public static class Program
 
         // run
         await Task.WhenAll(app.RunAsync(), app.Services.GetService<BotDriver.BotDriver>()!.Invoke());
+        // await Task.WhenAll(app.RunAsync());
     }
 }

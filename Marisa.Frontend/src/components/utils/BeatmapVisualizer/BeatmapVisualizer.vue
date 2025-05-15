@@ -309,6 +309,24 @@ onMounted(ListenOnDevicePixelRatio);
                         <div class="sv2" :style="Sv2Style(sv2, sv, sRange)"></div>
                     </template>
                 </template>
+
+                <template
+                    v-for="svs in [Distinct(
+                        sv2s
+                            .flatMap((x: BeatmapSpeedVelocity2) => x.SVs)
+                            .filter((x: BeatmapSpeedVelocity) => x.Velocity != 1)
+                            .toSorted((x: BeatmapSpeedVelocity, y: BeatmapSpeedVelocity) => x.Tick == y.Tick ? y.TickEnd - x.TickEnd : x.Tick - y.Tick),
+                        (a: BeatmapSpeedVelocity, y: BeatmapSpeedVelocity) =>
+                            a.Tick == y.Tick && a.TickEnd == y.TickEnd && a.Velocity == y.Velocity)
+                    ]">
+                    <template v-for="idxMap in [RemapSvs(svs)]">
+                        <template v-for="(sv, idx) in svs">
+                            <div class="sv" :style="SvStyle(sv, sRange, idxMap.get(idx))">
+                                x{{ sv.Velocity.toFixed(2) }}
+                            </div>
+                        </template>
+                    </template>
+                </template>
             </template>
 
             <!--            BEAT -->
@@ -348,6 +366,50 @@ const SvColor = d3.scaleLinear<string>()
 
 function GetColor(val: number) {
     return SvColor(val);
+}
+
+/**
+ * sv2 除了要在轨道是上渲染，还需要像 sv1 一样渲染变速条
+ * 然而 sv2 的变速条是有重叠的，因此我们要把它们分开
+ * @param input sorted input required
+ * @constructor
+ */
+function RemapSvs<
+    T extends { Tick: number, TickEnd: number },
+>(input: T[]) {
+    let idxMap = new Map<number, number>();
+
+    let mapped  = new Set();
+    let resIdx  = 0;
+    let inpIdx  = 0;
+    let resMax  = 0;
+    let skipped = 0;
+
+    console.log(d3.map(input, x => x))
+
+    while (true) {
+        if (mapped.size == input.length) {
+            break;
+        }
+        if (skipped == input.length) {
+            resIdx++;
+            skipped = 0;
+            resMax  = 0;
+            inpIdx  = 0;
+        }
+
+        if (!mapped.has(inpIdx)) {
+            let current = input[inpIdx];
+            if (current.Tick >= resMax) {
+                idxMap.set(inpIdx, resIdx);
+                resMax = current.TickEnd;
+                mapped.add(inpIdx);
+            } else skipped++;
+        } else skipped++;
+        inpIdx = (inpIdx + 1) % input.length;
+    }
+    console.log(idxMap)
+    return idxMap;
 }
 
 /**
