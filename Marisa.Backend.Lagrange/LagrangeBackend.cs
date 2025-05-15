@@ -22,9 +22,9 @@ public class LagrangeBackend : BotDriver.BotDriver
 {
     private readonly Logger _logger;
 
-    private readonly BotDeviceInfo _deviceInfo = LoadOr("deviceInfo.json", BotDeviceInfo.GenerateInfo);
-    private BotKeystore _keyStore = LoadOr("keystore.json", () => new BotKeystore());
-    private readonly BotConfig _config = LoadOr("config.json", () => new BotConfig());
+    private readonly BotDeviceInfo _deviceInfo = LoadOr("_deviceInfo.json", BotDeviceInfo.GenerateInfo);
+    private BotKeystore _keyStore = LoadOr("_keystore.json", () => new BotKeystore());
+    private readonly BotConfig _config = LoadOr("_config.json", () => new BotConfig());
     private readonly BotContext _bot;
 
     private static readonly DateTime UnixDateTimeStart = new(1970, 1, 1, 0, 0, 0, 0);
@@ -224,6 +224,7 @@ public class LagrangeBackend : BotDriver.BotDriver
             _ = await _bot.SendMessage(chain);
         }
 
+        // ReSharper disable once UnusedParameter.Local
         MessageChain ConstructChain(long? quote, MessageBuilder builder, BotDriver.Entity.Message.MessageChain message)
         {
             // if (quote is not null)
@@ -262,26 +263,25 @@ public class LagrangeBackend : BotDriver.BotDriver
 
     public override async Task Invoke()
     {
-        var suc = await _bot.LoginByPassword();
+        var suc = await _bot.LoginByEasy();
         if (!suc)
         {
             var qrCode = await _bot.FetchQrCode();
             if (qrCode == null)
             {
-                Console.WriteLine("null qrcode");
-                return;
+                _logger.Fatal("Failed to fetch qrcode");
+                Environment.Exit(-1);
             }
 
-            _logger.Info("qrcode dumped");
-            // write qrcode to png
+            _logger.Warn("qrcode dumped");
             await File.WriteAllBytesAsync("qrcode.png", qrCode.Value.QrCode);
             await _bot.LoginByQrCode();
         }
 
         _keyStore = _bot.UpdateKeystore();
-        Dump("keystore.json", _keyStore);
-        Dump("deviceInfo.json", _deviceInfo);
-        Dump("config.json", _config);
+        Dump("_keystore.json", _keyStore);
+        Dump("_deviceInfo.json", _deviceInfo);
+        Dump("_config.json", _config);
 
         await base.Invoke();
     }
