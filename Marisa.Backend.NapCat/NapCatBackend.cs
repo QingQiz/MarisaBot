@@ -335,11 +335,11 @@ public class NapCatBackend : BotDriver.BotDriver
     {
         return subType switch
         {
-            // NapCat reports group temporary sessions as private.group. Preserve that distinction for plugins that
-            // restrict handlers to TempMessage while still using the private-message OneBot payload shape.
-            "group" => MessageType.TempMessage,
+            // NapCat reports temporary private sessions as private.group, but downstream dialog and private-command
+            // handling expects these follow-up messages to behave like normal friend messages.
+            "group" => MessageType.FriendMessage,
             "other" => MessageType.StrangerMessage,
-            _ => targetId != 0 ? MessageType.TempMessage : MessageType.FriendMessage
+            _ => MessageType.FriendMessage
         };
     }
 
