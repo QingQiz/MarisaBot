@@ -45,7 +45,10 @@ public class Dialog : MarisaPluginBase
             case MarisaPluginTaskState.NoResponse:
                 DialogManager.RemoveDialog(key);
                 var rep = await MessageHandler(message);
-                await DialogManager.AddDialogAsync(key, dialogHandler);
+
+                // If another handler claimed the same dialog key while we let other plugins run,
+                // keep the newer dialog instead of waiting forever to restore the old one.
+                DialogManager.TryRestoreDialog(key, dialogHandler);
                 return rep;
             // 插件自闭了，请求删除自己
             case MarisaPluginTaskState.Canceled:

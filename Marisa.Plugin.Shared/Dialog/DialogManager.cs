@@ -4,6 +4,8 @@ using TKey = (long? GroupId, long? SenderId);
 
 public static class DialogManager
 {
+    private static readonly TimeSpan AddRetryDelay = TimeSpan.FromMilliseconds(100);
+
     // map (group id, user id) to handler
     private static readonly Dictionary<TKey, Dialog.MessageHandler> Handlers = new();
 
@@ -15,10 +17,12 @@ public static class DialogManager
         }
     }
 
-    public static async Task AddDialogAsync(TKey key, Dialog.MessageHandler handler)
+    public static async Task AddDialogAsync(TKey key, Dialog.MessageHandler handler, CancellationToken cancellationToken = default)
     {
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (Handlers)
             {
                 if (Handlers.TryAdd(key, handler))
@@ -26,7 +30,18 @@ public static class DialogManager
                     break;
                 }
             }
-            await Task.Delay(TimeSpan.FromSeconds(0.1));
+
+            await Task.Delay(AddRetryDelay, cancellationToken);
+        }
+    }
+
+    public static bool TryRestoreDialog(TKey key, Dialog.MessageHandler handler)
+    {
+        lock (Handlers)
+        {
+            if (Handlers.ContainsKey(key)) return false;
+            Handlers.Add(key, handler);
+            return true;
         }
     }
 
