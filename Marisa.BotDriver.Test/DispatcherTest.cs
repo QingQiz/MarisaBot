@@ -1,12 +1,14 @@
-﻿using Marisa.Backend.Lagrange;
+﻿using Marisa.Backend.NapCat;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
+using Marisa.EntityFrameworkCore;
 using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Configuration;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using EventHandler = Marisa.Plugin.EventHandler.EventHandler;
@@ -15,20 +17,52 @@ namespace Marisa.BotDriver.Test;
 
 public class DispatcherTest
 {
-    private MessageDispatcher _dispatcher;
+    private MessageDispatcher _dispatcher = null!;
+    private ServiceProvider _provider = null!;
+    private string _configPath = null!;
+    private string _tempRoot = null!;
 
     [SetUp]
     public void SetUp()
     {
-        var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
+        _tempRoot = Path.Join(Path.GetTempPath(), "Marisa.BotDriver.Test", Guid.NewGuid().ToString("N"));
+        _configPath = CreateTestConfig(_tempRoot);
 
-        ConfigurationManager.SetConfigFilePath(configPath);
+        ConfigurationManager.SetConfigFilePath(_configPath);
 
-        var sc = LagrangeBackend.Config(Utils.Assembly().GetTypes());
+        var sc = NapCatBackend.Config(Utils.Assembly().GetTypes());
 
-        var provider = sc.BuildServiceProvider();
+        _provider = sc.BuildServiceProvider();
 
-        _dispatcher = new MessageDispatcher(provider.GetServices<MarisaPluginBase>(), provider, provider.GetService<DictionaryProvider>()!);
+        _provider.GetRequiredService<BotDbContext>().Database.EnsureCreated();
+
+        _dispatcher = new MessageDispatcher(_provider.GetServices<MarisaPluginBase>(), _provider, _provider.GetService<DictionaryProvider>()!);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _provider.Dispose();
+        SqliteConnection.ClearAllPools();
+
+        if (Directory.Exists(_tempRoot))
+        {
+            Directory.Delete(_tempRoot, true);
+        }
+    }
+
+    private static string CreateTestConfig(string tempRoot)
+    {
+        var sourceConfigPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
+        var config = File.ReadAllText(sourceConfigPath)
+            .Replace("tempPath:     temp", $"tempPath:     {tempRoot.Replace("\\", "\\\\")}")
+            .Replace("databasePath: bot.db", "databasePath: QQBOT_DB.db");
+        var configPath = Path.Join(tempRoot, "config.yaml");
+
+        Directory.CreateDirectory(tempRoot);
+        File.WriteAllText(configPath, config);
+
+        return configPath;
     }
 
     private static Message CreateMessage(params MessageData[] data)
@@ -40,7 +74,7 @@ public class DispatcherTest
     {
         get
         {
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai b50")), typeof(MaiMaiDx), "MaiMaiDxB50").SetName("MaimaiDX");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai b50")), typeof(MaiMaiDx), "B50").SetName("MaimaiDX");
             yield return new TestCaseData(CreateMessage(new MessageDataSignServerLose("")), typeof(EventHandler), null).SetName("SignServer");
             yield return new TestCaseData(CreateMessage(new MessageDataBotOffline()), typeof(EventHandler), null).SetName("Online");
             yield return new TestCaseData(CreateMessage(new MessageDataBotOnline()), typeof(EventHandler), null).SetName("Offline");

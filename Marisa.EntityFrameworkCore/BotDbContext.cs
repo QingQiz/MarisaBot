@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using Marisa.EntityFrameworkCore.Entity;
 using Marisa.EntityFrameworkCore.Entity.Plugin;
 using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
@@ -12,6 +14,8 @@ namespace Marisa.EntityFrameworkCore;
 
 public class BotDbContext : DbContext
 {
+    public static string DatabasePath { get; set; } = Path.GetFullPath(Path.Join(AppContext.BaseDirectory, "temp", "bot.db"));
+
     public DbSet<CommandFilter> CommandFilters { get; set; }
     public DbSet<ChunithmGuess> ChunithmGuesses { get; set; }
     public DbSet<ChunithmBind> ChunithmBinds { get; set; }
@@ -26,7 +30,14 @@ public class BotDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite(@"Data Source=F:\MarisaBotTemp\QQBOT_DB.db");
+        var dbDirectory = Path.GetDirectoryName(DatabasePath);
+
+        if (!string.IsNullOrEmpty(dbDirectory))
+        {
+            Directory.CreateDirectory(dbDirectory);
+        }
+
+        options.UseSqlite($"Data Source={DatabasePath}");
     }
 }
 

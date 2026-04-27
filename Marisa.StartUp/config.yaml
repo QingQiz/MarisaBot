@@ -1,30 +1,38 @@
-ffmpegPath:     C:\bin\ffmpeg.exe
+tempPath:     E:\MarisaBotTemp
+resourceRoot: E:\MarisaBot\Marisa.Frontend\public\assets
+databasePath: bot.db
+ffmpegPath:   C:\bin\ffmpeg.exe
+
+napCat:
+  endpoint: ws://127.0.0.1:31001
+  token: 
+  selfId:
 
 arcaea:
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Arcaea
-  tempPath:     C:\Users\sofee\Desktop\temp\arcaea
-  assetsPath:   D:\arcaea_song_assets
+  resourcePath: arcaea
+  tempPath:     arcaea
+  assetsPath:
 
 game:
-  tempPath:     C:\Users\sofee\Desktop\temp\game
+  tempPath:     game
 
 osu:
   clientId:     
   clientSecret: 
-  tempPath:     C:\Users\sofee\Desktop\temp\osu
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Plugin.Shared\Resource\Osu
+  tempPath:     osu
+  resourcePath:
 
 chunithm:
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\chunithm
-  tempPath:     C:\Users\sofee\Desktop\temp\chunithm
+  resourcePath: chunithm
+  tempPath:     chunithm
   devToken:
   tokenLouis:
   rinNetKeyChip: 
   allNetKeyChip: 
   
 ongeki:
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\ongeki
-  tempPath:     C:\Users\sofee\Desktop\temp\ongeki
+  resourcePath: ongeki
+  tempPath:     ongeki
 
 maimai:
   secret:
@@ -32,9 +40,9 @@ maimai:
     aimeSalt:   
     aesKey:     
     aesIv:      
-  resourcePath: C:\Users\sofee\RiderProjects\QQBOT\Marisa.Frontend\public\assets\maimai
-  tempPath:     C:\Users\sofee\Desktop\temp\maimai
-  beatMapPath:  D:\maimai_beatmap_without_bga
+  resourcePath: maimai
+  tempPath:     maimai
+  beatMapPath:
   version:
     maimai:
       - maimai

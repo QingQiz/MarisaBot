@@ -2,10 +2,16 @@
 
 public class MessageDataImage : MessageData
 {
+    public string? File;
     public string? ImageId;
     public string? Url;
     public string? Path;
     public string? Base64;
+    public string? Name;
+    public string? Summary;
+    public string? SubType;
+    public string? FileSize;
+    public string? FileUnique;
 
     public static MessageDataImage FromBase64(string base64)
     {

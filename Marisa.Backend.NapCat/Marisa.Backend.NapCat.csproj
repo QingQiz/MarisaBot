@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Lagrange.Core\Lagrange.Core\Lagrange.Core.csproj"/>
         <ProjectReference Include="..\Marisa.BotDriver\Marisa.BotDriver.csproj"/>
+        <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj"/>
     </ItemGroup>
 </Project>

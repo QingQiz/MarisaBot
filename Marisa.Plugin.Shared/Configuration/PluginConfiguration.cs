@@ -6,6 +6,14 @@ namespace Marisa.Plugin.Shared.Configuration;
 
 public class PluginConfiguration
 {
+    public string TempPath { get; set; }
+
+    public string ResourceRoot { get; set; }
+
+    public string DatabasePath { get; set; }
+
+    public NapCatConfiguration NapCat { get; set; }
+
     public string[] Chi { get; set; }
 
     public long[] Commander { get; set; }

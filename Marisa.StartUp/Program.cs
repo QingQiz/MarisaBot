@@ -1,5 +1,5 @@
 ﻿
-using Marisa.Backend.Lagrange;
+using Marisa.Backend.NapCat;
 using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,7 +21,7 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
-        builder.Services.AddRange(LagrangeBackend.Config(Utils.Assembly().GetTypes()));
+        builder.Services.AddRange(NapCatBackend.Config(Utils.Assembly().GetTypes()));
         builder.WebHost.UseUrls("http://0.0.0.0:14311");
 
         // use nLog for logging
