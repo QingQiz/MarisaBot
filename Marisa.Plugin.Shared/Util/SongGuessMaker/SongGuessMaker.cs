@@ -1,26 +1,25 @@
-﻿using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
+﻿using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Shared;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Microsoft.EntityFrameworkCore;
+using Realms;
 using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Shared.Util.SongGuessMaker;
 
-public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, string guessDbSetName)
+public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
     where TSong : Song
-    where TSongGuess : SongGuess, new()
+    where TSongGuess : ISongGuess, IRealmObject, new()
 {
     private async Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
     {
-        var dbContext  = new BotDbContext();
         var senderId   = message.Sender.Id;
         var senderName = message.Sender.Name;
+        using var realm = BotDbContext.OpenRealm();
 
-        var db   = (DbSet<TSongGuess>)dbContext.GetType().GetProperty(guessDbSetName)!.GetValue(dbContext, null)!;
-        var @new = db.Any(u => u.UId == senderId);
-        var u = @new
-            ? db.First(u => u.UId == senderId)
+        var exists = realm.All<TSongGuess>().Any(u => u.UId == senderId);
+        var u = exists
+            ? realm.All<TSongGuess>().First(u => u.UId == senderId)
             : new SongGuess(senderId, senderName).CastTo<TSongGuess>();
 
         // 未知的歌，不算
@@ -33,10 +32,12 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, string gues
         // 猜对了
         if (guess.Title == song.Title)
         {
-            u.TimesCorrect++;
-            u.Name = senderName;
-            db.InsertOrUpdate(u);
-            await dbContext.SaveChangesAsync();
+            realm.Write(() =>
+            {
+                u.TimesCorrect++;
+                u.Name = senderName;
+                realm.InsertOrUpdateByUid(u);
+            });
 
             message.Reply(
                 new MessageDataText($"你猜对了！正确答案：{song.Title}"),
@@ -47,10 +48,12 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, string gues
         }
 
         // 猜错了
-        u.TimesWrong++;
-        u.Name = senderName;
-        db.InsertOrUpdate(u);
-        await dbContext.SaveChangesAsync();
+        realm.Write(() =>
+        {
+            u.TimesWrong++;
+            u.Name = senderName;
+            realm.InsertOrUpdateByUid(u);
+        });
 
         message.Reply("不对不对！");
         return MarisaPluginTaskState.ToBeContinued;
@@ -144,25 +147,25 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, string gues
             return false;
         }
 
-        using var dbContext = new BotDbContext();
-
-        var db = (DbSet<TSongGuess>)dbContext.GetType().GetProperty(guessDbSetName)!.GetValue(dbContext, null)!;
-        if (db.Any(g => g.UId == senderId))
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() =>
         {
-            var g = db.First(g => g.UId == senderId);
-            g.Name       =  senderName;
-            g.TimesStart += 1;
-            dbContext.Update(g);
-        }
-        else
-        {
-            db.Add(new SongGuess(senderId, senderName)
+            var guess = realm.All<TSongGuess>().FirstOrDefault(g => g.UId == senderId);
+            if (guess is not null)
             {
-                TimesStart = 1
-            }.CastTo<TSongGuess>());
-        }
-
-        dbContext.SaveChanges();
+                guess.Name       =  senderName;
+                guess.TimesStart += 1;
+            }
+            else
+            {
+                var newGuess = new SongGuess(senderId, senderName)
+                {
+                    TimesStart = 1
+                }.CastTo<TSongGuess>();
+                typeof(TSongGuess).GetProperty("Id")?.SetValue(newGuess, BotDbContext.NextId<TSongGuess>(realm));
+                realm.Add(newGuess);
+            }
+        });
 
         return true;
     }

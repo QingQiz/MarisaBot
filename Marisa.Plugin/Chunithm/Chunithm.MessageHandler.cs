@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Realms;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -59,21 +60,25 @@ public partial class Chunithm
 
                     if (idx is 0 or 1)
                     {
-                        using var dbContext = new BotDbContext();
+                        using var realm = BotDbContext.OpenRealm();
 
-                        var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+                        var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
 
-                        if (bind == null)
+                        realm.Write(() =>
                         {
-                            dbContext.ChunithmBinds.Add(new ChunithmBind(next.Sender.Id, fetchers[idx]));
-                        }
-                        else
-                        {
-                            bind.ServerName = fetchers[idx];
-                            bind.AccessCode = "";
-                            dbContext.ChunithmBinds.Update(bind);
-                        }
-                        dbContext.SaveChanges();
+                            if (bind == null)
+                            {
+                                realm.Add(new ChunithmBind(next.Sender.Id, fetchers[idx])
+                                {
+                                    Id = BotDbContext.NextId<ChunithmBind>(realm)
+                                });
+                            }
+                            else
+                            {
+                                bind.ServerName = fetchers[idx];
+                                bind.AccessCode = "";
+                            }
+                        });
 
                         message.Reply("好了");
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -122,15 +127,12 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    using var dbContext = new BotDbContext();
+                    using var realm = BotDbContext.OpenRealm();
 
-                    var bind = dbContext.ChunithmBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+                    var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id)
+                            ?? new ChunithmBind(next.Sender.Id, server, accessCode);
 
-                    if (bind == null)
-                    {
-                        bind = new ChunithmBind(next.Sender.Id, server, accessCode);
-                    }
-                    else
+                    if (!bind.IsManaged)
                     {
                         bind.ServerName = server;
                         bind.AccessCode = accessCode;
@@ -144,8 +146,7 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    dbContext.ChunithmBinds.InsertOrUpdate(bind);
-                    dbContext.SaveChanges();
+                    realm.Write(() => realm.InsertOrUpdateByUid(bind));
 
                     message.Reply("好了");
 

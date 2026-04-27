@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity;
+using Marisa.Database;
+using Marisa.Database.Entity;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Interface;
+using Realms;
 
 namespace Marisa.Plugin;
 
@@ -30,15 +31,15 @@ public class Command : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        if (!db.CommandFilters.Any())
+        if (!realm.All<CommandFilter>().Any())
         {
             m.Reply("无");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var reply = string.Join('\n', db.CommandFilters.Select(x => $"{x.Id}\t{x.Prefix}\t{x.Type}"));
+        var reply = string.Join('\n', realm.All<CommandFilter>().Select(x => $"{x.Id}\t{x.Prefix}\t{x.Type}"));
 
         m.Reply(reply);
 
@@ -55,11 +56,9 @@ public class Command : MarisaPluginBase
             {
                 if (long.TryParse(next.Command.Span, out var idLong))
                 {
-                    db.CommandFilters.Remove(db.CommandFilters.First(x => x.Id == idLong));
+                    realm.Write(() => realm.Remove(realm.All<CommandFilter>().First(x => x.Id == idLong)));
                 }
             }
-
-            db.SaveChanges();
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         });
@@ -85,14 +84,14 @@ public class Command : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var db = new BotDbContext();
-        db.CommandFilters.Add(new CommandFilter
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() => realm.Add(new CommandFilter
         {
+            Id      = BotDbContext.NextId<CommandFilter>(realm),
             GroupId = m.GroupInfo!.Id,
             Prefix  = prefix.ToString(),
             Type    = ""
-        });
-        db.SaveChanges();
+        }));
 
         m.Reply("好了");
 
@@ -125,14 +124,14 @@ public class Command : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var db = new BotDbContext();
-        db.CommandFilters.Add(new CommandFilter
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() => realm.Add(new CommandFilter
         {
+            Id      = BotDbContext.NextId<CommandFilter>(realm),
             GroupId = m.GroupInfo!.Id,
             Prefix  = "",
             Type    = type.ToString()
-        });
-        db.SaveChanges();
+        }));
 
         m.Reply("好了");
 

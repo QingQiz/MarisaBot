@@ -12,9 +12,9 @@ public static class OsuDrawerCommon
     public static string TempPath => ConfigurationManager.Configuration.Osu.TempPath;
     public static string ResourcePath => ConfigurationManager.Configuration.Osu.ResourcePath;
 
-    public static FontFamily FontIcon => SystemFonts.Get("Segoe UI Symbol");
-    public static FontFamily FontExo2 => SystemFonts.Get("Exo 2");
-    public static FontFamily FontYaHei => SystemFonts.Get("Microsoft YaHei");
+    public static FontFamily FontIcon => ImageDraw.GetFontFamily("Segoe UI Symbol", "Segoe UI", "Segoe Fluent Icons");
+    public static FontFamily FontExo2 => ImageDraw.GetFontFamily("Exo 2", "Exo2-Regular", "Segoe UI");
+    public static FontFamily FontYaHei => ImageDraw.GetFontFamily("Microsoft YaHei", "Segoe UI", "Arial Unicode MS Font");
 
     public static async Task<Image> GetCacheOrDownload(Uri uri, string ext = "")
     {

@@ -19,7 +19,7 @@ public class HelpDoc
 
     public Image GetImage(int depth = 1)
     {
-        var font1 = new Font(SystemFonts.Get("Microsoft YaHei"), 22, FontStyle.Regular);
+        var font1 = new Font(ImageDraw.GetFontFamily("Microsoft YaHei", "Segoe UI", "Arial Unicode MS Font"), 22, FontStyle.Regular);
 
         const int subCmdMarginX = 30;
         const int subCmdMarginY = 15;

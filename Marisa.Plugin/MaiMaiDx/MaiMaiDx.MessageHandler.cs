@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.Database;
+using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Realms;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -66,14 +67,13 @@ public partial class MaiMaiDx
 
                     if (idx == 0)
                     {
-                        await using var dbContext = new BotDbContext();
+                        using var realm = BotDbContext.OpenRealm();
 
-                        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == next.Sender.Id);
+                        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
 
                         if (bind != null)
                         {
-                            dbContext.MaiMaiBinds.Remove(bind);
-                            await dbContext.SaveChangesAsync();
+                            realm.Write(() => realm.Remove(bind));
                         }
 
                         message.Reply("好了");
@@ -96,11 +96,12 @@ public partial class MaiMaiDx
                     {
                         var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
 
-                        await using var dbContext = new BotDbContext();
+                        using var realm = BotDbContext.OpenRealm();
 
-                        dbContext.MaiMaiBinds.Add(new MaiMaiDxBind(next.Sender.Id, aimeId));
-
-                        await dbContext.SaveChangesAsync();
+                        realm.Write(() => realm.Add(new MaiMaiDxBind(next.Sender.Id, aimeId)
+                        {
+                            Id = BotDbContext.NextId<MaiMaiDxBind>(realm)
+                        }));
 
                         message.Reply("好了");
                     }
@@ -129,9 +130,9 @@ public partial class MaiMaiDx
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private static async Task<MarisaPluginTaskState> UnLock(Message message)
     {
-        await using var dbContext = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender.Id);
+        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == message.Sender.Id);
 
         if (bind == null)
         {
@@ -160,9 +161,9 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("fetch")]
     private async Task<MarisaPluginTaskState> Fetch(Message message)
     {
-        await using var dbContext = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var bind = dbContext.MaiMaiBinds.FirstOrDefault(x => x.UId == message.Sender.Id);
+        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == message.Sender.Id);
 
         if (bind == null)
         {

@@ -1,4 +1,4 @@
-﻿using Marisa.EntityFrameworkCore;
+﻿using Marisa.Database;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -187,9 +187,9 @@ public partial class MaiMaiDx
             qq = (at as MessageDataAt)?.Target ?? qq;
         }
 
-        using var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var bind = db.MaiMaiBinds.FirstOrDefault(x => x.UId == qq);
+        var bind = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
 
         return GetDataFetcher(bind == null ? DataFetcherType.DivingFish : DataFetcherType.Wahlap);
     }

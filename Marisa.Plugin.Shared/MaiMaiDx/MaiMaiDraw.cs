@@ -175,7 +175,7 @@ public static class MaiMaiDraw
         const int padding     = 40;
         const int borderWidth = 10;
 
-        var consolas = SystemFonts.Get("Consolas");
+        var consolas = ImageDraw.GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
 
         var imList = new List<Image>();
 
@@ -367,7 +367,7 @@ public static class MaiMaiDraw
         const int hW = 133, cW = 223;
         const int hH = 75,  cH = 75;
 
-        var consolas = SystemFonts.Get("Consolas");
+        var consolas = ImageDraw.GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
 
         void DrawString(string s, Font f, int x, int y)
         {
@@ -467,7 +467,7 @@ public static class MaiMaiDraw
         {
             const int padding = 20;
 
-            var consolas = SystemFonts.Get("Consolas");
+            var consolas = ImageDraw.GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
 
             var cover = ResourceManager.GetCover(score.Id);
             var bg    = new Image<Rgba32>(800, cover.Height + padding * 2);
@@ -516,7 +516,7 @@ public static class MaiMaiDraw
         {
             const int padding = 20;
 
-            var consolas = SystemFonts.Get("Consolas");
+            var consolas = ImageDraw.GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
 
             var cover = ResourceManager.GetCover(song.Id);
             var bg    = new Image<Rgba32>(800, cover.Height + padding * 2);

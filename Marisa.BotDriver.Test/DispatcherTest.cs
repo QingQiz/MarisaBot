@@ -3,7 +3,7 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
-using Marisa.EntityFrameworkCore;
+using Marisa.Database;
 using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
@@ -11,6 +11,7 @@ using Marisa.Plugin.Shared.Configuration;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using System.Text.RegularExpressions;
 using EventHandler = Marisa.Plugin.EventHandler.EventHandler;
 
 namespace Marisa.BotDriver.Test;
@@ -34,7 +35,7 @@ public class DispatcherTest
 
         _provider = sc.BuildServiceProvider();
 
-        _provider.GetRequiredService<BotDbContext>().Database.EnsureCreated();
+        BotDbContext.EnsureCreated();
 
         _dispatcher = new MessageDispatcher(_provider.GetServices<MarisaPluginBase>(), _provider, _provider.GetService<DictionaryProvider>()!);
     }
@@ -54,9 +55,10 @@ public class DispatcherTest
     private static string CreateTestConfig(string tempRoot)
     {
         var sourceConfigPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
-        var config = File.ReadAllText(sourceConfigPath)
-            .Replace("tempPath:     temp", $"tempPath:     {tempRoot.Replace("\\", "\\\\")}")
-            .Replace("databasePath: bot.db", "databasePath: QQBOT_DB.db");
+        var escapedTempRoot = tempRoot.Replace("\\", "\\\\");
+        var config = File.ReadAllText(sourceConfigPath);
+        config = Regex.Replace(config, @"^tempPath:\s*.*$", $"tempPath:     {escapedTempRoot}", RegexOptions.Multiline);
+        config = Regex.Replace(config, @"^databasePath:\s*.*$", "databasePath: bot.db", RegexOptions.Multiline);
         var configPath = Path.Join(tempRoot, "config.yaml");
 
         Directory.CreateDirectory(tempRoot);
@@ -88,6 +90,11 @@ public class DispatcherTest
             {
                 Type = MessageType.FriendMessage
             }, typeof(MaiMaiDx), null).SetName("friend");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai best")) with
+            {
+                Type = MessageType.TempMessage
+            }, typeof(MaiMaiDx), null).SetName("temp");
         }
     }
 
@@ -107,11 +114,6 @@ public class DispatcherTest
             {
                 Type = MessageType.StrangerMessage
             }, typeof(MaiMaiDx), null).SetName("no stranger");
-
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai best")) with
-            {
-                Type = MessageType.TempMessage
-            }, typeof(MaiMaiDx), null).SetName("no temp");
 
             yield return new TestCaseData(CreateMessage(new MessageDataUnknown()) with
             {

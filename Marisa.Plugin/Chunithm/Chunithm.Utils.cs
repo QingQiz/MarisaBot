@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -51,9 +51,9 @@ public partial class Chunithm
             qq = (at as MessageDataAt)?.Target ?? qq;
         }
 
-        await using var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var bind = db.ChunithmBinds.FirstOrDefault(x => x.UId == qq);
+        var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
         return bind == null
             ? GetDataFetcher("DivingFish", null) // 默认水鱼

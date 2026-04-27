@@ -1,5 +1,5 @@
-﻿using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin;
+﻿using Marisa.Database;
+using Marisa.Database.Entity.Plugin;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util;
 
@@ -11,6 +11,8 @@ public class Chi : MarisaPluginBase
 {
     private const int Times = 5;
     private readonly Dictionary<long, (DateTime, int)> _cache = new();
+    private readonly object _dataLock = new();
+    private bool _defaultPlaceInitialized;
 
     private bool Zuo(long id)
     {
@@ -36,16 +38,35 @@ public class Chi : MarisaPluginBase
         }
     }
 
-    private readonly Dictionary<string, HashSet<string>> _data = new()
-    {
-        ["西工大"] = ConfigurationManager.Configuration.Chi.ToHashSet()
-    };
+    private readonly Dictionary<string, HashSet<string>> _data = new();
 
-    public Chi(BotDbContext dbContext)
+    public Chi()
     {
-        foreach (var i in dbContext.Meals)
+        using var realm = BotDbContext.OpenRealm();
+        foreach (var i in realm.All<Meal>())
         {
             AddMeal(i.Place, i.Name);
+        }
+    }
+
+    private void EnsureDefaultPlaceConfigured()
+    {
+        lock (_dataLock)
+        {
+            if (_defaultPlaceInitialized) return;
+
+            var configuredMeals = ConfigurationManager.Configuration.Chi;
+
+            if (_data.TryGetValue("西工大", out var meals))
+            {
+                meals.UnionWith(configuredMeals);
+            }
+            else
+            {
+                _data["西工大"] = configuredMeals.ToHashSet();
+            }
+
+            _defaultPlaceInitialized = true;
         }
     }
 
@@ -63,6 +84,8 @@ public class Chi : MarisaPluginBase
 
     private string ChiSha(long id, string place)
     {
+        EnsureDefaultPlaceConfigured();
+
         if (Zuo(id))
         {
             return "生吃你妈 问这么多还不知道吃啥饿死你个臭傻逼";
@@ -93,8 +116,10 @@ public class Chi : MarisaPluginBase
 
     [MarisaPluginDoc("现有可用的地点")]
     [MarisaPluginCommand(true, "listplace")]
-    private MarisaPluginTaskState Place(Message message, BotDbContext dbContext)
+    private MarisaPluginTaskState Place(Message message)
     {
+        EnsureDefaultPlaceConfigured();
+
         lock (_data)
         {
             var places = _data
@@ -111,8 +136,10 @@ public class Chi : MarisaPluginBase
 
     [MarisaPluginDoc("添加吃啥的可选项。参数：地点")]
     [MarisaPluginCommand("addmeal")]
-    private MarisaPluginTaskState Add(Message message, BotDbContext dbContext)
+    private MarisaPluginTaskState Add(Message message)
     {
+        EnsureDefaultPlaceConfigured();
+
         var place = message.Command.ToString();
 
         if (place.Any(char.IsPunctuation))
@@ -133,8 +160,11 @@ public class Chi : MarisaPluginBase
 
             Task.Run(() =>
             {
-                dbContext.Meals.Add(new Meal(place, meal));
-                dbContext.SaveChanges();
+                using var realm = BotDbContext.OpenRealm();
+                realm.Write(() => realm.Add(new Meal(place, meal)
+                {
+                    Id = BotDbContext.NextId<Meal>(realm)
+                }));
             });
             message.Reply($"{place} 已添加菜品 {meal}");
 
@@ -146,9 +176,13 @@ public class Chi : MarisaPluginBase
 
     [MarisaPluginDoc("删除吃啥的可选项。参数：地点")]
     [MarisaPluginCommand("delmeal")]
-    private MarisaPluginTaskState DeleteMeal(Message message, BotDbContext dbContext)
+    private MarisaPluginTaskState DeleteMeal(Message message)
     {
-        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        EnsureDefaultPlaceConfigured();
+
+        var commanders = ConfigurationManager.Configuration.Commander;
+
+        if (!commanders.Contains(message.Sender.Id))
         {
             message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
             return MarisaPluginTaskState.CompletedTask;
@@ -180,8 +214,8 @@ public class Chi : MarisaPluginBase
 
             Task.Run(() =>
             {
-                dbContext.Meals.RemoveRange(dbContext.Meals.Where(x => x.Place == place && x.Name == meal));
-                dbContext.SaveChanges();
+                using var realm = BotDbContext.OpenRealm();
+                realm.Write(() => realm.RemoveRange(realm.All<Meal>().Where(x => x.Place == place && x.Name == meal)));
             });
             message.Reply($"{place} 已删除菜品 {meal}");
 
@@ -193,9 +227,13 @@ public class Chi : MarisaPluginBase
 
     [MarisaPluginDoc("删除吃啥的地点。参数：地点")]
     [MarisaPluginCommand("delplace")]
-    private MarisaPluginTaskState DeletePlace(Message message, BotDbContext dbContext)
+    private MarisaPluginTaskState DeletePlace(Message message)
     {
-        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        EnsureDefaultPlaceConfigured();
+
+        var commanders = ConfigurationManager.Configuration.Commander;
+
+        if (!commanders.Contains(message.Sender.Id))
         {
             message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
             return MarisaPluginTaskState.CompletedTask;
@@ -215,8 +253,8 @@ public class Chi : MarisaPluginBase
 
         Task.Run(() =>
         {
-            dbContext.Meals.RemoveRange(dbContext.Meals.Where(x => x.Place == place));
-            dbContext.SaveChanges();
+            using var realm = BotDbContext.OpenRealm();
+            realm.Write(() => realm.RemoveRange(realm.All<Meal>().Where(x => x.Place == place)));
         });
         message.Reply("删完了");
         return MarisaPluginTaskState.CompletedTask;

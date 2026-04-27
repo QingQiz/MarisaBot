@@ -9,7 +9,6 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.BotDriver.Plugin;
-using Marisa.EntityFrameworkCore;
 using Marisa.Plugin.Shared.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -48,7 +47,6 @@ public class NapCatBackend : BotDriver.BotDriver
         _dict     = dict;
         _config   = ConfigurationManager.Configuration.NapCat;
         _endpoint = BuildEndpoint(string.IsNullOrWhiteSpace(_config.Endpoint) ? "ws://127.0.0.1:3001" : _config.Endpoint, _config.Token);
-        BotDbContext.DatabasePath = ConfigurationManager.Configuration.DatabasePath;
 
         if (long.TryParse(_config.SelfId, out var selfId))
         {
@@ -467,7 +465,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 Sender = new SenderInfo(userId, string.Empty),
                 Type = MessageType.FriendMessage
             },
-            _ => OneBotEventMessage(root)
+            _ => null
         };
 
         bool IsBotBanNotice(long id) => id == 0 || id == _selfId;
@@ -481,15 +479,7 @@ public class NapCatBackend : BotDriver.BotDriver
 
     private Message? ConvertRequestEvent(JsonElement root)
     {
-        var data = OneBotEvent(root);
-        return new Message(MessageSenderProvider, data)
-        {
-            GroupInfo = ReadLong(root, "group_id") is var groupId && groupId != 0
-                ? new GroupInfo(groupId, string.Empty, string.Empty)
-                : null,
-            Sender = new SenderInfo(ReadLong(root, "user_id"), string.Empty),
-            Type = ReadLong(root, "group_id") == 0 ? MessageType.FriendMessage : MessageType.GroupMessage
-        };
+        return null;
     }
 
     private Message? ConvertMetaEvent(JsonElement root)
@@ -503,41 +493,7 @@ public class NapCatBackend : BotDriver.BotDriver
             };
         }
 
-        return OneBotEventMessage(root);
-    }
-
-    private Message OneBotEventMessage(JsonElement root)
-    {
-        var groupId = ReadLong(root, "group_id");
-        var userId = FirstNonZero(
-            ReadLong(root, "user_id"),
-            ReadLong(root, "operator_id"),
-            ReadLong(root, "sender_id"),
-            ReadLong(root, "self_id"));
-
-        return new Message(MessageSenderProvider, OneBotEvent(root))
-        {
-            GroupInfo = groupId == 0 ? null : new GroupInfo(groupId, string.Empty, string.Empty),
-            Sender = new SenderInfo(userId, string.Empty),
-            Type = groupId == 0 ? MessageType.FriendMessage : MessageType.GroupMessage
-        };
-    }
-
-    private static MessageDataOneBotEvent OneBotEvent(JsonElement root)
-    {
-        var postType = ReadString(root, "post_type") ?? string.Empty;
-        var eventType = postType switch
-        {
-            "notice" => ReadString(root, "notice_type"),
-            "request" => ReadString(root, "request_type"),
-            "meta_event" => ReadString(root, "meta_event_type"),
-            "message" or "message_sent" => ReadString(root, "message_type"),
-            _ => null
-        };
-        var subType = ReadString(root, "sub_type");
-        var parts = new[] { postType, eventType, subType }.Where(x => !string.IsNullOrEmpty(x));
-
-        return new MessageDataOneBotEvent(postType, string.Join('.', parts), ToDictionary(root), eventType, subType);
+        return null;
     }
 
     private Message GroupNotice(JsonElement root, MessageData data, long? senderId = null)

@@ -1,11 +1,12 @@
-﻿using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Shared;
+﻿using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Shared;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Plugin.Shared.Util.SongGuessMaker;
+using Realms;
 
 namespace Marisa.Plugin.Shared.Interface;
 
-public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : SongGuess, new()
+public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : ISongGuess, IRealmObject, new()
 {
     SongGuessMaker<TSong, TSongGuess> SongGuessMaker { get; }
 
@@ -17,9 +18,9 @@ public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : So
     [MarisaPluginCommand(true, "排名")]
     MarisaPluginTaskState GuessRank(Message message)
     {
-        using var dbContext = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var res = dbContext.OngekiGuesses
+        var res = realm.All<TSongGuess>()
             .OrderByDescending(g => g.TimesCorrect)
             .ThenBy(g => g.TimesWrong)
             .ThenBy(g => g.TimesStart)

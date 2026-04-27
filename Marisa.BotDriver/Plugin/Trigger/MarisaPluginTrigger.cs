@@ -18,7 +18,8 @@ public class MarisaPluginTrigger : Attribute
     /// </summary>
     /// <param name="triggerName"></param>
     /// <param name="target"></param>
-    public MarisaPluginTrigger(string triggerName, MessageType target = (MessageType)0b11) : this(typeof(MarisaPluginTrigger), triggerName, target)
+    public MarisaPluginTrigger(string triggerName, MessageType target = MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)
+        : this(typeof(MarisaPluginTrigger), triggerName, target)
     {
     }
 

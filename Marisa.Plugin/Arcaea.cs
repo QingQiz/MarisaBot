@@ -1,6 +1,5 @@
 ﻿using System.Dynamic;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Arcaea;
+using Marisa.Database.Entity.Plugin.Arcaea;
 using Marisa.Plugin.Shared.Arcaea;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -26,7 +25,7 @@ public class Arcaea :
             SongListGen
         );
 
-        SongGuessMaker = new SongGuessMaker<ArcaeaSong, ArcaeaGuess>(SongDb, nameof(BotDbContext.ArcaeaGuesses));
+        SongGuessMaker = new SongGuessMaker<ArcaeaSong, ArcaeaGuess>(SongDb);
     }
 
     public SongGuessMaker<ArcaeaSong, ArcaeaGuess> SongGuessMaker { get; }

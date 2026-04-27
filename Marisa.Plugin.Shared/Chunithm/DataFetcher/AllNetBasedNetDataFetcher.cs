@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;

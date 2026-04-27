@@ -6,6 +6,8 @@ namespace Marisa.BotDriver.Plugin.Trigger;
 public class MarisaPluginCommand(MessageType target, StringComparison comparison, bool strict = false, params string[] prefixes)
     : Attribute
 {
+    private const MessageType DefaultTarget = MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage;
+
     private bool Comparer(ReadOnlyMemory<char> a, ReadOnlyMemory<char> b)
     {
         return strict ? a.Span.Equals(b.Span, comparison) : a.Span.StartsWith(b.Span, comparison);
@@ -13,11 +15,11 @@ public class MarisaPluginCommand(MessageType target, StringComparison comparison
 
     public ReadOnlyMemory<char>[] Commands { get; } = prefixes.Select(p => p.AsMemory()).ToArray();
 
-    public MarisaPluginCommand(params string[] prefixes) : this((MessageType)0b11, StringComparison.OrdinalIgnoreCase, false, prefixes)
+    public MarisaPluginCommand(params string[] prefixes) : this(DefaultTarget, StringComparison.OrdinalIgnoreCase, false, prefixes)
     {
     }
 
-    public MarisaPluginCommand(bool strict = false, params string[] prefixes) : this((MessageType)0b11, StringComparison.OrdinalIgnoreCase, strict, prefixes)
+    public MarisaPluginCommand(bool strict = false, params string[] prefixes) : this(DefaultTarget, StringComparison.OrdinalIgnoreCase, strict, prefixes)
     {
     }
 
@@ -29,11 +31,11 @@ public class MarisaPluginCommand(MessageType target, StringComparison comparison
     {
     }
 
-    public MarisaPluginCommand(StringComparison comparison, bool strict = false, params string[] prefixes) : this((MessageType)0b11, comparison, strict, prefixes)
+    public MarisaPluginCommand(StringComparison comparison, bool strict = false, params string[] prefixes) : this(DefaultTarget, comparison, strict, prefixes)
     {
     }
 
-    public MarisaPluginCommand(StringComparison comparison, params string[] prefixes) : this((MessageType)0b11, comparison, false, prefixes)
+    public MarisaPluginCommand(StringComparison comparison, params string[] prefixes) : this(DefaultTarget, comparison, false, prefixes)
     {
     }
 

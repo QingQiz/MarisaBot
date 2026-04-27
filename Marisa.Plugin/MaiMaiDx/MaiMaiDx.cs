@@ -1,7 +1,6 @@
 ﻿using System.Dynamic;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.MaiMaiDx;
+using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -44,7 +43,7 @@ public partial class MaiMaiDx :
             }
         );
 
-        SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, nameof(BotDbContext.MaiMaiDxGuesses));
+        SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb);
     }
 
     public void Reset()

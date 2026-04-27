@@ -1,5 +1,6 @@
-﻿using Marisa.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Marisa.Database;
+using Marisa.Database.Entity;
+using BlackListEntity = Marisa.Database.Entity.BlackList;
 
 namespace Marisa.Plugin;
 
@@ -20,8 +21,11 @@ public class BlackList : MarisaPluginBase
         {
             _cacheInitialized = true;
 
-            var db = new BotDbContext();
-            await db.BlackLists.ForEachAsync(b => Cache.Add(b.UId));
+            using var realm = BotDbContext.OpenRealm();
+            foreach (var b in realm.All<BlackListEntity>())
+            {
+                Cache.Add(b.UId);
+            }
         }
 
         if (Cache.Contains(u)) return MarisaPluginTaskState.CompletedTask;
@@ -32,8 +36,8 @@ public class BlackList : MarisaPluginBase
         }
 
         {
-            var db      = new BotDbContext();
-            var filters = db.CommandFilters.Where(x => x.GroupId == message.GroupInfo.Id);
+            using var realm = BotDbContext.OpenRealm();
+            var filters = realm.All<CommandFilter>().Where(x => x.GroupId == message.GroupInfo.Id);
 
             foreach (var f in filters)
             {
@@ -64,7 +68,9 @@ public class BlackList : MarisaPluginBase
     [MarisaPluginCommand(":ban")]
     private static MarisaPluginTaskState Ban(Message message)
     {
-        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        var commanders = ConfigurationManager.Configuration.Commander;
+
+        if (!commanders.Contains(message.Sender.Id))
         {
             message.Reply("你没有资格。");
             return MarisaPluginTaskState.CompletedTask;
@@ -75,11 +81,13 @@ public class BlackList : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        using var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
         Cache.Add(qq);
-        db.BlackLists.Add(new EntityFrameworkCore.Entity.BlackList(qq));
-        db.SaveChanges();
+        realm.Write(() => realm.Add(new BlackListEntity(qq)
+        {
+            Id = BotDbContext.NextId<BlackListEntity>(realm)
+        }));
         message.Reply("好了");
 
         return MarisaPluginTaskState.CompletedTask;
@@ -88,7 +96,9 @@ public class BlackList : MarisaPluginBase
     [MarisaPluginCommand(":unban")]
     private static MarisaPluginTaskState UnBan(Message message)
     {
-        if (!ConfigurationManager.Configuration.Commander.Contains(message.Sender.Id))
+        var commanders = ConfigurationManager.Configuration.Commander;
+
+        if (!commanders.Contains(message.Sender.Id))
         {
             message.Reply("你没有资格。");
             return MarisaPluginTaskState.CompletedTask;
@@ -99,15 +109,14 @@ public class BlackList : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        using var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var item = db.BlackLists.FirstOrDefault(b => b.UId == qq);
+        var item = realm.All<BlackListEntity>().FirstOrDefault(b => b.UId == qq);
 
         if (item != null)
         {
             Cache.Remove(qq);
-            db.BlackLists.Remove(item);
-            db.SaveChanges();
+            realm.Write(() => realm.Remove(item));
             message.Reply("好了");
         }
         else
@@ -122,8 +131,8 @@ public class BlackList : MarisaPluginBase
     [MarisaPluginSubCommand(nameof(Ban))]
     private static MarisaPluginTaskState BanList(Message message)
     {
-        var db = new BotDbContext();
-        message.Reply(string.Join("\n", db.BlackLists.Select(b => b.UId)));
+        using var realm = BotDbContext.OpenRealm();
+        message.Reply(string.Join("\n", realm.All<BlackListEntity>().Select(b => b.UId)));
         return MarisaPluginTaskState.CompletedTask;
     }
 

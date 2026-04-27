@@ -1,4 +1,5 @@
-﻿using SixLabors.Fonts;
+﻿using Marisa.Plugin.Shared.Configuration;
+using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -11,6 +12,10 @@ namespace Marisa.Plugin.Shared.Util;
 
 public static class ImageDraw
 {
+    private static readonly object FontLock = new();
+    private static readonly Dictionary<string, FontFamily> FontCache = new(StringComparer.OrdinalIgnoreCase);
+    private static FontCollection? _fallbackFontCollection;
+
     #region Round Corner
 
     public static Image RoundCorners(this Image image, int cornerRadius)
@@ -132,7 +137,7 @@ public static class ImageDraw
         var background = new Image<Rgba32>(width, height);
 
         // 调整字体大小
-        var fontFamily = SystemFonts.Get("Consolas");
+        var fontFamily = GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
 
         var font = new Font(fontFamily, fontSize);
 
@@ -259,19 +264,100 @@ public static class ImageDraw
 
     public static RichTextOptions GetTextOptions(Font font)
     {
+        var fallbacks = new List<FontFamily>();
+
+        AddFallback(fallbacks, "FangSong");
+        AddFallback(fallbacks, "Microsoft JHengHei");
+        AddFallback(fallbacks, "Segoe Fluent Icons");
+        AddFallback(fallbacks, "Segoe UI Emoji", "Segoe UI");
+        AddFallback(fallbacks, "Segoe UI Historic", "Segoe UI");
+        AddFallback(fallbacks, "Segoe UI Symbol", "Segoe UI Symbol", "Segoe UI");
+        AddFallback(fallbacks, "Arial Unicode MS", "Arial Unicode MS Font", "Segoe UI", "Segoe UI Symbol");
+
         return new RichTextOptions(font)
         {
-            FallbackFontFamilies = new[]
-            {
-                SystemFonts.Get("FangSong"),
-                SystemFonts.Get("Microsoft JHengHei"),
-                SystemFonts.Get("Segoe Fluent Icons"),
-                SystemFonts.Get("Segoe UI Emoji"),
-                SystemFonts.Get("Segoe UI Historic"),
-                SystemFonts.Get("Segoe UI Symbol"),
-                SystemFonts.Get("Arial Unicode MS")
-            }
+            FallbackFontFamilies = fallbacks
         };
+    }
+
+    public static FontFamily GetFontFamily(params string[] names)
+    {
+        foreach (var name in names.Where(n => !string.IsNullOrWhiteSpace(n)))
+        {
+            lock (FontLock)
+            {
+                if (FontCache.TryGetValue(name, out var cached)) return cached;
+            }
+
+            try
+            {
+                var systemFont = SystemFonts.Get(name);
+                lock (FontLock)
+                {
+                    FontCache[name] = systemFont;
+                }
+
+                return systemFont;
+            }
+            catch (FontFamilyNotFoundException)
+            {
+            }
+
+            if (TryLoadBundledFont(name) is FontFamily fileFont)
+            {
+                lock (FontLock)
+                {
+                    FontCache[name] = fileFont;
+                }
+
+                return fileFont;
+            }
+        }
+
+        throw new FontFamilyNotFoundException($"None of the fallback font families could be loaded: {string.Join(", ", names)}");
+    }
+
+    private static void AddFallback(ICollection<FontFamily> fallbacks, params string[] names)
+    {
+        try
+        {
+            fallbacks.Add(GetFontFamily(names));
+        }
+        catch (FontFamilyNotFoundException)
+        {
+        }
+    }
+
+    private static FontFamily? TryLoadBundledFont(string name)
+    {
+        var fontDirectory = System.IO.Path.Join(ConfigurationManager.Configuration.ResourceRoot, "font");
+        if (!Directory.Exists(fontDirectory)) return null;
+
+        var candidates = Directory.EnumerateFiles(fontDirectory)
+            .Where(path => System.IO.Path.GetExtension(path).Equals(".ttf", StringComparison.OrdinalIgnoreCase)
+                        || System.IO.Path.GetExtension(path).Equals(".otf", StringComparison.OrdinalIgnoreCase))
+            .Where(path => System.IO.Path.GetFileNameWithoutExtension(path).Contains(name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (candidates.Count == 0) return null;
+
+        lock (FontLock)
+        {
+            _fallbackFontCollection ??= new FontCollection();
+
+            foreach (var candidate in candidates)
+            {
+                try
+                {
+                    return _fallbackFontCollection.Add(candidate);
+                }
+                catch (ArgumentException)
+                {
+                }
+            }
+        }
+
+        return null;
     }
 
     public static RichTextOptions GetTextOptions(Font font, PointF location)

@@ -1,5 +1,4 @@
-﻿using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Ongeki;
+﻿using Marisa.Database.Entity.Plugin.Ongeki;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Ongeki;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -31,7 +30,7 @@ public partial class Ongeki :
             }
         );
 
-        SongGuessMaker = new SongGuessMaker<OngekiSong, OngekiGuess>(SongDb, nameof(BotDbContext.OngekiGuesses));
+        SongGuessMaker = new SongGuessMaker<OngekiSong, OngekiGuess>(SongDb);
     }
 
     public SongGuessMaker<OngekiSong, OngekiGuess> SongGuessMaker { get; }

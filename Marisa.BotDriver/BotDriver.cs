@@ -4,7 +4,7 @@ using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
 using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.EntityFrameworkCore;
+using Marisa.Database;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Polly;
@@ -36,9 +36,7 @@ public abstract class BotDriver(
             .AddScoped(p => (ServiceProvider)p)
             .AddScoped<DictionaryProvider>()
             .AddScoped<MessageQueueProvider>()
-            .AddScoped<MessageSenderProvider>()
-            // db context
-            .AddScoped(_ => new BotDbContext());
+            .AddScoped<MessageSenderProvider>();
 
         var plugins = types
             .Where(t => t.GetCustomAttribute<MarisaPluginAttribute>(true) is not null)

@@ -1,9 +1,9 @@
-﻿using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
+﻿using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Util;
-using Microsoft.EntityFrameworkCore;
+using Realms;
 
 namespace Marisa.Plugin.Osu;
 
@@ -13,7 +13,7 @@ public partial class Osu
 
     [MarisaPluginDoc("绑定一个 osu 账号，参数为：osu 的用户名")]
     [MarisaPluginCommand("bind")]
-    private static async Task<MarisaPluginTaskState> Bind(Message message, BotDbContext dbContext)
+    private static async Task<MarisaPluginTaskState> Bind(Message message)
     {
         var name   = message.Command.Trim();
         var sender = message.Sender.Id;
@@ -26,35 +26,31 @@ public partial class Osu
 
         var info = await OsuApi.GetUserInfoByName(name.ToString());
 
-        if (dbContext.OsuBinds.Any(o => o.UserId == sender))
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() =>
         {
-            var bind = dbContext.OsuBinds.First(o => o.UserId == sender);
+            var bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == sender);
+            if (bind is null)
+            {
+                bind = realm.Add(new OsuBind
+                {
+                    Id     = BotDbContext.NextId<OsuBind>(realm),
+                    UserId = sender
+                });
+            }
 
             bind.OsuUserId   = info.Id;
             bind.OsuUserName = info.Username;
             bind.GameMode    = info.Playmode.ToLower();
-            await dbContext.SaveChangesAsync();
-            message.Reply("好了");
-        }
-        else
-        {
-            await dbContext.OsuBinds.AddAsync(new OsuBind
-            {
-                UserId      = sender,
-                GameMode    = info.Playmode.ToLower(),
-                OsuUserId   = info.Id,
-                OsuUserName = info.Username
-            });
-            await dbContext.SaveChangesAsync();
-            message.Reply("好了");
-        }
+        });
+        message.Reply("好了");
 
         return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("设置当前绑定的账户的默认模式，参数为：osu、taiko、catch 和 mania")]
     [MarisaPluginCommand("setMode", "set mode", "mode")]
-    private static async Task<MarisaPluginTaskState> SetMode(Message message, BotDbContext db)
+    private static Task<MarisaPluginTaskState> SetMode(Message message)
     {
         var sender = message.Sender.Id;
         var mode   = message.Command.Trim();
@@ -62,22 +58,21 @@ public partial class Osu
         if (!OsuApi.ModeList.Contains(mode))
         {
             message.Reply("可选的模式：" + string.Join(", ", OsuApi.ModeList));
-            return MarisaPluginTaskState.CompletedTask;
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
-        if (!db.OsuBinds.Any(o => o.UserId == sender))
+        using var realm = BotDbContext.OpenRealm();
+        var bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == sender);
+        if (bind is null)
         {
             message.Reply("您未绑定！");
-            return MarisaPluginTaskState.CompletedTask;
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
-        var o = await db.OsuBinds.FirstAsync(u => u.UserId == sender);
-        o.GameMode = mode.ToString();
-        db.OsuBinds.Update(o);
-        await db.SaveChangesAsync();
+        realm.Write(() => bind.GameMode = mode.ToString());
         message.Reply("好了");
 
-        return MarisaPluginTaskState.CompletedTask;
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
     #endregion
@@ -168,7 +163,7 @@ public partial class Osu
 
     [MarisaPluginDoc("查询某人 pp 最高的成绩图（bp）")]
     [MarisaPluginCommand("bp")]
-    private async Task<MarisaPluginTaskState> BestPerformance(Message message, BotDbContext db)
+    private async Task<MarisaPluginTaskState> BestPerformance(Message message)
     {
         if (!TryParseCommand(message, true, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 

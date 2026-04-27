@@ -3,7 +3,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore;
+using Marisa.Database;
 using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
@@ -141,9 +141,9 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
             qq = (at as MessageDataAt)?.Target ?? qq;
         }
 
-        using var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var user = db.MaiMaiBinds.First(x => x.UId == qq);
+        var user = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().First(x => x.UId == qq);
 
         return user.AimeId;
     }
@@ -196,18 +196,18 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 
     #region Helper
 
-    private static readonly string MaiSalt = ConfigurationManager.Configuration.MaiMai.Secret.MaiSalt;
+    private static string MaiSalt => ConfigurationManager.Configuration.MaiMai.Secret.MaiSalt;
 
     private const string MaiHost = "maimai-gm.wahlap.com:42081";
 
     private const string AimeHost = "ai.sys-all.cn";
-    private static readonly string AimeSalt = ConfigurationManager.Configuration.MaiMai.Secret.AimeSalt;
+    private static string AimeSalt => ConfigurationManager.Configuration.MaiMai.Secret.AimeSalt;
 
     private const string WeChatId = "SGWC";
     private const string GameId = "MAID";
 
-    private static readonly string AesKey = ConfigurationManager.Configuration.MaiMai.Secret.AesKey;
-    private static readonly string AesIv = ConfigurationManager.Configuration.MaiMai.Secret.AesIv;
+    private static string AesKey => ConfigurationManager.Configuration.MaiMai.Secret.AesKey;
+    private static string AesIv => ConfigurationManager.Configuration.MaiMai.Secret.AesIv;
 
     // ReSharper disable InconsistentNaming
     // ReSharper disable once ClassNeverInstantiated.Local

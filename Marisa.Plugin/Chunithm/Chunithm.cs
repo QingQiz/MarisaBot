@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using Flurl.Http;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Chunithm;
+using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Interface;
@@ -37,7 +36,7 @@ public partial class Chunithm :
             }
         );
 
-        SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb, nameof(BotDbContext.ChunithmGuesses));
+        SongGuessMaker = new SongGuessMaker<ChunithmSong, ChunithmGuess>(SongDb);
         // make sure constant old is initialized
         Task.Run(() => new LouisDataFetcher(SongDb).GetSongList());
     }

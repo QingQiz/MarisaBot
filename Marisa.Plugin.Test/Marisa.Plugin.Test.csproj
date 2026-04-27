@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Marisa.Configuration\Marisa.Configuration.csproj" />
         <ProjectReference Include="..\Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj" />
         <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
     </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿
+using System.Text;
 using Marisa.Backend.NapCat;
 using Marisa.Plugin;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +16,9 @@ public static class Program
 {
     private static async Task Main(string[] args)
     {
+        Console.InputEncoding = Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
+
         // asp dotnet
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers();
@@ -38,18 +42,25 @@ public static class Program
 
         app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-        app.UseStaticFiles(new StaticFileOptions
+        var webRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+        if (Directory.Exists(webRootPath))
         {
-            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
-            RequestPath  = ""
-        });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(webRootPath),
+                RequestPath  = ""
+            });
+        }
 
         app.MapGet("/", ctx =>
         {
             ctx.Response.Redirect("/index.html");
             return Task.CompletedTask;
         });
-        app.MapFallbackToFile("index.html");
+        if (Directory.Exists(webRootPath))
+        {
+            app.MapFallbackToFile("index.html");
+        }
 
         // run
         await Task.WhenAll(app.RunAsync(), app.Services.GetService<BotDriver.BotDriver>()!.Invoke());

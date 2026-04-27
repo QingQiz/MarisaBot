@@ -28,13 +28,24 @@
         <Content Include="config.yaml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"/>
     </ItemGroup>
 
-    <Target Name="CopyFiles" AfterTargets="Build">
+    <Target Name="CopyFilesToBuildOutput" AfterTargets="Build">
         <ItemGroup>
             <SourceFiles Include="../Marisa.Frontend/dist/**"/>
             <DestinationFiles Include="@(SourceFiles->'$(OutputPath)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')"/>
         </ItemGroup>
 
         <Copy SourceFiles="@(SourceFiles)" DestinationFiles="@(DestinationFiles)" SkipUnchangedFiles="true"/>
+
+        <Message Text="Copied @(CopiedFiles->'%(FullPath)')" Importance="High"/>
+    </Target>
+
+    <Target Name="CopyFilesToPublishOutput" AfterTargets="Publish">
+        <ItemGroup>
+            <PublishSourceFiles Include="../Marisa.Frontend/dist/**"/>
+            <PublishDestinationFiles Include="@(PublishSourceFiles->'$(PublishDir)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')"/>
+        </ItemGroup>
+
+        <Copy SourceFiles="@(PublishSourceFiles)" DestinationFiles="@(PublishDestinationFiles)" SkipUnchangedFiles="true"/>
 
         <Message Text="Copied @(CopiedFiles->'%(FullPath)')" Importance="High"/>
     </Target>

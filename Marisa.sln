@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33402.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marisa.EntityFrameworkCore", "Marisa.EntityFrameworkCore\Marisa.EntityFrameworkCore.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marisa.Database", "Marisa.Database\Marisa.Database.csproj", "{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marisa.Configuration", "Marisa.Configuration\Marisa.Configuration.csproj", "{2511454D-D63D-437A-9878-BE9173C82186}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marisa.Plugin.Shared", "Marisa.Plugin.Shared\Marisa.Plugin.Shared.csproj", "{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}"
 EndProject
@@ -37,6 +39,10 @@ Global
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2511454D-D63D-437A-9878-BE9173C82186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2511454D-D63D-437A-9878-BE9173C82186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2511454D-D63D-437A-9878-BE9173C82186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2511454D-D63D-437A-9878-BE9173C82186}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -81,6 +87,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF7F119F-2BE2-4701-8A00-25EF94A83EFE} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
+		{2511454D-D63D-437A-9878-BE9173C82186} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
 		{D2CBCAE7-7587-44DD-8A3A-4B1DD3F5A54D} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
 		{0A29E29D-15A4-4949-828D-D69AEDEC19D4} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}
 		{CD467B36-69B0-4501-8E10-214846321FA9} = {1BA6A94D-F7D4-4405-9CAE-143C10CA2989}

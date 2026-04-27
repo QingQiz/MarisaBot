@@ -1,6 +1,6 @@
 ﻿using Flurl.Http;
-using Marisa.EntityFrameworkCore;
-using Marisa.EntityFrameworkCore.Entity.Plugin.Osu;
+using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Osu;
@@ -83,7 +83,7 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
             return null;
         }
 
-        var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
         // 没设置名字，那就是查自己或者查@的人
         if (string.IsNullOrWhiteSpace(command.Name))
@@ -92,11 +92,11 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
             // @了人
             if (message.MessageChain?.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) is MessageDataAt at)
             {
-                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == at.Target);
+                bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == at.Target);
             }
             else
             {
-                bind = db.OsuBinds.FirstOrDefault(o => o.UserId == message.Sender.Id);
+                bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == message.Sender.Id);
             }
 
             // 没找到证明不知道查谁的
@@ -116,7 +116,7 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
             // 设置了mode的话就直接返回
             if (command.Mode != null) return command;
 
-            var bind = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == command.Name);
+            var bind = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == command.Name);
 
             // 没被绑定，说明我们不知道这个人的GameMode，需要请求OsuApi来拿
             if (bind == null)
@@ -136,9 +136,9 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
     /// <returns></returns>
     private static async Task<long> GetOsuIdByName(string name)
     {
-        var db = new BotDbContext();
+        using var realm = BotDbContext.OpenRealm();
 
-        var u = db.OsuBinds.FirstOrDefault(o => o.OsuUserName == name);
+        var u = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == name);
 
         if (u != null) return u.OsuUserId;
 
@@ -158,11 +158,11 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
 
             await Task.Delay(new DateTime(next.Year, next.Month, next.Day) - now);
 
-            var db = new BotDbContext();
+            using var realm = BotDbContext.OpenRealm();
 
             var tasks = new Queue<(string OsuUserName, int i, long id)>();
 
-            foreach (var bind in db.OsuBinds)
+            foreach (var bind in realm.All<OsuBind>())
             {
                 tasks.Enqueue((bind.OsuUserName, OsuApi.ModeList.IndexOf(bind.GameMode), bind.OsuUserId));
             }
@@ -174,15 +174,15 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
                 try
                 {
                     var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i);
-                    await db.OsuUserHistories.AddAsync(new OsuUserHistory
+                    realm.Write(() => realm.Add(new OsuUserHistory
                     {
+                        Id           = BotDbContext.NextId<OsuUserHistory>(realm),
                         OsuUserName  = task.OsuUserName,
                         OsuUserId    = task.id,
                         Mode         = task.i,
                         UserInfo     = result.ToJson(),
-                        CreationTime = DateTime.Now
-                    });
-                    await db.SaveChangesAsync();
+                        CreationTime = DateTimeOffset.Now
+                    }));
                 }
                 catch (FlurlHttpException e) when (e.StatusCode != 404)
                 {
@@ -196,6 +196,11 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {
+        if (exception is MissingConfigurationException || exception.InnerException is MissingConfigurationException)
+        {
+            return base.ExceptionHandler(exception, message);
+        }
+
         switch (exception)
         {
             case not null:
