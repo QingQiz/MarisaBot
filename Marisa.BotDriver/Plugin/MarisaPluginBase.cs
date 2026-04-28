@@ -54,7 +54,7 @@ public class MarisaPluginBase
             return Task.CompletedTask;
         }
 
-        message.Send(new MessageDataText(currentException.ToString()));
+        message.Send(new MessageDataText("出现异常，请稍后再试"));
 
         return Task.CompletedTask;
     }

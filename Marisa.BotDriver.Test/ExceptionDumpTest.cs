@@ -1,4 +1,9 @@
 using System.Text.RegularExpressions;
+using Marisa.BotDriver.DI.Message;
+using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Entity.MessageData;
+using Marisa.BotDriver.Entity.MessageSender;
+using Marisa.BotDriver.Plugin;
 using Marisa.Configuration;
 using NUnit.Framework;
 
@@ -42,6 +47,30 @@ public class ExceptionDumpTest
             Assert.That(content, Does.Contain("boom"));
             Assert.That(content, Does.Contain("test message"));
             Assert.That(content, Does.Contain("unit-test"));
+        });
+    }
+
+    [Test]
+    public async Task ExceptionHandler_Should_Not_Send_Raw_Exception_Detail_To_User()
+    {
+        var queue = new MessageQueueProvider();
+        var sender = new MessageSenderProvider(queue);
+        var message = new Message(new MessageChain(new MessageDataText("ping")), sender)
+        {
+            Type = MessageType.FriendMessage,
+            Sender = new SenderInfo(114514, "tester")
+        };
+
+        await new MarisaPluginBase().ExceptionHandler(new InvalidOperationException("boom"), message);
+
+        Assert.That(queue.SendQueue.Reader.TryRead(out var reply), Is.True);
+        var text = ((MessageDataText)reply!.MessageChain.Messages.Single()).Text.ToString();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(text, Is.EqualTo("出现异常，请稍后再试"));
+            Assert.That(text, Does.Not.Contain("boom"));
+            Assert.That(text, Does.Not.Contain("InvalidOperationException"));
         });
     }
 
