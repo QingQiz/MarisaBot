@@ -49,7 +49,7 @@ public static class RealmExt
         return realm.All<T>().AsEnumerable().FirstOrDefault(t => t.UId == uid);
     }
 
-    public static T InsertOrUpdateByUid<T>(this Realm realm, T value) where T : IHaveUId, IRealmObject
+    public static T InsertOrUpdateByUid<T>(this Realm realm, T value) where T : class, IHaveUId, IRealmObject
     {
         var existing = realm.FirstOrDefaultByUid<T>(value.UId);
 
