@@ -16,7 +16,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Marisa.Configuration\Marisa.Configuration.csproj"/>
-        <ProjectReference Include="..\Marisa.Database\Marisa.Database.csproj"/>
     </ItemGroup>
 
     <PropertyGroup>

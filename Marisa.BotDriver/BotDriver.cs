@@ -4,7 +4,6 @@ using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Plugin;
 using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.Database;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Polly;
