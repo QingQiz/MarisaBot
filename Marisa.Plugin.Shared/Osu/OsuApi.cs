@@ -28,6 +28,7 @@ public static partial class OsuApi
     private const string ApiUriBase = "https://osu.ppy.sh/api/v2";
     private const string TokenUri = "https://osu.ppy.sh/oauth/token";
     private const string UserInfoUri = $"{ApiUriBase}/users";
+    private const string ScoreObjectApiVersion = "20220705";
 
     private const string FakeUserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
@@ -90,6 +91,7 @@ public static partial class OsuApi
     public static IFlurlRequest Request(string uri)
     {
         return uri.WithHeader("Accept", "application/json")
+            .WithHeader("x-api-version", ScoreObjectApiVersion)
             .WithOAuthBearerToken(Token);
     }
 
@@ -138,13 +140,12 @@ public static partial class OsuApi
 
     public static async Task<OsuUserInfo> GetUserInfoByName(string username, int mode = -1)
     {
+        var user = username.StartsWith('@') ? username : $"@{username}";
+
         try
         {
             var json = await GetPolicy<FlurlHttpException>("GetUserInfoByName", e => e.StatusCode != 404)
-                .ExecuteAsync(async () => await $"{UserInfoUri}/{username}/{GetModeName(mode)}"
-                    .SetQueryParam("key", "facere")
-                    .WithHeader("Accept", "application/json")
-                    .WithOAuthBearerToken(Token)
+                .ExecuteAsync(async () => await Request($"{UserInfoUri}/{user}/{GetModeName(mode)}")
                     .GetStringAsync()
                 );
 
@@ -173,13 +174,11 @@ public static partial class OsuApi
         try
         {
             var json = await GetPolicy<FlurlHttpException>("GetScores", e => e.StatusCode != 404)
-                .ExecuteAsync(async () => await $"{UserInfoUri}/{osuId}/scores/{t}"
+                .ExecuteAsync(async () => await Request($"{UserInfoUri}/{osuId}/scores/{t}")
                     .SetQueryParam("include_fails", includeFails ? 1 : 0)
                     .SetQueryParam("mode", gameMode)
                     .SetQueryParam("limit", take)
                     .SetQueryParam("offset", skip)
-                    .WithHeader("Accept", "application/json")
-                    .WithOAuthBearerToken(Token)
                     .GetStringAsync()
                 );
 
