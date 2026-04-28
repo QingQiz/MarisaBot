@@ -6,7 +6,7 @@ using Realms;
 
 namespace Marisa.Plugin.Shared.Interface;
 
-public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : ISongGuess, IRealmObject, new()
+public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : class, ISongGuess, IRealmObject, new()
 {
     SongGuessMaker<TSong, TSongGuess> SongGuessMaker { get; }
 
