@@ -64,7 +64,7 @@ public class ChunithmDivingFishDataFetcherTest
         song.Version = "CHUNITHM LUMINOUS";
 
         dynamic beatmap = new ExpandoObject();
-        beatmap.Constant = 14.9m;
+        beatmap.Constant = 14.9;
         beatmap.Charter = "-";
         beatmap.LevelStr = "14+";
         beatmap.LevelName = "MASTER";
