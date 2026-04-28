@@ -1,42 +1,46 @@
 # AGENTS
 
-## Toolchain and Build
-- Use Windows `dotnet`, not WSL `dotnet`, for real builds/tests. The repo targets `net8.0`, but `global.json` is stale (`5.0`) and WSL may pick an unsupported SDK.
-- The main app build is `dotnet build Marisa.StartUp/Marisa.StartUp.csproj --no-restore` from Windows. `Marisa.StartUp.csproj` runs `npm install` and `npx vite build` in `Marisa.Frontend` before build, so Node/npm must be available.
-- For focused backend verification that avoids the frontend build hook, build project files directly, e.g. `dotnet build Marisa.Plugin/Marisa.Plugin.csproj --no-restore` or `dotnet build Marisa.Plugin.Shared/Marisa.Plugin.Shared.csproj --no-restore`.
-- `Marisa.StartUp.csproj` copies `Marisa.Frontend/dist/**` into `wwwroot` on both build and publish. If frontend assets are missing at runtime, check the startup project output, not just `Marisa.Frontend/dist`.
+## Toolchain
+- Use Windows `dotnet` for real builds/tests. `global.json` still pins SDK `5.0`, but the active projects target `net8.0`.
+- Main app build from repo root: `dotnet build Marisa.StartUp/Marisa.StartUp.csproj --no-restore`.
+- `Marisa.StartUp.csproj` always runs `npm install` and `npx vite build` in `Marisa.Frontend` before build. For backend-only verification, build or test the specific project instead of `Marisa.StartUp`.
+- There are no checked-in CI workflows and no npm `lint`, `test`, or `typecheck` scripts. Do not guess repo-wide validation commands that are not wired in the tree.
 
-## Runtime Wiring
-- The only active QQ backend is `Marisa.Backend.NapCat`. `Program.cs` wires the bot with `NapCatBackend.Config(Utils.Assembly().GetTypes())` and serves ASP.NET on `http://0.0.0.0:14311`.
-- `Marisa.Plugin.Utils.Assembly()` is the plugin assembly entrypoint used for discovery. If plugin loading looks broken, start there.
-- NapCat config is loaded from `Marisa.StartUp/config.yaml` under `napCat`. Runtime config is not env-driven.
+## Repo Shape
+- `Marisa.StartUp` hosts ASP.NET, serves `wwwroot`, falls back to `index.html`, and listens on `http://0.0.0.0:14311`.
+- Runtime message transport is `Marisa.Backend.NapCat`; startup wires `NapCatBackend.Config(Utils.Assembly().GetTypes())`.
+- Plugin discovery is reflection-based. `BotDriver.Config(...)` only registers types from the `Marisa.Plugin` assembly with `[MarisaPlugin]`, skips `[MarisaPluginDisabled]`, and orders them by plugin priority.
+- `Marisa.Plugin` contains concrete bot plugins. `Marisa.Plugin.Shared` and `Marisa.Plugin.Shared.FSharp` hold shared game/data logic. `Marisa.BotDriver` owns dispatch and plugin exception handling.
 
-## Configuration Rules
-- Config lives in `Marisa.Configuration` and the namespace is `Marisa.Configuration`.
-- `ConfigurationManager` is the source of truth for path resolution. `tempPath` and `resourceRoot` are the global roots; feature temp/resource paths are derived from them.
-- `databasePath: bot.db` is intentionally resolved relative to global `tempPath`, not the startup directory.
-- Missing required config is supposed to throw `MissingConfigurationException` from config property getters and be surfaced to users via plugin error handling. Preserve that pattern instead of adding ad hoc null checks.
-- Current shared token layout uses top-level `divingFish.devToken`, not `chunithm.devToken`.
-- Do not commit real secret values from `Marisa.StartUp/config.yaml` (tokens, credentials, local IDs). If config structure changes, update the committed file shape with empty placeholder values and keep any real local values only in the uncommitted working copy.
+## Configuration
+- `Marisa.Configuration.ConfigurationManager` is the source of truth. Relative paths are resolved from repo/config-root heuristics, not just the current working directory.
+- Runtime config is file-based through `Marisa.StartUp/config.yaml`; there is no environment-variable binding layer in startup.
+- `tempPath` and `resourceRoot` are the global roots; feature temp/resource paths are derived from them in `ResolveGamePaths(...)` and `ResolveResourcePaths(...)`.
+- `databasePath: bot.db` is resolved relative to global `tempPath`, not the startup directory.
+- If `resourceRoot` is empty, default lookup prefers `Marisa.Frontend/public/assets`, then published `wwwroot/assets`.
+- Required config is supposed to fail through `MissingConfigurationException`; `MarisaPluginBase.ExceptionHandler(...)` turns that into a user-facing reply. Preserve that flow instead of adding ad hoc null checks.
+- Shared DivingFish auth lives at top-level `divingFish.devToken`.
+- If you touch `Marisa.StartUp/config.yaml`, scrub real tokens, IDs, and machine-local paths before commit. The committed file should keep structure, not live secrets.
 
 ## Storage
-- EF Core has been replaced by direct Realm usage in `Marisa.Database`; do not add new EF patterns.
-- Open databases via `BotDbContext.OpenRealm()`. For numeric IDs, use `BotDbContext.NextId<T>(realm)`.
-- Realm models are flattened `IRealmObject`s; inheritance is intentionally avoided because Realm source generation here does not support it.
+- Active persistence is Realm in `Marisa.Database`; `Marisa.EntityFrameworkCore` is not part of `Marisa.sln`.
+- Open databases with `BotDbContext.OpenRealm()`. When inserting numeric-keyed objects, allocate IDs with `BotDbContext.NextId<T>(realm)`.
 
-## Frontend and Assets
-- Runtime assets are under `Marisa.Frontend/public/assets`. `resourceRoot` in config should point there.
-- Image/font code relies on bundled fonts under `public/assets/font`; do not assume Windows system fonts are present.
+## Frontend Assets
+- Frontend is Vue 3 + TypeScript + Vite in `Marisa.Frontend`.
+- Runtime assets live under `Marisa.Frontend/public/assets`; bundled fonts are under `public/assets/font`.
+- `vite.config.ts` keeps old files in `dist` (`emptyOutDir: false`) and emits stable names under `dist/js` and `dist/assets`. Clean stale output manually if asset behavior looks impossible.
+- `Marisa.StartUp.csproj` copies `Marisa.Frontend/dist/**` into startup `wwwroot` on both build and publish. If frontend assets are missing at runtime, inspect the startup output, not only `dist`.
 
 ## Tests
-- Dispatcher/integration-style bot tests are in `Marisa.BotDriver.Test`. They create an isolated temp config by copying `Marisa.StartUp/config.yaml` and overriding `tempPath`/`databasePath` via `ConfigurationManager.SetConfigFilePath(...)`.
-- Plugin/integration tests are in `Marisa.Plugin.Test` and many of them read the real `Marisa.StartUp/config.yaml`. They are not all hermetic.
-- The maimai DivingFish integration test in `Marisa.Plugin.Test/MaiMaiDxTest.cs` is conditional: it skips unless `divingFish.devToken` is configured, then uses `username = laplaze`.
-- Focused test commands that are known to work:
-  - `dotnet test E:\MarisaBot\Marisa.BotDriver.Test\Marisa.BotDriver.Test.csproj --no-restore --filter DialogManagerTest`
-  - `dotnet test E:\MarisaBot\Marisa.Plugin.Test\Marisa.Plugin.Test.csproj --no-restore --filter DivingFish_Should_Fetch_Rating_By_Username_When_DevToken_Configured`
+- `Marisa.BotDriver.Test` is the safest focused suite. `DispatcherTest` copies `Marisa.StartUp/config.yaml`, rewrites `tempPath` and `databasePath`, and points `ConfigurationManager` at the temp config.
+- Many `Marisa.Plugin.Test` cases point directly at `Marisa.StartUp/config.yaml` and can depend on real local config or external services.
+- Focused commands:
+  - `dotnet test Marisa.BotDriver.Test/Marisa.BotDriver.Test.csproj --no-restore --filter DialogManagerTest`
+  - `dotnet test Marisa.BotDriver.Test/Marisa.BotDriver.Test.csproj --no-restore --filter DispatcherTest`
+  - `dotnet test Marisa.Plugin.Test/Marisa.Plugin.Test.csproj --no-restore --filter DivingFish_Should_Fetch_Rating_By_Username_When_DevToken_Configured`
+- The DivingFish test is conditional: it ignores itself unless `divingFish.devToken` is configured, then queries username `laplaze`.
 
-## Known Gotchas
-- Parallel Windows builds can fail with file-lock errors on `Marisa.Configuration` / `Marisa.Database` outputs. If that happens, rerun the build serially before assuming the code is broken.
-- `Dialog` fallback logic is sensitive to dialog key reuse. If you touch dialog behavior, re-check `Marisa.Plugin/Dialog.cs` and `Marisa.Plugin.Shared/Dialog/DialogManager.cs` together.
-- NapCat private-message mapping is intentionally customized in `NapCatBackend.PrivateMessageType(...)`. Do not “simplify” message type mapping without checking dialog/private command behavior.
+## Behavior Traps
+- Dialog behavior is split across `Marisa.Plugin/Dialog.cs` and `Marisa.Plugin.Shared/Dialog/DialogManager.cs`. The dialog plugin falls back from `(group,user)` to `(group,null)` and then tries to restore the old handler if downstream plugins do not permanently claim the key.
+- NapCat private sessions with subtype `group` are intentionally mapped to `FriendMessage` in `NapCatBackend.PrivateMessageType(...)`; dialog and private-command behavior depends on this.
