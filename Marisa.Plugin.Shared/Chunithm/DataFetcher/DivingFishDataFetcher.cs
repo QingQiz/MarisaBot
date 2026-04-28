@@ -26,7 +26,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var scores = await GetScores(message, false);
+        var scores = await FetchScores(message, false);
 
         scores.Records.Best = scores.Records.Best.OrderByDescending(x => x.Rating).Take(30).ToArray();
 
@@ -35,14 +35,14 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        var scores = await GetScores(message, true);
+        var scores = await FetchScores(message, true);
 
         return scores.Records.Best
             .Where(x => !DeletedSongs.Contains(x.Id))
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
 
-    private async Task<ChunithmRating> GetScores(Message message, bool qqOnly)
+    protected virtual async Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
     {
         var (username, qq) = AtOrSelf(message, qqOnly);
 
@@ -62,16 +62,29 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         }
 
         var json = await response.GetJsonAsync<ChunithmRating>();
-        foreach (var r in json.Records.Best.Concat(json.Records.Recent))
-        {
-            if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
-
-            r.Id = SongDb.SongList.First(s => s.Title.Equals(r.Title, StringComparison.Ordinal)).Id;
-        }
-        json.DataSource   = "DivingFish";
-        json.Records.Best = json.Records.Best.Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+        json.DataSource    = "DivingFish";
+        json.Records.Best  = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+        json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
 
         return json;
+    }
+
+    private IEnumerable<ChunithmScore> NormalizeRecords(IEnumerable<ChunithmScore> records)
+    {
+        foreach (var record in records)
+        {
+            if (SongDb.SongIndexer.ContainsKey(record.Id))
+            {
+                yield return record;
+                continue;
+            }
+
+            var matchedSong = SongDb.SongList.FirstOrDefault(s => s.Title.Equals(record.Title, StringComparison.Ordinal));
+            if (matchedSong == null) continue;
+
+            record.Id = matchedSong.Id;
+            yield return record;
+        }
     }
 
     public void Reset()
