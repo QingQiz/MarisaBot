@@ -45,8 +45,8 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     private async Task<ChunithmRating> GetScoresCore(Message message, bool qqOnly)
     {
         var json = await FetchScores(message, qqOnly);
-        json.DataSource     = "DivingFish";
-        json.Records.Best   = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+        json.DataSource = "DivingFish";
+        json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
         json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
 
         return json;
