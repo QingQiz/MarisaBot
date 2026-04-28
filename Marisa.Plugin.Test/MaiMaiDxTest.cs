@@ -14,10 +14,10 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiDxTest
 {
-    private AllNetDataFetcher _allNet;
+    private AllNetDataFetcher _allNet = null!;
     private DivingFishDataFetcher _divingFish = null!;
-    private MaiMaiDx.MaiMaiDx _maiMaiDx;
-    private SongDb<MaiMaiSong> _songDb;
+    private MaiMaiDx.MaiMaiDx _maiMaiDx = null!;
+    private SongDb<MaiMaiSong> _songDb = null!;
 
     [SetUp]
     public void Setup()

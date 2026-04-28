@@ -27,13 +27,13 @@ public class MarisaPluginBase
             {
                 if (exception is TargetInvocationException { InnerException: not null } targetInvocationException)
                 {
-                    exception = targetInvocationException.InnerException;
+                    exception = targetInvocationException.InnerException!;
                     continue;
                 }
 
                 if (exception is AggregateException { InnerExceptions.Count: 1 } aggregateException)
                 {
-                    exception = aggregateException.InnerExceptions[0];
+                    exception = aggregateException.InnerExceptions[0]!;
                     continue;
                 }
 

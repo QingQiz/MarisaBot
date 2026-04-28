@@ -13,7 +13,7 @@ namespace Marisa.Plugin.Test;
 
 public class SongDbTest
 {
-    private SongDb<MaiMaiSong> _songDb;
+    private SongDb<MaiMaiSong> _songDb = null!;
 
     [SetUp]
     public void SetUp()

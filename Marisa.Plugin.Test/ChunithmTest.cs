@@ -10,8 +10,8 @@ namespace Marisa.Plugin.Test;
 
 public class ChunithmTest
 {
-    private Chunithm.Chunithm _chunithm;
-    private SongDb<ChunithmSong> _songDb;
+    private Chunithm.Chunithm _chunithm = null!;
+    private SongDb<ChunithmSong> _songDb = null!;
 
     [SetUp]
     public void SetUp()

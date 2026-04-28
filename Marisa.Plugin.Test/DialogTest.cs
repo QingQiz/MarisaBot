@@ -13,7 +13,7 @@ namespace Marisa.Plugin.Test;
 
 public class DialogTest
 {
-    private TestBackend _driver;
+    private TestBackend _driver = null!;
 
     [SetUp]
     public void SetUp()
