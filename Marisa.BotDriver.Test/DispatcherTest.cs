@@ -8,7 +8,6 @@ using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
 using Marisa.Configuration;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
@@ -44,7 +43,6 @@ public class DispatcherTest
     public void TearDown()
     {
         _provider.Dispose();
-        SqliteConnection.ClearAllPools();
 
         if (Directory.Exists(_tempRoot))
         {

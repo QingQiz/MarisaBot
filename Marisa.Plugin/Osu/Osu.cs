@@ -211,12 +211,6 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
             return base.ExceptionHandler(exception, message);
         }
 
-        switch (exception)
-        {
-            case not null:
-                message.Reply(exception.GetType().Name + ": " + exception.Message);
-                break;
-        }
-        return Task.CompletedTask;
+        return base.ExceptionHandler(exception, message);
     }
 }

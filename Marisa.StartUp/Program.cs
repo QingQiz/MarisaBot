@@ -33,7 +33,6 @@ public static class Program
         builder.Logging.ClearProviders();
         builder.Logging.SetMinimumLevel(LogLevel.Debug);
         builder.Host.UseNLog();
-        builder.Services.AddExceptionHandler<ExceptionHandler>();
 
         var app = builder.Build();
         var botDriver = app.Services.GetRequiredService<BotDriver.BotDriver>();
