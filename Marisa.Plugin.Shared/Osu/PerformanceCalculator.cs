@@ -1,93 +1,27 @@
-﻿using Marisa.Plugin.Shared.Osu.Entity.Score;
+using Marisa.Plugin.Shared.Osu.Entity.Score;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using osu.Framework.Audio.Track;
-using osu.Framework.Graphics.Textures;
-using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.Formats;
-using osu.Game.IO;
-using osu.Game.Rulesets;
-using osu.Game.Rulesets.Catch;
-using osu.Game.Rulesets.Mania;
-using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Osu;
-using osu.Game.Rulesets.Scoring;
-using osu.Game.Rulesets.Taiko;
-using osu.Game.Scoring;
-using osu.Game.Skinning;
-using osu.Game.Utils;
-using Beatmap = osu.Game.Beatmaps.Beatmap;
 
 namespace Marisa.Plugin.Shared.Osu;
 
 public static class PerformanceCalculator
 {
-    private static Mod[] GetMods(Ruleset ruleset, string[]? modsIn)
-    {
-        if (modsIn == null) return Array.Empty<Mod>();
-
-        var availableMods = ruleset.CreateAllMods().ToList();
-        var mods          = new List<Mod>();
-
-        foreach (var modString in modsIn)
-        {
-            var newMod = availableMods
-                .FirstOrDefault(m => string.Equals(m.Acronym, modString, StringComparison.CurrentCultureIgnoreCase));
-
-            if (newMod == null) throw new ArgumentException($"Invalid mod provided: {modString}");
-
-            mods.Add(newMod);
-        }
-
-        return mods.ToArray();
-    }
-
-    private static Ruleset GetRuleset(int modeInt)
-    {
-        return modeInt switch
-        {
-            0 => new OsuRuleset(),
-            1 => new TaikoRuleset(),
-            2 => new CatchRuleset(),
-            3 => new ManiaRuleset(),
-            _ => throw new ArgumentOutOfRangeException(nameof(modeInt), modeInt, null)
-        };
-    }
-
     public static (double ppMax, double length, double multiplier) ManiaPpChart(string beatmapPath, string[] gameMods, int totalHits)
     {
-        var ruleset = GetRuleset(3);
-
-        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, gameMods));
-        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(beatmapPath);
-
-        var difficultyCalculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
-        var difficultyAttributes = difficultyCalculator.Calculate(mods);
-        // var performanceCalculator = ruleset.CreatePerformanceCalculator();
-        return ManiaPerformanceCalculator.Calculate(gameMods, difficultyAttributes.StarRating, totalHits);
+        var starRating = StarRatingCalculator.Calculate(File.ReadAllText(beatmapPath), FilterStarRatingMods(gameMods));
+        return ManiaPerformanceCalculator.Calculate(gameMods, starRating, totalHits);
     }
 
     public static double GetStarRating(long beatmapsetId, string beatmapChecksum, long beatmapId, int modeInt, string[] mods)
     {
         var path = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
-
-        var ruleset = GetRuleset(modeInt);
-
-        var mods2          = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, mods));
-        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-        var attributes     = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(mods2);
-
-        return attributes.StarRating;
+        return StarRatingCalculator.Calculate(File.ReadAllText(path), FilterStarRatingMods(mods));
     }
 
     public static double StarRating(this OsuScore score)
     {
-        var starRatingChangeMods = new[] { "ez", "hr", "fl", "dt", "ht", "nc" };
-        var ruleSetChangeMods    = Enumerable.Range(1, 12).Select(i => $"{i}k").ToArray();
+        var starRatingMods = FilterStarRatingMods(score.Mods);
 
-        var starRatingChanged = starRatingChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase)));
-        var ruleSetChanged    = ruleSetChangeMods.Any(m1 => score.Mods.Any(m2 => m1.Equals(m2, StringComparison.OrdinalIgnoreCase)));
-
-        if (!starRatingChanged && !ruleSetChanged)
+        if (starRatingMods.Length == 0)
         {
             return score.Beatmap.StarRating;
         }
@@ -102,13 +36,7 @@ public static class PerformanceCalculator
             return score.Beatmap.StarRating;
         }
 
-        var ruleset = GetRuleset(score.ModeInt);
-
-        var mods           = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, score.Mods));
-        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-        var attributes     = ruleset.CreateDifficultyCalculator(workingBeatmap).Calculate(mods);
-
-        return attributes.StarRating;
+        return StarRatingCalculator.Calculate(File.ReadAllText(path), starRatingMods);
     }
 
     public static double GetPerformancePoint(
@@ -116,35 +44,12 @@ public static class PerformanceCalculator
         int c50, int cMiss, long score)
     {
         var path = OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
+        var beatmapText = File.ReadAllText(path);
+        var starRating = StarRatingCalculator.Calculate(beatmapText, FilterStarRatingMods(mods));
+        var beatmap = BeatmapPerformanceInfo.Parse(beatmapText);
+        var statistics = new ScoreStatistics(cMax, c300, c200, c100, c50, cMiss);
 
-        var ruleset = GetRuleset(modeInt);
-
-        var mods2          = LegacyHelper.ConvertToLegacyDifficultyAdjustmentMods(ruleset, GetMods(ruleset, mods));
-        var workingBeatmap = ProcessorWorkingBeatmap.FromFile(path);
-        var beatmap        = workingBeatmap.GetPlayableBeatmap(ruleset.RulesetInfo, mods2);
-
-        var difficultyCalculator  = ruleset.CreateDifficultyCalculator(workingBeatmap);
-        var difficultyAttributes  = difficultyCalculator.Calculate(mods2);
-        var performanceCalculator = ruleset.CreatePerformanceCalculator();
-
-        var ppAttributes = performanceCalculator!.Calculate(new ScoreInfo(beatmap.BeatmapInfo, ruleset.RulesetInfo)
-        {
-            Accuracy = acc,
-            MaxCombo = maxCombo,
-            Statistics = new Dictionary<HitResult, int>
-            {
-                { HitResult.Perfect, cMax },
-                { HitResult.Great, c300 },
-                { HitResult.Good, c200 },
-                { HitResult.Ok, c100 },
-                { HitResult.Meh, c50 },
-                { HitResult.Miss, cMiss }
-            },
-            Mods       = mods2,
-            TotalScore = score
-        }, difficultyAttributes);
-
-        return ppAttributes!.Total;
+        return CalculatePerformancePoint(modeInt, mods, starRating, NormalizeAccuracy(acc), maxCombo, score, statistics, beatmap);
     }
 
     public static double PerformancePoint(this OsuScore score)
@@ -186,152 +91,252 @@ public static class PerformanceCalculator
 
         return (0, 0, 0);
     }
-}
 
-internal class ProcessorWorkingBeatmap : WorkingBeatmap
-{
-    private readonly Beatmap _beatmap;
-
-    /// <summary>
-    ///     Constructs a new <see cref="ProcessorWorkingBeatmap" /> from a .osu file.
-    /// </summary>
-    /// <param name="file">The .osu file.</param>
-    /// <param name="beatmapId">An optional beatmap ID (for cases where .osu file doesn't have one).</param>
-    private ProcessorWorkingBeatmap(string file, int? beatmapId = null)
-        : this(ReadFromFile(file), beatmapId)
+    private static double CalculatePerformancePoint(int modeInt, string[] mods, double starRating, double accuracy, int maxCombo, long score, ScoreStatistics statistics, BeatmapPerformanceInfo beatmap)
     {
-    }
+        var totalHits = Math.Max(statistics.TotalHits, beatmap.TotalHits);
+        var mapMaxCombo = Math.Max(Math.Max(beatmap.MaxCombo, totalHits), maxCombo);
+        var comboRatio = mapMaxCombo <= 0 ? 1 : Math.Clamp(maxCombo / (double)mapMaxCombo, 0, 1);
+        var missPenalty = Math.Pow(0.97, statistics.Misses);
 
-    private ProcessorWorkingBeatmap(Beatmap beatmap, int? beatmapId = null)
-        : base(beatmap.BeatmapInfo, null)
-    {
-        _beatmap                    = beatmap;
-        beatmap.BeatmapInfo.Ruleset = LegacyHelper.GetRulesetFromLegacyId(beatmap.BeatmapInfo.Ruleset.OnlineID).RulesetInfo;
-
-        if (beatmapId.HasValue) beatmap.BeatmapInfo.OnlineID = beatmapId.Value;
-    }
-
-    private static Beatmap ReadFromFile(string filename)
-    {
-        using var stream = File.OpenRead(filename);
-        using var reader = new LineBufferedReader(stream);
-        return Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
-    }
-
-    public static ProcessorWorkingBeatmap FromFile(string file)
-    {
-        if (!File.Exists(file)) throw new ArgumentException($"Beatmap file {file} does not exist.");
-
-        return new ProcessorWorkingBeatmap(file);
-    }
-
-    protected override IBeatmap GetBeatmap()
-    {
-        return _beatmap;
-    }
-
-    public override Texture GetBackground()
-    {
-        throw new NotImplementedException();
-    }
-
-    protected override Track GetBeatmapTrack()
-    {
-        throw new NotImplementedException();
-    }
-
-    protected override ISkin GetSkin()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override Stream GetStream(string storagePath)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-internal static class LegacyHelper
-{
-    public static Ruleset GetRulesetFromLegacyId(int id)
-    {
-        return id switch
+        return modeInt switch
         {
-            0 => new OsuRuleset(),
-            1 => new TaikoRuleset(),
-            2 => new CatchRuleset(),
-            3 => new ManiaRuleset(),
-            _ => throw new ArgumentException("Invalid ruleset ID provided.")
-        };
+            1 => CalculateTaikoPerformance(mods, starRating, accuracy, comboRatio, totalHits, statistics.Misses),
+            2 => CalculateCatchPerformance(mods, starRating, accuracy, comboRatio, totalHits, statistics.Misses),
+            3 => CalculateManiaPerformance(mods, starRating, accuracy, totalHits, score, statistics),
+            _ => CalculateOsuPerformance(mods, starRating, accuracy, comboRatio, totalHits, statistics.Misses, beatmap)
+        } * ModMultiplier(mods, modeInt);
     }
 
-    /// <summary>
-    ///     Transforms a given <see cref="Mod" /> combination into one which is applicable to legacy scores.
-    ///     This is used to match osu!stable/osu!web calculations for the time being, until such a point that these mods do get
-    ///     considered.
-    /// </summary>
-    public static Mod[] ConvertToLegacyDifficultyAdjustmentMods(Ruleset ruleset, Mod[] mods)
+    private static double CalculateOsuPerformance(string[] mods, double starRating, double accuracy, double comboRatio, int totalHits, int misses, BeatmapPerformanceInfo beatmap)
     {
-        var beatmap = new EmptyWorkingBeatmap
+        var lengthBonus = 0.95 + 0.4 * Math.Min(1, totalHits / 2000.0) + (totalHits > 2000 ? Math.Log10(totalHits / 2000.0) * 0.5 : 0);
+        var missPenalty = Math.Pow(0.97, misses);
+        var comboPenalty = Math.Pow(comboRatio, 0.8);
+        var basePerformance = Math.Pow(Math.Max(starRating, 0.05), 3.0) * 1.18;
+        var accuracyPerformance = Math.Pow(accuracy, 9) * Math.Pow(beatmap.OverallDifficulty, 0.85) * 2.5;
+
+        if (HasMod(mods, "HD"))
+            basePerformance *= 1.03 + Math.Min(0.1, (10 - beatmap.ApproachRate) / 100);
+
+        if (HasMod(mods, "FL"))
+            basePerformance *= 1.08 + Math.Min(0.25, totalHits / 2400.0);
+
+        return Math.Pow(Math.Pow(basePerformance * lengthBonus * missPenalty * comboPenalty * Math.Pow(accuracy, 2.5), 1.1) + Math.Pow(accuracyPerformance, 1.1), 1 / 1.1);
+    }
+
+    private static double CalculateTaikoPerformance(string[] mods, double starRating, double accuracy, double comboRatio, int totalHits, int misses)
+    {
+        var lengthBonus = 1 + 0.1 * Math.Min(1, totalHits / 1500.0);
+        var missPenalty = Math.Pow(0.985, misses);
+        var basePerformance = Math.Pow(Math.Max(starRating, 0.05), 2.35) * 14.5;
+
+        if (HasMod(mods, "HD"))
+            basePerformance *= 1.075;
+
+        if (HasMod(mods, "FL"))
+            basePerformance *= 1.05 + Math.Min(0.15, totalHits / 3000.0);
+
+        return basePerformance * lengthBonus * missPenalty * Math.Pow(comboRatio, 0.5) * Math.Pow(accuracy, 5.5);
+    }
+
+    private static double CalculateCatchPerformance(string[] mods, double starRating, double accuracy, double comboRatio, int totalHits, int misses)
+    {
+        var lengthBonus = 0.95 + 0.3 * Math.Min(1, totalHits / 2500.0);
+        var missPenalty = Math.Pow(0.98, misses);
+        var basePerformance = Math.Pow(Math.Max(starRating, 0.05), 2.2) * 12.2;
+
+        if (HasMod(mods, "HD"))
+            basePerformance *= 1.05;
+
+        if (HasMod(mods, "FL"))
+            basePerformance *= 1.12;
+
+        return basePerformance * lengthBonus * missPenalty * Math.Pow(comboRatio, 0.8) * Math.Pow(accuracy, 5);
+    }
+
+    private static double CalculateManiaPerformance(string[] mods, double starRating, double accuracy, int totalHits, long score, ScoreStatistics statistics)
+    {
+        var (ppMax, length, multiplier) = ManiaPerformanceCalculator.Calculate(mods, starRating, totalHits);
+        var scoreRatio = score > 0 ? Math.Clamp(score / 1_000_000.0, 0, 1) : 0;
+        var accuracyRatio = Math.Pow(accuracy, 7.5);
+
+        if (statistics.TotalHits > 0)
+            accuracyRatio *= Math.Pow(1 - statistics.Misses / (double)statistics.TotalHits, 0.5);
+
+        return ppMax * length * multiplier * Math.Max(accuracyRatio, scoreRatio * scoreRatio);
+    }
+
+    private static double ModMultiplier(string[] mods, int modeInt)
+    {
+        var multiplier = 1.0;
+
+        if (HasMod(mods, "NF"))
+            multiplier *= modeInt == 3 ? 0.75 : 0.90;
+
+        if (HasMod(mods, "EZ"))
+            multiplier *= modeInt == 3 ? 0.50 : 0.95;
+
+        if (HasMod(mods, "SO"))
+            multiplier *= 0.95;
+
+        if (HasMod(mods, "RX") || HasMod(mods, "AP"))
+            multiplier *= 0;
+
+        return multiplier;
+    }
+
+    private static double NormalizeAccuracy(double accuracy)
+    {
+        if (accuracy > 1)
+            accuracy /= 100;
+
+        return Math.Clamp(accuracy, 0, 1);
+    }
+
+    private static string[] FilterStarRatingMods(IEnumerable<string> mods)
+    {
+        var result = new List<string>();
+
+        foreach (var acronym in ExpandModAcronyms(mods, keepRateSettings: true))
         {
-            BeatmapInfo =
-            {
-                Ruleset    = ruleset.RulesetInfo,
-                Difficulty = new BeatmapDifficulty()
-            }
-        };
+            if (acronym is "NM" or "CL" or "DT" or "NC" or "HT" or "DC")
+                result.Add(acronym);
 
-        var allMods = ruleset.CreateAllMods().ToArray();
-
-        var allowedMods = ModUtils.FlattenMods(
-                ruleset.CreateDifficultyCalculator(beatmap).CreateDifficultyAdjustmentModCombinations())
-            .Select(m => m.GetType())
-            .Distinct()
-            .ToHashSet();
-
-        // Special case to allow either DT or NC.
-        if (mods.Any(m => m is ModDoubleTime)) allowedMods.Add(allMods.Single(m => m is ModNightcore).GetType());
-
-        var result = new List<Mod>();
-
-        var classicMod = allMods.SingleOrDefault(m => m is ModClassic);
-        if (classicMod != null) result.Add(classicMod);
-
-        result.AddRange(mods.Where(m => allowedMods.Contains(m.GetType())));
+            if (acronym.Length > 2 && acronym[..2] is "DT" or "NC" or "HT" or "DC")
+                result.Add(acronym);
+        }
 
         return result.ToArray();
     }
 
-    private class EmptyWorkingBeatmap : WorkingBeatmap
+    private static bool HasMod(IEnumerable<string> mods, string mod)
+        => ExpandModAcronyms(mods, keepRateSettings: false).Any(m => m.Equals(mod, StringComparison.OrdinalIgnoreCase));
+
+    private static IEnumerable<string> ExpandModAcronyms(IEnumerable<string> mods, bool keepRateSettings)
     {
-        public EmptyWorkingBeatmap()
-            : base(new BeatmapInfo(), null)
+        foreach (var rawMod in mods)
         {
+            foreach (var token in rawMod.Split(new[] { ',', '+', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                var upper = token.ToUpperInvariant();
+
+                if (keepRateSettings && upper.Length > 2 && upper[..2] is "DT" or "NC" or "HT" or "DC" && (char.IsDigit(upper[2]) || upper[2] is '=' or ':' or '@'))
+                {
+                    yield return upper;
+                    continue;
+                }
+
+                if (upper.Length <= 2)
+                {
+                    yield return upper;
+                    continue;
+                }
+
+                if (upper.Length % 2 != 0)
+                    continue;
+
+                for (var i = 0; i < upper.Length; i += 2)
+                    yield return upper.Substring(i, 2);
+            }
+        }
+    }
+
+    private readonly record struct ScoreStatistics(int Perfect, int Great, int Good, int Ok, int Meh, int Misses)
+    {
+        public int TotalHits => Perfect + Great + Good + Ok + Meh + Misses;
+    }
+
+    private sealed record BeatmapPerformanceInfo(int Mode, int TotalHits, int MaxCombo, double OverallDifficulty, double ApproachRate)
+    {
+        public static BeatmapPerformanceInfo Parse(string text)
+        {
+            var mode = 0;
+            var overallDifficulty = 5d;
+            var approachRate = 5d;
+            var hasApproachRate = false;
+            var totalHits = 0;
+            var maxCombo = 0;
+            var section = string.Empty;
+
+            foreach (var rawLine in text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+            {
+                var line = rawLine.Trim();
+                if (line.Length == 0 || line.StartsWith("//", StringComparison.Ordinal))
+                    continue;
+
+                if (line.StartsWith('[') && line.EndsWith(']'))
+                {
+                    section = line[1..^1];
+                    continue;
+                }
+
+                switch (section)
+                {
+                    case "General":
+                        if (TrySplitKeyValue(line, out var key, out var value) && key == "Mode" && int.TryParse(value, out var parsedMode))
+                            mode = parsedMode;
+                        break;
+
+                    case "Difficulty":
+                        if (!TrySplitKeyValue(line, out key, out value))
+                            break;
+
+                        if (key == "OverallDifficulty" && double.TryParse(value, out var parsedOd))
+                        {
+                            overallDifficulty = parsedOd;
+                            if (!hasApproachRate)
+                                approachRate = parsedOd;
+                        }
+                        else if (key == "ApproachRate" && double.TryParse(value, out var parsedAr))
+                        {
+                            approachRate = parsedAr;
+                            hasApproachRate = true;
+                        }
+
+                        break;
+
+                    case "HitObjects":
+                        if (line.Split(',') is { Length: >= 4 } split && int.TryParse(split[3], out var type))
+                        {
+                            totalHits++;
+                            maxCombo += EstimateComboContribution(type, split, mode);
+                        }
+
+                        break;
+                }
+            }
+
+            return new BeatmapPerformanceInfo(mode, totalHits, Math.Max(maxCombo, totalHits), Math.Clamp(overallDifficulty, 0, 10), Math.Clamp(approachRate, 0, 10));
         }
 
-        protected override IBeatmap GetBeatmap()
+        private static bool TrySplitKeyValue(string line, out string key, out string value)
         {
-            throw new NotImplementedException();
+            var index = line.IndexOf(':');
+            if (index < 0)
+            {
+                key = string.Empty;
+                value = string.Empty;
+                return false;
+            }
+
+            key = line[..index].Trim();
+            value = line[(index + 1)..].Trim();
+            return true;
         }
 
-        public override Texture GetBackground()
+        private static int EstimateComboContribution(int type, string[] split, int mode)
         {
-            throw new NotImplementedException();
-        }
+            if (mode == 3)
+                return 1;
 
-        protected override Track GetBeatmapTrack()
-        {
-            throw new NotImplementedException();
-        }
+            if ((type & 2) == 0)
+                return 1;
 
-        protected override ISkin GetSkin()
-        {
-            throw new NotImplementedException();
-        }
+            if (split.Length < 7 || !int.TryParse(split[6], out var repeatCount))
+                return 1;
 
-        public override Stream GetStream(string storagePath)
-        {
-            throw new NotImplementedException();
+            return Math.Max(1, repeatCount + 1);
         }
     }
 }
@@ -340,16 +345,14 @@ public static class ManiaPerformanceCalculator
 {
     public static (double ppMax, double length, double multiplier) Calculate(string[] mods, double starRating, int totalHits)
     {
-        // Arbitrary initial value for scaling pp in order to standardize distributions across game modes.
-        // The specific number has no intrinsic meaning and can be adjusted as needed.
         var multiplier = 8.0;
 
         if (mods.Any(m => m.Equals("nf", StringComparison.OrdinalIgnoreCase))) multiplier *= 0.75;
         if (mods.Any(m => m.Equals("ez", StringComparison.OrdinalIgnoreCase))) multiplier *= 0.5;
 
         return (
-            Math.Pow(Math.Max(starRating - 0.15, 0.05), 2.2) // Star rating to pp curve
-          , 1 + 0.1 * Math.Min(1, totalHits / 1500)          // Length bonus, capped at 1500 notes
-          , multiplier);
+            Math.Pow(Math.Max(starRating - 0.15, 0.05), 2.2),
+            1 + 0.1 * Math.Min(1, totalHits / 1500.0),
+            multiplier);
     }
 }

@@ -20,4 +20,10 @@
         <ProjectReference Include="..\Marisa.Plugin\Marisa.Plugin.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Resources\Testing\Beatmaps\**\*.osu">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 </Project>
