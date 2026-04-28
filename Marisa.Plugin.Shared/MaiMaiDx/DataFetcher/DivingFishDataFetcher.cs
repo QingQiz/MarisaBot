@@ -6,6 +6,9 @@ namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
 public class DivingFishDataFetcher : DataFetcher
 {
+    private const int OldScoreLimit = 35;
+    private const int NewScoreLimit = 15;
+
     // TODO 下面的内容以后再来写吧！
     // private readonly Dictionary<int, List<DiffData?>> _diffDict;
     // private readonly List<Rank> _raRankList;
@@ -18,19 +21,40 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        return await GetScores(message, false);
+        var raw = await FetchScores(message, false);
+
+        var group = raw.Records
+            .Where(x => SongDb.SongIndexer.ContainsKey(x.Id))
+            .GroupBy(x => SongDb.SongIndexer[x.Id].Info.IsNew)
+            .ToList();
+
+        return new DxRating
+        {
+            Nickname = raw.Nickname,
+            OldScores = group.FirstOrDefault(x => !x.Key)?
+                            .OrderByDescending(x => x.Rating)
+                            .ThenByDescending(x => x.Id)
+                            .Take(OldScoreLimit)
+                            .ToList()
+                        ?? [],
+            NewScores = group.FirstOrDefault(x => x.Key)?
+                            .OrderByDescending(x => x.Rating)
+                            .ThenByDescending(x => x.Id)
+                            .Take(NewScoreLimit)
+                            .ToList()
+                        ?? []
+        };
     }
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var scores = await GetScores(message, true);
+        var scores = await FetchScores(message, true);
 
-        return scores.OldScores
-            .Concat(scores.NewScores)
+        return scores.Records
             .ToDictionary(x => (x.Id, x.LevelIdx), x => x);
     }
 
-    private async Task<DxRating> GetScores(Message message, bool qqOnly)
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
     {
         var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
 
@@ -50,23 +74,12 @@ public class DivingFishDataFetcher : DataFetcher
             throw new HttpRequestException(HttpRequestError.Unknown, $"[DivingFish] {response.StatusCode}: {errorMessage}");
         }
 
-        var raw = await response.GetJsonAsync<DivingFishDxRatingResponse>();
-
-        return new DxRating
-        {
-            Nickname = raw.Nickname,
-            OldScores = raw.Records
-                .Where(x => !x.Type.Equals("DX", StringComparison.OrdinalIgnoreCase))
-                .ToList(),
-            NewScores = raw.Records
-                .Where(x => x.Type.Equals("DX", StringComparison.OrdinalIgnoreCase))
-                .ToList()
-        };
+        return await response.GetJsonAsync<DivingFishDxRatingResponse>();
     }
 
     private sealed record DivingFishErrorResponse(string? Message, string? Msg);
 
-    private sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
+    protected sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
 
     // public DiffData GetFitDiff(int songId, int levelIdx)
     // {

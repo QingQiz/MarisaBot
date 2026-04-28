@@ -79,7 +79,16 @@ public class MaiMaiDxTest
 
         var res = await _divingFish.GetRating(m);
 
-        Assert.That(res.Nickname, Is.Not.Empty);
-        Assert.That(res.Rating, Is.GreaterThan(0));
+        Assert.Multiple(() =>
+        {
+            Assert.That(res.Nickname, Is.Not.Empty);
+            Assert.That(res.Rating, Is.GreaterThan(0));
+            Assert.That(res.OldScores.Count, Is.LessThanOrEqualTo(35));
+            Assert.That(res.NewScores.Count, Is.LessThanOrEqualTo(15));
+            Assert.That(res.OldScores, Is.All.Matches<SongScore>(x => _songDb.SongIndexer[x.Id].Info.IsNew == false));
+            Assert.That(res.NewScores, Is.All.Matches<SongScore>(x => _songDb.SongIndexer[x.Id].Info.IsNew));
+            Assert.That(res.OldScores, Is.Ordered.Descending.By(nameof(SongScore.Rating)).Then.Descending.By(nameof(SongScore.Id)));
+            Assert.That(res.NewScores, Is.Ordered.Descending.By(nameof(SongScore.Rating)).Then.Descending.By(nameof(SongScore.Id)));
+        });
     }
 }
