@@ -76,7 +76,7 @@ public class ExceptionDumpTest
 
     private static string CreateTestConfig(string tempRoot)
     {
-        var sourceConfigPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
+        var sourceConfigPath = Path.Join(FindRepositoryRoot(), "Marisa.StartUp", "config.yaml");
         var escapedTempRoot = tempRoot.Replace("\\", "\\\\");
         var config = File.ReadAllText(sourceConfigPath);
         config = Regex.Replace(config, @"^tempPath:\s*.*$", $"tempPath:     {escapedTempRoot}", RegexOptions.Multiline);
@@ -87,5 +87,22 @@ public class ExceptionDumpTest
         File.WriteAllText(configPath, config);
 
         return configPath;
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(Environment.CurrentDirectory);
+
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Join(directory.FullName, "Marisa.sln")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate repository root from current test directory.");
     }
 }

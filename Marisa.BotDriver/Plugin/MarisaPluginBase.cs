@@ -20,7 +20,7 @@ public class MarisaPluginBase
         var log = LogManager.GetCurrentClassLogger();
         var dumpPath = ExceptionDump.Save(exception, message.ToString(), GetType().FullName);
         
-        log.Error($"{exception}\nCasused by message: {message}");
+        log.Error($"{exception}\nCaused by message: {message}");
         if (dumpPath is not null)
         {
             log.Error("Exception dump saved to {0}", dumpPath);
