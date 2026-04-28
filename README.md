@@ -198,7 +198,7 @@
         - 其中`ffmpegPath`为FFmpeg的路径，用于处理音频文件
     - 需要补充里面的一些token（可以先不补充，但是有些功能会失效）
         - `clientId`和`clientSecret`为osu!的API的token，可以在osu的用户设置界面进行申请
-        - `devToken`为水鱼的token，需要联系水鱼本人获取
+        - `divingFish.devToken` 为水鱼的开发者 token，需要联系水鱼本人获取
 - 编译
     - `cd Marisa.StartUp`
     - `dotnet build -c Release`

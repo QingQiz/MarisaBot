@@ -77,6 +77,9 @@ public partial class MaiMaiDx :
             case FlurlHttpException e:
                 message.Reply(e.Message);
                 break;
+            case HttpRequestException { HttpRequestError: HttpRequestError.Unknown } e:
+                message.Reply(e.Message);
+                break;
             default:
                 base.ExceptionHandler(exception, message);
                 break;

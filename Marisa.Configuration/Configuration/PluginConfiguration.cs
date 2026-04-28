@@ -18,6 +18,8 @@ public class PluginConfiguration
 
     public NapCatConfiguration NapCat { get; set; }
 
+    public DivingFishConfiguration DivingFish { get; set; }
+
     public string[] Chi
     {
         get => ConfigurationManager.RequireArray("chi", _chi);

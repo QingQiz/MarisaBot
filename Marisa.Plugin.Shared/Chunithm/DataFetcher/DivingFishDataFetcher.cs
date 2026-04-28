@@ -51,7 +51,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             : $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?username={username}";
 
         var response = await uri
-            .WithHeader("Developer-Token", ConfigurationManager.Configuration.Chunithm.DevToken)
+            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
             .AllowHttpStatus("403")
             .GetAsync();
 

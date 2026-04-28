@@ -118,6 +118,7 @@ public static class ConfigurationManager
     private static void EnsureRequiredSections(PluginConfiguration config)
     {
         config.NapCat ??= new NapCatConfiguration();
+        config.DivingFish ??= new DivingFishConfiguration();
         config.Arcaea ??= new ArcaeaConfiguration();
         config.Chunithm ??= new ChunithmConfiguration();
         config.Ongeki ??= new OngekiConfiguration();
@@ -134,7 +135,7 @@ public static class ConfigurationManager
         WarnIfEmpty("napCat.selfId", config.NapCat?.SelfId);
         WarnIfEmpty("osu.clientId", config.Osu?.ClientIdRaw);
         WarnIfEmpty("osu.clientSecret", config.Osu?.ClientSecretRaw);
-        WarnIfEmpty("chunithm.devToken", config.Chunithm?.DevTokenRaw);
+        WarnIfEmpty("divingFish.devToken", config.DivingFish?.DevTokenRaw);
         WarnIfEmpty("chunithm.tokenLouis", config.Chunithm?.TokenLouisRaw);
         WarnIfEmpty("chunithm.rinNetKeyChip", config.Chunithm?.RinNetKeyChipRaw);
         WarnIfEmpty("chunithm.allNetKeyChip", config.Chunithm?.AllNetKeyChipRaw);

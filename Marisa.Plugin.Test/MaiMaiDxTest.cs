@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageSender;
@@ -16,6 +15,7 @@ namespace Marisa.Plugin.Test;
 public class MaiMaiDxTest
 {
     private AllNetDataFetcher _allNet;
+    private DivingFishDataFetcher _divingFish = null!;
     private MaiMaiDx.MaiMaiDx _maiMaiDx;
     private SongDb<MaiMaiSong> _songDb;
 
@@ -25,13 +25,10 @@ public class MaiMaiDxTest
         var configPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.Parent!.ToString(), "Marisa.StartUp", "config.yaml");
         ConfigurationManager.SetConfigFilePath(configPath);
 
-        _allNet   = new AllNetDataFetcher(_songDb);
         _maiMaiDx = new MaiMaiDx.MaiMaiDx();
-
-        var field = typeof(MaiMaiDx.MaiMaiDx).GetField("_songDb", BindingFlags.NonPublic | BindingFlags.Instance)!;
-
-        _songDb = (SongDb<MaiMaiSong>)field.GetValue(_maiMaiDx)!;
+        _songDb = _maiMaiDx.SongDb;
         _allNet = new AllNetDataFetcher(_songDb);
+        _divingFish = new DivingFishDataFetcher(_songDb);
     }
 
 
@@ -60,5 +57,29 @@ public class MaiMaiDxTest
         var res = await _allNet.GetRating(m);
 
         Assert.That(res.Rating > 0);
+    }
+
+    [Test]
+    public async Task DivingFish_Should_Fetch_Rating_By_Username_When_DevToken_Configured()
+    {
+        try
+        {
+            _ = ConfigurationManager.Configuration.DivingFish.DevToken;
+        }
+        catch (MissingConfigurationException)
+        {
+            Assert.Ignore("divingFish.devToken is not configured.");
+        }
+
+        var m = new Message(null!, [])
+        {
+            Sender = new SenderInfo(1, "test"),
+            Command = "laplaze".AsMemory()
+        };
+
+        var res = await _divingFish.GetRating(m);
+
+        Assert.That(res.Nickname, Is.Not.Empty);
+        Assert.That(res.Rating, Is.GreaterThan(0));
     }
 }

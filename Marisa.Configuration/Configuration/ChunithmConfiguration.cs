@@ -4,21 +4,12 @@ namespace Marisa.Plugin.Shared.Configuration;
 
 public class ChunithmConfiguration
 {
-    private string? _devToken;
     private string? _tokenLouis;
     private string? _rinNetKeyChip;
     private string? _allNetKeyChip;
 
     public string ResourcePath { get; set; }
     public string TempPath { get; set; }
-
-    public string DevToken
-    {
-        get => ConfigurationManager.RequireString("chunithm.devToken", _devToken);
-        set => _devToken = value;
-    }
-
-    internal string? DevTokenRaw => _devToken;
 
     public string TokenLouis
     {

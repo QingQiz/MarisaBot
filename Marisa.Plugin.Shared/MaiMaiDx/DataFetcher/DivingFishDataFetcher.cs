@@ -1,6 +1,6 @@
 ﻿using Flurl.Http;
+using Marisa.Plugin.Shared.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
@@ -18,30 +18,55 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
-
-        var rep = await "https://www.diving-fish.com/api/maimaidxprober/query/player".PostJsonAsync(
-            username.IsWhiteSpace()
-                ? new { qq, b50       = true }
-                : new { username, b50 = true });
-        return DxRating.FromJson(await rep.GetStringAsync());
+        return await GetScores(message, false);
     }
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var (_, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
+        var scores = await GetScores(message, true);
 
-        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/plate".PostJsonAsync(new
-        {
-            qq, version = MaiMaiSong.Plates
-        });
-
-        var res = await response.GetStringAsync();
-
-        return JObject.Parse(res).SelectToken("$.verlist")!
-            .Select(x => x.ToObject<SongScore>())
-            .ToDictionary(ss => (ss!.Id, ss.LevelIdx))!;
+        return scores.OldScores
+            .Concat(scores.NewScores)
+            .ToDictionary(x => (x.Id, x.LevelIdx), x => x);
     }
+
+    private async Task<DxRating> GetScores(Message message, bool qqOnly)
+    {
+        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
+
+        var uri = username.IsWhiteSpace()
+            ? $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?qq={qq}"
+            : $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?username={username}";
+
+        var response = await uri
+            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
+            .AllowHttpStatus("400,403")
+            .GetAsync();
+
+        if (response.StatusCode is 400 or 403)
+        {
+            var rep = await response.GetJsonAsync<DivingFishErrorResponse>();
+            var errorMessage = rep.Message ?? rep.Msg ?? "Unknown error";
+            throw new HttpRequestException(HttpRequestError.Unknown, $"[DivingFish] {response.StatusCode}: {errorMessage}");
+        }
+
+        var raw = await response.GetJsonAsync<DivingFishDxRatingResponse>();
+
+        return new DxRating
+        {
+            Nickname = raw.Nickname,
+            OldScores = raw.Records
+                .Where(x => !x.Type.Equals("DX", StringComparison.OrdinalIgnoreCase))
+                .ToList(),
+            NewScores = raw.Records
+                .Where(x => x.Type.Equals("DX", StringComparison.OrdinalIgnoreCase))
+                .ToList()
+        };
+    }
+
+    private sealed record DivingFishErrorResponse(string? Message, string? Msg);
+
+    private sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
 
     // public DiffData GetFitDiff(int songId, int levelIdx)
     // {
