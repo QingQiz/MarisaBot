@@ -44,9 +44,14 @@ public static class BotDbContext
 
 public static class RealmExt
 {
+    public static T? FirstOrDefaultByUid<T>(this Realm realm, long uid) where T : IHaveUId, IRealmObject
+    {
+        return realm.All<T>().AsEnumerable().FirstOrDefault(t => t.UId == uid);
+    }
+
     public static T InsertOrUpdateByUid<T>(this Realm realm, T value) where T : IHaveUId, IRealmObject
     {
-        var existing = realm.All<T>().FirstOrDefault(t => t.UId == value.UId);
+        var existing = realm.FirstOrDefaultByUid<T>(value.UId);
 
         if (existing is null)
         {

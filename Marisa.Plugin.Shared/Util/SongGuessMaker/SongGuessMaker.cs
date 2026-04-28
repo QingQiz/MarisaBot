@@ -17,10 +17,8 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         var senderName = message.Sender.Name;
         using var realm = BotDbContext.OpenRealm();
 
-        var exists = realm.All<TSongGuess>().Any(u => u.UId == senderId);
-        var u = exists
-            ? realm.All<TSongGuess>().First(u => u.UId == senderId)
-            : new SongGuess(senderId, senderName).CastTo<TSongGuess>();
+        var u = realm.FirstOrDefaultByUid<TSongGuess>(senderId)
+             ?? new SongGuess(senderId, senderName).CastTo<TSongGuess>();
 
         // 未知的歌，不算
         if (guess == null)
@@ -150,7 +148,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         using var realm = BotDbContext.OpenRealm();
         realm.Write(() =>
         {
-            var guess = realm.All<TSongGuess>().FirstOrDefault(g => g.UId == senderId);
+            var guess = realm.FirstOrDefaultByUid<TSongGuess>(senderId);
             if (guess is not null)
             {
                 guess.Name       =  senderName;
