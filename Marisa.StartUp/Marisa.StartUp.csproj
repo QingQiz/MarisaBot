@@ -5,7 +5,19 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Marisa.StartUp</RootNamespace>
+        <FrontendRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\Marisa.Frontend\'))</FrontendRoot>
+        <FrontendDistRoot>$(FrontendRoot)dist\</FrontendDistRoot>
+        <FrontendIntermediateRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)obj\frontend\'))</FrontendIntermediateRoot>
+        <FrontendRestoreStamp>$(FrontendRoot)node_modules\.frontend-install.stamp</FrontendRestoreStamp>
+        <FrontendBuildStamp>$(FrontendDistRoot).frontend-build.stamp</FrontendBuildStamp>
+        <BuildFrontendCopyStamp>$(FrontendIntermediateRoot)$(Configuration)\$(TargetFramework)\build-copy.stamp</BuildFrontendCopyStamp>
+        <PublishFrontendCopyStamp>$(FrontendIntermediateRoot)$(Configuration)\$(TargetFramework)\publish-copy.stamp</PublishFrontendCopyStamp>
     </PropertyGroup>
+
+    <ItemGroup>
+        <FrontendRestoreInputs Include="$(FrontendRoot)package.json;$(FrontendRoot)package-lock.json"/>
+        <FrontendBuildInputs Include="$(FrontendRoot)src\**\*;$(FrontendRoot)public\**\*;$(FrontendRoot)index.html;$(FrontendRoot)package.json;$(FrontendRoot)package-lock.json;$(FrontendRoot)vite.config.ts;$(FrontendRoot)tsconfig.json;$(FrontendRoot)jsconfig.json;$(FrontendRoot)postcss.config.js;$(FrontendRoot)tailwind.config.js;$(FrontendRoot).eslintrc.js"/>
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Marisa.Backend.NapCat\Marisa.Backend.NapCat.csproj"/>
@@ -19,35 +31,52 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
-    <Target Name="RunWebpack" BeforeTargets="BeforeBuild">
-        <Exec Command="npm install" WorkingDirectory="..\Marisa.Frontend"/>
-        <Exec Command="npx vite build" WorkingDirectory="..\Marisa.Frontend"/>
+    <Target Name="RestoreFrontendPackages"
+            Inputs="@(FrontendRestoreInputs)"
+            Outputs="$(FrontendRestoreStamp)">
+        <Exec Command="npm install" WorkingDirectory="$(FrontendRoot)"/>
+        <Touch Files="$(FrontendRestoreStamp)" AlwaysCreate="true"/>
+    </Target>
+
+    <Target Name="RunWebpack"
+            BeforeTargets="BeforeBuild"
+            DependsOnTargets="RestoreFrontendPackages"
+            Inputs="@(FrontendBuildInputs)"
+            Outputs="$(FrontendBuildStamp);$(FrontendDistRoot)index.html">
+        <Exec Command="npx vite build" WorkingDirectory="$(FrontendRoot)"/>
+        <Touch Files="$(FrontendBuildStamp)" AlwaysCreate="true"/>
     </Target>
 
     <ItemGroup>
         <Content Include="config.yaml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always"/>
     </ItemGroup>
 
-    <Target Name="CopyFilesToBuildOutput" AfterTargets="Build">
+    <Target Name="CopyFilesToBuildOutput"
+            AfterTargets="Build"
+            Inputs="$(FrontendBuildStamp)"
+            Outputs="$(BuildFrontendCopyStamp);$(OutputPath)wwwroot\index.html">
         <ItemGroup>
-            <SourceFiles Include="../Marisa.Frontend/dist/**"/>
+            <SourceFiles Include="$(FrontendDistRoot)**\*" Exclude="$(FrontendBuildStamp)"/>
             <DestinationFiles Include="@(SourceFiles->'$(OutputPath)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')"/>
         </ItemGroup>
 
         <Copy SourceFiles="@(SourceFiles)" DestinationFiles="@(DestinationFiles)" SkipUnchangedFiles="true"/>
-
-        <Message Text="Copied @(CopiedFiles->'%(FullPath)')" Importance="High"/>
+        <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(BuildFrontendCopyStamp)'))"/>
+        <Touch Files="$(BuildFrontendCopyStamp)" AlwaysCreate="true"/>
     </Target>
 
-    <Target Name="CopyFilesToPublishOutput" AfterTargets="Publish">
+    <Target Name="CopyFilesToPublishOutput"
+            AfterTargets="Publish"
+            Inputs="$(FrontendBuildStamp)"
+            Outputs="$(PublishFrontendCopyStamp);$(PublishDir)wwwroot\index.html">
         <ItemGroup>
-            <PublishSourceFiles Include="../Marisa.Frontend/dist/**"/>
+            <PublishSourceFiles Include="$(FrontendDistRoot)**\*" Exclude="$(FrontendBuildStamp)"/>
             <PublishDestinationFiles Include="@(PublishSourceFiles->'$(PublishDir)wwwroot/%(RecursiveDir)%(Filename)%(Extension)')"/>
         </ItemGroup>
 
         <Copy SourceFiles="@(PublishSourceFiles)" DestinationFiles="@(PublishDestinationFiles)" SkipUnchangedFiles="true"/>
-
-        <Message Text="Copied @(CopiedFiles->'%(FullPath)')" Importance="High"/>
+        <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(PublishFrontendCopyStamp)'))"/>
+        <Touch Files="$(PublishFrontendCopyStamp)" AlwaysCreate="true"/>
     </Target>
 
     <PropertyGroup>
