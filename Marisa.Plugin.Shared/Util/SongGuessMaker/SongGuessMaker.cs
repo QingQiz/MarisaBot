@@ -9,7 +9,7 @@ namespace Marisa.Plugin.Shared.Util.SongGuessMaker;
 
 public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
     where TSong : Song
-    where TSongGuess : ISongGuess, IRealmObject, new()
+    where TSongGuess : class, ISongGuess, IRealmObject, new()
 {
     private async Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
     {
