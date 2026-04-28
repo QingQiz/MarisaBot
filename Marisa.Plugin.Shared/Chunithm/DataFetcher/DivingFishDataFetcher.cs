@@ -8,6 +8,11 @@ namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private static List<ChunithmSong>? _songList;
+    private Dictionary<string, ChunithmSong>? _songTitleIndexer;
+
+    private Dictionary<string, ChunithmSong> SongTitleIndexer => _songTitleIndexer ??= SongDb.SongList
+        .GroupBy(song => song.Title, StringComparer.Ordinal)
+        .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
 
     public override List<ChunithmSong> GetSongList()
     {
@@ -26,7 +31,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var scores = await GetScores(message, false);
+        var scores = await GetScoresCore(message, false);
 
         scores.Records.Best = scores.Records.Best.OrderByDescending(x => x.Rating).Take(30).ToArray();
 
@@ -35,14 +40,24 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        var scores = await GetScores(message, true);
+        var scores = await GetScoresCore(message, true);
 
         return scores.Records.Best
             .Where(x => !DeletedSongs.Contains(x.Id))
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
 
-    private async Task<ChunithmRating> GetScores(Message message, bool qqOnly)
+    private async Task<ChunithmRating> GetScoresCore(Message message, bool qqOnly)
+    {
+        var json = await FetchScores(message, qqOnly);
+        json.DataSource = "DivingFish";
+        json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+        json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
+
+        return json;
+    }
+
+    protected virtual async Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
     {
         var (username, qq) = AtOrSelf(message, qqOnly);
 
@@ -61,21 +76,29 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             throw new HttpRequestException(HttpRequestError.Unknown, "[DivingFish] 403: " + rep.message);
         }
 
-        var json = await response.GetJsonAsync<ChunithmRating>();
-        foreach (var r in json.Records.Best.Concat(json.Records.Recent))
+        return await response.GetJsonAsync<ChunithmRating>();
+    }
+
+    private IEnumerable<ChunithmScore> NormalizeRecords(IEnumerable<ChunithmScore> records)
+    {
+        foreach (var record in records)
         {
-            if (SongDb.SongIndexer.ContainsKey(r.Id)) continue;
+            if (SongDb.SongIndexer.ContainsKey(record.Id))
+            {
+                yield return record;
+                continue;
+            }
 
-            r.Id = SongDb.SongList.First(s => s.Title.Equals(r.Title, StringComparison.Ordinal)).Id;
+            if (!SongTitleIndexer.TryGetValue(record.Title, out var matchedSong)) continue;
+
+            record.Id = matchedSong.Id;
+            yield return record;
         }
-        json.DataSource   = "DivingFish";
-        json.Records.Best = json.Records.Best.Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-
-        return json;
     }
 
     public void Reset()
     {
-        _songList = null;
+        _songList         = null;
+        _songTitleIndexer = null;
     }
 }
