@@ -18,8 +18,13 @@ public class MarisaPluginBase
     public virtual Task ExceptionHandler(Exception exception, Message message)
     {
         var log = LogManager.GetCurrentClassLogger();
+        var dumpPath = ExceptionDump.Save(exception, message.ToString(), GetType().FullName);
         
         log.Error($"{exception}\nCasused by message: {message}");
+        if (dumpPath is not null)
+        {
+            log.Error("Exception dump saved to {0}", dumpPath);
+        }
 
         static Exception Unwrap(Exception exception)
         {
