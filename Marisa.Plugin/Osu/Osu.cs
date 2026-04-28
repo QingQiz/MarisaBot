@@ -147,51 +147,61 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
         return id.Id;
     }
 
-    public override async Task BackgroundService()
+    public override async Task BackgroundService(CancellationToken cancellationToken)
     {
         // 1200/minute, with burst capability of up to 200 beyond that
         // > 60/minute, you should probably give peppy a yell
-        while (true)
+        return;
+        /*
+        try
         {
-            var now  = DateTime.Now;
-            var next = now.AddDays(1);
-
-            await Task.Delay(new DateTime(next.Year, next.Month, next.Day) - now);
-
-            using var realm = BotDbContext.OpenRealm();
-
-            var tasks = new Queue<(string OsuUserName, int i, long id)>();
-
-            foreach (var bind in realm.All<OsuBind>())
+            while (!cancellationToken.IsCancellationRequested)
             {
-                tasks.Enqueue((bind.OsuUserName, OsuApi.ModeList.IndexOf(bind.GameMode), bind.OsuUserId));
-            }
+                var now  = DateTime.Now;
+                var next = now.AddDays(1);
 
-            while (tasks.Count != 0)
-            {
-                var task = tasks.Dequeue();
+                await Task.Delay(new DateTime(next.Year, next.Month, next.Day) - now, cancellationToken);
 
-                try
+                using var realm = BotDbContext.OpenRealm();
+
+                var tasks = new Queue<(string OsuUserName, int i, long id)>();
+
+                foreach (var bind in realm.All<OsuBind>())
                 {
-                    var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i);
-                    realm.Write(() => realm.Add(new OsuUserHistory
+                    tasks.Enqueue((bind.OsuUserName, OsuApi.ModeList.IndexOf(bind.GameMode), bind.OsuUserId));
+                }
+
+                while (tasks.Count != 0 && !cancellationToken.IsCancellationRequested)
+                {
+                    var task = tasks.Dequeue();
+
+                    try
                     {
-                        Id           = BotDbContext.NextId<OsuUserHistory>(realm),
-                        OsuUserName  = task.OsuUserName,
-                        OsuUserId    = task.id,
-                        Mode         = task.i,
-                        UserInfo     = result.ToJson(),
-                        CreationTime = DateTimeOffset.Now
-                    }));
+                        var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i);
+                        realm.Write(() => realm.Add(new OsuUserHistory
+                        {
+                            Id           = BotDbContext.NextId<OsuUserHistory>(realm),
+                            OsuUserName  = task.OsuUserName,
+                            OsuUserId    = task.id,
+                            Mode         = task.i,
+                            UserInfo     = result.ToJson(),
+                            CreationTime = DateTimeOffset.Now
+                        }));
+                    }
+                    catch (FlurlHttpException e) when (e.StatusCode != 404)
+                    {
+                        tasks.Enqueue(task);
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 }
-                catch (FlurlHttpException e) when (e.StatusCode != 404)
-                {
-                    tasks.Enqueue(task);
-                }
-                await Task.Delay(TimeSpan.FromSeconds(1));
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
         // ReSharper disable once FunctionNeverReturns
+        */
     }
 
     public override Task ExceptionHandler(Exception exception, Message message)

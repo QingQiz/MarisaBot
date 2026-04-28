@@ -10,7 +10,7 @@ namespace Marisa.BotDriver.Plugin;
 [MarisaPlugin]
 public class MarisaPluginBase
 {
-    public virtual Task BackgroundService()
+    public virtual Task BackgroundService(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

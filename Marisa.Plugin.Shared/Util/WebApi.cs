@@ -1,4 +1,5 @@
-﻿using PuppeteerSharp;
+﻿using System.Runtime.Loader;
+using PuppeteerSharp;
 
 namespace Marisa.Plugin.Shared.Util;
 
@@ -8,6 +9,12 @@ public static class WebApi
     // private const string Frontend = "http://localhost:5173";
     private static IBrowser? _browserInner;
     private static readonly object BrowserLock = new();
+
+    static WebApi()
+    {
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => CloseBrowserOnShutdown();
+        AssemblyLoadContext.Default.Unloading += _ => CloseBrowserOnShutdown();
+    }
 
     public static bool DisableWebApi { get; set; }
 
@@ -44,6 +51,45 @@ public static class WebApi
             Headless = true,
             Args     = ["--force-device-scale-factor=1"]
         });
+    }
+
+    public static async Task CloseBrowserAsync()
+    {
+        IBrowser? browser;
+        lock (BrowserLock)
+        {
+            browser = _browserInner;
+            _browserInner = null;
+        }
+
+        if (browser is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!browser.IsClosed)
+            {
+                await browser.CloseAsync();
+            }
+        }
+        finally
+        {
+            await browser.DisposeAsync();
+        }
+    }
+
+    private static void CloseBrowserOnShutdown()
+    {
+        try
+        {
+            CloseBrowserAsync().GetAwaiter().GetResult();
+        }
+        catch
+        {
+            // Shutdown should not be blocked by browser cleanup errors.
+        }
     }
 
     private static async Task<string> RenderUrl(string url)

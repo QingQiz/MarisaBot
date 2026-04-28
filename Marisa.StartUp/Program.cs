@@ -2,6 +2,7 @@
 using System.Text;
 using Marisa.Backend.NapCat;
 using Marisa.Plugin;
+using Marisa.Plugin.Shared.Util;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,12 @@ public static class Program
         builder.Services.AddExceptionHandler<ExceptionHandler>();
 
         var app = builder.Build();
+        var botDriver = app.Services.GetRequiredService<BotDriver.BotDriver>();
+        app.Lifetime.ApplicationStopping.Register(() =>
+        {
+            botDriver.Stop();
+            WebApi.CloseBrowserAsync().GetAwaiter().GetResult();
+        });
         app.UseSwagger();
         app.UseSwaggerUI();
         app.MapControllers();
@@ -63,6 +70,6 @@ public static class Program
         }
 
         // run
-        await Task.WhenAll(app.RunAsync(), app.Services.GetService<BotDriver.BotDriver>()!.Invoke());
+        await Task.WhenAll(app.RunAsync(), botDriver.Invoke());
     }
 }

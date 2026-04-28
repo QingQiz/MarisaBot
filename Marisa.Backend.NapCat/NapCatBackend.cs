@@ -70,32 +70,38 @@ public class NapCatBackend : BotDriver.BotDriver
     {
         var taskList = new List<Task>();
 
-        while (await MessageQueueProvider.SendQueue.Reader.WaitToReadAsync())
+        try
         {
-            var s = await MessageQueueProvider.SendQueue.Reader.ReadAsync();
-
-            switch (s.Type)
+            while (await MessageQueueProvider.SendQueue.Reader.WaitToReadAsync(ShutdownToken))
             {
-                case MessageType.GroupMessage:
-                    taskList.Add(Task.Run(() => SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId)));
-                    break;
-                case MessageType.FriendMessage:
-                    taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId)));
-                    break;
-                case MessageType.TempMessage:
-                    taskList.Add(Task.Run(() => SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId)));
-                    break;
-                case MessageType.StrangerMessage:
-                    taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId)));
-                    break;
-                default:
-                    throw new InvalidEnumArgumentException();
+                var s = await MessageQueueProvider.SendQueue.Reader.ReadAsync(ShutdownToken);
+
+                switch (s.Type)
+                {
+                    case MessageType.GroupMessage:
+                        taskList.Add(Task.Run(() => SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
+                        break;
+                    case MessageType.FriendMessage:
+                        taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
+                        break;
+                    case MessageType.TempMessage:
+                        taskList.Add(Task.Run(() => SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId), ShutdownToken));
+                        break;
+                    case MessageType.StrangerMessage:
+                        taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
+                        break;
+                    default:
+                        throw new InvalidEnumArgumentException();
+                }
+
+                if (taskList.Count < 100) continue;
+
+                await Task.WhenAll(taskList);
+                taskList.Clear();
             }
-
-            if (taskList.Count < 100) continue;
-
-            await Task.WhenAll(taskList);
-            taskList.Clear();
+        }
+        catch (OperationCanceledException) when (ShutdownToken.IsCancellationRequested)
+        {
         }
 
         await Task.WhenAll(taskList);
@@ -145,9 +151,16 @@ public class NapCatBackend : BotDriver.BotDriver
     public override async Task Invoke()
     {
         await ConnectWithRetry();
-        _receiveTask = Task.Run(ReceiveLoop);
+        _receiveTask = Task.Run(ReceiveLoop, ShutdownToken);
         await InitializeSelfInfo();
         await base.Invoke();
+    }
+
+    public override void Stop()
+    {
+        base.Stop();
+        FailPendingActions(new OperationCanceledException("Application is shutting down", ShutdownToken));
+        CloseSocket();
     }
 
     private async Task InitializeSelfInfo()
@@ -169,7 +182,7 @@ public class NapCatBackend : BotDriver.BotDriver
 
     private async Task ReceiveLoop()
     {
-        while (true)
+        while (!ShutdownToken.IsCancellationRequested)
         {
             try
             {
@@ -192,12 +205,16 @@ public class NapCatBackend : BotDriver.BotDriver
 
                 await HandleEvent(root);
             }
+            catch (OperationCanceledException) when (ShutdownToken.IsCancellationRequested)
+            {
+                break;
+            }
             catch (Exception ex)
             {
                 _logger.Error(ex, "NapCat WebSocket receive loop failed; reconnecting in 5 seconds");
                 FailPendingActions(ex);
                 CloseSocket();
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                await Task.Delay(TimeSpan.FromSeconds(5), ShutdownToken);
             }
         }
     }
@@ -222,7 +239,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 var message = ConvertMessageEvent(root);
                 if (message is not null)
                 {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message, ShutdownToken);
                 }
 
                 break;
@@ -232,7 +249,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 var message = ConvertNoticeEvent(root);
                 if (message is not null)
                 {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message, ShutdownToken);
                 }
 
                 break;
@@ -242,7 +259,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 var message = ConvertRequestEvent(root);
                 if (message is not null)
                 {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message, ShutdownToken);
                 }
 
                 break;
@@ -252,7 +269,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 var message = ConvertMessageEvent(root, isSentBySelf: true);
                 if (message is not null)
                 {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message, ShutdownToken);
                 }
 
                 break;
@@ -262,7 +279,7 @@ public class NapCatBackend : BotDriver.BotDriver
                 var message = ConvertMetaEvent(root);
                 if (message is not null)
                 {
-                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message);
+                    await MessageQueueProvider.RecvQueue.Writer.WriteAsync(message, ShutdownToken);
                 }
 
                 break;
@@ -632,7 +649,7 @@ public class NapCatBackend : BotDriver.BotDriver
         try
         {
             await SendText(request);
-            var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30));
+            var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(30), ShutdownToken);
 
             if (ReadString(response, "status") != "ok" || ReadLong(response, "retcode", 0) != 0)
             {
@@ -656,10 +673,10 @@ public class NapCatBackend : BotDriver.BotDriver
         }
 
         var bytes = Encoding.UTF8.GetBytes(text);
-        await _sendLock.WaitAsync();
+        await _sendLock.WaitAsync(ShutdownToken);
         try
         {
-            await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, ShutdownToken);
         }
         finally
         {
@@ -675,7 +692,7 @@ public class NapCatBackend : BotDriver.BotDriver
 
         do
         {
-            result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), ShutdownToken);
             if (result.MessageType == WebSocketMessageType.Close) return null;
             stream.Write(buffer, 0, result.Count);
         } while (!result.EndOfMessage);
@@ -707,12 +724,12 @@ public class NapCatBackend : BotDriver.BotDriver
 
     private async Task ConnectWithRetry()
     {
-        await _connectLock.WaitAsync();
+        await _connectLock.WaitAsync(ShutdownToken);
         try
         {
             if (_socket?.State == WebSocketState.Open) return;
 
-            while (true)
+            while (!ShutdownToken.IsCancellationRequested)
             {
                 try
                 {
@@ -724,7 +741,7 @@ public class NapCatBackend : BotDriver.BotDriver
                         socket.Options.SetRequestHeader("Authorization", $"Bearer {_config.Token}");
                     }
 
-                    await socket.ConnectAsync(_endpoint, CancellationToken.None);
+                    await socket.ConnectAsync(_endpoint, ShutdownToken);
                     _socket = socket;
                     _logger.Info($"Connected to NapCat OneBot WebSocket: {_endpoint}");
                     return;
@@ -732,9 +749,11 @@ public class NapCatBackend : BotDriver.BotDriver
                 catch (Exception ex)
                 {
                     _logger.Warn(ex, $"Failed to connect NapCat OneBot WebSocket {_endpoint}; retrying in 5 seconds");
-                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    await Task.Delay(TimeSpan.FromSeconds(5), ShutdownToken);
                 }
             }
+
+            throw new OperationCanceledException(ShutdownToken);
         }
         finally
         {

@@ -22,6 +22,9 @@ public abstract class BotDriver(
     protected readonly MessageQueueProvider MessageQueueProvider = messageQueueProvider;
     protected readonly MessageDispatcher MessageDispatcher = new(pluginsAll, serviceProvider, dict);
     protected readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly CancellationTokenSource _shutdown = new();
+
+    protected CancellationToken ShutdownToken => _shutdown.Token;
 
     /// <summary>
     /// 配置依赖注入
@@ -59,10 +62,17 @@ public abstract class BotDriver(
     /// <exception cref="Exception"></exception>
     protected virtual async Task ProcMessage()
     {
-        while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync())
+        try
         {
-            var message = await MessageQueueProvider.RecvQueue.Reader.ReadAsync();
-            _ = ProcMessageStep(message);
+            while (await MessageQueueProvider.RecvQueue.Reader.WaitToReadAsync(ShutdownToken))
+            {
+                var message = await MessageQueueProvider.RecvQueue.Reader.ReadAsync(ShutdownToken);
+                _ = ProcMessageStep(message);
+            }
+        }
+        catch (OperationCanceledException) when (ShutdownToken.IsCancellationRequested)
+        {
+            return;
         }
 
         Logger.Fatal("Message processing task exited unexpectedly");
@@ -121,8 +131,18 @@ public abstract class BotDriver(
     public virtual async Task Invoke()
     {
         await Task.WhenAll(
-            Task.WhenAll(pluginsAll.Select(p => p.BackgroundService())),
+            Task.WhenAll(pluginsAll.Select(p => p.BackgroundService(ShutdownToken))),
             RecvMessage(), SendMessage(), ProcMessage()
         );
+    }
+
+    public virtual void Stop()
+    {
+        if (_shutdown.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _shutdown.Cancel();
     }
 }
