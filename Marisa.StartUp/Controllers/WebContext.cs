@@ -55,10 +55,10 @@ public class WebContext : Controller
             return output;
         }
 
-        var obj = Plugin.Shared.Extension.WebContext.Get(id, name);
+        var obj = Plugin.Shared.Util.WebContext.Get(id, name);
         var str = obj is string ? obj.ToString()! : JsonConvert.SerializeObject(obj);
 
-        Task.Run(() => Plugin.Shared.Extension.WebContext.Dump(id, name, str));
+        Task.Run(() => Plugin.Shared.Util.WebContext.Dump(id, name, str));
 
         return str;
     }

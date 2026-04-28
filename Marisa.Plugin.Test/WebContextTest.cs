@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Marisa.Plugin.Shared.Extension;
+using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Test;
 

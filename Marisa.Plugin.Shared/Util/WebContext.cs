@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 
-namespace Marisa.Plugin.Shared.Extension;
+namespace Marisa.Plugin.Shared.Util;
 
 public class WebContext
 {
