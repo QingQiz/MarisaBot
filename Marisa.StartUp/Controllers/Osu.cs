@@ -1,7 +1,7 @@
 ﻿using Flurl.Http;
+using Marisa.Plugin.Shared.Extension;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
-using Marisa.Plugin.Shared.Util;
 using Microsoft.AspNetCore.Mvc;
 using Image = SixLabors.ImageSharp.Image;
 
@@ -61,9 +61,10 @@ public class Osu : Controller
             ? OsuApi.GetBeatmapPathByBeatmapId(beatmapsetId, beatmapId)
             : OsuApi.GetBeatmapPath(beatmapsetId, beatmapChecksum, beatmapId);
 
-        if (OsuApi.TryGetBeatmapCover(beatmapPath, out var coverPath))
+        if (OsuApi.TryGetBeatmapCover(beatmapPath, out var coverPath) && !string.IsNullOrWhiteSpace(coverPath))
         {
-            return new FileStreamResult(Image.Load(coverPath).ToStream(), "image/png");
+            using var cover = Image.Load(coverPath);
+            return new FileStreamResult(cover.ToStream(), "image/png");
         }
 
         throw new FileNotFoundException("Not Found");
