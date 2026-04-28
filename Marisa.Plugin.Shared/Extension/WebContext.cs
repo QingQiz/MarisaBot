@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 
-namespace Marisa.BotDriver.Extension;
+namespace Marisa.Plugin.Shared.Extension;
 
 public class WebContext
 {

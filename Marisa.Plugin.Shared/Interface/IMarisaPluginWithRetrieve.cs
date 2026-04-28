@@ -1,7 +1,6 @@
 ﻿using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Markdig.Helpers;
 
 namespace Marisa.Plugin.Shared.Interface;
 
@@ -382,7 +381,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                 case "=": return a == b;
             }
 
-            if (!b[0].IsDigit() || !a[0].IsDigit())
+            if (!char.IsDigit(b[0]) || !char.IsDigit(a[0]))
             {
                 return false;
             }
@@ -452,7 +451,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
     private static ReadOnlyMemory<char> GetKeyword(ReadOnlyMemory<char> search, List<ReadOnlyMemory<char>> expr)
     {
-        return expr.Aggregate(search, (current, e) => current.Replace(e, ReadOnlyMemory<char>.Empty));
+        return expr.Aggregate(search, static (current, expression) => current.Replace(expression, ReadOnlyMemory<char>.Empty));
     }
 
     private static async Task<MarisaPluginTaskState> SearchSong<T>(SongDb<T> songDb, Message message) where T : Song

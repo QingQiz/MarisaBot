@@ -1,4 +1,4 @@
-﻿namespace Marisa.Plugin.Shared.Util;
+﻿namespace Marisa.Plugin.Shared.Extension;
 
 public static class ListExt
 {

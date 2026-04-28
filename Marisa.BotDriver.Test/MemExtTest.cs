@@ -1,4 +1,4 @@
-﻿using Marisa.BotDriver.Extension;
+﻿using Marisa.Plugin.Shared.Extension;
 using NUnit.Framework;
 
 namespace Marisa.BotDriver.Test;

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Marisa.BotDriver.Extension;
+namespace Marisa.Plugin.Shared.Extension;
 
 public static class MemoryExt
 {
@@ -202,17 +202,30 @@ public static class MemoryExt
 
     public static ReadOnlyMemory<char> Replace(this ReadOnlyMemory<char> input, ReadOnlyMemory<char> from, ReadOnlyMemory<char> to)
     {
-        var sb = new StringBuilder();
+        if (from.IsEmpty)
+            return input;
 
-        foreach (var s in input.Split(from))
+        var source = input.Span;
+        var target = from.Span;
+        var replacement = to.Span;
+        var start = 0;
+        var sb = new StringBuilder(input.Length);
+
+        while (start < source.Length)
         {
-            sb.Append(s);
-            sb.Append(to);
+            var index = source[start..].IndexOf(target);
+            if (index < 0)
+            {
+                sb.Append(source[start..]);
+                break;
+            }
+
+            sb.Append(source.Slice(start, index));
+            sb.Append(replacement);
+            start += index + target.Length;
         }
 
-        var mem = sb.ToString().AsMemory();
-
-        return mem[..^to.Length];
+        return sb.ToString().AsMemory();
     }
 
     public static ReadOnlyMemory<char> Replace(this ReadOnlyMemory<char> input, string from, string to)

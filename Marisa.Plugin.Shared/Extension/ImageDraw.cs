@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 
-namespace Marisa.Plugin.Shared.Util;
+namespace Marisa.Plugin.Shared.Extension;
 
 public static class ImageDraw
 {

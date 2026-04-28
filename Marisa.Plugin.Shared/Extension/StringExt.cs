@@ -2,7 +2,7 @@
 using System.Text;
 using SixLabors.Fonts;
 
-namespace Marisa.Plugin.Shared.Util;
+namespace Marisa.Plugin.Shared.Extension;
 
 public static class StringExt
 {
