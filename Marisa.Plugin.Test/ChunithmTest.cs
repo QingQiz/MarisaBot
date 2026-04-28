@@ -2,7 +2,7 @@
 using System.IO;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
 

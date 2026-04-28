@@ -2,7 +2,7 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Marisa.Plugin.Shared.Configuration;
+namespace Marisa.Configuration;
 
 public static class ConfigurationManager
 {

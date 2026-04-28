@@ -1,6 +1,6 @@
 ﻿#pragma warning disable CS8618
 
-namespace Marisa.Plugin.Shared.Configuration;
+namespace Marisa.Configuration;
 
 public class ArcaeaConfiguration
 {

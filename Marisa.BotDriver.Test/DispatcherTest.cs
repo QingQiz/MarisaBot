@@ -7,7 +7,7 @@ using Marisa.Database;
 using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;

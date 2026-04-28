@@ -1,5 +1,5 @@
 ﻿using Flurl.Http;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
 

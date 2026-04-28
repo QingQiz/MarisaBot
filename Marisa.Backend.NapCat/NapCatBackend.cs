@@ -9,7 +9,7 @@ using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.BotDriver.Plugin;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 

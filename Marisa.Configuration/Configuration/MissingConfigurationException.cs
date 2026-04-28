@@ -1,4 +1,4 @@
-namespace Marisa.Plugin.Shared.Configuration;
+namespace Marisa.Configuration;
 
 public sealed class MissingConfigurationException(string key)
     : InvalidOperationException($"Configuration `{key}` is missing")

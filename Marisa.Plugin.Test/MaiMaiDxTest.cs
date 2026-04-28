@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageSender;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util.SongDb;

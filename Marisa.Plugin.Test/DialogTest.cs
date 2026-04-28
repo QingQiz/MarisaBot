@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Extension;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.Util;
 using NUnit.Framework;
 

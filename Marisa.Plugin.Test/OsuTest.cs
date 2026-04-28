@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl.Http;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
 using NUnit.Framework;

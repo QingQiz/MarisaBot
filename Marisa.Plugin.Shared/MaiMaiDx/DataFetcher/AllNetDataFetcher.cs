@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
 using Marisa.Database;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

@@ -2,7 +2,7 @@
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin.Attributes;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using NLog;
 
 namespace Marisa.BotDriver.Plugin;

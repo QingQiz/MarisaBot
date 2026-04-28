@@ -2,7 +2,7 @@
 
 using YamlDotNet.Serialization;
 
-namespace Marisa.Plugin.Shared.Configuration;
+namespace Marisa.Configuration;
 
 public class TodayFortuneEvent
 {

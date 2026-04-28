@@ -12,7 +12,7 @@
 - NapCat config is loaded from `Marisa.StartUp/config.yaml` under `napCat`. Runtime config is not env-driven.
 
 ## Configuration Rules
-- Config lives in `Marisa.Configuration`, but the namespace remains `Marisa.Plugin.Shared.Configuration`.
+- Config lives in `Marisa.Configuration` and the namespace is `Marisa.Configuration`.
 - `ConfigurationManager` is the source of truth for path resolution. `tempPath` and `resourceRoot` are the global roots; feature temp/resource paths are derived from them.
 - `databasePath: bot.db` is intentionally resolved relative to global `tempPath`, not the startup directory.
 - Missing required config is supposed to throw `MissingConfigurationException` from config property getters and be surfaced to users via plugin error handling. Preserve that pattern instead of adding ad hoc null checks.

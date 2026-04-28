@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using Marisa.Database.Entity;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using Realms;
 
 namespace Marisa.Database;

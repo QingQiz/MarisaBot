@@ -7,4 +7,4 @@ global using Marisa.BotDriver.Plugin.Attributes;
 global using Marisa.BotDriver.Plugin.Trigger;
 global using Marisa.BotDriver.Extension;
 global using Marisa.Plugin.Shared;
-global using Marisa.Plugin.Shared.Configuration;
+global using Marisa.Configuration;

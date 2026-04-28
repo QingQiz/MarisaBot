@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Marisa.Plugin.Shared.Configuration;
+using Marisa.Configuration;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
