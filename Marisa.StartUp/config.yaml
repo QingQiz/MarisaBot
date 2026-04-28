@@ -8,6 +8,9 @@ napCat:
   token: 96110
   selfId: 2035872327
 
+divingFish:
+  devToken:
+
 arcaea:
   resourcePath: arcaea
   tempPath:     arcaea
@@ -25,7 +28,6 @@ osu:
 chunithm:
   resourcePath: chunithm
   tempPath:     chunithm
-  devToken:
   tokenLouis:
   rinNetKeyChip: 
   allNetKeyChip: 
