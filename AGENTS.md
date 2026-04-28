@@ -17,6 +17,7 @@
 - `databasePath: bot.db` is intentionally resolved relative to global `tempPath`, not the startup directory.
 - Missing required config is supposed to throw `MissingConfigurationException` from config property getters and be surfaced to users via plugin error handling. Preserve that pattern instead of adding ad hoc null checks.
 - Current shared token layout uses top-level `divingFish.devToken`, not `chunithm.devToken`.
+- Do not commit real secret values from `Marisa.StartUp/config.yaml` (tokens, credentials, local IDs). If config structure changes, update the committed file shape with empty placeholder values and keep any real local values only in the uncommitted working copy.
 
 ## Storage
 - EF Core has been replaced by direct Realm usage in `Marisa.Database`; do not add new EF patterns.
