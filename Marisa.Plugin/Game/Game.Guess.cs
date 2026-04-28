@@ -8,7 +8,6 @@ using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util;
 using Newtonsoft.Json;
-using osu.Game.Extensions;
 using ResourceManager = Marisa.Plugin.Shared.Chunithm.ResourceManager;
 
 namespace Marisa.Plugin.Game;
@@ -101,7 +100,8 @@ public partial class Game
                 return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
             }
 
-            res.AddRange(titles);
+            foreach (var title in titles)
+                res.Add(title);
             mNext.Reply("继续", false);
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);

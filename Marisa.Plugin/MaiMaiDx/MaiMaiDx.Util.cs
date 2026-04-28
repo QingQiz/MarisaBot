@@ -2,7 +2,6 @@
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
-using osu.Game.Extensions;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -24,8 +23,11 @@ public partial class MaiMaiDx
         var raNew = rating.NewScores.Sum(s => s.Ra());
 
         var idSet = new HashSet<(long, int)>();
-        idSet.AddRange(rating.OldScores.Select(s => (s.Id, s.LevelIdx)));
-        idSet.AddRange(rating.NewScores.Select(s => (s.Id, s.LevelIdx)));
+        foreach (var id in rating.OldScores.Select(s => (s.Id, s.LevelIdx)))
+            idSet.Add(id);
+
+        foreach (var id in rating.NewScores.Select(s => (s.Id, s.LevelIdx)))
+            idSet.Add(id);
 
         var newSongList = SongDb.SongList.Where(s => s.Info.IsNew).ToList();
         var oldSongList = SongDb.SongList.Where(s => !s.Info.IsNew).ToList();

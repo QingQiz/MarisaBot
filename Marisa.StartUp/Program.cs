@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using osu.Game.Extensions;
 
 namespace Marisa.StartUp;
 
@@ -25,7 +24,8 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigLogger();
-        builder.Services.AddRange(NapCatBackend.Config(Utils.Assembly().GetTypes()));
+        foreach (var service in NapCatBackend.Config(Utils.Assembly().GetTypes()))
+            builder.Services.Add(service);
         builder.WebHost.UseUrls("http://0.0.0.0:14311");
 
         // use nLog for logging
