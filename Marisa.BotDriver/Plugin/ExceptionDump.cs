@@ -1,7 +1,8 @@
 using System.Text.Json;
+using Marisa.Configuration;
 using NLog;
 
-namespace Marisa.Configuration;
+namespace Marisa.BotDriver.Plugin;
 
 public static class ExceptionDump
 {
