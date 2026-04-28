@@ -44,7 +44,7 @@ public static class BotDbContext
 
 public static class RealmExt
 {
-    public static T? FirstOrDefaultByUid<T>(this Realm realm, long uid) where T : IHaveUId, IRealmObject
+    public static T FirstOrDefaultByUid<T>(this Realm realm, long uid) where T : class, IHaveUId, IRealmObject
     {
         return realm.All<T>().AsEnumerable().FirstOrDefault(t => t.UId == uid);
     }
