@@ -8,6 +8,11 @@ namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private static List<ChunithmSong>? _songList;
+    private Dictionary<string, ChunithmSong>? _songTitleIndexer;
+
+    private Dictionary<string, ChunithmSong> SongTitleIndexer => _songTitleIndexer ??= SongDb.SongList
+        .GroupBy(song => song.Title, StringComparer.Ordinal)
+        .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
 
     public override List<ChunithmSong> GetSongList()
     {
@@ -84,8 +89,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
                 continue;
             }
 
-            var matchedSong = SongDb.SongList.FirstOrDefault(s => s.Title.Equals(record.Title, StringComparison.Ordinal));
-            if (matchedSong == null) continue;
+            if (!SongTitleIndexer.TryGetValue(record.Title, out var matchedSong)) continue;
 
             record.Id = matchedSong.Id;
             yield return record;
@@ -94,6 +98,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public void Reset()
     {
-        _songList = null;
+        _songList         = null;
+        _songTitleIndexer = null;
     }
 }
