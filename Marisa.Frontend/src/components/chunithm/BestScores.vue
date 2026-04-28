@@ -38,7 +38,7 @@ function GetR10Ra() {
             <div class="bg-mask"></div>
             <div class="h-[800px] text-5xl flex w-full bg-top bg-cover relative">
                 <img :src="`/assets/chunithm/pic/kv_logo.png`"
-                     class="absolute object-cover right-0 w-[550px] mt-5 -z-20" alt="logo">
+                     class="absolute object-cover right-0 w-[550px] mt-5 z-10" alt="logo">
                 <div class="info-card">
                     <div class="avatar">
                         <img :src="`/assets/chunithm/pic/logo.png`" alt="avatar">
