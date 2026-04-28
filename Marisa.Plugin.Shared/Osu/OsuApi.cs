@@ -428,13 +428,14 @@ public static partial class OsuApi
                 .ToHashSet();
 
             // 删除除了谱面文件（.osu）和封面 以外的所有文件，从而减小体积
-            Parallel.ForEach(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories), f =>
-            {
-                if (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)) return;
-                if (cover.Contains(Path.GetFileName(f))) return;
+            // 下都下了，先不删
+            // Parallel.ForEach(Directory.GetFiles(path, "*.*", SearchOption.AllDirectories), f =>
+            // {
+            //     if (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)) return;
+            //     if (cover.Contains(Path.GetFileName(f))) return;
 
-                File.Delete(f);
-            });
+            //     File.Delete(f);
+            // });
 
             return GetBeatmapPathByMd5(beatmapsetId, beatmapChecksum);
         }
