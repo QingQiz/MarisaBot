@@ -1,11 +1,14 @@
+using System;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
-using Marisa.Plugin.Osu;
 using Marisa.Plugin.Shared.Util;
 using NUnit.Framework;
+using OsuPlugin = Marisa.Plugin.Osu.Osu;
 
 namespace Marisa.Plugin.Test;
 
@@ -25,7 +28,7 @@ public class CommonExceptionHandlerTest
         const string privateUrl = "http://127.0.0.1:14311/osu/score?name=test";
         const string publicUrl = "http://public.example.com:14311/osu/score?name=test";
 
-        await new Osu().ExceptionHandler(
+        await new OsuPlugin().ExceptionHandler(
             new TargetInvocationException(new WebRenderFailedException(privateUrl, publicUrl, new InvalidOperationException("boom"))),
             message
         );

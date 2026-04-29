@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using WebContextStore = Marisa.Plugin.Shared.Util.WebContext;
 
 namespace Marisa.StartUp.Controllers;
 
@@ -9,14 +10,12 @@ public class WebContext : Controller
 {
     public WebContext()
     {
-        var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
-        // create if not exists
-        Directory.CreateDirectory(path);
+        _ = WebContextStore.EnsureHistoryPath();
     }
 
     private static bool TryReadHistory(Guid id, string name, out string output)
     {
-        var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "WebContextHistory");
+        var path = WebContextStore.EnsureHistoryPath();
 
         if (id == Guid.Empty)
         {
@@ -55,10 +54,10 @@ public class WebContext : Controller
             return output;
         }
 
-        var obj = Plugin.Shared.Util.WebContext.Get(id, name);
+        var obj = WebContextStore.Get(id, name);
         var str = obj is string ? obj.ToString()! : JsonConvert.SerializeObject(obj);
 
-        Task.Run(() => Plugin.Shared.Util.WebContext.Dump(id, name, str));
+        Task.Run(() => WebContextStore.Dump(id, name, str));
 
         return str;
     }
