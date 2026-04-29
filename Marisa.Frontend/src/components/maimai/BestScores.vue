@@ -72,14 +72,42 @@ let ra_old = ref(NaN)
 let ra_new = ref(NaN)
 
 axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
-    json.value   = data.data
+    json.value   = ParseMaiMaiRating(data.data)
     ra_old.value = json.value.charts.sd.reduce((ra, cur) => ra + cur.ra, 0);
     ra_new.value = json.value.charts.dx.reduce((ra, cur) => ra + cur.ra, 0);
 }).catch(err => {
-    err_msg.value = err.response.status + ': ' + err.response.data.message
+    if (axios.isAxiosError(err) && err.response) {
+        err_msg.value = `${err.response.status}: ${err.response.data?.message ?? err.message}`
+        return
+    }
+
+    err_msg.value = err instanceof Error ? err.message : '加载 b50 失败'
 }).finally(() => {
     data_fetched.value = true
 })
+
+function ParseMaiMaiRating(payload: unknown): MaiMaiRating {
+    const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload
+
+    if (!IsMaiMaiRating(parsed)) {
+        throw new Error('b50 数据格式错误')
+    }
+
+    return parsed
+}
+
+function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
+    if (payload == null || typeof payload !== 'object') {
+        return false
+    }
+
+    const rating = payload as Partial<MaiMaiRating>
+
+    return typeof rating.nickname === 'string'
+        && rating.charts != null
+        && Array.isArray(rating.charts.sd)
+        && Array.isArray(rating.charts.dx)
+}
 </script>
 
 <style scoped>

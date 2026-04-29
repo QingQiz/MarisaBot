@@ -191,7 +191,7 @@ public partial class MaiMaiDx
 
         var context = new WebContext();
 
-        context.Put("b50", b50.ToJson());
+        context.Put("b50", b50);
 
         message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
 

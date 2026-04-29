@@ -24,7 +24,7 @@ public class WebContext : Controller
                 var file = Path.GetFileName(i);
                 if (file.StartsWith(name))
                 {
-                    output = System.IO.File.ReadAllText(i);
+                    output = WebContextStore.NormalizeStoredValue(System.IO.File.ReadAllText(i));
                     return true;
                 }
             }
@@ -36,7 +36,7 @@ public class WebContext : Controller
                 var file = Path.GetFileName(i);
                 if (file.StartsWith(name) && file.EndsWith(id.ToString()))
                 {
-                    output = System.IO.File.ReadAllText(i);
+                    output = WebContextStore.NormalizeStoredValue(System.IO.File.ReadAllText(i));
                     return true;
                 }
             }

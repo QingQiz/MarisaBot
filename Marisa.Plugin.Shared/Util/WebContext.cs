@@ -29,7 +29,31 @@ public class WebContext
         var path = EnsureHistoryPath();
 
         var file = Path.Join(path, $"{name}.{id}");
-        File.WriteAllText(file, JsonConvert.SerializeObject(value));
+        File.WriteAllText(file, SerializeForStorage(value));
+    }
+
+    public static string NormalizeStoredValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        var trimmed = value.TrimStart();
+
+        if (!trimmed.StartsWith('"'))
+        {
+            return value;
+        }
+
+        try
+        {
+            return JsonConvert.DeserializeObject<string>(value) ?? value;
+        }
+        catch (JsonException)
+        {
+            return value;
+        }
     }
 
     public WebContext()
@@ -68,5 +92,10 @@ public class WebContext
             throw new KeyNotFoundException($"{name} not found in context {id}");
         }
         throw new KeyNotFoundException($"Context {id} not found");
+    }
+
+    private static string SerializeForStorage(object value)
+    {
+        return value is string str ? str : JsonConvert.SerializeObject(value);
     }
 }
