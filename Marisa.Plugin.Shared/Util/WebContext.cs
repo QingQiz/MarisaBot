@@ -32,30 +32,6 @@ public class WebContext
         File.WriteAllText(file, SerializeForStorage(value));
     }
 
-    public static string NormalizeStoredValue(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return value;
-        }
-
-        var trimmed = value.TrimStart();
-
-        if (!trimmed.StartsWith('"'))
-        {
-            return value;
-        }
-
-        try
-        {
-            return JsonConvert.DeserializeObject<string>(value) ?? value;
-        }
-        catch (JsonException)
-        {
-            return value;
-        }
-    }
-
     public WebContext()
     {
         ContextPool.TryAdd(Id, new ConcurrentDictionary<string, object>());

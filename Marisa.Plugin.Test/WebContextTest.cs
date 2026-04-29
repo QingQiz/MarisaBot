@@ -3,7 +3,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Marisa.Configuration;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using Marisa.Plugin.Shared.Util;
 
@@ -77,15 +76,6 @@ public class WebContextTest
         var historyFile = Path.Join(ConfigurationManager.Configuration.TempPath, "WebContextHistory", $"b50.{context.Id}");
 
         Assert.That(File.ReadAllText(historyFile), Is.EqualTo(rawJson));
-    }
-
-    [Test]
-    public void NormalizeStoredValue_Should_Unwrap_Legacy_Stringified_Json()
-    {
-        var rawJson = "{\"charts\":{\"sd\":[],\"dx\":[]},\"nickname\":\"tester\"}";
-        var storedValue = JsonConvert.SerializeObject(rawJson);
-
-        Assert.That(WebContext.NormalizeStoredValue(storedValue), Is.EqualTo(rawJson));
     }
 
     private static async Task W1(Guid contextId)
