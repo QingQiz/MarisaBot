@@ -68,7 +68,7 @@ public class ExceptionDumpTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(text, Is.EqualTo("出现异常，请稍后再试"));
+            Assert.That(text, Is.EqualTo("出现异常，已上报开发者"));
             Assert.That(text, Does.Not.Contain("boom"));
             Assert.That(text, Does.Not.Contain("InvalidOperationException"));
         });

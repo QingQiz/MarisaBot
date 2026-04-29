@@ -1,14 +1,19 @@
 ﻿using System.Runtime.Loader;
+using Marisa.Configuration;
+using NLog;
 using PuppeteerSharp;
 
 namespace Marisa.Plugin.Shared.Util;
 
 public static class WebApi
 {
-    private const string Frontend = "http://localhost:14311";
-    // private const string Frontend = "http://localhost:5173";
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static IBrowser? _browserInner;
     private static readonly object BrowserLock = new();
+
+    private static string PrivateFrontend => ConfigurationManager.Configuration.Web.PrivateBaseUrl;
+
+    private static string PublicFrontend => ConfigurationManager.Configuration.Web.PublicBaseUrl;
 
     static WebApi()
     {
@@ -99,86 +104,112 @@ public static class WebApi
             return "";
         }
 
-        await using var page = await Browser.NewPageAsync();
+        var privateUrl = CombineUrl(PrivateFrontend, url);
 
-        await page.SetViewportAsync(new ViewPortOptions
+        try
         {
-            Width = 1, Height = 1
-        });
+            await using var page = await Browser.NewPageAsync();
 
-        await page.GoToAsync(url, new NavigationOptions
+            await page.SetViewportAsync(new ViewPortOptions
+            {
+                Width = 1, Height = 1
+            });
+
+            await page.GoToAsync(privateUrl, new NavigationOptions
+            {
+                WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Networkidle2, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded],
+                // Disable Timeout
+                Timeout = 0
+            });
+
+            return await page.ScreenshotBase64Async(ScreenshotOptions);
+        }
+        catch (Exception e)
         {
-            WaitUntil = [WaitUntilNavigation.Networkidle0, WaitUntilNavigation.Networkidle2, WaitUntilNavigation.Load, WaitUntilNavigation.DOMContentLoaded],
-            // Disable Timeout
-            Timeout = 0
-        });
+            var publicUrl  = CombineUrl(PublicFrontend, url);
+            Logger.Warn(e, "Failed to render screenshot for {0}; public URL fallback is {1}", privateUrl, publicUrl);
+            throw new WebRenderFailedException(privateUrl, publicUrl, e);
+        }
+    }
 
-        return await page.ScreenshotBase64Async(ScreenshotOptions);
+    private static string CombineUrl(string baseUrl, string relativeUrl)
+    {
+        if (Uri.TryCreate(relativeUrl, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.ToString();
+        }
+
+        if (relativeUrl.StartsWith('/'))
+        {
+            return $"{baseUrl}{relativeUrl}";
+        }
+
+        return $"{baseUrl}/{relativeUrl}";
     }
 
     public static async Task<string> MaiMaiBest(Guid guid)
     {
-        return await RenderUrl(Frontend + "/maimai/best?id=" + guid);
+        return await RenderUrl("/maimai/best?id=" + guid);
     }
 
     public static async Task<string> MaiMaiRank(Guid guid)
     {
-        return await RenderUrl(Frontend + "/maimai/rank?id=" + guid);
+        return await RenderUrl("/maimai/rank?id=" + guid);
     }
 
     public static async Task<string> OsuScore(string name, int modeInt, int? bpRank, bool recent, bool fail)
     {
-        return await RenderUrl(Frontend + "/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + (bpRank ?? 1) +
+        return await RenderUrl("/osu/score?" + "name=" + name + "&mode=" + modeInt + "&bpRank=" + (bpRank ?? 1) +
                                (recent ? "&recent=" + recent : "") +
                                (fail ? "&fail=" + fail : ""));
     }
 
     public static async Task<string> OsuRecommend(Guid contextId)
     {
-        return await RenderUrl(Frontend + "/osu/recommend?id=" + contextId);
+        return await RenderUrl("/osu/recommend?id=" + contextId);
     }
 
     public static async Task<string> OsuPreview(long beatmapId)
     {
-        return await RenderUrl(Frontend + "/osu/preview?id=" + beatmapId);
+        return await RenderUrl("/osu/preview?id=" + beatmapId);
     }
 
     public static async Task<string> MaiMaiRecommend(Guid contextId)
     {
-        return await RenderUrl(Frontend + "/maimai/recommend?id=" + contextId);
+        return await RenderUrl("/maimai/recommend?id=" + contextId);
     }
 
     public static async Task<string> OngekiSong(int id)
     {
-        return await RenderUrl(Frontend + $"/ongeki/song/{id}");
+        return await RenderUrl($"/ongeki/song/{id}");
     }
 
     public static async Task<string> ChunithmSong(Guid id)
     {
-        return await RenderUrl(Frontend + "/chunithm/song?id=" + id);
+        return await RenderUrl("/chunithm/song?id=" + id);
     }
 
     public static async Task<string> ChunithmSummary(Guid contextId)
     {
-        return await RenderUrl(Frontend + "/chunithm/summary?id=" + contextId);
+        return await RenderUrl("/chunithm/summary?id=" + contextId);
     }
 
     public static async Task<string> ChunithmOverPowerAll(Guid contextId)
     {
-        return await RenderUrl(Frontend + "/chunithm/overpower?id=" + contextId);
+        return await RenderUrl("/chunithm/overpower?id=" + contextId);
     }
 
     public static async Task<string> ChunithmPreview(Guid contextId)
     {
-        return await RenderUrl(Frontend + "/chunithm/preview?id=" + contextId);
+        return await RenderUrl("/chunithm/preview?id=" + contextId);
     }
 
     public static async Task<string> ChunithmBest(Guid contextId, bool b50)
     {
         if (b50)
         {
-            return await RenderUrl(Frontend + $"/chunithm/best?id={contextId}&b50=1");
+            return await RenderUrl($"/chunithm/best?id={contextId}&b50=1");
         }
-        return await RenderUrl(Frontend + $"/chunithm/best?id={contextId}");
+        return await RenderUrl($"/chunithm/best?id={contextId}");
     }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+    osu_beatmapById,
     osu_beatmapCover_builder,
     osu_beatmapInfo,
     GetDiffColor,
@@ -43,7 +44,7 @@ let color_map = computed(() => {
     return color[key_count - 1].split('').map(x => cm[x as keyof typeof cm]);
 })
 
-axios.get("http://localhost:14311/Api/Osu/GetBeatmapById", {params: {beatmapId: beatmapId.value}})
+axios.get(osu_beatmapById, {params: {beatmapId: beatmapId.value}})
     .then(data => {
         d.value       = data.data;
         beatmap.value = parse(data.data);

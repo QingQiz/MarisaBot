@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-export const host = `http://${window.location.host}/Api`
+export const host = `${window.location.origin}/Api`
 
 export const context_get      = host + "/WebContext/Get"
 export const osu_pp           = host + '/Osu/PerformanceCalculator'
@@ -12,6 +12,7 @@ export const osu_beatmapCover = host + '/Osu/GetCover'
 export const osu_recent       = host + '/Osu/GetRecent'
 export const osu_best         = host + '/Osu/GetBest'
 export const osu_beatmapInfo  = host + '/Osu/GetBeatmapInfo'
+export const osu_beatmapById  = host + '/Osu/GetBeatmapById'
 export const osu_getImage     = host + '/Osu/GetImage'
 
 export function osu_accRing_builder(acc: number, modeInt: number) {

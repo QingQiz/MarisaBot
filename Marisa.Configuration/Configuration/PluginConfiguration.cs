@@ -16,6 +16,8 @@ public class PluginConfiguration
 
     public string DatabasePath { get; set; }
 
+    public WebConfiguration Web { get; set; }
+
     public NapCatConfiguration NapCat { get; set; }
 
     public DivingFishConfiguration DivingFish { get; set; }

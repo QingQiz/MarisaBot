@@ -117,6 +117,7 @@ public static class ConfigurationManager
 
     private static void EnsureRequiredSections(PluginConfiguration config)
     {
+        config.Web ??= new WebConfiguration();
         config.NapCat ??= new NapCatConfiguration();
         config.DivingFish ??= new DivingFishConfiguration();
         config.Arcaea ??= new ArcaeaConfiguration();
@@ -130,6 +131,8 @@ public static class ConfigurationManager
 
     private static void WarnMissingConfiguration(PluginConfiguration config)
     {
+        WarnIfEmpty("web.private", config.Web?.Private);
+        WarnIfEmpty("web.public", config.Web?.Public);
         WarnIfEmpty("napCat.endpoint", config.NapCat?.Endpoint);
         WarnIfEmpty("napCat.token", config.NapCat?.Token);
         WarnIfEmpty("napCat.selfId", config.NapCat?.SelfId);

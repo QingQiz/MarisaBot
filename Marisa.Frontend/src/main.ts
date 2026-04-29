@@ -42,7 +42,7 @@ const router = createRouter({
 
 const app = createApp(App)
 
-app.config.globalProperties.$host = 'http://localhost:14311'
+app.config.globalProperties.$host = window.location.origin
 app.use(router).mount('#app')
 
 

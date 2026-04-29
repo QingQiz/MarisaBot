@@ -12,6 +12,7 @@ namespace Marisa.Plugin.Ongeki;
 [MarisaPluginCommand("ongeki", "ogk", "音击")]
 public partial class Ongeki :
     MarisaPluginBase,
+    IHandleCommonException,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<OngekiSong>,
     IMarisaPluginWithCoverGuess<OngekiSong, OngekiGuess>
@@ -36,4 +37,9 @@ public partial class Ongeki :
     public SongGuessMaker<OngekiSong, OngekiGuess> SongGuessMaker { get; }
 
     public SongDb<OngekiSong> SongDb { get; }
+
+    public override Task ExceptionHandler(Exception exception, Message message)
+    {
+        return CommonExceptionHandler.HandleCommonExceptionOr(exception, message, () => base.ExceptionHandler(exception, message));
+    }
 }

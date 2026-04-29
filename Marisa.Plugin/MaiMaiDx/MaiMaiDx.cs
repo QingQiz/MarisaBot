@@ -14,6 +14,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [MarisaPluginCommand("maimai", "mai", "舞萌")]
 public partial class MaiMaiDx :
     MarisaPluginBase,
+    IHandleCommonException,
     ICanReset,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<MaiMaiSong>,
@@ -60,7 +61,12 @@ public partial class MaiMaiDx :
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {
-        switch (exception)
+        if (CommonExceptionHandler.TryHandleCommonException(exception, message))
+        {
+            return Task.CompletedTask;
+        }
+
+        switch (CommonExceptionHandler.UnwrapCommonException(exception))
         {
             case FlurlHttpException { StatusCode: 400 }:
                 message.Reply("“查无此人”");
@@ -81,8 +87,7 @@ public partial class MaiMaiDx :
                 message.Reply(e.Message);
                 break;
             default:
-                base.ExceptionHandler(exception, message);
-                break;
+                return base.ExceptionHandler(exception, message);
         }
         return Task.CompletedTask;
     }

@@ -3,6 +3,10 @@ resourceRoot: E:\MarisaBot\Marisa.Frontend\public\assets
 databasePath: bot.db
 ffmpegPath:   D:\Software\anaconda3\envs\PNP\Library\bin\ffmpeg.exe
 
+web:
+  private: 127.0.0.1:14311
+  public: localhost:14311
+
 napCat:
   endpoint: ws://127.0.0.1:31001
   token: 96110
@@ -20,8 +24,8 @@ game:
   tempPath:     game
 
 osu:
-  clientId:     
-  clientSecret: 
+  clientId:
+  clientSecret:
   tempPath:     osu
   resourcePath:
 
@@ -29,8 +33,8 @@ chunithm:
   resourcePath: chunithm
   tempPath:     chunithm
   tokenLouis:
-  rinNetKeyChip: 
-  allNetKeyChip: 
+  rinNetKeyChip:
+  allNetKeyChip:
   
 ongeki:
   resourcePath: ongeki

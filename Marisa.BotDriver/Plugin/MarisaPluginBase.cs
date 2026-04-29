@@ -54,7 +54,7 @@ public class MarisaPluginBase
             return Task.CompletedTask;
         }
 
-        message.Send(new MessageDataText("出现异常，请等待修复"));
+        message.Send(new MessageDataText("出现异常，已上报开发者"));
 
         return Task.CompletedTask;
     }

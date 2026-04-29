@@ -17,6 +17,7 @@ namespace Marisa.Plugin.Chunithm;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class Chunithm :
     MarisaPluginBase,
+    IHandleCommonException,
     ICanReset,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<ChunithmSong>,
@@ -54,7 +55,12 @@ public partial class Chunithm :
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {
-        switch (exception)
+        if (CommonExceptionHandler.TryHandleCommonException(exception, message))
+        {
+            return Task.CompletedTask;
+        }
+
+        switch (CommonExceptionHandler.UnwrapCommonException(exception))
         {
             case FlurlHttpException { StatusCode: 400 }:
                 message.Reply("“查无此人”");
@@ -75,8 +81,7 @@ public partial class Chunithm :
                 message.Reply(e.Message);
                 break;
             default:
-                base.ExceptionHandler(exception, message);
-                break;
+                return base.ExceptionHandler(exception, message);
         }
         return Task.CompletedTask;
     }

@@ -11,7 +11,7 @@ namespace Marisa.Plugin.Osu;
 [MarisaPlugin(PluginPriority.Osu)]
 [MarisaPluginDoc("音游 osu! 的相关功能，在子命令中可以使用 [name][#rank][:mode] 指定查询目标")]
 [MarisaPluginCommand("osu!", "osu！", "osu", "o", "!", "！")]
-public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
+public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommonException
 {
     private static readonly HashSet<string> Debounce = [];
 
@@ -206,11 +206,6 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp
 
     public override Task ExceptionHandler(Exception exception, Message message)
     {
-        if (exception is MissingConfigurationException || exception.InnerException is MissingConfigurationException)
-        {
-            return base.ExceptionHandler(exception, message);
-        }
-
-        return base.ExceptionHandler(exception, message);
+        return CommonExceptionHandler.HandleCommonExceptionOr(exception, message, () => base.ExceptionHandler(exception, message));
     }
 }
