@@ -11,6 +11,7 @@
 - Runtime message transport is `Marisa.Backend.NapCat`; startup wires `NapCatBackend.Config(Utils.Assembly().GetTypes())`.
 - Plugin discovery is reflection-based. `BotDriver.Config(...)` only registers types from the `Marisa.Plugin` assembly with `[MarisaPlugin]`, skips `[MarisaPluginDisabled]`, and orders them by plugin priority.
 - `Marisa.Plugin` contains concrete bot plugins. `Marisa.Plugin.Shared` and `Marisa.Plugin.Shared.FSharp` hold shared game/data logic. `Marisa.BotDriver` owns dispatch and plugin exception handling.
+- For `Marisa.Plugin/MaiMaiDx`, keep helper/utility functions in `MaiMaiDx.Utils.cs`; keep `MaiMaiDx.cs` focused on plugin wiring and lifecycle.
 
 ## Configuration
 - `Marisa.Configuration.ConfigurationManager` is the source of truth. Relative paths are resolved from repo/config-root heuristics, not just the current working directory.

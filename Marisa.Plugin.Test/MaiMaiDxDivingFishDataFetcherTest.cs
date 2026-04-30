@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageSender;
@@ -13,6 +14,29 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiDxDivingFishDataFetcherTest
 {
+    [Test]
+    public void BuildVersionList_Should_Deduplicate_And_Keep_Chronological_Order()
+    {
+        var songs = new List<MaiMaiSong>
+        {
+            CreateSong(300, false, "maimai でらっくす FESTiVAL"),
+            CreateSong(100, false, "maimai"),
+            CreateSong(200, false, "maimai でらっくす"),
+            CreateSong(400, false, "maimai でらっくす FESTiVAL"),
+            CreateSong(250, false, "maimai でらっくす")
+        };
+
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("BuildVersionList", BindingFlags.NonPublic | BindingFlags.Static);
+        var versions = (IReadOnlyList<string>)method!.Invoke(null, [songs])!;
+
+        Assert.That(versions, Is.EqualTo(new[]
+        {
+            "maimai",
+            "maimai でらっくす",
+            "maimai でらっくす FESTiVAL"
+        }));
+    }
+
     [Test]
     public async Task GetRating_Should_Keep_Top_35_Old_And_Top_15_New_By_IsNew()
     {
@@ -53,7 +77,7 @@ public class MaiMaiDxDivingFishDataFetcherTest
         });
     }
 
-    private static MaiMaiSong CreateSong(long id, bool isNew)
+    private static MaiMaiSong CreateSong(long id, bool isNew, string version = "test")
     {
         dynamic song = new ExpandoObject();
         song.id = id.ToString();
@@ -66,7 +90,7 @@ public class MaiMaiDxDivingFishDataFetcherTest
         basicInfo.genre = "genre";
         basicInfo.bpm = 120;
         basicInfo.release_date = "2024-01-01";
-        basicInfo.from = "test";
+        basicInfo.from = version;
         basicInfo.is_new = isNew;
         song.basic_info = basicInfo;
 

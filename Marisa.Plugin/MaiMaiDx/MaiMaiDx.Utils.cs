@@ -1,4 +1,4 @@
-﻿using Marisa.Database;
+using Marisa.Database;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -7,6 +7,24 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    private string[]? _versions;
+
+    private string[] Versions => _versions ??= BuildVersionList(SongDb.SongList);
+
+    private void ResetCaches()
+    {
+        _versions = null;
+    }
+
+    private static string[] BuildVersionList(IReadOnlyList<MaiMaiSong> songs)
+    {
+        return [.. songs
+            .Where(song => !string.IsNullOrWhiteSpace(song.Version))
+            .GroupBy(song => song.Version, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(group => group.Min(song => song.Id))
+            .Select(group => group.First().Version)];
+    }
+
     #region recommend
 
     private (List<(MaiMaiSong, int, double, int)> listOld, List<(MaiMaiSong, int, double, int)> listNew, bool)

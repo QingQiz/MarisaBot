@@ -334,7 +334,7 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
-        var version = MaiMaiSong.Plates.FirstOrDefault(p =>
+        var version = Versions.FirstOrDefault(p =>
             p.Equals(message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (version == null)
@@ -346,7 +346,7 @@ public partial class MaiMaiDx
 
             if (v.Count == 0)
             {
-                message.Reply("可用的版本号有：\n" + string.Join('\n', MaiMaiSong.Plates) + "\n（或者你也可以用一些别名）");
+                message.Reply("可用的版本号有：\n" + string.Join('\n', Versions) + "\n（或者你也可以用一些别名）");
                 return MarisaPluginTaskState.CompletedTask;
             }
 

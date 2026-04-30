@@ -49,6 +49,7 @@ public partial class MaiMaiDx :
 
     public void Reset()
     {
+        ResetCaches();
         SongDb.Reset();
         _dataFetchers.Clear();
     }

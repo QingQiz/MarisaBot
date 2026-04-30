@@ -16,28 +16,6 @@ public class MaiMaiSong : Song
         Color.FromRgb(219, 170, 255)
     ];
 
-    public static readonly string[] Plates =
-    [
-        "maimai",
-        "maimai PLUS",
-        "maimai GreeN",
-        "maimai GreeN PLUS",
-        "maimai ORANGE",
-        "maimai ORANGE PLUS",
-        "maimai PiNK",
-        "maimai PiNK PLUS",
-        "maimai MURASAKi",
-        "maimai MURASAKi PLUS",
-        "maimai MiLK",
-        "MiLK PLUS",
-        "maimai FiNALE",
-        "maimai でらっくす",
-        "maimai でらっくす Splash",
-        "maimai でらっくす UNiVERSE",
-        "maimai でらっくす FESTiVAL",
-        "maimai でらっくす BUDDiES"
-    ];
-
     public static readonly List<string> LevelNameAll =
     [
         "Basic",

@@ -1,5 +1,4 @@
 using System.Reflection;
-using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Shared.Interface;
 
