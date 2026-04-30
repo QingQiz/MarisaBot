@@ -329,50 +329,59 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取版本的成绩汇总，参数为：版本名")]
+    [MarisaPluginDoc("获取版本的成绩汇总，无参数，使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
-        var version = Versions.FirstOrDefault(p =>
-            p.Equals(message.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+        var versions = Versions;
 
-        if (version == null)
+        if (versions.Length == 0)
         {
-            var v = ConfigurationManager.Configuration.MaiMai.Version
-                .Where(x => x.Value
-                    .Contains(message.Command.Trim(), StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (v.Count == 0)
-            {
-                message.Reply("可用的版本号有：\n" + string.Join('\n', Versions) + "\n（或者你也可以用一些别名）");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-
-            version = v.First().Key;
+            message.Reply("暂无可用版本数据");
+            return MarisaPluginTaskState.CompletedTask;
         }
 
-        var versions = version.Split(',');
+        message.Reply("请选择版本（序号）：\n\n" + string.Join('\n', versions
+            .Select((version, index) => $"{index}. {version}"))
+        );
 
-        var fetcher = GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), async next =>
+        {
+            var command = next.Command.Trim();
 
-        var groupedSong = SongDb.SongList
-            .Where(song => versions.Contains(song.Version, StringComparer.OrdinalIgnoreCase))
-            .Select(song => song.Constants
-                .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s)
-            .Where(data => data.i == 3)
-            .OrderByDescending(x => x.constant)
-            .GroupBy(x => x.song.Levels[x.i]);
+            if (!int.TryParse(command.Span, out var index) || index < 0 || index >= versions.Length)
+            {
+                next.Reply("错误的序号，会话已关闭");
+                return MarisaPluginTaskState.Canceled;
+            }
 
-        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
+            await ReplyVersionSummary(next, versions[index]);
 
-        // 不可能是 null
-        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+            return MarisaPluginTaskState.CompletedTask;
+        });
 
         return MarisaPluginTaskState.CompletedTask;
+
+        async Task ReplyVersionSummary(Message replyMessage, string version)
+        {
+            var fetcher = GetDataFetcher(message);
+            var scores  = await fetcher.GetScores(message);
+
+            var groupedSong = SongDb.SongList
+                .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
+                .Select(song => song.Constants
+                    .Select((constant, i) => (constant, i, song)))
+                .SelectMany(s => s)
+                .Where(data => data.i == 3)
+                .OrderByDescending(x => x.constant)
+                .GroupBy(x => x.song.Levels[x.i]);
+
+            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
+
+            // 不可能是 null
+            replyMessage.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        }
     }
 
     [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]

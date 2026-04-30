@@ -12,6 +12,8 @@
 - Plugin discovery is reflection-based. `BotDriver.Config(...)` only registers types from the `Marisa.Plugin` assembly with `[MarisaPlugin]`, skips `[MarisaPluginDisabled]`, and orders them by plugin priority.
 - `Marisa.Plugin` contains concrete bot plugins. `Marisa.Plugin.Shared` and `Marisa.Plugin.Shared.FSharp` hold shared game/data logic. `Marisa.BotDriver` owns dispatch and plugin exception handling.
 - For `Marisa.Plugin/MaiMaiDx`, keep helper/utility functions in `MaiMaiDx.Utils.cs`; keep `MaiMaiDx.cs` focused on plugin wiring and lifecycle.
+- Do not add backward-compatibility shims for removed config or legacy behavior unless the task explicitly requires them; prefer clean removal of obsolete paths.
+- In message handlers, if a local helper function is only used by one method, prefer placing it after the main flow's `return` so the primary logic stays top-to-bottom.
 
 ## Configuration
 - `Marisa.Configuration.ConfigurationManager` is the source of truth. Relative paths are resolved from repo/config-root heuristics, not just the current working directory.
@@ -22,6 +24,8 @@
 - Required config is supposed to fail through `MissingConfigurationException`; `MarisaPluginBase.ExceptionHandler(...)` turns that into a user-facing reply. Preserve that flow instead of adding ad hoc null checks.
 - Shared DivingFish auth lives at top-level `divingFish.devToken`.
 - If you touch `Marisa.StartUp/config.yaml`, scrub real tokens, IDs, and machine-local paths before commit. The committed file should keep structure, not live secrets.
+- `Marisa.StartUp/config.yaml` may be locally marked `assume-unchanged`. When a config change must be committed, first run `git update-index --no-assume-unchanged Marisa.StartUp/config.yaml`, then stage and commit or amend only the scrubbed file, and finally restore the flag with `git update-index --assume-unchanged Marisa.StartUp/config.yaml`.
+- After committing the scrubbed `config.yaml`, if local runtime secrets are still needed, restore them only in the working tree; do not put them back into Git history or the index.
 
 ## Storage
 - Active persistence is Realm in `Marisa.Database`; `Marisa.EntityFrameworkCore` is not part of `Marisa.sln`.

@@ -18,11 +18,7 @@ public partial class MaiMaiDx
 
     private static string[] BuildVersionList(IReadOnlyList<MaiMaiSong> songs)
     {
-        return [.. songs
-            .Where(song => !string.IsNullOrWhiteSpace(song.Version))
-            .GroupBy(song => song.Version, StringComparer.OrdinalIgnoreCase)
-            .OrderBy(group => group.Min(song => song.Id))
-            .Select(group => group.First().Version)];
+        return VersionOrderHelper.BuildVersionList(songs, song => song.Version, song => song.Id);
     }
 
     #region recommend

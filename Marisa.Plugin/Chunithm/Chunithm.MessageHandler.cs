@@ -321,40 +321,60 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取版本的成绩汇总，参数为：版本名")]
+    [MarisaPluginDoc("获取版本的成绩汇总，无参数，使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
         var fetcher = await GetDataFetcher(message);
+        var songList = fetcher.GetSongList();
 
-        var versions = fetcher.GetSongList().Select(song => song.Version).Distinct().ToArray();
+        var versions = VersionOrderHelper.BuildVersionList(songList, song => song.Version, song => song.Id);
 
-        var version = versions.FirstOrDefault(p =>
-            message.Command.Trim().Equals(p, StringComparison.OrdinalIgnoreCase));
-
-        if (version == null)
+        if (versions.Length == 0)
         {
-            message.Reply("可用的版本有：\n" + string.Join('\n', versions));
+            message.Reply("暂无可用版本数据");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var scores = await fetcher.GetScores(message);
+        message.Reply("请选择版本（序号）：\n\n" + string.Join('\n', versions
+            .Select((version, index) => $"{index}. {version}"))
+        );
 
-        var groupedSong = fetcher.GetSongList()
-            .Where(song => song.Version == version)
-            .Select(song => song.Constants
-                .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s)
-            .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
-            .OrderByDescending(x => x.constant)
-            .GroupBy(x => x.song.Levels[x.i]);
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), async next =>
+        {
+            var command = next.Command.Trim();
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+            if (!int.TryParse(command.Span, out var index) || index < 0 || index >= versions.Length)
+            {
+                next.Reply("错误的序号，会话已关闭");
+                return MarisaPluginTaskState.Canceled;
+            }
 
-        message.Reply(MessageDataImage.FromBase64(im));
+            await ReplyVersionSummary(next, versions[index]);
+
+            return MarisaPluginTaskState.CompletedTask;
+        });
 
         return MarisaPluginTaskState.CompletedTask;
+
+        async Task ReplyVersionSummary(Message replyMessage, string version)
+        {
+            var scores = await fetcher.GetScores(message);
+
+            var groupedSong = songList
+                .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
+                .Select(song => song.Constants
+                    .Select((constant, i) => (constant, i, song)))
+                .SelectMany(s => s)
+                .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
+                .OrderByDescending(x => x.constant)
+                .GroupBy(x => x.song.Levels[x.i]);
+
+            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+
+            replyMessage.Reply(MessageDataImage.FromBase64(im));
+        }
     }
 
     [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]

@@ -38,6 +38,33 @@ public class MaiMaiDxDivingFishDataFetcherTest
     }
 
     [Test]
+    public void BuildVersionList_Should_Prefer_Version_Whose_Majority_Ids_Are_Smaller()
+    {
+        var songs = new List<MaiMaiSong>
+        {
+            CreateSong(1, false, "maimai でらっくす FESTiVAL"),
+            CreateSong(300, false, "maimai でらっくす FESTiVAL"),
+            CreateSong(310, false, "maimai でらっくす FESTiVAL"),
+            CreateSong(100, false, "maimai"),
+            CreateSong(110, false, "maimai"),
+            CreateSong(120, false, "maimai"),
+            CreateSong(200, false, "maimai でらっくす"),
+            CreateSong(210, false, "maimai でらっくす"),
+            CreateSong(220, false, "maimai でらっくす")
+        };
+
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("BuildVersionList", BindingFlags.NonPublic | BindingFlags.Static);
+        var versions = (IReadOnlyList<string>)method!.Invoke(null, [songs])!;
+
+        Assert.That(versions, Is.EqualTo(new[]
+        {
+            "maimai",
+            "maimai でらっくす",
+            "maimai でらっくす FESTiVAL"
+        }));
+    }
+
+    [Test]
     public async Task GetRating_Should_Keep_Top_35_Old_And_Top_15_New_By_IsNew()
     {
         var songDb = CreateSongDb();
