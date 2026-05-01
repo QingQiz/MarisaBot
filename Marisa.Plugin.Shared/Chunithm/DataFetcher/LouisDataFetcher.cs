@@ -49,18 +49,6 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
             _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
 
-            foreach (var song in _songList)
-            {
-                if (!SongDb.SongIndexer.TryGetValue(song.Id, out var songNew)) continue;
-
-                for (var i = 0; i < song.Constants.Count; i++)
-                {
-                    var j = songNew.DiffNames.FindIndex(x => x == song.DiffNames[i]);
-
-                    if (j != -1) songNew.ConstantOld[j] = song.Constants[i];
-                }
-            }
-
             return _songList;
         }
     }

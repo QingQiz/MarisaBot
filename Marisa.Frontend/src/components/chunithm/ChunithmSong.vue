@@ -117,9 +117,6 @@ function group_bpm() {
                     <div>难度</div>
                     <div>等级</div>
                     <div>定数</div>
-                    <div>
-                        <div class="bg-green-200 rounded-full px-3">定数VERSE</div>
-                    </div>
                     <div>Combo</div>
                     <div>作图者</div>
                 </div>
@@ -128,20 +125,7 @@ function group_bpm() {
                         {{ c['LevelName'] }}
                     </div>
                     <div>{{ c['LevelStr'] }}</div>
-                    <div>{{ c.ConstantOld == 0 ? '' : c.ConstantOld }}</div>
-                    <div>
-                        {{ c.Constant == 0 ? '' : c.Constant }}
-                        <div v-if="c.ConstantOld != 0 && c.Constant != c.ConstantOld && c.Constant != 0" class="text-sm">
-                            <template v-for="x in [c.Constant - c.ConstantOld]">
-                                <div v-if="x > 0" class="text-green-600">
-                                    +{{ x.toFixed(1) }}
-                                </div>
-                                <div v-else class="text-red-500">
-                                    {{ x.toFixed(1) }}
-                                </div>
-                            </template>
-                        </div>
-                    </div>
+                    <div>{{ c.Constant == 0 ? '' : c.Constant }}</div>
                     <div>{{ c.MaxCombo }}</div>
                     <div class="text-center">{{ c.Charter }}</div>
                 </div>
@@ -195,21 +179,16 @@ function group_bpm() {
 }
 
 .chart > div > div:nth-child(3) {
-    width: 70px;
-    max-width: 70px;
-}
-
-.chart > div > div:nth-child(4) {
     width: 120px;
     max-width: 120px;
 }
 
-.chart > div > div:nth-child(5) {
+.chart > div > div:nth-child(4) {
     width: 100px;
     max-width: 100px;
 }
 
-.chart > div > div:nth-child(6) {
+.chart > div > div:nth-child(5) {
     min-width: 500px;
 }
 

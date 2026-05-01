@@ -21,7 +21,6 @@ public partial class ChunithmSong : Song
     public readonly List<string> ChartName = [];
     public readonly string Genre;
     public readonly List<long> MaxCombo = [];
-    public readonly List<double> ConstantOld = [];
 
     private readonly List<string> _bpms = [];
     private List<List<double>>? _bpmList;
@@ -47,7 +46,6 @@ public partial class ChunithmSong : Song
                 for (var i = 0; i < o.level.Count; i++)
                 {
                     Constants.Add(o.ds[i]);
-                    ConstantOld.Add(0);
                     Charters.Add(o.charts[i].charter);
                     Levels.Add(o.level[i]);
                     DiffNames.Add(o.level[i]);
@@ -72,7 +70,6 @@ public partial class ChunithmSong : Song
                     if (!chart.enabled) continue;
 
                     Constants.Add(chart.constant);
-                    ConstantOld.Add(0);
                     Charters.Add(chart.charter);
                     Levels.Add(chart.level);
                     DiffNames.Add(LevelLabel[i]);
@@ -92,7 +89,6 @@ public partial class ChunithmSong : Song
                 foreach (var i in o.Beatmaps)
                 {
                     Constants.Add(i.Constant);
-                    ConstantOld.Add(0);
                     Charters.Add(i.Charter);
                     Levels.Add(i.LevelStr);
                     DiffNames.Add(i.LevelName);
@@ -187,7 +183,6 @@ public partial class ChunithmSong : Song
                     MaxCombo    = MaxCombo[i],
                     LevelStr    = Levels[i],
                     Constant    = Constants[i],
-                    ConstantOld = ConstantOld[i],
                     Charter     = Charters[i],
                     Bpm         = _bpms[i],
                     ChartName   = ChartName[i]
