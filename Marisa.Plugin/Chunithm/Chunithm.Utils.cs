@@ -69,9 +69,16 @@ public partial class Chunithm
         var scores = await fetcher.GetScores(message);
         rating.IsB50 = true;
 
-        var newestV = fetcher is AllNetBasedNetDataFetcher ? "CHUNITHM VERSE" : "CHUNITHM LUMINOUS";
+        var newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CHUNITHM LUMINOUS PLUS",
+            "CHUNITHM VERSE"
+        };
 
-        var div = scores.Select(x => x.Value).GroupBy(x => SongDb.GetSongById(x.Id)!.Version == newestV).ToList();
+        var div = scores
+            .Select(x => x.Value)
+            .GroupBy(x => newestVersions.Contains(SongDb.GetSongById(x.Id)!.Version))
+            .ToList();
 
         var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];
         var b = div.FirstOrDefault(x => !x.Key)?.Select(x => x) ?? [];

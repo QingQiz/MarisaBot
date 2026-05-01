@@ -5,7 +5,6 @@ using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json.Linq;
-using Polly;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -14,44 +13,10 @@ using IndexerT = Dictionary<long, ChunithmSong>;
 public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
     private const string Uri = "http://43.139.107.206:8998/api";
-    private static string MusicListUri => $"{Uri}/resource/chunithm/song-list";
     private static string RatingUri => $"{Uri}/open/chunithm/basic-info";
     private static string ScoresUri => $"{Uri}/open/chunithm/filtered-info";
     private static string Token => ConfigurationManager.Configuration.Chunithm.TokenLouis;
-    private static List<ChunithmSong>? _songList;
-    private static IndexerT? _indexer;
-    private readonly object _songListLocker = new();
-    private readonly object _songIndexerLocker = new();
-
-    private IndexerT Indexer
-    {
-        get
-        {
-            lock (_songIndexerLocker)
-            {
-                return _indexer ??= GetSongList().ToDictionary(x => x.Id);
-            }
-        }
-    }
-
-    public override List<ChunithmSong> GetSongList()
-    {
-        lock (_songListLocker)
-        {
-            if (_songList != null) return _songList;
-
-            var listLouis = Policy.Handle<Exception>(_ => true).WaitAndRetryAsync(10,
-                _ => TimeSpan.FromSeconds(1)
-            ).ExecuteAsync(async () => await MusicListUri.GetJsonListAsync()).Result;
-
-            var list = listLouis
-                .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Louis));
-
-            _songList = list.Where(x => !DeletedSongs.Contains(x.Id)).ToList();
-
-            return _songList;
-        }
-    }
+    private IndexerT Indexer => SongDb.SongIndexer;
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
@@ -136,10 +101,5 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
     public void Reset()
     {
-        lock (_songListLocker)
-        {
-            _songList = null;
-            _indexer  = null;
-        }
     }
 }

@@ -7,27 +7,11 @@ namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
 public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb), ICanReset
 {
-    private static List<ChunithmSong>? _songList;
     private Dictionary<string, ChunithmSong>? _songTitleIndexer;
 
     private Dictionary<string, ChunithmSong> SongTitleIndexer => _songTitleIndexer ??= SongDb.SongList
         .GroupBy(song => song.Title, StringComparer.Ordinal)
         .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
-
-    public override List<ChunithmSong> GetSongList()
-    {
-        if (_songList != null) return _songList;
-
-        var list = "https://www.diving-fish.com/api/chunithmprober/music_data"
-            .GetJsonListAsync()
-            .Result;
-
-        _songList = list.Select(x => new ChunithmSong(x, ChunithmSong.DataSource.DivingFish))
-            .Where(x => !DeletedSongs.Contains(x.Id))
-            .ToList();
-
-        return _songList;
-    }
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
@@ -98,7 +82,6 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public void Reset()
     {
-        _songList         = null;
         _songTitleIndexer = null;
     }
 }
