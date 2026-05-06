@@ -213,7 +213,7 @@ public static partial class OsuApi
     // 从 sayobot 镜像下载 beatmap
     public static async Task<string> DownloadBeatmap(long beatmapSetId, string path)
     {
-        return await GetPolicy<FlurlHttpException>("DownloadBeatmap", _ => true, 10).ExecuteAsync(
+        return await GetPolicy<FlurlHttpException>("DownloadBeatmap", e => e.StatusCode is not (404 or 502), 3).ExecuteAsync(
             async () => await $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapSetId}"
                 .WithHeader("authority", "dl.sayobot.cn")
                 .WithHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
