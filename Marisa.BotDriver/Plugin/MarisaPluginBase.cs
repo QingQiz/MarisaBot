@@ -18,12 +18,30 @@ public class MarisaPluginBase
     public virtual Task ExceptionHandler(Exception exception, Message message)
     {
         var log = LogManager.GetCurrentClassLogger();
-        var dumpPath = ExceptionDump.Save(exception, message.ToString(), GetType().FullName);
-        
+        var currentException = Unwrap(exception);
+        var dumpPath = TrySaveDump(currentException);
+
         log.Error($"{exception}\nCaused by message: {message}");
         if (dumpPath is not null)
         {
             log.Error("Exception dump saved to {0}", dumpPath);
+        }
+
+        if (currentException is MissingConfigurationException missingConfigurationException)
+        {
+            message.Reply(missingConfigurationException.UserMessage);
+            return Task.CompletedTask;
+        }
+
+        message.Send(new MessageDataText("出现异常，已上报开发者"));
+
+        return Task.CompletedTask;
+
+        string? TrySaveDump(Exception currentException)
+        {
+            return currentException is MissingConfigurationException
+                ? null
+                : ExceptionDump.Save(currentException, message.ToString(), GetType().FullName);
         }
 
         static Exception Unwrap(Exception exception)
@@ -45,17 +63,5 @@ public class MarisaPluginBase
                 return exception;
             }
         }
-
-        var currentException = Unwrap(exception);
-
-        if (currentException is MissingConfigurationException missingConfigurationException)
-        {
-            message.Reply(missingConfigurationException.UserMessage);
-            return Task.CompletedTask;
-        }
-
-        message.Send(new MessageDataText("出现异常，已上报开发者"));
-
-        return Task.CompletedTask;
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Reflection;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -71,6 +72,32 @@ public class ExceptionDumpTest
             Assert.That(text, Is.EqualTo("出现异常，已上报开发者"));
             Assert.That(text, Does.Not.Contain("boom"));
             Assert.That(text, Does.Not.Contain("InvalidOperationException"));
+        });
+    }
+
+    [Test]
+    public async Task ExceptionHandler_Should_Not_Dump_MissingConfigurationException()
+    {
+        var queue = new MessageQueueProvider();
+        var sender = new MessageSenderProvider(queue);
+        var message = new Message(new MessageChain(new MessageDataText("ping")), sender)
+        {
+            Type = MessageType.FriendMessage,
+            Sender = new SenderInfo(114514, "tester")
+        };
+
+        await new MarisaPluginBase().ExceptionHandler(
+            new TargetInvocationException(new MissingConfigurationException("divingFish.devToken")),
+            message
+        );
+
+        Assert.That(queue.SendQueue.Reader.TryRead(out var reply), Is.True);
+        var text = ((MessageDataText)reply!.MessageChain.Messages.Single()).Text.ToString();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(text, Is.EqualTo("该功能未配置，请联系管理员检查配置项：divingFish.devToken"));
+            Assert.That(Directory.Exists(Path.Join(_tempRoot, "exceptions")), Is.False);
         });
     }
 
