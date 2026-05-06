@@ -10,7 +10,7 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
-    private DataFetcher GetDataFetcher(string name, ChunithmBind? bind)
+    private DataFetcher GetDataFetcher(string name, string? accessCode)
     {
         try
         {
@@ -19,12 +19,12 @@ public partial class Chunithm
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "Louis"      => new LouisDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "RinNET", "aqua.naominet.live",
-                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, bind!),
+                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode!),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "Aqua", "aqua.msm.moe",
-                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!),
+                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!),
                 _ => Dns.GetHostAddresses(name).Length != 0
                     ? new AllNetBasedNetDataFetcher(SongDb, name, name,
-                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, bind!)
+                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!)
                     : throw new InvalidDataException("无效的服务器名： " + name)
             };
         }
@@ -55,9 +55,15 @@ public partial class Chunithm
 
         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
-        return bind == null
-            ? GetDataFetcher("DivingFish", null) // 默认水鱼
-            : GetDataFetcher(bind.ServerName, bind);
+        if (bind == null)
+        {
+            return GetDataFetcher("DivingFish", null); // 默认水鱼
+        }
+
+        var serverName = bind.ServerName;
+        var accessCode = bind.AccessCode;
+
+        return GetDataFetcher(serverName, accessCode);
     }
 
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)

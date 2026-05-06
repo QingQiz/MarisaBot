@@ -138,7 +138,7 @@ public partial class Chunithm
                         bind.AccessCode = accessCode;
                     }
 
-                    var fetcher = GetDataFetcher(server, bind);
+                    var fetcher = GetDataFetcher(server, accessCode);
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {

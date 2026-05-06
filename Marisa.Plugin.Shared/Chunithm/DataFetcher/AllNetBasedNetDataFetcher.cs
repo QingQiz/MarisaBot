@@ -5,12 +5,11 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Flurl.Http;
-using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
-public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string shortname, string host, string keyChipId, ChunithmBind bind) : DataFetcher(songDb)
+public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string shortname, string host, string keyChipId, string accessCode) : DataFetcher(songDb)
 {
     private string? _serverUri;
     private string Host { get; } = host;
@@ -152,7 +151,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
 
     private int GetAimeId()
     {
-        var aimeId = AccessCodeToAimeId(bind.AccessCode, KeyChipId);
+        var aimeId = AccessCodeToAimeId(accessCode, KeyChipId);
 
         if (aimeId < 0) throw new InvalidDataException("该卡尚未在该服务器注册");
 
