@@ -1,6 +1,6 @@
-﻿using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util;
 
-namespace Marisa.Plugin;
+namespace Marisa.Plugin.TodayFortune;
 
 [MarisaPluginDoc("魔理沙对你进行恶臭算命，得到你今天的音游运势")]
 [MarisaPluginCommand(MessageType.GroupMessage, StringComparison.Ordinal, "今日运势", "jrys")]
@@ -21,21 +21,19 @@ public class TodayFortune : MarisaPluginBase
         var sender = message.Sender.Id;
         var rand   = new Random(GenRandomSeed(sender));
 
-        var config = ConfigurationManager.Configuration.Fortune;
-
-        var e1 = config.Events.RandomTake(rand);
-        var e2 = config.Events.RandomTake(rand);
+        var e1 = TodayFortuneDefaults.Events.RandomTake(rand);
+        var e2 = TodayFortuneDefaults.Events.RandomTake(rand);
 
         while (e2.EventName == e1.EventName)
         {
-            e2 = config.Events.RandomTake(rand);
+            e2 = TodayFortuneDefaults.Events.RandomTake(rand);
         }
 
         var pe = e1.Positive.RandomTake(rand);
         var ne = e2.Negative.RandomTake(rand);
-        var g  = config.RhythmGames.RandomTake(rand);
-        var d  = config.Direction.RandomTake(rand);
-        var p  = config.Position.RandomTake(rand);
+        var g  = TodayFortuneDefaults.RhythmGames.RandomTake(rand);
+        var d  = TodayFortuneDefaults.Direction.RandomTake(rand);
+        var p  = TodayFortuneDefaults.Position.RandomTake(rand);
 
         var now = DateTime.Now;
 

@@ -6,9 +6,7 @@ namespace Marisa.Configuration;
 
 public class PluginConfiguration
 {
-    private string[]? _chi;
     private long[]? _commander;
-    private TodayFortune? _fortune;
 
     public string TempPath { get; set; }
 
@@ -22,14 +20,6 @@ public class PluginConfiguration
 
     public DivingFishConfiguration DivingFish { get; set; }
 
-    public string[] Chi
-    {
-        get => ConfigurationManager.RequireArray("chi", _chi);
-        set => _chi = value;
-    }
-
-    internal string[]? ChiRaw => _chi;
-
     public long[] Commander
     {
         get => ConfigurationManager.RequireArray("commander", _commander);
@@ -37,14 +27,6 @@ public class PluginConfiguration
     }
 
     internal long[]? CommanderRaw => _commander;
-
-    public TodayFortune Fortune
-    {
-        get => ConfigurationManager.RequireObject("fortune", _fortune);
-        set => _fortune = value;
-    }
-
-    internal TodayFortune? FortuneRaw => _fortune;
 
     [YamlMember(Alias = "maimai", ApplyNamingConventions = false)]
     public MaiMaiConfiguration MaiMai { get; set; }
