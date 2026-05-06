@@ -89,7 +89,6 @@ public class NapCatBackend : BotDriver.BotDriver
         }
 
         await Task.WhenAll(taskList);
-        return;
 
         async Task SendQueuedMessageSafely(MessageToSend s)
         {
