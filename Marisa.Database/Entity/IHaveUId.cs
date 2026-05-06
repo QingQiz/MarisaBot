@@ -1,4 +1,4 @@
-﻿namespace Marisa.Database.Entity;
+namespace Marisa.Database.Entity;
 
 public interface IHaveUId
 {

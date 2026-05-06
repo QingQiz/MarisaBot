@@ -7,7 +7,6 @@ using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Realms;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -98,10 +97,7 @@ public partial class MaiMaiDx
 
                         using var realm = BotDbContext.OpenRealm();
 
-                        realm.Write(() => realm.Add(new MaiMaiDxBind(next.Sender.Id, aimeId)
-                        {
-                            Id = BotDbContext.NextId<MaiMaiDxBind>(realm)
-                        }));
+                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, aimeId)));
 
                         message.Reply("好了");
                     }

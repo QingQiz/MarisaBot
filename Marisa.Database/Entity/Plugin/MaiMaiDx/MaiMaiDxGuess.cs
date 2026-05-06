@@ -1,14 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.MaiMaiDx;
 
-[Table("MaiMaiDx.Guess")]
-public partial class MaiMaiDxGuess : IRealmObject, ISongGuess
+public partial class MaiMaiDxGuess : IRealmObject, IHaveId, ISongGuess
 {
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

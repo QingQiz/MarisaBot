@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Marisa.Database.Entity;
+﻿using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.MaiMaiDx;
 
-[Table("MaiMaiDx.Bind")]
-public partial class MaiMaiDxBind : IRealmObject, IHaveUId
+public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
 {
     public MaiMaiDxBind() {}
 
@@ -16,7 +13,6 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveUId
         AimeId = aimeId;
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

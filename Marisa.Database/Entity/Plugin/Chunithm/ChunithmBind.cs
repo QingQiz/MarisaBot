@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.Chunithm;
 
-[Table("Chunithm.Bind")]
-public partial class ChunithmBind : IRealmObject, IHaveUId
+public partial class ChunithmBind : IRealmObject, IHaveId, IHaveUId
 {
     public ChunithmBind() {}
 
@@ -17,7 +15,6 @@ public partial class ChunithmBind : IRealmObject, IHaveUId
         AccessCode = accessCode;
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

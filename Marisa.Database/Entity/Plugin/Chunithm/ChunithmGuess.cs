@@ -1,12 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.Chunithm;
 
-[Table("Chunithm.Guess")]
-public partial class ChunithmGuess : IRealmObject, ISongGuess
+public partial class ChunithmGuess : IRealmObject, IHaveId, ISongGuess
 {
     public ChunithmGuess()
     {
@@ -18,7 +16,6 @@ public partial class ChunithmGuess : IRealmObject, ISongGuess
         Name = name;
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

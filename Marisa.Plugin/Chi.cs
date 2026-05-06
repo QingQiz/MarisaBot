@@ -386,10 +386,7 @@ public class Chi : MarisaPluginBase
             Task.Run(() =>
             {
                 using var realm = BotDbContext.OpenRealm();
-                realm.Write(() => realm.Add(new Meal(place, meal)
-                {
-                    Id = BotDbContext.NextId<Meal>(realm)
-                }));
+                realm.Write(() => realm.AddWithAutoId(new Meal(place, meal)));
             });
             message.Reply($"{place} 已添加菜品 {meal}");
 

@@ -1,12 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.Arcaea;
 
-[Table("Arcaea.Guess")]
-public partial class ArcaeaGuess : IRealmObject, ISongGuess
+public partial class ArcaeaGuess : IRealmObject, IHaveId, ISongGuess
 {
     public ArcaeaGuess()
     {
@@ -18,7 +16,6 @@ public partial class ArcaeaGuess : IRealmObject, ISongGuess
         Name = name;
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

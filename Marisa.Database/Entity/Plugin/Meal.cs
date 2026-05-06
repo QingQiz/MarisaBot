@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin;
 
-[Table("Meal")]
-public partial class Meal : IRealmObject
+public partial class Meal : IRealmObject, IHaveId
 {
     public Meal(string place, string name)
     {
@@ -17,7 +15,6 @@ public partial class Meal : IRealmObject
     {
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

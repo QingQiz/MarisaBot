@@ -3,7 +3,6 @@ using Marisa.Database.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Osu.Drawer;
 using Marisa.Plugin.Shared.Util;
-using Realms;
 
 namespace Marisa.Plugin.Osu;
 
@@ -32,9 +31,8 @@ public partial class Osu
             var bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == sender);
             if (bind is null)
             {
-                bind = realm.Add(new OsuBind
+                bind = realm.AddWithAutoId(new OsuBind
                 {
-                    Id     = BotDbContext.NextId<OsuBind>(realm),
                     UserId = sender
                 });
             }

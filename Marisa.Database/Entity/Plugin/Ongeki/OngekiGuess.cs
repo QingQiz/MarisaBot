@@ -1,14 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.Ongeki;
 
-[Table("Ongeki.Guess")]
-public partial class OngekiGuess : IRealmObject, ISongGuess
+public partial class OngekiGuess : IRealmObject, IHaveId, ISongGuess
 {
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

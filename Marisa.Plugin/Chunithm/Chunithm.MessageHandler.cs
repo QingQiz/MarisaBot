@@ -9,7 +9,6 @@ using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Realms;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -68,10 +67,7 @@ public partial class Chunithm
                         {
                             if (bind == null)
                             {
-                                realm.Add(new ChunithmBind(next.Sender.Id, fetchers[idx])
-                                {
-                                    Id = BotDbContext.NextId<ChunithmBind>(realm)
-                                });
+                                realm.AddWithAutoId(new ChunithmBind(next.Sender.Id, fetchers[idx]));
                             }
                             else
                             {

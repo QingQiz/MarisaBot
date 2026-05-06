@@ -1,4 +1,5 @@
 ﻿using Marisa.Database;
+using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -9,7 +10,7 @@ namespace Marisa.Plugin.Shared.Util.SongGuessMaker;
 
 public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
     where TSong : Song
-    where TSongGuess : class, ISongGuess, IRealmObject, new()
+    where TSongGuess : class, IHaveId, ISongGuess, IRealmObject, new()
 {
     private async Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
     {
@@ -160,8 +161,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
                 {
                     TimesStart = 1
                 }.CastTo<TSongGuess>();
-                typeof(TSongGuess).GetProperty("Id")?.SetValue(newGuess, BotDbContext.NextId<TSongGuess>(realm));
-                realm.Add(newGuess);
+                realm.AddWithAutoId(newGuess);
             }
         });
 

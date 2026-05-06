@@ -1,5 +1,4 @@
-﻿using Flurl.Http;
-using Marisa.Database;
+﻿using Marisa.Database;
 using Marisa.Database.Entity.Plugin.Osu;
 using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Interface;
@@ -178,9 +177,8 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
                     try
                     {
                         var result = await OsuApi.GetUserInfoByName(task.OsuUserName, task.i);
-                        realm.Write(() => realm.Add(new OsuUserHistory
+                        realm.Write(() => realm.AddWithAutoId(new OsuUserHistory
                         {
-                            Id           = BotDbContext.NextId<OsuUserHistory>(realm),
                             OsuUserName  = task.OsuUserName,
                             OsuUserId    = task.id,
                             Mode         = task.i,

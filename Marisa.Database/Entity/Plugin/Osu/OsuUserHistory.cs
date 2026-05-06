@@ -1,14 +1,11 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.Osu;
 
-[Table("Osu.UserHistory")]
-public partial class OsuUserHistory : IRealmObject
+public partial class OsuUserHistory : IRealmObject, IHaveId
 {
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
     

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Realms;
 
 namespace Marisa.Database.Entity;
 
-[Table("BlackList")]
-public partial class BlackList : IRealmObject, IHaveUId
+public partial class BlackList : IRealmObject, IHaveId, IHaveUId
 {
     public BlackList()
     {
@@ -18,7 +15,6 @@ public partial class BlackList : IRealmObject, IHaveUId
         AddTime = DateTimeOffset.Now;
     }
 
-    [Key]
     [PrimaryKey]
     public long Id { get; set; }
 

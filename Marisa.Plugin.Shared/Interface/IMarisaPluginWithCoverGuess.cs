@@ -1,4 +1,5 @@
 ﻿using Marisa.Database;
+using Marisa.Database.Entity;
 using Marisa.Database.Entity.Plugin.Shared;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Plugin.Shared.Util.SongGuessMaker;
@@ -6,7 +7,7 @@ using Realms;
 
 namespace Marisa.Plugin.Shared.Interface;
 
-public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : class, ISongGuess, IRealmObject, new()
+public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : Song where TSongGuess : class, IHaveId, ISongGuess, IRealmObject, new()
 {
     SongGuessMaker<TSong, TSongGuess> SongGuessMaker { get; }
 

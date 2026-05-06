@@ -52,10 +52,7 @@ public class BlackList : MarisaPluginBase
         using var realm = BotDbContext.OpenRealm();
 
         Cache.Add(qq);
-        realm.Write(() => realm.Add(new BlackListEntity(qq)
-        {
-            Id = BotDbContext.NextId<BlackListEntity>(realm)
-        }));
+        realm.Write(() => realm.AddWithAutoId(new BlackListEntity(qq)));
         message.Reply("好了");
 
         return MarisaPluginTaskState.CompletedTask;
