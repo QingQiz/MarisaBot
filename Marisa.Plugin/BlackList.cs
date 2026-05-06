@@ -30,38 +30,6 @@ public class BlackList : MarisaPluginBase
 
         if (Cache.Contains(u)) return MarisaPluginTaskState.CompletedTask;
 
-        if (message.GroupInfo == null)
-        {
-            return MarisaPluginTaskState.NoResponse; // 插件不处理这条消息，等于不ban
-        }
-
-        {
-            using var realm = BotDbContext.OpenRealm();
-            var filters = realm.All<CommandFilter>().Where(x => x.GroupId == message.GroupInfo.Id);
-
-            foreach (var f in filters)
-            {
-                if (!string.IsNullOrWhiteSpace(f.Prefix))
-                {
-                    if (message.Command.StartsWith(f.Prefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // 阻断
-                        return MarisaPluginTaskState.CompletedTask;
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(f.Type)) continue;
-
-                var t = (MessageDataType)Enum.Parse(typeof(MessageDataType), f.Type);
-
-                if (message.MessageChain!.Messages.Any(x => x.Type == t))
-                {
-                    // 阻断
-                    return MarisaPluginTaskState.CompletedTask;
-                }
-            }
-        }
-
         return MarisaPluginTaskState.NoResponse; // 插件不处理这条消息，等于不ban
     }
 
