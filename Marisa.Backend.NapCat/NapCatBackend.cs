@@ -76,23 +76,7 @@ public class NapCatBackend : BotDriver.BotDriver
             {
                 var s = await MessageQueueProvider.SendQueue.Reader.ReadAsync(ShutdownToken);
 
-                switch (s.Type)
-                {
-                    case MessageType.GroupMessage:
-                        taskList.Add(Task.Run(() => SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
-                        break;
-                    case MessageType.FriendMessage:
-                        taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
-                        break;
-                    case MessageType.TempMessage:
-                        taskList.Add(Task.Run(() => SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId), ShutdownToken));
-                        break;
-                    case MessageType.StrangerMessage:
-                        taskList.Add(Task.Run(() => SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId), ShutdownToken));
-                        break;
-                    default:
-                        throw new InvalidEnumArgumentException();
-                }
+                taskList.Add(Task.Run(() => SendQueuedMessageSafely(s), ShutdownToken));
 
                 if (taskList.Count < 100) continue;
 
@@ -106,6 +90,41 @@ public class NapCatBackend : BotDriver.BotDriver
 
         await Task.WhenAll(taskList);
         return;
+
+        async Task SendQueuedMessageSafely(MessageToSend s)
+        {
+            try
+            {
+                switch (s.Type)
+                {
+                    case MessageType.GroupMessage:
+                        await SendGroupMessage(s.MessageChain, s.ReceiverId, s.QuoteId);
+                        break;
+                    case MessageType.FriendMessage:
+                        await SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId);
+                        break;
+                    case MessageType.TempMessage:
+                        await SendTempMessage(s.MessageChain, s.ReceiverId, s.GroupId, s.QuoteId);
+                        break;
+                    case MessageType.StrangerMessage:
+                        await SendFriendMessage(s.MessageChain, s.ReceiverId, s.QuoteId);
+                        break;
+                    default:
+                        throw new InvalidEnumArgumentException();
+                }
+            }
+            catch (OperationCanceledException) when (ShutdownToken.IsCancellationRequested)
+            {
+            }
+            catch (Exception ex) when (IsUnavailableGroupFailure(s, ex))
+            {
+                _logger.Warn(ex, $"Skipped sending group message to unavailable group {s.ReceiverId}: {s.MessageChain}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Failed to send {s.Type} to {DescribeTarget(s)}: {s.MessageChain}");
+            }
+        }
 
         async Task SendGroupMessage(MessageChain message, long target, long? quote = null)
         {
@@ -145,6 +164,28 @@ public class NapCatBackend : BotDriver.BotDriver
             }
 
             await SendAction("send_private_msg", parameters);
+        }
+
+        static bool IsUnavailableGroupFailure(MessageToSend s, Exception ex)
+        {
+            if (s.Type != MessageType.GroupMessage || ex is not InvalidOperationException)
+            {
+                return false;
+            }
+
+            return ex.Message.Contains("你已被移出该群", StringComparison.Ordinal) ||
+                   ex.Message.Contains("群聊不存在", StringComparison.Ordinal) ||
+                   ex.Message.Contains("\"result\": 110", StringComparison.Ordinal) ||
+                   ex.Message.Contains("\"result\":110", StringComparison.Ordinal);
+        }
+
+        static string DescribeTarget(MessageToSend s)
+        {
+            return s.Type switch
+            {
+                MessageType.TempMessage => $"user {s.ReceiverId} (temp group {s.GroupId?.ToString() ?? "?"})",
+                _ => s.ReceiverId.ToString()
+            };
         }
     }
 
