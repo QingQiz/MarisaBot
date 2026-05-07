@@ -10,6 +10,7 @@ import MaiBestScores from "@/components/maimai/BestScores.vue";
 import OngekiSong from "@/components/ongeki/OngekiSong.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
+import Help from "@/components/help/Help.vue";
 import OsuRecommend from "@/components/osu/OsuRecommend.vue";
 import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
@@ -21,6 +22,7 @@ import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
 
 const routes = [
     {path: '/', component: NotFound},
+    {path: '/help', component: Help},
     {path: '/maimai/best', component: MaiBestScores},
     {path: '/maimai/recommend', component: Recommend},
     {path: '/chunithm/best', component: ChuBestScores},

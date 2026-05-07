@@ -1,7 +1,7 @@
 # AGENTS
 
 ## Toolchain
-- Use Windows `dotnet` for real builds/tests. `global.json` still pins SDK `5.0`, but the active projects target `net8.0`.
+- Use Windows `dotnet` for real builds/tests.
 - Main app build from repo root: `dotnet build Marisa.StartUp/Marisa.StartUp.csproj --no-restore`.
 - `Marisa.StartUp.csproj` always runs `npm install` and `npx vite build` in `Marisa.Frontend` before build. For backend-only verification, build or test the specific project instead of `Marisa.StartUp`.
 - There are no checked-in CI workflows and no npm `lint`, `test`, or `typecheck` scripts. Do not guess repo-wide validation commands that are not wired in the tree.

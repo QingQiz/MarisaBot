@@ -5,7 +5,7 @@ using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin;
 
-[MarisaPluginDoc("这是一个用来解决「中午吃什么」这一人生 N 大难题之一的功能")]
+[MarisaPluginDoc("解决**中午吃什么**这一人生 N 大难题之一")]
 [MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
 public class Chi : MarisaPluginBase
 {
@@ -359,7 +359,7 @@ public class Chi : MarisaPluginBase
     }
 
 
-    [MarisaPluginDoc("添加吃啥的可选项。参数：地点")]
+    [MarisaPluginDoc("添加吃啥的可选项", "`地点`")]
     [MarisaPluginCommand("addmeal")]
     private MarisaPluginTaskState Add(Message message)
     {
@@ -396,7 +396,7 @@ public class Chi : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("删除吃啥的可选项。参数：地点")]
+    [MarisaPluginDoc("删除吃啥的可选项", "`地点`")]
     [MarisaPluginCommand("delmeal")]
     private MarisaPluginTaskState DeleteMeal(Message message)
     {
@@ -447,7 +447,7 @@ public class Chi : MarisaPluginBase
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("删除吃啥的地点。参数：地点")]
+    [MarisaPluginDoc("删除吃啥的地点", "`地点`")]
     [MarisaPluginCommand("delplace")]
     private MarisaPluginTaskState DeletePlace(Message message)
     {

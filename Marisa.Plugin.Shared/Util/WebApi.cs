@@ -97,7 +97,7 @@ public static class WebApi
         }
     }
 
-    private static async Task<string> RenderUrl(string url)
+    public static async Task<string> RenderUrl(string url)
     {
         if (DisableWebApi)
         {

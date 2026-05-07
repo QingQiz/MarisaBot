@@ -9,7 +9,11 @@ public class HelpDoc
 {
     private readonly List<ReadOnlyMemory<char>> _commands;
     private readonly string _help;
+    public string? ParamDesc;
     public List<HelpDoc> SubHelp = [];
+
+    public string Doc => _help;
+    public string[] Commands => _commands.Select(c => c.ToString()).ToArray();
 
     public HelpDoc(string help, List<ReadOnlyMemory<char>> commands)
     {

@@ -13,7 +13,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     /// <summary>
     ///     搜歌
     /// </summary>
-    [MarisaPluginDoc("搜歌，参数为：歌曲名 或 歌曲别名 或 歌曲id 或表达式（例如const>10）")]
+    [MarisaPluginDoc("搜歌", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("song", "search", "搜索")]
     async Task<MarisaPluginTaskState> SearchSong(Message message)
     {
@@ -39,7 +39,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     /// <summary>
     ///     获取别名
     /// </summary>
-    [MarisaPluginDoc("获取别名，参数为：歌名/别名")]
+    [MarisaPluginDoc("获取别名", "`歌名`/`别名`")]
     [MarisaPluginSubCommand(nameof(SongAlias))]
     [MarisaPluginCommand("get")]
     MarisaPluginTaskState SongAliasGet(Message message)
@@ -68,7 +68,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     /// <summary>
     ///     设置别名
     /// </summary>
-    [MarisaPluginDoc("设置别名，参数为：歌曲原名 或 歌曲id := 歌曲别名")]
+    [MarisaPluginDoc("设置别名", "`歌曲原名` 或 `歌曲id` := `歌曲别名`")]
     [MarisaPluginSubCommand(nameof(SongAlias))]
     [MarisaPluginCommand("set")]
     MarisaPluginTaskState SongAliasSet(Message message)
@@ -105,7 +105,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
+    [MarisaPluginDoc("给出符合指定定数约束的歌", "`定数` 或 `定数1`-`定数2`")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginTrigger(typeof(Triggers), nameof(Triggers.ListBaseTrigger))]
     [MarisaPluginCommand("base", "b", "定数")]
@@ -115,7 +115,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("给出符合指定谱师约束的歌，参数为：谱师")]
+    [MarisaPluginDoc("给出符合指定谱师约束的歌", "`谱师`")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("charter", "谱师")]
     async Task<MarisaPluginTaskState> ListSongCharter(Message message)
@@ -124,7 +124,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("给出符合指定等级约束的歌，参数为：等级")]
+    [MarisaPluginDoc("给出符合指定等级约束的歌", "`等级`")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("level", "lv", "等级")]
     async Task<MarisaPluginTaskState> ListSongLevel(Message message)
@@ -133,7 +133,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
+    [MarisaPluginDoc("给出符合指定BPM约束的歌", "`bpm` 或 `bpm1`-`bpm2`")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("bpm")]
     async Task<MarisaPluginTaskState> ListSongBpm(Message message)
@@ -142,7 +142,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("给出符合指定曲师约束的歌，参数为：曲师")]
+    [MarisaPluginDoc("给出符合指定曲师约束的歌", "`曲师`")]
     [MarisaPluginSubCommand(nameof(ListSong))]
     [MarisaPluginCommand("artist", "a")]
     async Task<MarisaPluginTaskState> ListSongArtist(Message message)
@@ -166,7 +166,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("随机给出符合指定定数约束的歌，参数为：定数 或 定数1-定数2")]
+    [MarisaPluginDoc("随机给出符合指定定数约束的歌", "`定数` 或 `定数1`-`定数2`")]
     [MarisaPluginSubCommand(nameof(RandomSong))]
     [MarisaPluginTrigger(typeof(Triggers), nameof(Triggers.ListBaseTrigger))]
     [MarisaPluginCommand("base", "b", "定数")]
@@ -176,7 +176,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("随机给出符合指定谱师约束的歌，参数为：谱师")]
+    [MarisaPluginDoc("随机给出符合指定谱师约束的歌", "`谱师`")]
     [MarisaPluginSubCommand(nameof(RandomSong))]
     [MarisaPluginCommand("charter", "谱师")]
     Task<MarisaPluginTaskState> RandomSongCharter(Message message)
@@ -185,7 +185,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("随机给出符合指定等级约束的歌，参数为：等级")]
+    [MarisaPluginDoc("随机给出符合指定等级约束的歌", "`等级`")]
     [MarisaPluginSubCommand(nameof(RandomSong))]
     [MarisaPluginCommand("level", "lv", "等级")]
     Task<MarisaPluginTaskState> RandomSongLevel(Message message)
@@ -194,7 +194,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("随机给出符合指定BPM约束的歌，参数为：bpm 或 bmp1-bmp2")]
+    [MarisaPluginDoc("随机给出符合指定BPM约束的歌", "`bpm` 或 `bpm1`-`bpm2`")]
     [MarisaPluginSubCommand(nameof(RandomSong))]
     [MarisaPluginCommand("bpm")]
     Task<MarisaPluginTaskState> RandomSongBpm(Message message)
@@ -203,7 +203,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("随机给出符合指定曲师约束的歌，参数为：曲师")]
+    [MarisaPluginDoc("随机给出符合指定曲师约束的歌", "`曲师`")]
     [MarisaPluginSubCommand(nameof(RandomSong))]
     [MarisaPluginCommand("artist", "a")]
     Task<MarisaPluginTaskState> RandomSongArtist(Message message)

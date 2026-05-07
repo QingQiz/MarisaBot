@@ -2,7 +2,7 @@
 
 namespace Marisa.Plugin;
 
-[MarisaPluginDoc("解决选择困难症的功能，参数为：A还是B还是C")]
+[MarisaPluginDoc("解决**选择困难症**，用`还是`分隔选项", "`A`还是`B`还是`C`")]
 [MarisaPluginCommand("请问")]
 [MarisaPluginTrigger(typeof(Select), nameof(Trigger))]
 public class Select : MarisaPluginBase

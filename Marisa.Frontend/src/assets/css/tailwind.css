@@ -29,6 +29,14 @@
     src: url("@/assets/fonts/Torus-SemiBold.otf") format("opentype");
 }
 
+
+
+@font-face {
+    font-family: 'LXGW WenKai';
+    font-weight: normal;
+    src: url('@/assets/fonts/LXGWWenKai-Regular.ttf') format('truetype');
+}
+
 @tailwind components;
 
 .osu-table {

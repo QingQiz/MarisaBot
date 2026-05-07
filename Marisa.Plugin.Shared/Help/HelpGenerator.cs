@@ -42,6 +42,7 @@ public static class HelpGenerator
 
         return new HelpDoc(doc?.Doc ?? "", commands)
         {
+            ParamDesc = doc?.ParamDesc,
             SubHelp = handlers
                 .Select(h => GetHelp(h, availableHandler))
                 .Where(d => d != null)
@@ -79,6 +80,7 @@ public static class HelpGenerator
 
         return new HelpDoc(doc?.Doc ?? "", commands)
         {
+            ParamDesc = doc?.ParamDesc,
             SubHelp = subcommandsDoc
         };
     }

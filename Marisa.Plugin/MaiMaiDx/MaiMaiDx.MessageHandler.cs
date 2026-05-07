@@ -177,7 +177,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     b50
     /// </summary>
-    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginDoc("查询 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
     [MarisaPluginCommand("best", "b50", "查分")]
     private async Task<MarisaPluginTaskState> B50(Message message)
     {
@@ -198,7 +198,7 @@ public partial class MaiMaiDx
 
     #region 汇总 / summary
 
-    [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
+    [MarisaPluginDoc("获取成绩汇总，可以`@某人`查他的汇总")]
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
@@ -207,7 +207,7 @@ public partial class MaiMaiDx
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("新谱的成绩汇总，无参数")]
+    [MarisaPluginDoc("新谱的成绩汇总")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("new", "新谱")]
     private async Task<MarisaPluginTaskState> SummaryNew(Message message)
@@ -233,7 +233,7 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2 或 定数")]
+    [MarisaPluginDoc("获取某定数的成绩汇总", "`定数1`-`定数2` 或 `定数`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> SummaryBase(Message message)
@@ -288,7 +288,7 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取类别的成绩汇总，参数为：类别")]
+    [MarisaPluginDoc("获取类别的成绩汇总", "`类别`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
@@ -325,7 +325,7 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取版本的成绩汇总，无参数，使用对话选择版本")]
+    [MarisaPluginDoc("获取版本的成绩汇总，使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
@@ -380,7 +380,7 @@ public partial class MaiMaiDx
         }
     }
 
-    [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]
+    [MarisaPluginDoc("获取某个难度的成绩汇总", "`难度`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
@@ -438,7 +438,7 @@ public partial class MaiMaiDx
 
     #region 打什么歌
 
-    [MarisaPluginDoc("如何推分到：参数")]
+    [MarisaPluginDoc("如何**推分**到目标")]
     [MarisaPluginCommand("howto", "how to")]
     private async Task<MarisaPluginTaskState> HowTo(Message message)
     {
@@ -491,7 +491,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     mai什么
     /// </summary>
-    [MarisaPluginDoc("随机给出一个歌，参数任意")]
+    [MarisaPluginDoc("随机给出一个歌")]
     [MarisaPluginCommand("打什么歌", "打什么", "什么")]
     private MarisaPluginTaskState PlayWhat(Message message)
     {
@@ -531,7 +531,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     分数线，达到某个达成率rating会上升的线
     /// </summary>
-    [MarisaPluginDoc("给出定数对应的所有 rating 或 rating 对应的所有定数，参数为：歌曲定数 或 预期rating")]
+    [MarisaPluginDoc("给出定数对应的所有 rating 或 rating 对应的所有定数", "`歌曲定数` 或 `预期rating`")]
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState RatingLine(Message message)
     {
@@ -591,7 +591,7 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
+    [MarisaPluginDoc("计算某首歌曲的容错率", "`歌名`")]
     [MarisaPluginCommand("tolerance", "tol", "容错率")]
     private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {

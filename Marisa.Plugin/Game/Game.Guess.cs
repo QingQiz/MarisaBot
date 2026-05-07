@@ -42,7 +42,7 @@ public partial class Game
     };
     private static string GuessDbPath => Path.Join(ConfigurationManager.Configuration.Game.TempPath, "Guess");
 
-    [MarisaPluginDoc("添加曲库，仅私聊可用，参数：曲库名字")]
+    [MarisaPluginDoc("添加曲库，仅私聊可用", "`曲库名字`")]
     [MarisaPluginSubCommand(nameof(Guess))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "add")]
     private static MarisaPluginTaskState GuessAddDb(Message message, long qq)
@@ -110,7 +110,7 @@ public partial class Game
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("一种新的猜歌游戏，参数为数据库名，可写多个，用:分隔，仅群聊可用")]
+    [MarisaPluginDoc("一种新的猜歌游戏，仅群聊可用", "`数据库名`，可写多个，用`:`分隔")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "guess")]
     private static MarisaPluginTaskState Guess(Message message)
     {

@@ -1,5 +1,4 @@
-﻿using Marisa.Plugin.Shared.Help;
-using Marisa.Plugin.Shared.Util;
+﻿using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.Shared.Interface;
 
@@ -7,10 +6,11 @@ public interface IMarisaPluginWithHelp
 {
     [MarisaPluginNoDoc]
     [MarisaPluginCommand("help")]
-    MarisaPluginTaskState Help(Message message)
+    async Task<MarisaPluginTaskState> Help(Message message)
     {
-        var doc = HelpGenerator.GetHelp(GetType());
-        message.Reply(MessageDataImage.FromBase64(doc.GetImage().ToB64()));
+        var b64 = await WebApi.RenderUrl($"/help?plugin={GetType().Name}");
+
+        message.Reply(MessageDataImage.FromBase64(b64));
 
         return MarisaPluginTaskState.CompletedTask;
     }

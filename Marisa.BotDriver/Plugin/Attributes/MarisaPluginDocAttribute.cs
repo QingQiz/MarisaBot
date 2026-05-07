@@ -4,9 +4,11 @@
 public class MarisaPluginDocAttribute: Attribute
 {
     public readonly string Doc;
+    public readonly string? ParamDesc;
 
-    public MarisaPluginDocAttribute(string doc)
+    public MarisaPluginDocAttribute(string doc, string? paramDesc = null)
     {
         Doc = doc;
+        ParamDesc = paramDesc;
     }
 }

@@ -163,7 +163,7 @@ public partial class Chunithm
     /// <summary>
     ///     谱面预览
     /// </summary>
-    [MarisaPluginDoc("谱面预览，参数为：歌曲名 或 歌曲别名 或 歌曲id")]
+    [MarisaPluginDoc("谱面**预览**", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("preview", "view", "谱面", "预览")]
     private async Task<MarisaPluginTaskState> PreviewSong(Message message)
     {
@@ -233,7 +233,7 @@ public partial class Chunithm
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总，参数为：定数1-定数2 或 定数")]
+    [MarisaPluginDoc("获取某定数的成绩汇总", "`定数1`-`定数2` 或 `定数`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> SummaryBase(Message message)
@@ -281,7 +281,7 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取类别的成绩汇总，参数为：类别")]
+    [MarisaPluginDoc("获取类别的成绩汇总", "`类别`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
@@ -317,7 +317,7 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取版本的成绩汇总，无参数，使用对话选择版本")]
+    [MarisaPluginDoc("获取版本的成绩汇总", "使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
@@ -373,7 +373,7 @@ public partial class Chunithm
         }
     }
 
-    [MarisaPluginDoc("获取某个难度的成绩汇总，参数为：难度")]
+    [MarisaPluginDoc("获取某个难度的成绩汇总", "`难度`")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
@@ -456,7 +456,7 @@ public partial class Chunithm
     /// <summary>
     ///     b50
     /// </summary>
-    [MarisaPluginDoc("查询 b50，参数为：查分器的账号名 或 @某人 或 留空")]
+    [MarisaPluginDoc("查询 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
     [MarisaPluginCommand("b50")]
     private async Task<MarisaPluginTaskState> B50(Message message)
     {
@@ -490,7 +490,7 @@ public partial class Chunithm
     /// <summary>
     ///     分数线，达到某个达成率rating会上升的线
     /// </summary>
-    [MarisaPluginDoc("给出定数对应的一些 rating，参数为：歌曲定数")]
+    [MarisaPluginDoc("给出定数对应的一些 rating", "`歌曲定数`")]
     [MarisaPluginCommand("line", "分数线")]
     private static MarisaPluginTaskState RatingLine(Message message)
     {
@@ -523,7 +523,7 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
+    [MarisaPluginDoc("计算某首歌曲的容错率", "`歌名`")]
     [MarisaPluginCommand("tolerance", "tol", "容错率")]
     protected async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {

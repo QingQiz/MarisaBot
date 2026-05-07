@@ -10,7 +10,7 @@ public partial class Ongeki
 {
     #region 分数线 / 容错率
 
-    [MarisaPluginDoc("计算某首歌曲的容错率，参数为：歌名")]
+    [MarisaPluginDoc("计算某首歌曲的容错率", "`歌名`")]
     [MarisaPluginCommand("tolerance", "容错率")]
     private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {

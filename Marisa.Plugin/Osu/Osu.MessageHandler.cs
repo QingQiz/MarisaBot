@@ -10,7 +10,7 @@ public partial class Osu
 {
     #region 绑定 / help
 
-    [MarisaPluginDoc("绑定一个 osu 账号，参数为：osu 的用户名")]
+    [MarisaPluginDoc("绑定一个 osu 账号", "你的**osu**用户名")]
     [MarisaPluginCommand("bind")]
     private static async Task<MarisaPluginTaskState> Bind(Message message)
     {
@@ -46,7 +46,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("设置当前绑定的账户的默认模式，参数为：osu、taiko、catch 和 mania")]
+    [MarisaPluginDoc("设置当前绑定的账户的默认模式", "`osu`、`taiko`、`catch` 和 `mania`")]
     [MarisaPluginCommand("setMode", "set mode", "mode")]
     private static Task<MarisaPluginTaskState> SetMode(Message message)
     {
@@ -250,7 +250,7 @@ public partial class Osu
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("预览某个mania图，参数beatmap id，留空时给出最近打的一张图的预览（包括failed）")]
+    [MarisaPluginDoc("预览某个mania图", "`beatmap id`，留空时给出最近打的一张图的预览（包括failed）")]
     [MarisaPluginCommand("view")]
     private async Task<MarisaPluginTaskState> Preview(Message message)
     {
