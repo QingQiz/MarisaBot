@@ -75,15 +75,32 @@ public partial class Chunithm
         var scores = await fetcher.GetScores(message);
         rating.IsB50 = true;
 
-        var newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        var songList = fetcher.GetSongList();
+        HashSet<string> newestVersions;
+
+        if (fetcher is DivingFishDataFetcher)
         {
-            "CHUNITHM LUMINOUS PLUS",
-            "CHUNITHM VERSE"
-        };
+            newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "CHUNITHM LUMINOUS PLUS",
+                "CHUNITHM VERSE"
+            };
+        }
+        else
+        {
+            newestVersions = songList
+                .Select(s => s.Version)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderDescending(StringComparer.OrdinalIgnoreCase)
+                .Take(1)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
 
         var div = scores
             .Select(x => x.Value)
-            .GroupBy(x => newestVersions.Contains(SongDb.GetSongById(x.Id)!.Version))
+            .GroupBy(x => newestVersions.Contains(versionMap.GetValueOrDefault(x.Id, "")))
             .ToList();
 
         var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];

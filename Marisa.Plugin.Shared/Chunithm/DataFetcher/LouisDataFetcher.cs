@@ -15,8 +15,31 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     private const string Uri = "http://43.139.107.206:8998/api";
     private static string RatingUri => $"{Uri}/open/chunithm/basic-info";
     private static string ScoresUri => $"{Uri}/open/chunithm/filtered-info";
+    private static string SongListUri => $"{Uri}/resource/chunithm/song-list";
     private static string Token => ConfigurationManager.Configuration.Chunithm.TokenLouis;
-    private IndexerT Indexer => SongDb.SongIndexer;
+
+    private static List<ChunithmSong>? _cachedSongList;
+    private IndexerT? _indexer;
+
+    private IndexerT Indexer => _indexer ??= GetSongList().ToDictionary(s => s.Id);
+
+    public override List<ChunithmSong> GetSongList()
+    {
+        if (_cachedSongList != null) return _cachedSongList;
+
+        try
+        {
+            var data = SongListUri.GetJsonListAsync().Result;
+
+            _cachedSongList = data.Select(d => new ChunithmSong(d, ChunithmSong.DataSource.Louis)).ToList();
+
+            return _cachedSongList;
+        }
+        catch
+        {
+            return base.GetSongList();
+        }
+    }
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
@@ -101,5 +124,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
     public void Reset()
     {
+        _cachedSongList = null;
+        _indexer = null;
     }
 }

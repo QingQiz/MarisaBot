@@ -13,6 +13,61 @@ namespace Marisa.Plugin.Test;
 
 public class ChunithmDivingFishDataFetcherTest
 {
+    [TearDown]
+    public void TearDown()
+    {
+        new DivingFishDataFetcher(CreateSongDb()).Reset();
+    }
+
+    [Test]
+    public void GetSongList_Should_Return_Songs()
+    {
+        var fetcher = new DivingFishDataFetcher(CreateSongDb());
+        var songs = fetcher.GetSongList();
+
+        Assert.That(songs, Is.Not.Null);
+        Assert.That(songs, Is.Not.Empty);
+
+        var first = songs[0];
+        Assert.That(first.Id, Is.GreaterThan(0));
+        Assert.That(first.Title, Is.Not.Empty);
+        Assert.That(first.Artist, Is.Not.Empty);
+        Assert.That(first.Genre, Is.Not.Empty);
+        Assert.That(first.Version, Is.Not.Empty);
+        Assert.That(first.Constants, Is.Not.Empty);
+        Assert.That(first.Levels, Is.Not.Empty);
+        Assert.That(first.DiffNames, Is.Not.Empty);
+        Assert.That(first.Charters, Is.Not.Empty);
+        Assert.That(first.Constants.Count, Is.EqualTo(first.Levels.Count));
+        Assert.That(first.Constants.Count, Is.EqualTo(first.DiffNames.Count));
+    }
+
+    [Test]
+    public void GetSongList_Should_Cache_Result()
+    {
+        var db = CreateSongDb();
+        var fetcher1 = new DivingFishDataFetcher(db);
+        var songs1 = fetcher1.GetSongList();
+
+        var fetcher2 = new DivingFishDataFetcher(db);
+        var songs2 = fetcher2.GetSongList();
+
+        Assert.That(songs2, Is.SameAs(songs1));
+    }
+
+    [Test]
+    public void GetSongList_Should_Refresh_After_Reset()
+    {
+        var db = CreateSongDb();
+        var fetcher = new DivingFishDataFetcher(db);
+        var songs1 = fetcher.GetSongList();
+
+        fetcher.Reset();
+
+        var songs2 = fetcher.GetSongList();
+        Assert.That(songs2, Is.Not.SameAs(songs1));
+    }
+
     [Test]
     public async Task GetRating_And_GetScores_Should_Skip_Unmatched_Songs()
     {
@@ -93,6 +148,11 @@ public class ChunithmDivingFishDataFetcherTest
 
     private sealed class TestDivingFishDataFetcher(SongDb<ChunithmSong> songDb, ChunithmRating rating) : DivingFishDataFetcher(songDb)
     {
+        public override List<ChunithmSong> GetSongList()
+        {
+            return SongDb.SongList;
+        }
+
         protected override Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
         {
             return Task.FromResult(new ChunithmRating

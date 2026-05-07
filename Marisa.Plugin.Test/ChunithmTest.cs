@@ -78,13 +78,58 @@ public class ChunithmTest
         });
     }
 
+    [TearDown]
+    public void TearDown()
+    {
+        new LouisDataFetcher(_songDb).Reset();
+    }
+
     [Test]
-    public void Should_Fetch_Song_List_From_Louis()
+    public void GetSongList_Should_Return_Songs()
     {
         var fetcher = new LouisDataFetcher(_songDb);
-        Assert.DoesNotThrow(() =>
+        var songs = fetcher.GetSongList();
+
+        Assert.That(songs, Is.Not.Null);
+        Assert.That(songs, Is.Not.Empty);
+
+        var first = songs[0];
+        Assert.Multiple(() =>
         {
-            fetcher.GetSongList();
+            Assert.That(first.Id, Is.GreaterThan(0));
+            Assert.That(first.Title, Is.Not.Empty);
+            Assert.That(first.Artist, Is.Not.Empty);
+            Assert.That(first.Genre, Is.Not.Empty);
+            Assert.That(first.Version, Is.Not.Empty);
+            Assert.That(first.Constants, Is.Not.Empty);
+            Assert.That(first.Levels, Is.Not.Empty);
+            Assert.That(first.DiffNames, Is.Not.Empty);
+            Assert.That(first.Constants.Count, Is.EqualTo(first.Levels.Count));
+            Assert.That(first.Constants.Count, Is.EqualTo(first.DiffNames.Count));
         });
+    }
+
+    [Test]
+    public void GetSongList_Should_Cache_Result()
+    {
+        var fetcher1 = new LouisDataFetcher(_songDb);
+        var songs1 = fetcher1.GetSongList();
+
+        var fetcher2 = new LouisDataFetcher(_songDb);
+        var songs2 = fetcher2.GetSongList();
+
+        Assert.That(songs2, Is.SameAs(songs1));
+    }
+
+    [Test]
+    public void GetSongList_Should_Refresh_After_Reset()
+    {
+        var fetcher = new LouisDataFetcher(_songDb);
+        var songs1 = fetcher.GetSongList();
+
+        fetcher.Reset();
+
+        var songs2 = fetcher.GetSongList();
+        Assert.That(songs2, Is.Not.SameAs(songs1));
     }
 }
