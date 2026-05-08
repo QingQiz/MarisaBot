@@ -4,7 +4,7 @@
 
 ## 功能
 
-本bot使用反射实时生成文档。具体文档请使用 `help` 指令获取
+本bot使用反射实时生成文档。具体文档请使用 `help` 指令获取 / [link](https://bot.qingqiz.uk/help)
 
 ## 部署
 
