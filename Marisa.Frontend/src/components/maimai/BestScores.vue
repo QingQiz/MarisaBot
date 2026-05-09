@@ -15,7 +15,12 @@
                     <!-- Right: rating + breakdown -->
                     <div class="text-right shrink-0">
                         <div class="text-[11rem] leading-none font-black tabular-nums tracking-tight">
-                            <span :class="{ 'rainbow-glow': total_ra >= 15000 }">{{ total_ra }}</span>
+                            <template v-if="total_ra >= 15000">
+                                <span v-for="(ch, i) in totalRaChars" :key="i"
+                                      class="mai-rainbow-char"
+                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                            </template>
+                            <span v-else>{{ total_ra }}</span>
                         </div>
                         <div class="text-3xl font-semibold mt-3 tabular-nums flex items-baseline justify-end gap-3">
                             <span>{{ ra_old }}</span>
@@ -30,8 +35,14 @@
                         <div class="text-2xl uppercase tracking-[0.5em] font-bold mb-2 mai-subtitle">
                             maimai DX · best 50
                         </div>
-                        <div class="text-[8rem] leading-none font-extrabold tracking-tight whitespace-nowrap">
-                            <span :class="{ 'rainbow-glow': total_ra >= 15000 }">{{ json.nickname }}</span>
+                        <div :style="{ fontSize: nicknameFontSize }"
+                             class="leading-none font-extrabold tracking-tight whitespace-nowrap">
+                            <template v-if="total_ra >= 15000">
+                                <span v-for="(ch, i) in nicknameChars" :key="i"
+                                      class="mai-rainbow-char"
+                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                            </template>
+                            <span v-else>{{ json.nickname }}</span>
                         </div>
                     </div>
                 </header>
@@ -92,6 +103,23 @@ let ra_new = ref(NaN)
 
 const total_ra = computed(() => ra_old.value + ra_new.value)
 
+const nicknameChars = computed(() => Array.from(json.value?.nickname ?? ''))
+const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
+
+// Auto-shrink nickname so long names don't collide with logo / rating columns.
+// Fullwidth chars count as 1.0, halfwidth ~0.55 — matches their actual rendered width ratio.
+const nicknameFontSize = computed(() => {
+    const nick = json.value?.nickname ?? ''
+    let weight = 0
+    for (const c of nick) {
+        weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.0 : 0.55
+    }
+    if (weight <= 5) return '8rem'
+    if (weight <= 7) return '7rem'
+    if (weight <= 9) return '6rem'
+    return '5rem'
+})
+
 axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
     json.value   = ParseMaiMaiRating(data.data)
     ra_old.value = json.value.charts.sd.reduce((ra, cur) => ra + cur.ra, 0);
@@ -140,16 +168,15 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     background-color: #ffd5cf;
 }
 
-/* PRiSM PLUS pastel vertical gradient (white bottom → peach → pink → lavender → blue → mint top) */
+/* PRiSM PLUS pastel vertical gradient (peach bottom → pink → lavender → blue → mint top) */
 .mai-deco-bg {
     background-image: linear-gradient(0deg,
-        #fff 14%,
-        #ffd5cf 24%,
-        #ffd5cf 46%,
-        #ffc5d5 56%,
-        #eaabff 67%,
-        #72bcfe 85%,
-        #65f2df 95%);
+        #ffd5cf 0%,
+        #ffd5cf 31%,
+        #ffc5d5 45%,
+        #eaabff 61%,
+        #72bcfe 86%,
+        #65f2df 100%);
 }
 
 .mai-text-shadow {
@@ -195,24 +222,24 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
-/* Rainbow-tier (rating ≥ 15000) glow — 135° diagonal rainbow per char + bright white core + cyan/magenta dual halo */
-.rainbow-glow {
-    background-image: linear-gradient(135deg,
-        #ff1aa1 0%,
-        #ff7700 18%,
-        #fff700 36%,
-        #00ff66 54%,
-        #00d4ff 72%,
-        #6a4dff 90%,
-        #d600ff 100%);
+/* Rainbow-tier (rating ≥ 15000) — maimai でらっくす logo style: per-char solid color cycle,
+   top→down white→color gradient fill for 3D pop, thick black outline, soft drop-shadow. */
+.mai-rainbow-char {
+    display: inline-block;
+    background-image: linear-gradient(to bottom, #fff 4%, var(--rb-color) 58%, var(--rb-color) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    filter: saturate(1.4) brightness(1.15)
-        drop-shadow(0 0 8px rgba(255, 255, 255, 0.95))
-        drop-shadow(0 0 24px rgba(0, 200, 255, 0.6))
-        drop-shadow(0 0 40px rgba(255, 100, 220, 0.45))
-        drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    -webkit-text-stroke: 4px #000;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 }
+
+.mai-rainbow-char--c0 { --rb-color: #ff3838; }  /* red */
+.mai-rainbow-char--c1 { --rb-color: #ff9128; }  /* orange */
+.mai-rainbow-char--c2 { --rb-color: #ffd000; }  /* yellow */
+.mai-rainbow-char--c3 { --rb-color: #2ecf52; }  /* green */
+.mai-rainbow-char--c4 { --rb-color: #1aa3ff; }  /* blue */
+.mai-rainbow-char--c5 { --rb-color: #b840ff; }  /* purple */
 </style>
