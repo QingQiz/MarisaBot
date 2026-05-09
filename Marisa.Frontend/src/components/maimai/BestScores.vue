@@ -114,10 +114,12 @@ const nicknameFontSize = computed(() => {
     for (const c of nick) {
         weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.0 : 0.55
     }
-    if (weight <= 5) return '8rem'
-    if (weight <= 7) return '7rem'
-    if (weight <= 9) return '6rem'
-    return '5rem'
+    if (weight <= 5)  return '8rem'
+    if (weight <= 7)  return '7rem'
+    if (weight <= 9)  return '6rem'
+    if (weight <= 12) return '5rem'
+    if (weight <= 16) return '4rem'
+    return '3rem'
 })
 
 axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
@@ -226,20 +228,20 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
    top→down white→color gradient fill for 3D pop, thick black outline, soft drop-shadow. */
 .mai-rainbow-char {
     display: inline-block;
-    background-image: linear-gradient(to bottom, #fff 4%, var(--rb-color) 58%, var(--rb-color) 100%);
+    background-image: linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
     -webkit-text-stroke: 4px #000;
     paint-order: stroke fill;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) saturate(1.85) brightness(1.2);
 }
 
-.mai-rainbow-char--c0 { --rb-color: #ff3838; }  /* red */
-.mai-rainbow-char--c1 { --rb-color: #ff9128; }  /* orange */
-.mai-rainbow-char--c2 { --rb-color: #ffd000; }  /* yellow */
-.mai-rainbow-char--c3 { --rb-color: #2ecf52; }  /* green */
-.mai-rainbow-char--c4 { --rb-color: #1aa3ff; }  /* blue */
-.mai-rainbow-char--c5 { --rb-color: #b840ff; }  /* purple */
+.mai-rainbow-char--c0 { --rb-color: #ff0028; }  /* red */
+.mai-rainbow-char--c1 { --rb-color: #ff6a00; }  /* orange */
+.mai-rainbow-char--c2 { --rb-color: #ffe800; }  /* yellow */
+.mai-rainbow-char--c3 { --rb-color: #00e040; }  /* green */
+.mai-rainbow-char--c4 { --rb-color: #008cff; }  /* blue */
+.mai-rainbow-char--c5 { --rb-color: #d000ff; }  /* purple */
 </style>
