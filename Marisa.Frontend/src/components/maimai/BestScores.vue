@@ -18,10 +18,7 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in totalRaChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="[
-                                          `mai-rainbow-char--c${i % 6}`,
-                                          { 'mai-rainbow-char--tl': hasTopLeftCut(ch, i) },
-                                      ]">{{ ch }}</span>
+                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
                             </template>
                             <span v-else>{{ total_ra }}</span>
                         </div>
@@ -43,10 +40,7 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in nicknameChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="[
-                                          `mai-rainbow-char--c${i % 6}`,
-                                          { 'mai-rainbow-char--tl': hasTopLeftCut(ch, i) },
-                                      ]">{{ ch }}</span>
+                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
                             </template>
                             <span v-else>{{ json.nickname }}</span>
                         </div>
@@ -111,23 +105,6 @@ const total_ra = computed(() => ra_old.value + ra_new.value)
 
 const nicknameChars = computed(() => Array.from(json.value?.nickname ?? ''))
 const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
-
-// Decides whether a rainbow char gets the optional top-left corner cut.
-// Whitelist filter: anything in BMP non-ASCII (CJK ideographs / kana / hangul)
-// densely fills the em-box, so the diagonal cut lands on glyph; for Latin/digits
-// only a few flat-top shapes look right. Random ~50% rate among eligible chars
-// for visual variety, deterministic per (char, position) so renders are stable.
-const TL_LATIN_WHITELIST = new Set('mnMNTt47'.split(''))
-
-function hasTopLeftCut(ch: string, i: number): boolean {
-    const cp = ch.codePointAt(0) ?? 0
-    const eligible = cp >= 0x3000 || TL_LATIN_WHITELIST.has(ch)
-    if (!eligible) return false
-    let h = (2166136261 ^ i) >>> 0
-    h = Math.imul(h, 16777619) ^ cp
-    h = Math.imul(h, 16777619)
-    return ((h ^ (h >>> 16)) >>> 0) % 2 === 0
-}
 
 // Auto-shrink nickname so long names don't collide with logo / rating columns.
 // Fullwidth chars count as 1.0, halfwidth ~0.55 — matches their actual rendered width ratio.
@@ -247,22 +224,19 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
-/* Rainbow-tier (rating ≥ 15000) — maimai でらっくす logo style: per-char solid color cycle,
-   top→down white→color gradient fill for 3D pop, thick black outline, soft drop-shadow. */
+/* Rainbow-tier (rating ≥ 15000) — three-band per-char shading.
+   Each char carries three discrete bands at a true 45° diagonal (light → main → dark),
+   approximating the in-game logo letter style without smooth gradients. */
 .mai-rainbow-char {
     display: inline-block;
-    /* Drop tabular-nums inherited from the rating container — for narrow digits
-       like "1", tabular widths leave the bottom-right of the span box empty so
-       the corner cut lands on whitespace and gets masked away. */
+    /* Drop tabular-nums inherited from the rating container — narrow digits
+       like "1" otherwise sit inside a wide fixed-width box and the diagonal
+       bands land on whitespace that background-clip:text masks away. */
     font-variant-numeric: normal;
-    background-image:
-        /* Bottom-right diagonal cut: a deeper-shade triangle on every rainbow char,
-           matching the soft "3D shading" of the official maimai でらっくす logo. */
-        linear-gradient(to bottom right,
-            transparent 0%, transparent 72%,
-            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
-        /* Base fill: white at the very top, fade into the bright color. */
-        linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
+    background-image: linear-gradient(135deg,
+        var(--rb-color-light) 0%,  var(--rb-color-light) 43%,
+        var(--rb-color)       43%, var(--rb-color)       68%,
+        var(--rb-color-dark)  68%, var(--rb-color-dark)  100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -272,25 +246,22 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) saturate(1.85) brightness(1.2);
 }
 
-/* Variant: also cut the top-left corner, like the "m" in the official logo.
-   Applied randomly to whitelisted chars — see hasTopLeftCut() in script. */
-.mai-rainbow-char--tl {
-    background-image:
-        linear-gradient(to top left,
-            transparent 0%, transparent 72%,
-            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
-        linear-gradient(to bottom right,
-            transparent 0%, transparent 72%,
-            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
-        linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
+/* c4 (indigo-violet) needs both filters disabled to render its blue hex truly:
+   - saturate(1.85) brightness(1.2) on .mai-rainbow-char shifts blue toward magenta-pink
+   - the magenta text-shadow inherited from .mai-text-shadow blends with high-B
+     glyphs at edges, also shifting perceived color toward purple
+   Other colors keep both effects so they retain the V8 vibrancy + halo. */
+.mai-rainbow-char--c4 {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    text-shadow: none;
 }
 
-/* Bright + dark pair per color slot. Dark is HSL S=100% L=22% (green bumped to
-   L=35% — at L=22% green reads as muddy swamp green even under saturate filter). */
-.mai-rainbow-char--c0 { --rb-color: #ff0028; --rb-color-dark: #70000B; }  /* red */
-.mai-rainbow-char--c1 { --rb-color: #ff6a00; --rb-color-dark: #702F00; }  /* orange */
-.mai-rainbow-char--c2 { --rb-color: #ffe800; --rb-color-dark: #706700; }  /* yellow */
-.mai-rainbow-char--c3 { --rb-color: #00e040; --rb-color-dark: #00B233; }  /* green */
-.mai-rainbow-char--c4 { --rb-color: #008cff; --rb-color-dark: #003370; }  /* blue */
-.mai-rainbow-char--c5 { --rb-color: #d000ff; --rb-color-dark: #5B0070; }  /* purple */
+/* Per-color light / main / dark triplet, hand-tuned through pixel-level
+   comparison with the official maimai でらっくす logo letters. */
+.mai-rainbow-char--c0 { --rb-color-light: #FF8F9A; --rb-color: #FF0028; --rb-color-dark: #70000B; }  /* red */
+.mai-rainbow-char--c1 { --rb-color-light: #FF974C; --rb-color: #FF6A00; --rb-color-dark: #702F00; }  /* orange */
+.mai-rainbow-char--c2 { --rb-color-light: #FFF580; --rb-color: #FFE800; --rb-color-dark: #BDAD00; }  /* yellow */
+.mai-rainbow-char--c3 { --rb-color-light: #33FF6E; --rb-color: #00E040; --rb-color-dark: #00B233; }  /* green */
+.mai-rainbow-char--c4 { --rb-color-light: #9477E3; --rb-color: #6553FF; --rb-color-dark: #6132E3; }  /* indigo-violet */
+.mai-rainbow-char--c5 { --rb-color-light: #F1B3FF; --rb-color: #D000FF; --rb-color-dark: #70008A; }  /* purple */
 </style>
