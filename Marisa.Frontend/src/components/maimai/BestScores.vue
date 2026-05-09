@@ -18,7 +18,10 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in totalRaChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                                      :class="[
+                                          `mai-rainbow-char--c${i % 6}`,
+                                          { 'mai-rainbow-char--tl': hasTopLeftCut(ch, i) },
+                                      ]">{{ ch }}</span>
                             </template>
                             <span v-else>{{ total_ra }}</span>
                         </div>
@@ -40,7 +43,10 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in nicknameChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                                      :class="[
+                                          `mai-rainbow-char--c${i % 6}`,
+                                          { 'mai-rainbow-char--tl': hasTopLeftCut(ch, i) },
+                                      ]">{{ ch }}</span>
                             </template>
                             <span v-else>{{ json.nickname }}</span>
                         </div>
@@ -105,6 +111,23 @@ const total_ra = computed(() => ra_old.value + ra_new.value)
 
 const nicknameChars = computed(() => Array.from(json.value?.nickname ?? ''))
 const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
+
+// Decides whether a rainbow char gets the optional top-left corner cut.
+// Whitelist filter: anything in BMP non-ASCII (CJK ideographs / kana / hangul)
+// densely fills the em-box, so the diagonal cut lands on glyph; for Latin/digits
+// only a few flat-top shapes look right. Random ~50% rate among eligible chars
+// for visual variety, deterministic per (char, position) so renders are stable.
+const TL_LATIN_WHITELIST = new Set('mnMNTt47'.split(''))
+
+function hasTopLeftCut(ch: string, i: number): boolean {
+    const cp = ch.codePointAt(0) ?? 0
+    const eligible = cp >= 0x3000 || TL_LATIN_WHITELIST.has(ch)
+    if (!eligible) return false
+    let h = (2166136261 ^ i) >>> 0
+    h = Math.imul(h, 16777619) ^ cp
+    h = Math.imul(h, 16777619)
+    return ((h ^ (h >>> 16)) >>> 0) % 2 === 0
+}
 
 // Auto-shrink nickname so long names don't collide with logo / rating columns.
 // Fullwidth chars count as 1.0, halfwidth ~0.55 — matches their actual rendered width ratio.
@@ -228,7 +251,18 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
    top→down white→color gradient fill for 3D pop, thick black outline, soft drop-shadow. */
 .mai-rainbow-char {
     display: inline-block;
-    background-image: linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
+    /* Drop tabular-nums inherited from the rating container — for narrow digits
+       like "1", tabular widths leave the bottom-right of the span box empty so
+       the corner cut lands on whitespace and gets masked away. */
+    font-variant-numeric: normal;
+    background-image:
+        /* Bottom-right diagonal cut: a deeper-shade triangle on every rainbow char,
+           matching the soft "3D shading" of the official maimai でらっくす logo. */
+        linear-gradient(to bottom right,
+            transparent 0%, transparent 72%,
+            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
+        /* Base fill: white at the very top, fade into the bright color. */
+        linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -238,10 +272,25 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) saturate(1.85) brightness(1.2);
 }
 
-.mai-rainbow-char--c0 { --rb-color: #ff0028; }  /* red */
-.mai-rainbow-char--c1 { --rb-color: #ff6a00; }  /* orange */
-.mai-rainbow-char--c2 { --rb-color: #ffe800; }  /* yellow */
-.mai-rainbow-char--c3 { --rb-color: #00e040; }  /* green */
-.mai-rainbow-char--c4 { --rb-color: #008cff; }  /* blue */
-.mai-rainbow-char--c5 { --rb-color: #d000ff; }  /* purple */
+/* Variant: also cut the top-left corner, like the "m" in the official logo.
+   Applied randomly to whitelisted chars — see hasTopLeftCut() in script. */
+.mai-rainbow-char--tl {
+    background-image:
+        linear-gradient(to top left,
+            transparent 0%, transparent 72%,
+            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
+        linear-gradient(to bottom right,
+            transparent 0%, transparent 72%,
+            var(--rb-color-dark) 72%, var(--rb-color-dark) 100%),
+        linear-gradient(to bottom, #fff 0%, var(--rb-color) 26%, var(--rb-color) 100%);
+}
+
+/* Bright + dark pair per color slot. Dark is HSL S=100% L=22% (green bumped to
+   L=35% — at L=22% green reads as muddy swamp green even under saturate filter). */
+.mai-rainbow-char--c0 { --rb-color: #ff0028; --rb-color-dark: #70000B; }  /* red */
+.mai-rainbow-char--c1 { --rb-color: #ff6a00; --rb-color-dark: #702F00; }  /* orange */
+.mai-rainbow-char--c2 { --rb-color: #ffe800; --rb-color-dark: #706700; }  /* yellow */
+.mai-rainbow-char--c3 { --rb-color: #00e040; --rb-color-dark: #00B233; }  /* green */
+.mai-rainbow-char--c4 { --rb-color: #008cff; --rb-color-dark: #003370; }  /* blue */
+.mai-rainbow-char--c5 { --rb-color: #d000ff; --rb-color-dark: #5B0070; }  /* purple */
 </style>
