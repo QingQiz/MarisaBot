@@ -37,6 +37,12 @@
     src: url('@/assets/fonts/LXGWWenKai-Regular.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'SEGA Maru Gothic';
+    font-weight: normal;
+    src: url('@/assets/fonts/SEGAMaruGothicDB.woff2') format('woff2');
+}
+
 @tailwind components;
 
 .osu-table {

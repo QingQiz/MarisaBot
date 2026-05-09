@@ -1,47 +1,66 @@
-﻿<template>
+<template>
     <template v-if="data_fetched">
-        <div class="best-body" v-if="err_msg === ''">
-            <div :style="`background-image: url('/assets/maimai/pic/UI_UNL_BG.png')`"
-                 class="bg-center bg-no-repeat bg-cover w-best">
-                <div class="font-osu-web">
-                    <div class="h-[650px] bg-cover bg-bottom flex items-center justify-center relative"
-                         :style="`background-image:url('/assets/maimai/pic/Sub.png')`">
-                        <img src="/assets/maimai/pic/name.png" alt="" class="absolute h-[450px] m-auto inset-0">
-                        <div class="w-[800px] h-[400px] pb-[50px] px-[130px] relative">
-                            <div
-                                class="text-6xl font-bold overflow-hidden w-full h-full flex justify-center items-center text-center"
-                                :class="{ 'rainbow-text-shadow': ra_old + ra_new >= 15000 }">
-                                {{ json.nickname }}
-                            </div>
-                            <div class="absolute text-6xl -top-3 left-0 right-0 text-center"
-                                 :class="{ 'rainbow-text-shadow': ra_old + ra_new >= 15000 }">
-                                {{ ra_old + ra_new }}
-                            </div>
-                            <div class="absolute text-4xl top-12 left-0 right-0 text-center mt-2 font-bold">
-                                {{ ra_old }}+{{ ra_new }}
-                            </div>
+        <div class="best-shell relative overflow-hidden" v-if="err_msg === ''">
+            <!-- Backdrop: maimai でらっくす PRiSM PLUS pastel vertical gradient -->
+            <div class="absolute inset-0 pointer-events-none mai-deco-bg"></div>
+
+            <div class="relative w-best font-osu-web mai-text-shadow">
+                <!-- Header -->
+                <header class="relative px-card-x pt-16 pb-14 flex items-end justify-between gap-10 text-white">
+                    <!-- Left: maimai でらっくす PRiSM PLUS logo -->
+                    <img src="/assets/maimai/pic/logo_prism.png" alt="maimai でらっくす PRiSM PLUS"
+                         class="w-[675px] shrink-0 drop-shadow-[0_6px_12px_rgba(80,30,90,0.45)]"
+                         style="transform: translateY(-10px)"/>
+
+                    <!-- Right: rating + breakdown -->
+                    <div class="text-right shrink-0">
+                        <div class="text-[11rem] leading-none font-black tabular-nums tracking-tight">
+                            <span :class="{ 'rainbow-glow': total_ra >= 15000 }">{{ total_ra }}</span>
+                        </div>
+                        <div class="text-3xl font-semibold mt-3 tabular-nums flex items-baseline justify-end gap-3">
+                            <span>{{ ra_old }}</span>
+                            <span class="text-white/70">+</span>
+                            <span>{{ ra_new }}</span>
+                            <span class="text-base text-white/85 ml-3 uppercase tracking-[0.3em]">old · new</span>
                         </div>
                     </div>
-                    <div
-                        class="w-[var(--best-width)] h-[calc(var(--best-gap)_*_1.5)] overflow-x-hidden bg-center flex -mt-[100px]">
-                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="" class="z-10">
-                        <img :src="`/assets/maimai/pic/UI_TST_BG_Parts_01.png`" alt="" class="z-10">
+
+                    <!-- Center (absolute, page-centered): subtitle + nickname -->
+                    <div class="absolute left-1/2 -translate-x-1/2 bottom-[71px] flex flex-col items-center text-center pointer-events-none">
+                        <div class="text-2xl uppercase tracking-[0.5em] font-bold mb-2 mai-subtitle">
+                            maimai DX · best 50
+                        </div>
+                        <div class="text-[8rem] leading-none font-extrabold tracking-tight whitespace-nowrap">
+                            <span :class="{ 'rainbow-glow': total_ra >= 15000 }">{{ json.nickname }}</span>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <div class="grid grid-cols-5-maimai p-card gap-card">
+                </header>
+
+                <!-- B35 (Standard) section -->
+                <section class="px-card-x">
+                    <div class="flex items-baseline gap-5 pb-7">
+                        <span class="mai-section-tag bg-[#f93eac]">B35</span>
+                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Standard</div>
+                        <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
+                        <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">{{ ra_old }}</div>
+                    </div>
+                    <div class="grid grid-cols-5-maimai gap-card pb-12">
                         <score-card v-for="(data, i) in json.charts.sd" v-bind:key="i" :score="data"/>
                     </div>
-                    <div class="px-[var(--card-padding)]">
-                        <div class="h-gap overflow-x-hidden bg-center flex">
-                            <img :src="`/assets/maimai/pic/UI_RSL_BG_Parts_01.png`" alt="">
-                            <img :src="`/assets/maimai/pic/UI_RSL_BG_Parts_01.png`" alt="">
-                        </div>
+                </section>
+
+                <!-- B15 (New) section -->
+                <section class="px-card-x">
+                    <div class="flex items-baseline gap-5 pb-7">
+                        <span class="mai-section-tag bg-[#6dbefe]">B15</span>
+                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(20,40,120,0.55)]">NEW</div>
+                        <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
+                        <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(20,40,120,0.55)]">{{ ra_new }}</div>
                     </div>
-                    <div class="grid grid-cols-5-maimai p-card gap-card">
+                    <div class="grid grid-cols-5-maimai gap-card pb-[70px]">
                         <score-card v-for="(data, i) in json.charts.dx" v-bind:key="i" :score="data"/>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
         <div v-else class="w-[1000px] h-[700px] flex items-center justify-center bg-red-600">
@@ -53,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
 import axios from 'axios';
 import {useRoute} from "vue-router";
 
@@ -70,6 +89,8 @@ let data_fetched = ref(false)
 
 let ra_old = ref(NaN)
 let ra_new = ref(NaN)
+
+const total_ra = computed(() => ra_old.value + ra_new.value)
 
 axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
     json.value   = ParseMaiMaiRating(data.data)
@@ -111,14 +132,44 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
 </script>
 
 <style scoped>
-.best-body {
+.best-shell {
     --card-gap: 1.75rem;
     --card-padding: 3rem;
-    --best-gap: 150px;
     --best-width-inner: calc(400px * 5 + var(--card-gap) * 4);
     --best-width: calc(var(--best-width-inner) + var(--card-padding) * 2);
-    --best-height-t: calc(200px * 5 + var(--card-padding) * 2 + var(--card-gap) * 4);
-    --best-height-b: calc(200px * 3 + var(--card-padding) * 2 + var(--card-gap) * 4);
+    background-color: #ffd5cf;
+}
+
+/* PRiSM PLUS pastel vertical gradient (white bottom → peach → pink → lavender → blue → mint top) */
+.mai-deco-bg {
+    background-image: linear-gradient(0deg,
+        #fff 14%,
+        #ffd5cf 24%,
+        #ffd5cf 46%,
+        #ffc5d5 56%,
+        #eaabff 67%,
+        #72bcfe 85%,
+        #65f2df 95%);
+}
+
+.mai-text-shadow {
+    text-shadow: 0 2px 4px rgba(160, 30, 90, 0.45),
+                 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.mai-section-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.85rem;
+    border-radius: 9999px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 0 3px #fff,
+                0 4px 14px rgba(0, 0, 0, 0.25);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .grid-cols-5-maimai {
@@ -129,21 +180,39 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     gap: var(--card-gap);
 }
 
-.p-card {
-    padding: var(--card-padding);
+.px-card-x {
+    padding-left: var(--card-padding);
+    padding-right: var(--card-padding);
 }
 
 .w-best {
     width: var(--best-width);
 }
 
-.h-gap {
-    height: var(--best-gap);
+/* Subtitle "MAIMAI DX · BEST 50" — dark navy on the light pastel top of the gradient */
+.mai-subtitle {
+    color: #1e293b;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
-.rainbow-text-shadow {
-    color: #ef3550;
-    letter-spacing: 7px;
-    text-shadow: 1px 0 #f48fb1, 2px 0 #7e57c2, 3px 0 #2196f3, 4px 0 #26c6da, 5px 0 #43a047, -1px 0 #f48fb1, -2px 0 #7e57c2, -3px 0 #2196f3, -4px 0 #26c6da, -5px 0 #43a047;
+/* Rainbow-tier (rating ≥ 15000) glow — 135° diagonal rainbow per char + bright white core + cyan/magenta dual halo */
+.rainbow-glow {
+    background-image: linear-gradient(135deg,
+        #ff1aa1 0%,
+        #ff7700 18%,
+        #fff700 36%,
+        #00ff66 54%,
+        #00d4ff 72%,
+        #6a4dff 90%,
+        #d600ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: saturate(1.4) brightness(1.15)
+        drop-shadow(0 0 8px rgba(255, 255, 255, 0.95))
+        drop-shadow(0 0 24px rgba(0, 200, 255, 0.6))
+        drop-shadow(0 0 40px rgba(255, 100, 220, 0.45))
+        drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
 </style>
