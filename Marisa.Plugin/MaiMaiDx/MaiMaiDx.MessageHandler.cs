@@ -30,7 +30,6 @@ public partial class MaiMaiDx
 
     #region 绑定
 
-    [MarisaPluginDisabled]
     [MarisaPluginDoc("绑定某个查分器")]
     [MarisaPluginCommand("bind", "绑定")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
@@ -38,7 +37,7 @@ public partial class MaiMaiDx
     {
         var fetchers = new[]
         {
-            "DivingFish", "Wahlap"
+            "DivingFish", "Wahlap", "lxns"
         };
 
         message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
@@ -74,6 +73,33 @@ public partial class MaiMaiDx
                         {
                             realm.Write(() => realm.Remove(bind));
                         }
+                        
+                        // 为 DivingFish 创建一个 bind 记录
+                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0)
+                        {
+                            ServerName = "DivingFish"
+                        }));
+
+                        message.Reply("好了");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                    
+                    if (idx == 2)
+                    {
+                        // lxns
+                        using var realm = BotDbContext.OpenRealm();
+
+                        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
+
+                        if (bind != null)
+                        {
+                            realm.Write(() => realm.Remove(bind));
+                        }
+
+                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0)
+                        {
+                            ServerName = "lxns"
+                        }));
 
                         message.Reply("好了");
                         return MarisaPluginTaskState.CompletedTask;
@@ -97,7 +123,10 @@ public partial class MaiMaiDx
 
                         using var realm = BotDbContext.OpenRealm();
 
-                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, aimeId)));
+                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, aimeId)
+                        {
+                            ServerName = "Wahlap"
+                        }));
 
                         message.Reply("好了");
                     }
@@ -214,6 +243,12 @@ public partial class MaiMaiDx
     {
         var fetcher = GetDataFetcher(message);
 
+        if (fetcher is LxnsDataFetcher)
+        {
+            message.Reply("sum功能暂不支持落雪查分器");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         // 旧谱的操作和新谱的一样，所以直接复制了，为这两个抽象一层有点不值
         var groupedSong = SongDb.SongList
             .Where(song => song.Info.IsNew)
@@ -305,6 +340,13 @@ public partial class MaiMaiDx
         else
         {
             var fetcher = GetDataFetcher(message);
+
+            if (fetcher is LxnsDataFetcher)
+            {
+                message.Reply("sum功能暂不支持落雪查分器");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
             var scores  = await fetcher.GetScores(message);
 
             var groupedSong = SongDb.SongList
@@ -362,7 +404,14 @@ public partial class MaiMaiDx
         async Task ReplyVersionSummary(Message replyMessage, string version)
         {
             var fetcher = GetDataFetcher(message);
-            var scores  = await fetcher.GetScores(message);
+
+            if (fetcher is LxnsDataFetcher)
+            {
+                replyMessage.Reply("sum功能暂不支持落雪查分器");
+                return;
+            }
+
+            var scores = await fetcher.GetScores(message);
 
             var groupedSong = SongDb.SongList
                 .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
@@ -409,8 +458,15 @@ public partial class MaiMaiDx
             goto _error;
         }
 
-        var fetcher = GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+            var fetcher = GetDataFetcher(message);
+
+            if (fetcher is LxnsDataFetcher)
+            {
+                message.Reply("sum功能暂不支持落雪查分器");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var scores  = await fetcher.GetScores(message);
 
         var groupedSong = SongDb.SongList
             .Select(song => song.Constants

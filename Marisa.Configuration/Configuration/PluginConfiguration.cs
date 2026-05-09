@@ -20,6 +20,8 @@ public class PluginConfiguration
 
     public DivingFishConfiguration DivingFish { get; set; }
 
+    public LxnsConfiguration Lxns { get; set; }
+
     public long[] Commander
     {
         get => ConfigurationManager.RequireArray("commander", _commander);

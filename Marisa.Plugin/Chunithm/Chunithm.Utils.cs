@@ -18,19 +18,20 @@ public partial class Chunithm
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "Louis"      => new LouisDataFetcher(SongDb),
+                "lxns"       => new LxnsDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "RinNET", "aqua.naominet.live",
-                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode!),
+                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "Aqua", "aqua.msm.moe",
-                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!),
+                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode),
                 _ => Dns.GetHostAddresses(name).Length != 0
                     ? new AllNetBasedNetDataFetcher(SongDb, name, name,
-                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!)
-                    : throw new InvalidDataException("无效的服务器名： " + name)
+                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode)
+                    : throw new InvalidDataException("无效的服务器名：" + name)
             };
         }
         catch (Exception e) when (e is SocketException or ArgumentException)
         {
-            throw new InvalidDataException("无效的服务器名： " + name);
+            throw new InvalidDataException("无效的服务器名：" + name);
         }
     }
 
@@ -55,62 +56,58 @@ public partial class Chunithm
 
         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
-        if (bind == null)
-        {
-            return GetDataFetcher("DivingFish", null); // 默认水鱼
-        }
-
-        var serverName = bind.ServerName;
-        var accessCode = bind.AccessCode;
-
-        return GetDataFetcher(serverName, accessCode);
+        return bind == null
+            ? GetDataFetcher("DivingFish", null)
+            : GetDataFetcher(bind.ServerName, bind.AccessCode);
     }
 
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)
     {
         var fetcher = await GetDataFetcher(message, true);
-        if (!b50) return await fetcher.GetRating(message);
-
-        var rating = await fetcher.GetRating(message);
-        var scores = await fetcher.GetScores(message);
-        rating.IsB50 = true;
-
-        var songList = fetcher.GetSongList();
-        HashSet<string> newestVersions;
-
-        if (fetcher is DivingFishDataFetcher)
+        
+        // 如果是 lxns 查分器
+        if (fetcher is LxnsDataFetcher lxnsFetcher)
         {
-            newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            // B50时返回原始数据（best对应best，new_best对应recent）
+            if (b50)
             {
-                "CHUNITHM LUMINOUS PLUS",
-                "CHUNITHM VERSE"
-            };
+                var rating = await lxnsFetcher.GetRatingRaw(message);
+                rating.IsB50 = true;
+                return rating;
+            }
+            // B30时返回合并后的数据（旧版本逻辑）
+            else
+            {
+                var rating = await lxnsFetcher.GetRating(message);
+                rating.IsB50 = false;
+                return rating;
+            }
         }
-        else
+
+        var baseRating = await fetcher.GetRating(message);
+        
+        if (!b50) return baseRating;
+
+        var scores = await fetcher.GetScores(message);
+        var newestVersions = new[] { "CHUNITHM VERSE", "CHUNITHM LUMINOUS PLUS" };
+
+        baseRating.IsB50 = true;
+
+        var div = scores.Select(s => s.Value).GroupBy(s => 
         {
-            newestVersions = songList
-                .Select(s => s.Version)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderDescending(StringComparer.OrdinalIgnoreCase)
-                .Take(1)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        }
+            var songObj = SongDb.GetSongById(s.Id);
+            // 如果找不到歌曲，默认分到旧版本组
+            return songObj != null && newestVersions.Contains(songObj.Version);
+        }).ToList();
 
-        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
+        var r = div.FirstOrDefault(g => g.Key)?.ToList() ?? [];
+        var b = div.FirstOrDefault(g => !g.Key)?.ToList() ?? [];
+        r = r.OrderByDescending(s => s.Rating).Take(20).ToList();
+        b = b.OrderByDescending(s => s.Rating).Take(30).ToList();
 
-        var div = scores
-            .Select(x => x.Value)
-            .GroupBy(x => newestVersions.Contains(versionMap.GetValueOrDefault(x.Id, "")))
-            .ToList();
-
-        var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];
-        var b = div.FirstOrDefault(x => !x.Key)?.Select(x => x) ?? [];
-        r = r.OrderByDescending(x => x.Rating).Take(20);
-        b = b.OrderByDescending(x => x.Rating).Take(30);
-
-        rating.Records.Best   = b.ToArray();
-        rating.Records.Recent = r.ToArray();
-        return rating;
+        baseRating.Records.Best   = b.ToArray();
+        baseRating.Records.Recent = r.ToArray();
+        return baseRating;
     }
 
     private async Task<MessageChain> GetRatingImg(Message message, bool b50 = false)

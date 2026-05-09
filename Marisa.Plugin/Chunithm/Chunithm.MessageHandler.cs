@@ -26,6 +26,7 @@ public partial class Chunithm
         {
             "DivingFish",
             "Louis",
+            "lxns",
             "RinNET",
             "Aqua",
             "其它基于AllNet/Aqua/Chusan的服务"
@@ -57,7 +58,7 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    if (idx is 0 or 1)
+                    if (idx is 0 or 1 or 2)
                     {
                         using var realm = BotDbContext.OpenRealm();
 
@@ -134,7 +135,7 @@ public partial class Chunithm
                         bind.AccessCode = accessCode;
                     }
 
-                    var fetcher = GetDataFetcher(server, accessCode);
+                    var fetcher = GetDataFetcher(server, bind.AccessCode);
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
@@ -454,6 +455,44 @@ public partial class Chunithm
     #region 查分
 
     /// <summary>
+    ///     b30
+    /// </summary>
+    [MarisaPluginDoc("查询 b30", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("b30", "查分")]
+    private async Task<MarisaPluginTaskState> B30(Message message)
+    {
+        var ret = await GetRatingImg(message);
+
+        message.Reply(ret);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("b30的汇总情况，具体的试一试命令就知道了（懒）")]
+    [MarisaPluginSubCommand(nameof(B30))]
+    [MarisaPluginCommand("sum")]
+    private async Task<MarisaPluginTaskState> B30Sum(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+
+        if (fetcher is LxnsDataFetcher)
+        {
+            message.Reply("sum功能暂不支持落雪查分器");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var rating = await fetcher.GetRating(message);
+
+        var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
+        var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
+
+        message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
+                      $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     b50
     /// </summary>
     [MarisaPluginDoc("查询 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
@@ -472,7 +511,15 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B50Sum(Message message)
     {
-        var rating = await GetRating(message, true);
+        var fetcher = await GetDataFetcher(message, true);
+
+        if (fetcher is LxnsDataFetcher)
+        {
+            message.Reply("sum功能暂不支持落雪查分器");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var rating = await fetcher.GetRating(message);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
         var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
