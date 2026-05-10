@@ -18,7 +18,10 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in totalRaChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                                      :class="[
+                                          `mai-rainbow-char--c${i % 6}`,
+                                          { 'mai-rainbow-char--banded': total_ra >= 16000 },
+                                      ]">{{ ch }}</span>
                             </template>
                             <span v-else>{{ total_ra }}</span>
                         </div>
@@ -40,7 +43,10 @@
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in nicknameChars" :key="i"
                                       class="mai-rainbow-char"
-                                      :class="`mai-rainbow-char--c${i % 6}`">{{ ch }}</span>
+                                      :class="[
+                                          `mai-rainbow-char--c${i % 6}`,
+                                          { 'mai-rainbow-char--banded': total_ra >= 16000 },
+                                      ]">{{ ch }}</span>
                             </template>
                             <span v-else>{{ json.nickname }}</span>
                         </div>
@@ -225,19 +231,17 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }
 
-/* Rainbow-tier (rating ≥ 15000) — three-band per-char shading.
-   Each char carries three discrete bands at a true 45° diagonal (light → main → dark),
-   approximating the in-game logo letter style without smooth gradients. */
+/* Rainbow-tier base (rating ≥ 15000) — per-char solid color cycle. The 6 slots
+   below cycle through bright/main/dark color triplets; this base applies only
+   the main color, used for the 15000–15999 mid-tier. */
 .mai-rainbow-char {
     display: inline-block;
     /* Drop tabular-nums inherited from the rating container — narrow digits
        like "1" otherwise sit inside a wide fixed-width box and the diagonal
-       bands land on whitespace that background-clip:text masks away. */
+       bands of the --banded variant land on whitespace that background-clip:text
+       masks away. Apply uniformly so both tiers stay visually consistent. */
     font-variant-numeric: normal;
-    background-image: linear-gradient(135deg,
-        var(--rb-color-light) 0%,  var(--rb-color-light) 43%,
-        var(--rb-color)       43%, var(--rb-color)       68%,
-        var(--rb-color-dark)  68%, var(--rb-color-dark)  100%);
+    background-image: linear-gradient(0deg, var(--rb-color), var(--rb-color));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -245,6 +249,16 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     -webkit-text-stroke: 4px #000;
     paint-order: stroke fill;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) saturate(1.85) brightness(1.2);
+}
+
+/* Banded variant (rating ≥ 16000) — three discrete bands at a true 45° diagonal
+   (light → main → dark, hard stops), approximating the in-game logo letter
+   style without smooth gradients. */
+.mai-rainbow-char--banded {
+    background-image: linear-gradient(135deg,
+        var(--rb-color-light) 0%,  var(--rb-color-light) 43%,
+        var(--rb-color)       43%, var(--rb-color)       68%,
+        var(--rb-color-dark)  68%, var(--rb-color-dark)  100%);
 }
 
 /* c4 (indigo-violet) needs both filters disabled to render its blue hex truly:
