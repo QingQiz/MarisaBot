@@ -39,7 +39,7 @@
                             maimai DX · best 50
                         </div>
                         <div :style="{ fontSize: nicknameFontSize }"
-                             class="leading-none font-extrabold tracking-tight whitespace-nowrap">
+                             class="mai-nickname tracking-tight whitespace-nowrap">
                             <template v-if="total_ra >= 15000">
                                 <span v-for="(ch, i) in nicknameChars" :key="i"
                                       class="mai-rainbow-char"
@@ -234,6 +234,16 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
 /* Rainbow-tier base (rating ≥ 15000) — per-char solid color cycle. The 6 slots
    below cycle through bright/main/dark color triplets; this base applies only
    the main color, used for the 15000–15999 mid-tier. */
+/* Nickname container — Noto Sans (Latin only) + YaHei/Hiragino fallback for CJK,
+   weight 700 to match the loaded face (avoids synthetic bold rendering artifacts),
+   and line-height 1.2 so the span box contains the full descender (otherwise the
+   inherited magenta text-shadow leaks through descender tails of 'p'/'q'/'g'/'y'). */
+.mai-nickname {
+    font-family: 'Noto Sans', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
 .mai-rainbow-char {
     display: inline-block;
     /* Drop tabular-nums inherited from the rating container — narrow digits
