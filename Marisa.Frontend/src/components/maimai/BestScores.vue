@@ -47,11 +47,12 @@
                     </div>
                 </header>
 
-                <!-- B35 (Standard) section -->
+                <!-- B35 (Old) section — "Old" rather than "Standard" because old-version
+                     charts can include DX charts from previous releases too. -->
                 <section class="px-card-x">
                     <div class="flex items-baseline gap-5 pb-7">
                         <span class="mai-section-tag bg-[#f93eac]">B35</span>
-                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Standard</div>
+                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Old</div>
                         <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
                         <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">{{ ra_old }}</div>
                     </div>
