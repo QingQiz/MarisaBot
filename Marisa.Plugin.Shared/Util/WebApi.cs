@@ -179,6 +179,11 @@ public static class WebApi
         return await RenderUrl("/maimai/recommend?id=" + contextId);
     }
 
+    public static async Task<string> MaiMaiSummary(Guid contextId)
+    {
+        return await RenderUrl("/maimai/summary?id=" + contextId);
+    }
+
     public static async Task<string> OngekiSong(int id)
     {
         return await RenderUrl($"/ongeki/song/{id}");
