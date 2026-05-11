@@ -50,4 +50,9 @@ maimai:
   tempPath:     maimai
   beatMapPath:
 
+openai:
+  endpoint:
+  model:
+  apiKey:
+
 commander: []

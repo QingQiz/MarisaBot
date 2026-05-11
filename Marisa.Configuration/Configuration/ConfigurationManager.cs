@@ -120,6 +120,7 @@ public static class ConfigurationManager
         config.Web ??= new WebConfiguration();
         config.NapCat ??= new NapCatConfiguration();
         config.DivingFish ??= new DivingFishConfiguration();
+        config.OpenAi ??= new OpenAIConfiguration();
         config.Arcaea ??= new ArcaeaConfiguration();
         config.Chunithm ??= new ChunithmConfiguration();
         config.Ongeki ??= new OngekiConfiguration();
@@ -139,6 +140,7 @@ public static class ConfigurationManager
         WarnIfEmpty("osu.clientId", config.Osu?.ClientIdRaw);
         WarnIfEmpty("osu.clientSecret", config.Osu?.ClientSecretRaw);
         WarnIfEmpty("divingFish.devToken", config.DivingFish?.DevTokenRaw);
+        WarnIfEmpty("openai.apiKey", config.OpenAi?.ApiKeyRaw);
         WarnIfEmpty("chunithm.tokenLouis", config.Chunithm?.TokenLouisRaw);
         WarnIfEmpty("chunithm.rinNetKeyChip", config.Chunithm?.RinNetKeyChipRaw);
         WarnIfEmpty("chunithm.allNetKeyChip", config.Chunithm?.AllNetKeyChipRaw);

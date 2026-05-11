@@ -20,6 +20,9 @@ public class PluginConfiguration
 
     public DivingFishConfiguration DivingFish { get; set; }
 
+    [YamlMember(Alias = "openai", ApplyNamingConventions = false)]
+    public OpenAIConfiguration OpenAi { get; set; }
+
     public long[] Commander
     {
         get => ConfigurationManager.RequireArray("commander", _commander);
