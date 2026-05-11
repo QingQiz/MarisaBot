@@ -54,21 +54,27 @@
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Noto Sans Symbols (1+2 merged) — covers Misc Symbols / Dingbats range
-   (☆ ★ ♪ ♫ ♥ ❤ etc.). Declared as its own 'Noto Sans Symbols' family so
-   the b50 rainbow pipeline can put it first in the .mai-nickname font
-   stack and have these codepoints rendered through a font we control,
-   instead of falling through to system fonts (whose symbol glyphs are
-   usually too thin for the 4px text-stroke and would also vary between
-   the local Windows preview and the bot's Linux render server, where
-   they would otherwise hit Noto Color Emoji and bypass background-clip:
-   text entirely). */
+/* Noto Sans Symbols 1 + 2 (full font merge, ~275 KB woff2). Declared as its
+   own 'Noto Sans Symbols' family so the b50 rainbow pipeline can put it
+   first in the .mai-nickname font stack and route any symbol-block codepoint
+   through a font we control — instead of falling through to system fonts
+   (whose symbol glyphs are usually too thin for the 4px text-stroke and
+   would also vary between the local Windows preview and the bot's Linux
+   render server, where they would otherwise hit Noto Color Emoji and bypass
+   background-clip:text entirely).
+
+   The unicode-range below covers every symbol block this font ships
+   (Punctuation/Letterlike/Arrows/Math/Misc Tech/Geometric/Misc Symbols/
+   Dingbats/Braille/Misc Symbols-Arrows/Yijing/Mahjong-Domino-Cards/
+   Mathematical Alphanumerics/Misc Symbols and Pictographs subset/Symbols
+   for Legacy Computing/etc.) but deliberately excludes Latin and CJK so
+   those still resolve to their dedicated faces (Noto Sans / YaHei). */
 @font-face {
     font-family: 'Noto Sans Symbols';
     font-weight: 700;
     font-style: normal;
-    src: url('@/assets/fonts/NotoSansSymbols-Subset.woff2') format('woff2');
-    unicode-range: U+2600-27BF;
+    src: url('@/assets/fonts/NotoSansSymbols.woff2') format('woff2');
+    unicode-range: U+20D0-20FF, U+2100-2FFF, U+4DC0-4DFF, U+10000-1FBFF;
 }
 
 @tailwind components;
