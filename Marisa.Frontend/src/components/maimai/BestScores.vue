@@ -110,7 +110,22 @@ let ra_new = ref(NaN)
 
 const total_ra = computed(() => ra_old.value + ra_new.value)
 
-const nicknameChars = computed(() => Array.from(json.value?.nickname ?? ''))
+// Append U+FE0E (VARIATION SELECTOR-15) to chars in the Misc Symbols /
+// Dingbats range (U+2600-27BF) so browsers force text-presentation instead
+// of falling back to a color-emoji font. Without this, codepoints like ❤
+// (U+2764) — which are emoji-presentation-default — could bypass
+// background-clip:text on systems where a color-emoji font is installed
+// (e.g., the bot's Linux render server's Noto Color Emoji), losing the
+// rainbow style entirely. Belt-and-suspenders alongside the bundled
+// Noto Sans Symbols subset declared as @font-face in tailwind.css.
+const FORCE_TEXT_PRESENTATION = /[☀-➿]/u
+const nicknameChars = computed(() => {
+    const out: string[] = []
+    for (const c of json.value?.nickname ?? '') {
+        out.push(FORCE_TEXT_PRESENTATION.test(c) ? c + '\uFE0E' : c)
+    }
+    return out
+})
 const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
 
 // Auto-shrink nickname so long names don't collide with logo / rating columns.
@@ -239,7 +254,7 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
    and line-height 1.2 so the span box contains the full descender (otherwise the
    inherited magenta text-shadow leaks through descender tails of 'p'/'q'/'g'/'y'). */
 .mai-nickname {
-    font-family: 'Noto Sans', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-family: 'Noto Sans Symbols', 'Noto Sans', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
     font-weight: 700;
     line-height: 1.2;
 }
