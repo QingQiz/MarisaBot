@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Marisa.Database.Entity;
+﻿using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.MaiMaiDx;
@@ -22,6 +21,5 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
 
     public int AimeId { get; set; }
 
-    [MaxLength(255)]
     public string ServerName { get; set; } = string.Empty;
 }

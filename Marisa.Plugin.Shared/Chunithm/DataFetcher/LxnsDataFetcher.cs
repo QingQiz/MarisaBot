@@ -128,8 +128,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         // 获取 Lxns 的歌曲列表用于匹配
         var lxnsSongs = GetSongList();
-        var lxnsSongById = lxnsSongs.GroupBy(s => s.Id).ToDictionary(g => g.Key, g => g.First());
-        var lxnsSongByTitle = lxnsSongs.GroupBy(s => s.Title).ToDictionary(g => g.Key, g => g.First());
+        var lxnsSongById = lxnsSongs.ToDictionary(s => s.Id, s => s);
+        var lxnsSongByTitle = lxnsSongs.ToDictionary(s => s.Title, s => s);
 
         var bestScores = responseData.TryGetProperty("bests", out var bests)
             ? ParseScores(bests, SongDb, lxnsSongById, lxnsSongByTitle)
