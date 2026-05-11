@@ -42,7 +42,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     [MarisaPluginDoc("获取别名", "`歌名`/`别名`")]
     [MarisaPluginSubCommand(nameof(SongAlias))]
     [MarisaPluginCommand("get")]
-    MarisaPluginTaskState SongAliasGet(Message message)
+    async Task<MarisaPluginTaskState> SongAliasGet(Message message)
     {
         var songName = message.Command;
 
@@ -53,14 +53,10 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         var songList = SongDb.SearchSong(songName);
 
-        if (songList.Count == 1)
-        {
-            message.Reply($"当前歌在录的别名有：{string.Join('、', SongDb.GetSongAliasesByName(songList[0].Title))}");
-        }
-        else
-        {
-            message.Reply(SongDb.GetSearchResult(songList));
-        }
+        var song = await SongDb.MultiPageSelectResult(songList, message, false, true);
+        if (song == null) return MarisaPluginTaskState.CompletedTask;
+
+        message.Reply($"当前歌在录的别名有：{string.Join('、', SongDb.GetSongAliasesByName(song.Title))}");
 
         return MarisaPluginTaskState.CompletedTask;
     }
