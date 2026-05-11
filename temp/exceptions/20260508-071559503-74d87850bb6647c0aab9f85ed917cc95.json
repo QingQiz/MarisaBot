@@ -1,8 +1,0 @@
-{
-  "TimestampUtc": "2026-05-08T07:15:59.5039434+00:00",
-  "Source": "Marisa.Plugin.MaiMaiDx.MaiMaiDx",
-  "ExceptionType": "System.Collections.Generic.KeyNotFoundException",
-  "Message": "The given key was not present in the dictionary.",
-  "Detail": "System.Collections.Generic.KeyNotFoundException: The given key was not present in the dictionary.\r\n   at System.Text.Json.JsonElement.GetProperty(String propertyName)\r\n   at Marisa.Plugin.Shared.MaiMaiDx.DataFetcher.LxnsDataFetcher.GetScores(Message message, Boolean qqOnly) in .\\Marisa.Plugin.Shared\\MaiMaiDx\\DataFetcher\\LxnsDataFetcher.cs:line 81\r\n   at Marisa.Plugin.Shared.MaiMaiDx.DataFetcher.LxnsDataFetcher.GetRating(Message message) in .\\Marisa.Plugin.Shared\\MaiMaiDx\\DataFetcher\\LxnsDataFetcher.cs:line 14\r\n   at Marisa.Plugin.MaiMaiDx.MaiMaiDx.B50(Message message) in .\\Marisa.Plugin\\MaiMaiDx\\MaiMaiDx.MessageHandler.cs:line 215\r\n   at Marisa.BotDriver.MessageDispatcher.DependencyInjectInvoke(MarisaPluginBase plugin, MethodInfo m, Message message) in .\\Marisa.BotDriver\\MessageDispatcher.cs:line 188",
-  "RelatedMessage": "[GroupMessage]  (920759985) -\u003E Marisa Tester (1091494267) =\u003E [:Id:] maibest"
-}

@@ -475,12 +475,6 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message);
 
-        if (fetcher is LxnsDataFetcher)
-        {
-            message.Reply("sum功能暂不支持落雪查分器");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
         var rating = await fetcher.GetRating(message);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
@@ -512,12 +506,6 @@ public partial class Chunithm
     private async Task<MarisaPluginTaskState> B50Sum(Message message)
     {
         var fetcher = await GetDataFetcher(message, true);
-
-        if (fetcher is LxnsDataFetcher)
-        {
-            message.Reply("sum功能暂不支持落雪查分器");
-            return MarisaPluginTaskState.CompletedTask;
-        }
 
         var rating = await fetcher.GetRating(message);
 
