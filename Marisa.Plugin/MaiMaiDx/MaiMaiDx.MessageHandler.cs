@@ -434,6 +434,99 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    private const string PlateUsage =
+        "格式：mai <选择><阈值>[<难度>]完成表\n" +
+        "  选择：版本代字（真/熊/华/鏡/...，'代'后缀可选）/ 谱师名 / 类别名\n" +
+        "  阈值：将=SSS / 大将=SSS+ / 神=AP / 理论值=AP+ / 极=FC / 舞舞=FDX；\n" +
+        "        或直接 SSS+/SSS/SS+/.../FC+/AP+/FDX+/FS+/...\n" +
+        "  难度（可选，默认 MASTER）：BSC/ADV/EXP/MST/绿谱/黄谱/红谱/紫谱/白谱(Re:MASTER)\n" +
+        "  字段顺序可任意：mai 真代EXPERT将完成表 ≡ mai 真将EXPERT完成表\n" +
+        "  例：mai 真大将完成表 / mai 翠楼屋将完成表 / mai 术力口神完成表";
+
+    public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
+        message.Command.EndsWith(PlateData.CommandSuffix);
+
+    [MarisaPluginDoc("查询版本/谱师/类别的完成表")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(PlateTrigger))]
+    private async Task<MarisaPluginTaskState> Plate(Message message)
+    {
+        var raw = message.Command.ToString();
+
+        var charters = SongDb.SongList
+            .SelectMany(s => s.Charters)
+            .Where(c => !string.IsNullOrWhiteSpace(c) && c != "-" && c != "N/A")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (!PlateData.TryParse(raw, charters, out var query, out var error))
+        {
+            // trigger 已经挡住非"完成表"消息，这里几乎不可能拿到 NotPlateCommand；保险兜底。
+            if (error!.Kind == PlateData.ErrorKind.NotPlateCommand)
+            {
+                return MarisaPluginTaskState.NoResponse;
+            }
+            message.Reply(FormatError(error) + "\n\n" + PlateUsage);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var pairs = SelectCharts(query!);
+
+        if (pairs.Count == 0)
+        {
+            message.Reply($"没有找到 {query!.Selector.Display} 对应的歌曲");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var fetcher = GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        // 标题原样使用用户输入的命令文本（含"完成表"）。
+        var im = await Task.Run(() => MaiMaiDraw.DrawPlateProgress(query!, pairs, scores, raw.Trim()));
+        message.Reply(MessageDataImage.FromBase64(im.ToB64()));
+
+        return MarisaPluginTaskState.CompletedTask;
+
+        static string FormatError(PlateData.ParseError err) => err.Kind switch
+        {
+            PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
+            PlateData.ErrorKind.UnknownThreshold => $"无法识别阈值，请检查：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery       => "请在'完成表'前指定 <版本/谱师/类别> + <阈值>",
+            _                                    => "命令格式错误",
+        };
+
+        List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
+        {
+            // 完成表默认只看 MASTER (i=3)；用户在命令里加难度（红谱/EXPERT/...）则筛对应难度。
+            var levelIdx = q.LevelIdx;
+            var allCharts = SongDb.SongList
+                .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
+                .Where(t => t.i == levelIdx);
+
+            return q.Selector switch
+            {
+                PlateData.Selector.Plate p => allCharts
+                    .Where(t => p.Versions.Any(v => string.Equals(v, t.song.Version, StringComparison.OrdinalIgnoreCase)))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
+                PlateData.Selector.Charter c => allCharts
+                    .Where(t => t.i < t.song.Charters.Count
+                             && t.song.Charters[t.i].Contains(c.Name, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                PlateData.Selector.Genre g => allCharts
+                    .Where(t => string.Equals(t.song.Info.Genre, g.FullName, StringComparison.Ordinal))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                _ => [],
+            };
+        }
+    }
+
     #endregion
 
     #region 打什么歌
