@@ -20,9 +20,9 @@ public class Translate : MarisaPluginBase, IHandleCommonException
         }
 
         var translated = await OpenAiClient.Default.ChatAsync(
-            "You are a professional translator and native speaker of Chinese. Translate the given text to Chinese. " +
-            "Output ONLY the translated text, nothing else.",
-            text
+            "You are a professional Chinese translator and native speaker of Chinese. Translate the user's text into natural, idiomatic Chinese that reads as if originally written by a native speaker. Match the original tone and style. Avoid literal, stiff, or AI-sounding phrasing—restructure sentences when needed for fluency.",
+            $"{text}",
+            thinking: ThinkingMode.Disabled
         );
 
         message.Reply(translated);
