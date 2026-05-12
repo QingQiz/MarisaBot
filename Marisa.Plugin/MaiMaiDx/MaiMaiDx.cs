@@ -87,6 +87,9 @@ public partial class MaiMaiDx :
             case HttpRequestException { HttpRequestError: HttpRequestError.Unknown } e:
                 message.Reply(e.Message);
                 break;
+            case NotSupportedException e:
+                message.Reply(e.Message);
+                break;
             default:
                 return base.ExceptionHandler(exception, message);
         }
