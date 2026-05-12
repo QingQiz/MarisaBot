@@ -425,15 +425,17 @@ public partial class MaiMaiDx
     }
 
     private const string PlateUsage =
-        "查询某个版本 / 谱师 / 类别 / 作曲家的完成情况，比如 mai 真大将完成表\n" +
+        "查询某个版本 / 谱师 / 类别 / 作曲家 / 难度 / 定数的完成情况，比如 mai 真大将完成表\n" +
         "\n" +
         "完整格式：mai (对象)(成绩)[难度]完成表\n" +
         "\n" +
-        "(对象) — 必填，四选一：\n" +
+        "(对象) — 必填，六选一：\n" +
         "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 …（后面加 '代' 也行，例如 熊代）\n" +
         "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
         "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
+        "  · 难度 label：13 / 13+ / 14 / 14+ 等（游戏内显示难度）\n" +
+        "  · 定数：13.5 / 14.7 等（必含小数点，1 位小数）\n" +
         "\n" +
         "(成绩) — 不写就是 '将'（SSS）\n" +
         "  · 将=SSS / 大将=SSS+\n" +
@@ -441,7 +443,7 @@ public partial class MaiMaiDx
         "  · 舞舞=FDX\n" +
         "  · 也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
         "\n" +
-        "[难度] — 不写就是紫谱（MASTER）\n" +
+        "[难度] — 不写就是紫谱 + 白谱（MASTER + Re:MASTER）\n" +
         "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
         "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
         "\n" +
@@ -449,12 +451,14 @@ public partial class MaiMaiDx
         "  mai 真完成表          ← 阈值省略，默认 '将'\n" +
         "  mai 翠楼屋将完成表\n" +
         "  mai HIMEHINA神完成表\n" +
+        "  mai 14+大将完成表     ← 难度 label\n" +
+        "  mai 13.5神完成表      ← 定数\n" +
         "  mai 紫谱将真完成表    ← 字段顺序随便换";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
 
-    [MarisaPluginDoc("查询版本/谱师/类别/作曲家的完成表")]
+    [MarisaPluginDoc("查询版本/谱师/类别/作曲家/难度/定数的完成表")]
     [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(PlateTrigger))]
     private async Task<MarisaPluginTaskState> Plate(Message message)
     {
@@ -503,18 +507,18 @@ public partial class MaiMaiDx
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
             PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery       => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名",
+            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery       => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
             _                                    => "命令格式错误",
         };
 
         List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
         {
-            // 完成表默认只看 MASTER (i=3)；用户在命令里加难度（红谱/EXPERT/...）则筛对应难度。
-            var levelIdx = q.LevelIdx;
+            // 完成表默认 MASTER + Re:MASTER；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
+            var levelIdxes = q.LevelIdxes;
             var allCharts = SongDb.SongList
                 .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
-                .Where(t => t.i == levelIdx);
+                .Where(t => levelIdxes.Contains(t.i));
 
             return q.Selector switch
             {
@@ -548,6 +552,19 @@ public partial class MaiMaiDx
 
                 PlateData.Selector.Genre g => allCharts
                     .Where(t => string.Equals(t.song.Info.Genre, g.FullName, StringComparison.Ordinal))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                // 难度 label：匹 song.Levels[i] 精确相等
+                PlateData.Selector.Level lvl => allCharts
+                    .Where(t => t.i < t.song.Levels.Count
+                             && string.Equals(t.song.Levels[t.i], lvl.Label, StringComparison.Ordinal))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                // 定数：song.Constants[i] 精确等于 (0.05 tolerance for floating point safety；定数小数点 1 位)
+                PlateData.Selector.Constant cst => allCharts
+                    .Where(t => Math.Abs(t.constant - cst.Value) < 0.05)
                     .Select(t => (t.constant, t.i, t.song))
                     .ToList(),
 

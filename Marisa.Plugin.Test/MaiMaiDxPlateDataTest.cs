@@ -143,13 +143,13 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
-    // 缺省 fallback：阈值未指定时默认 SSS（"将"）；难度未指定仍默认 MASTER。
+    // 缺省 fallback：阈值未指定时默认 SSS（"将"）；难度未指定时默认 MASTER + Re:MASTER。
     // ──────────────────────────────────────────────────────────────────────
 
-    [TestCase("真完成表",          "真",     12, 3)]   // selector=Plate, default SSS + MASTER
-    [TestCase("真代完成表",        "真",     12, 3)]   // 含可选"代"
-    [TestCase("熊完成表",          "熊",     12, 3)]
-    public void DefaultsToSssWhenThresholdMissingForPlate(string raw, string kanji, int level, int levelIdx)
+    [TestCase("真完成表",   "真",   12)]   // selector=Plate, default SSS + (MASTER+Re:MASTER)
+    [TestCase("真代完成表", "真",   12)]   // 含可选"代"
+    [TestCase("熊完成表",   "熊",   12)]
+    public void DefaultsToSssWhenThresholdMissingForPlate(string raw, string kanji, int level)
     {
         var q = MustParse(raw);
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Plate>());
@@ -157,7 +157,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Achievement));
         Assert.That(q.Threshold.Level, Is.EqualTo(level));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdx, Is.EqualTo(levelIdx));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 
     [Test]
@@ -167,17 +167,18 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
         Assert.That(((PlateData.Selector.Charter)q.Selector).Name, Is.EqualTo("翠楼屋"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdx, Is.EqualTo(3));
+        // 难度未指定 → 默认 MASTER + Re:MASTER
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 
     [Test]
     public void DefaultsToSssWhenThresholdMissingForCharterWithDifficulty()
     {
-        // 阈值缺省 + 难度显式给：threshold=SSS / LevelIdx=EXPERT
+        // 阈值缺省 + 难度显式给：threshold=SSS / LevelIdxes=[EXPERT]
         var q = MustParse("翠楼屋红谱完成表");
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdx, Is.EqualTo(2));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));
     }
 
     // 注：以前 RejectsUnknownThreshold 测 "真完成表" 应该报 UnknownThreshold。改默认 fallback 后
@@ -234,9 +235,6 @@ public class MaiMaiDxPlateDataTest
         Assert.That(PlateData.FsLevel(fs), Is.EqualTo(expected));
     }
 
-    [TestCase("真将完成表",            3)]   // 默认 MASTER
-    [TestCase("真大将完成表",          3)]
-    [TestCase("熊代理论值完成表",      3)]
     [TestCase("真代SSS+紫谱完成表",    3)]
     [TestCase("真代SSS+MASTER完成表",  3)]
     [TestCase("真代SSS+MST完成表",     3)]
@@ -253,7 +251,7 @@ public class MaiMaiDxPlateDataTest
     public void DifficultyAliasParsing(string raw, int expectedLevelIdx)
     {
         var query = MustParse(raw);
-        Assert.That(query.LevelIdx, Is.EqualTo(expectedLevelIdx));
+        Assert.That(query.LevelIdxes, Is.EquivalentTo(new[] {expectedLevelIdx}));
     }
 
     [Test]
@@ -261,9 +259,9 @@ public class MaiMaiDxPlateDataTest
     {
         // 单字"红"不在 difficulty alias map（避免跟未来代字冲突，要写就写"红谱"或"EXPERT"）。
         // 新版"字段位置任意"算法下，"真代SSS+红完成表" 阈值 SSS+ 在中间也能剥，剩"真代红"
-        // 走 charter substring（catch-all），LevelIdx 仍是默认 MASTER (=3)。
+        // 走 charter substring（catch-all），LevelIdxes 仍是默认 MASTER+Re:MASTER ([3, 4])。
         var q = MustParse("真代SSS+红完成表");
-        Assert.That(q.LevelIdx, Is.EqualTo(3), "single '红' must not be parsed as difficulty");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}), "single '红' must not be parsed as difficulty");
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS+"));
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
     }
@@ -273,7 +271,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("熊代将re:master完成表", 4)]
     public void RemasterDifficultyParsing(string raw, int expectedLevelIdx)
     {
-        Assert.That(MustParse(raw).LevelIdx, Is.EqualTo(expectedLevelIdx));
+        Assert.That(MustParse(raw).LevelIdxes, Is.EquivalentTo(new[] {expectedLevelIdx}));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -293,7 +291,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Plate>(), "should resolve to Plate(真)");
         Assert.That(((PlateData.Selector.Plate)q.Selector).Kanji, Is.EqualTo("真"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdx, Is.EqualTo(2));    // EXPERT
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));    // EXPERT
     }
 
     /// <summary>白谱（Re:MASTER）放在中间或前面都能识别。</summary>
@@ -305,23 +303,23 @@ public class MaiMaiDxPlateDataTest
         var q = MustParse(raw);
         Assert.That(((PlateData.Selector.Plate)q.Selector).Kanji, Is.EqualTo("真"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));  // 神
-        Assert.That(q.LevelIdx, Is.EqualTo(4));                  // 白谱 = Re:MASTER
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {4}));     // 白谱 = Re:MASTER
     }
 
     // ──────────────────────────────────────────────────────────────────────
     // Artist (作曲家) — substring 匹配；纯 artist 单边命中应解析为 Artist。
     // ──────────────────────────────────────────────────────────────────────
 
-    [TestCase("HIMEHINA神完成表",        "HIMEHINA",   3, 3)]   // Fc=AP / MASTER
-    [TestCase("HIMEHINA舞舞完成表",      "HIMEHINA",   4, 3)]   // Fs=FDX / MASTER
-    [TestCase("HIMEHINA完成表",          "HIMEHINA",  12, 3)]   // 默认 SSS / MASTER
-    public void ParsesArtistWhenOnlyArtistMatches(string raw, string artist, int level, int levelIdx)
+    [TestCase("HIMEHINA神完成表",        "HIMEHINA",   3)]   // Fc=AP / 默认 master+remaster
+    [TestCase("HIMEHINA舞舞完成表",      "HIMEHINA",   4)]   // Fs=FDX / 默认
+    [TestCase("HIMEHINA完成表",          "HIMEHINA",  12)]   // 默认 SSS / 默认
+    public void ParsesArtistWhenOnlyArtistMatches(string raw, string artist, int level)
     {
         var q = MustParse(raw);
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Artist>(), $"expected Artist for '{raw}'");
         Assert.That(((PlateData.Selector.Artist)q.Selector).Name, Is.EqualTo(artist));
         Assert.That(q.Threshold.Level, Is.EqualTo(level));
-        Assert.That(q.LevelIdx, Is.EqualTo(levelIdx));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 
     [Test]
@@ -356,7 +354,7 @@ public class MaiMaiDxPlateDataTest
             "rintaro soma 同时是已知谱师和作曲家，应解析为 CharterOrArtist union");
         Assert.That(((PlateData.Selector.CharterOrArtist)q.Selector).Name, Is.EqualTo("rintaro soma"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdx, Is.EqualTo(3));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 
     [Test]
@@ -380,5 +378,33 @@ public class MaiMaiDxPlateDataTest
         var q = MustParse("サファ太将完成表");
         Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
         Assert.That(((PlateData.Selector.Charter)q.Selector).Name, Is.EqualTo("サファ太"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Level / Constant selector
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void ParsesLevelLabel()
+    {
+        // "14+神完成表" → Selector.Level("14+") + Fc=AP + 默认难度 [3, 4]
+        var q = MustParse("14+神完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Level>());
+        Assert.That(((PlateData.Selector.Level)q.Selector).Label, Is.EqualTo("14+"));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fc));
+        Assert.That(q.Threshold.Level, Is.EqualTo(3));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
+
+    [Test]
+    public void ParsesConstant()
+    {
+        // "14.9FDX完成表" → Selector.Constant(14.9) + Fs=FDX + 默认难度 [3, 4]
+        var q = MustParse("14.9FDX完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Constant>());
+        Assert.That(((PlateData.Selector.Constant)q.Selector).Value, Is.EqualTo(14.9).Within(0.001));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fs));
+        Assert.That(q.Threshold.Level, Is.EqualTo(4));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 }

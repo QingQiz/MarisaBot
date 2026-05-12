@@ -43,6 +43,4 @@ export interface PlateInfo {
     Level: number
     /** 标题里显示的阈值名（"SSS+" / "AP" / "FDX" 等） */
     DisplayName: string
-    /** 难度索引,0~4 */
-    LevelIdx: number
 }

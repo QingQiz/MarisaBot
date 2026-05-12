@@ -39,12 +39,18 @@ public static class PlateData
         ///     （例如 "rintaro soma" 既写谱又作曲）。handler 按 OR 筛 — 谱师维度命中或作曲家维度命中均收录。
         /// </summary>
         public sealed record CharterOrArtist(string Name) : Selector(Name);
+
+        /// <summary>难度 label：用户输 "13" / "13+" 这种游戏内显示难度，匹 song.Levels[i] 精确相等。</summary>
+        public sealed record Level(string Label) : Selector(Label);
+
+        /// <summary>定数：用户输 "13.5" / "14.7" 这种小数（必含小数点），匹 song.Constants[i]。</summary>
+        public sealed record Constant(double Value) : Selector(Value.ToString("F1"));
     }
 
-    public sealed record Query(Selector Selector, Threshold Threshold, int LevelIdx);
+    public sealed record Query(Selector Selector, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
 
-    /// <summary>默认难度（MASTER）。完成表语义里 BASIC/ADV/EXPERT 也允许显式指定，Re:MASTER 永不参与。</summary>
-    public const int DefaultLevelIdx = 3;
+    /// <summary>默认难度：未指定时同时查 MASTER + Re:MASTER。</summary>
+    public static readonly IReadOnlyList<int> DefaultLevelIdxes = [3, 4];
 
     /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
     public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
@@ -287,17 +293,18 @@ public static class PlateData
             ? (inner[..thresholdAt] + inner[(thresholdAt + thresholdLen)..]).Trim()
             : inner;
 
-        // 2. 难度 token（可选，同样 anywhere + rightmost + 同样的 ASCII letter 边界规则）。默认 MASTER。
-        var levelIdx = DefaultLevelIdx;
+        // 2. 难度 token（可选，同样 anywhere + rightmost + 同样的 ASCII letter 边界规则）。
+        //    缺省时回落到 DefaultLevelIdxes ([3, 4] = MASTER + Re:MASTER)；显式给一个就是单元素。
+        IReadOnlyList<int> levelIdxes = DefaultLevelIdxes;
         int diffAt = -1, diffLen = 0;
         foreach (var (token, idx) in DifficultyEntriesLongestFirst)
         {
             var pos = FindBoundedRightmost(afterThreshold, token);
             if (pos >= 0)
             {
-                levelIdx = idx;
-                diffAt   = pos;
-                diffLen  = token.Length;
+                levelIdxes = [idx];
+                diffAt     = pos;
+                diffLen    = token.Length;
                 break;
             }
         }
@@ -312,12 +319,13 @@ public static class PlateData
             return false;
         }
 
-        // 3. 解析 selector：Plate → Genre → (Charter precise + Artist precise 同时查) → Charter catch-all。
+        // 3. 解析 selector：Plate → Genre → Level → Constant → (Charter precise + Artist precise 同时查) → Charter catch-all。
+        //    Level/Constant 是纯数字格式（"13" / "13+" / "13.5"），跟 charter / artist 名不冲突，放靠前优先级。
         //    Charter / Artist 同时命中时合并为 CharterOrArtist（处理 "rintaro soma" 这种身兼谱师+作曲家的人）。
         //    Charter catch-all 殿后保留"乱输入也接受 + handler 报 0 首"语义。
         if (TryResolvePlate(selectorPart, out var plateSel, out var plateErr))
         {
-            query = new Query(plateSel!, threshold, levelIdx);
+            query = new Query(plateSel!, threshold, levelIdxes);
             return true;
         }
         if (plateErr != null)
@@ -328,7 +336,19 @@ public static class PlateData
 
         if (TryResolveGenre(selectorPart, out var genreSel))
         {
-            query = new Query(genreSel!, threshold, levelIdx);
+            query = new Query(genreSel!, threshold, levelIdxes);
+            return true;
+        }
+
+        if (TryResolveLevel(selectorPart, out var levelSel))
+        {
+            query = new Query(levelSel!, threshold, levelIdxes);
+            return true;
+        }
+
+        if (TryResolveConstant(selectorPart, out var constantSel))
+        {
+            query = new Query(constantSel!, threshold, levelIdxes);
             return true;
         }
 
@@ -337,22 +357,22 @@ public static class PlateData
 
         if (charterHit && artistHit)
         {
-            query = new Query(new Selector.CharterOrArtist(selectorPart), threshold, levelIdx);
+            query = new Query(new Selector.CharterOrArtist(selectorPart), threshold, levelIdxes);
             return true;
         }
         if (charterHit)
         {
-            query = new Query(charterPreciseSel!, threshold, levelIdx);
+            query = new Query(charterPreciseSel!, threshold, levelIdxes);
             return true;
         }
         if (artistHit)
         {
-            query = new Query(artistSel!, threshold, levelIdx);
+            query = new Query(artistSel!, threshold, levelIdxes);
             return true;
         }
 
         // catch-all：把 selector 当作 charter 接收，由 handler 在筛选时报 0 首。
-        query = new Query(new Selector.Charter(selectorPart), threshold, levelIdx);
+        query = new Query(new Selector.Charter(selectorPart), threshold, levelIdxes);
         return true;
     }
 
@@ -395,6 +415,37 @@ public static class PlateData
             }
         }
 
+        return false;
+    }
+
+    /// <summary>
+    ///     难度 label：纯整数（1-15）+ 可选 "+" 后缀，匹 song.Levels[i] 精确相等。
+    ///     例 "13" / "13+" / "14" — 跨所有难度找出所有该 label 的 chart。
+    ///     注意：必须无小数点，否则走 TryResolveConstant；"13.0" 也走 Constant，不当 label。
+    /// </summary>
+    private static bool TryResolveLevel(string selectorPart, out Selector? selector)
+    {
+        selector = null;
+        if (System.Text.RegularExpressions.Regex.IsMatch(selectorPart, @"^([1-9]|1[0-5])\+?$"))
+        {
+            selector = new Selector.Level(selectorPart);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    ///     定数：必含小数点，1-15.x 范围，1 位小数（如 "13.5" / "14.7"）。匹 song.Constants[i]。
+    /// </summary>
+    private static bool TryResolveConstant(string selectorPart, out Selector? selector)
+    {
+        selector = null;
+        if (System.Text.RegularExpressions.Regex.IsMatch(selectorPart, @"^([1-9]|1[0-5])\.\d$")
+            && double.TryParse(selectorPart, System.Globalization.CultureInfo.InvariantCulture, out var c))
+        {
+            selector = new Selector.Constant(c);
+            return true;
+        }
         return false;
     }
 

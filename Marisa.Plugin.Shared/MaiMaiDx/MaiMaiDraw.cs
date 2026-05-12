@@ -207,7 +207,6 @@ public static class MaiMaiDraw
             Dim         = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs"
             Level       = query.Threshold.Level,
             DisplayName = query.Threshold.DisplayName,
-            LevelIdx    = query.LevelIdx,
         });
         return await WebApi.MaiMaiSummary(ctx.Id);
     }
