@@ -13,7 +13,7 @@
 - `Marisa.Plugin` contains concrete bot plugins. `Marisa.Plugin.Shared` and `Marisa.Plugin.Shared.FSharp` hold shared game/data logic. `Marisa.BotDriver` owns dispatch and plugin exception handling.
 - For `Marisa.Plugin/MaiMaiDx`, keep helper/utility functions in `MaiMaiDx.Utils.cs`; keep `MaiMaiDx.cs` focused on plugin wiring and lifecycle.
 - Do not add backward-compatibility shims for removed config or legacy behavior unless the task explicitly requires them; prefer clean removal of obsolete paths.
-- In message handlers, if a local helper function is only used by one method, prefer placing it after the main flow's `return` so the primary logic stays top-to-bottom.
+- If a local helper function is only used by one method, prefer placing it after the main flow's `return` so the primary logic stays top-to-bottom.
 
 ## Configuration
 - `Marisa.Configuration.ConfigurationManager` is the source of truth. Relative paths are resolved from repo/config-root heuristics, not just the current working directory.
