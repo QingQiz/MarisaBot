@@ -35,19 +35,19 @@ public partial class MaiMaiDx
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private static Task<MarisaPluginTaskState> Bind(Message message)
     {
-        var fetchers = new[]
+        var servers = new[]
         {
             "DivingFish", "lxns"
         };
 
-        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
+        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', servers
             .Select((x, i) => (x, i))
             .Select(x => $"{x.i}. {x.x}"))
         );
 
         DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
-            if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
+            if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= servers.Length)
             {
                 next.Reply("错误的序号，会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -64,7 +64,7 @@ public partial class MaiMaiDx
 
             realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0)
             {
-                ServerName = idx == 0 ? "DivingFish" : "lxns"
+                ServerName = servers[idx]
             }));
 
             message.Reply("好了");

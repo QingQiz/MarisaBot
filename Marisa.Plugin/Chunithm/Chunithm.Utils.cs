@@ -65,10 +65,12 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message, true);
 
-        // 如果是 lxns 查分器，统一走 GetRating 合并逻辑
-        if (fetcher is LxnsDataFetcher)
+        // 如果是 lxns 查分器
+        if (fetcher is LxnsDataFetcher lxns)
         {
-            var rating = await fetcher.GetRating(message);
+            var rating = b50
+                ? await lxns.GetRating(message)      // B50: 不合并，保持 best/new_best 分离
+                : await lxns.GetRatingMerged(message); // B30: 合并取前30
             rating.IsB50 = b50;
             return rating;
         }
