@@ -8,7 +8,7 @@
     --level-mark-size: 14px;            /* 难度小三角 */
     --rank-marker-height: 60px;         /* Achievement 维度的 rank_*.png（200x89，宽按比例） */
     --icon-marker-height: 75px;         /* Fc/Fs 的 icon_*.png（近方形） */
-    --achievement-bar-height: 36px;     /* sum 模式底部黑条 */
+    --achievement-bar-height: 42px;     /* sum 模式底部黑条 */
     --sum-rank-height: 60px;            /* sum 模式中心 rank（同 rank-marker-height） */
 
     padding: 40px;
@@ -28,19 +28,19 @@
 
 .title-row {
     display: flex;
-    align-items: baseline;
-    gap: 20px;
+    align-items: center;
+    gap: 30px;
     margin-bottom: 20px;
 }
 
 .title {
-    font-size: 50px;
+    font-size: 72px;
     font-weight: bold;
-    font-style: italic;
+    line-height: 1;
 }
 
 .title-progress {
-    font-size: 30px;
+    font-size: 36px;
     font-weight: bold;
     color: #555;
 }
@@ -58,22 +58,26 @@
 }
 
 .group-title {
-    font-size: 40px;
+    font-size: 56px;
     font-weight: bold;
-    font-style: italic;
+    line-height: 1;
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
 .min-rank {
-    height: 40px;
+    height: 50px;
 }
 
-.group-progress {
+.title-stats {
+    margin-left: 30px;
+    width: 1100px;
+}
+
+.group-stats {
     margin-left: auto;
-    font-size: 28px;
-    color: #777;
+    width: 380px;
 }
 
 .row {
@@ -142,24 +146,25 @@
     right: 0;
     height: var(--achievement-bar-height);
     background: rgba(0, 0, 0, 0.85);
+    /* flex 字底对齐 bar 底 + 水平居中。padding-bottom 让字符 descender 离 bar 底有点空隙，
+       这样视觉中线大致落在 bar 中部（受 Consolas italic ascender 比 descender 厚一点的
+       影响，纯 flex center 会偏顶）。 */
     display: flex;
-    align-items: baseline;
-    padding: 2px 4px 0 1px;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 5px;
     font-weight: bold;
     font-style: italic;
-    /* 必须用 Consolas 跟 commit f035410 时 SkiaSharp 渲染的 sum 一致；
-       Torus 之类排版字体在数字上跟原版差太远。 */
     font-family: 'Consolas', 'Segoe UI', 'Arial Unicode MS Font', monospace;
+    line-height: 1;
 }
 
 .ach-int {
-    font-size: 35px;
-    line-height: 1;
+    font-size: 32px;
 }
 
 .ach-frac {
-    font-size: 22px;
-    line-height: 1;
+    font-size: 23px;
 }
 
 .level-mark {

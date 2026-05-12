@@ -4,6 +4,7 @@ import {ref, computed} from 'vue'
 import axios from 'axios'
 import {context_get} from '@/GlobalVars'
 import type {GroupedSong, Score, PlateInfo} from '@/components/maimai/utils/summary_t'
+import StatsBar from '@/components/maimai/partial/StatsBar.vue'
 
 const route          = useRoute()
 const id             = ref(route.query.id)
@@ -36,17 +37,11 @@ axios.all([
     }
 }).finally(() => { data_fetched.value = true })
 
+const allCharts = computed(() => grouped.value.flatMap(g => g.x))
+
 function getScore(songId: number, levelIdx: number): Score | undefined {
     return scores.value[`(${songId}, ${levelIdx})`]
 }
-
-const totalCount = computed(() => grouped.value.reduce((s, g) => s + g.x.length, 0))
-const doneCount  = computed(() => {
-    if (!plate.value) return 0
-    let c = 0
-    for (const g of grouped.value) for (const s of g.x) if (isPassed(s.Item3.Id, s.Item2)) c++
-    return c
-})
 
 function achievementOrdinal(a: number): number {
     if (a >= 100.5) return 13
@@ -79,13 +74,6 @@ function isPassed(songId: number, levelIdx: number): boolean {
             : plate.value.Dim === 'Fc'           ? fcOrdinal(s.fc)
             :                                       fsOrdinal(s.fs)
     return lv >= plate.value.Level
-}
-
-function groupDoneCount(g: GroupedSong): number {
-    if (!plate.value) return 0
-    let c = 0
-    for (const s of g.x) if (isPassed(s.Item3.Id, s.Item2)) c++
-    return c
 }
 
 function calcRank(a: number): string {
@@ -158,7 +146,7 @@ function groupMinRank(g: GroupedSong): string | null {
 function formatAch(a: number): {intPart: string, fracPart: string} {
     const [i, f] = a.toFixed(4).split('.')
     return {
-        intPart:  a < 100 ? '0' + i : i,
+        intPart:  i,           // 不再补 '0' 到 3 位 — "99.xxxx" 比 "099.xxxx" 自然
         fracPart: '.' + f,
     }
 }
@@ -168,24 +156,22 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
     <div class="mai-summary" v-if="data_fetched">
         <div class="title-row">
             <span class="title">{{ title }}</span>
-            <span v-if="plate" class="title-progress">
-                {{ doneCount }}/{{ totalCount }} ({{ (doneCount * 100 / Math.max(1, totalCount)).toFixed(1) }}%)
-            </span>
+            <StatsBar :charts="allCharts" :scores="scores" :detail="true" class="title-stats"/>
         </div>
         <div class="groups">
             <div class="group" v-for="g in grouped" :key="g.Key">
                 <div class="group-title" :style="{color: groupKeyColor(g)}">
                     <span>{{ g.Key }}</span>
                     <img v-if="groupMinRank(g)" :src="groupMinRank(g)!" class="min-rank" alt=""/>
-                    <span v-if="plate" class="group-progress">{{ groupDoneCount(g) }}/{{ g.x.length }}</span>
+                    <StatsBar :charts="g.x" :scores="scores" :detail="false" class="group-stats"/>
                 </div>
                 <div class="row">
                     <template v-for="s in g.x" :key="`${s.Item3.Id}-${s.Item2}`">
                         <div v-for="score in [getScore(s.Item3.Id, s.Item2)]" class="cell">
                             <div class="cover" :style="`background-image: url('/assets/maimai/cover/${s.Item3.Id}.png')`"></div>
-                            <img v-if="getBorder(score)" :src="getBorder(score)!" class="border-img" alt=""/>
-                            <!-- plate mode: 达成 → 印章罩 + 居中 marker -->
+                            <!-- plate mode 达成 → 印章罩 + 居中 marker（带边框） -->
                             <template v-if="plate && score && isPassed(s.Item3.Id, s.Item2)">
+                                <img v-if="getBorder(score)" :src="getBorder(score)!" class="border-img" alt=""/>
                                 <div class="plate-stamp"></div>
                                 <img v-if="getMarker(score)"
                                      :src="getMarker(score)!"
@@ -193,11 +179,13 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
                                      :class="{rank: plate.Dim === 'Achievement'}"
                                      alt=""/>
                             </template>
-                            <!-- sum mode: 底部成绩 + 中心 rank -->
+                            <!-- plate mode 未达成 — 仅原色曲绘 + 难度三角，无边框、无成绩条 -->
+                            <!-- sum mode: 底部成绩 + 中心 rank（带边框） -->
                             <template v-else-if="!plate && score">
+                                <img v-if="getBorder(score)" :src="getBorder(score)!" class="border-img" alt=""/>
                                 <img :src="`/assets/maimai/pic/rank_${score.rate}.png`" class="sum-rank" alt=""/>
                                 <div class="achievement-bar" :style="{color: fcColor(score.fc)}">
-                                    <span class="ach-int">{{ formatAch(score.achievements).intPart }}</span><span class="ach-frac">{{ formatAch(score.achievements).fracPart }}</span>
+                                    <span class="ach-text"><span class="ach-int">{{ formatAch(score.achievements).intPart }}</span><span class="ach-frac">{{ formatAch(score.achievements).fracPart }}</span></span>
                                 </div>
                             </template>
                             <div class="level-mark" :style="`background: ${getLevelColor(s.Item2)}`"></div>

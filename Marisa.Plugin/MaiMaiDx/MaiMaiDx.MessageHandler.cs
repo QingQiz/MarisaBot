@@ -226,7 +226,7 @@ public partial class MaiMaiDx
 
         var scores = await fetcher.GetScores(message);
 
-        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores);
+        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, "新谱");
         message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
@@ -272,8 +272,12 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.constant.ToString("F1"));
 
+            var title = constants[0].Equals(constants[1])
+                ? constants[0].ToString("F1")
+                : $"{constants[0]:F1} - {constants[1]:F1}";
+
             // 前端渲染下空集就是一张空白图，不再做服务端 EMPTY 兜底。
-            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores);
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, title);
             message.Reply(MessageDataImage.FromBase64(im));
         }
 
@@ -308,7 +312,7 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores);
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, genre);
             message.Reply(MessageDataImage.FromBase64(im));
         }
 
@@ -363,7 +367,7 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores);
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, version);
             replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
     }
@@ -408,7 +412,7 @@ public partial class MaiMaiDx
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores);
+        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, lv.ToString());
             message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
@@ -421,14 +425,31 @@ public partial class MaiMaiDx
     }
 
     private const string PlateUsage =
-        "格式：mai <选择><阈值>[<难度>]完成表\n" +
-        "  选择：版本代字（真/熊/华/鏡/...，'代'后缀可选）/ 谱师名 / 类别名 / 作曲家\n" +
-        "        谱师名 / 作曲家 均 substring 匹配（输 '翠楼屋' 命中 'サファ太 vs 翠楼屋'）\n" +
-        "  阈值（可省，缺省=将=SSS）：将=SSS / 大将=SSS+ / 神=AP / 理论值=AP+ / 极=FC / 舞舞=FDX；\n" +
-        "        或直接 SSS+/SSS/SS+/.../FC+/AP+/FDX+/FS+/...\n" +
-        "  难度（可省，缺省 MASTER）：BSC/ADV/EXP/MST/绿谱/黄谱/红谱/紫谱/白谱(Re:MASTER)\n" +
-        "  字段顺序可任意：mai 真代EXPERT将完成表 ≡ mai 真将EXPERT完成表\n" +
-        "  例：mai 真完成表 / mai 真大将完成表 / mai 翠楼屋将完成表 / mai HIMEHINA神完成表";
+        "查询某个版本 / 谱师 / 类别 / 作曲家的完成情况，比如 mai 真大将完成表\n" +
+        "\n" +
+        "完整格式：mai (对象)(成绩)[难度]完成表\n" +
+        "\n" +
+        "(对象) — 必填，四选一：\n" +
+        "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 …（后面加 '代' 也行，例如 熊代）\n" +
+        "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
+        "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
+        "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
+        "\n" +
+        "(成绩) — 不写就是 '将'（SSS）\n" +
+        "  · 将=SSS / 大将=SSS+\n" +
+        "  · 神=AP / 理论值=AP+ / 极=FC\n" +
+        "  · 舞舞=FDX\n" +
+        "  · 也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
+        "\n" +
+        "[难度] — 不写就是紫谱（MASTER）\n" +
+        "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
+        "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
+        "\n" +
+        "其他例子（顺序可以随便换）：\n" +
+        "  mai 真完成表          ← 阈值省略，默认 '将'\n" +
+        "  mai 翠楼屋将完成表\n" +
+        "  mai HIMEHINA神完成表\n" +
+        "  mai 紫谱将真完成表    ← 字段顺序随便换";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
@@ -483,7 +504,7 @@ public partial class MaiMaiDx
         {
             PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
             PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery       => "请在'完成表'前指定 <版本/谱师/类别/作曲家>",
+            PlateData.ErrorKind.EmptyQuery       => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名",
             _                                    => "命令格式错误",
         };
 
