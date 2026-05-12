@@ -501,9 +501,7 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B50Sum(Message message)
     {
-        var fetcher = await GetDataFetcher(message, true);
-
-        var rating = await fetcher.GetRating(message);
+        var rating = await GetRating(message, true);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
         var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;

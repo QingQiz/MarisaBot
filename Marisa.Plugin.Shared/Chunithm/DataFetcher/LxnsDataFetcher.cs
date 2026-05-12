@@ -148,10 +148,10 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         var bestScores = responseData.TryGetProperty("bests", out var bests)
             ? ParseScores(bests, SongDb, lxnsSongById, lxnsSongByTitle)
-            : new List<ChunithmScore>();
+            : [];
         var recentScores = responseData.TryGetProperty("new_bests", out var newBests)
             ? ParseScores(newBests, SongDb, lxnsSongById, lxnsSongByTitle)
-            : new List<ChunithmScore>();
+            : [];
 
         return new ChunithmRating
         {
@@ -159,8 +159,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             Username = playerName,
             Records = new Records
             {
-                Best = bestScores.ToArray(),
-                Recent = recentScores.ToArray()
+                Best = bestScores.OrderByDescending(x => x.Rating).Take(30).ToArray(),
+                Recent = recentScores.OrderByDescending(x => x.Rating).Take(20).ToArray()
             }
         };
     }
@@ -202,27 +202,27 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     private static ChunithmSong? FindMatchingSong(ChunithmScore score, SongDb<ChunithmSong> songDb, Dictionary<long, ChunithmSong> lxnsSongById, Dictionary<string, ChunithmSong> lxnsSongByTitle)
     {
-        // 1. 优先从本地 SongDb 按 ID 查找
-        if (songDb.SongIndexer.TryGetValue(score.Id, out var song))
+        // 从 Lxns 歌曲列表按 ID 查找
+        if (lxnsSongById.TryGetValue(score.Id, out var song))
         {
             return song;
         }
 
-        // 2. 从本地 SongDb 按标题查找
+        // 从 Lxns 歌曲列表按标题查找
+        if (lxnsSongByTitle.TryGetValue(score.Title, out song))
+        {
+            return song;
+        }
+
+        // 从本地 SongDb 按 ID 查找
+        if (songDb.SongIndexer.TryGetValue(score.Id, out song))
+        {
+            return song;
+        }
+
+        // 从本地 SongDb 按标题查找
         song = songDb.SongList.FirstOrDefault(x => x.Title.Equals(score.Title, StringComparison.OrdinalIgnoreCase));
         if (song != null)
-        {
-            return song;
-        }
-
-        // 3. 从 Lxns 歌曲列表按 ID 查找
-        if (lxnsSongById.TryGetValue(score.Id, out song))
-        {
-            return song;
-        }
-
-        // 4. 从 Lxns 歌曲列表按标题查找
-        if (lxnsSongByTitle.TryGetValue(score.Title, out song))
         {
             return song;
         }
