@@ -189,7 +189,7 @@ public partial class MaiMaiDx
 
     private DataFetcher GetDataFetcher(Message message, bool allowUsername = false)
     {
-        // Command不为空的话，就是用用户名查。只有DivingFish和lxns能使用用户名查
+        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
         if (allowUsername && !message.Command.IsWhiteSpace())
         {
             return GetDataFetcher(DataFetcherType.DivingFish);

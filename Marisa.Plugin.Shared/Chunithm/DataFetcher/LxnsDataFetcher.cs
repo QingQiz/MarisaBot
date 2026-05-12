@@ -11,38 +11,49 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/chunithm";
     private static List<ChunithmSong>? _songList;
 
-    public override List<ChunithmSong> GetSongList()
+    internal static List<ChunithmSong> GetSharedSongList()
     {
         if (_songList != null) return _songList;
 
-        try
-        {
-            var response = $"{BaseUrl}/song/list?notes=true"
-                .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
-                .GetJsonAsync()
-                .Result;
+        var response = "https://maimai.lxns.net/api/v0/chunithm/song/list?notes=true"
+            .GetJsonAsync().Result;
 
-            _songList = ((IEnumerable<dynamic>)response.songs).Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Lxns))
-                .Where(x => !DeletedSongs.Contains(x.Id))
-                .ToList();
-        }
-        catch
+        var versionMap = new Dictionary<int, string>();
+        foreach (var v in response.versions)
         {
-            _songList = [];
+            versionMap[(int)v.version] = (string)v.title;
+        }
+
+        _songList = ((IEnumerable<dynamic>)response.songs)
+            .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Lxns))
+            .Where(x => !DeletedSongs.Contains(x.Id))
+            .ToList();
+
+        foreach (var song in _songList)
+        {
+            if (int.TryParse(song.Version, out var versionId) && versionMap.TryGetValue(versionId, out var versionName))
+            {
+                song.Version = versionName;
+            }
         }
 
         return _songList;
     }
 
+    public override List<ChunithmSong> GetSongList()
+    {
+        return GetSharedSongList();
+    }
+
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var scores = await GetScores(message, false);
+        var scores = await FetchScores(message);
 
         // 合并 best 和 new_best，去重（按歌曲ID和难度），排序后取前30
         var allScores = scores.Records.Best
             .Concat(scores.Records.Recent)
             .GroupBy(x => new { x.Id, x.LevelIndex })
-            .Select(g => g.OrderByDescending(x => x.Achievement).First()) // 每个谱面保留最高分
+            .Select(g => g.OrderByDescending(x => x.Achievement).First())
             .OrderByDescending(x => x.Rating)
             .Take(30)
             .ToArray();
@@ -53,57 +64,35 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         return scores;
     }
 
-    // 获取原始数据，用于B50
-    public async Task<ChunithmRating> GetRatingRaw(Message message)
+    public override Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        return await GetScores(message, false);
+        throw new NotSupportedException("[Lxns] 不支持的操作");
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
+    private async Task<ChunithmRating> FetchScores(Message message)
     {
-        var scores = await GetScores(message, true);
+        var (_, qq) = AtOrSelf(message, true);
 
-        return scores.Records.Best
-            .Concat(scores.Records.Recent)
-            .Where(x => !DeletedSongs.Contains(x.Id))
-            .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
-    }
+        var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
+            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
 
-    private async Task<ChunithmRating> GetScores(Message message, bool qqOnly)
-    {
-        var (username, qq) = AtOrSelf(message, qqOnly);
-
-        string friendCode;
-        string playerName;
-
-        if (!username.IsWhiteSpace())
+        if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
         {
-            friendCode = username.ToString();
-            playerName = username.ToString();
+            var errorJson = await playerResponse.GetStringAsync();
+            using var errorDoc = JsonDocument.Parse(errorJson);
+            var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
+                ? msg.GetString() ?? "Player not found"
+                : "Player not found";
+            throw new HttpRequestException($"[Lxns] {playerResponse.StatusCode}: {errorMessage}");
         }
-        else
-        {
-            var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
-                .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
-                .AllowHttpStatus("400,401,403,404")
-                .GetAsync();
 
-            if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
-            {
-                var errorJson = await playerResponse.GetStringAsync();
-                using var errorDoc = JsonDocument.Parse(errorJson);
-                var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
-                    ? msg.GetString() ?? "Player not found"
-                    : "Player not found";
-                throw new HttpRequestException(HttpRequestError.Unknown, $"[Lxns] {playerResponse.StatusCode}: {errorMessage}");
-            }
-
-            var playerJson = await playerResponse.GetStringAsync();
-            using var playerDoc = JsonDocument.Parse(playerJson);
-            var data = playerDoc.RootElement.GetProperty("data");
-            friendCode = data.GetProperty("friend_code").GetInt64().ToString();
-            playerName = data.GetProperty("name").GetString() ?? "";
-        }
+        var playerJson = await playerResponse.GetStringAsync();
+        using var playerDoc = JsonDocument.Parse(playerJson);
+        var data = playerDoc.RootElement.GetProperty("data");
+        var friendCode = data.GetProperty("friend_code").GetInt64().ToString();
+        var playerName = data.GetProperty("name").GetString() ?? "";
 
         var response = await $"{BaseUrl}/player/{friendCode}/bests"
             .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
@@ -117,7 +106,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
                 ? msg.GetString() ?? "Unknown error"
                 : "Unknown error";
-            throw new HttpRequestException(HttpRequestError.Unknown, $"[Lxns] {response.StatusCode}: {errorMessage}");
+            throw new HttpRequestException($"[Lxns] {response.StatusCode}: {errorMessage}");
         }
 
         var jsonString = await response.GetStringAsync();
