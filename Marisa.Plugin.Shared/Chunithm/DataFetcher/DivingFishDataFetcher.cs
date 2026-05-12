@@ -20,11 +20,31 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var scores = await GetScoresCore(message, false);
+        var raw = await GetScoresCore(message, false);
+        var allScores = raw.Records.Best.Concat(raw.Records.Recent);
 
-        scores.Records.Best = scores.Records.Best.OrderByDescending(x => x.Rating).Take(30).ToArray();
+        var songList = GetSongList();
+        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
 
-        return scores;
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
+        };
+
+        var div = allScores
+            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .ToList();
+
+        return new ChunithmRating
+        {
+            DataSource = raw.DataSource,
+            Username = raw.Username,
+            Records = new Records
+            {
+                Best = div.FirstOrDefault(x => !x.Key)?.OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
+                Recent = div.FirstOrDefault(x => x.Key)?.OrderByDescending(x => x.Rating).Take(20).ToArray() ?? []
+            }
+        };
     }
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)

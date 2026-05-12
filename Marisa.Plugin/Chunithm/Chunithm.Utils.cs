@@ -65,69 +65,25 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message, true);
 
-        var baseRating = await fetcher.GetRating(message);
+        var rating = await fetcher.GetRating(message);
 
-        if (!b50)
+        if (b50)
         {
-            // 兜底：合并 best 和 recent，避免查分器未合并导致 B30 数据错误
-            var allScores = baseRating.Records.Best
-                .Concat(baseRating.Records.Recent)
-                .GroupBy(x => new { x.Id, x.LevelIndex })
-                .Select(g => g.OrderByDescending(x => x.Achievement).First())
-                .OrderByDescending(x => x.Rating)
-                .Take(30)
-                .ToArray();
-            baseRating.Records.Best = allScores;
-            baseRating.Records.Recent = [];
-            return baseRating;
+            rating.IsB50 = true;
+            return rating;
         }
 
-        // lxns 不支持 GetScores，B50 直接返回合并结果
-        if (fetcher is LxnsDataFetcher)
-        {
-            baseRating.IsB50 = true;
-            return baseRating;
-        }
-
-        var scores = await fetcher.GetScores(message);
-        baseRating.IsB50 = true;
-
-        var songList = fetcher.GetSongList();
-        HashSet<string> newestVersions;
-
-        if (fetcher is DivingFishDataFetcher or LouisDataFetcher or LxnsDataFetcher)
-        {
-            newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "CHUNITHM LUMINOUS PLUS",
-                "CHUNITHM VERSE"
-            };
-        }
-        else
-        {
-            newestVersions = songList
-                .Select(s => s.Version)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderDescending(StringComparer.OrdinalIgnoreCase)
-                .Take(1)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        }
-
-        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
-
-        var div = scores
-            .Select(x => x.Value)
-            .GroupBy(x => newestVersions.Contains(versionMap.GetValueOrDefault(x.Id, "")))
-            .ToList();
-
-        var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];
-        var b = div.FirstOrDefault(x => !x.Key)?.Select(x => x) ?? [];
-        r = r.OrderByDescending(x => x.Rating).Take(20);
-        b = b.OrderByDescending(x => x.Rating).Take(30);
-
-        baseRating.Records.Best   = b.ToArray();
-        baseRating.Records.Recent = r.ToArray();
-        return baseRating;
+        // B30: 合并 best+recent，兜底避免查分器数据未合并
+        var allScores = rating.Records.Best
+            .Concat(rating.Records.Recent)
+            .GroupBy(x => new { x.Id, x.LevelIndex })
+            .Select(g => g.OrderByDescending(x => x.Achievement).First())
+            .OrderByDescending(x => x.Rating)
+            .Take(30)
+            .ToArray();
+        rating.Records.Best = allScores;
+        rating.Records.Recent = [];
+        return rating;
     }
 
     private async Task<MessageChain> GetRatingImg(Message message, bool b50 = false)

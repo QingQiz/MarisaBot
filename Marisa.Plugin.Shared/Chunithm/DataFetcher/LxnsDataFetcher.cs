@@ -47,21 +47,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var scores = await FetchScores(message);
-
-        // 合并 best 和 new_best，去重（按歌曲ID和难度），排序后取前30
-        var allScores = scores.Records.Best
-            .Concat(scores.Records.Recent)
-            .GroupBy(x => new { x.Id, x.LevelIndex })
-            .Select(g => g.OrderByDescending(x => x.Achievement).First())
-            .OrderByDescending(x => x.Rating)
-            .Take(30)
-            .ToArray();
-
-        scores.Records.Best = allScores;
-        scores.Records.Recent = [];
-
-        return scores;
+        return await FetchScores(message);
     }
 
     public override Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
