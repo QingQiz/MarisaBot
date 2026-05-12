@@ -20,4 +20,6 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
     public long UId { get; set; }
 
     public int AimeId { get; set; }
+
+    public string ServerName { get; set; } = string.Empty;
 }

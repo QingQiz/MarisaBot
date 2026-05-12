@@ -30,87 +30,45 @@ public partial class MaiMaiDx
 
     #region 绑定
 
-    [MarisaPluginDisabled]
     [MarisaPluginDoc("绑定某个查分器")]
     [MarisaPluginCommand("bind", "绑定")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private static Task<MarisaPluginTaskState> Bind(Message message)
     {
-        var fetchers = new[]
+        var servers = new[]
         {
-            "DivingFish", "Wahlap"
+            "DivingFish", "lxns"
         };
 
-        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', fetchers
+        message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', servers
             .Select((x, i) => (x, i))
             .Select(x => $"{x.i}. {x.x}"))
         );
 
-        /*
-         * 0 -> 检查输入的index，正确时询问access code
-         * 1 -> 检查输入的access code
-         */
-        var stat = 0;
-
-        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), async next =>
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
-            switch (stat)
+            if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= servers.Length)
             {
-                case 0:
-                {
-                    if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
-                    {
-                        next.Reply("错误的序号，会话已关闭");
-                        return MarisaPluginTaskState.CompletedTask;
-                    }
-
-                    if (idx == 0)
-                    {
-                        using var realm = BotDbContext.OpenRealm();
-
-                        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
-
-                        if (bind != null)
-                        {
-                            realm.Write(() => realm.Remove(bind));
-                        }
-
-                        message.Reply("好了");
-                        return MarisaPluginTaskState.CompletedTask;
-                    }
-
-                    // message.Reply("给出你舞萌在有效期内的二维码的扫描结果（以SGWC开头的字符串）");
-                    // stat = 1;
-                    //
-                    // return MarisaPluginTaskState.ToBeContinued;
-
-                    message.Reply("作者的服务器ip被Aime服务器ban了，暂时无法绑定。你可以使用的电脑获取AimeId，详情联系作者😢");
-                    return MarisaPluginTaskState.CompletedTask;
-                }
-                case 1:
-                {
-                    var accessCode = next.Command.Trim();
-
-                    try
-                    {
-                        var aimeId = await AllNetDataFetcher.GetUserId(accessCode);
-
-                        using var realm = BotDbContext.OpenRealm();
-
-                        realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, aimeId)));
-
-                        message.Reply("好了");
-                    }
-                    catch (InvalidDataException e)
-                    {
-                        message.Reply($"错误的二维码结果: {e.Message}。会话已关闭");
-                    }
-
-                    return MarisaPluginTaskState.CompletedTask;
-                }
+                next.Reply("错误的序号，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            return MarisaPluginTaskState.CompletedTask;
+            using var realm = BotDbContext.OpenRealm();
+
+            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
+
+            if (bind != null)
+            {
+                realm.Write(() => realm.Remove(bind));
+            }
+
+            realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0)
+            {
+                ServerName = servers[idx]
+            }));
+
+            message.Reply("好了");
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         });
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
@@ -362,7 +320,7 @@ public partial class MaiMaiDx
         async Task ReplyVersionSummary(Message replyMessage, string version)
         {
             var fetcher = GetDataFetcher(message);
-            var scores  = await fetcher.GetScores(message);
+            var scores = await fetcher.GetScores(message);
 
             var groupedSong = SongDb.SongList
                 .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
@@ -409,8 +367,8 @@ public partial class MaiMaiDx
             goto _error;
         }
 
-        var fetcher = GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+            var fetcher = GetDataFetcher(message);
+            var scores  = await fetcher.GetScores(message);
 
         var groupedSong = SongDb.SongList
             .Select(song => song.Constants

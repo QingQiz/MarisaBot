@@ -12,7 +12,10 @@ napCat:
   token:
   selfId:
 
-divingFish:
+ divingFish:
+  devToken:
+
+ lxns:
   devToken:
 
 arcaea:

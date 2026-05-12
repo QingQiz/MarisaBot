@@ -44,8 +44,32 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     public override async Task<ChunithmRating> GetRating(Message message)
     {
         var (username, qq) = AtOrSelf(message);
+        var scores = await ReqScores(username.IsWhiteSpace()
+            ? new { qq, constant = "0-16" }
+            : new { username, constant = "0-16" });
 
-        return await ReqRating(username, qq);
+        var songList = GetSongList();
+        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
+
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
+        };
+
+        var div = scores.Values
+            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .ToList();
+
+        return new ChunithmRating
+        {
+            DataSource = "Louis",
+            Username = username.IsWhiteSpace() ? "" : username.ToString(),
+            Records = new Records
+            {
+                Best = div.FirstOrDefault(x => !x.Key)?.OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
+                Recent = div.FirstOrDefault(x => x.Key)?.OrderByDescending(x => x.Rating).Take(20).ToArray() ?? []
+            }
+        };
     }
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)

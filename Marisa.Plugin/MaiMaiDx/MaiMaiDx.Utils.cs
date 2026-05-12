@@ -207,7 +207,18 @@ public partial class MaiMaiDx
 
         var bind = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
 
-        return GetDataFetcher(bind == null ? DataFetcherType.DivingFish : DataFetcherType.Wahlap);
+        if (bind == null)
+        {
+            return GetDataFetcher(DataFetcherType.DivingFish);
+        }
+
+        return bind.ServerName switch
+        {
+            "lxns" => GetDataFetcher(DataFetcherType.Lxns),
+            "DivingFish" => GetDataFetcher(DataFetcherType.DivingFish),
+            "Wahlap" => GetDataFetcher(DataFetcherType.Wahlap),
+            _ => GetDataFetcher(DataFetcherType.Wahlap)
+        };
     }
 
     private readonly Dictionary<DataFetcherType, DataFetcher> _dataFetchers = new();
@@ -220,6 +231,7 @@ public partial class MaiMaiDx
         {
             DataFetcherType.DivingFish => new DivingFishDataFetcher(SongDb),
             DataFetcherType.Wahlap     => new AllNetDataFetcher(SongDb),
+            DataFetcherType.Lxns       => new LxnsDataFetcher(SongDb),
             _                          => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -227,7 +239,8 @@ public partial class MaiMaiDx
     private enum DataFetcherType
     {
         DivingFish,
-        Wahlap
+        Wahlap,
+        Lxns
     }
 
     #endregion

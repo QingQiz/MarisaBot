@@ -20,6 +20,8 @@ public class PluginConfiguration
 
     public DivingFishConfiguration DivingFish { get; set; }
 
+    public LxnsConfiguration Lxns { get; set; }
+
     [YamlMember(Alias = "openai", ApplyNamingConventions = false)]
     public OpenAIConfiguration OpenAi { get; set; }
 

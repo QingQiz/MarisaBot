@@ -13,6 +13,7 @@ public partial class ChunithmSong : Song
     {
         DivingFish,
         Louis,
+        Lxns,
         Default
     }
 
@@ -75,6 +76,27 @@ public partial class ChunithmSong : Song
                     DiffNames.Add(LevelLabel[i]);
                     MaxCombo.Add(0);
                     ChartName.Add("");
+                }
+                break;
+            }
+            case DataSource.Lxns:
+            {
+                Id      = o.id;
+                Title   = o.title;
+                Artist  = o.artist;
+                Genre   = o.genre;
+                Version = o.version.ToString();
+
+                for (var i = 0; i < o.difficulties.Count; i++)
+                {
+                    var chart = o.difficulties[i];
+                    Constants.Add((double)chart.level_value);
+                    Charters.Add(chart.note_designer);
+                    Levels.Add(chart.level);
+                    DiffNames.Add(LevelLabel[i]);
+                    MaxCombo.Add(chart.notes?.total ?? 0);
+                    ChartName.Add("");
+                    _bpms.Add(o.bpm.ToString());
                 }
                 break;
             }

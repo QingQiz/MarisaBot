@@ -18,6 +18,7 @@ public partial class Chunithm
             {
                 "DivingFish" => new DivingFishDataFetcher(SongDb),
                 "Louis"      => new LouisDataFetcher(SongDb),
+                "lxns"       => new LxnsDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "RinNET", "aqua.naominet.live",
                     ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode!),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "Aqua", "aqua.msm.moe",
@@ -25,12 +26,12 @@ public partial class Chunithm
                 _ => Dns.GetHostAddresses(name).Length != 0
                     ? new AllNetBasedNetDataFetcher(SongDb, name, name,
                         ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!)
-                    : throw new InvalidDataException("无效的服务器名： " + name)
+                    : throw new InvalidDataException("无效的服务器名：" + name)
             };
         }
         catch (Exception e) when (e is SocketException or ArgumentException)
         {
-            throw new InvalidDataException("无效的服务器名： " + name);
+            throw new InvalidDataException("无效的服务器名：" + name);
         }
     }
 
@@ -55,61 +56,33 @@ public partial class Chunithm
 
         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
-        if (bind == null)
-        {
-            return GetDataFetcher("DivingFish", null); // 默认水鱼
-        }
-
-        var serverName = bind.ServerName;
-        var accessCode = bind.AccessCode;
-
-        return GetDataFetcher(serverName, accessCode);
+        return bind == null
+            ? GetDataFetcher("DivingFish", null)
+            : GetDataFetcher(bind.ServerName, bind.AccessCode);
     }
 
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)
     {
         var fetcher = await GetDataFetcher(message, true);
-        if (!b50) return await fetcher.GetRating(message);
 
         var rating = await fetcher.GetRating(message);
-        var scores = await fetcher.GetScores(message);
-        rating.IsB50 = true;
 
-        var songList = fetcher.GetSongList();
-        HashSet<string> newestVersions;
-
-        if (fetcher is DivingFishDataFetcher)
+        if (b50)
         {
-            newestVersions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "CHUNITHM LUMINOUS PLUS",
-                "CHUNITHM VERSE"
-            };
-        }
-        else
-        {
-            newestVersions = songList
-                .Select(s => s.Version)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderDescending(StringComparer.OrdinalIgnoreCase)
-                .Take(1)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            rating.IsB50 = true;
+            return rating;
         }
 
-        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
-
-        var div = scores
-            .Select(x => x.Value)
-            .GroupBy(x => newestVersions.Contains(versionMap.GetValueOrDefault(x.Id, "")))
-            .ToList();
-
-        var r = div.FirstOrDefault(x => x.Key)?.Select(x => x) ?? [];
-        var b = div.FirstOrDefault(x => !x.Key)?.Select(x => x) ?? [];
-        r = r.OrderByDescending(x => x.Rating).Take(20);
-        b = b.OrderByDescending(x => x.Rating).Take(30);
-
-        rating.Records.Best   = b.ToArray();
-        rating.Records.Recent = r.ToArray();
+        // B30: 合并 best+recent，兜底避免查分器数据未合并
+        var allScores = rating.Records.Best
+            .Concat(rating.Records.Recent)
+            .GroupBy(x => new { x.Id, x.LevelIndex })
+            .Select(g => g.OrderByDescending(x => x.Achievement).First())
+            .OrderByDescending(x => x.Rating)
+            .Take(30)
+            .ToArray();
+        rating.Records.Best = allScores;
+        rating.Records.Recent = [];
         return rating;
     }
 
