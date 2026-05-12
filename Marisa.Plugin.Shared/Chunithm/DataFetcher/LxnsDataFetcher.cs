@@ -47,11 +47,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        return await FetchScores(message);
-    }
-
-    public async Task<ChunithmRating> GetRatingMerged(Message message)
-    {
         var scores = await FetchScores(message);
 
         // 合并 best 和 new_best，去重（按歌曲ID和难度），排序后取前30

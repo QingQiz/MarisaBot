@@ -65,16 +65,6 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message, true);
 
-        // 如果是 lxns 查分器
-        if (fetcher is LxnsDataFetcher lxns)
-        {
-            var rating = b50
-                ? await lxns.GetRating(message)      // B50: 不合并，保持 best/new_best 分离
-                : await lxns.GetRatingMerged(message); // B30: 合并取前30
-            rating.IsB50 = b50;
-            return rating;
-        }
-
         var baseRating = await fetcher.GetRating(message);
 
         if (!b50)
@@ -89,6 +79,13 @@ public partial class Chunithm
                 .ToArray();
             baseRating.Records.Best = allScores;
             baseRating.Records.Recent = [];
+            return baseRating;
+        }
+
+        // lxns 不支持 GetScores，B50 直接返回合并结果
+        if (fetcher is LxnsDataFetcher)
+        {
+            baseRating.IsB50 = true;
             return baseRating;
         }
 
