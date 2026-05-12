@@ -24,10 +24,50 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             versionMap[(int)v.version] = (string)v.title;
         }
 
-        _songList = ((IEnumerable<dynamic>)response.songs)
+        var allSongs = ((IEnumerable<dynamic>)response.songs).ToList();
+
+        var normalData = new List<dynamic>();
+        var weSongData = new List<dynamic>();
+        var weOriginIds = new List<int>();
+
+        foreach (var song in allSongs)
+        {
+            if (song.difficulties.Count > 0 && song.difficulties[0].difficulty == 5)
+            {
+                weSongData.Add(song);
+                weOriginIds.Add((int)song.difficulties[0].origin_id);
+            }
+            else
+            {
+                normalData.Add(song);
+            }
+        }
+
+        _songList = normalData
             .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Lxns))
             .Where(x => !DeletedSongs.Contains(x.Id))
             .ToList();
+
+        for (var i = 0; i < weSongData.Count; i++)
+        {
+            var weSong = weSongData[i];
+            var originId = weOriginIds[i];
+
+            var parent = _songList.FirstOrDefault(s => s.Id == originId);
+            if (parent == null) continue;
+
+            var weChart = weSong.difficulties[0];
+
+            parent.AddDifficulty(
+                level: (string)weChart.level,
+                constant: (double)weChart.level_value,
+                charter: (string)weChart.note_designer,
+                diffName: ChunithmSong.LevelLabel[5],
+                maxCombo: weChart.notes?.total ?? 0,
+                chartName: "",
+                bpm: weSong.bpm.ToString()
+            );
+        }
 
         foreach (var song in _songList)
         {
@@ -104,7 +144,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         // 获取 Lxns 的歌曲列表用于匹配
         var lxnsSongs = GetSongList();
         var lxnsSongById = lxnsSongs.ToDictionary(s => s.Id, s => s);
-        var lxnsSongByTitle = lxnsSongs.ToDictionary(s => s.Title, s => s);
+        var lxnsSongByTitle = lxnsSongs.DistinctBy(s => s.Title).ToDictionary(s => s.Title, s => s);
 
         var bestScores = responseData.TryGetProperty("bests", out var bests)
             ? ParseScores(bests, SongDb, lxnsSongById, lxnsSongByTitle)

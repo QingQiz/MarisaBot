@@ -46,8 +46,8 @@ public class ChunithmDivingFishDataFetcherTest
         // 验证难度级别格式（7, 7+, 11, 13+ 等）
         Assert.That(first.Levels, Has.All.Match(@"^\d+\+?$"));
 
-        // 验证定数范围（1.0 ~ 15.4）
-        Assert.That(first.Constants, Has.All.InRange(1.0, 15.4));
+        // 验证定数范围（0.0 ~ 15.4），WE 难度定数为 0
+        Assert.That(first.Constants, Has.All.InRange(0.0, 15.4));
 
         // 验证所有歌曲的 Title 和 Version 都不为空
         Assert.That(songs, Has.All.Matches<ChunithmSong>(s => !string.IsNullOrWhiteSpace(s.Title)));
@@ -103,9 +103,10 @@ public class ChunithmDivingFishDataFetcherTest
                 .OrderBy(d => (int)d.difficulty).ToList();
 
             Assert.That(rawDiffs, Is.Not.Empty);
-            Assert.That(parsed.Constants.Count, Is.EqualTo(rawDiffs.Count));
-            Assert.That(parsed.Levels.Count, Is.EqualTo(rawDiffs.Count));
-            Assert.That(parsed.Charters.Count, Is.EqualTo(rawDiffs.Count));
+            // WE variant 的谱面会合并到原曲中，因此 parsed 可能比 raw 多
+            Assert.That(parsed.Constants.Count, Is.GreaterThanOrEqualTo(rawDiffs.Count));
+            Assert.That(parsed.Levels.Count, Is.GreaterThanOrEqualTo(rawDiffs.Count));
+            Assert.That(parsed.Charters.Count, Is.GreaterThanOrEqualTo(rawDiffs.Count));
 
             for (var j = 0; j < rawDiffs.Count; j++)
             {
