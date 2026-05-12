@@ -14,9 +14,10 @@ public class ChunithmRating
     {
         get
         {
-            var r = Records.Best.Sum(s => s.Rating);
-            var b = Records.Recent.Sum(s => s.Rating);
-            return Math.Round((r + b) / (IsB50 ? 50 : 40), 2, MidpointRounding.ToZero);
+            var b = Records.Best.Sum(s => s.Rating);
+            var r = Records.Recent.Sum(s => s.Rating);
+            var v = IsB50 ? (r + b) / 50 : b / 30;
+            return Math.Round(v, 2, MidpointRounding.ToZero);
         }
         // ReSharper disable once ValueParameterNotUsed
         set {}

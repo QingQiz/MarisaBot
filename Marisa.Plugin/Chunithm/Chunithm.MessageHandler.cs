@@ -473,15 +473,11 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B30Sum(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-
-        var rating = await fetcher.GetRating(message);
+        var rating = await GetRating(message);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
-        var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;
 
-        message.Reply($"{rating.Username} ({rating.Rating})\nBest: {rating.B30}\nRecent: {rating.R10}\n\n" +
-                      $"推分剩余: 0.{40 - (bSum + rSum) % 40:00}\nBest 推分剩余: 0.{30 - bSum % 30:00}\nRecent 推分剩余: 0.{10 - rSum % 10:00}");
+        message.Reply($"{rating.Username} ({rating.Rating})\n\n推分剩余: 0.{30 - bSum % 30:00}");
 
         return MarisaPluginTaskState.CompletedTask;
     }

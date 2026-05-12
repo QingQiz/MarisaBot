@@ -83,6 +83,7 @@ public partial class Chunithm
             .ToArray();
         rating.Records.Best = allScores;
         rating.Records.Recent = [];
+        rating.IsB50 = false;
         return rating;
     }
 
