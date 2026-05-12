@@ -422,17 +422,18 @@ public partial class MaiMaiDx
 
     private const string PlateUsage =
         "格式：mai <选择><阈值>[<难度>]完成表\n" +
-        "  选择：版本代字（真/熊/华/鏡/...，'代'后缀可选）/ 谱师名 / 类别名\n" +
-        "  阈值：将=SSS / 大将=SSS+ / 神=AP / 理论值=AP+ / 极=FC / 舞舞=FDX；\n" +
+        "  选择：版本代字（真/熊/华/鏡/...，'代'后缀可选）/ 谱师名 / 类别名 / 作曲家\n" +
+        "        谱师名 / 作曲家 均 substring 匹配（输 '翠楼屋' 命中 'サファ太 vs 翠楼屋'）\n" +
+        "  阈值（可省，缺省=将=SSS）：将=SSS / 大将=SSS+ / 神=AP / 理论值=AP+ / 极=FC / 舞舞=FDX；\n" +
         "        或直接 SSS+/SSS/SS+/.../FC+/AP+/FDX+/FS+/...\n" +
-        "  难度（可选，默认 MASTER）：BSC/ADV/EXP/MST/绿谱/黄谱/红谱/紫谱/白谱(Re:MASTER)\n" +
+        "  难度（可省，缺省 MASTER）：BSC/ADV/EXP/MST/绿谱/黄谱/红谱/紫谱/白谱(Re:MASTER)\n" +
         "  字段顺序可任意：mai 真代EXPERT将完成表 ≡ mai 真将EXPERT完成表\n" +
-        "  例：mai 真大将完成表 / mai 翠楼屋将完成表 / mai 术力口神完成表";
+        "  例：mai 真完成表 / mai 真大将完成表 / mai 翠楼屋将完成表 / mai HIMEHINA神完成表";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
 
-    [MarisaPluginDoc("查询版本/谱师/类别的完成表")]
+    [MarisaPluginDoc("查询版本/谱师/类别/作曲家的完成表")]
     [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(PlateTrigger))]
     private async Task<MarisaPluginTaskState> Plate(Message message)
     {
@@ -444,7 +445,13 @@ public partial class MaiMaiDx
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (!PlateData.TryParse(raw, charters, out var query, out var error))
+        var artists = SongDb.SongList
+            .Select(s => s.Info.Artist)
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (!PlateData.TryParse(raw, charters, artists, out var query, out var error))
         {
             // trigger 已经挡住非"完成表"消息，这里几乎不可能拿到 NotPlateCommand；保险兜底。
             if (error!.Kind == PlateData.ErrorKind.NotPlateCommand)
@@ -475,9 +482,8 @@ public partial class MaiMaiDx
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
             PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.UnknownThreshold => $"无法识别阈值，请检查：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery       => "请在'完成表'前指定 <版本/谱师/类别> + <阈值>",
+            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery       => "请在'完成表'前指定 <版本/谱师/类别/作曲家>",
             _                                    => "命令格式错误",
         };
 
@@ -500,6 +506,22 @@ public partial class MaiMaiDx
                 PlateData.Selector.Charter c => allCharts
                     .Where(t => t.i < t.song.Charters.Count
                              && t.song.Charters[t.i].Contains(c.Name, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                // song-level substring 匹配，兼容 "sasakure.UK x DECO*27" 这种合作作曲名义。
+                PlateData.Selector.Artist a => allCharts
+                    .Where(t => !string.IsNullOrEmpty(t.song.Info.Artist)
+                             && t.song.Info.Artist.Contains(a.Name, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => (t.constant, t.i, t.song))
+                    .ToList(),
+
+                // 谱师 ∪ 作曲家：处理 "rintaro soma" 这种身兼两职的人。
+                PlateData.Selector.CharterOrArtist ca => allCharts
+                    .Where(t => (t.i < t.song.Charters.Count
+                                 && t.song.Charters[t.i].Contains(ca.Name, StringComparison.OrdinalIgnoreCase))
+                              || (!string.IsNullOrEmpty(t.song.Info.Artist)
+                                  && t.song.Info.Artist.Contains(ca.Name, StringComparison.OrdinalIgnoreCase)))
                     .Select(t => (t.constant, t.i, t.song))
                     .ToList(),
 

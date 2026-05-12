@@ -6,19 +6,29 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiDxPlateDataTest
 {
+    // 含合作名义"サファ太 vs 翠楼屋"，验证 substring 命中。"rintaro soma" 同时进 charters + artists
+    // (见下) 用于 CharterOrArtist union case。
     private static readonly IReadOnlyCollection<string> Charters =
-        ["翠楼屋", "Jack", "はっぴー", "ロシェ@ペンギン", "rioN"];
+    [
+        "翠楼屋", "サファ太 vs 翠楼屋", "Jack", "はっぴー", "ロシェ@ペンギン", "rioN", "rintaro soma",
+    ];
+
+    // 含合作名义"sasakure.UK x DECO*27"，验证 substring 命中；"HIMEHINA" 验证纯 artist 单边命中。
+    private static readonly IReadOnlyCollection<string> Artists =
+    [
+        "DECO*27", "sasakure.UK x DECO*27", "HIMEHINA", "rintaro soma", "Various Artists",
+    ];
 
     private static PlateData.Query MustParse(string raw)
     {
-        var ok = PlateData.TryParse(raw, Charters, out var query, out var error);
+        var ok = PlateData.TryParse(raw, Charters, Artists, out var query, out var error);
         Assert.That(ok, Is.True, $"parse failed for '{raw}': {error?.Kind}/{error?.Detail}");
         return query!;
     }
 
     private static PlateData.ParseError MustFail(string raw)
     {
-        var ok = PlateData.TryParse(raw, Charters, out _, out var error);
+        var ok = PlateData.TryParse(raw, Charters, Artists, out _, out var error);
         Assert.That(ok, Is.False, $"parse unexpectedly succeeded for '{raw}'");
         return error!;
     }
@@ -132,16 +142,47 @@ public class MaiMaiDxPlateDataTest
         Assert.That(MustFail("  完成表  ").Kind, Is.EqualTo(PlateData.ErrorKind.EmptyQuery));
     }
 
-    [Test]
-    public void RejectsUnknownThreshold()
+    // ──────────────────────────────────────────────────────────────────────
+    // 缺省 fallback：阈值未指定时默认 SSS（"将"）；难度未指定仍默认 MASTER。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("真完成表",          "真",     12, 3)]   // selector=Plate, default SSS + MASTER
+    [TestCase("真代完成表",        "真",     12, 3)]   // 含可选"代"
+    [TestCase("熊完成表",          "熊",     12, 3)]
+    public void DefaultsToSssWhenThresholdMissingForPlate(string raw, string kanji, int level, int levelIdx)
     {
-        // "真" 自己就是代字，但没阈值
-        Assert.That(MustFail("真完成表").Kind, Is.EqualTo(PlateData.ErrorKind.UnknownThreshold));
+        var q = MustParse(raw);
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(((PlateData.Selector.Plate)q.Selector).Kanji, Is.EqualTo(kanji));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Achievement));
+        Assert.That(q.Threshold.Level, Is.EqualTo(level));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdx, Is.EqualTo(levelIdx));
     }
 
-    // 注：以前这里有个 RejectsUnknownSelector 测试。改了 charter substring 行为后，
-    // 任何非代字非 genre 的 selector 都会被当 charter 接受（实际找不到会在 handler
-    // 渲染时报 0 首），所以解析层不再产生 UnknownSelector。该 ErrorKind 仍保留作 future 使用。
+    [Test]
+    public void DefaultsToSssWhenThresholdMissingForCharter()
+    {
+        var q = MustParse("翠楼屋完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(((PlateData.Selector.Charter)q.Selector).Name, Is.EqualTo("翠楼屋"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdx, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void DefaultsToSssWhenThresholdMissingForCharterWithDifficulty()
+    {
+        // 阈值缺省 + 难度显式给：threshold=SSS / LevelIdx=EXPERT
+        var q = MustParse("翠楼屋红谱完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdx, Is.EqualTo(2));
+    }
+
+    // 注：以前 RejectsUnknownThreshold 测 "真完成表" 应该报 UnknownThreshold。改默认 fallback 后
+    // 该输入合法 → Plate(真) + SSS + MASTER（见 DefaultsToSssWhenThresholdMissingForPlate）。
+    // ErrorKind.UnknownThreshold 整个 enum value 已从 PlateData 移除（dead code）。
 
     [Test]
     public void LongestThresholdMatchPicksDaiJiang()
@@ -265,5 +306,79 @@ public class MaiMaiDxPlateDataTest
         Assert.That(((PlateData.Selector.Plate)q.Selector).Kanji, Is.EqualTo("真"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));  // 神
         Assert.That(q.LevelIdx, Is.EqualTo(4));                  // 白谱 = Re:MASTER
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Artist (作曲家) — substring 匹配；纯 artist 单边命中应解析为 Artist。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("HIMEHINA神完成表",        "HIMEHINA",   3, 3)]   // Fc=AP / MASTER
+    [TestCase("HIMEHINA舞舞完成表",      "HIMEHINA",   4, 3)]   // Fs=FDX / MASTER
+    [TestCase("HIMEHINA完成表",          "HIMEHINA",  12, 3)]   // 默认 SSS / MASTER
+    public void ParsesArtistWhenOnlyArtistMatches(string raw, string artist, int level, int levelIdx)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Artist>(), $"expected Artist for '{raw}'");
+        Assert.That(((PlateData.Selector.Artist)q.Selector).Name, Is.EqualTo(artist));
+        Assert.That(q.Threshold.Level, Is.EqualTo(level));
+        Assert.That(q.LevelIdx, Is.EqualTo(levelIdx));
+    }
+
+    [Test]
+    public void ParsesArtistViaCollabSubstring()
+    {
+        // "DECO*27" 不在 charters 列表，但 artists 列表里有 "sasakure.UK x DECO*27" —— substring 命中
+        var q = MustParse("DECO*27将完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Artist>());
+        Assert.That(((PlateData.Selector.Artist)q.Selector).Name, Is.EqualTo("DECO*27"));
+    }
+
+    [Test]
+    public void ParsesArtistViaCollabSubstringSasakure()
+    {
+        // 验证 substring 方向：用户输 collab 名义里的部分 ("sasakure.UK")，应命中 Artist
+        var q = MustParse("sasakure.UK将完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Artist>());
+        Assert.That(((PlateData.Selector.Artist)q.Selector).Name, Is.EqualTo("sasakure.UK"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // CharterOrArtist union — selector 同时是某 charter substring 和某 artist substring 时
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void ParsesCharterOrArtistWhenBothMatch()
+    {
+        // "rintaro soma" 在 Charters 和 Artists 列表里都有 → Selector 应合并为 CharterOrArtist，
+        // handler 按 OR 筛 (谱师维度命中 ∪ 作曲家维度命中)。
+        var q = MustParse("rintaro soma将完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.CharterOrArtist>(),
+            "rintaro soma 同时是已知谱师和作曲家，应解析为 CharterOrArtist union");
+        Assert.That(((PlateData.Selector.CharterOrArtist)q.Selector).Name, Is.EqualTo("rintaro soma"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdx, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void ParsesCharterOrArtistViaSubstring()
+    {
+        // 输 substring "rintaro" 仍应命中 union（charter "rintaro soma" 含 + artist "rintaro soma" 含）。
+        var q = MustParse("rintaro完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.CharterOrArtist>());
+        Assert.That(((PlateData.Selector.CharterOrArtist)q.Selector).Name, Is.EqualTo("rintaro"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Charter precise — 输入是 collab 名义的 substring 时仍能命中 Charter
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void ParsesCharterViaCollabSubstring()
+    {
+        // "サファ太" 不在 charters 列表直接条目，但 "サファ太 vs 翠楼屋" 含它 — substring 命中
+        // 且 artists 列表里没含 → 单边 Charter (不是 CharterOrArtist)
+        var q = MustParse("サファ太将完成表");
+        Assert.That(q.Selector, Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(((PlateData.Selector.Charter)q.Selector).Name, Is.EqualTo("サファ太"));
     }
 }

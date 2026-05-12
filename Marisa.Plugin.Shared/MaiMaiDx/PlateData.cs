@@ -18,18 +18,27 @@ public static class PlateData
     public sealed record Threshold(Dimension Dim, int Level, string DisplayName);
 
     /// <summary>
-    ///     选择条件：版本（plate）/ 谱师 / 类别 三选一。
+    ///     选择条件：版本（plate）/ 谱师 / 类别 / 作曲家 四选一。
     /// </summary>
     public abstract record Selector(string Display)
     {
         /// <summary>版本。Versions 是 diving-fish basic_info.from 字段值集合。</summary>
         public sealed record Plate(string Kanji, string[] Versions) : Selector(Kanji);
 
-        /// <summary>谱师。Name 与 song.Charters[i] 精确匹配。</summary>
+        /// <summary>谱师。Name 与 song.Charters[i] substring 匹配。</summary>
         public sealed record Charter(string Name) : Selector(Name);
 
         /// <summary>类别。FullName 与 song.Info.Genre 精确匹配；Alias 是用户输入的别名（用于显示）。</summary>
         public sealed record Genre(string FullName, string Alias) : Selector(Alias);
+
+        /// <summary>作曲家。Name 与 song.Info.Artist substring 匹配（song-level，非 chart-level）。</summary>
+        public sealed record Artist(string Name) : Selector(Name);
+
+        /// <summary>
+        ///     谱师 ∪ 作曲家：当 Name 同时是某 charter 名 substring 又是某 artist 名 substring 时使用
+        ///     （例如 "rintaro soma" 既写谱又作曲）。handler 按 OR 筛 — 谱师维度命中或作曲家维度命中均收录。
+        /// </summary>
+        public sealed record CharterOrArtist(string Name) : Selector(Name);
     }
 
     public sealed record Query(Selector Selector, Threshold Threshold, int LevelIdx);
@@ -37,7 +46,10 @@ public static class PlateData
     /// <summary>默认难度（MASTER）。完成表语义里 BASIC/ADV/EXPERT 也允许显式指定，Re:MASTER 永不参与。</summary>
     public const int DefaultLevelIdx = 3;
 
-    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnknownThreshold, UnsupportedPlate, UnknownSelector }
+    /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
+    public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
+
+    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector }
 
     public sealed record ParseError(ErrorKind Kind, string? Detail = null);
 
@@ -223,6 +235,7 @@ public static class PlateData
     public static bool TryParse(
         string raw,
         IReadOnlyCollection<string> knownCharters,
+        IReadOnlyCollection<string> knownArtists,
         out Query? query,
         out ParseError? error)
     {
@@ -246,39 +259,40 @@ public static class PlateData
         }
 
         // 1. 阈值 token —— 字段位置可任意（"真代EXPERT将"=阈值在末尾、"将真EXPERT"=阈值在开头都接受）。
-        //    longest-first 顺序遍历表，找最后一次出现位置（rightmost），strip 掉得到剩余字符串。
+        //    longest-first 顺序遍历表，找 rightmost 满足"边界合法"的出现位置，strip 掉得到剩余字符串。
+        //    边界规则：纯 ASCII 字母 token（如 "A"、"AAA"、"FC+"）必须 word boundary（前后不是 ASCII 字母），
+        //    否则会把 "HIMEHINA" 里的 "A" 当 threshold；CJK token（将/神/...）不受边界限制。
+        //    缺省时回落到 DefaultThreshold（"将"=SSS）。
         Threshold? threshold = null;
         int thresholdAt = -1, thresholdLen = 0;
         foreach (var (token, t) in ThresholdEntriesLongestFirst)
         {
-            var at = inner.LastIndexOf(token, StringComparison.OrdinalIgnoreCase);
-            if (at >= 0)
+            var pos = FindBoundedRightmost(inner, token);
+            if (pos >= 0)
             {
                 threshold    = t;
-                thresholdAt  = at;
+                thresholdAt  = pos;
                 thresholdLen = token.Length;
                 break;
             }
         }
 
-        if (threshold == null)
-        {
-            error = new(ErrorKind.UnknownThreshold, inner);
-            return false;
-        }
+        threshold ??= DefaultThreshold;
 
-        var afterThreshold = (inner[..thresholdAt] + inner[(thresholdAt + thresholdLen)..]).Trim();
+        var afterThreshold = thresholdAt >= 0
+            ? (inner[..thresholdAt] + inner[(thresholdAt + thresholdLen)..]).Trim()
+            : inner;
 
-        // 2. 难度 token（可选，同样 anywhere + rightmost）。默认 MASTER。
+        // 2. 难度 token（可选，同样 anywhere + rightmost + 同样的 ASCII letter 边界规则）。默认 MASTER。
         var levelIdx = DefaultLevelIdx;
         int diffAt = -1, diffLen = 0;
         foreach (var (token, idx) in DifficultyEntriesLongestFirst)
         {
-            var at = afterThreshold.LastIndexOf(token, StringComparison.OrdinalIgnoreCase);
-            if (at >= 0)
+            var pos = FindBoundedRightmost(afterThreshold, token);
+            if (pos >= 0)
             {
                 levelIdx = idx;
-                diffAt   = at;
+                diffAt   = pos;
                 diffLen  = token.Length;
                 break;
             }
@@ -294,9 +308,9 @@ public static class PlateData
             return false;
         }
 
-        // 3. 解析 selector：先试代字（含可选末尾"代"），再 genre（固定 alias 表），
-        //    最后 charter（substring catch-all，永远 succeed）。
-        //    顺序关键：charter 阶段不再要求精确匹配，所以必须放最后，否则会拦截 genre。
+        // 3. 解析 selector：Plate → Genre → (Charter precise + Artist precise 同时查) → Charter catch-all。
+        //    Charter / Artist 同时命中时合并为 CharterOrArtist（处理 "rintaro soma" 这种身兼谱师+作曲家的人）。
+        //    Charter catch-all 殿后保留"乱输入也接受 + handler 报 0 首"语义。
         if (TryResolvePlate(selectorPart, out var plateSel, out var plateErr))
         {
             query = new Query(plateSel!, threshold, levelIdx);
@@ -314,14 +328,28 @@ public static class PlateData
             return true;
         }
 
-        if (TryResolveCharter(selectorPart, knownCharters, out var charterSel))
+        var charterHit = TryResolveCharterPrecise(selectorPart, knownCharters, out var charterPreciseSel);
+        var artistHit  = TryResolveArtist(selectorPart, knownArtists, out var artistSel);
+
+        if (charterHit && artistHit)
         {
-            query = new Query(charterSel!, threshold, levelIdx);
+            query = new Query(new Selector.CharterOrArtist(selectorPart), threshold, levelIdx);
+            return true;
+        }
+        if (charterHit)
+        {
+            query = new Query(charterPreciseSel!, threshold, levelIdx);
+            return true;
+        }
+        if (artistHit)
+        {
+            query = new Query(artistSel!, threshold, levelIdx);
             return true;
         }
 
-        error = new(ErrorKind.UnknownSelector, selectorPart);
-        return false;
+        // catch-all：把 selector 当作 charter 接收，由 handler 在筛选时报 0 首。
+        query = new Query(new Selector.Charter(selectorPart), threshold, levelIdx);
+        return true;
     }
 
     /// <summary>
@@ -366,17 +394,62 @@ public static class PlateData
         return false;
     }
 
-    private static bool TryResolveCharter(
+    /// <summary>
+    ///     在 haystack 中找 token 的 rightmost 出现位置，要求 word boundary（仅当 token 含 ASCII 字母时）。
+    ///     避免 "HIMEHINA" 里的单字母 "A" 被识别为 Achievement A 阈值。
+    /// </summary>
+    private static int FindBoundedRightmost(string haystack, string token)
+    {
+        var requireBoundary = token.Any(IsAsciiLetter);
+        var at = haystack.LastIndexOf(token, StringComparison.OrdinalIgnoreCase);
+        while (at >= 0)
+        {
+            if (!requireBoundary) return at;
+
+            var before = at > 0 ? haystack[at - 1] : '\0';
+            var after  = at + token.Length < haystack.Length ? haystack[at + token.Length] : '\0';
+            if (!IsAsciiLetter(before) && !IsAsciiLetter(after)) return at;
+
+            // 该位置边界不合法，往左继续找下一个 occurrence
+            if (at == 0) return -1;
+            at = haystack.LastIndexOf(token, at - 1, StringComparison.OrdinalIgnoreCase);
+        }
+        return -1;
+    }
+
+    private static bool IsAsciiLetter(char c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
+
+    /// <summary>
+    ///     精确 charter 匹配：当且仅当 selectorPart 是某个已知 charter 名的 substring 时命中。
+    ///     未命中时返回 false，由后续 Artist precise / Charter catch-all 接力。
+    ///     目的：在引入 Artist 后避免 charter catch-all 抢走本应识别为 artist 的输入。
+    /// </summary>
+    private static bool TryResolveCharterPrecise(
         string selectorPart, IReadOnlyCollection<string> knownCharters, out Selector? selector)
     {
-        // 永远当作 charter 接受 — 实际筛选用 substring（Contains）匹配，目的是支持
-        // "サファ太 vs 翠楼屋" 这类合作谱师名义（输 "翠楼屋" 也能命中）。
-        // 真不存在的谱师名（用户 typo）就在 SelectChartsForQuery 那边匹到 0 首，
-        // 由 handler 报 "没有找到 X 对应的歌曲"，而不是在这里报 UnknownSelector。
-        // knownCharters 当前不参与判定，保留参数方便将来需要时（例如想做模糊提示）。
-        _ = knownCharters;
-        selector = new Selector.Charter(selectorPart);
-        return true;
+        if (knownCharters.Any(c => c.Contains(selectorPart, StringComparison.OrdinalIgnoreCase)))
+        {
+            selector = new Selector.Charter(selectorPart);
+            return true;
+        }
+        selector = null;
+        return false;
+    }
+
+    /// <summary>
+    ///     精确 artist 匹配：当且仅当 selectorPart 是某个已知 artist 名的 substring 时命中。
+    ///     必须 precise（不能 catch-all），否则会跟 Charter catch-all 冲突。
+    /// </summary>
+    private static bool TryResolveArtist(
+        string selectorPart, IReadOnlyCollection<string> knownArtists, out Selector? selector)
+    {
+        if (knownArtists.Any(a => a.Contains(selectorPart, StringComparison.OrdinalIgnoreCase)))
+        {
+            selector = new Selector.Artist(selectorPart);
+            return true;
+        }
+        selector = null;
+        return false;
     }
 
     private static bool TryResolveGenre(string selectorPart, out Selector? selector)
