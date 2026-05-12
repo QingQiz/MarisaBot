@@ -86,23 +86,31 @@ function CalcOverPower(song: GroupSongInfo, score: Score): number {
 }
 
 function FilterDuplicateIds(group: GroupSongInfo[], scoreList: Score[]): [GroupSongInfo[], Score[]] {
-    const bestMap = new Map<number, { song: GroupSongInfo; score: Score; op: number }>();
+    const bestMap = new Map<number, { songForConst: GroupSongInfo; bestOpScore: Score; bestOp: number }>();
 
     for (let i = 0; i < group.length; i++) {
         const song = group[i];
         const score = scoreList[i];
         const op = CalcOverPower(song, score);
         const existing = bestMap.get(song.Item3.Id);
-        if (!existing || op > existing.op) {
-            bestMap.set(song.Item3.Id, { song, score, op });
+
+        if (!existing) {
+            bestMap.set(song.Item3.Id, { songForConst: song, bestOpScore: score, bestOp: op });
+        } else {
+            if (song.Item1 > existing.songForConst.Item1) {
+                bestMap.set(song.Item3.Id, { songForConst: song, bestOpScore: existing.bestOpScore, bestOp: existing.bestOp });
+            }
+            if (op > existing.bestOp) {
+                bestMap.set(song.Item3.Id, { songForConst: existing.songForConst, bestOpScore: score, bestOp: op });
+            }
         }
     }
 
     const filteredSongs: GroupSongInfo[] = [];
     const filteredScores: Score[] = [];
     bestMap.forEach(v => {
-        filteredSongs.push(v.song);
-        filteredScores.push(v.score);
+        filteredSongs.push(v.songForConst);
+        filteredScores.push(v.bestOpScore);
     });
 
     return [filteredSongs, filteredScores];
