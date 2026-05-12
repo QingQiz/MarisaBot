@@ -11,53 +11,38 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        return await GetScores(message, false);
+        return await FetchScores(message);
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+    public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var scores = await GetScores(message, true);
-
-        return scores.OldScores
-            .Concat(scores.NewScores)
-            .ToDictionary(x => (x.Id, x.LevelIdx), x => x);
+        throw new NotSupportedException("[Lxns] 不支持的操作");
     }
 
-    private async Task<DxRating> GetScores(Message message, bool qqOnly)
+    private async Task<DxRating> FetchScores(Message message)
     {
-        var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
+        var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
 
-        string friendCode;
-        string playerName;
+        var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
+            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
 
-        if (!username.IsWhiteSpace())
+        if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
         {
-            friendCode = username.ToString();
-            playerName = username.ToString();
+            var errorJson = await playerResponse.GetStringAsync();
+            using var errorDoc = JsonDocument.Parse(errorJson);
+            var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
+                ? msg.GetString() ?? "Player not found"
+                : "Player not found";
+            throw new HttpRequestException(HttpRequestError.Unknown, $"[Lxns] {playerResponse.StatusCode}: {errorMessage}");
         }
-        else
-        {
-            var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
-                .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
-                .AllowHttpStatus("400,401,403,404")
-                .GetAsync();
 
-            if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
-            {
-                var errorJson = await playerResponse.GetStringAsync();
-                using var errorDoc = JsonDocument.Parse(errorJson);
-                var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
-                    ? msg.GetString() ?? "Player not found"
-                    : "Player not found";
-                throw new HttpRequestException(HttpRequestError.Unknown, $"[Lxns] {playerResponse.StatusCode}: {errorMessage}");
-            }
-
-            var playerJson = await playerResponse.GetStringAsync();
-            using var playerDoc = JsonDocument.Parse(playerJson);
-            var data = playerDoc.RootElement.GetProperty("data");
-            friendCode = data.GetProperty("friend_code").GetInt64().ToString();
-            playerName = data.GetProperty("name").GetString() ?? "";
-        }
+        var playerJson = await playerResponse.GetStringAsync();
+        using var playerDoc = JsonDocument.Parse(playerJson);
+        var data = playerDoc.RootElement.GetProperty("data");
+        var friendCode = data.GetProperty("friend_code").GetInt64().ToString();
+        var playerName = data.GetProperty("name").GetString() ?? "";
 
         var response = await $"{BaseUrl}/player/{friendCode}/bests"
             .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
@@ -77,10 +62,10 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         var responseData = root.TryGetProperty("data", out var dataElement) ? dataElement : root;
 
         var standardScores = responseData.TryGetProperty("standard", out var standard)
-            ? ParseScores(standard, songDb)
+            ? ParseScores(standard, SongDb)
             : new List<SongScore>();
         var dxScores = responseData.TryGetProperty("dx", out var dx)
-            ? ParseScores(dx, songDb)
+            ? ParseScores(dx, SongDb)
             : new List<SongScore>();
 
         return new DxRating

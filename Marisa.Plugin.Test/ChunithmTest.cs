@@ -53,17 +53,6 @@ public class ChunithmTest
     }
 
     [Test]
-    [TestCase("", 920759985)]
-    public void Should_Fetch_Rating_From_Louis(string username, long qq)
-    {
-        var fetcher = new LouisDataFetcher(_songDb);
-        Assert.DoesNotThrowAsync(async () =>
-        {
-            await fetcher.ReqRating(username.AsMemory(), qq);
-        });
-    }
-
-    [Test]
     [TestCase(920759985)]
     [TestCase(2661036521)]
     public void Should_Fetch_Scores_From_Louis(long qq)

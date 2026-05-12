@@ -9,7 +9,7 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     ///     这导致了op计算和rating计算不正确，
     ///     因此需要手动过滤掉
     /// </summary>
-    protected readonly HashSet<long> DeletedSongs =
+    protected static readonly HashSet<long> DeletedSongs =
     [
         156, 343, 1046, 1049, 1050, 1051, 1054, 2007, 2008, 2014, 2016, 2020, 2021,
         2027, 2039, 2075, 2076, 2095, 2141, 2211, 2212, 2213

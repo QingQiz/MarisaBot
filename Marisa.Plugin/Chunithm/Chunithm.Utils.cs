@@ -20,12 +20,12 @@ public partial class Chunithm
                 "Louis"      => new LouisDataFetcher(SongDb),
                 "lxns"       => new LxnsDataFetcher(SongDb),
                 "RinNET" => new AllNetBasedNetDataFetcher(SongDb, "RinNET", "aqua.naominet.live",
-                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode),
+                    ConfigurationManager.Configuration.Chunithm.RinNetKeyChip, accessCode!),
                 "Aqua" => new AllNetBasedNetDataFetcher(SongDb, "Aqua", "aqua.msm.moe",
-                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode),
+                    ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!),
                 _ => Dns.GetHostAddresses(name).Length != 0
                     ? new AllNetBasedNetDataFetcher(SongDb, name, name,
-                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode)
+                        ConfigurationManager.Configuration.Chunithm.AllNetKeyChip, accessCode!)
                     : throw new InvalidDataException("无效的服务器名：" + name)
             };
         }
@@ -64,50 +64,27 @@ public partial class Chunithm
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)
     {
         var fetcher = await GetDataFetcher(message, true);
-        
-        // 如果是 lxns 查分器
-        if (fetcher is LxnsDataFetcher lxnsFetcher)
+
+        var rating = await fetcher.GetRating(message);
+
+        if (b50)
         {
-            // B50时返回原始数据（best对应best，new_best对应recent）
-            if (b50)
-            {
-                var rating = await lxnsFetcher.GetRatingRaw(message);
-                rating.IsB50 = true;
-                return rating;
-            }
-            // B30时返回合并后的数据（旧版本逻辑）
-            else
-            {
-                var rating = await lxnsFetcher.GetRating(message);
-                rating.IsB50 = false;
-                return rating;
-            }
+            rating.IsB50 = true;
+            return rating;
         }
 
-        var baseRating = await fetcher.GetRating(message);
-        
-        if (!b50) return baseRating;
-
-        var scores = await fetcher.GetScores(message);
-        var newestVersions = new[] { "CHUNITHM VERSE", "CHUNITHM LUMINOUS PLUS" };
-
-        baseRating.IsB50 = true;
-
-        var div = scores.Select(s => s.Value).GroupBy(s => 
-        {
-            var songObj = SongDb.GetSongById(s.Id);
-            // 如果找不到歌曲，默认分到旧版本组
-            return songObj != null && newestVersions.Contains(songObj.Version);
-        }).ToList();
-
-        var r = div.FirstOrDefault(g => g.Key)?.ToList() ?? [];
-        var b = div.FirstOrDefault(g => !g.Key)?.ToList() ?? [];
-        r = r.OrderByDescending(s => s.Rating).Take(20).ToList();
-        b = b.OrderByDescending(s => s.Rating).Take(30).ToList();
-
-        baseRating.Records.Best   = b.ToArray();
-        baseRating.Records.Recent = r.ToArray();
-        return baseRating;
+        // B30: 合并 best+recent，兜底避免查分器数据未合并
+        var allScores = rating.Records.Best
+            .Concat(rating.Records.Recent)
+            .GroupBy(x => new { x.Id, x.LevelIndex })
+            .Select(g => g.OrderByDescending(x => x.Achievement).First())
+            .OrderByDescending(x => x.Rating)
+            .Take(30)
+            .ToArray();
+        rating.Records.Best = allScores;
+        rating.Records.Recent = [];
+        rating.IsB50 = false;
+        return rating;
     }
 
     private async Task<MessageChain> GetRatingImg(Message message, bool b50 = false)

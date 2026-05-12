@@ -19,63 +19,35 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
     public override async Task<ChunithmRating> GetRating(Message message)
     {
         var aimeId = GetAimeId();
-
         var scores = await GetScores(aimeId);
 
-        var b30 = scores.Values.OrderByDescending(x => x.Rating).Take(30).ToList();
+        var songList = GetSongList();
+        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
 
-        var recentRep = await $"{ServerUri}ChuniServlet/GetUserRecentRatingApi".PostJsonAsync(new
-        {
-            userId = $"{aimeId}"
-        });
+        var newest = songList
+            .Select(s => s.Version)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderDescending(StringComparer.OrdinalIgnoreCase)
+            .Take(1)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var recentData = await recentRep.GetJsonAsync();
-
-        var res = new List<RecentData>();
-
-        foreach (var data in recentData.userRecentRatingList)
-        {
-            res.Add(new RecentData(int.Parse(data.musicId), int.Parse(data.difficultId), int.Parse(data.score)));
-        }
-
-        var recent = new List<ChunithmScore>();
-
-        foreach (var data in res)
-        {
-            var exist = SongDb.SongIndexer.TryGetValue(data.Id, out var song);
-
-            if (!exist || song == null) continue;
-
-            recent.Add(new ChunithmScore
-            {
-                Id          = data.Id,
-                Achievement = data.Score,
-                Fc          = "",
-                Level       = song.Levels[data.Index],
-                LevelIndex  = data.Index,
-                LevelLabel  = song.DiffNames[data.Index],
-                Title       = song.Title,
-                Constant    = (decimal)song.Constants[data.Index]
-            });
-        }
-
-        var r10 = recent.OrderByDescending(x => x.Rating).Take(10).ToList();
+        var div = scores.Values
+            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .ToList();
 
         var userData = await (await $"{ServerUri}ChuniServlet/GetUserDataApi".PostJsonAsync(new
         {
             userId = $"{aimeId}"
         })).GetJsonAsync();
 
-        string username = userData.userData.userName;
-
         return new ChunithmRating
         {
-            Username   = username,
+            Username   = (string)userData.userData.userName,
             DataSource = shortname,
             Records = new Records
             {
-                B30    = b30.ToArray(),
-                Recent = r10.ToArray()
+                Best = div.FirstOrDefault(x => !x.Key)?.OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
+                Recent = div.FirstOrDefault(x => x.Key)?.OrderByDescending(x => x.Rating).Take(20).ToArray() ?? []
             }
         };
     }

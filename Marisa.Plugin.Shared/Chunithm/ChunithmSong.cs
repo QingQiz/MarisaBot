@@ -26,6 +26,17 @@ public partial class ChunithmSong : Song
     private readonly List<string> _bpms = [];
     private List<List<double>>? _bpmList;
 
+    public void AddDifficulty(string level, double constant, string charter, string diffName, long maxCombo, string chartName, string bpm)
+    {
+        Levels.Add(level);
+        Constants.Add(constant);
+        Charters.Add(charter);
+        DiffNames.Add(diffName);
+        MaxCombo.Add(maxCombo);
+        ChartName.Add(chartName);
+        _bpms.Add(bpm);
+    }
+
     public List<List<double>> BpmList => _bpmList ??= _bpms
         .Select(x => DoubleRegex().Matches(x))
         .Select(m => m

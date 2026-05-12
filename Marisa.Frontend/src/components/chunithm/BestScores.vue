@@ -25,8 +25,8 @@ function GetB30Ra() {
     return (best.value.records.b30 as []).reduce((ra, cur: { ra: number }) => ra + cur.ra, 0) / 30;
 }
 
-function GetR10Ra() {
-    return (best.value.records.r10 as []).reduce((ra, cur: { ra: number }) => ra + cur.ra, 0) / (b50.value ? 20 : 10);
+function GetN20Ra() {
+    return (best.value.records.r10 as []).reduce((ra, cur: { ra: number }) => ra + cur.ra, 0) / 20;
 }
 </script>
 
@@ -58,10 +58,10 @@ function GetR10Ra() {
                                         <div class="my-1 w-[15px] bg-gray-500"></div>
                                         <div class="text-[33px]">B30: {{ ToFixedNoRound(GetB30Ra(), 2) }}</div>
                                     </div>
-                                    <div class="flex gap-2 font-console">
+                                    <div class="flex gap-2 font-console" v-if="b50">
                                         <div class="my-1 w-[15px] bg-gray-500"></div>
                                         <div class="text-[33px]">
-                                            {{ b50 ? "N20" : "R10" }}: {{ ToFixedNoRound(GetR10Ra(), 2) }}
+                                            {{ b50 ? "N20" : "R10" }}: {{ ToFixedNoRound(GetN20Ra(), 2) }}
                                         </div>
                                     </div>
                                 </div>
@@ -73,17 +73,21 @@ function GetR10Ra() {
                     </div>
                 </div>
             </div>
+
             <div class="grid grid-cols-5-chu card-gap">
                 <score-card v-for="(data, i) in best.records.b30" v-bind:key="i" :score="data"/>
             </div>
-            <div class="flex w-full justify-between">
-                <div class="splitter-img-box" v-for="i in shuffle(range(1, 17))">
-                    <img :src="`/assets/chunithm/pic/ch_${i}.png`" class="-scale-x-100" alt="分割线">
+
+            <template v-if="b50">
+                <div class="flex w-full justify-between">
+                    <div class="splitter-img-box" v-for="i in shuffle(range(1, 17))">
+                        <img :src="`/assets/chunithm/pic/ch_${i}.png`" class="-scale-x-100" alt="分割线">
+                    </div>
                 </div>
-            </div>
-            <div class="grid grid-cols-5-chu card-gap">
-                <score-card v-for="(data, i) in best.records.r10" v-bind:key="i" :score="data"/>
-            </div>
+                <div class="grid grid-cols-5-chu card-gap">
+                    <score-card v-for="(data, i) in best.records.r10" v-bind:key="i" :score="data"/>
+                </div>
+            </template>
         </div>
     </template>
 </template>
