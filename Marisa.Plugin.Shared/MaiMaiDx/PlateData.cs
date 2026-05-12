@@ -82,15 +82,19 @@ public static class PlateData
         _     => 0,
     };
 
-    /// <summary>Fs 字段顺序值。0=空，5=fdxp(FDX+)。sync 是 maimai でらっくす 早期成就，比 fs 还低。</summary>
+    /// <summary>
+    ///     Fs 字段顺序值。0=空，5=FDX+。sync 是 maimai でらっくす 早期成就，比 fs 还低。
+    ///     diving-fish API 用 "fsd"/"fsdp" (FDX/FDX+) 命名；AllNet 内部也是 fsd/fsdp；
+    ///     旧别名 "fdx"/"fdxp" 仍接受以防 fixture / 第三方源用旧命名。
+    /// </summary>
     public static int FsLevel(string? fs) => fs switch
     {
-        "sync" => 1,
-        "fs"   => 2,
-        "fsp"  => 3,
-        "fdx"  => 4,
-        "fdxp" => 5,
-        _      => 0,
+        "sync"          => 1,
+        "fs"            => 2,
+        "fsp"           => 3,
+        "fsd" or "fdx"  => 4,
+        "fsdp" or "fdxp" => 5,
+        _               => 0,
     };
 
     /// <summary>给定 score 字段值，返回该 score 在指定维度上的 ordinal。</summary>

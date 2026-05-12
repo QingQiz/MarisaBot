@@ -39,6 +39,17 @@ axios.all([
 
 const allCharts = computed(() => grouped.value.flatMap(g => g.x))
 
+// 标题字号按字符数自适应 — 防止长标题被 stats-bar 挤出而截断
+// grid 总宽 1240px - stats-bar 720px - gap 30px = 490px 给 title
+const titleFontSize = computed(() => {
+    const n = title.value?.length ?? 0
+    if (n <= 5)  return '72px'   // 5×72=360
+    if (n <= 7)  return '60px'   // 7×60=420
+    if (n <= 9)  return '50px'   // 9×50=450
+    if (n <= 11) return '42px'   // 11×42=462
+    return '36px'                // 12×36=432
+})
+
 function getScore(songId: number, levelIdx: number): Score | undefined {
     return scores.value[`(${songId}, ${levelIdx})`]
 }
@@ -63,7 +74,8 @@ function fcOrdinal(fc: string): number {
     return ({fc: 1, fcp: 2, ap: 3, app: 4} as Record<string, number>)[fc] ?? 0
 }
 function fsOrdinal(fs: string): number {
-    return ({sync: 1, fs: 2, fsp: 3, fdx: 4, fdxp: 5} as Record<string, number>)[fs] ?? 0
+    // diving-fish 用 fsd/fsdp (FDX/FDX+)；fdx/fdxp 是旧别名，并存接受
+    return ({sync: 1, fs: 2, fsp: 3, fsd: 4, fdx: 4, fsdp: 5, fdxp: 5} as Record<string, number>)[fs] ?? 0
 }
 
 function isPassed(songId: number, levelIdx: number): boolean {
@@ -111,7 +123,13 @@ function getMarker(score: Score): string | null {
     switch (plate.value.Dim) {
         case 'Achievement': return `/assets/maimai/pic/rank_${score.rate}.png`
         case 'Fc':          return score.fc ? `/assets/maimai/pic/icon_${score.fc}.png` : null
-        case 'Fs':          return score.fs ? `/assets/maimai/pic/icon_${score.fs}.png` : null
+        case 'Fs': {
+            if (!score.fs) return null
+            // diving-fish 返回 fsd/fsdp（老命名），但素材里 icon_fsd.png 印的是旧 FSD/FSD+ 字。
+            // 现行游戏内称为 FDX/FDX+，repo 里 icon_fdx.png / icon_fdxp.png 是新版。
+            const fsNorm = score.fs === 'fsd' ? 'fdx' : score.fs === 'fsdp' ? 'fdxp' : score.fs
+            return `/assets/maimai/pic/icon_${fsNorm}.png`
+        }
     }
 }
 
@@ -132,11 +150,11 @@ function groupKeyColor(g: GroupedSong): string {
 }
 
 function groupMinRank(g: GroupedSong): string | null {
-    if (plate.value) return null
+    // 该组已打的歌中最低 ach 对应的 rank icon；跳过未打的歌
     let minA = Infinity
     for (const s of g.x) {
         const sc = getScore(s.Item3.Id, s.Item2)
-        if (!sc) return null
+        if (!sc) continue
         if (sc.achievements < minA) minA = sc.achievements
     }
     if (!isFinite(minA)) return null
@@ -155,7 +173,7 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
 <template>
     <div class="mai-summary" v-if="data_fetched">
         <div class="title-row">
-            <span class="title">{{ title }}</span>
+            <span class="title" :style="{fontSize: titleFontSize}">{{ title }}</span>
             <StatsBar :charts="allCharts" :scores="scores" :detail="true" class="title-stats"/>
         </div>
         <div class="groups">

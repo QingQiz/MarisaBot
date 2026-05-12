@@ -8,7 +8,9 @@ const props = defineProps({
     detail: { type: Boolean, default: false },
 })
 
-type RankKey = 'sssp' | 'sss' | 'ssp' | 'ss' | 'oth' | 'np'
+// rank 顶档加 'app'（fc=='app' 等价 ach 满分 101 — 与下层 fc 顶档对齐，amber-200 同色，
+// 但 detail label 上层不写 AP+ 字样，只在下层 fc detail 写 — 朋友 review #2 的诉求）
+type RankKey = 'app' | 'sssp' | 'sss' | 'ssp' | 'ss' | 'oth' | 'np'
 type FcKey   = 'app' | 'ap' | 'fcp' | 'fc' | 'oth' | 'np'
 
 function getScore(songId: number, levelIdx: number): Score | undefined {
@@ -17,6 +19,7 @@ function getScore(songId: number, levelIdx: number): Score | undefined {
 
 function rankKey(score: Score | undefined): RankKey {
     if (!score) return 'np'
+    if (score.fc === 'app') return 'app'   // ap+ 等价满分 → 上条最顶档 segment
     const a = score.achievements
     if (a >= 100.5) return 'sssp'
     if (a >= 100)   return 'sss'
@@ -37,7 +40,7 @@ function fcKey(score: Score | undefined): FcKey {
 }
 
 const rankStat = computed(() => {
-    const s = {sssp: 0, sss: 0, ssp: 0, ss: 0, oth: 0, np: 0, total: 0}
+    const s = {app: 0, sssp: 0, sss: 0, ssp: 0, ss: 0, oth: 0, np: 0, total: 0}
     for (const c of props.charts) {
         s[rankKey(getScore(c.Item3.Id, c.Item2))]++
         s.total++
@@ -60,7 +63,8 @@ function pct(n: number, total: number): string {
 
 const overallPct = computed(() => {
     const r = rankStat.value
-    const done = r.sssp + r.sss
+    // 完成率 = SSS 及以上 (含 app/sssp/sss)；SS+ 以下不算
+    const done = r.app + r.sssp + r.sss
     return r.total ? (done / r.total * 100).toFixed(2) + '%' : '0.00%'
 })
 </script>
@@ -68,8 +72,9 @@ const overallPct = computed(() => {
 <template>
     <div class="stats-bar" :class="{detail}">
         <div v-if="detail" class="detail-row">
+            <!-- 上层 detail 不写 AP+ (字样只在下层 fc detail) — SSS+ 段含 app+sssp 合计 -->
             <pre class="t-all">ALL:{{ rankStat.total }}</pre>
-            <pre class="t-sssp">SSS+:{{ rankStat.sssp }}</pre>
+            <pre class="t-sssp">SSS+:{{ rankStat.app + rankStat.sssp }}</pre>
             <pre class="t-sss">SSS:{{ rankStat.sss }}</pre>
             <pre class="t-ssp">SS+:{{ rankStat.ssp }}</pre>
             <pre class="t-ss">SS:{{ rankStat.ss }}</pre>
@@ -79,6 +84,7 @@ const overallPct = computed(() => {
 
         <div class="bars">
             <div class="bar">
+                <div class="seg app"  :style="{width: pct(rankStat.app,  rankStat.total)}"></div>
                 <div class="seg sssp" :style="{width: pct(rankStat.sssp, rankStat.total)}"></div>
                 <div class="seg sss"  :style="{width: pct(rankStat.sss,  rankStat.total)}"></div>
                 <div class="seg ssp"  :style="{width: pct(rankStat.ssp,  rankStat.total)}"></div>

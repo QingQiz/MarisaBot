@@ -26,29 +26,35 @@
     max-width: none;
 }
 
+/* title-row / group-title 宽度等于 grid 内容宽 (8 cell × 120 + 7 gap × 40 = 1240px)，
+   stats-bar 永远靠右贴 grid 右边界，标题靠左 + flex shrink 处理过长情况。
+   不再让 stats-bar 跟着标题走，避免标题长就把统计条推出 grid 右边界。 */
 .title-row {
     display: flex;
     align-items: center;
     gap: 30px;
     margin-bottom: 20px;
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap));
 }
 
 .title {
-    font-size: 72px;
+    /* font-size 由 JS computed titleFontSize 按字符数自适应 */
     font-weight: bold;
-    line-height: 1;
+    line-height: 1.2;          /* 1 太紧，配合 overflow:hidden 会把 CJK descender 切掉 */
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-.title-progress {
-    font-size: 36px;
-    font-weight: bold;
-    color: #555;
+.title-stats {
+    flex: 0 0 720px;         /* 固定大条宽度 720px，永远贴 grid 右边界（留出空间给长标题） */
 }
 
 .groups {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 50px;
 }
 
 .group {
@@ -63,21 +69,26 @@
     line-height: 1;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 6px;
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap));
+    position: relative;       /* 给 .min-rank-center 提供 absolute 锚点 */
 }
 
 .min-rank {
     height: 50px;
-}
-
-.title-stats {
-    margin-left: 30px;
-    width: 1100px;
+    /* push 到 stats-bar 左边界外，跟 stats-bar 隔 group-title 的 gap (6px) */
+    margin-left: auto;
 }
 
 .group-stats {
     margin-left: auto;
-    width: 380px;
+    flex: 0 0 380px;         /* 固定小条宽度 380px，靠右对齐 grid 右边界 */
+}
+
+/* 当 .min-rank (layout=left) 存在时，它已经 margin-left:auto 推到右贴 stats-bar；
+   stats-bar 不再 auto 否则会跟 min-rank 平分剩余空间导致缝隙变大 */
+.min-rank ~ .group-stats {
+    margin-left: 0;
 }
 
 .row {
