@@ -146,11 +146,11 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
         return id.Id;
     }
 
-    public override async Task BackgroundService(CancellationToken cancellationToken)
+    public override Task BackgroundService(CancellationToken cancellationToken)
     {
         // 1200/minute, with burst capability of up to 200 beyond that
         // > 60/minute, you should probably give peppy a yell
-        return;
+        return Task.CompletedTask;
         /*
         try
         {

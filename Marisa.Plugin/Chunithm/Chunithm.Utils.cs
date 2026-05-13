@@ -35,13 +35,13 @@ public partial class Chunithm
         }
     }
 
-    private async Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
+    private Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
     {
         // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查。
         // NOTE Louis也能用用户名查，但现在还是默认水鱼吧
         if (allowUsername && !message.Command.IsWhiteSpace())
         {
-            return GetDataFetcher("DivingFish", null);
+            return Task.FromResult(GetDataFetcher("DivingFish", null));
         }
 
         var qq = message.Sender.Id;
@@ -56,9 +56,9 @@ public partial class Chunithm
 
         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
-        return bind == null
+        return Task.FromResult(bind == null
             ? GetDataFetcher("DivingFish", null)
-            : GetDataFetcher(bind.ServerName, bind.AccessCode);
+            : GetDataFetcher(bind.ServerName, bind.AccessCode));
     }
 
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)

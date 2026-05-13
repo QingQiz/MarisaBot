@@ -176,7 +176,7 @@ public static class MaiMaiDraw
         ctx.Put("GroupedSongs", groupedSong.Select(g => new { g.Key, x = g.ToArray() }).ToArray());
         ctx.Put("Scores", scores);
         ctx.Put("Title", title);
-        ctx.Put("Plate", null as object);
+        ctx.Put("Plate", null);
         return await WebApi.MaiMaiSummary(ctx.Id);
     }
 
@@ -190,11 +190,27 @@ public static class MaiMaiDraw
         IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores,
         string title)
     {
-        // 按 Level 字符串分组（"15+"/"15"/"14+"...），跨度内按定数降序。
+        // 分组策略：
+        // - Level selector (输入 "14" / "14+")：按定数 F1 字符串分组（"14.6" / "14.5" / ... / "14.0"），
+        //   因为整张表都是同一 lv label，再按 label 分组等于一个大 group，没有可读性。
+        // - 其他 selector（版本/谱师/类别/作曲家/定数等）：按 lv label 分组（"15+" / "15" / "14+" / ...），
+        //   跨多 lv label 时分块呈现。
+        var isLevelSelector = query.Selector is PlateData.Selector.Level;
+
+        string GroupKey((double Constant, int LevelIdx, MaiMaiSong Song) t) =>
+            isLevelSelector
+                ? t.Constant.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)
+                : t.Song.Levels[t.LevelIdx];
+
+        int GroupSortKey(string key) =>
+            isLevelSelector
+                ? (int)Math.Round(double.Parse(key, System.Globalization.CultureInfo.InvariantCulture) * 10)
+                : LevelSortKey(key);
+
         var grouped = pairs
             .OrderByDescending(t => t.Constant)
-            .GroupBy(t => t.Song.Levels[t.LevelIdx])
-            .OrderByDescending(g => LevelSortKey(g.Key))
+            .GroupBy(GroupKey)
+            .OrderByDescending(g => GroupSortKey(g.Key))
             .Select(g => new { Key = g.Key, x = g.ToArray() })
             .ToArray();
 

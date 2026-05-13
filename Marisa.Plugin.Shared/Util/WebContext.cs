@@ -37,16 +37,17 @@ public class WebContext
         ContextPool.TryAdd(Id, new ConcurrentDictionary<string, object>());
     }
 
-    public void Put(string name, object obj)
+    public void Put(string name, object? obj)
     {
         if (ContextPool.TryGetValue(Id, out var context))
         {
-            context.TryAdd(name, obj);
+            // 允许显式存 null（前端 axios.get 用统一管线取值，"该字段为空" 的语义需要存条目而不是不存）
+            context.TryAdd(name, obj!);
         }
 
         if (!DumpOnPut) return;
 
-        Dump(Id, name, obj);
+        Dump(Id, name, obj!);
         Console.WriteLine($"Dump context {Id} to {Path.Join(GetHistoryPath(), $"{name}.{Id}")}");
     }
 
