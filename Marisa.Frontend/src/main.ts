@@ -14,6 +14,7 @@ import Help from "@/components/help/Help.vue";
 import OsuRecommend from "@/components/osu/OsuRecommend.vue";
 import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
+import MaiMaiSummary from "@/components/maimai/Summary.vue";
 import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
 import OverPowerAll from "@/components/chunithm/OverPowerAll.vue";
 import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
@@ -25,6 +26,7 @@ const routes = [
     {path: '/help', component: Help},
     {path: '/maimai/best', component: MaiBestScores},
     {path: '/maimai/recommend', component: Recommend},
+    {path: '/maimai/summary', component: MaiMaiSummary},
     {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},

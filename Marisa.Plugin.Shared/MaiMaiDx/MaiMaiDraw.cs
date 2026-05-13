@@ -164,194 +164,59 @@ public static class MaiMaiDraw
     }
 
     /// <summary>
-    ///     画汇总表
+    ///     画汇总表（前端渲染）。把 grouped songs + scores 投到 WebContext，让
+    ///     Marisa.Frontend 的 /maimai/summary 页面用 Puppeteer 截图。
     /// </summary>
-    public static Image? DrawGroupedSong(
+    public static async Task<string> DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, MaiMaiSong Song)>> groupedSong,
-        IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores)
+        IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores,
+        string title = "SUMMARY")
     {
-        const int column      = 8;
-        const int height      = 120;
-        const int padding     = 40;
-        const int borderWidth = 10;
+        var ctx = new WebContext();
+        ctx.Put("GroupedSongs", groupedSong.Select(g => new { g.Key, x = g.ToArray() }).ToArray());
+        ctx.Put("Scores", scores);
+        ctx.Put("Title", title);
+        ctx.Put("Plate", null as object);
+        return await WebApi.MaiMaiSummary(ctx.Id);
+    }
 
-        var consolas = ImageDraw.GetFontFamily("Consolas", "Segoe UI", "Arial Unicode MS Font");
+    /// <summary>
+    ///     画完成表（plate progress）。复用 /maimai/summary 前端页面 + plate 模式：
+    ///     额外传 query 信息（dim/level/displayName/levelIdx），前端按维度筛达成 + 叠印章 + 居中 marker。
+    /// </summary>
+    public static async Task<string> DrawPlateProgress(
+        PlateData.Query query,
+        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> pairs,
+        IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores,
+        string title)
+    {
+        // 按 Level 字符串分组（"15+"/"15"/"14+"...），跨度内按定数降序。
+        var grouped = pairs
+            .OrderByDescending(t => t.Constant)
+            .GroupBy(t => t.Song.Levels[t.LevelIdx])
+            .OrderByDescending(g => LevelSortKey(g.Key))
+            .Select(g => new { Key = g.Key, x = g.ToArray() })
+            .ToArray();
 
-        var imList = new List<Image>();
-
-        var borderSss = ResourceManager.GetImage("border_SSS.png");
-        var borderSs  = ResourceManager.GetImage("border_SS.png");
-        var borderS   = ResourceManager.GetImage("border_S.png");
-
-        var rankImages = scores.Values
-            .Select(x => x.Rank.ToLower())
-            .Distinct()
-            .ToDictionary(x => x, x => ResourceManager.GetImage($"rank_{x}.png").ResizeY(60));
-
-        foreach (var group in groupedSong)
+        var ctx = new WebContext();
+        ctx.Put("GroupedSongs", grouped);
+        ctx.Put("Scores", scores);
+        ctx.Put("Title", title);
+        ctx.Put("Plate", new
         {
-            var key = group.Key;
-            var value = group
-                .Select(x => (x.LevelIdx, x.Song))
-                // 先按白紫红黄绿排
-                .OrderByDescending(song => song.LevelIdx)
-                // 再按 ID 排
-                .ThenByDescending(song => song.Song.Id)
-                .ToList();
+            Dim         = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs"
+            Level       = query.Threshold.Level,
+            DisplayName = query.Threshold.DisplayName,
+        });
+        return await WebApi.MaiMaiSummary(ctx.Id);
+    }
 
-            if (value.Count == 0) continue;
-
-            var rows = (value.Count + column - 1) / column;
-            var cols = rows > 1 ? column : value.Count;
-
-            var im = new Image<Rgba32>(cols * (height + padding) + padding, rows * (height + padding) + padding);
-
-            for (var j = 0; j < rows; j++)
-            {
-                for (var i = 0; i < cols; i++)
-                {
-                    var idx = j * cols + i;
-                    if (idx >= value.Count) goto _break;
-
-                    var (levelIdx, song) = value[idx];
-
-                    var x     = (i + 1) * padding + height * i;
-                    var y     = (j + 1) * padding + height * j;
-                    var cover = ResourceManager.GetCover(song.Id).Resize(height, height);
-
-                    im.DrawImage(cover, x, y);
-
-                    var polygon = new Polygon(new LinearLineSegment(new PointF[]
-                    {
-                        new Point(x, y),
-                        new Point(x + 12, y),
-                        new Point(x, y + 12)
-                    }));
-
-                    // 难度指示器（小三角）
-                    im.Mutate(ctx => ctx.Fill(MaiMaiSong.LevelColor[levelIdx], polygon));
-
-                    // 跳过没有成绩的歌
-                    if (!scores.ContainsKey((song.Id, levelIdx))) continue;
-
-                    var score = scores[(song.Id, levelIdx)];
-
-                    switch (score.Achievement)
-                    {
-                        // 边框
-                        case >= 100:
-                            im.DrawImage(borderSss, x - borderWidth, y - borderWidth);
-                            break;
-                        case >= 99:
-                            im.DrawImage(borderSs, x - borderWidth, y - borderWidth);
-                            break;
-                        case >= 97:
-                            im.DrawImage(borderS, x - borderWidth, y - borderWidth);
-                            break;
-                    }
-
-                    var achievement = score.Achievement.ToString("F4").Split('.');
-
-                    var font = new Font(consolas, 35, FontStyle.Bold | FontStyle.Italic);
-
-                    im.Mutate(ctx => ctx
-                        .DrawLine(Color.Black, 40, new PointF(x, y + height - 20), new PointF(x + height, y + height - 20))
-                    );
-
-                    var ach1 = (score.Achievement < 100 ? "0" : "") + achievement[0];
-
-                    var fontColor = score.Fc switch
-                    {
-                        "fc"  => Color.LimeGreen,
-                        "fcp" => Color.LawnGreen,
-                        "ap"  => Color.Goldenrod,
-                        "app" => Color.Gold,
-                        _     => Color.White
-                    };
-                    // 达成率 整数部分
-                    im.DrawText(ach1, font, fontColor, x + 2, y + height - 35);
-
-                    font = new Font(consolas, 22, FontStyle.Bold | FontStyle.Italic);
-
-                    // 达成率 小数部分 
-                    im.DrawText("." + achievement[1], font, fontColor, x + 57, y + height - 26);
-
-                    // rank 标志 (SSS+, SSS,...)
-                    var rank = rankImages[score.Rank.ToLower()];
-
-                    im.DrawImage(rank, x + (height - rank.Width) / 2, y + (height - rank.Height - 30) / 2);
-                }
-            }
-
-            _break: ;
-
-            {
-                var bg = new Image<Rgba32>(im.Width, im.Height + 70);
-
-                var font = new Font(consolas, 45, FontStyle.Bold | FontStyle.Italic);
-
-                var groupScores = group
-                    .Select(tuple => scores.ContainsKey((tuple.Song.Id, tuple.LevelIdx)) ? scores[(tuple.Song.Id, tuple.LevelIdx)] : null)
-                    .ToList();
-
-                // 根据 ap 和 fc 的状态确定 Key 的颜色
-                var minFc = groupScores.Select(s => (s?.Fc ?? "") switch
-                {
-                    "fc"  => 1,
-                    "fcp" => 2,
-                    "ap"  => 3,
-                    "app" => 4,
-                    _     => 0
-                }).Min();
-
-                var fontColor = minFc switch
-                {
-                    1 => Color.LimeGreen,
-                    2 => Color.LawnGreen,
-                    3 => Color.Goldenrod,
-                    4 => Color.Gold,
-                    _ => Color.Black
-                };
-
-                bg.DrawText(key, font, fontColor, padding - borderWidth, padding);
-
-                var measure = key.Measure(font);
-
-                // 如果全 sss/ss/s 则标记出来
-                var minAch = groupScores.Min(x => x?.Achievement ?? 0);
-
-                var imgRank = minAch > 0 ? rankImages[SongScore.CalcRank(minAch).ToLower()] : null;
-
-                if (imgRank != null)
-                {
-                    bg.DrawImage(imgRank, padding - borderWidth + (int)measure.Width, padding / 2);
-                }
-
-                bg.DrawImage(im, 0, 70);
-
-                imList.Add(bg);
-            }
-
-            if (imList.Count == 0)
-            {
-                return null;
-            }
-        }
-
-        {
-            var res = new Image<Rgba32>(imList.Max(im => im.Width), imList.Sum(im => im.Height));
-
-            res.Clear(Color.White);
-
-            var y = 0;
-            foreach (var im in imList)
-            {
-                res.DrawImage(im, 0, y);
-                y += im.Height;
-            }
-
-            return res;
-        }
+    /// <summary>把 maimai 难度字符串排序成整数（"15"=30, "15+"=31, "14"=28, "14+"=29 ...）。</summary>
+    private static int LevelSortKey(string lv)
+    {
+        var plus    = lv.EndsWith('+');
+        var numPart = plus ? lv[..^1] : lv;
+        return int.TryParse(numPart, out var n) ? n * 2 + (plus ? 1 : 0) : 0;
     }
 
     /// <summary>
