@@ -150,11 +150,13 @@ function groupKeyColor(g: GroupedSong): string {
 }
 
 function groupMinRank(g: GroupedSong): string | null {
-    // 该组已打的歌中最低 ach 对应的 rank icon；跳过未打的歌
+    // 该组所有歌中最低 ach 对应的 rank icon。
+    // 任何一首未打过 (np / scores 字典里没条目) → 整组不显示 min-rank（朋友诉求：组内必须全打过才有意义）。
+    // 打过但 ach=0 仍算入（其 rank=d，min 会落到 d）。
     let minA = Infinity
     for (const s of g.x) {
         const sc = getScore(s.Item3.Id, s.Item2)
-        if (!sc) continue
+        if (!sc) return null
         if (sc.achievements < minA) minA = sc.achievements
     }
     if (!isFinite(minA)) return null
