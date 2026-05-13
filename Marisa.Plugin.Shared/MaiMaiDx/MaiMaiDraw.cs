@@ -176,7 +176,7 @@ public static class MaiMaiDraw
         ctx.Put("GroupedSongs", groupedSong.Select(g => new { g.Key, x = g.ToArray() }).ToArray());
         ctx.Put("Scores", scores);
         ctx.Put("Title", title);
-        ctx.Put("Plate", null as object);
+        ctx.Put("Plate", null);
         return await WebApi.MaiMaiSummary(ctx.Id);
     }
 

@@ -13,7 +13,7 @@ public class BlackList : MarisaPluginBase
     private static bool _cacheInitialized;
 
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.AlwaysTrueTrigger))]
-    private static async Task<MarisaPluginTaskState> Handler(Message message)
+    private static Task<MarisaPluginTaskState> Handler(Message message)
     {
         var u = message.Sender.Id;
 
@@ -28,9 +28,9 @@ public class BlackList : MarisaPluginBase
             }
         }
 
-        if (Cache.Contains(u)) return MarisaPluginTaskState.CompletedTask;
+        if (Cache.Contains(u)) return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
-        return MarisaPluginTaskState.NoResponse; // 插件不处理这条消息，等于不ban
+        return Task.FromResult(MarisaPluginTaskState.NoResponse); // 插件不处理这条消息，等于不ban
     }
 
     [MarisaPluginCommand(":ban")]
