@@ -26,15 +26,16 @@
     max-width: none;
 }
 
-/* title-row / group-title 宽度等于 grid 内容宽 (8 cell × 120 + 7 gap × 40 = 1240px)，
-   stats-bar 永远靠右贴 grid 右边界，标题靠左 + flex shrink 处理过长情况。
-   不再让 stats-bar 跟着标题走，避免标题长就把统计条推出 grid 右边界。 */
+/* title-row / group-title 宽度 = grid 内容宽 + border-overflow (8 cell × 120 + 7 gap × 40 + 10 = 1250px)，
+   让 stats-bar 右沿对齐"带边框"的 grid 右边界 (cell 8 的 .border-img 比 cell 右沿外突出 10px)；
+   左沿仍贴 padding 内沿，因为标题靠左对齐看起来比 -10 偏移自然。
+   stats-bar 永远靠右贴这条带边框右边界，标题靠左 + flex shrink 处理过长情况。 */
 .title-row {
     display: flex;
     align-items: center;
     gap: 30px;
     margin-bottom: 20px;
-    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap));
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
 }
 
 .title {
@@ -70,7 +71,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap));
+    /* +border-overflow 与 .title-row 同理，让 group-stats 右沿对齐带边框 grid 右边界 */
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
     position: relative;       /* 给 .min-rank-center 提供 absolute 锚点 */
 }
 

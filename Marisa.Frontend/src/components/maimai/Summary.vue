@@ -40,7 +40,7 @@ axios.all([
 const allCharts = computed(() => grouped.value.flatMap(g => g.x))
 
 // 标题字号按字符数自适应 — 防止长标题被 stats-bar 挤出而截断
-// grid 总宽 1240px - stats-bar 720px - gap 30px = 490px 给 title
+// title-row 总宽 1250px (grid 1240 + border-overflow 10) - stats-bar 720px - gap 30px = 500px 给 title
 const titleFontSize = computed(() => {
     const n = title.value?.length ?? 0
     if (n <= 5)  return '72px'   // 5×72=360
