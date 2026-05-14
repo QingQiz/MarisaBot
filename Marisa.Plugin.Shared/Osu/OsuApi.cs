@@ -210,25 +210,85 @@ public static partial class OsuApi
     private static Func<long, string> BeatmapsetPath => beatmapsetId =>
         Path.Join(OsuDrawerCommon.TempPath, "beatmap", beatmapsetId.ToString());
 
-    // 从 sayobot 镜像下载 beatmap
+    // 从多个镜像依次尝试下载谱面，全部失败时抛出异常
     public static async Task<string> DownloadBeatmap(long beatmapSetId, string path)
     {
-        return await GetPolicy<FlurlHttpException>("DownloadBeatmap", e => e.StatusCode is not (404 or 502), 3).ExecuteAsync(
-            async () => await $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapSetId}"
-                .WithHeader("authority", "dl.sayobot.cn")
-                .WithHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
-                .WithHeader("accept-language", "zh-CN,zh;q=0.9,en-GB;q=0.8,en;q=0.7")
-                .WithHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"")
-                .WithHeader("sec-ch-ua-mobile", "?0")
-                .WithHeader("sec-ch-ua-platform", "\"Windows\"")
-                .WithHeader("sec-fetch-dest", "document")
-                .WithHeader("sec-fetch-mode", "navigate")
-                .WithHeader("sec-fetch-site", "none")
-                .WithHeader("sec-fetch-user", "?1")
-                .WithHeader("upgrade-insecure-requests", "1")
-                .WithHeader("user-agent", FakeUserAgent)
-                .DownloadFileAsync(path, $"{beatmapSetId}.osz")
-        );
+        // 1. osu.direct
+        try
+        {
+            return await AttemptDownload("osu.direct",
+                $"https://osu.direct/api/d/{beatmapSetId}", beatmapSetId, path,
+                shouldRetry: e => e.StatusCode is null);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn($"osu.direct failed: {e.Message}");
+        }
+
+        // 2. mirror.hinamizawa.ai (级联镜像，内置多源容错)
+        try
+        {
+            return await AttemptDownload("mirror.hinamizawa.ai",
+                $"https://mirror.hinamizawa.ai/api/v1/hinai/d/{beatmapSetId}", beatmapSetId, path,
+                shouldRetry: e => e.StatusCode is null);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn($"mirror.hinamizawa.ai failed: {e.Message}");
+        }
+
+        // 3. mirror.nekoha.moe
+        try
+        {
+            return await AttemptDownload("mirror.nekoha.moe",
+                $"https://mirror.nekoha.moe/api4/download/{beatmapSetId}", beatmapSetId, path,
+                shouldRetry: e => e.StatusCode is null);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn($"mirror.nekoha.moe failed: {e.Message}");
+        }
+
+        // 4. dl.sayobot.cn (最终回退)
+        return await AttemptDownload("dl.sayobot.cn",
+            $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapSetId}", beatmapSetId, path,
+            shouldRetry: e => e.StatusCode is not (404 or 502),
+            extraHeaders: new Dictionary<string, string>
+            {
+                ["authority"] = "dl.sayobot.cn",
+                ["accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                ["accept-language"] = "zh-CN,zh;q=0.9,en-GB;q=0.8,en;q=0.7",
+                ["sec-ch-ua"] = "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"",
+                ["sec-ch-ua-mobile"] = "?0",
+                ["sec-ch-ua-platform"] = "\"Windows\"",
+                ["sec-fetch-dest"] = "document",
+                ["sec-fetch-mode"] = "navigate",
+                ["sec-fetch-site"] = "none",
+                ["sec-fetch-user"] = "?1",
+                ["upgrade-insecure-requests"] = "1",
+            });
+    }
+
+    private static async Task<string> AttemptDownload(string name, string url, long beatmapSetId, string path,
+        Func<FlurlHttpException, bool>? shouldRetry = null, Dictionary<string, string>? extraHeaders = null)
+    {
+        var request = url.WithHeader("user-agent", FakeUserAgent);
+        if (extraHeaders != null)
+        {
+            foreach (var (k, v) in extraHeaders)
+            {
+                request = request.WithHeader(k, v);
+            }
+        }
+
+        if (shouldRetry != null)
+        {
+            return await GetPolicy<FlurlHttpException>(name, shouldRetry, 3).ExecuteAsync(
+                async () => await request.DownloadFileAsync(path, $"{beatmapSetId}.osz")
+            );
+        }
+
+        return await request.DownloadFileAsync(path, $"{beatmapSetId}.osz");
     }
 
     private static string GetBeatmapPathBy(long beatmapsetId, Func<string, bool> condition)
