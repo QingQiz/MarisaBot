@@ -225,7 +225,19 @@ public static partial class OsuApi
             Logger.Warn($"osu.direct failed: {e.Message}");
         }
 
-        // 2. mirror.hinamizawa.ai (级联镜像，内置多源容错)
+        // 2. nerinyan.moe
+        try
+        {
+            return await AttemptDownload("nerinyan.moe",
+                $"https://nerinyan.moe/d/{beatmapSetId}", beatmapSetId, path,
+                shouldRetry: e => e.StatusCode is null);
+        }
+        catch (Exception e)
+        {
+            Logger.Warn($"nerinyan.moe failed: {e.Message}");
+        }
+
+        // 3. mirror.hinamizawa.ai (级联镜像，内置多源容错)
         try
         {
             return await AttemptDownload("mirror.hinamizawa.ai",
@@ -237,7 +249,7 @@ public static partial class OsuApi
             Logger.Warn($"mirror.hinamizawa.ai failed: {e.Message}");
         }
 
-        // 3. mirror.nekoha.moe
+        // 4. mirror.nekoha.moe
         try
         {
             return await AttemptDownload("mirror.nekoha.moe",
@@ -249,7 +261,7 @@ public static partial class OsuApi
             Logger.Warn($"mirror.nekoha.moe failed: {e.Message}");
         }
 
-        // 4. dl.sayobot.cn (最终回退)
+        // 5. dl.sayobot.cn (最终回退)
         return await AttemptDownload("dl.sayobot.cn",
             $"https://dl.sayobot.cn/beatmaps/download/mini/{beatmapSetId}", beatmapSetId, path,
             shouldRetry: e => e.StatusCode is not (404 or 502),
