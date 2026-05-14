@@ -38,6 +38,7 @@ is left unchecked.
 ## Storage
 - Active persistence is Realm in `Marisa.Database`; `Marisa.EntityFrameworkCore` is not part of `Marisa.sln`.
 - Open databases with `BotDbContext.OpenRealm()`. When inserting numeric-keyed objects, allocate IDs with `BotDbContext.NextId<T>(realm)`.
+- When adding, removing, or renaming Realm model properties (any class implementing `IRealmObject`), bump `BotDbContext.cs`'s `SchemaVersion` by 1 so existing databases migrate cleanly.
 
 ## Frontend Assets
 - Frontend is Vue 3 + TypeScript + Vite in `Marisa.Frontend`.

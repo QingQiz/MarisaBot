@@ -9,7 +9,7 @@ public partial class OpenAiUsageRecord : IRealmObject, IHaveId
     public long Id { get; set; }
 
     [Indexed]
-    public string UserId { get; set; }
+    public long UserId { get; set; }
 
     public string Model { get; set; }
 
