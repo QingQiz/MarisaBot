@@ -531,4 +531,36 @@ public class MaiMaiDxPlateDataTest
         Assert.That(err.Kind, Is.EqualTo(PlateData.ErrorKind.ConflictingSelector));
         Assert.That(err.Detail, Is.EqualTo("类别"));
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 宴会場 special-case：宴谱只有 1-2 个低 idx 谱面（没有 MASTER+Re:MASTER），
+    // 默认 LevelIdxes=[3,4] 会全过滤光。Genre("宴会場") + 用户未给难度 → 默认全难度。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("宴会场完成表",   "宴会場")]
+    [TestCase("宴谱完成表",     "宴会場")]
+    public void BanquetGenreDefaultsToAllDifficulties(string raw, string fullName)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Genre>());
+        Assert.That(((PlateData.Selector.Genre)q.Selectors.Single()).FullName, Is.EqualTo(fullName));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}),
+            "宴会場 Genre 用户未给难度时默认应扩为全难度");
+    }
+
+    [Test]
+    public void BanquetGenreExplicitDifficultyKept()
+    {
+        // 用户显式给 BASIC → LevelIdxes 仍是 [0]，不被特殊扩展
+        var q = MustParse("宴会场BASIC完成表");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0}));
+    }
+
+    [Test]
+    public void NonBanquetGenreKeepsDefaultMasterRemaster()
+    {
+        // 其他 Genre（如 V家）默认仍是 [3,4]；只 宴会場 特殊扩展
+        var q = MustParse("V家完成表");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
 }

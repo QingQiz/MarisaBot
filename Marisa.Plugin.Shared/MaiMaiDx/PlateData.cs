@@ -427,6 +427,14 @@ public static class PlateData
             return false;
         }
 
+        // 宴会場 special-case：宴谱（id > 100000）只有 1-2 个低 idx 谱面（没有 MASTER+Re:MASTER），
+        // 用 DefaultLevelIdxes=[3,4] 会把所有 宴会場 songs 过滤光。
+        // 用户未显式指定难度 (diffAt < 0) 且 selector 命中 Genre("宴会場") 时，扩展到全难度。
+        if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
+        {
+            levelIdxes = [0, 1, 2, 3, 4];
+        }
+
         query = new Query(selectors, threshold, levelIdxes);
         return true;
     }
