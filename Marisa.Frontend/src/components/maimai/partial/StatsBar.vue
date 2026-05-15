@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import {computed} from 'vue'
-import type {Score, GroupedSong} from '@/components/maimai/utils/summary_t'
+import type {Score, GroupedSong, PlateInfo} from '@/components/maimai/utils/summary_t'
+import {achievementOrdinal, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
 
 const props = defineProps({
     charts: { type: Array as () => GroupedSong['x'], required: true },
     scores: { type: Object as () => Record<string, Score>, required: true },
     detail: { type: Boolean, default: false },
+    // plate 模式时传入；中央 overlay 完成率按 plate.Dim + plate.Level 动态算。
+    // sum 模式 (null) 时按 SSS 阈值兜底 (与 PR #38 行为一致)。
+    plate:  { type: Object as () => PlateInfo | null, default: null },
 })
 
 // rank 顶档加 'app'（fc=='app' 等价 ach 满分 101 — 与下层 fc 顶档对齐，amber-200 同色，
@@ -62,10 +66,26 @@ function pct(n: number, total: number): string {
 }
 
 const overallPct = computed(() => {
-    const r = rankStat.value
-    // 完成率 = SSS 及以上 (含 app/sssp/sss)；SS+ 以下不算
-    const done = r.app + r.sssp + r.sss
-    return r.total ? (done / r.total * 100).toFixed(2) + '%' : '0.00%'
+    // 中央完成率按命令的阈值维度动态算：
+    // - plate.Dim = Achievement → 按达成率 (achievementOrdinal)
+    // - plate.Dim = Fc          → 按 fc 字段 (fcOrdinal)
+    // - plate.Dim = Fs          → 按 fs 字段 (fsOrdinal)
+    // - sum 模式 (plate = null) → 按 SSS (与 PR #38 兜底一致)
+    const dim       = props.plate?.Dim   ?? 'Achievement'
+    const threshold = props.plate?.Level ?? 12   // 12 = SSS
+    const total = props.charts.length
+    if (!total) return '0.00%'
+
+    let done = 0
+    for (const c of props.charts) {
+        const sc = props.scores[`(${c.Item3.Id}, ${c.Item2})`]
+        if (!sc) continue
+        const lv = dim === 'Achievement' ? achievementOrdinal(sc.achievements)
+                : dim === 'Fc'           ? fcOrdinal(sc.fc)
+                :                          fsOrdinal(sc.fs)
+        if (lv >= threshold) done++
+    }
+    return (done / total * 100).toFixed(2) + '%'
 })
 </script>
 

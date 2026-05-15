@@ -47,7 +47,12 @@ public static class PlateData
         public sealed record Constant(double Value) : Selector(Value.ToString("F1"));
     }
 
-    public sealed record Query(Selector Selector, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
+    /// <summary>
+    ///     完整查询：一组 Selectors（AND 合取——所有 selector 都命中的 chart 才入选）+ 阈值 + 难度。
+    ///     当前 TryParse 阶段返回 Selectors.Count == 1（与历史单 selector 行为等价）；
+    ///     multi-selector 解析在后续 commit 启用。
+    /// </summary>
+    public sealed record Query(IReadOnlyList<Selector> Selectors, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
 
     /// <summary>默认难度：未指定时同时查 MASTER + Re:MASTER。</summary>
     public static readonly IReadOnlyList<int> DefaultLevelIdxes = [3, 4];
@@ -55,7 +60,7 @@ public static class PlateData
     /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
     public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
 
-    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector }
+    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector, ConflictingSelector }
 
     public sealed record ParseError(ErrorKind Kind, string? Detail = null);
 
@@ -319,60 +324,118 @@ public static class PlateData
             return false;
         }
 
-        // 3. 解析 selector：Plate → Genre → Level → Constant → (Charter precise + Artist precise 同时查) → Charter catch-all。
-        //    Level/Constant 是纯数字格式（"13" / "13+" / "13.5"），跟 charter / artist 名不冲突，放靠前优先级。
-        //    Charter / Artist 同时命中时合并为 CharterOrArtist（处理 "rintaro soma" 这种身兼谱师+作曲家的人）。
-        //    Charter catch-all 殿后保留"乱输入也接受 + handler 报 0 首"语义。
-        if (TryResolvePlate(selectorPart, out var plateSel, out var plateErr))
+        // 3. 多 selector 解析：每轮在 workingPart 内找一个"硬" token（Plate / Genre / Constant / Level）
+        //    的 rightmost-longest match，剥掉，加入 selectors 列表。重复直到无新匹配。
+        //    剩下的连续片段当作 Charter / Artist（substring precise → CharterOrArtist union → catch-all）。
+        //    AND 语义：handler 端对每首 chart 用 selectors.All(MatchSelector) 求交集。
+        //
+        //    冲突规则：同类 selector 出现两次（含 Level + Constant 互斥，因为 Constant 隐含确定 Level）
+        //    → ConflictingSelector 错误。
+        var selectors = new List<Selector>();
+        var workingPart = selectorPart;
+
+        while (true)
         {
-            query = new Query(plateSel!, threshold, levelIdxes);
-            return true;
+            // 同一轮内收集 4 种 token 候选，按 (length DESC, start DESC) 取最优。
+            // longest-first 是为了处理像 "宴会场" 的歧义 — "宴" 是 Plate kanji（BUDDiES）
+            // 但 "宴会场" 是 Genre 别名；明确选最长（Genre）。
+            int matchStart = -1, matchLen = 0;
+            Selector? matched = null;
+
+            if (TryFindRightmostPlateInString(workingPart, out var pStart, out var pLen, out var pSel, out var pErr))
+            {
+                if (pLen > matchLen || (pLen == matchLen && pStart > matchStart))
+                { matchStart = pStart; matchLen = pLen; matched = pSel; }
+            }
+            else if (pErr != null)
+            {
+                error = pErr;       // 丸/彩 这种已知不支持，立刻返回
+                return false;
+            }
+
+            if (TryFindRightmostGenreInString(workingPart, out var gStart, out var gLen, out var gSel))
+            {
+                if (gLen > matchLen || (gLen == matchLen && gStart > matchStart))
+                { matchStart = gStart; matchLen = gLen; matched = gSel; }
+            }
+
+            if (TryFindRightmostConstantInString(workingPart, out var cStart, out var cLen, out var cSel))
+            {
+                if (cLen > matchLen || (cLen == matchLen && cStart > matchStart))
+                { matchStart = cStart; matchLen = cLen; matched = cSel; }
+            }
+
+            if (TryFindRightmostLevelInString(workingPart, out var lStart, out var lLen, out var lSel))
+            {
+                if (lLen > matchLen || (lLen == matchLen && lStart > matchStart))
+                { matchStart = lStart; matchLen = lLen; matched = lSel; }
+            }
+
+            if (matchStart < 0) break;
+
+            // 同类冲突检查（Level + Constant 视为同类——Constant 隐含 Level，二者只能给一个）
+            if (matched is Selector.Plate && selectors.OfType<Selector.Plate>().Any())
+            {
+                error = new(ErrorKind.ConflictingSelector, "版本");
+                return false;
+            }
+            if (matched is Selector.Genre && selectors.OfType<Selector.Genre>().Any())
+            {
+                error = new(ErrorKind.ConflictingSelector, "类别");
+                return false;
+            }
+            if (matched is Selector.Level or Selector.Constant
+                && selectors.Any(s => s is Selector.Level or Selector.Constant))
+            {
+                error = new(ErrorKind.ConflictingSelector, "难度或定数");
+                return false;
+            }
+
+            selectors.Add(matched!);
+            workingPart = (workingPart[..matchStart] + workingPart[(matchStart + matchLen)..]).Trim();
         }
-        if (plateErr != null)
+
+        // 剩余连续片段当 Charter / Artist
+        if (workingPart.Length > 0)
         {
-            error = plateErr;  // 丸/彩 这种已知不支持，立刻返回
+            var charterHit = TryResolveCharterPrecise(workingPart, knownCharters, out var charterPreciseSel);
+            var artistHit  = TryResolveArtist(workingPart, knownArtists, out var artistSel);
+
+            if (charterHit && artistHit)
+            {
+                selectors.Add(new Selector.CharterOrArtist(workingPart));
+            }
+            else if (charterHit)
+            {
+                selectors.Add(charterPreciseSel!);
+            }
+            else if (artistHit)
+            {
+                selectors.Add(artistSel!);
+            }
+            else
+            {
+                // catch-all：把剩余部分当 charter 接收，由 handler 在筛选时报 0 首。
+                selectors.Add(new Selector.Charter(workingPart));
+            }
+        }
+
+        if (selectors.Count == 0)
+        {
+            // 理论上不会走到（EmptyQuery 在更早被挡），保险兜底
+            error = new(ErrorKind.UnknownSelector, inner);
             return false;
         }
 
-        if (TryResolveGenre(selectorPart, out var genreSel))
+        // 宴会場 special-case：宴谱（id > 100000）只有 1-2 个低 idx 谱面（没有 MASTER+Re:MASTER），
+        // 用 DefaultLevelIdxes=[3,4] 会把所有 宴会場 songs 过滤光。
+        // 用户未显式指定难度 (diffAt < 0) 且 selector 命中 Genre("宴会場") 时，扩展到全难度。
+        if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
         {
-            query = new Query(genreSel!, threshold, levelIdxes);
-            return true;
+            levelIdxes = [0, 1, 2, 3, 4];
         }
 
-        if (TryResolveLevel(selectorPart, out var levelSel))
-        {
-            query = new Query(levelSel!, threshold, levelIdxes);
-            return true;
-        }
-
-        if (TryResolveConstant(selectorPart, out var constantSel))
-        {
-            query = new Query(constantSel!, threshold, levelIdxes);
-            return true;
-        }
-
-        var charterHit = TryResolveCharterPrecise(selectorPart, knownCharters, out var charterPreciseSel);
-        var artistHit  = TryResolveArtist(selectorPart, knownArtists, out var artistSel);
-
-        if (charterHit && artistHit)
-        {
-            query = new Query(new Selector.CharterOrArtist(selectorPart), threshold, levelIdxes);
-            return true;
-        }
-        if (charterHit)
-        {
-            query = new Query(charterPreciseSel!, threshold, levelIdxes);
-            return true;
-        }
-        if (artistHit)
-        {
-            query = new Query(artistSel!, threshold, levelIdxes);
-            return true;
-        }
-
-        // catch-all：把 selector 当作 charter 接收，由 handler 在筛选时报 0 首。
-        query = new Query(new Selector.Charter(selectorPart), threshold, levelIdxes);
+        query = new Query(selectors, threshold, levelIdxes);
         return true;
     }
 
@@ -526,4 +589,154 @@ public static class PlateData
 
         return false;
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // multi-selector: 在 workingPart 内"任意位置"找一个 token 的 rightmost-longest match。
+    // Plate / Genre 直接走表；Level / Constant 走 regex，并要求两侧不是 ASCII 字母
+    // （避免吃到 charter / artist 名里的偶然数字，如假想 charter "k14"）。
+    // ──────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    ///     找 workingPart 内"最佳"Plate kanji 匹配。优先级 (length DESC, rightmost) —
+    ///     即更长的匹配（带"代"后缀的双字版本）优先；同长度时取靠右的位置。
+    ///     BlockedPlateKanji 命中且比有效 kanji 更靠右时报错。
+    /// </summary>
+    private static bool TryFindRightmostPlateInString(
+        string s, out int start, out int length, out Selector? selector, out ParseError? plateErr)
+    {
+        start = -1; length = 0; selector = null; plateErr = null;
+
+        int bestStart = -1, bestLen = 0;
+        string? bestKanji = null;
+        string[]? bestVersions = null;
+
+        foreach (var (kanji, versions) in PlateVersionMap)
+        {
+            var idx = s.LastIndexOf(kanji, StringComparison.Ordinal);
+            if (idx < 0) continue;
+            // 同位置时优先 "kanji+代"（更长）
+            var withDai = idx + kanji.Length < s.Length && s[idx + kanji.Length] == '代';
+            var len = withDai ? kanji.Length + 1 : kanji.Length;
+            if (len > bestLen || (len == bestLen && idx > bestStart))
+            {
+                bestStart = idx; bestLen = len; bestKanji = kanji; bestVersions = versions;
+            }
+        }
+
+        int blockedStart = -1;
+        string? blockedKanji = null;
+        foreach (var bk in BlockedPlateKanji)
+        {
+            var idx = s.LastIndexOf(bk, StringComparison.Ordinal);
+            if (idx > blockedStart) { blockedStart = idx; blockedKanji = bk; }
+        }
+
+        // 若被屏蔽 kanji 出现得比任何有效 kanji 更右 → 立即报错（避免悄悄走 catch-all）
+        if (blockedStart > bestStart)
+        {
+            plateErr = new(ErrorKind.UnsupportedPlate, blockedKanji!);
+            return false;
+        }
+
+        if (bestStart < 0) return false;
+        start = bestStart; length = bestLen;
+        selector = new Selector.Plate(bestKanji!, bestVersions!);
+        return true;
+    }
+
+    /// <summary>
+    ///     找 workingPart 内"最佳"Genre alias 或全名匹配。优先级 (length DESC, rightmost) —
+    ///     避免 "流行动漫" 被更短的 "动漫" 抢掉位置。
+    /// </summary>
+    private static bool TryFindRightmostGenreInString(
+        string s, out int start, out int length, out Selector? selector)
+    {
+        start = -1; length = 0; selector = null;
+
+        int bestStart = -1, bestLen = 0;
+        Selector? bestSel = null;
+
+        foreach (var (alias, fullName) in GenreAliasMap)
+        {
+            var idx = s.LastIndexOf(alias, StringComparison.Ordinal);
+            if (idx < 0) continue;
+            if (alias.Length > bestLen || (alias.Length == bestLen && idx > bestStart))
+            {
+                bestStart = idx; bestLen = alias.Length;
+                bestSel = new Selector.Genre(fullName, alias);
+            }
+        }
+        foreach (var fullName in GenreAliasMap.Values.Distinct(StringComparer.Ordinal))
+        {
+            var idx = s.LastIndexOf(fullName, StringComparison.Ordinal);
+            if (idx < 0) continue;
+            if (fullName.Length > bestLen || (fullName.Length == bestLen && idx > bestStart))
+            {
+                bestStart = idx; bestLen = fullName.Length;
+                bestSel = new Selector.Genre(fullName, fullName);
+            }
+        }
+
+        if (bestStart < 0) return false;
+        start = bestStart; length = bestLen; selector = bestSel;
+        return true;
+    }
+
+    /// <summary>
+    ///     找 workingPart 内 rightmost Constant（X.Y 格式，1-15.x 范围）。
+    ///     两侧不能是 ASCII 字母 / 数字 / 点号，避免吃到 charter/artist 名里的偶然数字（如 "DECO*27"）。
+    ///     正则 alternation 顺序 (1[0-5]|[1-9]) 优先匹更长以保证 "14" 不被 "1" 吃。
+    /// </summary>
+    private static bool TryFindRightmostConstantInString(
+        string s, out int start, out int length, out Selector? selector)
+    {
+        start = -1; length = 0; selector = null;
+        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(1[0-5]|[1-9])\.\d");
+        for (var i = matches.Count - 1; i >= 0; i--)
+        {
+            var m = matches[i];
+            if (!IsCompleteNumberToken(s, m.Index, m.Length)) continue;
+            if (!double.TryParse(m.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)) continue;
+            start = m.Index; length = m.Length;
+            selector = new Selector.Constant(v);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    ///     找 workingPart 内 rightmost Level（X 或 X+ 格式，1-15）。
+    ///     1）两侧不能是 ASCII 字母 / 数字 / 点号；2）右边不能是 ".X"（避免吃 Constant 前缀）。
+    /// </summary>
+    private static bool TryFindRightmostLevelInString(
+        string s, out int start, out int length, out Selector? selector)
+    {
+        start = -1; length = 0; selector = null;
+        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(1[0-5]|[1-9])\+?");
+        for (var i = matches.Count - 1; i >= 0; i--)
+        {
+            var m = matches[i];
+            if (m.Length == 0) continue;
+            // 不能是 Constant 前缀（紧跟 ".d"），由 IsCompleteNumberToken 的 dot 检查覆盖。
+            if (!IsCompleteNumberToken(s, m.Index, m.Length)) continue;
+            start = m.Index; length = m.Length;
+            selector = new Selector.Level(m.Value);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    ///     match 两侧（前一个 char、后一个 char）都不是 ASCII 字母、数字或点号 —
+    ///     即整个数字 token 完整呈现于该匹配位置，没被更长的数字串截断。
+    /// </summary>
+    private static bool IsCompleteNumberToken(string s, int idx, int len)
+    {
+        var before = idx > 0 ? s[idx - 1] : '\0';
+        var after  = idx + len < s.Length ? s[idx + len] : '\0';
+        return !IsAsciiLetterOrDigitOrDot(before) && !IsAsciiLetterOrDigitOrDot(after);
+    }
+
+    private static bool IsAsciiLetterOrDigitOrDot(char c)
+        => IsAsciiLetter(c) || (c >= '0' && c <= '9') || c == '.';
 }

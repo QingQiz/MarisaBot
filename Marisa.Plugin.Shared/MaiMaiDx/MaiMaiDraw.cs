@@ -195,7 +195,8 @@ public static class MaiMaiDraw
         //   因为整张表都是同一 lv label，再按 label 分组等于一个大 group，没有可读性。
         // - 其他 selector（版本/谱师/类别/作曲家/定数等）：按 lv label 分组（"15+" / "15" / "14+" / ...），
         //   跨多 lv label 时分块呈现。
-        var isLevelSelector = query.Selector is PlateData.Selector.Level;
+        // 任一 selector 是 Level（如 "镜代13+" 含 Level("13+")）就按定数分组。
+        var isLevelSelector = query.Selectors.Any(s => s is PlateData.Selector.Level);
 
         string GroupKey((double Constant, int LevelIdx, MaiMaiSong Song) t) =>
             isLevelSelector

@@ -387,13 +387,14 @@ public partial class MaiMaiDx
         "\n" +
         "完整格式：mai (对象)(成绩)[难度]完成表\n" +
         "\n" +
-        "(对象) — 必填，六选一：\n" +
+        "(对象) — 必填，下面六类中至少给 1 个；也可以同时给多个，要求歌曲全部满足才入选：\n" +
         "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 …（后面加 '代' 也行，例如 熊代）\n" +
         "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
         "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
         "  · 难度 label：13 / 13+ / 14 / 14+ 等（游戏内显示难度）\n" +
         "  · 定数：13.5 / 14.7 等（必含小数点，1 位小数）\n" +
+        "  注：同一类不能给两个（如 '镜代真'/'13+15'/'13+14.6' 会冲突报错）\n" +
         "\n" +
         "(成绩) — 不写就是 '将'（SSS）\n" +
         "  · 将=SSS / 大将=SSS+\n" +
@@ -405,13 +406,16 @@ public partial class MaiMaiDx
         "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
         "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
         "\n" +
-        "其他例子（顺序可以随便换）：\n" +
-        "  mai 真完成表          ← 阈值省略，默认 '将'\n" +
+        "其他例子（字段顺序可以随便换）：\n" +
+        "  mai 真完成表             ← 阈值省略，默认 '将'\n" +
         "  mai 翠楼屋将完成表\n" +
         "  mai HIMEHINA神完成表\n" +
-        "  mai 14+大将完成表     ← 难度 label\n" +
-        "  mai 13.5神完成表      ← 定数\n" +
-        "  mai 紫谱将真完成表    ← 字段顺序随便换";
+        "  mai 14+大将完成表        ← 难度 label\n" +
+        "  mai 13.5神完成表         ← 定数\n" +
+        "  mai 紫谱将真完成表       ← 字段顺序随便换\n" +
+        "  mai 镜代13+AP完成表      ← 版本 + 难度 组合\n" +
+        "  mai 镜代V家将完成表      ← 版本 + 类别 组合\n" +
+        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 组合";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
@@ -449,7 +453,7 @@ public partial class MaiMaiDx
 
         if (pairs.Count == 0)
         {
-            message.Reply($"没有找到 {query!.Selector.Display} 对应的歌曲");
+            message.Reply($"没有找到 {string.Join(" + ", query!.Selectors.Select(s => s.Display))} 对应的歌曲");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -464,71 +468,62 @@ public partial class MaiMaiDx
 
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
-            PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery       => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
-            _                                    => "命令格式错误",
+            PlateData.ErrorKind.UnsupportedPlate     => $"不支持该版本：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
+            PlateData.ErrorKind.ConflictingSelector  => $"{err.Detail}只能指定一次",
+            _                                        => "命令格式错误",
         };
 
         List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
         {
             // 完成表默认 MASTER + Re:MASTER；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
             var levelIdxes = q.LevelIdxes;
-            var allCharts = SongDb.SongList
+            return SongDb.SongList
                 .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
-                .Where(t => levelIdxes.Contains(t.i));
-
-            return q.Selector switch
-            {
-                PlateData.Selector.Plate p => allCharts
-                    .Where(t => p.Versions.Any(v => string.Equals(v, t.song.Version, StringComparison.OrdinalIgnoreCase)))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
-                PlateData.Selector.Charter c => allCharts
-                    .Where(t => t.i < t.song.Charters.Count
-                             && t.song.Charters[t.i].Contains(c.Name, StringComparison.OrdinalIgnoreCase))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                // song-level substring 匹配，兼容 "sasakure.UK x DECO*27" 这种合作作曲名义。
-                PlateData.Selector.Artist a => allCharts
-                    .Where(t => !string.IsNullOrEmpty(t.song.Info.Artist)
-                             && t.song.Info.Artist.Contains(a.Name, StringComparison.OrdinalIgnoreCase))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                // 谱师 ∪ 作曲家：处理 "rintaro soma" 这种身兼两职的人。
-                PlateData.Selector.CharterOrArtist ca => allCharts
-                    .Where(t => (t.i < t.song.Charters.Count
-                                 && t.song.Charters[t.i].Contains(ca.Name, StringComparison.OrdinalIgnoreCase))
-                              || (!string.IsNullOrEmpty(t.song.Info.Artist)
-                                  && t.song.Info.Artist.Contains(ca.Name, StringComparison.OrdinalIgnoreCase)))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                PlateData.Selector.Genre g => allCharts
-                    .Where(t => string.Equals(t.song.Info.Genre, g.FullName, StringComparison.Ordinal))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                // 难度 label：匹 song.Levels[i] 精确相等
-                PlateData.Selector.Level lvl => allCharts
-                    .Where(t => t.i < t.song.Levels.Count
-                             && string.Equals(t.song.Levels[t.i], lvl.Label, StringComparison.Ordinal))
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                // 定数：song.Constants[i] 精确等于 (0.05 tolerance for floating point safety；定数小数点 1 位)
-                PlateData.Selector.Constant cst => allCharts
-                    .Where(t => Math.Abs(t.constant - cst.Value) < 0.05)
-                    .Select(t => (t.constant, t.i, t.song))
-                    .ToList(),
-
-                _ => [],
-            };
+                .Where(t => levelIdxes.Contains(t.i))
+                .Where(t => q.Selectors.All(sel => MatchSelector(sel, t.constant, t.i, t.song)))
+                .Select(t => (t.constant, t.i, t.song))
+                .ToList();
         }
+
+        // 单 chart × 单 selector 的命中判断；handler 用 Selectors.All(...) 求 AND 交集。
+        static bool MatchSelector(PlateData.Selector sel, double constant, int levelIdx, MaiMaiSong song) => sel switch
+        {
+            PlateData.Selector.Plate p =>
+                p.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)),
+
+            // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
+            PlateData.Selector.Charter c =>
+                levelIdx < song.Charters.Count
+                && song.Charters[levelIdx].Contains(c.Name, StringComparison.OrdinalIgnoreCase),
+
+            // song-level substring 匹配，兼容 "sasakure.UK x DECO*27" 这种合作作曲名义。
+            PlateData.Selector.Artist a =>
+                !string.IsNullOrEmpty(song.Info.Artist)
+                && song.Info.Artist.Contains(a.Name, StringComparison.OrdinalIgnoreCase),
+
+            // 谱师 ∪ 作曲家：处理 "rintaro soma" 这种身兼两职的人。
+            PlateData.Selector.CharterOrArtist ca =>
+                (levelIdx < song.Charters.Count
+                 && song.Charters[levelIdx].Contains(ca.Name, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrEmpty(song.Info.Artist)
+                    && song.Info.Artist.Contains(ca.Name, StringComparison.OrdinalIgnoreCase)),
+
+            PlateData.Selector.Genre g =>
+                string.Equals(song.Info.Genre, g.FullName, StringComparison.Ordinal),
+
+            // 难度 label：匹 song.Levels[i] 精确相等
+            PlateData.Selector.Level lvl =>
+                levelIdx < song.Levels.Count
+                && string.Equals(song.Levels[levelIdx], lvl.Label, StringComparison.Ordinal),
+
+            // 定数：song.Constants[i] 精确等于 (0.05 tolerance for floating point safety；定数小数点 1 位)
+            PlateData.Selector.Constant cst =>
+                Math.Abs(constant - cst.Value) < 0.05,
+
+            _ => false,
+        };
     }
 
     #endregion
