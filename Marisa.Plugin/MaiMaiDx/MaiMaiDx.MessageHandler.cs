@@ -387,13 +387,14 @@ public partial class MaiMaiDx
         "\n" +
         "完整格式：mai (对象)(成绩)[难度]完成表\n" +
         "\n" +
-        "(对象) — 必填，六选一：\n" +
+        "(对象) — 必填，下面六类中可任选 1 个或多个（多个时取 AND 交集）：\n" +
         "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 …（后面加 '代' 也行，例如 熊代）\n" +
         "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
         "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
         "  · 难度 label：13 / 13+ / 14 / 14+ 等（游戏内显示难度）\n" +
         "  · 定数：13.5 / 14.7 等（必含小数点，1 位小数）\n" +
+        "  注：同类只能给一个（'镜代真'、'13+15'、'13+14.6' 会报冲突）\n" +
         "\n" +
         "(成绩) — 不写就是 '将'（SSS）\n" +
         "  · 将=SSS / 大将=SSS+\n" +
@@ -405,13 +406,16 @@ public partial class MaiMaiDx
         "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
         "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
         "\n" +
-        "其他例子（顺序可以随便换）：\n" +
-        "  mai 真完成表          ← 阈值省略，默认 '将'\n" +
+        "其他例子（字段顺序可以随便换）：\n" +
+        "  mai 真完成表             ← 阈值省略，默认 '将'\n" +
         "  mai 翠楼屋将完成表\n" +
         "  mai HIMEHINA神完成表\n" +
-        "  mai 14+大将完成表     ← 难度 label\n" +
-        "  mai 13.5神完成表      ← 定数\n" +
-        "  mai 紫谱将真完成表    ← 字段顺序随便换";
+        "  mai 14+大将完成表        ← 难度 label\n" +
+        "  mai 13.5神完成表         ← 定数\n" +
+        "  mai 紫谱将真完成表       ← 字段顺序随便换\n" +
+        "  mai 镜代13+AP完成表      ← 版本 + 难度 多 selector\n" +
+        "  mai 镜代V家将完成表      ← 版本 + 类别 多 selector\n" +
+        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 多 selector";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
