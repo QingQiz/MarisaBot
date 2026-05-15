@@ -464,10 +464,11 @@ public partial class MaiMaiDx
 
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
-            PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector  => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery       => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
-            _                                    => "命令格式错误",
+            PlateData.ErrorKind.UnsupportedPlate     => $"不支持该版本：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
+            PlateData.ErrorKind.ConflictingSelector  => $"{err.Detail}只能指定一次",
+            _                                        => "命令格式错误",
         };
 
         List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)

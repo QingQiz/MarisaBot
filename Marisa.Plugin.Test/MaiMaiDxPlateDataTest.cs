@@ -259,12 +259,15 @@ public class MaiMaiDxPlateDataTest
     public void DifficultySingleKanjiNotAccepted()
     {
         // 单字"红"不在 difficulty alias map（避免跟未来代字冲突，要写就写"红谱"或"EXPERT"）。
-        // 新版"字段位置任意"算法下，"真代SSS+红完成表" 阈值 SSS+ 在中间也能剥，剩"真代红"
-        // 走 charter substring（catch-all），LevelIdxes 仍是默认 MASTER+Re:MASTER ([3, 4])。
+        // multi-selector 解析下，"真代SSS+红完成表" 剥阈值后剩"真代红"
+        //   → "真代" 作 Plate(真), 单字"红"作 Charter（catch-all，handler 找不到含"红"的谱师报 0 首）。
+        // LevelIdxes 仍是默认 MASTER+Re:MASTER ([3, 4])。
         var q = MustParse("真代SSS+红完成表");
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}), "single '红' must not be parsed as difficulty");
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS+"));
-        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("红"));
     }
 
     [TestCase("真代神白谱完成表", 4)]
@@ -407,5 +410,125 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fs));
         Assert.That(q.Threshold.Level, Is.EqualTo(4));
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Multi-selector (AND 合取)
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void MultiSelector_PlateAndLevel()
+    {
+        // "镜代13+AP完成表" → Plate(镜) ∩ Level("13+") + Fc=AP
+        var q = MustParse("镜代13+AP完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+    }
+
+    [Test]
+    public void MultiSelector_PlateAndGenre()
+    {
+        // "镜代V家将完成表" → Plate(镜) ∩ Genre("niconico & VOCALOID") + SSS
+        var q = MustParse("镜代V家将完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+    }
+
+    [Test]
+    public void MultiSelector_PlateAndConstant()
+    {
+        // "镜代14.6神完成表" → Plate(镜) ∩ Constant(14.6) + AP
+        var q = MustParse("镜代14.6神完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Constant>().Single().Value, Is.EqualTo(14.6).Within(0.001));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+    }
+
+    [Test]
+    public void MultiSelector_LevelAndCharter()
+    {
+        // "14+翠楼屋将完成表" → Level("14+") ∩ Charter("翠楼屋")
+        var q = MustParse("14+翠楼屋将完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14+"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("翠楼屋"));
+    }
+
+    [Test]
+    public void MultiSelector_GenreAndCharter()
+    {
+        // "V家翠楼屋将完成表" → Genre(niconico) ∩ Charter("翠楼屋")
+        var q = MustParse("V家翠楼屋将完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("翠楼屋"));
+    }
+
+    [Test]
+    public void MultiSelector_ThreeWayPlateLevelGenre()
+    {
+        // "镜代13+V家将完成表" → 3 个 selector AND
+        var q = MustParse("镜代13+V家将完成表");
+        Assert.That(q.Selectors, Has.Exactly(3).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
+    }
+
+    [TestCase("镜代13+AP完成表")]
+    [TestCase("AP镜代13+完成表")]
+    [TestCase("13+AP镜代完成表")]
+    [TestCase("13+镜代AP完成表")]
+    [TestCase("AP13+镜代完成表")]
+    public void MultiSelector_OrderIndependent(string raw)
+    {
+        // 多 selector + 阈值/难度的字段顺序应不影响解析结果（rightmost match + iterative strip）
+        var q = MustParse(raw);
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 同类 selector 冲突 → ConflictingSelector
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void Conflict_TwoPlates()
+    {
+        var err = MustFail("镜代真完成表");
+        Assert.That(err.Kind, Is.EqualTo(PlateData.ErrorKind.ConflictingSelector));
+        Assert.That(err.Detail, Is.EqualTo("版本"));
+    }
+
+    [Test]
+    public void Conflict_TwoLevels()
+    {
+        var err = MustFail("13+15完成表");
+        Assert.That(err.Kind, Is.EqualTo(PlateData.ErrorKind.ConflictingSelector));
+        Assert.That(err.Detail, Is.EqualTo("难度或定数"));
+    }
+
+    [Test]
+    public void Conflict_LevelAndConstant()
+    {
+        // Constant 已隐含 Level；二者同给视作冲突
+        var err = MustFail("13+14.6完成表");
+        Assert.That(err.Kind, Is.EqualTo(PlateData.ErrorKind.ConflictingSelector));
+        Assert.That(err.Detail, Is.EqualTo("难度或定数"));
+    }
+
+    [Test]
+    public void Conflict_TwoGenres()
+    {
+        var err = MustFail("V家东方完成表");
+        Assert.That(err.Kind, Is.EqualTo(PlateData.ErrorKind.ConflictingSelector));
+        Assert.That(err.Detail, Is.EqualTo("类别"));
     }
 }
