@@ -47,7 +47,12 @@ public static class PlateData
         public sealed record Constant(double Value) : Selector(Value.ToString("F1"));
     }
 
-    public sealed record Query(Selector Selector, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
+    /// <summary>
+    ///     完整查询：一组 Selectors（AND 合取——所有 selector 都命中的 chart 才入选）+ 阈值 + 难度。
+    ///     当前 TryParse 阶段返回 Selectors.Count == 1（与历史单 selector 行为等价）；
+    ///     multi-selector 解析在后续 commit 启用。
+    /// </summary>
+    public sealed record Query(IReadOnlyList<Selector> Selectors, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
 
     /// <summary>默认难度：未指定时同时查 MASTER + Re:MASTER。</summary>
     public static readonly IReadOnlyList<int> DefaultLevelIdxes = [3, 4];
@@ -325,7 +330,7 @@ public static class PlateData
         //    Charter catch-all 殿后保留"乱输入也接受 + handler 报 0 首"语义。
         if (TryResolvePlate(selectorPart, out var plateSel, out var plateErr))
         {
-            query = new Query(plateSel!, threshold, levelIdxes);
+            query = new Query([plateSel!], threshold, levelIdxes);
             return true;
         }
         if (plateErr != null)
@@ -336,19 +341,19 @@ public static class PlateData
 
         if (TryResolveGenre(selectorPart, out var genreSel))
         {
-            query = new Query(genreSel!, threshold, levelIdxes);
+            query = new Query([genreSel!], threshold, levelIdxes);
             return true;
         }
 
         if (TryResolveLevel(selectorPart, out var levelSel))
         {
-            query = new Query(levelSel!, threshold, levelIdxes);
+            query = new Query([levelSel!], threshold, levelIdxes);
             return true;
         }
 
         if (TryResolveConstant(selectorPart, out var constantSel))
         {
-            query = new Query(constantSel!, threshold, levelIdxes);
+            query = new Query([constantSel!], threshold, levelIdxes);
             return true;
         }
 
@@ -357,22 +362,22 @@ public static class PlateData
 
         if (charterHit && artistHit)
         {
-            query = new Query(new Selector.CharterOrArtist(selectorPart), threshold, levelIdxes);
+            query = new Query([new Selector.CharterOrArtist(selectorPart)], threshold, levelIdxes);
             return true;
         }
         if (charterHit)
         {
-            query = new Query(charterPreciseSel!, threshold, levelIdxes);
+            query = new Query([charterPreciseSel!], threshold, levelIdxes);
             return true;
         }
         if (artistHit)
         {
-            query = new Query(artistSel!, threshold, levelIdxes);
+            query = new Query([artistSel!], threshold, levelIdxes);
             return true;
         }
 
         // catch-all：把 selector 当作 charter 接收，由 handler 在筛选时报 0 首。
-        query = new Query(new Selector.Charter(selectorPart), threshold, levelIdxes);
+        query = new Query([new Selector.Charter(selectorPart)], threshold, levelIdxes);
         return true;
     }
 
