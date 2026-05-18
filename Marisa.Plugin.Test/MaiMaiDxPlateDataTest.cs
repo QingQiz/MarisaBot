@@ -576,6 +576,13 @@ public class MaiMaiDxPlateDataTest
     [TestCase("镜代2星完成表",   "镜",   2)]
     [TestCase("镜代1星完成表",   "镜",   1)]
     [TestCase("镜代一星完成表", "镜",   1)]
+    [TestCase("真1*完成表",     "真",   1)]
+    [TestCase("真2*完成表",     "真",   2)]
+    [TestCase("真3*完成表",     "真",   3)]
+    [TestCase("真4*完成表",     "真",   4)]
+    [TestCase("真5*完成表",     "真",   5)]
+    [TestCase("镜代1*完成表",   "镜",   1)]
+    [TestCase("镜代5*完成表",   "镜",   5)]
     public void ParsesDxScoreStar(string raw, string kanji, int level)
     {
         var q = MustParse(raw);
@@ -611,6 +618,50 @@ public class MaiMaiDxPlateDataTest
         var q = MustParse("镜代5星红谱完成表");
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));
         Assert.That(q.Threshold.Level, Is.EqualTo(5));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 1* / 2* 简写与 digit-boundary 处理：11星完成表、91星完成表、星1星完成表
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void StarShorthand_1Star_Asterisk()
+    {
+        // "1*" 等价于 "1星"
+        var q = MustParse("真1*完成表");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.DxScore));
+        Assert.That(q.Threshold.Level, Is.EqualTo(1));
+    }
+
+    [TestCase("11星完成表",     null, "1",   1, 1,     "1★")]
+    [TestCase("21星完成表",     null, "2",   1, 1,     "1★")]
+    [TestCase("91星完成表",     null, "9",   1, 1,     "1★")]
+    [TestCase("11*完成表",      null, "1",   1, 1,     "1★")]
+    [TestCase("星1星完成表",     "星", null, 1, 1,     "1★")]
+    [TestCase("星1*完成表",      "星", null, 1, 1,     "1★")]
+    [TestCase("11星1星完成表",   "星", "11", 1, 1,     "1★")]
+    [TestCase("星111*完成表",    "星", "11", 1, 1,     "1★")]
+    [TestCase("星11*完成表",     "星", "1",  1, 1,     "1★")]
+    [TestCase("11星SSS完成表",   "星", "11", 0, 12,    "SSS")]
+    public void LevelOrPlate_WithStarThreshold(
+        string raw, string? plateKanji, string? levelLabel,
+        int starLevel, int thresholdLevel, string thresholdDisplay)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.Threshold.Dim,
+            Is.EqualTo(starLevel > 0 ? PlateData.Dimension.DxScore : PlateData.Dimension.Achievement));
+        Assert.That(q.Threshold.Level, Is.EqualTo(thresholdLevel));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo(thresholdDisplay));
+
+        var selectorCount = (plateKanji != null ? 1 : 0) + (levelLabel != null ? 1 : 0);
+        Assert.That(q.Selectors, Has.Exactly(selectorCount).Items);
+
+        if (plateKanji != null)
+            Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo(plateKanji));
+        if (levelLabel != null)
+            Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo(levelLabel));
     }
 
     // DxScoreStar helper integer math 验证（边界 85/90/93/95/97%）

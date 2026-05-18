@@ -254,6 +254,11 @@ public static class PlateData
         ("3星",  new(Dimension.DxScore, 3, "3★")),
         ("4星",  new(Dimension.DxScore, 4, "4★")),
         ("5星",  new(Dimension.DxScore, 5, "5★")),
+        ("1*",   new(Dimension.DxScore, 1, "1★")),
+        ("2*",   new(Dimension.DxScore, 2, "2★")),
+        ("3*",   new(Dimension.DxScore, 3, "3★")),
+        ("4*",   new(Dimension.DxScore, 4, "4★")),
+        ("5*",   new(Dimension.DxScore, 5, "5★")),
     ];
 
     /// <summary>按 token 长度倒序，保证 longest-suffix-match 正确（"大将" 优先于 "将"，"FDX+" 优先于 "FDX"）。</summary>
