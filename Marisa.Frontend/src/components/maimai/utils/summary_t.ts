@@ -1,6 +1,7 @@
 export interface Score {
     achievements: number
     ds: number
+    dxScore: number
     fc: string
     fs: string
     level: string
@@ -13,15 +14,15 @@ export interface Score {
     type: string
 }
 
+/**
+ * Vue 端读到的歌曲投影（MaiMaiDraw.ProjectSong 投出，per-chart）。
+ * 历史 SongInfo 还含 Levels/Constants/Charters 等全量字段，但 Vue 只读 Id；
+ * PR #40 起收窄为最小集 Id/Title/MaxDx（MaxDx = song.Charts[levelIdx].Notes.Sum() * 3）。
+ */
 export interface SongInfo {
     Id: number
     Title: string
-    Levels: string[]
-    Constants: number[]
-    Charters: string[]
-    Type: string
-    Version: string
-    Bpm: number
+    MaxDx: number
 }
 
 export interface GroupedSong {
