@@ -563,4 +563,73 @@ public class MaiMaiDxPlateDataTest
         var q = MustParse("V家完成表");
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // DxScore 维度 — 5 个星档 threshold（1星-5星，对应 max DX 的 85/90/93/95/97%）
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("镜代5星完成表",   "镜",   5)]
+    [TestCase("镜代五星完成表", "镜",   5)]
+    [TestCase("镜代4星完成表",   "镜",   4)]
+    [TestCase("镜代四星完成表", "镜",   4)]
+    [TestCase("镜代3星完成表",   "镜",   3)]
+    [TestCase("镜代2星完成表",   "镜",   2)]
+    [TestCase("镜代1星完成表",   "镜",   1)]
+    [TestCase("镜代一星完成表", "镜",   1)]
+    public void ParsesDxScoreStar(string raw, string kanji, int level)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(((PlateData.Selector.Plate)q.Selectors.Single()).Kanji, Is.EqualTo(kanji));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.DxScore));
+        Assert.That(q.Threshold.Level, Is.EqualTo(level));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo($"{level}★"));
+    }
+
+    [Test]
+    public void DxScoreStar_WithLevel_MultiSelector()
+    {
+        // multi-selector: Plate(镜) ∩ Level("14+") + DxScore=5
+        var q = MustParse("镜代14+5星完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14+"));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.DxScore));
+        Assert.That(q.Threshold.Level, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void DxScoreStar_DefaultLevelIdxes()
+    {
+        var q = MustParse("镜代5星完成表");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}), "DxScore 没指定难度时仍默认 MASTER+Re:MASTER");
+    }
+
+    [Test]
+    public void DxScoreStar_ExplicitDifficulty()
+    {
+        var q = MustParse("镜代5星红谱完成表");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));
+        Assert.That(q.Threshold.Level, Is.EqualTo(5));
+    }
+
+    // DxScoreStar helper integer math 验证（边界 85/90/93/95/97%）
+    [TestCase(0,    1000, 0)]
+    [TestCase(849,  1000, 0)]
+    [TestCase(850,  1000, 1)]   // 85.0% 边界
+    [TestCase(899,  1000, 1)]
+    [TestCase(900,  1000, 2)]   // 90.0%
+    [TestCase(929,  1000, 2)]
+    [TestCase(930,  1000, 3)]   // 93.0%
+    [TestCase(949,  1000, 3)]
+    [TestCase(950,  1000, 4)]   // 95.0%
+    [TestCase(969,  1000, 4)]
+    [TestCase(970,  1000, 5)]   // 97.0%
+    [TestCase(1000, 1000, 5)]
+    [TestCase(266,  288,  2)]   // True Love Song BASIC, TamakoZz 实际样本 92.36% → 2★
+    [TestCase(100,  0,    0)]   // maxDx=0 兜底
+    public void DxScoreStarHelper_Boundaries(int dxScore, int maxDx, int expected)
+    {
+        Assert.That(PlateData.DxScoreStar(dxScore, maxDx), Is.EqualTo(expected));
+    }
 }

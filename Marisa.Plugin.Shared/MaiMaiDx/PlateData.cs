@@ -10,7 +10,7 @@ public static class PlateData
     public const string CommandSuffix = "完成表";
     private const string OptionalDaiSuffix = "代";
 
-    public enum Dimension { Achievement, Fc, Fs }
+    public enum Dimension { Achievement, Fc, Fs, DxScore }
 
     /// <summary>
     ///     阈值定义。用 ordinal value 比较：score 的对应字段 ≥ Level 即视作达标。
@@ -108,7 +108,30 @@ public static class PlateData
         _               => 0,
     };
 
-    /// <summary>给定 score 字段值，返回该 score 在指定维度上的 ordinal。</summary>
+    /// <summary>
+    ///     DX Score 星档（官方 1★-5★，对应 max DX 的 85/90/93/95/97%）。
+    ///     用整数运算避免浮点误差：dxScore * 100 ≥ maxDx * pct 等价于 dxScore / maxDx ≥ pct/100。
+    ///     注意：maimai でらっくす BUDDiES 官方 plate marker 也只到 5★，icon asset 只有这 5 档。
+    ///     maxDx 接 long 是因为生产代码用 song.Charts[i].Notes.Sum() * 3 自然推 long
+    ///     （Notes 是 List long）；call site 不用手动 cast。
+    /// </summary>
+    public static int DxScoreStar(int dxScore, long maxDx)
+    {
+        if (maxDx <= 0) return 0;
+        var hundred = dxScore * 100L;
+        if (hundred >= maxDx * 97L) return 5;
+        if (hundred >= maxDx * 95L) return 4;
+        if (hundred >= maxDx * 93L) return 3;
+        if (hundred >= maxDx * 90L) return 2;
+        if (hundred >= maxDx * 85L) return 1;
+        return 0;
+    }
+
+    /// <summary>
+    ///     给定 score 字段值，返回该 score 在指定维度上的 ordinal。
+    ///     DxScore 维度需要 chart maxDx 才能算（不只看 score 字段），所以这个 helper 不处理；
+    ///     调用方用 <see cref="DxScoreStar"/> 单独算。
+    /// </summary>
     public static int LevelOf(Dimension dim, SongScore score) => dim switch
     {
         Dimension.Achievement => AchievementLevel(score.Achievement),
@@ -219,6 +242,18 @@ public static class PlateData
         ("FDX",  new(Dimension.Fs, 4, "FDX")),
         ("FS+",  new(Dimension.Fs, 3, "FS+")),
         ("FS",   new(Dimension.Fs, 2, "FS")),
+
+        // DxScore 星档 1-5★（85/90/93/95/97% × max DX）— 中文 + ASCII 数字两套写法
+        ("一星", new(Dimension.DxScore, 1, "1★")),
+        ("二星", new(Dimension.DxScore, 2, "2★")),
+        ("三星", new(Dimension.DxScore, 3, "3★")),
+        ("四星", new(Dimension.DxScore, 4, "4★")),
+        ("五星", new(Dimension.DxScore, 5, "5★")),
+        ("1星",  new(Dimension.DxScore, 1, "1★")),
+        ("2星",  new(Dimension.DxScore, 2, "2★")),
+        ("3星",  new(Dimension.DxScore, 3, "3★")),
+        ("4星",  new(Dimension.DxScore, 4, "4★")),
+        ("5星",  new(Dimension.DxScore, 5, "5★")),
     ];
 
     /// <summary>按 token 长度倒序，保证 longest-suffix-match 正确（"大将" 优先于 "将"，"FDX+" 优先于 "FDX"）。</summary>
