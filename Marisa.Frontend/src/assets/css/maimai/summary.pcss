@@ -141,6 +141,14 @@
     height: var(--rank-marker-height);
 }
 
+/* DxScore 维度 marker: 用 width+height 固定 box + object-fit:contain，统一 1-5★ 的视觉大小。
+   官方 5★ asset 是 70×70，1-4★ 是 46×46；contain 让两边都填满 75×75 box 但保持各自宽高比。 */
+.plate-marker.dxstar {
+    width: var(--icon-marker-height);
+    height: var(--icon-marker-height);
+    object-fit: contain;
+}
+
 /* sum mode 底部成绩 + 中心 rank */
 .sum-rank {
     position: absolute;

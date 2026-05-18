@@ -4,7 +4,7 @@ import {ref, computed} from 'vue'
 import axios from 'axios'
 import {context_get} from '@/GlobalVars'
 import type {GroupedSong, Score, PlateInfo} from '@/components/maimai/utils/summary_t'
-import {achievementOrdinal, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
+import {achievementOrdinal, fcOrdinal, fsOrdinal, dxScoreStar} from '@/components/maimai/utils/ordinal'
 import StatsBar from '@/components/maimai/partial/StatsBar.vue'
 
 const route          = useRoute()
@@ -55,13 +55,14 @@ function getScore(songId: number, levelIdx: number): Score | undefined {
     return scores.value[`(${songId}, ${levelIdx})`]
 }
 
-function isPassed(songId: number, levelIdx: number): boolean {
+function isPassed(songId: number, levelIdx: number, maxDx: number = 0): boolean {
     if (!plate.value) return false
     const s = getScore(songId, levelIdx)
     if (!s) return false
     const lv = plate.value.Dim === 'Achievement' ? achievementOrdinal(s.achievements)
             : plate.value.Dim === 'Fc'           ? fcOrdinal(s.fc)
-            :                                       fsOrdinal(s.fs)
+            : plate.value.Dim === 'Fs'           ? fsOrdinal(s.fs)
+            :                                       dxScoreStar(s.dxScore, maxDx)
     return lv >= plate.value.Level
 }
 
@@ -95,7 +96,7 @@ function getBorder(score: Score | undefined): string | null {
     return null
 }
 
-function getMarker(score: Score): string | null {
+function getMarker(score: Score, maxDx: number = 0): string | null {
     if (!plate.value) return null
     switch (plate.value.Dim) {
         case 'Achievement': return `/assets/maimai/pic/rank_${score.rate}.png`
@@ -106,6 +107,12 @@ function getMarker(score: Score): string | null {
             // 现行游戏内称为 FDX/FDX+，repo 里 icon_fdx.png / icon_fdxp.png 是新版。
             const fsNorm = score.fs === 'fsd' ? 'fdx' : score.fs === 'fsdp' ? 'fdxp' : score.fs
             return `/assets/maimai/pic/icon_${fsNorm}.png`
+        }
+        case 'DxScore': {
+            // 展示用户实际达到的星档（不是命令的 threshold 星）。跟 Achievement / Fc 维度
+            // 的 "显示实际达到的 rank/fc" 行为一致 — 用户拿 5★ 不会因命令是 4星 就只显示 4★。
+            const star = dxScoreStar(score.dxScore, maxDx)
+            return star >= 1 ? `/assets/maimai/pic/music_icon_dxstar_${star}.png` : null
         }
     }
 }
@@ -127,9 +134,24 @@ function groupKeyColor(g: GroupedSong): string {
 }
 
 function groupMinRank(g: GroupedSong): string | null {
-    // 该组所有歌中最低 ach 对应的 rank icon。
-    // 任何一首未打过 (np / scores 字典里没条目) → 整组不显示 min-rank（朋友诉求：组内必须全打过才有意义）。
+    // 该组所有歌中最低成绩对应的 icon。
+    // 任何一首未打过 (np / scores 字典里没条目) → 整组不显示 min-rank（用户诉求：组内必须全打过才有意义）。
     // 打过但 ach=0 仍算入（其 rank=d，min 会落到 d）。
+    //
+    // DxScore 维度时显示最低星档 icon (music_icon_dxstar_${minStar}.png)，其他维度（含 sum/Fc/Fs）
+    // 显示最低达成率 rank icon (rank_${minAch}.png)。
+    if (plate.value && plate.value.Dim === 'DxScore') {
+        let minStar = Infinity
+        for (const s of g.x) {
+            const sc = getScore(s.Item3.Id, s.Item2)
+            if (!sc) return null
+            const star = dxScoreStar(sc.dxScore, s.Item3.MaxDx)
+            if (star < minStar) minStar = star
+        }
+        if (!isFinite(minStar) || minStar < 1) return null
+        return `/assets/maimai/pic/music_icon_dxstar_${minStar}.png`
+    }
+
     let minA = Infinity
     for (const s of g.x) {
         const sc = getScore(s.Item3.Id, s.Item2)
@@ -167,13 +189,13 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
                         <div v-for="score in [getScore(s.Item3.Id, s.Item2)]" class="cell">
                             <div class="cover" :style="`background-image: url('/assets/maimai/cover/${s.Item3.Id}.png')`"></div>
                             <!-- plate mode 达成 → 印章罩 + 居中 marker（带边框） -->
-                            <template v-if="plate && score && isPassed(s.Item3.Id, s.Item2)">
+                            <template v-if="plate && score && isPassed(s.Item3.Id, s.Item2, s.Item3.MaxDx)">
                                 <img v-if="getBorder(score)" :src="getBorder(score)!" class="border-img" alt=""/>
                                 <div class="plate-stamp"></div>
-                                <img v-if="getMarker(score)"
-                                     :src="getMarker(score)!"
+                                <img v-if="getMarker(score, s.Item3.MaxDx)"
+                                     :src="getMarker(score, s.Item3.MaxDx)!"
                                      class="plate-marker"
-                                     :class="{rank: plate.Dim === 'Achievement'}"
+                                     :class="{rank: plate.Dim === 'Achievement', dxstar: plate.Dim === 'DxScore'}"
                                      alt=""/>
                             </template>
                             <!-- plate mode 未达成 — 仅原色曲绘 + 难度三角，无边框、无成绩条 -->
