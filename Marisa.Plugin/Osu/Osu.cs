@@ -1,6 +1,5 @@
 ﻿using Marisa.Database;
 using Marisa.Database.Entity.Plugin.Osu;
-using Marisa.Plugin.Shared.FSharp.Osu;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Osu;
 using Marisa.Plugin.Shared.Util;
@@ -53,7 +52,7 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
             return false;
         }
 
-        if (command.BpRank == null)
+        if (command.Rank == null)
         {
             command = command.Mode == null
                 ? new OsuCommandParser.OsuCommand(command.Name, null, 3)
@@ -65,19 +64,19 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
 
     private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank, bool allowRange)
     {
-        var command = OsuCommandParser.parser(message.Command.ToString())?.Value;
+        var command = OsuCommandParser.Parse(message.Command.ToString());
 
         if (command == null)
         {
             return null;
         }
 
-        if (command.BpRank != null && !withBpRank)
+        if (command.Rank != null && !withBpRank)
         {
             return null;
         }
 
-        if (command.BpRank?.Value.Item2 != null && !allowRange)
+        if (command.Rank?.End != null && !allowRange)
         {
             return null;
         }
@@ -105,9 +104,9 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
             }
 
             // 设置GameMode
-            var mode = command.Mode?.Value ?? OsuApi.ModeList.IndexOf(bind.GameMode);
+            var mode = command.Mode ?? OsuApi.ModeList.IndexOf(bind.GameMode);
 
-            return new OsuCommandParser.OsuCommand(bind.OsuUserName, command.BpRank, mode);
+            return new OsuCommandParser.OsuCommand(bind.OsuUserName, command.Rank, mode);
         }
         // 有设置名字，那么要检查GameMode
         else
@@ -121,10 +120,10 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
             if (bind == null)
             {
                 var u = OsuApi.GetUserInfoByName(command.Name).Result;
-                return new OsuCommandParser.OsuCommand(command.Name, command.BpRank, OsuApi.ModeList.IndexOf(u.Playmode.ToLower()));
+                return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(u.Playmode.ToLower()));
             }
 
-            return new OsuCommandParser.OsuCommand(command.Name, command.BpRank, OsuApi.ModeList.IndexOf(bind.GameMode));
+            return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(bind.GameMode));
         }
     }
 
