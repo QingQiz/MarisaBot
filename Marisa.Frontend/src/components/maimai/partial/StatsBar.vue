@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed} from 'vue'
 import type {Score, GroupedSong, PlateInfo} from '@/components/maimai/utils/summary_t'
-import {achievementOrdinal, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
+import {achievementOrdinal, fcOrdinal, fsOrdinal, dxScoreStar} from '@/components/maimai/utils/ordinal'
 
 const props = defineProps({
     charts: { type: Array as () => GroupedSong['x'], required: true },
@@ -70,6 +70,7 @@ const overallPct = computed(() => {
     // - plate.Dim = Achievement → 按达成率 (achievementOrdinal)
     // - plate.Dim = Fc          → 按 fc 字段 (fcOrdinal)
     // - plate.Dim = Fs          → 按 fs 字段 (fsOrdinal)
+    // - plate.Dim = DxScore     → 按星档 (dxScoreStar，需 chart.MaxDx)
     // - sum 模式 (plate = null) → 按 SSS (与 PR #38 兜底一致)
     const dim       = props.plate?.Dim   ?? 'Achievement'
     const threshold = props.plate?.Level ?? 12   // 12 = SSS
@@ -82,7 +83,8 @@ const overallPct = computed(() => {
         if (!sc) continue
         const lv = dim === 'Achievement' ? achievementOrdinal(sc.achievements)
                 : dim === 'Fc'           ? fcOrdinal(sc.fc)
-                :                          fsOrdinal(sc.fs)
+                : dim === 'Fs'           ? fsOrdinal(sc.fs)
+                :                          dxScoreStar(sc.dxScore, c.Item3.MaxDx)
         if (lv >= threshold) done++
     }
     return (done / total * 100).toFixed(2) + '%'

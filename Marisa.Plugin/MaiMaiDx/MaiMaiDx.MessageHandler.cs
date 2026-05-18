@@ -401,6 +401,7 @@ public partial class MaiMaiDx
         "  · 神=AP / 理论值=AP+ / 极=FC\n" +
         "  · 舞舞=FDX\n" +
         "  · 也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
+        "  · DX 分星档：一星~五星（或 1星~5星），对应 max DX 的 85/90/93/95/97%\n" +
         "\n" +
         "[难度] — 不写就是紫谱 + 白谱（MASTER + Re:MASTER）\n" +
         "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
@@ -415,7 +416,9 @@ public partial class MaiMaiDx
         "  mai 紫谱将真完成表       ← 字段顺序随便换\n" +
         "  mai 镜代13+AP完成表      ← 版本 + 难度 组合\n" +
         "  mai 镜代V家将完成表      ← 版本 + 类别 组合\n" +
-        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 组合";
+        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 组合\n" +
+        "  mai 镜代5星完成表        ← DX 分 5★ 完成情况\n" +
+        "  mai 14+四星完成表        ← Lv14+ 全谱拿到 4★ 的情况";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);

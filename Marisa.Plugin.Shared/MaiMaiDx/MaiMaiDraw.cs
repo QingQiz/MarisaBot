@@ -173,12 +173,29 @@ public static class MaiMaiDraw
         string title = "SUMMARY")
     {
         var ctx = new WebContext();
-        ctx.Put("GroupedSongs", groupedSong.Select(g => new { g.Key, x = g.ToArray() }).ToArray());
+        ctx.Put("GroupedSongs", groupedSong.Select(g => new
+        {
+            g.Key,
+            x = g.Select(t => new { Item1 = t.Constant, Item2 = t.LevelIdx, Item3 = ProjectSong(t.Song, t.LevelIdx) }).ToArray(),
+        }).ToArray());
         ctx.Put("Scores", scores);
         ctx.Put("Title", title);
         ctx.Put("Plate", null);
         return await WebApi.MaiMaiSummary(ctx.Id);
     }
+
+    /// <summary>
+    ///     把 MaiMaiSong 收窄成 Vue 渲染需要的最小投影：Id（cell key / cover url）、Title、
+    ///     MaxDx（DxScore 维度阈值判定）。生产 WebContext payload 之前发的是整个 MaiMaiSong
+    ///     对象包括 Charters/Constants/Charts 等大量 Vue 不读的字段，浪费带宽 + 触发 NoCover
+    ///     getter 在 fixture-gen 场景下炸 ResourceManager init。
+    /// </summary>
+    private static object ProjectSong(MaiMaiSong song, int levelIdx) => new
+    {
+        song.Id,
+        song.Title,
+        MaxDx = levelIdx < song.Charts.Count ? song.Charts[levelIdx].Notes.Sum() * 3 : 0,
+    };
 
     /// <summary>
     ///     画完成表（plate progress）。复用 /maimai/summary 前端页面 + plate 模式：
@@ -212,7 +229,11 @@ public static class MaiMaiDraw
             .OrderByDescending(t => t.Constant)
             .GroupBy(GroupKey)
             .OrderByDescending(g => GroupSortKey(g.Key))
-            .Select(g => new { Key = g.Key, x = g.ToArray() })
+            .Select(g => new
+            {
+                Key = g.Key,
+                x = g.Select(t => new { Item1 = t.Constant, Item2 = t.LevelIdx, Item3 = ProjectSong(t.Song, t.LevelIdx) }).ToArray(),
+            })
             .ToArray();
 
         var ctx = new WebContext();
@@ -221,7 +242,7 @@ public static class MaiMaiDraw
         ctx.Put("Title", title);
         ctx.Put("Plate", new
         {
-            Dim         = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs"
+            Dim         = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs" / "DxScore"
             Level       = query.Threshold.Level,
             DisplayName = query.Threshold.DisplayName,
         });
