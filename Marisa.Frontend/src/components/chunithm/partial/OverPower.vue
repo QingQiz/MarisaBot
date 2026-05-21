@@ -30,11 +30,11 @@ let props = defineProps({
 const SCORE_SEGMENTS: { threshold: number; opBase: (c: number) => number; cellLength: (c: number) => number; cellValue: number }[] = [
     { threshold: 800000,   opBase: () => 0,            cellLength: (c: number) => 6000 / (c - 5),  cellValue: 0.05  },
     { threshold: 900000,   opBase: (c: number) => (c - 5) / 2, cellLength: (c: number) => 2000 / (c - 5), cellValue: 0.05 },
-    { threshold: 975000,   opBase: (c: number) => c - 5,        cellLength: 150,                     cellValue: 0.05 },
-    { threshold: 1000000,  opBase: (c: number) => c,             cellLength: 250,                     cellValue: 0.05 },
-    { threshold: 1005000,  opBase: (c: number) => c + 1,         cellLength: 10,                      cellValue: 0.005 },
-    { threshold: 1007500,  opBase: (c: number) => c + 1.5,       cellLength: 5,                       cellValue: 0.005 },
-    { threshold: Infinity, opBase: (c: number) => c + 2,         cellLength: 10 / 3,                  cellValue: 0.005 },
+    { threshold: 975000,   opBase: (c: number) => c - 5,        cellLength: () => 150,                cellValue: 0.05 },
+    { threshold: 1000000,  opBase: (c: number) => c,             cellLength: () => 250,                cellValue: 0.05 },
+    { threshold: 1005000,  opBase: (c: number) => c + 1,         cellLength: () => 10,                 cellValue: 0.005 },
+    { threshold: 1007500,  opBase: (c: number) => c + 1.5,       cellLength: () => 5,                  cellValue: 0.005 },
+    { threshold: Infinity, opBase: (c: number) => c + 2,         cellLength: () => 10 / 3,             cellValue: 0.005 },
 ];
 
 function getOpS(constT: number, score: number): number {
@@ -52,22 +52,17 @@ function getOpS(constT: number, score: number): number {
     return 0;
 }
 
-/**
- * @param score
- * @return op * 10000
- */
 function OverPower(score: Score) {
     if (!score || score.score == 0) return 0;
 
-    const s = getOpS(score.ds, score.score) / 200;
-    let r = score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2' ? 5000 : 0;
+    const op_s = getOpS(score.ds, score.score);
 
-    if (score.fc == 'alljustice') r = 10000;
-    if (score.score == 101_0000) r = 12500;
+    let op_r = 0;
+    if (score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2') op_r = 100;
+    if (score.fc == 'alljustice') op_r = 200;
+    if (score.score == 101_0000) op_r = 250;
 
-    let e = score.score <= 100_7500 ? 0 : (score.score - 100_7500) * 15;
-
-    return s * 5 + r + e;
+    return (op_s + op_r) / 200;
 }
 
 function ShouldSkip(song: GroupSongInfo) {
@@ -97,11 +92,8 @@ function GetOverPowerStatistic() {
         opStat['opSum'] += OverPower(score);
         opStat[GetKey(score)] += 1
         opStat['songCnt'] += 1
-        opStat['opMax'] += ((constant) * 5 + 15) * 10000;
+        opStat['opMax'] += (getOpS(constant, 101_0000) + 250) / 200;
     }
-
-    opStat['opMax'] /= 10000.;
-    opStat['opSum'] /= 10000.;
 
     return opStat
 }
