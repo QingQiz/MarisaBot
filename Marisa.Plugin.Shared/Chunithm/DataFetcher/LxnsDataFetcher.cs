@@ -92,7 +92,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     public override Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        throw new NotSupportedException("[Lxns] 不支持的操作");
+        throw new NotSupportedException("[Lxns] 落雪不支持获取所有分数，该功能已禁用");
     }
 
     private async Task<ChunithmRating> FetchScores(Message message)
