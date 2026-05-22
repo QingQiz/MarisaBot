@@ -37,6 +37,20 @@ public class WebContext
         ContextPool.TryAdd(Id, new ConcurrentDictionary<string, object>());
     }
 
+    public WebContext(object obj) : this()
+    {
+        if (obj is IDictionary<string, object> dict)
+        {
+            foreach (var k in dict.Keys) Put(k, dict[k]);
+            return;
+        }
+
+        foreach (var prop in obj.GetType().GetProperties())
+        {
+            Put(prop.Name, prop.GetValue(obj));
+        }
+    }
+
     public void Put(string name, object? obj)
     {
         if (ContextPool.TryGetValue(Id, out var context))

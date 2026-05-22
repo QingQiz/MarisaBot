@@ -133,6 +133,46 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
+    ///     b35
+    /// </summary>
+    [MarisaPluginDoc("查询 b35，不论新旧版本", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("b35")]
+    private async Task<MarisaPluginTaskState> B35(Message message)
+    {
+        var fetcher = GetDataFetcher(message, true);
+
+        var rat = await fetcher.GetRating(message);
+        try
+        {
+            var scores = (await fetcher.GetScores(message))
+                .OrderByDescending(kv => kv.Value.Rating).ThenBy(x => x.Key.Id)
+                .Select(x => x.Value)
+                .ToList();
+            rat = rat with
+            {
+                OldScores = scores.Take(DivingFishDataFetcher.OldScoreLimit).ToList(),
+                NewScores = scores.Skip(DivingFishDataFetcher.OldScoreLimit).Take(DivingFishDataFetcher.NewScoreLimit).ToList()
+            };
+        }
+        catch (NotSupportedException)
+        {
+            rat = rat with
+            {
+                OldScores = rat.OldScores.Concat(rat.NewScores)
+                    .OrderByDescending(x => x.Rating).ThenBy(x => x.Id)
+                    .Take(DivingFishDataFetcher.OldScoreLimit).ToList(),
+                NewScores = []
+            };
+        }
+
+        var context = new WebContext(new { b50 = rat });
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     b50
     /// </summary>
     [MarisaPluginDoc("查询 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]

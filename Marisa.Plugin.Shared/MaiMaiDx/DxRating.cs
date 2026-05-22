@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 
-public class DxRating
+public record DxRating
 {
     private class Charts
     {
