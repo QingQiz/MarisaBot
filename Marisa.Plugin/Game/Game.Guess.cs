@@ -137,11 +137,13 @@ public partial class Game
             {
                 if (!SongTitleMatcher().IsMatch(mNext.Command[1..].ToString()))
                 {
+                    mNext.Reply("无效字符");
                     return Task.FromResult(MarisaPluginTaskState.NoResponse);
                 }
 
                 if (DateTime.Now - cooldownGlobal < TimeSpan.FromMinutes(1))
                 {
+                    mNext.Reply("冷却中...");
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 }
 
@@ -149,12 +151,14 @@ public partial class Game
                 {
                     if (DateTime.Now - t < TimeSpan.FromMinutes(3))
                     {
+                        mNext.Reply("冷却中...");
                         return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                     }
                 }
 
                 if (tips.Contains(mNext.Command.Span[1]))
                 {
+                    mNext.Reply("？");
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 }
 
@@ -178,6 +182,7 @@ public partial class Game
 
                 if (name.Length != songName[num - 1].Length)
                 {
+                    mNext.Reply("不对不对！");
                 }
                 else
                 {
