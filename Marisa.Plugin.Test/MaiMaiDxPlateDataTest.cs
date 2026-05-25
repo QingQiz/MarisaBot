@@ -12,6 +12,7 @@ public class MaiMaiDxPlateDataTest
     private static readonly IReadOnlyCollection<string> Charters =
     [
         "翠楼屋", "サファ太 vs 翠楼屋", "Jack", "はっぴー", "ロシェ@ペンギン", "rioN", "rintaro soma",
+        "超七味星人", "隅田川星人", // 名字含版本代字（超=GreeN / 星=UNiVERSE），验证反查保护
     ];
 
     // 含合作名义"sasakure.UK x DECO*27"，验证 substring 命中；"HIMEHINA" 验证纯 artist 单边命中。
@@ -682,5 +683,38 @@ public class MaiMaiDxPlateDataTest
     public void DxScoreStarHelper_Boundaries(int dxScore, int maxDx, int expected)
     {
         Assert.That(PlateData.DxScoreStar(dxScore, maxDx), Is.EqualTo(expected));
+    }
+
+    // 反查保护：谱师名里恰好含版本代字时（"超七味星人"含超/星、"隅田川星人"含星），整名当 charter，不被切成 Plate + 残名。覆盖全名与半截名。
+    [TestCase("隅田川星人将完成表", "隅田川星人")]
+    [TestCase("隅田川星人完成表",   "隅田川星人")]
+    [TestCase("超七味星人完成表",   "超七味星人")]
+    [TestCase("超七味完成表",       "超七味")]
+    public void ProtectsCharterNameContainingPlateKanji(string raw, string charter)
+    {
+        var query = MustParse(raw);
+        Assert.That(query.Selectors, Has.None.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(query.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(((PlateData.Selector.Charter)query.Selectors.Single()).Name, Is.EqualTo(charter));
+    }
+
+    // 只给一个版本代字字时（即便 mock 里存在含该字的谱师），length == 代字长度，length 判据短路保护，仍当版本。
+    [TestCase("超将完成表", "超")]
+    [TestCase("星将完成表", "星")]
+    public void StillTreatsBarePlateKanjiAsVersion(string raw, string kanji)
+    {
+        var query = MustParse(raw);
+        Assert.That(query.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(((PlateData.Selector.Plate)query.Selectors.Single()).Kanji, Is.EqualTo(kanji));
+    }
+
+    // 多轮 strip 后保护仍生效：先 strip Level(14)，剩"超七味星人"再触发反查保护，与 Level selector 共存。
+    [Test]
+    public void ProtectsCharterNameAlongsideLevelToken()
+    {
+        var query = MustParse("超七味星人14完成表");
+        Assert.That(query.Selectors, Has.None.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(query.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("超七味星人"));
+        Assert.That(query.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14"));
     }
 }
