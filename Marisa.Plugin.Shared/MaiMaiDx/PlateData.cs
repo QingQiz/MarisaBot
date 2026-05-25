@@ -413,6 +413,15 @@ public static class PlateData
 
             if (matchStart < 0) break;
 
+            // 反查保护：版本代字/类别单字若嵌在更长且能对上某谱师/曲师名的片段里（如"隅田川星人"的"星"、"超七味"的"超"），它是名字的一部分而非 selector，否决匹配让整段落到下面 Charter/Artist
+            if (matched is Selector.Plate or Selector.Genre
+                && workingPart.Length > matchLen
+                && (TryResolveCharterPrecise(workingPart, knownCharters, out _)
+                    || TryResolveArtist(workingPart, knownArtists, out _)))
+            {
+                break;
+            }
+
             // 同类冲突检查（Level + Constant 视为同类——Constant 隐含 Level，二者只能给一个）
             if (matched is Selector.Plate && selectors.OfType<Selector.Plate>().Any())
             {
