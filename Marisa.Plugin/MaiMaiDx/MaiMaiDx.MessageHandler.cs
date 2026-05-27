@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
@@ -190,6 +191,61 @@ public partial class MaiMaiDx
         message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 锐评 / roast
+
+    // TODO(用户): 占位 system prompt，待用户用设计好的锐评 prompt 替换。
+    private const string RoastSystemPrompt =
+        "你是一个毒舌但内行的 maimai 玩家。下面是某玩家的 b50 成绩单（旧版本 b35 + 新版本 b15）。" +
+        "请用中文写一段简短犀利、有梗但不低俗的锐评，整体点评其选曲口味、版本偏好、达成率水平与强弱项；" +
+        "不要逐曲罗列，要有洞察，控制在 300 字以内。";
+
+    [MarisaPluginDoc("让 AI 锐评你的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("锐评", "roast")]
+    private async Task<MarisaPluginTaskState> Roast(Message message)
+    {
+        var fetcher = GetDataFetcher(message, true);
+        var b50 = await fetcher.GetRating(message);
+
+        var roast = await OpenAiClient.Default.ChatAsync(
+            RoastSystemPrompt,
+            FormatB50ForRoast(b50),
+            auditUserId: message.Sender.Id,
+            thinking: ThinkingMode.Disabled
+        );
+
+        message.Reply(roast);
+        return MarisaPluginTaskState.CompletedTask;
+
+
+        string FormatB50ForRoast(DxRating b50)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"玩家 {b50.Nickname}，总 Rating {b50.Rating}。");
+            sb.AppendLine("b50 = 旧版本 b35 + 新版本 b15。每行格式：序号. 曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记");
+
+            AppendSection(sb, "旧版本 b35", b50.OldScores);
+            AppendSection(sb, "新版本 b15", b50.NewScores);
+
+            return sb.ToString();
+
+            void AppendSection(StringBuilder sb, string title, List<SongScore> scores)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"== {title} ==");
+                for (var i = 0; i < scores.Count; i++)
+                {
+                    var s = scores[i];
+                    var marker = string.Join('/', new[] { FcLabel(s.Fc), FsLabel(s.Fs) }.Where(x => x.Length > 0));
+                    sb.Append($"{i + 1}. {s.Title} [{s.Type}/{s.LevelLabel}/{s.Constant:F1}] {s.Achievement:F4}% Ra{s.Rating}");
+                    sb.AppendLine(marker.Length > 0 ? $" {marker}" : "");
+                }
+            }
+        }
+
     }
 
     #endregion
