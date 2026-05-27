@@ -4,39 +4,32 @@ namespace Marisa.Configuration;
 
 public class WebConfiguration
 {
-    private const int DefaultPort = 14311;
-
     public string? Private { get; set; }
 
     public string? Public { get; set; }
 
     [YamlIgnore]
-    public string PrivateBaseUrl => BuildBaseUrl(Private, DefaultPrivateEndpoint);
+    public string PrivateBaseUrl => BuildUrl(Private, "web.private");
 
     [YamlIgnore]
-    public string PublicBaseUrl => BuildBaseUrl(Public, DefaultPublicEndpoint);
+    public string PublicBaseUrl => BuildUrl(Public, "web.public");
 
-    private static string DefaultPrivateEndpoint => $"127.0.0.1:{DefaultPort}";
-
-    private static string DefaultPublicEndpoint => $"localhost:{DefaultPort}";
-
-    private static string BuildBaseUrl(string? endpoint, string fallbackEndpoint)
+    private static string BuildUrl(string? endpoint, string configKey)
     {
-        var actualEndpoint = NormalizeEndpoint(string.IsNullOrWhiteSpace(endpoint) ? fallbackEndpoint : endpoint);
-        return $"http://{actualEndpoint}";
-    }
+        var value = ConfigurationManager.RequireString(configKey, endpoint);
+        var trimmed = value.Trim();
 
-    private static string NormalizeEndpoint(string endpoint)
-    {
-        var trimmedEndpoint = endpoint.Trim();
-
-        if (trimmedEndpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            trimmedEndpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            var uri = new Uri(trimmedEndpoint, UriKind.Absolute);
-            return uri.IsDefaultPort ? $"{uri.Host}:{DefaultPort}" : $"{uri.Host}:{uri.Port}";
+            return trimmed;
         }
 
-        return trimmedEndpoint.Contains(':') ? trimmedEndpoint : $"{trimmedEndpoint}:{DefaultPort}";
+        if (!trimmed.Contains(':'))
+        {
+            throw new MissingConfigurationException($"{configKey}: port is required");
+        }
+
+        return $"http://{trimmed}";
     }
 }
