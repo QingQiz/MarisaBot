@@ -197,11 +197,15 @@ public partial class MaiMaiDx
 
     #region 锐评 / roast
 
-    // TODO(用户): 占位 system prompt，待用户用设计好的锐评 prompt 替换。
+    // TODO(用户): 占位 system prompt 的「文风/人格」部分，待用户用设计好的锐评 prompt 替换。
     private const string RoastSystemPrompt =
         "你是一个毒舌但内行的 maimai 玩家。下面是某玩家的 b50 成绩单（旧版本 b35 + 新版本 b15）。" +
         "请用中文写一段简短犀利、有梗但不低俗的锐评，整体点评其选曲口味、版本偏好、达成率水平与强弱项；" +
         "不要逐曲罗列，要有洞察，控制在 300 字以内。";
+
+    // 固定输出约束：独立于上面的文风 prompt（换文风时保留）。QQ 不渲染 markdown，否则原始 ** # 等标记会直接显示出来。
+    private const string PlainTextConstraint =
+        "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。";
 
     [MarisaPluginDoc("让 AI 锐评你的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
     [MarisaPluginCommand("锐评", "roast")]
@@ -212,7 +216,7 @@ public partial class MaiMaiDx
 
         // 开思考：占位 prompt + 关思考时模型基本在胡说。DeepSeek V4 的 reasoning_effort 只剩 high/max，Medium 会被映射到 high。
         var roast = await OpenAiClient.Default.ChatAsync(
-            RoastSystemPrompt,
+            RoastSystemPrompt + PlainTextConstraint,
             FormatB50ForRoast(b50),
             auditUserId: message.Sender.Id,
             thinking: ThinkingMode.Medium
