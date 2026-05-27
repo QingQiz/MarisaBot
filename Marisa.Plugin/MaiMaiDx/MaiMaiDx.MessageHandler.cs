@@ -203,7 +203,7 @@ public partial class MaiMaiDx
         "请基于这些数据锐评 TA：可点评选曲口味、版本/谱面偏好、达成率与定数的匹配度、强项与短板，并据此调侃 TA 的性格。" +
         "要有具体洞察、能点到具体曲目或数据，但别逐曲念流水账；篇幅约 200-300 字。对事不对人，可以损但不低俗、不人身攻击。";
 
-    // 文风池：随机抽一个决定人格/语气；加新文风往这里塞即可。最终 system prompt = 文风 + RoastTask + PlainTextConstraint。
+    // 文风池：随机抽一个决定人格/语气；加新文风往这里塞即可。最终 system prompt = 文风 + RoastTask + OutputConstraint。
     private static readonly string[] RoastStyles =
     [
         // 雌小鬼（凶）
@@ -231,7 +231,7 @@ public partial class MaiMaiDx
         "- 底线：脏话点到为止、为搞笑服务；火力只对着打歌表现，别上升到地域、性别、真正的人身侮辱（开头那句固定梗除外）。本质是“假装暴怒”的喜剧表演，越浮夸越好笑。";
 
     // 固定约束：独立于上面的文风 prompt（换文风时保留）。① QQ 不渲染 markdown，否则原始 ** # 等标记会直接显示；② 禁止模型编造不存在的歌。
-    private const string PlainTextConstraint =
+    private const string OutputConstraint =
         "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
         "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
 
@@ -248,7 +248,7 @@ public partial class MaiMaiDx
             ? RareRoastStyle
             : RoastStyles[Random.Shared.Next(RoastStyles.Length)];
         var roast = await OpenAiClient.Default.ChatAsync(
-            style + "\n\n" + RoastTask + PlainTextConstraint,
+            style + "\n\n" + RoastTask + OutputConstraint,
             FormatB50ForRoast(b50),
             auditUserId: message.Sender.Id,
             thinking: ThinkingMode.Medium
