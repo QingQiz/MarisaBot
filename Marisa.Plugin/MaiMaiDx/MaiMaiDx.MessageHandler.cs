@@ -210,11 +210,12 @@ public partial class MaiMaiDx
         var fetcher = GetDataFetcher(message, true);
         var b50 = await fetcher.GetRating(message);
 
+        // 开思考：占位 prompt + 关思考时模型基本在胡说。DeepSeek V4 的 reasoning_effort 只剩 high/max，Medium 会被映射到 high。
         var roast = await OpenAiClient.Default.ChatAsync(
             RoastSystemPrompt,
             FormatB50ForRoast(b50),
             auditUserId: message.Sender.Id,
-            thinking: ThinkingMode.Disabled
+            thinking: ThinkingMode.Medium
         );
 
         message.Reply(roast);
