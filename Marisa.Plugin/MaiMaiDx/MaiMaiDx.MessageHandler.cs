@@ -208,7 +208,7 @@ public partial class MaiMaiDx
     private async Task<MarisaPluginTaskState> Roast(Message message)
     {
         var fetcher = GetDataFetcher(message, true);
-        var b50     = await fetcher.GetRating(message);
+        var b50 = await fetcher.GetRating(message);
 
         var roast = await OpenAiClient.Default.ChatAsync(
             RoastSystemPrompt,
@@ -219,55 +219,34 @@ public partial class MaiMaiDx
 
         message.Reply(roast);
         return MarisaPluginTaskState.CompletedTask;
-    }
 
-    /// <summary>
-    ///     把 b50 压成紧凑文本喂给 LLM。每行：序号. 曲名 [谱面类型/难度/定数] 达成率 单曲Ra 完成标记
-    /// </summary>
-    private static string FormatB50ForRoast(DxRating b50)
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine($"玩家 {b50.Nickname}，总 Rating {b50.Rating}。");
-        sb.AppendLine("b50 = 旧版本 b35 + 新版本 b15。每行格式：序号. 曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记");
 
-        AppendSection(sb, "旧版本 b35", b50.OldScores);
-        AppendSection(sb, "新版本 b15", b50.NewScores);
-
-        return sb.ToString();
-
-        static void AppendSection(StringBuilder sb, string title, List<SongScore> scores)
+        string FormatB50ForRoast(DxRating b50)
         {
-            sb.AppendLine();
-            sb.AppendLine($"== {title} ==");
-            for (var i = 0; i < scores.Count; i++)
+            var sb = new StringBuilder();
+            sb.AppendLine($"玩家 {b50.Nickname}，总 Rating {b50.Rating}。");
+            sb.AppendLine("b50 = 旧版本 b35 + 新版本 b15。每行格式：序号. 曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记");
+
+            AppendSection(sb, "旧版本 b35", b50.OldScores);
+            AppendSection(sb, "新版本 b15", b50.NewScores);
+
+            return sb.ToString();
+
+            void AppendSection(StringBuilder sb, string title, List<SongScore> scores)
             {
-                var s      = scores[i];
-                var marker = string.Join('/', new[] { FcLabel(s.Fc), FsLabel(s.Fs) }.Where(x => x.Length > 0));
-                sb.Append($"{i + 1}. {s.Title} [{s.Type}/{s.LevelLabel}/{s.Constant:F1}] {s.Achievement:F4}% Ra{s.Rating}");
-                sb.AppendLine(marker.Length > 0 ? $" {marker}" : "");
+                sb.AppendLine();
+                sb.AppendLine($"== {title} ==");
+                for (var i = 0; i < scores.Count; i++)
+                {
+                    var s = scores[i];
+                    var marker = string.Join('/', new[] { FcLabel(s.Fc), FsLabel(s.Fs) }.Where(x => x.Length > 0));
+                    sb.Append($"{i + 1}. {s.Title} [{s.Type}/{s.LevelLabel}/{s.Constant:F1}] {s.Achievement:F4}% Ra{s.Rating}");
+                    sb.AppendLine(marker.Length > 0 ? $" {marker}" : "");
+                }
             }
         }
+
     }
-
-    // diving-fish fc/fs 字段 → 可读标记。fs 的 fsd/fsdp 是 FDX/FDX+ 的老命名。
-    private static string FcLabel(string? fc) => fc switch
-    {
-        "app" => "AP+",
-        "ap"  => "AP",
-        "fcp" => "FC+",
-        "fc"  => "FC",
-        _     => ""
-    };
-
-    private static string FsLabel(string? fs) => fs switch
-    {
-        "fsdp" => "FDX+",
-        "fsd"  => "FDX",
-        "fsp"  => "FS+",
-        "fs"   => "FS",
-        "sync" => "SYNC",
-        _      => ""
-    };
 
     #endregion
 
