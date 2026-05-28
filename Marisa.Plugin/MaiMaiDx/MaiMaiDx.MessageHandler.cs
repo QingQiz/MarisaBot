@@ -34,7 +34,7 @@ public partial class MaiMaiDx
     [MarisaPluginDoc("绑定某个查分器")]
     [MarisaPluginCommand("bind", "绑定")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
-    private static Task<MarisaPluginTaskState> Bind(Message message)
+    private Task<MarisaPluginTaskState> Bind(Message message)
     {
         var servers = new[]
         {
@@ -70,7 +70,7 @@ public partial class MaiMaiDx
 
             message.Reply("好了");
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
@@ -450,7 +450,7 @@ public partial class MaiMaiDx
             await ReplyVersionSummary(next, versions[index]);
 
             return MarisaPluginTaskState.CompletedTask;
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
 
@@ -905,7 +905,7 @@ public partial class MaiMaiDx
                 MessageDataImage.FromBase64(MaiMaiDraw.DrawFaultTable(x, y).ToB64())
             );
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
 
         return MarisaPluginTaskState.CompletedTask;

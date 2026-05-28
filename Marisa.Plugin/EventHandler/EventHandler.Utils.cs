@@ -70,7 +70,7 @@ public partial class EventHandler
         }
     }
 
-    private static void BotMuteHandler(Message message, MessageData msg, long qq)
+    private void BotMuteHandler(Message message, MessageData msg, long qq)
     {
         var m = (msg as MessageDataBotMute)!;
 
@@ -95,6 +95,6 @@ public partial class EventHandler
             log.Warn("少女祈祷中...");
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-        });
+        }, this);
     }
 }

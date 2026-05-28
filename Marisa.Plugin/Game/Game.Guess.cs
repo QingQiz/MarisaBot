@@ -45,7 +45,7 @@ public partial class Game
     [MarisaPluginDoc("添加曲库，仅私聊可用", "`曲库名字`")]
     [MarisaPluginSubCommand(nameof(Guess))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "add")]
-    private static MarisaPluginTaskState GuessAddDb(Message message, long qq)
+    private MarisaPluginTaskState GuessAddDb(Message message, long qq)
     {
         if (message.GroupInfo != null) return MarisaPluginTaskState.CompletedTask;
 
@@ -105,14 +105,14 @@ public partial class Game
             mNext.Reply("继续", false);
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("一种新的猜歌游戏，仅群聊可用", "`数据库名`，可写多个，用`:`分隔")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "guess")]
-    private static MarisaPluginTaskState Guess(Message message)
+    private MarisaPluginTaskState Guess(Message message)
     {
         if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
 
@@ -201,7 +201,7 @@ public partial class Game
             }
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-        });
+        }, this);
 
         if (res)
         {

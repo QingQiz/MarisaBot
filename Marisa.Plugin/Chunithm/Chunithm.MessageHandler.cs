@@ -151,7 +151,7 @@ public partial class Chunithm
             }
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
@@ -215,7 +215,7 @@ public partial class Chunithm
             );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -350,7 +350,7 @@ public partial class Chunithm
             await ReplyVersionSummary(next, versions[index]);
 
             return MarisaPluginTaskState.CompletedTask;
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
 
@@ -619,7 +619,7 @@ public partial class Chunithm
             );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }
