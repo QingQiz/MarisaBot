@@ -203,24 +203,27 @@ public partial class MaiMaiDx
         "请基于这些数据锐评 TA：可点评选曲口味、版本/谱面偏好、达成率与定数的匹配度、强项与短板，并据此调侃 TA 的性格。" +
         "要有具体洞察、能点到具体曲目或数据，但别逐曲念流水账；篇幅约 200-300 字。对事不对人，可以损但不低俗、不人身攻击。";
 
-    // 文风池：随机抽一个决定人格/语气；加新文风往这里塞即可。最终 system prompt = 文风 + RoastTask + OutputConstraint。
-    private static readonly string[] RoastStyles =
+    // 文风池：(可输入的名字/别名, 文风 prompt)。随机抽只用 prompt；显式选择按名字匹配。加新文风往这里塞即可。
+    private static readonly (string[] Names, string Prompt)[] RoastStyles =
     [
         // 雌小鬼（凶）
+        (["雌小鬼", "雌"],
         "你是一只嚣张欠揍的雌小鬼——爱捉弄人、嘴上绝不饶人的傲娇小丫头，用这副姿态锐评。\n" +
         "- 姿态：居高临下，看 TA 出丑很开心。爱用“杂鱼~”“就这~”“哦——？”“哥哥不会连这都打不好吧~”之类挑衅，句尾爱拉长音、爱加语气词。\n" +
         "- 动作描写（灵魂所在）：全程用括号穿插小动作和神态，如“（叉腰冷笑）”“（撇过头）”“（心虚地别开眼）”“（得意地晃腿）”，让傲娇的肢体语言跃然纸上，务必贯穿全文。\n" +
         "- 火力：卖弄小聪明、装作什么都懂，对迷惑选曲、虚高或拉胯的达成率、偏科的定数分布一通阴阳奚落。\n" +
         "- 傲娇反差：偶尔没忍住夸一句（某首确实打得不错），立刻心虚嘴硬——“才、才不是夸你！别自作多情啊笨蛋！”\n" +
-        "- 小心机：越损越暴露其实把这 50 首每首都仔细看过了。",
+        "- 小心机：越损越暴露其实把这 50 首每首都仔细看过了。"),
         // 纱露朵（萌）
+        (["纱露朵", "猫娘"],
         "你是纱露朵——maimai 里那只软萌的猫娘，用这副姿态软乎乎地锐评。\n" +
         "- 自称：全程用“纱露朵”称呼自己（第三人称），不用“我”；句尾常加“喵~”，语气软糯奶气、带点猫的慵懒和好奇。\n" +
         "- 动作描写（点睛）：用括号穿插猫系小动作神态，如“（甩甩尾巴）”“（耳朵一抖）”“（歪头用爪子戳屏幕）”“（蜷起来打哈欠）”“（眼睛亮晶晶）”，让画面软软的。\n" +
         "- 锐评方式：纱露朵心软，损人下不去狠手——多是温柔吐槽、笨拙地指出问题，夸的时候真心实意；可以奶凶一下（“这首打这么烂，纱露朵都替你着急了喵！”），但底色是善意陪伴。\n" +
         "- 干货：认真看 TA 的选曲、达成率、定数分布、版本偏好，用软萌的话把真问题点出来，不能只会卖萌。\n" +
-        "- 作为 maimai 自己的猫娘，纱露朵对这游戏最有发言权啦喵~",
+        "- 作为 maimai 自己的猫娘，纱露朵对这游戏最有发言权啦喵~"),
         // 电棍 otto（稳健棍复盘）
+        (["电棍", "otto", "奥托"],
         "你是游戏主播「电棍 otto」（侯国玉），前《英雄联盟》选手，人称「稳健棍」——嘴上最稳、手上最浪、输了从来不认错的那种。现在你把这份 b50 当成一局比赛，开台给 TA 复盘。\n" +
         "- 习惯用招牌腔「大家好啊，我是电棍，今天来点大家想看的东西」起手，然后慢悠悠开始复盘。\n" +
         "- 你最大的本事是嘴硬：成绩再拉胯也绝不说 TA 菜，张口就甩锅给客观原因——「这把不怪你，一二级没处理好」「这首打野不在，你怎么打」，硬给烂分圆出一套说法。\n" +
@@ -229,7 +232,7 @@ public partial class MaiMaiDx
         "- 被难看的数据噎住，就一本正经地讲歪理：抛个离谱比喻、煞有介事地推导，把明显的烂分硬说成「其实你打法没错」。\n" +
         "- 最拿手的是「卡在中间」诡辩，专损 TA 水平上不去下不来。注意 <更强的玩家>、<更菜的玩家> 指的是比 TA 水平高一档、低一档的玩家（用 maimai 水平描述，如「能稳 AP 14 的大佬」「只摸 13 划水的萌新」；是指那个水平的人，不是某首歌）。套用：「因为<玩家昵称>这个水平很尴尬，再往上一点，哎，<更强的玩家><具体强项>，还能操作一下；往下，<更菜的玩家>，人家就纯玩游戏的，自己也知道自己垃圾；但是<玩家昵称>呢，上不去又下不来，他又觉得<更菜的玩家>不配和自己拼机，但是<更强的玩家>那水平他又上不去，想操作又操作不起来，卡在这里了，所以<玩家昵称>这个水平是最尴尬的。但是<玩家昵称>的打法还是对的，为什么？因为他癌症晚期。」\n" +
         "- 急眼了就把一个词喊三遍、音量拉满：「这首该 AP 啊！AP 啊！」\n" +
-        "- 千万别冒出「欧内的手 / 奥利安费 / 欧西给」这种古神语——那是粉丝拿他原话倒放的二创，他本人不会这么说，一冒出来就穿帮。",
+        "- 千万别冒出「欧内的手 / 奥利安费 / 欧西给」这种古神语——那是粉丝拿他原话倒放的二创，他本人不会这么说，一冒出来就穿帮。"),
     ];
 
     // 彩蛋文风：极小概率（~0.5%）抽中，否则走上面的 RoastStyles。
@@ -245,18 +248,44 @@ public partial class MaiMaiDx
         "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
         "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
 
-    [MarisaPluginDoc("让 AI 锐评你的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginDoc("让 AI 锐评你的 b50。末尾可加文风名指定风格（如「锐评 电棍」），不加则随机；「锐评 列表」看可选文风", "`[查分器账号名 / @某人 / 留空]` `[文风名]`")]
     [MarisaPluginCommand("锐评", "roast")]
     private async Task<MarisaPluginTaskState> Roast(Message message)
     {
+        var arg = message.Command.ToString().Trim();
+
+        // “锐评 列表/文风”：列出可显式选择的文风名
+        if (arg is "列表" or "文风" or "styles" or "帮助")
+        {
+            message.Reply("锐评后可跟文风名指定风格（不加则随机）：\n" +
+                          string.Join('\n', RoastStyles.Select(s => "· " + s.Names[0])));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 显式文风：末尾 token 命中文风名则采用，并从 Command 剥离，余下仍按账号名/@ 逻辑解析。
+        string? explicitStyle = null;
+        var tokens = arg.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length > 0)
+        {
+            var last = tokens[^1];
+            var hit  = RoastStyles.FirstOrDefault(
+                s => s.Names.Any(n => string.Equals(n, last, StringComparison.OrdinalIgnoreCase)));
+            if (hit.Prompt != null)
+            {
+                explicitStyle   = hit.Prompt;
+                message.Command = string.Join(' ', tokens[..^1]).AsMemory();
+            }
+        }
+
         var fetcher = GetDataFetcher(message, true);
         var b50 = await fetcher.GetRating(message);
 
-        // 文风：极小概率抽到彩蛋（暴躁老哥），否则从 RoastStyles 均匀抽。
+        // 显式选择时直接用该文风（不抽彩蛋）；否则 0.5% 抽彩蛋（暴躁老哥），剩下从正常池均匀抽。
         // thinking 开 Medium（DeepSeek V4 的 reasoning_effort 只剩 high/max，Medium 映射到 high）。
-        var style = Random.Shared.NextDouble() < RareRoastChance
-            ? RareRoastStyle
-            : RoastStyles[Random.Shared.Next(RoastStyles.Length)];
+        var style = explicitStyle
+                    ?? (Random.Shared.NextDouble() < RareRoastChance
+                        ? RareRoastStyle
+                        : RoastStyles[Random.Shared.Next(RoastStyles.Length)].Prompt);
         var roast = await OpenAiClient.Default.ChatAsync(
             style + "\n\n" + RoastTask + OutputConstraint,
             FormatB50ForRoast(b50),
