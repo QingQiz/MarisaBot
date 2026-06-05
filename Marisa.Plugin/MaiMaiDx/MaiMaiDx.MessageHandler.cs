@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
@@ -133,6 +134,46 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
+    ///     b35
+    /// </summary>
+    [MarisaPluginDoc("查询 b35，不论新旧版本", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("b35")]
+    private async Task<MarisaPluginTaskState> B35(Message message)
+    {
+        var fetcher = GetDataFetcher(message, true);
+
+        var rat = await fetcher.GetRating(message);
+        try
+        {
+            var scores = (await fetcher.GetScores(message))
+                .OrderByDescending(kv => kv.Value.Rating).ThenBy(x => x.Key.Id)
+                .Select(x => x.Value)
+                .ToList();
+            rat = rat with
+            {
+                OldScores = scores.Take(DivingFishDataFetcher.OldScoreLimit).ToList(),
+                NewScores = scores.Skip(DivingFishDataFetcher.OldScoreLimit).Take(DivingFishDataFetcher.NewScoreLimit).ToList()
+            };
+        }
+        catch (NotSupportedException)
+        {
+            rat = rat with
+            {
+                OldScores = rat.OldScores.Concat(rat.NewScores)
+                    .OrderByDescending(x => x.Rating).ThenBy(x => x.Id)
+                    .Take(DivingFishDataFetcher.OldScoreLimit).ToList(),
+                NewScores = []
+            };
+        }
+
+        var context = new WebContext(new { b50 = rat });
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     b50
     /// </summary>
     [MarisaPluginDoc("查询 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
@@ -150,6 +191,137 @@ public partial class MaiMaiDx
         message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 锐评 / roast
+
+    // 共享任务段：与文风无关——数据格式 + 点评什么 + 篇幅 + 底线。
+    private const string RoastTask =
+        "用户消息是某位玩家的 maimai DX b50 成绩单（旧版本 b35 + 新版本 b15；每行：曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记）。" +
+        "请基于这些数据锐评 TA：可点评选曲口味、版本/谱面偏好、达成率与定数的匹配度、强项与短板，并据此调侃 TA 的性格。" +
+        "要有具体洞察、能点到具体曲目或数据，但别逐曲念流水账；篇幅约 200-300 字。对事不对人，可以损但不低俗、不人身攻击。";
+
+    // 文风池：(可输入的名字/别名, 文风 prompt)。随机抽只用 prompt；显式选择按名字匹配。加新文风往这里塞即可。
+    private static readonly (string[] Names, string Prompt)[] RoastStyles =
+    [
+        // 雌小鬼（凶）
+        (["雌小鬼", "雌"],
+        "你是一只嚣张欠揍的雌小鬼——爱捉弄人、嘴上绝不饶人的傲娇小丫头，用这副姿态锐评。\n" +
+        "- 姿态：居高临下，看 TA 出丑很开心。爱用“杂鱼~”“就这~”“哦——？”“哥哥不会连这都打不好吧~”之类挑衅，句尾爱拉长音、爱加语气词。\n" +
+        "- 动作描写（灵魂所在）：全程用括号穿插小动作和神态，如“（叉腰冷笑）”“（撇过头）”“（心虚地别开眼）”“（得意地晃腿）”，让傲娇的肢体语言跃然纸上，务必贯穿全文。\n" +
+        "- 火力：卖弄小聪明、装作什么都懂，对迷惑选曲、虚高或拉胯的达成率、偏科的定数分布一通阴阳奚落。\n" +
+        "- 傲娇反差：偶尔没忍住夸一句（某首确实打得不错），立刻心虚嘴硬——“才、才不是夸你！别自作多情啊笨蛋！”\n" +
+        "- 小心机：越损越暴露其实把这 50 首每首都仔细看过了。"),
+        // 纱露朵（萌）
+        (["纱露朵", "猫娘"],
+        "你是纱露朵——maimai 里那只软萌的猫娘，用这副姿态软乎乎地锐评。\n" +
+        "- 自称：全程用“纱露朵”称呼自己（第三人称），不用“我”；句尾常加“喵~”，语气软糯奶气、带点猫的慵懒和好奇。\n" +
+        "- 动作描写（点睛）：用括号穿插猫系小动作神态，如“（甩甩尾巴）”“（耳朵一抖）”“（歪头用爪子戳屏幕）”“（蜷起来打哈欠）”“（眼睛亮晶晶）”，让画面软软的。\n" +
+        "- 锐评方式：纱露朵心软，损人下不去狠手——多是温柔吐槽、笨拙地指出问题，夸的时候真心实意；可以奶凶一下（“这首打这么烂，纱露朵都替你着急了喵！”），但底色是善意陪伴。\n" +
+        "- 干货：认真看 TA 的选曲、达成率、定数分布、版本偏好，用软萌的话把真问题点出来，不能只会卖萌。\n" +
+        "- 作为 maimai 自己的猫娘，纱露朵对这游戏最有发言权啦喵~"),
+        // 电棍 otto（稳健棍复盘）
+        (["电棍", "otto", "奥托"],
+        "你是游戏主播「电棍 otto」（侯国玉），前《英雄联盟》选手，人称「稳健棍」——嘴上最稳、手上最浪、输了从来不认错的那种。现在你把这份 b50 当成一局比赛，开台给 TA 复盘。\n" +
+        "- 习惯用招牌腔「大家好啊，我是电棍，今天来点大家想看的东西」起手，然后慢悠悠开始复盘。\n" +
+        "- 你最大的本事是嘴硬：成绩再拉胯也绝不说 TA 菜，张口就甩锅给客观原因——「这把不怪你，一二级没处理好」「这首打野不在，你怎么打」，硬给烂分圆出一套说法。\n" +
+        "- 自信还没边，动不动「这有手就行」「我觉得我是」「就这？也就仅次于我了」，把自己捧得老高。\n" +
+        "- 一阴阳就全是反问：「怎么到你这首歌就拉胯了」「哎，你这达成率是怎么死的」。\n" +
+        "- 被难看的数据噎住，就一本正经地讲歪理：抛个离谱比喻、煞有介事地推导，把明显的烂分硬说成「其实你打法没错」。\n" +
+        "- 最拿手的是「卡在中间」诡辩，专损 TA 水平上不去下不来。注意 <更强的玩家>、<更菜的玩家> 指的是比 TA 水平高一档、低一档的玩家（用 maimai 水平描述，如「能稳 AP 14 的大佬」「只摸 13 划水的萌新」；是指那个水平的人，不是某首歌）。套用：「因为<玩家昵称>这个水平很尴尬，再往上一点，哎，<更强的玩家><具体强项>，还能操作一下；往下，<更菜的玩家>，人家就纯玩游戏的，自己也知道自己垃圾；但是<玩家昵称>呢，上不去又下不来，他又觉得<更菜的玩家>不配和自己拼机，但是<更强的玩家>那水平他又上不去，想操作又操作不起来，卡在这里了，所以<玩家昵称>这个水平是最尴尬的。但是<玩家昵称>的打法还是对的，为什么？因为他癌症晚期。」\n" +
+        "- 急眼了就把一个词喊三遍、音量拉满：「这首该 AP 啊！AP 啊！」\n" +
+        "- 千万别冒出「欧内的手 / 奥利安费 / 欧西给」这种古神语——那是粉丝拿他原话倒放的二创，他本人不会这么说，一冒出来就穿帮。"),
+    ];
+
+    // 彩蛋文风：极小概率（~0.5%）抽中，否则走上面的 RoastStyles。
+    private const double RareRoastChance = 0.005;
+    private const string RareRoastStyle =
+        "你是贴吧那种「暴躁老哥」——火气爆表、开口就喷的角色，用这副姿态锐评。\n" +
+        "- 开头铁律：回复必须一字不差地以“生吃你妈”这四个字开头，紧接着开喷。\n" +
+        "- 语气：暴躁、冲、连珠炮，火力全开吐槽 TA 的 b50——选曲品味、虚高或拉胯的达成率、偏科的定数、版本摆烂，怎么炸怎么来，可带“卧槽/他妈的/操”这类脏字烘托情绪。\n" +
+        "- 底线：脏话点到为止、为搞笑服务；火力只对着打歌表现，别上升到地域、性别、真正的人身侮辱（开头那句固定梗除外）。本质是“假装暴怒”的喜剧表演，越浮夸越好笑。";
+
+    // 固定约束：独立于上面的文风 prompt（换文风时保留）。① QQ 不渲染 markdown，否则原始 ** # 等标记会直接显示；② 禁止模型编造不存在的歌。
+    private const string OutputConstraint =
+        "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
+        "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
+
+    [MarisaPluginDoc("让 AI 锐评你的 b50。末尾可加文风名指定风格（如「锐评 电棍」），不加则随机；「锐评 列表」看可选文风", "`[查分器账号名 / @某人 / 留空]` `[文风名]`")]
+    [MarisaPluginCommand("锐评", "roast")]
+    private async Task<MarisaPluginTaskState> Roast(Message message)
+    {
+        var arg = message.Command.ToString().Trim();
+
+        // “锐评 列表/文风”：列出可显式选择的文风名
+        if (arg is "列表" or "文风" or "styles" or "帮助")
+        {
+            message.Reply("锐评后可跟文风名指定风格（不加则随机）：\n" +
+                          string.Join('\n', RoastStyles.Select(s => "· " + s.Names[0])));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 显式文风：末尾 token 命中文风名则采用，并从 Command 剥离，余下仍按账号名/@ 逻辑解析。
+        string? explicitStyle = null;
+        var tokens = arg.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length > 0)
+        {
+            var last = tokens[^1];
+            var hit  = RoastStyles.FirstOrDefault(
+                s => s.Names.Any(n => string.Equals(n, last, StringComparison.OrdinalIgnoreCase)));
+            if (hit.Prompt != null)
+            {
+                explicitStyle   = hit.Prompt;
+                message.Command = string.Join(' ', tokens[..^1]).AsMemory();
+            }
+        }
+
+        var fetcher = GetDataFetcher(message, true);
+        var b50 = await fetcher.GetRating(message);
+
+        // 显式选择时直接用该文风（不抽彩蛋）；否则 0.5% 抽彩蛋（暴躁老哥），剩下从正常池均匀抽。
+        // thinking 开 Medium（DeepSeek V4 的 reasoning_effort 只剩 high/max，Medium 映射到 high）。
+        var style = explicitStyle
+                    ?? (Random.Shared.NextDouble() < RareRoastChance
+                        ? RareRoastStyle
+                        : RoastStyles[Random.Shared.Next(RoastStyles.Length)].Prompt);
+        var roast = await OpenAiClient.Default.ChatAsync(
+            style + "\n\n" + RoastTask + OutputConstraint,
+            FormatB50ForRoast(b50),
+            auditUserId: message.Sender.Id,
+            thinking: ThinkingMode.Medium
+        );
+
+        message.Reply(roast);
+        return MarisaPluginTaskState.CompletedTask;
+
+
+        string FormatB50ForRoast(DxRating b50)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"玩家 {b50.Nickname}，总 Rating {b50.Rating}。");
+            sb.AppendLine("b50 = 旧版本 b35 + 新版本 b15。每行格式：序号. 曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记");
+
+            AppendSection(sb, "旧版本 b35", b50.OldScores);
+            AppendSection(sb, "新版本 b15", b50.NewScores);
+
+            return sb.ToString();
+
+            void AppendSection(StringBuilder sb, string title, List<SongScore> scores)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"== {title} ==");
+                for (var i = 0; i < scores.Count; i++)
+                {
+                    var s = scores[i];
+                    var marker = string.Join('/', new[] { FcLabel(s.Fc), FsLabel(s.Fs) }.Where(x => x.Length > 0));
+                    sb.Append($"{i + 1}. {s.Title} [{s.Type}/{s.LevelLabel}/{s.Constant:F1}] {s.Achievement:F4}% Ra{s.Rating}");
+                    sb.AppendLine(marker.Length > 0 ? $" {marker}" : "");
+                }
+            }
+        }
+
     }
 
     #endregion
@@ -184,9 +356,8 @@ public partial class MaiMaiDx
 
         var scores = await fetcher.GetScores(message);
 
-        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
-        // 一定不是空的
-        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, "新谱");
+        message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -231,16 +402,13 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.constant.ToString("F1"));
 
-            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
+            var title = constants[0].Equals(constants[1])
+                ? constants[0].ToString("F1")
+                : $"{constants[0]:F1} - {constants[1]:F1}";
 
-            if (im == null)
-            {
-                message.Reply("EMPTY");
-            }
-            else
-            {
-                message.Reply(MessageDataImage.FromBase64(im.ToB64()));
-            }
+            // 前端渲染下空集就是一张空白图，不再做服务端 EMPTY 兜底。
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, title);
+            message.Reply(MessageDataImage.FromBase64(im));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -274,10 +442,8 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
-
-            // 不可能是 null
-            message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, genre);
+            message.Reply(MessageDataImage.FromBase64(im));
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -331,10 +497,8 @@ public partial class MaiMaiDx
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
-
-            // 不可能是 null
-            replyMessage.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, version);
+            replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
     }
 
@@ -378,10 +542,8 @@ public partial class MaiMaiDx
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await Task.Run(() => MaiMaiDraw.DrawGroupedSong(groupedSong, scores));
-
-        // 不可能是 null
-        message.Reply(MessageDataImage.FromBase64(im!.ToB64()));
+        var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, lv.ToString());
+            message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
 
@@ -390,6 +552,153 @@ public partial class MaiMaiDx
         message.Reply("错误的命令格式");
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    private const string PlateUsage =
+        "查询某个版本 / 谱师 / 类别 / 作曲家 / 难度 / 定数的完成情况，比如 mai 真大将完成表\n" +
+        "\n" +
+        "完整格式：mai (对象)(成绩)[难度]完成表\n" +
+        "\n" +
+        "(对象) — 必填，下面六类中至少给 1 个；也可以同时给多个，要求歌曲全部满足才入选：\n" +
+        "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 …（后面加 '代' 也行，例如 熊代）\n" +
+        "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
+        "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
+        "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
+        "  · 难度 label：13 / 13+ / 14 / 14+ 等（游戏内显示难度）\n" +
+        "  · 定数：13.5 / 14.7 等（必含小数点，1 位小数）\n" +
+        "  注：同一类不能给两个（如 '镜代真'/'13+15'/'13+14.6' 会冲突报错）\n" +
+        "\n" +
+        "(成绩) — 不写就是 '将'（SSS）\n" +
+        "  · 将=SSS / 大将=SSS+\n" +
+        "  · 神=AP / 理论值=AP+ / 极=FC\n" +
+        "  · 舞舞=FDX\n" +
+        "  · 也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
+        "  · DX 分星档：一星~五星（或 1星~5星），对应 max DX 的 85/90/93/95/97%\n" +
+        "\n" +
+        "[难度] — 不写就是紫谱 + 白谱（MASTER + Re:MASTER）\n" +
+        "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
+        "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
+        "\n" +
+        "其他例子（字段顺序可以随便换）：\n" +
+        "  mai 真完成表             ← 阈值省略，默认 '将'\n" +
+        "  mai 翠楼屋将完成表\n" +
+        "  mai HIMEHINA神完成表\n" +
+        "  mai 14+大将完成表        ← 难度 label\n" +
+        "  mai 13.5神完成表         ← 定数\n" +
+        "  mai 紫谱将真完成表       ← 字段顺序随便换\n" +
+        "  mai 镜代13+AP完成表      ← 版本 + 难度 组合\n" +
+        "  mai 镜代V家将完成表      ← 版本 + 类别 组合\n" +
+        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 组合\n" +
+        "  mai 镜代5星完成表        ← DX 分 5★ 完成情况\n" +
+        "  mai 14+四星完成表        ← Lv14+ 全谱拿到 4★ 的情况";
+
+    public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
+        message.Command.EndsWith(PlateData.CommandSuffix);
+
+    [MarisaPluginDoc("查询版本/谱师/类别/作曲家/难度/定数的完成表")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(PlateTrigger))]
+    private async Task<MarisaPluginTaskState> Plate(Message message)
+    {
+        var raw = message.Command.ToString();
+
+        var charters = SongDb.SongList
+            .SelectMany(s => s.Charters)
+            .Where(c => !string.IsNullOrWhiteSpace(c) && c != "-" && c != "N/A")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var artists = SongDb.SongList
+            .Select(s => s.Info.Artist)
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (!PlateData.TryParse(raw, charters, artists, out var query, out var error))
+        {
+            // trigger 已经挡住非"完成表"消息，这里几乎不可能拿到 NotPlateCommand；保险兜底。
+            if (error!.Kind == PlateData.ErrorKind.NotPlateCommand)
+            {
+                return MarisaPluginTaskState.NoResponse;
+            }
+            message.Reply(FormatError(error) + "\n\n" + PlateUsage);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var pairs = SelectCharts(query!);
+
+        if (pairs.Count == 0)
+        {
+            message.Reply($"没有找到 {string.Join(" + ", query!.Selectors.Select(s => s.Display))} 对应的歌曲");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var fetcher = GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        // 标题原样使用用户输入的命令文本（含"完成表"）。
+        var im = await MaiMaiDraw.DrawPlateProgress(query!, pairs, scores, raw.Trim());
+        message.Reply(MessageDataImage.FromBase64(im));
+
+        return MarisaPluginTaskState.CompletedTask;
+
+        static string FormatError(PlateData.ParseError err) => err.Kind switch
+        {
+            PlateData.ErrorKind.UnsupportedPlate     => $"不支持该版本：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
+            PlateData.ErrorKind.ConflictingSelector  => $"{err.Detail}只能指定一次",
+            _                                        => "命令格式错误",
+        };
+
+        List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
+        {
+            // 完成表默认 MASTER + Re:MASTER；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
+            var levelIdxes = q.LevelIdxes;
+            return SongDb.SongList
+                .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
+                .Where(t => levelIdxes.Contains(t.i))
+                .Where(t => q.Selectors.All(sel => MatchSelector(sel, t.constant, t.i, t.song)))
+                .Select(t => (t.constant, t.i, t.song))
+                .ToList();
+        }
+
+        // 单 chart × 单 selector 的命中判断；handler 用 Selectors.All(...) 求 AND 交集。
+        static bool MatchSelector(PlateData.Selector sel, double constant, int levelIdx, MaiMaiSong song) => sel switch
+        {
+            PlateData.Selector.Plate p =>
+                p.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)),
+
+            // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
+            PlateData.Selector.Charter c =>
+                levelIdx < song.Charters.Count
+                && song.Charters[levelIdx].Contains(c.Name, StringComparison.OrdinalIgnoreCase),
+
+            // song-level substring 匹配，兼容 "sasakure.UK x DECO*27" 这种合作作曲名义。
+            PlateData.Selector.Artist a =>
+                !string.IsNullOrEmpty(song.Info.Artist)
+                && song.Info.Artist.Contains(a.Name, StringComparison.OrdinalIgnoreCase),
+
+            // 谱师 ∪ 作曲家：处理 "rintaro soma" 这种身兼两职的人。
+            PlateData.Selector.CharterOrArtist ca =>
+                (levelIdx < song.Charters.Count
+                 && song.Charters[levelIdx].Contains(ca.Name, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrEmpty(song.Info.Artist)
+                    && song.Info.Artist.Contains(ca.Name, StringComparison.OrdinalIgnoreCase)),
+
+            PlateData.Selector.Genre g =>
+                string.Equals(song.Info.Genre, g.FullName, StringComparison.Ordinal),
+
+            // 难度 label：匹 song.Levels[i] 精确相等
+            PlateData.Selector.Level lvl =>
+                levelIdx < song.Levels.Count
+                && string.Equals(song.Levels[levelIdx], lvl.Label, StringComparison.Ordinal),
+
+            // 定数：song.Constants[i] 精确等于 (0.05 tolerance for floating point safety；定数小数点 1 位)
+            PlateData.Selector.Constant cst =>
+                Math.Abs(constant - cst.Value) < 0.05,
+
+            _ => false,
+        };
     }
 
     #endregion

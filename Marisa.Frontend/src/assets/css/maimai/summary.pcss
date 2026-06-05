@@ -1,0 +1,197 @@
+.mai-summary {
+    /* 全部跟 commit f035410 时 SkiaSharp 的 plate 渲染等同：cell=120, gap=40,
+       border 突出 10px, rank marker 60px, icon marker 75px。 */
+    --cell-size: 120px;
+    --cell-gap: 40px;                   /* 净缝 = gap - 2*border-overflow = 20px */
+    --col-count: 8;
+    --border-overflow: 10px;            /* 边框图比 cell 大的那一圈 */
+    --level-mark-size: 14px;            /* 难度小三角 */
+    --rank-marker-height: 60px;         /* Achievement 维度的 rank_*.png（200x89，宽按比例） */
+    --icon-marker-height: 75px;         /* Fc/Fs 的 icon_*.png（近方形） */
+    --achievement-bar-height: 42px;     /* sum 模式底部黑条 */
+    --sum-rank-height: 60px;            /* sum 模式中心 rank（同 rank-marker-height） */
+
+    padding: 40px;
+    background: white;
+    color: #1a1a1a;
+    width: max-content;                 /* 配合 Puppeteer 截全宽 */
+
+    /* 西文 Torus 跟 b50 一致；中文 fallback YaHei (Hiragino 兜底 macOS) */
+    font-family: 'Torus', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+}
+
+/* Tailwind preflight 给所有 img 强制 max-width:100%，会把 border / marker / rank 等
+   按 cell 宽度截断。这里整个 summary 内的 img 都解除限制。 */
+.mai-summary img {
+    max-width: none;
+}
+
+/* title-row / group-title 宽度 = grid 内容宽 + border-overflow (8 cell × 120 + 7 gap × 40 + 10 = 1250px)，
+   让 stats-bar 右沿对齐"带边框"的 grid 右边界 (cell 8 的 .border-img 比 cell 右沿外突出 10px)；
+   左沿仍贴 padding 内沿，因为标题靠左对齐看起来比 -10 偏移自然。
+   stats-bar 永远靠右贴这条带边框右边界，标题靠左 + flex shrink 处理过长情况。 */
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
+}
+
+.title {
+    /* font-size 由 JS computed titleFontSize 按字符数自适应 */
+    font-weight: bold;
+    line-height: 1.2;          /* 1 太紧，配合 overflow:hidden 会把 CJK descender 切掉 */
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.title-stats {
+    flex: 0 0 720px;         /* 固定大条宽度 720px，永远贴 grid 右边界（留出空间给长标题） */
+}
+
+.groups {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.group-title {
+    font-size: 56px;
+    font-weight: bold;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    /* +border-overflow 与 .title-row 同理，让 group-stats 右沿对齐带边框 grid 右边界 */
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
+    position: relative;       /* 给 .min-rank-center 提供 absolute 锚点 */
+}
+
+.min-rank {
+    height: 50px;
+    /* push 到 stats-bar 左边界外，跟 stats-bar 隔 group-title 的 gap (6px) */
+    margin-left: auto;
+}
+
+.group-stats {
+    margin-left: auto;
+    flex: 0 0 380px;         /* 固定小条宽度 380px，靠右对齐 grid 右边界 */
+}
+
+/* 当 .min-rank (layout=left) 存在时，它已经 margin-left:auto 推到右贴 stats-bar；
+   stats-bar 不再 auto 否则会跟 min-rank 平分剩余空间导致缝隙变大 */
+.min-rank ~ .group-stats {
+    margin-left: 0;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(var(--col-count), var(--cell-size));
+    gap: var(--cell-gap);
+}
+
+.cell {
+    position: relative;
+    width: var(--cell-size);
+    height: var(--cell-size);
+}
+
+.cover {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+.border-img {
+    position: absolute;
+    top: calc(-1 * var(--border-overflow));
+    left: calc(-1 * var(--border-overflow));
+    width: calc(var(--cell-size) + 2 * var(--border-overflow));
+    height: calc(var(--cell-size) + 2 * var(--border-overflow));
+    pointer-events: none;
+}
+
+/* plate mode 印章罩 + 居中 marker */
+.plate-stamp {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.40);
+}
+
+.plate-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: var(--icon-marker-height);
+    width: auto;
+}
+
+.plate-marker.rank {
+    height: var(--rank-marker-height);
+}
+
+/* DxScore 维度 marker: 用 width+height 固定 box + object-fit:contain，统一 1-5★ 的视觉大小。
+   官方 5★ asset 是 70×70，1-4★ 是 46×46；contain 让两边都填满 75×75 box 但保持各自宽高比。 */
+.plate-marker.dxstar {
+    width: var(--icon-marker-height);
+    height: var(--icon-marker-height);
+    object-fit: contain;
+}
+
+/* sum mode 底部成绩 + 中心 rank */
+.sum-rank {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -65%);
+    height: var(--sum-rank-height);
+    width: auto;
+    pointer-events: none;
+}
+
+.achievement-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--achievement-bar-height);
+    background: rgba(0, 0, 0, 0.85);
+    /* flex 字底对齐 bar 底 + 水平居中。padding-bottom 让字符 descender 离 bar 底有点空隙，
+       这样视觉中线大致落在 bar 中部（受 Consolas italic ascender 比 descender 厚一点的
+       影响，纯 flex center 会偏顶）。 */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 5px;
+    font-weight: bold;
+    font-family: 'Consolas', 'Segoe UI', 'Arial Unicode MS Font', monospace;
+    line-height: 1;
+}
+
+.ach-int {
+    font-size: 32px;
+}
+
+.ach-frac {
+    font-size: 23px;
+}
+
+.level-mark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--level-mark-size);
+    height: var(--level-mark-size);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+}

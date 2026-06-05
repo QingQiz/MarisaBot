@@ -244,4 +244,28 @@ public partial class MaiMaiDx
     }
 
     #endregion
+
+    #region label helpers
+
+    // diving-fish fc/fs 字段 → 可读标记。fs 的 fsd/fsdp 是 FDX/FDX+ 的老命名。
+    private static string FcLabel(string? fc) => fc switch
+    {
+        "app" => "AP+",
+        "ap" => "AP",
+        "fcp" => "FC+",
+        "fc" => "FC",
+        _ => ""
+    };
+
+    private static string FsLabel(string? fs) => fs switch
+    {
+        "fsdp" => "FDX+",
+        "fsd" => "FDX",
+        "fsp" => "FS+",
+        "fs" => "FS",
+        "sync" => "SYNC",
+        _ => ""
+    };
+
+    #endregion
 }

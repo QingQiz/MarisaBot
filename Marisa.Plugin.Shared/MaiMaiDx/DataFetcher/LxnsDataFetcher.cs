@@ -16,7 +16,7 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 
     public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        throw new NotSupportedException("[Lxns] 不支持的操作");
+        throw new NotSupportedException("[Lxns] 落雪不支持获取所有分数，该功能已禁用");
     }
 
     private async Task<DxRating> FetchScores(Message message)

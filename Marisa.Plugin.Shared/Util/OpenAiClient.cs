@@ -12,7 +12,7 @@ public class OpenAiClient
 {
     public static readonly OpenAiClient Default = new OpenAiClient();
 
-    public async Task<string> ChatAsync(string systemPrompt, string userMessage, string? model = null, string? userId = null, ThinkingMode thinking = ThinkingMode.Default, CancellationToken cancellationToken = default)
+    public async Task<string> ChatAsync(string systemPrompt, string userMessage, string? model = null, string? userId = null, long? auditUserId = null, ThinkingMode thinking = ThinkingMode.Default, CancellationToken cancellationToken = default)
     {
         var cfg = ConfigurationManager.Configuration.OpenAi;
         model ??= cfg.Model;
@@ -42,7 +42,7 @@ public class OpenAiClient
         var output = json["choices"]?[0]?["message"]?["content"]?.Value<string>()?.Trim()
                      ?? throw new InvalidOperationException("OpenAI API returned empty response");
 
-        RecordUsage(json, model, systemPrompt, userMessage, output, userId);
+        RecordUsage(json, model, systemPrompt, userMessage, output, auditUserId ?? 0);
 
         return output;
 
@@ -57,7 +57,7 @@ public class OpenAiClient
             _ => (null, null)
         };
 
-        void RecordUsage(JObject root, string usedModel, string prompt, string userPrompt, string output, string uid)
+        void RecordUsage(JObject root, string usedModel, string prompt, string userPrompt, string output, long uid)
         {
             var usage = root["usage"];
             if (usage is null) return;

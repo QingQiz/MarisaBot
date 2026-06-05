@@ -6,8 +6,8 @@ namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
 public class DivingFishDataFetcher : DataFetcher
 {
-    private const int OldScoreLimit = 35;
-    private const int NewScoreLimit = 15;
+    public const int OldScoreLimit = 35;
+    public const int NewScoreLimit = 15;
 
     // TODO 下面的内容以后再来写吧！
     // private readonly Dictionary<int, List<DiffData?>> _diffDict;

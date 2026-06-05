@@ -129,13 +129,7 @@ public partial class Chunithm
                     var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id)
                             ?? new ChunithmBind(next.Sender.Id, server, accessCode);
 
-                    if (!bind.IsManaged)
-                    {
-                        bind.ServerName = server;
-                        bind.AccessCode = accessCode;
-                    }
-
-                    var fetcher = GetDataFetcher(server, bind.AccessCode);
+                    var fetcher = GetDataFetcher(server, accessCode);
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
@@ -143,7 +137,12 @@ public partial class Chunithm
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    realm.Write(() => realm.InsertOrUpdateByUid(bind));
+                    realm.Write(() =>
+                    {
+                        bind.ServerName = server;
+                        bind.AccessCode = accessCode;
+                        realm.InsertOrUpdateByUid(bind);
+                    });
 
                     message.Reply("好了");
 
@@ -501,9 +500,7 @@ public partial class Chunithm
     [MarisaPluginCommand("sum")]
     private async Task<MarisaPluginTaskState> B50Sum(Message message)
     {
-        var fetcher = await GetDataFetcher(message, true);
-
-        var rating = await fetcher.GetRating(message);
+        var rating = await GetRating(message, true);
 
         var bSum = rating.Records.Best.Sum(x => x.Rating) * 100;
         var rSum = rating.Records.Recent.Sum(x => x.Rating) * 100;

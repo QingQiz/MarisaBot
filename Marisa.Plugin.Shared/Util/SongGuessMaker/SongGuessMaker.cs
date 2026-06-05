@@ -12,7 +12,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
     where TSong : Song
     where TSongGuess : class, IHaveId, ISongGuess, IRealmObject, new()
 {
-    private async Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
+    private Task<MarisaPluginTaskState> ProcSongGuessResult(Message message, TSong song, TSong? guess)
     {
         var senderId   = message.Sender.Id;
         var senderName = message.Sender.Name;
@@ -25,7 +25,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         if (guess == null)
         {
             message.Reply("没找到你说的这首歌");
-            return MarisaPluginTaskState.ToBeContinued;
+            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }
 
         // 猜对了
@@ -43,7 +43,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
                 MessageDataImage.FromBase64(song.GetImage())
             );
 
-            return MarisaPluginTaskState.CompletedTask;
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
         // 猜错了
@@ -55,7 +55,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         });
 
         message.Reply("不对不对！");
-        return MarisaPluginTaskState.ToBeContinued;
+        return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
     }
 
     private Dialog.Dialog.MessageHandler GenGuessDialogHandler(TSong song, DateTime startTime, long qq)

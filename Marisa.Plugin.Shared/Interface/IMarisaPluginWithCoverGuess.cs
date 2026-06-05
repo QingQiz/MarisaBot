@@ -25,10 +25,15 @@ public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : So
             .OrderByDescending(g => g.TimesCorrect)
             .ThenBy(g => g.TimesWrong)
             .ThenBy(g => g.TimesStart)
+            .AsEnumerable()
             .Take(10)
             .ToList();
 
-        if (res.Count == 0) message.Reply("None");
+        if (res.Count == 0)
+        {
+            message.Reply("None");
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         message.Reply(string.Join('\n', res.Select((guess, i) =>
             $"{i + 1}、 {guess.Name}： (s:{guess.TimesStart}, w:{guess.TimesWrong}, c:{guess.TimesCorrect})")));

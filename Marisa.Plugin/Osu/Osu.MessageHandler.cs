@@ -90,7 +90,7 @@ public partial class Osu
 
         try
         {
-            var uInfo = await OsuApi.GetUserInfoByName(command.Name, command.Mode?.Value ?? -1);
+            var uInfo = await OsuApi.GetUserInfoByName(command.Name, command.Mode ?? -1);
 
             if (uInfo.RankHistory == null)
             {
@@ -117,7 +117,7 @@ public partial class Osu
     {
         if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command!.Mode.Value is not (0 or 3))
+            if (command!.Mode is not (0 or 3))
         {
             message.Reply("目前只支持 osu 和 mania 模式");
             return MarisaPluginTaskState.CompletedTask;
@@ -128,7 +128,7 @@ public partial class Osu
         var context = new WebContext();
 
         context.Put("info", info);
-        context.Put("recommend", await OsuApi.GetRecommend(info.Id, command.Mode.Value));
+        context.Put("recommend", await OsuApi.GetRecommend(info.Id, command.Mode!.Value));
 
         message.Reply(MessageDataImage.FromBase64(await WebApi.OsuRecommend(context.Id)));
 
@@ -141,8 +141,8 @@ public partial class Osu
     {
         if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
-            command.BpRank?.Value.Item1, true, false)));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode!.Value,
+            command.Rank?.Start, true, false)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -153,8 +153,8 @@ public partial class Osu
     {
         if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode.Value,
-            command.BpRank?.Value.Item1, true, true)));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode!.Value,
+            command.Rank?.Start, true, true)));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -165,23 +165,24 @@ public partial class Osu
     {
         if (!TryParseCommand(message, true, true, out var command)) return MarisaPluginTaskState.CompletedTask;
 
-        if (command!.BpRank?.Value?.Item2 == null)
+        if (command!.Rank?.End == null)
         {
-            message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command.Name, command.Mode.Value,
-                command.BpRank?.Value?.Item1, false, false)));
+            message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command.Name, command.Mode!.Value,
+                command.Rank?.Start, false, false)));
         }
         else
         {
-            var oid  = await GetOsuIdByName(command.Name);
-            var mode = OsuApi.GetModeName(command.Mode.Value);
+            var oid = await GetOsuIdByName(command.Name);
+            var mode = OsuApi.GetModeName(command.Mode!.Value);
+            var rank = command.Rank!;
             var best = (await OsuApi.GetScores(
                     oid,
                     OsuApi.OsuScoreType.Best,
                     mode,
-                    command.BpRank.Value.Item1 - 1,
-                    command.BpRank.Value.Item2.Value - command.BpRank.Value.Item1 + 1
+                    rank.Start - 1,
+                    (int)rank.End - rank.Start + 1
                 ))?
-                .Select((x, i) => (x, i + command.BpRank.Value.Item1 - 1))
+                .Select((x, i) => (x, i + rank.Start - 1))
                 .ToList();
 
             if (!(best?.Any() ?? false))
@@ -225,14 +226,14 @@ public partial class Osu
 
         var recentScores =
             (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best,
-                OsuApi.GetModeName(command.Mode.Value), 0, 100))?
+                OsuApi.GetModeName(command.Mode!.Value), 0, 100))?
             .Select((x, i) => (x, i))
-            .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < (command.BpRank == null ? 24 : command.BpRank.Value.Item1))
+            .Where(s => (DateTime.Now - s.x.CreatedAt).TotalHours < (command.Rank?.Start ?? 24))
             .ToList();
 
         if (!(recentScores?.Any() ?? false))
         {
-            message.Reply($"最近24小时内在 {OsuApi.GetModeName(command.Mode.Value)} 上未恰到分");
+            message.Reply($"最近24小时内在 {OsuApi.GetModeName(command.Mode!.Value)} 上未恰到分");
         }
         else
         {
@@ -265,7 +266,7 @@ public partial class Osu
 
             var id = await GetOsuIdByName(command!.Name);
             var scores = await OsuApi.GetScores(
-                id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode.Value), 0, 1, true
+                id, OsuApi.OsuScoreType.Recent, OsuApi.GetModeName(command.Mode!.Value), 0, 1, true
             );
 
             if (scores.Length != 0)
