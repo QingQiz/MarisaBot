@@ -9,8 +9,8 @@ web:
 
 napCat:
   endpoint: ws://127.0.0.1:31001
-  token: 96110
-  selfId: 2035872327
+  token:
+  selfId:
 
 divingFish:
   devToken:
