@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {Score, GroupSongInfo} from "../utils/summary_t";
 import {computed} from "vue";
+import {getOpS, calcOverPower} from "../utils/overpower";
 
 
 type OpStatisticKey = 'pl' | 'fc' | 'aj' | 'ajc' | 'np' | 'opMax' | 'opSum' | 'songCnt'
@@ -27,51 +28,6 @@ let props = defineProps({
     }
 })
 
-const SCORE_SEGMENTS: { threshold: number; opBase: (c: number) => number; cellLength: (c: number) => number; cellValue: number }[] = [
-    { threshold: 800000,   opBase: () => 0,            cellLength: (c: number) => 6000 / (c - 5),  cellValue: 0.05  },
-    { threshold: 900000,   opBase: (c: number) => (c - 5) / 2, cellLength: (c: number) => 2000 / (c - 5), cellValue: 0.05 },
-    { threshold: 975000,   opBase: (c: number) => c - 5,        cellLength: () => 150,                cellValue: 0.05 },
-    { threshold: 1000000,  opBase: (c: number) => c,             cellLength: () => 250,                cellValue: 0.05 },
-    { threshold: 1005000,  opBase: (c: number) => c + 1,         cellLength: () => 10,                 cellValue: 0.005 },
-    { threshold: 1007500,  opBase: (c: number) => c + 1.5,       cellLength: () => 5,                  cellValue: 0.005 },
-    { threshold: Infinity, opBase: (c: number) => c + 2,         cellLength: () => 10 / 3,             cellValue: 0.005 },
-];
-
-function getOpS(constT: number, score: number): number {
-    if (score < 500000) return 0;
-
-    let prevThreshold = 500000;
-    for (const seg of SCORE_SEGMENTS) {
-        if (score < seg.threshold) {
-            const scoreDiff = score - prevThreshold;
-            const cellNum = Math.floor(scoreDiff / seg.cellLength(constT));
-            return (seg.opBase(constT) * 5 + cellNum * seg.cellValue) * 200;
-        }
-        prevThreshold = seg.threshold;
-    }
-    return 0;
-}
-
-function OverPower(score: Score) {
-    if (!score || score.score == 0) return 0;
-
-    const op_s = getOpS(score.ds, score.score);
-
-    let op_r = 0;
-    if (score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2') op_r = 100;
-    if (score.fc == 'alljustice') op_r = 200;
-    if (score.score == 101_0000) op_r = 250;
-
-    return (op_s + op_r) / 200;
-}
-
-function ShouldSkip(song: GroupSongInfo) {
-    if (song.Item2 != 3 && song.Item2 != 4) return true;
-    let constant = song.Item3.Constants[song.Item2]
-    // 好像有一些垃圾数据
-    return constant < 10;
-}
-
 function GetOverPowerStatistic() {
     function GetKey(score: Score): OpStatisticKey {
         if (!score) return 'np'
@@ -86,10 +42,9 @@ function GetOverPowerStatistic() {
     for (let i = 0; i < props.group.length; i++) {
         let song  = props.group[i]
         let score = props.scores[i]
-        if (ShouldSkip(song)) continue;
 
-        let constant = song.Item3.Constants[song.Item2]
-        opStat['opSum'] += OverPower(score);
+        let constant = Math.max(...song.Item3.Constants)
+        opStat['opSum'] += calcOverPower(score);
         opStat[GetKey(score)] += 1
         opStat['songCnt'] += 1
         opStat['opMax'] += (getOpS(constant, 101_0000) + 250) / 200;
@@ -112,8 +67,6 @@ function GetRankStatistic() {
     let rkStat = {'ajc': 0, 'sssp': 0, 'sss': 0, 'ssp': 0, 'ss': 0, 'oth': 0, 'np': 0, 'songCnt': 0} as RkStatistic;
 
     for (let i = 0; i < props.group.length; i++) {
-        if (ShouldSkip(props.group[i])) continue;
-
         rkStat[GetKey(props.scores[i])] += 1
         rkStat['songCnt'] += 1
     }
