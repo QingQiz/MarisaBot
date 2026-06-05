@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {Score, GroupSongInfo} from "../utils/summary_t";
 import {computed} from "vue";
+import {getOpS, calcOverPower} from "../utils/overpower";
 
 
 type OpStatisticKey = 'pl' | 'fc' | 'aj' | 'ajc' | 'np' | 'opMax' | 'opSum' | 'songCnt'
@@ -27,31 +28,6 @@ let props = defineProps({
     }
 })
 
-/**
- * @param score
- * @return op * 10000
- */
-function OverPower(score: Score) {
-    if (!score || score.score == 0) return 0;
-
-    let s = score.score <= 100_7500 ? score.ra * 10000 : parseInt((score.ds * 10000).toString()) + 20000;
-    let r = score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2' ? 5000 : 0;
-
-    if (score.fc == 'alljustice') r = 10000;
-    if (score.score == 101_0000) r = 12500;
-
-    let e = score.score <= 100_7500 ? 0 : (score.score - 100_7500) * 15;
-
-    return s * 5 + r + e;
-}
-
-function ShouldSkip(song: GroupSongInfo) {
-    if (song.Item2 != 3 && song.Item2 != 4) return true;
-    let constant = song.Item3.Constants[song.Item2]
-    // 好像有一些垃圾数据
-    return constant < 10;
-}
-
 function GetOverPowerStatistic() {
     function GetKey(score: Score): OpStatisticKey {
         if (!score) return 'np'
@@ -66,17 +42,13 @@ function GetOverPowerStatistic() {
     for (let i = 0; i < props.group.length; i++) {
         let song  = props.group[i]
         let score = props.scores[i]
-        if (ShouldSkip(song)) continue;
 
-        let constant = song.Item3.Constants[song.Item2]
-        opStat['opSum'] += OverPower(score);
+        let constant = Math.max(...song.Item3.Constants)
+        opStat['opSum'] += calcOverPower(score);
         opStat[GetKey(score)] += 1
         opStat['songCnt'] += 1
-        opStat['opMax'] += ((constant) * 5 + 15) * 10000;
+        opStat['opMax'] += (getOpS(constant, 101_0000) + 250) / 200;
     }
-
-    opStat['opMax'] /= 10000.;
-    opStat['opSum'] /= 10000.;
 
     return opStat
 }
@@ -95,8 +67,6 @@ function GetRankStatistic() {
     let rkStat = {'ajc': 0, 'sssp': 0, 'sss': 0, 'ssp': 0, 'ss': 0, 'oth': 0, 'np': 0, 'songCnt': 0} as RkStatistic;
 
     for (let i = 0; i < props.group.length; i++) {
-        if (ShouldSkip(props.group[i])) continue;
-
         rkStat[GetKey(props.scores[i])] += 1
         rkStat['songCnt'] += 1
     }
