@@ -19,7 +19,7 @@ public class Command : MarisaPluginBase
     /// <returns></returns>
     [MarisaPluginNoDoc]
     [MarisaPluginCommand("shell")]
-    private static MarisaPluginTaskState Shell(Message m)
+    private MarisaPluginTaskState Shell(Message m)
     {
         var dialogKey = (m.GroupInfo?.Id, m.Sender.Id);
 
@@ -87,7 +87,7 @@ public class Command : MarisaPluginBase
             _ = Task.Run(() => ObserveCommandAsync(message, commandState));
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-        });
+        }, this);
 
         m.Reply($"Shell启动了；发送“退出”可关闭，空闲 {idleTimeout.TotalMinutes:0} 分钟会自动退出。长输出会分段发送，若命令等待输入可继续直接发送内容。");
 

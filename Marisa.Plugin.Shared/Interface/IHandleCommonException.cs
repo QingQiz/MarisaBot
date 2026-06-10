@@ -17,13 +17,18 @@ public static class CommonExceptionHandler
     {
         var currentException = UnwrapCommonException(exception);
 
-        if (currentException is not WebRenderFailedException webRenderFailedException)
+        switch (currentException)
         {
-            return false;
+            case WebRenderFailedException webRenderFailedException:
+                message.Reply(webRenderFailedException.PublicUrl);
+                return true;
+
+            case NotSupportedException unsupported:
+                message.Reply(unsupported.Message);
+                return true;
         }
 
-        message.Reply(webRenderFailedException.PublicUrl);
-        return true;
+        return false;
     }
 
     public static Exception UnwrapCommonException(Exception exception)

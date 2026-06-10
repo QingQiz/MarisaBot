@@ -103,7 +103,7 @@ public partial class Ongeki
             );
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }

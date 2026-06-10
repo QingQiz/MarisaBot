@@ -391,10 +391,11 @@ public class Chi : MarisaPluginBase
             message.Reply($"{place} 已添加菜品 {meal}");
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
 
     [MarisaPluginDoc("删除吃啥的可选项", "`地点`")]
     [MarisaPluginCommand("delmeal")]
@@ -442,7 +443,7 @@ public class Chi : MarisaPluginBase
             message.Reply($"{place} 已删除菜品 {meal}");
 
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        });
+        }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }

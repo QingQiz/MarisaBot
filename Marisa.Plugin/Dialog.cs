@@ -21,14 +21,21 @@ public class Dialog : MarisaPluginBase
         // 是否有 针对整个群组的dialog
         if (!DialogManager.TryGetDialog(key, out var dialogHandler)) return MarisaPluginTaskState.NoResponse;
 
+        var sourcePlugin = DialogManager.GetSourcePlugin(key);
+
         MarisaPluginTaskState dialogRes;
         try
         {
-            dialogRes = dialogHandler!(message).Result;
+            dialogRes = await dialogHandler!(message);
         }
-        catch
+        catch (Exception e)
         {
             DialogManager.RemoveDialog(key);
+            if (sourcePlugin != null)
+            {
+                await sourcePlugin.ExceptionHandler(e, message);
+                return MarisaPluginTaskState.NoResponse;
+            }
             throw;
         }
 
@@ -46,9 +53,9 @@ public class Dialog : MarisaPluginBase
                 DialogManager.RemoveDialog(key);
                 var rep = await MessageHandler(message);
 
-                // If another handler claimed the same dialog key while we let other plugins run,
+                // If another plugin claimed the same dialog key while we let other plugins run,
                 // keep the newer dialog instead of waiting forever to restore the old one.
-                DialogManager.TryRestoreDialog(key, dialogHandler);
+                DialogManager.TryRestoreDialog(key, dialogHandler, sourcePlugin);
                 return rep;
             // 插件自闭了，请求删除自己
             case MarisaPluginTaskState.Canceled:
