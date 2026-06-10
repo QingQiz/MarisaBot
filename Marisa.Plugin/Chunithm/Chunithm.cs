@@ -43,7 +43,10 @@ public partial class Chunithm :
     public void Reset()
     {
         SongDb.Reset();
-        new DivingFishDataFetcher(SongDb).Reset();
+        // 共享歌单缓存是 LxnsDataFetcher 的 static _songList（DivingFish 也走它），必须清；
+        // DivingFish 自己的 _songTitleIndexer 是实例字段、handler 每次请求都新建 fetcher，
+        // 对临时实例调 Reset 没有意义，故不再调用它。
+        new LxnsDataFetcher(SongDb).Reset();
         new LouisDataFetcher(SongDb).Reset();
     }
 
