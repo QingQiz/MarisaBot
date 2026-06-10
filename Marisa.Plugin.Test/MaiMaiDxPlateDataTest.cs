@@ -56,7 +56,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("華将完成表",   new[] { "maimai でらっくす" })] // 繁体華
     [TestCase("镜将完成表",   new[] { "maimai でらっくす PRiSM" })] // 简体镜
     [TestCase("鏡将完成表",   new[] { "maimai でらっくす PRiSM" })]
-    [TestCase("彩将完成表",   new[] { "maimai でらっくす PRiSM PLUS" })] // 2026 PRiSM PLUS（曾在黑名单）
+    [TestCase("彩将完成表",   new[] { "maimai でらっくす PRiSM PLUS" })]
     [TestCase("辉将完成表",   new[] { "maimai FiNALE" })]    // 简体辉
     [TestCase("輝将完成表",   new[] { "maimai FiNALE" })]
     [TestCase("真将完成表",   new[] { "maimai", "maimai PLUS" })] // 真双 from
