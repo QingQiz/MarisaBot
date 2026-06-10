@@ -77,6 +77,187 @@ public partial class MaiMaiDx
 
     #endregion
 
+    #region 推分同步（导）
+
+    [MarisaPluginDoc("把成绩从华立(机台)推/导到查分器(水鱼/落雪)。首次需【私聊】配置一次令牌，之后群里也能直接用。基于 bakapiano/maimai-score-hub")]
+    [MarisaPluginCommand("导", "导分")]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    private async Task<MarisaPluginTaskState> Sync(Message message)
+    {
+        var qq = message.Sender.Id;
+
+        string? friendCode;
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
+        }
+
+        // 已设置过 → 直接同步（群里也行，不需要任何机密）
+        if (!string.IsNullOrWhiteSpace(friendCode))
+        {
+            await RunSync(message, friendCode!, null);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 首次设置：要让用户发导入令牌，必须私聊
+        if (message.GroupInfo != null)
+        {
+            message.Reply("首次使用「导」需要配置查分器令牌。请【私聊我】发送 `maimai 导` 完成一次设置（令牌不要发在群里，会泄露）。设置好以后群里也能直接用。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(
+            "【首次设置 · 推分同步】\n" +
+            "第一步：发送你的 maimai DX 好友码（游戏内「フレンド」里那串数字）。\n" +
+            "之后我会用 maimai-score-hub 的机器人号给你发游戏内好友申请，你同意后我就能抓成绩并同步到查分器。"
+        );
+
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), async fcMsg =>
+        {
+            var fc = fcMsg.Command.Trim().ToString().Trim();
+            if (fc.Length is < 6 or > 20 || !fc.All(char.IsDigit))
+            {
+                fcMsg.Reply("好友码应该是一串数字，格式不对，已退出。可重新 `maimai 导`。");
+                return MarisaPluginTaskState.Canceled;
+            }
+
+            fcMsg.Reply(
+                "好。第二步：发送你要同步的查分器【导入令牌】（不是密码！）。\n" +
+                "一行一个，至少一个，两个都发就两边都推：\n" +
+                "  落雪 <你的落雪个人 API 令牌>\n" +
+                "  水鱼 <你的水鱼 Import-Token>\n" +
+                "令牌在哪拿：落雪→个人主页/开发者；水鱼→个人主页的「导入 token」。"
+            );
+
+            await DialogManager.AddDialogAsync((fcMsg.GroupInfo?.Id, fcMsg.Sender.Id), async tkMsg =>
+            {
+                var (lxns, df) = ParseTokens(tkMsg.Command.Trim().ToString());
+                if (lxns == null && df == null)
+                {
+                    tkMsg.Reply("没识别到令牌（格式：`落雪 xxx` / `水鱼 xxx`），已退出。可重新 `maimai 导`。");
+                    return MarisaPluginTaskState.Canceled;
+                }
+
+                // 只持久化好友码，令牌不落库
+                using (var realm = BotDbContext.OpenRealm())
+                {
+                    var b = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == tkMsg.Sender.Id);
+                    realm.Write(() =>
+                    {
+                        if (b == null)
+                            realm.AddWithAutoId(new MaiMaiDxBind(tkMsg.Sender.Id, 0) { FriendCode = fc });
+                        else
+                            b.FriendCode = fc;
+                    });
+                }
+
+                await RunSync(tkMsg, fc, (lxns, df));
+                return MarisaPluginTaskState.CompletedTask;
+            }, this);
+
+            return MarisaPluginTaskState.CompletedTask;
+        }, this);
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>跑一次完整同步：登录 → 轮询 → （可选设令牌）→ 推到所有已配置的查分器。</summary>
+    private static async Task RunSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
+    {
+        var msh = new MaiScoreHubClient();
+
+        message.Reply("正在请求登录…（首次需要你在游戏里同意机器人的好友申请，已是好友则会直接抓分）");
+
+        var login = await msh.LoginRequestAsync(friendCode);
+        if (!string.IsNullOrEmpty(login.BotFriendCode))
+        {
+            message.Reply($"已用机器人账号（好友码 {login.BotFriendCode}）发起好友申请，请进游戏【同意好友】。我最多等 3 分钟，同意后会自动抓分并同步。");
+        }
+
+        // 轮询直到完成 / 失败 / 超时
+        MaiScoreHubClient.LoginStatusResult? status = null;
+        var deadline = DateTime.UtcNow.AddMinutes(3);
+        while (DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(5000);
+            status = await msh.LoginStatusAsync(login.JobId);
+            if (status.Done) break;
+            if (status.Status is "failed" or "canceled")
+            {
+                message.Reply($"同步失败：{status.Message ?? status.Status}");
+                return;
+            }
+        }
+
+        if (status is not { Done: true } || string.IsNullOrEmpty(status.Token))
+        {
+            message.Reply("等待超时或没拿到登录凭据（多半是没及时同意好友申请）。同意后重试 `maimai 导` 即可。");
+            return;
+        }
+
+        var jwt = status.Token!;
+
+        // 设置新令牌（如有），再看 MSH 里配置了哪些查分器
+        if (newTokens is { } t)
+        {
+            if (!string.IsNullOrWhiteSpace(t.Lxns)) await msh.SetTokenAsync(jwt, "lxns", t.Lxns!);
+            if (!string.IsNullOrWhiteSpace(t.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", t.DivingFish!);
+        }
+
+        var profile = await msh.GetProfileAsync(jwt);
+
+        var targets = new List<string>();
+        if (profile.HasLxns) targets.Add("lxns");
+        if (profile.HasDivingFish) targets.Add("diving-fish");
+
+        if (targets.Count == 0)
+        {
+            message.Reply("华立成绩已抓取，但还没配置任何查分器令牌。请【私聊我】重新 `maimai 导` 设置令牌。");
+            return;
+        }
+
+        var sb = new StringBuilder("同步完成：\n");
+        foreach (var p in targets)
+        {
+            var name = p == "lxns" ? "落雪" : "水鱼";
+            try
+            {
+                var r = await msh.ExportAsync(jwt, p);
+                sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
+            }
+            catch (Exception e)
+            {
+                sb.AppendLine($"{name} ❌ {e.Message}");
+            }
+        }
+
+        message.Reply(sb.ToString().TrimEnd());
+    }
+
+    private static (string? Lxns, string? DivingFish) ParseTokens(string text)
+    {
+        string? lxns = null, df = null;
+
+        foreach (var raw in text.Split('\n'))
+        {
+            var line = raw.Trim();
+            if (line.Length == 0) continue;
+
+            var sp  = line.IndexOfAny([' ', '\t', '：', ':']);
+            var val = sp >= 0 ? line[(sp + 1)..].Trim() : "";
+
+            if (line.StartsWith("落雪") || line.StartsWith("lxns", StringComparison.OrdinalIgnoreCase))
+                lxns = val;
+            else if (line.StartsWith("水鱼") || line.StartsWith("df", StringComparison.OrdinalIgnoreCase) ||
+                     line.StartsWith("divingfish", StringComparison.OrdinalIgnoreCase) || line.StartsWith("diving-fish", StringComparison.OrdinalIgnoreCase))
+                df = val;
+        }
+
+        return (string.IsNullOrWhiteSpace(lxns) ? null : lxns, string.IsNullOrWhiteSpace(df) ? null : df);
+    }
+
+    #endregion
+
     #region unlock
 
     [MarisaPluginDisabled]
