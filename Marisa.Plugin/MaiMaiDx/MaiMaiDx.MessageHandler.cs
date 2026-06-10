@@ -189,13 +189,19 @@ public partial class MaiMaiDx
             }
         }
 
-        if (status is not { Done: true } || string.IsNullOrEmpty(status.Token))
+        if (status is not { Done: true })
         {
-            message.Reply("等待超时或没拿到登录凭据（多半是没及时同意好友申请）。同意后重试 `maimai 导` 即可。");
+            message.Reply("等待超时（多半是没及时同意好友申请）。同意后重试 `maimai 导` 即可。");
             return;
         }
 
-        var jwt = status.Token!;
+        // JWT 可能来自 login-status 的 token，也可能来自 login-request 的 authToken（契约不明，两处都兜）
+        var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
+        if (string.IsNullOrEmpty(jwt))
+        {
+            message.Reply("抓分完成但没拿到登录凭据（MSH 的 token 下发方式可能变了）。请反馈给开发者。");
+            return;
+        }
 
         // 设置新令牌（如有），再看 MSH 里配置了哪些查分器
         if (newTokens is { } t)

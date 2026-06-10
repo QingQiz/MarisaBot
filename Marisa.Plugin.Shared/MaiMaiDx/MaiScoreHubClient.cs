@@ -22,7 +22,7 @@ public class MaiScoreHubClient
     private static IFlurlRequest Authed(string path, string jwt) => Req(path)
         .WithHeader("Authorization", "Bearer " + jwt);
 
-    public sealed record LoginRequestResult(string JobId, string? BotFriendCode, string? Message);
+    public sealed record LoginRequestResult(string JobId, string? BotFriendCode, string? AuthToken, string? Message);
 
     public sealed record LoginStatusResult(bool Done, string Status, string? Stage, string? Token, string? Message);
 
@@ -48,8 +48,9 @@ public class MaiScoreHubClient
             bot = b.GetString();
         }
 
+        var authToken = root.TryGetProperty("authToken", out var a) && a.ValueKind == JsonValueKind.String ? a.GetString() : null;
         var msg = root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String ? m.GetString() : null;
-        return new LoginRequestResult(jobId, bot, msg);
+        return new LoginRequestResult(jobId, bot, authToken, msg);
     }
 
     /// <summary>GET /auth/login-status?jobId= — 轮询任务，完成时附带 JWT。</summary>
