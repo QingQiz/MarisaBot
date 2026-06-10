@@ -125,13 +125,21 @@ function UpdateColor() {
             mask-composite: intersect;
 }
 
-/* Song title — SEGA Maru Gothic DB with stroke-thickened weight to match maimai in-game UI */
+/* Song title — SEGA NewRodin EB, the font maimai actually uses for song titles
+   in-game. It is already Extra Bold, so the old Maru Gothic approach's 2.2px
+   text-stroke faux-bold is no longer needed. Maru Gothic kept as a fallback for
+   any glyph NewRodin lacks. */
 .mai-title {
-    font-family: 'SEGA Maru Gothic', 'Torus', 'Hiragino Kaku Gothic ProN', 'Microsoft YaHei', sans-serif;
+    font-family: 'SEGA NewRodin', 'SEGA Maru Gothic', 'Torus', 'Hiragino Kaku Gothic ProN', 'Microsoft YaHei', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    -webkit-text-stroke: 2.2px currentColor;
-    paint-order: stroke fill;
+    /* NewRodin EB has tall vertical metrics; its glyph ink overshoots the
+       line-box top & bottom, which the ellipsis's overflow:hidden would clip.
+       Extend the clip region with padding and cancel the layout impact with
+       equal negative margins, so descenders/kana render fully without shifting
+       the card layout. */
+    padding-block: 7px 10px;
+    margin-block: -7px -10px;
 }
 
 /* Specular highlight: top sheen + diagonal corner shine — kept very soft */
