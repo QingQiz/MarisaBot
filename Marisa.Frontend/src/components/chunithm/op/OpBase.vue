@@ -27,12 +27,18 @@ function GetScore(id: number, level: number) {
     return scores.value[`(${id}, ${level})`]
 }
 
-const allScores = computed(() => songs.value.map(s => GetScore(s.Item3.Id, s.Item2)))
+function shouldSkip(s: GroupSongInfo): boolean {
+    if (s.Item2 !== 3 && s.Item2 !== 4) return true;
+    return s.Item3.Constants[s.Item2] < 10;
+}
+
+const filteredSongs = computed(() => songs.value.filter(s => !shouldSkip(s)))
+const allScores = computed(() => filteredSongs.value.map(s => GetScore(s.Item3.Id, s.Item2)))
 
 // 按定数 (Item1) 分组, 0.1 一档
 const groups = computed(() => {
     const map = new Map<number, { songs: GroupSongInfo[], scs: Score[] }>();
-    for (const s of songs.value) {
+    for (const s of filteredSongs.value) {
         const k = Math.round(s.Item1 * 10) / 10;
         if (!map.has(k)) map.set(k, { songs: [], scs: [] });
         map.get(k)!.songs.push(s);
@@ -52,7 +58,7 @@ const groups = computed(() => {
     <div v-if="data_fetched" class="container">
         <div class="op-container">
             <div>ALL</div>
-            <OverPower :scores="allScores" :group="songs" :detail="true"/>
+            <OverPower :scores="allScores" :group="filteredSongs" :detail="true"/>
         </div>
         <template v-for="g in groups" :key="g.label">
             <div class="op-container">
