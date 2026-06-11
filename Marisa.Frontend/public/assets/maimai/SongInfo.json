@@ -755,7 +755,7 @@
       6.0,
       8.4,
       11.2,
-      12.8
+      12.9
     ],
     "level": [
       "6",
@@ -1467,14 +1467,14 @@
       5.0,
       7.0,
       11.2,
-      12.8,
+      13.0,
       13.4
     ],
     "level": [
       "5",
       "7",
       "11",
-      "12+",
+      "13",
       "13"
     ],
     "cids": [
@@ -1935,14 +1935,14 @@
       7.0,
       8.4,
       9.7,
-      12.9,
+      13.0,
       13.3
     ],
     "level": [
       "7",
       "8",
       "9+",
-      "12+",
+      "13",
       "13"
     ],
     "cids": [
@@ -3781,13 +3781,13 @@
       3.0,
       7.3,
       11.9,
-      12.8
+      13.0
     ],
     "level": [
       "3",
       "7",
       "11+",
-      "12+"
+      "13"
     ],
     "cids": [
       220,
@@ -4225,13 +4225,13 @@
       3.0,
       8.2,
       11.2,
-      13.0
+      12.9
     ],
     "level": [
       "3",
       "8",
       "11",
-      "13"
+      "12+"
     ],
     "cids": [
       244,
@@ -5977,14 +5977,14 @@
       5.0,
       8.6,
       11.2,
-      12.9,
+      13.0,
       13.4
     ],
     "level": [
       "5",
       "8+",
       "11",
-      "12+",
+      "13",
       "13"
     ],
     "cids": [
@@ -7343,13 +7343,13 @@
       3.0,
       7.2,
       10.4,
-      12.9
+      13.3
     ],
     "level": [
       "3",
       "7",
       "10",
-      "12+"
+      "13"
     ],
     "cids": [
       420,
@@ -8639,13 +8639,13 @@
       2.0,
       7.1,
       11.1,
-      12.8
+      13.0
     ],
     "level": [
       "2",
       "7",
       "11",
-      "12+"
+      "13"
     ],
     "cids": [
       494,
@@ -10157,13 +10157,13 @@
       4.0,
       6.8,
       10.5,
-      12.8
+      13.0
     ],
     "level": [
       "4",
       "6",
       "10",
-      "12+"
+      "13"
     ],
     "cids": [
       580,
@@ -11291,7 +11291,7 @@
       4.0,
       8.5,
       11.7,
-      13.1
+      13.3
     ],
     "level": [
       "4",
@@ -12086,7 +12086,7 @@
       6.6,
       10.1,
       12.6,
-      12.8
+      12.9
     ],
     "level": [
       "3",
@@ -13055,13 +13055,13 @@
       4.0,
       7.3,
       10.9,
-      12.9
+      13.0
     ],
     "level": [
       "4",
       "7",
       "10+",
-      "12+"
+      "13"
     ],
     "cids": [
       746,
@@ -15961,13 +15961,13 @@
       5.0,
       7.3,
       9.8,
-      12.9
+      13.4
     ],
     "level": [
       "5",
       "7",
       "9+",
-      "12+"
+      "13"
     ],
     "cids": [
       912,
@@ -21751,13 +21751,13 @@
       4.0,
       7.8,
       10.1,
-      13.0
+      12.9
     ],
     "level": [
       "4",
       "7+",
       "10",
-      "13"
+      "12+"
     ],
     "cids": [
       1223,
@@ -21891,13 +21891,13 @@
       5.0,
       7.8,
       10.8,
-      12.9
+      13.0
     ],
     "level": [
       "5",
       "7+",
       "10+",
-      "12+"
+      "13"
     ],
     "cids": [
       1231,
@@ -22253,13 +22253,13 @@
       4.0,
       7.8,
       11.1,
-      13.0
+      12.9
     ],
     "level": [
       "4",
       "7+",
       "11",
-      "13"
+      "12+"
     ],
     "cids": [
       1256,
@@ -32323,13 +32323,13 @@
       5.0,
       8.5,
       11.4,
-      13.0
+      12.9
     ],
     "level": [
       "5",
       "8",
       "11",
-      "13"
+      "12+"
     ],
     "cids": [
       1831,
@@ -35183,13 +35183,13 @@
       5.0,
       7.8,
       10.6,
-      13.0
+      12.9
     ],
     "level": [
       "5",
       "7+",
       "10+",
-      "13"
+      "12+"
     ],
     "cids": [
       1996,
@@ -38373,13 +38373,13 @@
       4.0,
       7.0,
       9.0,
-      12.9
+      13.0
     ],
     "level": [
       "4",
       "7",
       "9",
-      "12+"
+      "13"
     ],
     "cids": [
       2759,
@@ -38922,6 +38922,80 @@
       "bpm": 165,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "10030",
+    "title": "ネコ日和。",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.5,
+      9.5,
+      13.7
+    ],
+    "level": [
+      "2",
+      "6",
+      "9",
+      "13+"
+    ],
+    "cids": [
+      9277,
+      9278,
+      9279,
+      9280
+    ],
+    "charts": [
+      {
+        "notes": [
+          97,
+          11,
+          6,
+          4,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          162,
+          12,
+          6,
+          28,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          216,
+          38,
+          14,
+          21,
+          30
+        ],
+        "charter": "Luxizhel"
+      },
+      {
+        "notes": [
+          417,
+          8,
+          91,
+          41,
+          74
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "ネコ日和。",
+      "artist": "Kai/能登有沙",
+      "genre": "舞萌",
+      "bpm": 171,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },
@@ -38996,7 +39070,7 @@
       "bpm": 127,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -39081,7 +39155,7 @@
       2.0,
       5.8,
       9.8,
-      13.0
+      13.2
     ],
     "level": [
       "2",
@@ -39144,6 +39218,80 @@
       "bpm": 108,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "10122",
+    "title": "ゴーゴー幽霊船",
+    "type": "DX",
+    "ds": [
+      3.0,
+      7.0,
+      10.0,
+      13.0
+    ],
+    "level": [
+      "3",
+      "7",
+      "10",
+      "13"
+    ],
+    "cids": [
+      9281,
+      9282,
+      9283,
+      9284
+    ],
+    "charts": [
+      {
+        "notes": [
+          102,
+          9,
+          4,
+          7,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          210,
+          16,
+          4,
+          28,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          334,
+          45,
+          33,
+          5,
+          15
+        ],
+        "charter": "Luxizhel"
+      },
+      {
+        "notes": [
+          309,
+          41,
+          101,
+          72,
+          20
+        ],
+        "charter": "鳩ホルダー"
+      }
+    ],
+    "basic_info": {
+      "title": "ゴーゴー幽霊船",
+      "artist": "米津玄師",
+      "genre": "niconico & VOCALOID",
+      "bpm": 180,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },
@@ -39155,13 +39303,13 @@
       3.0,
       6.8,
       10.7,
-      13.0
+      12.9
     ],
     "level": [
       "3",
       "6",
       "10+",
-      "13"
+      "12+"
     ],
     "cids": [
       8599,
@@ -39218,7 +39366,7 @@
       "bpm": 147,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -39229,7 +39377,7 @@
       4.0,
       7.5,
       11.9,
-      13.1
+      13.4
     ],
     "level": [
       "4",
@@ -39958,7 +40106,7 @@
       "bpm": 168,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -40920,7 +41068,7 @@
       "bpm": 186,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -41216,7 +41364,7 @@
       "bpm": 156,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -41290,7 +41438,7 @@
       "bpm": 145,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -41449,13 +41597,13 @@
       3.0,
       7.8,
       9.8,
-      12.9
+      13.2
     ],
     "level": [
       "3",
       "7+",
       "9+",
-      "12+"
+      "13"
     ],
     "cids": [
       6383,
@@ -42178,7 +42326,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -42485,14 +42633,14 @@
       2.0,
       7.0,
       10.8,
-      12.9,
+      13.3,
       13.8
     ],
     "level": [
       "2",
       "7",
       "10+",
-      "12+",
+      "13",
       "13+"
     ],
     "cids": [
@@ -43464,13 +43612,13 @@
       4.0,
       7.2,
       10.8,
-      12.9
+      13.0
     ],
     "level": [
       "4",
       "7",
       "10+",
-      "12+"
+      "13"
     ],
     "cids": [
       2303,
@@ -48683,13 +48831,13 @@
       3.0,
       7.5,
       9.0,
-      12.9
+      13.2
     ],
     "level": [
       "3",
       "7",
       "9",
-      "12+"
+      "13"
     ],
     "cids": [
       2795,
@@ -49214,7 +49362,7 @@
       3.0,
       6.5,
       9.8,
-      12.8
+      12.9
     ],
     "level": [
       "3",
@@ -50707,7 +50855,7 @@
       5.0,
       7.7,
       10.8,
-      13.0
+      13.1
     ],
     "level": [
       "5",
@@ -53460,7 +53608,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -54866,7 +55014,7 @@
       "bpm": 120,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -57654,7 +57802,7 @@
       2.0,
       7.0,
       9.8,
-      13.1
+      13.2
     ],
     "level": [
       "2",
@@ -59948,7 +60096,7 @@
       2.0,
       7.8,
       10.0,
-      13.1
+      13.3
     ],
     "level": [
       "2",
@@ -60984,7 +61132,7 @@
       4.0,
       7.0,
       10.2,
-      13.1
+      13.2
     ],
     "level": [
       "4",
@@ -62331,7 +62479,7 @@
       "bpm": 138,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -62342,7 +62490,7 @@
       2.0,
       6.5,
       10.0,
-      13.0
+      13.1
     ],
     "level": [
       "2",
@@ -64072,7 +64220,7 @@
       "bpm": 176,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -64146,7 +64294,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -64157,13 +64305,13 @@
       3.0,
       7.0,
       9.8,
-      12.8
+      13.0
     ],
     "level": [
       "3",
       "7",
       "9+",
-      "12+"
+      "13"
     ],
     "cids": [
       6608,
@@ -66081,7 +66229,7 @@
       3.0,
       6.2,
       10.7,
-      13.0
+      13.2
     ],
     "level": [
       "3",
@@ -71598,7 +71746,7 @@
       "bpm": 168,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -71672,7 +71820,7 @@
       "bpm": 133,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -71746,7 +71894,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -71757,13 +71905,13 @@
       3.0,
       6.5,
       10.0,
-      12.9
+      13.0
     ],
     "level": [
       "3",
       "6",
       "10",
-      "12+"
+      "13"
     ],
     "cids": [
       7817,
@@ -72053,13 +72201,13 @@
       4.0,
       7.2,
       10.5,
-      12.9
+      13.0
     ],
     "level": [
       "4",
       "7",
       "10",
-      "12+"
+      "13"
     ],
     "cids": [
       7873,
@@ -73237,7 +73385,7 @@
       3.0,
       7.0,
       10.0,
-      13.1
+      13.2
     ],
     "level": [
       "3",
@@ -78974,7 +79122,7 @@
       2.0,
       6.5,
       9.5,
-      13.1
+      13.2
     ],
     "level": [
       "2",
@@ -83070,13 +83218,13 @@
       4.0,
       7.2,
       10.8,
-      13.1
+      12.9
     ],
     "level": [
       "4",
       "7",
       "10+",
-      "13"
+      "12+"
     ],
     "cids": [
       8583,
@@ -83379,13 +83527,13 @@
       4.0,
       7.2,
       10.7,
-      13.0
+      12.9
     ],
     "level": [
       "4",
       "7",
       "10+",
-      "13"
+      "12+"
     ],
     "cids": [
       8381,
@@ -83516,7 +83664,7 @@
       "bpm": 140,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -83590,7 +83738,7 @@
       "bpm": 171,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -83601,7 +83749,7 @@
       3.0,
       6.8,
       10.5,
-      12.8
+      12.7
     ],
     "level": [
       "3",
@@ -83664,7 +83812,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -83812,7 +83960,7 @@
       "bpm": 196,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -83886,7 +84034,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -83960,7 +84108,7 @@
       "bpm": 252,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84034,7 +84182,7 @@
       "bpm": 120,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84045,7 +84193,7 @@
       6.0,
       8.0,
       12.8,
-      14.7
+      14.6
     ],
     "level": [
       "6",
@@ -84108,7 +84256,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84182,7 +84330,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84256,7 +84404,7 @@
       "bpm": 200,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84330,7 +84478,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84404,7 +84552,7 @@
       "bpm": 195,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84415,7 +84563,7 @@
       5.0,
       8.0,
       11.8,
-      13.8
+      13.9
     ],
     "level": [
       "5",
@@ -84478,7 +84626,7 @@
       "bpm": 188,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84552,7 +84700,7 @@
       "bpm": 142,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84626,7 +84774,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84700,7 +84848,7 @@
       "bpm": 167,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84774,7 +84922,7 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84848,7 +84996,7 @@
       "bpm": 131,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84922,7 +85070,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -84996,7 +85144,7 @@
       "bpm": 230,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85070,7 +85218,7 @@
       "bpm": 163,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85144,7 +85292,7 @@
       "bpm": 198,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85218,7 +85366,7 @@
       "bpm": 184,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85292,7 +85440,7 @@
       "bpm": 276,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85366,7 +85514,7 @@
       "bpm": 130,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85440,7 +85588,7 @@
       "bpm": 191,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85527,7 +85675,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85538,13 +85686,13 @@
       4.0,
       7.5,
       10.0,
-      12.9
+      13.0
     ],
     "level": [
       "4",
       "7",
       "10",
-      "12+"
+      "13"
     ],
     "cids": [
       8648,
@@ -85601,7 +85749,7 @@
       "bpm": 187,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85675,7 +85823,7 @@
       "bpm": 135,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85749,7 +85897,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85760,7 +85908,7 @@
       3.0,
       6.5,
       9.8,
-      11.4,
+      11.5,
       13.1
     ],
     "level": [
@@ -85836,7 +85984,7 @@
       "bpm": 166,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -85923,7 +86071,7 @@
       "bpm": 173,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86010,7 +86158,7 @@
       "bpm": 115,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86021,7 +86169,7 @@
       3.0,
       6.5,
       10.7,
-      13.7
+      13.6
     ],
     "level": [
       "3",
@@ -86084,7 +86232,7 @@
       "bpm": 144,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86158,7 +86306,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86169,7 +86317,7 @@
       3.0,
       7.2,
       10.5,
-      13.1
+      13.0
     ],
     "level": [
       "3",
@@ -86232,7 +86380,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86306,7 +86454,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86317,7 +86465,7 @@
       3.0,
       6.2,
       9.7,
-      13.7
+      13.6
     ],
     "level": [
       "3",
@@ -86380,7 +86528,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86454,7 +86602,7 @@
       "bpm": 174,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86528,7 +86676,7 @@
       "bpm": 188,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86539,7 +86687,7 @@
       6.0,
       9.0,
       12.5,
-      14.4
+      14.5
     ],
     "level": [
       "6",
@@ -86602,7 +86750,7 @@
       "bpm": 188,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86613,7 +86761,7 @@
       4.0,
       6.5,
       10.7,
-      13.6
+      13.7
     ],
     "level": [
       "4",
@@ -86676,7 +86824,7 @@
       "bpm": 145,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86750,7 +86898,7 @@
       "bpm": 130,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86824,7 +86972,7 @@
       "bpm": 135,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86898,7 +87046,7 @@
       "bpm": 220,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86972,7 +87120,7 @@
       "bpm": 140,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -86983,7 +87131,7 @@
       3.0,
       7.5,
       10.0,
-      13.2
+      13.1
     ],
     "level": [
       "3",
@@ -87046,7 +87194,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87057,7 +87205,7 @@
       5.0,
       7.9,
       11.0,
-      13.7
+      13.6
     ],
     "level": [
       "5",
@@ -87120,7 +87268,7 @@
       "bpm": 240,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87131,7 +87279,7 @@
       2.0,
       6.5,
       9.8,
-      12.7
+      12.6
     ],
     "level": [
       "2",
@@ -87194,7 +87342,7 @@
       "bpm": 133,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87205,7 +87353,7 @@
       2.0,
       6.2,
       9.8,
-      13.1
+      13.3
     ],
     "level": [
       "2",
@@ -87268,7 +87416,7 @@
       "bpm": 135,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87279,7 +87427,7 @@
       6.0,
       9.0,
       12.5,
-      14.6
+      14.7
     ],
     "level": [
       "6",
@@ -87342,7 +87490,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87416,7 +87564,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87490,7 +87638,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87564,7 +87712,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87575,13 +87723,13 @@
       5.0,
       8.0,
       10.7,
-      13.5
+      13.6
     ],
     "level": [
       "5",
       "8",
       "10+",
-      "13"
+      "13+"
     ],
     "cids": [
       8889,
@@ -87638,7 +87786,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87712,7 +87860,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87786,7 +87934,7 @@
       "bpm": 155,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87860,7 +88008,7 @@
       "bpm": 183,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -87934,7 +88082,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88008,7 +88156,7 @@
       "bpm": 176,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88082,7 +88230,7 @@
       "bpm": 195,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88156,7 +88304,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88167,13 +88315,13 @@
       4.0,
       6.5,
       10.0,
-      13.5
+      13.7
     ],
     "level": [
       "4",
       "6",
       "10",
-      "13"
+      "13+"
     ],
     "cids": [
       8771,
@@ -88230,7 +88378,7 @@
       "bpm": 168,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88304,7 +88452,7 @@
       "bpm": 204,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88315,7 +88463,7 @@
       1.0,
       6.5,
       9.8,
-      12.9
+      12.7
     ],
     "level": [
       "1",
@@ -88378,7 +88526,7 @@
       "bpm": 121,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88452,7 +88600,7 @@
       "bpm": 155,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88526,7 +88674,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88600,7 +88748,7 @@
       "bpm": 174,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88674,7 +88822,7 @@
       "bpm": 184,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88748,7 +88896,7 @@
       "bpm": 178,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88822,7 +88970,7 @@
       "bpm": 175,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88896,7 +89044,7 @@
       "bpm": 204,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -88970,7 +89118,7 @@
       "bpm": 178,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89044,7 +89192,7 @@
       "bpm": 163,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89118,7 +89266,7 @@
       "bpm": 205,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89192,7 +89340,7 @@
       "bpm": 166,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89266,7 +89414,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89340,7 +89488,7 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89414,7 +89562,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89488,7 +89636,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89562,7 +89710,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89636,7 +89784,7 @@
       "bpm": 250,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89710,7 +89858,7 @@
       "bpm": 125,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89784,7 +89932,7 @@
       "bpm": 163,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89858,7 +90006,7 @@
       "bpm": 164,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -89932,7 +90080,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90006,7 +90154,7 @@
       "bpm": 175,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90080,7 +90228,7 @@
       "bpm": 155,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90154,7 +90302,7 @@
       "bpm": 220,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90241,7 +90389,7 @@
       "bpm": 104,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90315,7 +90463,7 @@
       "bpm": 203,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90402,7 +90550,7 @@
       "bpm": 153,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90489,7 +90637,7 @@
       "bpm": 132,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90563,7 +90711,7 @@
       "bpm": 141,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90637,7 +90785,7 @@
       "bpm": 133,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90711,7 +90859,7 @@
       "bpm": 154,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90785,7 +90933,7 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90859,7 +91007,7 @@
       "bpm": 200,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -90933,7 +91081,7 @@
       "bpm": 227,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91007,7 +91155,7 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91081,7 +91229,7 @@
       "bpm": 145,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91155,7 +91303,7 @@
       "bpm": 160,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91229,7 +91377,7 @@
       "bpm": 210,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91303,7 +91451,7 @@
       "bpm": 140,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91377,7 +91525,7 @@
       "bpm": 55,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91464,7 +91612,7 @@
       "bpm": 158,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91551,7 +91699,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91625,7 +91773,7 @@
       "bpm": 176,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91699,7 +91847,7 @@
       "bpm": 108,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91773,7 +91921,7 @@
       "bpm": 195,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91847,7 +91995,7 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91921,7 +92069,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -91995,7 +92143,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92069,7 +92217,7 @@
       "bpm": 175,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92143,7 +92291,7 @@
       "bpm": 165,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92217,7 +92365,7 @@
       "bpm": 181,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92291,7 +92439,7 @@
       "bpm": 216,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92365,7 +92513,7 @@
       "bpm": 190,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92439,7 +92587,7 @@
       "bpm": 154,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92513,7 +92661,7 @@
       "bpm": 135,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92587,7 +92735,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92661,7 +92809,7 @@
       "bpm": 204,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92735,7 +92883,7 @@
       "bpm": 175,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92809,7 +92957,7 @@
       "bpm": 155,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92883,7 +93031,7 @@
       "bpm": 225,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -92957,7 +93105,7 @@
       "bpm": 175,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93031,7 +93179,7 @@
       "bpm": 224,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93105,7 +93253,7 @@
       "bpm": 230,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93179,7 +93327,7 @@
       "bpm": 142,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93253,7 +93401,7 @@
       "bpm": 102,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93327,7 +93475,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93401,6 +93549,1599 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "11806",
+    "title": "Fraq",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.5,
+      12.2,
+      13.7
+    ],
+    "level": [
+      "5",
+      "8",
+      "12",
+      "13+"
+    ],
+    "cids": [
+      9285,
+      9286,
+      9287,
+      9288
+    ],
+    "charts": [
+      {
+        "notes": [
+          171,
+          19,
+          6,
+          24,
+          9
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          358,
+          26,
+          8,
+          28,
+          7
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          466,
+          90,
+          31,
+          55,
+          35
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          521,
+          83,
+          110,
+          26,
+          66
+        ],
+        "charter": "Luxizhel"
+      }
+    ],
+    "basic_info": {
+      "title": "Fraq",
+      "artist": "owl＊tree feat. べんざ",
+      "genre": "舞萌",
+      "bpm": 221,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11807",
+    "title": "ウタヒメナイトストーム",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.0,
+      11.5,
+      13.8
+    ],
+    "level": [
+      "4",
+      "7",
+      "11",
+      "13+"
+    ],
+    "cids": [
+      9289,
+      9290,
+      9291,
+      9292
+    ],
+    "charts": [
+      {
+        "notes": [
+          157,
+          18,
+          4,
+          8,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          260,
+          12,
+          12,
+          26,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          406,
+          46,
+          55,
+          16,
+          29
+        ],
+        "charter": "Jack"
+      },
+      {
+        "notes": [
+          631,
+          43,
+          142,
+          14,
+          26
+        ],
+        "charter": "はっぴー"
+      }
+    ],
+    "basic_info": {
+      "title": "ウタヒメナイトストーム",
+      "artist": "yowanecity feat.Eye",
+      "genre": "舞萌",
+      "bpm": 164,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11808",
+    "title": "Feel The Luv",
+    "type": "DX",
+    "ds": [
+      4.0,
+      7.7,
+      11.2,
+      13.8
+    ],
+    "level": [
+      "4",
+      "7+",
+      "11",
+      "13+"
+    ],
+    "cids": [
+      9293,
+      9294,
+      9295,
+      9296
+    ],
+    "charts": [
+      {
+        "notes": [
+          170,
+          9,
+          8,
+          14,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          300,
+          18,
+          4,
+          26,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          413,
+          86,
+          48,
+          11,
+          36
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          611,
+          42,
+          90,
+          127,
+          57
+        ],
+        "charter": "アマリリス"
+      }
+    ],
+    "basic_info": {
+      "title": "Feel The Luv",
+      "artist": "EmoCosine",
+      "genre": "舞萌",
+      "bpm": 155,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11809",
+    "title": "Åntinomiε",
+    "type": "DX",
+    "ds": [
+      6.0,
+      9.5,
+      12.8,
+      14.6
+    ],
+    "level": [
+      "6",
+      "9",
+      "12+",
+      "14+"
+    ],
+    "cids": [
+      9297,
+      9298,
+      9299,
+      9300
+    ],
+    "charts": [
+      {
+        "notes": [
+          254,
+          18,
+          8,
+          26,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          433,
+          21,
+          14,
+          24,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          471,
+          87,
+          58,
+          19,
+          53
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          631,
+          98,
+          114,
+          72,
+          124
+        ],
+        "charter": "SAFARi☆CAT"
+      }
+    ],
+    "basic_info": {
+      "title": "Åntinomiε",
+      "artist": "ああ…翡翠茶漬け…",
+      "genre": "舞萌",
+      "bpm": 242,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11810",
+    "title": "ATLAS RUSH",
+    "type": "DX",
+    "ds": [
+      5.0,
+      7.8,
+      12.6,
+      14.7
+    ],
+    "level": [
+      "5",
+      "7+",
+      "12+",
+      "14+"
+    ],
+    "cids": [
+      9301,
+      9302,
+      9303,
+      9304
+    ],
+    "charts": [
+      {
+        "notes": [
+          193,
+          13,
+          6,
+          14,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          304,
+          23,
+          7,
+          21,
+          13
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          403,
+          61,
+          48,
+          21,
+          59
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          763,
+          42,
+          103,
+          28,
+          109
+        ],
+        "charter": "BELiZHEL"
+      }
+    ],
+    "basic_info": {
+      "title": "ATLAS RUSH",
+      "artist": "kanone",
+      "genre": "舞萌",
+      "bpm": 156,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11822",
+    "title": "Supersonic Generation",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.0,
+      11.7,
+      13.9
+    ],
+    "level": [
+      "4",
+      "8",
+      "11+",
+      "13+"
+    ],
+    "cids": [
+      9305,
+      9306,
+      9307,
+      9308
+    ],
+    "charts": [
+      {
+        "notes": [
+          140,
+          11,
+          4,
+          6,
+          10
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          251,
+          22,
+          7,
+          28,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          341,
+          59,
+          32,
+          31,
+          40
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          567,
+          12,
+          91,
+          70,
+          75
+        ],
+        "charter": "Luxizhel"
+      }
+    ],
+    "basic_info": {
+      "title": "Supersonic Generation",
+      "artist": "Massive New Krew",
+      "genre": "音击&中二节奏",
+      "bpm": 155,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11823",
+    "title": "Zitronectar",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.7,
+      12.0,
+      14.3
+    ],
+    "level": [
+      "5",
+      "8+",
+      "12",
+      "14"
+    ],
+    "cids": [
+      9309,
+      9310,
+      9311,
+      9312
+    ],
+    "charts": [
+      {
+        "notes": [
+          168,
+          8,
+          8,
+          9,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          300,
+          14,
+          6,
+          16,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          357,
+          64,
+          55,
+          31,
+          39
+        ],
+        "charter": "ロシェ@ペンギン"
+      },
+      {
+        "notes": [
+          469,
+          51,
+          106,
+          29,
+          87
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "Zitronectar",
+      "artist": "Reku Mochizuki",
+      "genre": "音击&中二节奏",
+      "bpm": 222,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11831",
+    "title": "きゅびずむ",
+    "type": "DX",
+    "ds": [
+      3.0,
+      7.0,
+      10.0,
+      12.9
+    ],
+    "level": [
+      "3",
+      "7",
+      "10",
+      "12+"
+    ],
+    "cids": [
+      9313,
+      9314,
+      9315,
+      9316
+    ],
+    "charts": [
+      {
+        "notes": [
+          134,
+          14,
+          4,
+          12,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          308,
+          18,
+          9,
+          29,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          315,
+          53,
+          33,
+          19,
+          49
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          445,
+          68,
+          87,
+          65,
+          73
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "きゅびずむ",
+      "artist": "超てんちゃん",
+      "genre": "流行&动漫",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11832",
+    "title": "きゅびびびびずむ",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.0,
+      12.0,
+      13.8
+    ],
+    "level": [
+      "5",
+      "8",
+      "12",
+      "13+"
+    ],
+    "cids": [
+      9317,
+      9318,
+      9319,
+      9320
+    ],
+    "charts": [
+      {
+        "notes": [
+          221,
+          15,
+          15,
+          13,
+          14
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          404,
+          18,
+          13,
+          14,
+          14
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          323,
+          129,
+          41,
+          49,
+          124
+        ],
+        "charter": "はっぴー"
+      },
+      {
+        "notes": [
+          424,
+          98,
+          103,
+          121,
+          248
+        ],
+        "charter": "サぴぴぴぴちネファ太太太太コ"
+      }
+    ],
+    "basic_info": {
+      "title": "きゅびびびびずむ",
+      "artist": "超てんちゃん",
+      "genre": "流行&动漫",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11833",
+    "title": "ゆりかご",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.0,
+      9.0,
+      13.0
+    ],
+    "level": [
+      "2",
+      "6",
+      "9",
+      "13"
+    ],
+    "cids": [
+      9321,
+      9322,
+      9323,
+      9324
+    ],
+    "charts": [
+      {
+        "notes": [
+          86,
+          9,
+          6,
+          13,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          153,
+          21,
+          8,
+          28,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          255,
+          34,
+          20,
+          24,
+          10
+        ],
+        "charter": "Luxizhel"
+      },
+      {
+        "notes": [
+          457,
+          38,
+          88,
+          58,
+          13
+        ],
+        "charter": "鳩ホルダー"
+      }
+    ],
+    "basic_info": {
+      "title": "ゆりかご",
+      "artist": "歌：可不／作詞・作曲：MIMI",
+      "genre": "niconico & VOCALOID",
+      "bpm": 120,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11834",
+    "title": "月光",
+    "type": "DX",
+    "ds": [
+      4.0,
+      8.0,
+      11.2,
+      13.7
+    ],
+    "level": [
+      "4",
+      "8",
+      "11",
+      "13+"
+    ],
+    "cids": [
+      9325,
+      9326,
+      9327,
+      9328
+    ],
+    "charts": [
+      {
+        "notes": [
+          176,
+          16,
+          6,
+          8,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          350,
+          16,
+          5,
+          24,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          514,
+          44,
+          44,
+          12,
+          27
+        ],
+        "charter": "アマリリス"
+      },
+      {
+        "notes": [
+          550,
+          54,
+          137,
+          10,
+          69
+        ],
+        "charter": "ロシェ@ペンギン"
+      }
+    ],
+    "basic_info": {
+      "title": "月光",
+      "artist": "歌：V.I.P／作詞・作曲：廉",
+      "genre": "niconico & VOCALOID",
+      "bpm": 195,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11835",
+    "title": "はいよろこんで",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.5,
+      9.8,
+      11.6,
+      13.2
+    ],
+    "level": [
+      "3",
+      "6",
+      "9+",
+      "11+",
+      "13"
+    ],
+    "cids": [
+      9329,
+      9330,
+      9331,
+      9332,
+      9333
+    ],
+    "charts": [
+      {
+        "notes": [
+          155,
+          17,
+          4,
+          9,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          305,
+          20,
+          6,
+          13,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          357,
+          37,
+          56,
+          34,
+          22
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          401,
+          81,
+          105,
+          16,
+          46
+        ],
+        "charter": "緑風 犬三郎"
+      },
+      {
+        "notes": [
+          588,
+          78,
+          95,
+          37,
+          40
+        ],
+        "charter": "Jack"
+      }
+    ],
+    "basic_info": {
+      "title": "はいよろこんで",
+      "artist": "こっちのけんと",
+      "genre": "流行&动漫",
+      "bpm": 147,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11836",
+    "title": "ビビデバ",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.4,
+      9.7,
+      11.8,
+      13.2
+    ],
+    "level": [
+      "2",
+      "6",
+      "9+",
+      "11+",
+      "13"
+    ],
+    "cids": [
+      9334,
+      9335,
+      9336,
+      9337,
+      9338
+    ],
+    "charts": [
+      {
+        "notes": [
+          143,
+          13,
+          6,
+          7,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          277,
+          14,
+          7,
+          13,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          312,
+          89,
+          32,
+          15,
+          32
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          500,
+          66,
+          82,
+          5,
+          15
+        ],
+        "charter": "緑風 犬三郎"
+      },
+      {
+        "notes": [
+          616,
+          40,
+          107,
+          44,
+          18
+        ],
+        "charter": "シチミヘルツ"
+      }
+    ],
+    "basic_info": {
+      "title": "ビビデバ",
+      "artist": "星街すいせい（ホロライブ）",
+      "genre": "流行&动漫",
+      "bpm": 120,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11837",
+    "title": "シカ色デイズ",
+    "type": "DX",
+    "ds": [
+      3.0,
+      7.0,
+      9.8,
+      12.8
+    ],
+    "level": [
+      "3",
+      "7",
+      "9+",
+      "12+"
+    ],
+    "cids": [
+      9339,
+      9340,
+      9341,
+      9342
+    ],
+    "charts": [
+      {
+        "notes": [
+          99,
+          7,
+          4,
+          6,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          182,
+          12,
+          4,
+          28,
+          4
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          281,
+          34,
+          22,
+          31,
+          20
+        ],
+        "charter": "鳩ホルダー"
+      },
+      {
+        "notes": [
+          275,
+          24,
+          113,
+          52,
+          31
+        ],
+        "charter": "はっぴー"
+      }
+    ],
+    "basic_info": {
+      "title": "シカ色デイズ",
+      "artist": "シカ部 [鹿乃子のこ (CV.潘めぐみ)、虎視虎子 (CV.藤田 咲)、虎視餡子 (CV.田辺留依)、馬車芽めめ (CV.和泉風花)]",
+      "genre": "流行&动漫",
+      "bpm": 183,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11838",
+    "title": "メズマライザー",
+    "type": "DX",
+    "ds": [
+      3.0,
+      7.2,
+      10.5,
+      11.9,
+      13.8
+    ],
+    "level": [
+      "3",
+      "7",
+      "10",
+      "11+",
+      "13+"
+    ],
+    "cids": [
+      9343,
+      9344,
+      9345,
+      9346,
+      9347
+    ],
+    "charts": [
+      {
+        "notes": [
+          175,
+          22,
+          7,
+          6,
+          7
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          357,
+          22,
+          13,
+          15,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          379,
+          44,
+          56,
+          29,
+          16
+        ],
+        "charter": "ロシェ@ペンギン"
+      },
+      {
+        "notes": [
+          428,
+          70,
+          127,
+          40,
+          10
+        ],
+        "charter": "緑風 犬三郎"
+      },
+      {
+        "notes": [
+          613,
+          38,
+          83,
+          111,
+          155
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "メズマライザー",
+      "artist": "サツキ feat.初音ミク・重音テト",
+      "genre": "niconico & VOCALOID",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11839",
+    "title": "ももいろの鍵",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.5,
+      9.0,
+      12.7
+    ],
+    "level": [
+      "2",
+      "6",
+      "9",
+      "12+"
+    ],
+    "cids": [
+      9348,
+      9349,
+      9350,
+      9351
+    ],
+    "charts": [
+      {
+        "notes": [
+          135,
+          10,
+          4,
+          17,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          258,
+          14,
+          11,
+          28,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          305,
+          45,
+          22,
+          13,
+          11
+        ],
+        "charter": "はっぴー"
+      },
+      {
+        "notes": [
+          395,
+          90,
+          89,
+          36,
+          30
+        ],
+        "charter": "アマリリス"
+      }
+    ],
+    "basic_info": {
+      "title": "ももいろの鍵",
+      "artist": "いよわ",
+      "genre": "niconico & VOCALOID",
+      "bpm": 165,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11840",
+    "title": "のだ",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.2,
+      9.8,
+      13.3
+    ],
+    "level": [
+      "3",
+      "6",
+      "9+",
+      "13"
+    ],
+    "cids": [
+      9352,
+      9353,
+      9354,
+      9355
+    ],
+    "charts": [
+      {
+        "notes": [
+          158,
+          15,
+          4,
+          8,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          240,
+          13,
+          15,
+          26,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          273,
+          62,
+          41,
+          11,
+          56
+        ],
+        "charter": "サファ太"
+      },
+      {
+        "notes": [
+          526,
+          34,
+          141,
+          74,
+          55
+        ],
+        "charter": "Luxizhel & はっぴー"
+      }
+    ],
+    "basic_info": {
+      "title": "のだ",
+      "artist": "大漠波新",
+      "genre": "niconico & VOCALOID",
+      "bpm": 142,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11841",
+    "title": "Idoratrize World",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.8,
+      10.5,
+      13.3
+    ],
+    "level": [
+      "3",
+      "6",
+      "10",
+      "13"
+    ],
+    "cids": [
+      9356,
+      9357,
+      9358,
+      9359
+    ],
+    "charts": [
+      {
+        "notes": [
+          149,
+          11,
+          4,
+          7,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          282,
+          16,
+          14,
+          28,
+          2
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          354,
+          51,
+          56,
+          27,
+          37
+        ],
+        "charter": "Luxizhel"
+      },
+      {
+        "notes": [
+          487,
+          51,
+          130,
+          41,
+          52
+        ],
+        "charter": "鳩ホルダー"
+      }
+    ],
+    "basic_info": {
+      "title": "Idoratrize World",
+      "artist": "A-One",
+      "genre": "东方Project",
+      "bpm": 170,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11842",
+    "title": "Synthesis.",
+    "type": "DX",
+    "ds": [
+      5.0,
+      8.8,
+      12.6,
+      14.1
+    ],
+    "level": [
+      "5",
+      "8+",
+      "12+",
+      "14"
+    ],
+    "cids": [
+      9360,
+      9361,
+      9362,
+      9363
+    ],
+    "charts": [
+      {
+        "notes": [
+          218,
+          18,
+          10,
+          22,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          417,
+          16,
+          12,
+          29,
+          3
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          400,
+          128,
+          65,
+          32,
+          20
+        ],
+        "charter": "Jack"
+      },
+      {
+        "notes": [
+          738,
+          84,
+          72,
+          127,
+          82
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "Synthesis.",
+      "artist": "tn-shi",
+      "genre": "其他游戏",
+      "bpm": 180,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11843",
+    "title": "もういいよ",
+    "type": "DX",
+    "ds": [
+      2.0,
+      6.0,
+      9.8,
+      13.1
+    ],
+    "level": [
+      "2",
+      "6",
+      "9+",
+      "13"
+    ],
+    "cids": [
+      9364,
+      9365,
+      9366,
+      9367
+    ],
+    "charts": [
+      {
+        "notes": [
+          124,
+          15,
+          4,
+          13,
+          8
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          265,
+          18,
+          6,
+          22,
+          5
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          358,
+          119,
+          38,
+          16,
+          15
+        ],
+        "charter": "はっぴー"
+      },
+      {
+        "notes": [
+          526,
+          65,
+          107,
+          70,
+          38
+        ],
+        "charter": "鳩ホルダー"
+      }
+    ],
+    "basic_info": {
+      "title": "もういいよ",
+      "artist": "こっちのけんと",
+      "genre": "流行&动漫",
+      "bpm": 147,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
+    "id": "11844",
+    "title": "モエチャッカファイア",
+    "type": "DX",
+    "ds": [
+      3.0,
+      6.7,
+      10.5,
+      13.8
+    ],
+    "level": [
+      "3",
+      "6",
+      "10",
+      "13+"
+    ],
+    "cids": [
+      9368,
+      9369,
+      9370,
+      9371
+    ],
+    "charts": [
+      {
+        "notes": [
+          164,
+          11,
+          6,
+          6,
+          11
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          267,
+          17,
+          16,
+          26,
+          6
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          393,
+          22,
+          45,
+          29,
+          36
+        ],
+        "charter": "Luxizhel"
+      },
+      {
+        "notes": [
+          675,
+          54,
+          131,
+          70,
+          54
+        ],
+        "charter": "サファ太"
+      }
+    ],
+    "basic_info": {
+      "title": "モエチャッカファイア",
+      "artist": "弌誠「ゲーム『ゼンレスゾーンゼロ』エレン・ジョー 同人イメージソング」",
+      "genre": "流行&动漫",
+      "bpm": 163,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },
@@ -93475,7 +95216,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93549,7 +95290,7 @@
       "bpm": 195,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93623,7 +95364,7 @@
       "bpm": 185,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93697,7 +95438,7 @@
       "bpm": 180,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -93771,7 +95512,7 @@
       "bpm": 240,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -94405,6 +96146,41 @@
     }
   },
   {
+    "id": "110121",
+    "title": "[甘]スイートマジック",
+    "type": "DX",
+    "ds": [
+      12.0
+    ],
+    "level": [
+      "12?"
+    ],
+    "cids": [
+      9372
+    ],
+    "charts": [
+      {
+        "notes": [
+          303,
+          43,
+          21,
+          18,
+          47
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[甘]スイートマジック",
+      "artist": "ろん×Junky",
+      "genre": "宴会場",
+      "bpm": 123,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
     "id": "110227",
     "title": "[J]Garakuta Doll Play",
     "type": "DX",
@@ -94484,7 +96260,7 @@
       "bpm": 138,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -94519,7 +96295,7 @@
       "bpm": 120,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -94567,7 +96343,7 @@
       "bpm": 125,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -94838,6 +96614,41 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "111113",
+    "title": "[回]ハム太郎とっとこうた",
+    "type": "DX",
+    "ds": [
+      13.0
+    ],
+    "level": [
+      "13?"
+    ],
+    "cids": [
+      9373
+    ],
+    "charts": [
+      {
+        "notes": [
+          421,
+          78,
+          81,
+          36,
+          58
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[回]ハム太郎とっとこうた",
+      "artist": "ハムちゃんず [covered by 光吉猛修]",
+      "genre": "宴会場",
+      "bpm": 140,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },
@@ -94908,7 +96719,7 @@
       "bpm": 200,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -95087,7 +96898,7 @@
       "bpm": 155,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -95135,6 +96946,41 @@
       "bpm": 187,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "111388",
+    "title": "[即]チューリングの跡",
+    "type": "DX",
+    "ds": [
+      13.0
+    ],
+    "level": [
+      "13?"
+    ],
+    "cids": [
+      9374
+    ],
+    "charts": [
+      {
+        "notes": [
+          263,
+          0,
+          202,
+          0,
+          9
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[即]チューリングの跡",
+      "artist": "Frums",
+      "genre": "宴会場",
+      "bpm": 180,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },
@@ -95170,7 +97016,7 @@
       "bpm": 202,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -95406,7 +97252,7 @@
       "bpm": 195,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -95528,6 +97374,54 @@
     }
   },
   {
+    "id": "111714",
+    "title": "[匿]匿名M",
+    "type": "DX",
+    "ds": [
+      13.7,
+      13.7
+    ],
+    "level": [
+      "13+?",
+      "13+?"
+    ],
+    "cids": [
+      9375,
+      9376
+    ],
+    "charts": [
+      {
+        "notes": [
+          347,
+          59,
+          48,
+          7,
+          14
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          549,
+          0,
+          60,
+          45,
+          2
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[匿]匿名M",
+      "artist": "ピノキオピー",
+      "genre": "宴会場",
+      "bpm": 140,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
+      "is_new": true
+    }
+  },
+  {
     "id": "111715",
     "title": "[嘘]ライアーダンサー",
     "type": "DX",
@@ -95559,7 +97453,7 @@
       "bpm": 170,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
-      "is_new": true
+      "is_new": false
     }
   },
   {
@@ -95594,6 +97488,54 @@
       "bpm": 150,
       "release_date": "",
       "from": "maimai でらっくす PRiSM",
+      "is_new": false
+    }
+  },
+  {
+    "id": "111838",
+    "title": "[助]メズマライザー",
+    "type": "DX",
+    "ds": [
+      13.7,
+      13.7
+    ],
+    "level": [
+      "13+?",
+      "13+?"
+    ],
+    "cids": [
+      9377,
+      9378
+    ],
+    "charts": [
+      {
+        "notes": [
+          652,
+          124,
+          151,
+          132,
+          21
+        ],
+        "charter": "-"
+      },
+      {
+        "notes": [
+          578,
+          148,
+          2,
+          47,
+          188
+        ],
+        "charter": "-"
+      }
+    ],
+    "basic_info": {
+      "title": "[助]メズマライザー",
+      "artist": "サツキ feat.初音ミク・重音テト",
+      "genre": "宴会場",
+      "bpm": 185,
+      "release_date": "",
+      "from": "maimai でらっくす PRiSM PLUS",
       "is_new": true
     }
   },

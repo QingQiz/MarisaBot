@@ -146,6 +146,7 @@ public static class PlateData
     ///     真：两个 from 字段都查（旧版 PLUS 在 diving-fish 是独立条目）。
     ///     熊/華、爽/煌、宙/星、祭/祝、双/宴：DX 时代 PLUS 已被 diving-fish 合并到主版本下，
     ///     所以两个代字都映射到同一个 from 字符串。
+    ///     鏡(PRiSM)/彩(PRiSM PLUS)：国服分作两个年份(2025/2026)，是各自独立的 from 条目。
     /// </summary>
     public static readonly Dictionary<string, string[]> PlateVersionMap = new()
     {
@@ -178,10 +179,11 @@ public static class PlateData
         ["宴"] = ["maimai でらっくす BUDDiES"],
         ["鏡"] = ["maimai でらっくす PRiSM"],
         ["镜"] = ["maimai でらっくす PRiSM"],
+        ["彩"] = ["maimai でらっくす PRiSM PLUS"],
     };
 
-    /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸、PRiSM PLUS 的彩）。报错而非"未识别"。</summary>
-    public static readonly HashSet<string> BlockedPlateKanji = ["丸", "彩"];
+    /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸）。报错而非"未识别"。</summary>
+    public static readonly HashSet<string> BlockedPlateKanji = ["丸"];
 
     /// <summary>类别别名 → diving-fish basic_info.genre 实际值。</summary>
     public static readonly Dictionary<string, string> GenreAliasMap = new()

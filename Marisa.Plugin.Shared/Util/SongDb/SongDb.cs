@@ -75,7 +75,15 @@ public class SongDb<TSong> : ICanReset where TSong : Song
 
     public void Reset()
     {
-        _songList = null;
+        // 重新生成歌单，并作废所有从它派生的缓存——否则 SongList 虽刷新，
+        // SongIndexer / SongAlias 仍指向旧数据（b50 的 is_new 走 SongIndexer，会一直 stale）。
+        _songList    = null;
+        _songIndexer = null;
+
+        // alias 索引重建时会新建 FileSystemWatcher，先 dispose 旧的防泄漏。
+        _songAliasChangedWatcher?.Dispose();
+        _songAliasChangedWatcher = null!;
+        _songAlias               = null;
     }
 
     private Dictionary<ReadOnlyMemory<char>, List<ReadOnlyMemory<char>>> GetSongAliases()

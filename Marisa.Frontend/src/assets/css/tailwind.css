@@ -43,6 +43,18 @@
     src: url('@/assets/fonts/SEGAMaruGothicDB.woff2') format('woff2');
 }
 
+/* SEGA NewRodin EB — the font maimai actually uses for song titles in-game
+   (SEGA's licensed cut of Fontworks New Rodin Pro EB; verified glyph-for-glyph
+   against the game's TMP SDF atlas). Used by .mai-title in ScoreCard.vue.
+   Declared with a 100-900 weight range so the title's heavy font-weight selects
+   this single Extra-Bold face directly, instead of the browser synthesizing bold
+   on top of an already-bold face. */
+@font-face {
+    font-family: 'SEGA NewRodin';
+    font-weight: 100 900;
+    src: url('@/assets/fonts/SEGANewRodinEB.woff2') format('woff2');
+}
+
 /* Noto Sans Bold (Latin only) — used for the b50 nickname/rating rainbow chars
    in BestScores.vue. Latin-only subset (~13 KB) so CJK falls through to the
    system font in font-osu-web (YaHei on Windows / Hiragino on macOS). */
