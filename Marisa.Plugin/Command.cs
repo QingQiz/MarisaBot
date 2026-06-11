@@ -378,10 +378,9 @@ public class Command : MarisaPluginBase
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var filtered =
-            from plugin in plugins
-            where plugin.GetType().IsSubclassOf(typeof(ICanReset))
-            select plugin as ICanReset;
+        // 必须用 OfType/is，不能用 plugin.GetType().IsSubclassOf(typeof(ICanReset))——
+        // IsSubclassOf 只认类继承链，对「接口」恒返回 false，曾导致 reset 命令完全空转。
+        var filtered = plugins.OfType<ICanReset>();
 
         foreach (var canReset in filtered)
         {
