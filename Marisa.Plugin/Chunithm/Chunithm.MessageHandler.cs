@@ -451,6 +451,170 @@ public partial class Chunithm
 
     #endregion
 
+    #region ChuOp
+
+    private static double LevelToNumber(string level)
+    {
+        if (level.EndsWith('+')) return double.Parse(level.TrimEnd('+')) + 0.5;
+        return double.Parse(level);
+    }
+
+    [MarisaPluginDoc("获取OverPower统计，子命令: base / genre / level / version")]
+    [MarisaPluginCommand("op")]
+    private static async Task<MarisaPluginTaskState> ChuOp(Message message)
+    {
+        message.Reply("子命令: base / genre / level / version");
+        return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("获取OverPower统计 (按定数范围)", "`定数1`-`定数2` 如 12.5-13.2")]
+    [MarisaPluginSubCommand(nameof(ChuOp))]
+    [MarisaPluginCommand("base", "b")]
+    private async Task<MarisaPluginTaskState> ChuOpBase(Message message)
+    {
+        var cmd = message.Command.Trim().ToString();
+        if (string.IsNullOrWhiteSpace(cmd))
+        {
+            message.Reply("请输入定数范围，如 12.5-13.2 或单个定数 15.2");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        double a, b;
+        if (cmd.Contains('-'))
+        {
+            var parts = cmd.Split('-');
+            if (parts.Length != 2 || !double.TryParse(parts[0].Trim(), out a) || !double.TryParse(parts[1].Trim(), out b))
+            {
+                message.Reply("格式错误，请使用 定数1-定数2，如 12.5-13.2");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+        }
+        else if (double.TryParse(cmd.Trim(), out a))
+        {
+            b = a;
+        }
+        else
+        {
+            message.Reply("格式错误，请使用 定数1-定数2 或单个定数");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (a > b) (a, b) = (b, a);
+
+        var fetcher = await GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        var songs = fetcher.GetSongList()
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(x => x.constant >= a && x.constant <= b);
+
+        var ctx = new WebContext();
+        ctx.Put("OverPowerScores", scores);
+        ctx.Put("OverPowerSongs", songs);
+
+        var img = await WebApi.ChunithmOpBase(ctx.Id);
+        message.Reply(MessageDataImage.FromBase64(img));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取OverPower统计 (按类别分组)")]
+    [MarisaPluginSubCommand(nameof(ChuOp))]
+    [MarisaPluginCommand("genre", "type", "g")]
+    private async Task<MarisaPluginTaskState> ChuOpGenre(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        var songs = fetcher.GetSongList()
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s);
+
+        var ctx = new WebContext();
+        ctx.Put("OverPowerScores", scores);
+        ctx.Put("OverPowerSongs", songs);
+
+        var img = await WebApi.ChunithmOpGenre(ctx.Id);
+        message.Reply(MessageDataImage.FromBase64(img));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取OverPower统计 (按难度范围)", "`难度1`-`难度2` 如 13-14+")]
+    [MarisaPluginSubCommand(nameof(ChuOp))]
+    [MarisaPluginCommand("level", "lv")]
+    private async Task<MarisaPluginTaskState> ChuOpLevel(Message message)
+    {
+        var cmd = message.Command.Trim().ToString();
+        if (string.IsNullOrWhiteSpace(cmd))
+        {
+            cmd = "10-15+";
+        }
+
+        var parts = cmd.Split('-');
+        if (parts.Length != 2)
+        {
+            message.Reply("格式错误，请使用 难度1-难度2，如 13-14+");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        double a, b;
+        try { a = LevelToNumber(parts[0].Trim()); b = LevelToNumber(parts[1].Trim()); }
+        catch { message.Reply("格式错误，请使用 难度1-难度2，如 13-14+"); return MarisaPluginTaskState.CompletedTask; }
+
+        if (a > b) (a, b) = (b, a);
+
+        var fetcher = await GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        var songs = fetcher.GetSongList()
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s)
+            .Where(x =>
+            {
+                var lv = LevelToNumber(x.song.Levels[x.i]);
+                return lv >= a && lv <= b;
+            });
+
+        var ctx = new WebContext();
+        ctx.Put("OverPowerScores", scores);
+        ctx.Put("OverPowerSongs", songs);
+
+        var img = await WebApi.ChunithmOpLevel(ctx.Id);
+        message.Reply(MessageDataImage.FromBase64(img));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("获取OverPower统计 (按版本分组)")]
+    [MarisaPluginSubCommand(nameof(ChuOp))]
+    [MarisaPluginCommand("version", "ver")]
+    private async Task<MarisaPluginTaskState> ChuOpVersion(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+        var scores  = await fetcher.GetScores(message);
+
+        var songs = fetcher.GetSongList()
+            .Select(song => song.Constants
+                .Select((constant, i) => (constant, i, song)))
+            .SelectMany(s => s);
+
+        var ctx = new WebContext();
+        ctx.Put("OverPowerScores", scores);
+        ctx.Put("OverPowerSongs", songs);
+
+        var img = await WebApi.ChunithmOpVersion(ctx.Id);
+        message.Reply(MessageDataImage.FromBase64(img));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
     #region 查分
 
     /// <summary>

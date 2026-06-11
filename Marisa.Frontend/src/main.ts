@@ -17,6 +17,10 @@ import Recommend from "@/components/maimai/Recommend.vue";
 import MaiMaiSummary from "@/components/maimai/Summary.vue";
 import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
 import OverPowerAll from "@/components/chunithm/OverPowerAll.vue";
+import OpBase from "@/components/chunithm/op/OpBase.vue";
+import OpGenre from "@/components/chunithm/op/OpGenre.vue";
+import OpLevel from "@/components/chunithm/op/OpLevel.vue";
+import OpVersion from "@/components/chunithm/op/OpVersion.vue";
 import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
 import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
 
@@ -30,6 +34,10 @@ const routes = [
     {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},
+    {path: '/chunithm/op-base', component: OpBase},
+    {path: '/chunithm/op-genre', component: OpGenre},
+    {path: '/chunithm/op-level', component: OpLevel},
+    {path: '/chunithm/op-version', component: OpVersion},
     {path: '/chunithm/preview', component: ChunithmPreview},
     {path: '/chunithm/song', component: ChunithmSong},
     {path: '/ongeki/song/:id', component: OngekiSong},

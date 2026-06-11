@@ -204,6 +204,26 @@ public static class WebApi
         return await RenderUrl("/chunithm/overpower?id=" + contextId);
     }
 
+    public static async Task<string> ChunithmOpBase(Guid contextId)
+    {
+        return await RenderUrl("/chunithm/op-base?id=" + contextId);
+    }
+
+    public static async Task<string> ChunithmOpGenre(Guid contextId)
+    {
+        return await RenderUrl("/chunithm/op-genre?id=" + contextId);
+    }
+
+    public static async Task<string> ChunithmOpLevel(Guid contextId)
+    {
+        return await RenderUrl("/chunithm/op-level?id=" + contextId);
+    }
+
+    public static async Task<string> ChunithmOpVersion(Guid contextId)
+    {
+        return await RenderUrl("/chunithm/op-version?id=" + contextId);
+    }
+
     public static async Task<string> ChunithmPreview(Guid contextId)
     {
         return await RenderUrl("/chunithm/preview?id=" + contextId);
