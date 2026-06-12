@@ -59,7 +59,6 @@ public partial class MaiMaiDx
 
             var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
 
-            // 原地改而不是删了重建：同一行上还有「导」存的 FriendCode（和 AimeId），删行会把它们一起抹掉
             realm.Write(() =>
             {
                 if (bind == null)
@@ -79,8 +78,8 @@ public partial class MaiMaiDx
 
     #region 推分同步（导）
 
-    [MarisaPluginDoc("把成绩从NET导到查分器(水鱼/落雪)。首次「导」会一步步引导；也可直接「导 <好友码>」、「导 落雪 xxx 水鱼 yyy」（设置导入令牌，发一个也行）。基于 bakapiano/maimai-score-hub")]
-    [MarisaPluginCommand("传分", "导")]
+    [MarisaPluginDoc("把成绩从NET导到查分器(水鱼/落雪)，首次使用会引导设置")]
+    [MarisaPluginCommand("传分", "导", "sync")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private async Task<MarisaPluginTaskState> Sync(Message message)
     {

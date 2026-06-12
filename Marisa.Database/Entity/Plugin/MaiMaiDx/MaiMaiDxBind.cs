@@ -22,7 +22,6 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
 
     public int AimeId { get; set; }
 
-    // 注解必须保持可空：optional→required 的 Realm 自动迁移是删列重建，会清空存量数据
     public string? ServerName { get; set; } = string.Empty;
 
     /// <summary>
