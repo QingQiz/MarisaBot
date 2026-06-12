@@ -112,7 +112,7 @@ public partial class MaiMaiDx
         if (junk != null)
         {
             // 解析失败的原文不回显：其中可能包含真实令牌，而 bot 发出的消息用户无法撤回
-            message.Reply($"有解析失败的参数（请确认令牌前后有空格分隔）。\n{UsageText}");
+            ReplyAt(message, $"有解析失败的参数（请确认令牌前后有空格分隔）。\n{UsageText}");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -120,13 +120,13 @@ public partial class MaiMaiDx
 
         if (newTokens != null && message.GroupInfo != null)
         {
-            message.Reply("令牌解析成功。建议立即「撤回」含有令牌的消息。");
+            ReplyAt(message, "令牌解析成功。建议立即「撤回」含有令牌的消息。");
         }
 
         // 同步任务可能持续数分钟，期间拒绝新的指令；携带令牌的指令需明确告知未提交，避免用户误以为设置已生效
         if (Syncing.ContainsKey(qq))
         {
-            message.Reply(newTokens == null
+            ReplyAt(message, newTokens == null
                 ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
                 : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
             return MarisaPluginTaskState.CompletedTask;
@@ -149,7 +149,7 @@ public partial class MaiMaiDx
         // 实现为单个对话的状态机（ToBeContinued 表示继续当前对话）。注意不能在对话 handler 内
         // 对同一 key 再次调用 AddDialogAsync：它会自旋等待 key 释放，而 key 要到 handler 返回
         // 之后才会释放，二者互相等待形成死锁。
-        message.Reply(newTokens == null
+        ReplyAt(message, newTokens == null
             ? "「首次传分设置」先发送你的 maimai DX 好友码（NET-好友-你的好友号码，15 位数字）。\n" +
               "发送请求后会有bot账号在NET里加好友，同意后自动传分到水鱼/落雪。"
             : "令牌解析成功，还需要好友码：请发送你的 maimai DX 好友码（NET-好友-你的好友号码，15 位数字）。");
@@ -173,7 +173,7 @@ public partial class MaiMaiDx
             {
                 if (input.Length != 15 || !input.All(char.IsAsciiDigit))
                 {
-                    next.Reply("好友码应为 15 位数字，解析失败，已退出设置。可重新发送「mai 导」。");
+                    ReplyAt(next, "好友码应为 15 位数字，解析失败，已退出设置。可重新发送「mai 导」。");
                     return Task.FromResult(MarisaPluginTaskState.Canceled);
                 }
 
@@ -187,7 +187,7 @@ public partial class MaiMaiDx
                     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                 }
 
-                next.Reply(
+                ReplyAt(next,
                     "好友码已绑定。接下来请发送查分器的【导入令牌】（不是账号密码），一行一个，可只填其中一个：\n" +
                     "落雪 xxx\n" +
                     "水鱼 yyy\n" +
@@ -208,7 +208,7 @@ public partial class MaiMaiDx
             var (fcExtra, lx, d, leftover) = ParseSyncArgs(input);
             if (lx == null && d == null)
             {
-                next.Reply("没有解析到令牌（格式：落雪 xxx / 水鱼 yyy），已退出设置。之后可随时发送「mai 导 落雪 xxx 水鱼 yyy」完成设置。");
+                ReplyAt(next, "没有解析到令牌（格式：落雪 xxx / 水鱼 yyy），已退出设置。之后可随时发送「mai 导 落雪 xxx 水鱼 yyy」完成设置。");
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
 
@@ -216,14 +216,14 @@ public partial class MaiMaiDx
             {
                 // 部分解析成功（如「水鱼yyy」缺少空格）时整体拒绝，避免用户误以为两个令牌都已设置；
                 // 原文不回显，其中可能包含真实令牌
-                next.Reply("部分参数解析失败（请确认令牌前后有空格分隔），已退出设置。可重新发送「mai 导 落雪 xxx 水鱼 yyy」。" +
-                           (next.GroupInfo != null ? "建议立即「撤回」含有令牌的消息。" : ""));
+                ReplyAt(next, "部分参数解析失败（请确认令牌前后有空格分隔），已退出设置。可重新发送「mai 导 落雪 xxx 水鱼 yyy」。" +
+                              (next.GroupInfo != null ? "建议立即「撤回」含有令牌的消息。" : ""));
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
 
             if (next.GroupInfo != null)
             {
-                next.Reply("令牌解析成功。建议立即「撤回」含有令牌的消息。");
+                ReplyAt(next, "令牌解析成功。建议立即「撤回」含有令牌的消息。");
             }
 
             StartSync(next, fc, (lx, d));
@@ -281,6 +281,19 @@ public partial class MaiMaiDx
         }
     }
 
+    /// <summary>用 @ 用户代替引用回复：传分消息常落在已被撤回的令牌消息上，引用会显示「原消息已被撤回」。</summary>
+    private static void ReplyAt(Message message, string text)
+    {
+        if (message.GroupInfo == null)
+        {
+            message.Reply(text, false);
+        }
+        else
+        {
+            message.Send(new MessageDataAt(message.Sender.Id), new MessageDataText(" " + text));
+        }
+    }
+
     /// <summary>
     ///     在后台启动一次完整同步并立即返回。
     ///     同步需要等待用户在游戏内同意好友申请（最长 10 分钟），不能阻塞消息处理管线：
@@ -290,7 +303,7 @@ public partial class MaiMaiDx
     {
         if (!Syncing.TryAdd(message.Sender.Id, 0))
         {
-            message.Reply(newTokens == null
+            ReplyAt(message, newTokens == null
                 ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
                 : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
             return;
@@ -304,7 +317,7 @@ public partial class MaiMaiDx
             }
             catch (Exception e)
             {
-                message.Reply($"同步失败：{e.Message}。{RetryHint(newTokens)}");
+                ReplyAt(message, $"同步失败：{e.Message}。{RetryHint(newTokens)}");
             }
             finally
             {
@@ -325,13 +338,11 @@ public partial class MaiMaiDx
 
         var retryHint = RetryHint(newTokens);
 
-        message.Reply("正在发送请求…（马上会有bot加你好友）");
-
         var login = await msh.LoginRequestAsync(friendCode);
         var announced = false;
         if (!string.IsNullOrEmpty(login.BotFriendCode))
         {
-            message.Reply($"Bot 账号（好友码{login.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
+            ReplyAt(message, $"Bot 账号（好友码{login.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
             announced = true;
         }
 
@@ -352,7 +363,7 @@ public partial class MaiMaiDx
             {
                 // 10 分钟内约轮询 120 次，容忍偶发的瞬时失败（5xx/超时），连续多次失败才放弃
                 if (++pollFailures < 6) continue;
-                message.Reply($"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
+                ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
                 return;
             }
 
@@ -360,21 +371,21 @@ public partial class MaiMaiDx
 
             if (status.Status is "failed" or "canceled")
             {
-                message.Reply($"同步失败：{status.Message ?? status.Status}。{retryHint}");
+                ReplyAt(message, $"同步失败：{status.Message ?? status.Status}。{retryHint}");
                 return;
             }
 
             // 实测 botUserFriendCode 仅在轮询返回的 job 对象中下发（login-request 不携带），在等待好友同意阶段提示一次
             if (!announced && status.Stage == "wait_acceptance" && !string.IsNullOrEmpty(status.BotFriendCode))
             {
-                message.Reply($"Bot 账号（好友码{status.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
+                ReplyAt(message, $"Bot 账号（好友码{status.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
                 announced = true;
             }
         }
 
         if (status is not { Done: true })
         {
-            message.Reply($"等待超时（可能未及时同意好友申请）。同意后{retryHint}");
+            ReplyAt(message, $"等待超时（可能未及时同意好友申请）。同意后{retryHint}");
             return;
         }
 
@@ -382,7 +393,7 @@ public partial class MaiMaiDx
         var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
         if (string.IsNullOrEmpty(jwt))
         {
-            message.Reply("成绩抓取完成，但未获取到登录凭据（MSH 的 token 下发方式可能已变更）。请向开发者反馈。");
+            ReplyAt(message, "成绩抓取完成，但未获取到登录凭据（MSH 的 token 下发方式可能已变更）。请向开发者反馈。");
             return;
         }
 
@@ -401,7 +412,7 @@ public partial class MaiMaiDx
 
         if (targets.Count == 0)
         {
-            message.Reply("成绩已抓取，但尚未配置任何查分器令牌。发送「mai 导 落雪 xxx 水鱼 yyy」完成设置（可只填其中一个，建议发送令牌后立即「撤回」消息）。");
+            ReplyAt(message, "成绩已抓取，但尚未配置任何查分器令牌。发送「mai 导 落雪 xxx 水鱼 yyy」完成设置（可只填其中一个，建议发送令牌后立即「撤回」消息）。");
             return;
         }
 
@@ -420,7 +431,7 @@ public partial class MaiMaiDx
             }
         }
 
-        message.Reply(sb.ToString().TrimEnd());
+        ReplyAt(message, sb.ToString().TrimEnd());
     }
 
     #endregion
@@ -596,7 +607,7 @@ public partial class MaiMaiDx
         "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
         "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
 
-    [MarisaPluginDoc("让 AI 锐评你的 b50。末尾可加文风名指定风格（如「锐评 电棍」），不加则随机；「锐评 列表」看可选文风", "`[查分器账号名 / @某人 / 留空]` `[文风名]`")]
+    [MarisaPluginDoc("让 AI 锐评你的 b50，可在末尾指定文风（「锐评 列表」查看）", "`[账号名/@某人]` `[文风名]`")]
     [MarisaPluginCommand("锐评", "roast")]
     private async Task<MarisaPluginTaskState> Roast(Message message)
     {
