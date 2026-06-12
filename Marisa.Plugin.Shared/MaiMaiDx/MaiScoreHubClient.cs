@@ -65,7 +65,6 @@ public class MaiScoreHubClient
 
         var status = S(root, "status") ?? "";
         var token  = S(root, "token");
-        var done   = root.TryGetProperty("done", out var d) && d.ValueKind == JsonValueKind.True;
 
         // 实测 stage / 失败原因 / 机器人好友码均位于嵌套的 job 对象中（根级没有这些字段；完成时 job 整体缺失）
         string? stage = null, error = null, botFriendCode = null;
@@ -76,8 +75,9 @@ public class MaiScoreHubClient
             botFriendCode = S(job, "botUserFriendCode");
         }
 
-        // 取到 token（或终态 completed）即视为抓分完成；实测完成时 status 仍为 processing 且无 done 字段
-        if (!string.IsNullOrEmpty(token) || status == "completed") done = true;
+        // token 在 update_score（抓分进行中）阶段就会随响应下发，不能作为完成依据：
+        // 抓分记录要等 status 变为 completed 之后才创建，过早导出会报 Sync not found（首次使用必现）
+        var done = status == "completed";
 
         return new LoginStatusResult(done, status, stage, token, error ?? S(root, "message"), botFriendCode);
     }

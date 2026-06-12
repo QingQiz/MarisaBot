@@ -423,6 +423,14 @@ public partial class MaiMaiDx
             try
             {
                 var r = await msh.ExportAsync(jwt, p);
+
+                // 抓分记录在任务 completed 之后才异步落库，导出可能恰好跑在落库之前，稍候重试
+                for (var retry = 0; retry < 5 && !r.Success && r.Message == "Sync not found"; retry++)
+                {
+                    await Task.Delay(3000);
+                    r = await msh.ExportAsync(jwt, p);
+                }
+
                 sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
             }
             catch (Exception e)
