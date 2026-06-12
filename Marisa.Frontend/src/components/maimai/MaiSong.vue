@@ -145,7 +145,6 @@ interface Chart {
     Charter: string
     Notes: number[]
     MaxDx: number
-    FitDiff: number | null
 }
 
 interface Song {
