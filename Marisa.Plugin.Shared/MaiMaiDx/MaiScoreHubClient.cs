@@ -30,6 +30,8 @@ public class MaiScoreHubClient
 
     public sealed record ExportResult(bool Success, int Exported, int Scores, string? Message);
 
+    public sealed record JobResult(string Status, string? Stage, string? Error);
+
     /// <summary>POST /auth/login-request — 用好友码发起登录+抓分任务。</summary>
     public async Task<LoginRequestResult> LoginRequestAsync(string friendCode)
     {
@@ -80,6 +82,23 @@ public class MaiScoreHubClient
         var done = status == "completed";
 
         return new LoginStatusResult(done, status, stage, token, error ?? S(root, "message"), botFriendCode);
+    }
+
+    /// <summary>
+    ///     GET /job/{jobId} — 轻量的任务状态查询（无需鉴权）。
+    ///     login-status 在抓分期间每次调用都伴随数据库写入与 JWT 签发，持续轮询会撞上服务端长时间停滞；
+    ///     MSH 自家前端跟踪抓分进度用的就是本接口。
+    /// </summary>
+    public async Task<JobResult> GetJobAsync(string jobId)
+    {
+        var json = await Req($"/job/{jobId}").GetStringAsync();
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        string? S(string k) => root.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+        return new JobResult(S("status") ?? "", S("stage"), S("error"));
     }
 
     /// <summary>GET /users/profile（Bearer）— 看 MSH 里已配置了哪些查分器令牌。</summary>
