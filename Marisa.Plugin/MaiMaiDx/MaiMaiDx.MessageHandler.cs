@@ -213,6 +213,53 @@ public partial class MaiMaiDx
         }, this);
 
         return MarisaPluginTaskState.CompletedTask;
+
+        // 解析「导」后面的参数：15 位纯数字是好友码，「落雪/水鱼 xxx」是对应查分器的导入令牌，
+        // 其余内容原样带回（Junk 非空说明没看懂，应当回用法而不是瞎猜）
+        static (string? Fc, string? Lxns, string? Df, string? Junk) ParseSyncArgs(string args)
+        {
+            string? lxnsTok = null, dfTok = null;
+
+            var rest = SyncTokenArg.Replace(args, m =>
+            {
+                var val = m.Groups["val"].Value;
+                // 「落雪 水鱼 yyy」这种没给值的，整段还回去当没看懂（真令牌都是 ASCII）
+                if (val.Any(c => c > 127)) return m.Value;
+
+                if (m.Groups["key"].Value.ToLowerInvariant() is "落雪" or "lxns") lxnsTok = val;
+                else dfTok = val;
+                return " ";
+            });
+
+            string? fcVal = null;
+            var junkWords = new List<string>();
+            foreach (var w in rest.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (fcVal == null && w.Length == 15 && w.All(char.IsAsciiDigit)) fcVal = w;
+                else junkWords.Add(w);
+            }
+
+            return (fcVal, lxnsTok, dfTok, junkWords.Count == 0 ? null : string.Join(' ', junkWords));
+        }
+
+        // 只持久化好友码，令牌不落库（只经手转交 MSH）
+        static void PersistFriendCode(long uid, string code)
+        {
+            using var realm = BotDbContext.OpenRealm();
+            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == uid);
+            realm.Write(() =>
+            {
+                if (bind == null)
+                {
+                    // ServerName 不能留空：空串会被 GetDataFetcher 的 _ 分支路由到华立 fetcher（AimeId=0 必坏）
+                    realm.AddWithAutoId(new MaiMaiDxBind(uid, 0) { FriendCode = code, ServerName = "DivingFish" });
+                }
+                else
+                {
+                    bind.FriendCode = code;
+                }
+            });
+        }
     }
 
     private const string UsageText =
@@ -228,56 +275,6 @@ public partial class MaiMaiDx
     private static readonly Regex SyncTokenArg = new(
         @"(?<=^|\s)(?<key>落雪|水鱼|lxns|diving-fish|divingfish|df)[:：\s]+(?<val>\S+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    /// <summary>
-    ///     解析「导」后面的参数：15 位纯数字是好友码，「落雪/水鱼 xxx」是对应查分器的导入令牌，
-    ///     其余内容原样带回（Junk 非空说明没看懂，应当回用法而不是瞎猜）。
-    /// </summary>
-    private static (string? Fc, string? Lxns, string? Df, string? Junk) ParseSyncArgs(string args)
-    {
-        string? lxns = null, df = null;
-
-        var rest = SyncTokenArg.Replace(args, m =>
-        {
-            var val = m.Groups["val"].Value;
-            // 「落雪 水鱼 yyy」这种没给值的，整段还回去当没看懂（真令牌都是 ASCII）
-            if (val.Any(c => c > 127)) return m.Value;
-
-            if (m.Groups["key"].Value.ToLowerInvariant() is "落雪" or "lxns") lxns = val;
-            else df = val;
-            return " ";
-        });
-
-        string? fc = null;
-        var junk = new List<string>();
-        foreach (var w in rest.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (fc == null && w.Length == 15 && w.All(char.IsAsciiDigit)) fc = w;
-            else junk.Add(w);
-        }
-
-        return (fc, lxns, df, junk.Count == 0 ? null : string.Join(' ', junk));
-    }
-
-    /// <summary>只持久化好友码，令牌不落库（只经手转交 MSH）。</summary>
-    private static void PersistFriendCode(long qq, string friendCode)
-    {
-        using var realm = BotDbContext.OpenRealm();
-        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
-        realm.Write(() =>
-        {
-            if (bind == null)
-            {
-                // ServerName 不能留空：空串会被 GetDataFetcher 的 _ 分支路由到华立 fetcher（AimeId=0 必坏），
-                // 给没 bind 过的人按默认值补上水鱼
-                realm.AddWithAutoId(new MaiMaiDxBind(qq, 0) { FriendCode = friendCode, ServerName = "DivingFish" });
-            }
-            else
-            {
-                bind.FriendCode = friendCode;
-            }
-        });
-    }
 
     /// <summary>正在后台同步的用户，防止同一个人并发开多个 MSH 任务。</summary>
     private static readonly ConcurrentDictionary<long, byte> Syncing = new();
