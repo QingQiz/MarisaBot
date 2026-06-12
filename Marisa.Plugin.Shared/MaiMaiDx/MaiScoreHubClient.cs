@@ -67,7 +67,7 @@ public class MaiScoreHubClient
         var token  = S(root, "token");
         var done   = root.TryGetProperty("done", out var d) && d.ValueKind == JsonValueKind.True;
 
-        // 实测 stage / 失败原因 / 机器人好友码都在嵌套的 job 里（根级没有；完成时整个 job 缺失）
+        // 实测 stage / 失败原因 / 机器人好友码均位于嵌套的 job 对象中（根级没有这些字段；完成时 job 整体缺失）
         string? stage = null, error = null, botFriendCode = null;
         if (root.TryGetProperty("job", out var job) && job.ValueKind == JsonValueKind.Object)
         {
@@ -76,7 +76,7 @@ public class MaiScoreHubClient
             botFriendCode = S(job, "botUserFriendCode");
         }
 
-        // 拿到 token（或终态 completed）就算抓分完成——实测完成时 status 仍是 processing 且无 done 字段
+        // 取到 token（或终态 completed）即视为抓分完成；实测完成时 status 仍为 processing 且无 done 字段
         if (!string.IsNullOrEmpty(token) || status == "completed") done = true;
 
         return new LoginStatusResult(done, status, stage, token, error ?? S(root, "message"), botFriendCode);
@@ -120,11 +120,11 @@ public class MaiScoreHubClient
 
         int I(string k) => root.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var n) ? n : 0;
 
-        // 实测返回（HTTP 201）没有顶层 success：{"status":200,"scores":N,"exported":N,"response":{...}}
+        // 实测返回（HTTP 201）无顶层 success 字段：{"status":200,"scores":N,"exported":N,"response":{...}}
         var success = root.TryGetProperty("status", out var s) && s.ValueKind == JsonValueKind.Number &&
                       s.TryGetInt32(out var code) && code == 200;
 
-        // 查分器自己的回执在嵌套 response 里（水鱼有 message="更新成功"，落雪只有 success 标志）；出错时兜顶层 message
+        // 查分器的回执位于嵌套的 response 对象中（水鱼为 message="更新成功"，落雪仅有 success 标志）；出错时回退到顶层 message
         string? msg = null;
         if (root.TryGetProperty("response", out var resp) && resp.ValueKind == JsonValueKind.Object &&
             resp.TryGetProperty("message", out var rm) && rm.ValueKind == JsonValueKind.String)
