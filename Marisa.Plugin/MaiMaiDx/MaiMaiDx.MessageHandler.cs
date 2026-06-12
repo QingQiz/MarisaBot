@@ -78,6 +78,23 @@ public partial class MaiMaiDx
 
     #region 推分同步（导）
 
+    private const string UsageText =
+        "用法：\n" +
+        "mai 导 —— 同步成绩到查分器（首次会一步步引导）\n" +
+        "mai 导 <好友码> —— 绑定/换绑好友码\n" +
+        "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（发一个也行）\n" +
+        "令牌获取方法：\n\n" +
+        "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
+        "落雪：账号详情-个人API密钥\n\n" +
+        "建议发送令牌后立即「撤回」消息。";
+
+    private static readonly Regex SyncTokenArg = new(
+        @"(?<=^|\s)(?<key>落雪|水鱼|lxns|diving-fish|divingfish|df)[:：\s]+(?<val>\S+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>正在后台同步的用户，防止同一个人并发开多个 MSH 任务。</summary>
+    private static readonly ConcurrentDictionary<long, byte> Syncing = new();
+
     [MarisaPluginDoc("把成绩从NET导到查分器(水鱼/落雪)，首次使用会引导设置")]
     [MarisaPluginCommand("传分", "导", "sync")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
@@ -261,23 +278,6 @@ public partial class MaiMaiDx
             });
         }
     }
-
-    private const string UsageText =
-        "用法：\n" +
-        "mai 导 —— 同步成绩到查分器（首次会一步步引导）\n" +
-        "mai 导 <好友码> —— 绑定/换绑好友码\n" +
-        "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（发一个也行）\n" +
-        "令牌获取方法：\n\n" +
-        "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
-        "落雪：账号详情-个人API密钥\n\n" +
-        "建议发送令牌后立即「撤回」消息。";
-
-    private static readonly Regex SyncTokenArg = new(
-        @"(?<=^|\s)(?<key>落雪|水鱼|lxns|diving-fish|divingfish|df)[:：\s]+(?<val>\S+)",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    /// <summary>正在后台同步的用户，防止同一个人并发开多个 MSH 任务。</summary>
-    private static readonly ConcurrentDictionary<long, byte> Syncing = new();
 
     /// <summary>
     ///     把一次完整同步丢到后台执行并立即返回。
