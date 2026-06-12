@@ -1,6 +1,8 @@
-﻿using Marisa.Plugin.Shared.Util;
+﻿using Flurl.Http;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
@@ -36,6 +38,21 @@ public class MaiMaiSong : Song
     public readonly List<MaiMaiSongChart> Charts = new();
     public readonly MaiMaiSongInfo Info;
     public readonly string Type;
+
+    /// <summary>水鱼拟合定数，进程级缓存，失败时为空</summary>
+    private static readonly Lazy<Dictionary<string, List<double?>>> FitDiffs = new(() =>
+    {
+        try
+        {
+            var json = "https://www.diving-fish.com/api/maimaidxprober/chart_stats".GetStringAsync().Result;
+            return JObject.Parse(json)["charts"]!.ToObject<Dictionary<string, List<JObject>>>()!
+                .ToDictionary(x => x.Key, x => x.Value.Select(c => (double?)c["fit_diff"]).ToList());
+        }
+        catch
+        {
+            return new Dictionary<string, List<double?>>();
+        }
+    });
 
     public MaiMaiSong(dynamic data)
     {
@@ -107,6 +124,26 @@ public class MaiMaiSong : Song
     public override string GetImage()
     {
         var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
-        return new CacheableText(path, () => this.Draw().ToB64()).Value;
+        return new CacheableText(path, () =>
+        {
+            var fitDiffs = FitDiffs.Value.GetValueOrDefault(Id.ToString());
+
+            var ctx = new WebContext();
+            ctx.Put("SongData", new
+            {
+                Id, Title, Type,
+                Info.Artist, Info.Genre, Info.Bpm, Info.From, Info.IsNew,
+                Charts = Levels.Select((level, i) => new
+                {
+                    Level    = level,
+                    Constant = Constants[i],
+                    Charter  = Charters[i],
+                    Notes    = Charts[i].Notes,
+                    MaxDx    = Charts[i].Notes.Sum() * 3,
+                    FitDiff  = fitDiffs?.ElementAtOrDefault(i)
+                }).ToList()
+            });
+            return WebApi.MaiMaiSong(ctx.Id).Result;
+        }).Value;
     }
 }
