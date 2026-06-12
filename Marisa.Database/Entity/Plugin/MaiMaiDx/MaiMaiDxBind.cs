@@ -1,4 +1,5 @@
-﻿using Marisa.Database.Entity;
+﻿#nullable enable
+using Marisa.Database.Entity;
 using Realms;
 
 namespace Marisa.Database.Entity.Plugin.MaiMaiDx;
@@ -21,7 +22,8 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
 
     public int AimeId { get; set; }
 
-    public string ServerName { get; set; } = string.Empty;
+    // 注解必须保持可空：optional→required 的 Realm 自动迁移是删列重建，会清空存量数据
+    public string? ServerName { get; set; } = string.Empty;
 
     /// <summary>
     ///     maimai DX 好友码（游戏内「フレンド」里的数字）。用于 `导` 命令经 maimai-score-hub 推分。

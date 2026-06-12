@@ -23,7 +23,9 @@ public static class BotDbContext
 
         return Realm.GetInstance(new RealmConfiguration(DatabasePath)
         {
-            SchemaVersion = 4
+            // 5: MaiMaiDxBind 增加 FriendCode（可空列，自动迁移给旧行补 null）。
+            // 注意：字符串列必须保持 optional——optional→required 的自动迁移会清空整列存量数据
+            SchemaVersion = 5
         });
     }
 
