@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
 using Marisa.Database;
@@ -79,7 +80,7 @@ public partial class MaiMaiDx
 
     #region 推分同步（导）
 
-    [MarisaPluginDoc("把成绩从华立(机台)推/导到查分器(水鱼/落雪)。首次需【私聊】配置一次令牌，之后群里也能直接用。基于 bakapiano/maimai-score-hub")]
+    [MarisaPluginDoc("把成绩从华立(机台)推/导到查分器(水鱼/落雪)。首次需【私聊】配置一次令牌，之后群里也能直接用；`导 令牌`=补设/更换令牌，`导 重置`=连好友码一起重设。基于 bakapiano/maimai-score-hub")]
     [MarisaPluginCommand("导", "导分")]
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private async Task<MarisaPluginTaskState> Sync(Message message)
@@ -92,110 +93,217 @@ public partial class MaiMaiDx
             friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
         }
 
-        // 已设置过 → 直接同步（群里也行，不需要任何机密）
-        if (!string.IsNullOrWhiteSpace(friendCode))
+        // 同步一跑几分钟，期间别再进任何流程（尤其别白收一遍令牌再丢掉）
+        if (Syncing.ContainsKey(qq))
         {
-            await RunSync(message, friendCode!, null);
+            message.Reply("已经有一个同步在进行中了，等它结束再来。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        // 首次设置：要让用户发导入令牌，必须私聊
+        var cmd = message.Command.Trim().ToString();
+        // 「导 令牌」= 补设/更换查分器令牌（首次失败后好友码已存、令牌却没到 MSH 时也靠这个救）；
+        // 「导 重置」= 好友码填错了之类，连好友码一起重来
+        var wantTokenSetup = cmd.EndsWith("令牌");
+        var wantReset      = cmd.EndsWith("重置");
+
+        // 已设置过且不是要重新配置 → 直接同步（群里也行，不需要任何机密）
+        if (!string.IsNullOrWhiteSpace(friendCode) && !wantTokenSetup && !wantReset)
+        {
+            StartSync(message, friendCode!, null);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 接下来都要让用户发导入令牌，必须私聊
         if (message.GroupInfo != null)
         {
-            message.Reply("首次使用「导」需要配置查分器令牌。请【私聊我】发送 `maimai 导` 完成一次设置（令牌不要发在群里，会泄露）。设置好以后群里也能直接用。");
+            message.Reply(string.IsNullOrWhiteSpace(friendCode)
+                ? "首次使用「导」需要配置查分器令牌。请【私聊我】发送 `maimai 导` 完成一次设置（令牌不要发在群里，会泄露）。设置好以后群里也能直接用。"
+                : $"这一步需要发查分器令牌，请【私聊我】发送 `maimai 导 {(wantReset ? "重置" : "令牌")}`（令牌不要发在群里，会泄露）。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 已有好友码且只是换令牌：跳过好友码一步
+        if (!string.IsNullOrWhiteSpace(friendCode) && !wantReset)
+        {
+            await AskTokensAndSync(message, friendCode!);
             return MarisaPluginTaskState.CompletedTask;
         }
 
         message.Reply(
-            "【首次设置 · 推分同步】\n" +
-            "第一步：发送你的 maimai DX 好友码（游戏内「フレンド」里那串数字）。\n" +
+            "【设置 · 推分同步】\n" +
+            "先发送你的 maimai DX 好友码（游戏内「フレンド」里那串数字）。\n" +
             "之后我会用 maimai-score-hub 的机器人号给你发游戏内好友申请，你同意后我就能抓成绩并同步到查分器。"
         );
 
-        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), async fcMsg =>
+        // 同一个对话先收好友码、再收令牌（ToBeContinued 保住对话）。
+        // 不能在对话 handler 里再 AddDialogAsync 同一个 key：AddDialogAsync 会自旋等 key 释放，
+        // 而 key 要等 handler 返回才释放 —— 死锁。
+        string? fc = null;
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), async next =>
         {
-            var fc = fcMsg.Command.Trim().ToString().Trim();
-            if (fc.Length is < 6 or > 20 || !fc.All(char.IsDigit))
+            if (fc == null)
             {
-                fcMsg.Reply("好友码应该是一串数字，格式不对，已退出。可重新 `maimai 导`。");
-                return MarisaPluginTaskState.Canceled;
-            }
-
-            fcMsg.Reply(
-                "好。第二步：发送你要同步的查分器【导入令牌】（不是密码！）。\n" +
-                "一行一个，至少一个，两个都发就两边都推：\n" +
-                "  落雪 <你的落雪个人 API 令牌>\n" +
-                "  水鱼 <你的水鱼 Import-Token>\n" +
-                "令牌在哪拿：落雪→个人主页/开发者；水鱼→个人主页的「导入 token」。"
-            );
-
-            await DialogManager.AddDialogAsync((fcMsg.GroupInfo?.Id, fcMsg.Sender.Id), async tkMsg =>
-            {
-                var (lxns, df) = ParseTokens(tkMsg.Command.Trim().ToString());
-                if (lxns == null && df == null)
+                var input = next.Command.Trim().ToString();
+                if (input.Length is < 6 or > 20 || !input.All(char.IsDigit))
                 {
-                    tkMsg.Reply("没识别到令牌（格式：`落雪 xxx` / `水鱼 xxx`），已退出。可重新 `maimai 导`。");
+                    next.Reply("好友码应该是一串数字，格式不对，已退出。可重新 `maimai 导`。");
                     return MarisaPluginTaskState.Canceled;
                 }
 
-                // 只持久化好友码，令牌不落库
-                using (var realm = BotDbContext.OpenRealm())
-                {
-                    var b = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == tkMsg.Sender.Id);
-                    realm.Write(() =>
-                    {
-                        if (b == null)
-                            realm.AddWithAutoId(new MaiMaiDxBind(tkMsg.Sender.Id, 0) { FriendCode = fc });
-                        else
-                            b.FriendCode = fc;
-                    });
-                }
+                fc = input;
+                next.Reply(TokenPrompt);
+                return MarisaPluginTaskState.ToBeContinued;
+            }
 
-                await RunSync(tkMsg, fc, (lxns, df));
-                return MarisaPluginTaskState.CompletedTask;
-            }, this);
-
-            return MarisaPluginTaskState.CompletedTask;
+            return await HandleTokensAndSync(next, fc);
         }, this);
 
         return MarisaPluginTaskState.CompletedTask;
     }
+
+    private const string TokenPrompt =
+        "现在发送你要同步的查分器【导入令牌】（不是密码！）。\n" +
+        "一行一个，至少一个，两个都发就两边都推：\n" +
+        "  落雪 <你的落雪个人 API 令牌>\n" +
+        "  水鱼 <你的水鱼 Import-Token>\n" +
+        "令牌在哪拿：落雪→个人主页/开发者；水鱼→个人主页的「导入 token」。";
+
+    /// <summary>问用户要查分器导入令牌，收到后存好友码并开始同步。</summary>
+    private Task AskTokensAndSync(Message message, string friendCode)
+    {
+        message.Reply(TokenPrompt);
+        return DialogManager.AddDialogAsync((message.GroupInfo?.Id, message.Sender.Id), tkMsg => HandleTokensAndSync(tkMsg, friendCode), this);
+    }
+
+    /// <summary>令牌对话的收尾：解析令牌、持久化好友码、把同步丢到后台。令牌只经手转交 MSH，不落库。</summary>
+    private static Task<MarisaPluginTaskState> HandleTokensAndSync(Message tkMsg, string friendCode)
+    {
+        var (lxns, df) = ParseTokens(tkMsg.Command.Trim().ToString());
+        if (lxns == null && df == null)
+        {
+            tkMsg.Reply("没识别到令牌（格式：`落雪 xxx` / `水鱼 xxx`），已退出。可发 `maimai 导 令牌` 重新设置。");
+            return Task.FromResult(MarisaPluginTaskState.Canceled);
+        }
+
+        // 只持久化好友码，令牌不落库
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            var b = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == tkMsg.Sender.Id);
+            realm.Write(() =>
+            {
+                if (b == null)
+                    realm.AddWithAutoId(new MaiMaiDxBind(tkMsg.Sender.Id, 0) { FriendCode = friendCode });
+                else
+                    b.FriendCode = friendCode;
+            });
+        }
+
+        StartSync(tkMsg, friendCode, (lxns, df));
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    /// <summary>正在后台同步的用户，防止同一个人并发开多个 MSH 任务。</summary>
+    private static readonly ConcurrentDictionary<long, byte> Syncing = new();
+
+    /// <summary>
+    ///     把一次完整同步丢到后台执行并立即返回。
+    ///     同步要等用户游戏内同意好友（最长 10 分钟），不能占着消息管线：
+    ///     BotDriver 对每条消息有 10 分钟硬超时，对话挂起期间还会把用户的其它消息当令牌吃掉。
+    /// </summary>
+    private static void StartSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
+    {
+        if (!Syncing.TryAdd(message.Sender.Id, 0))
+        {
+            message.Reply(newTokens == null
+                ? "已经有一个同步在进行中了，等它结束再来。"
+                : "已经有一个同步在进行中了，刚发的令牌没有提交。等它结束后请【私聊我】发送 `maimai 导 令牌` 重发一次。");
+            return;
+        }
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await RunSync(message, friendCode, newTokens);
+            }
+            catch (Exception e)
+            {
+                message.Reply($"同步失败：{e.Message}。{RetryHint(newTokens)}");
+            }
+            finally
+            {
+                Syncing.TryRemove(message.Sender.Id, out _);
+            }
+        });
+    }
+
+    /// <summary>中途失败时令牌不会保存（令牌不落库），带着令牌跑的失败要用「导 令牌」重来。</summary>
+    private static string RetryHint((string? Lxns, string? DivingFish)? newTokens) => newTokens == null
+        ? "重试 `maimai 导` 即可。"
+        : "请【私聊我】发送 `maimai 导 令牌` 重试（令牌需要重新发一次）。";
 
     /// <summary>跑一次完整同步：登录 → 轮询 → （可选设令牌）→ 推到所有已配置的查分器。</summary>
     private static async Task RunSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
     {
         var msh = new MaiScoreHubClient();
 
+        var retryHint = RetryHint(newTokens);
+
         message.Reply("正在请求登录…（首次需要你在游戏里同意机器人的好友申请，已是好友则会直接抓分）");
 
         var login = await msh.LoginRequestAsync(friendCode);
+        var announced = false;
         if (!string.IsNullOrEmpty(login.BotFriendCode))
         {
-            message.Reply($"已用机器人账号（好友码 {login.BotFriendCode}）发起好友申请，请进游戏【同意好友】。我最多等 3 分钟，同意后会自动抓分并同步。");
+            message.Reply($"已用机器人账号（好友码 {login.BotFriendCode}）发起好友申请，请进游戏【同意好友】。我最多等 10 分钟，同意后会自动抓分并同步。");
+            announced = true;
         }
 
-        // 轮询直到完成 / 失败 / 超时
+        // 轮询直到完成 / 失败 / 超时（MSH 忙时 send_request 排队可达数分钟，所以放宽到 10 分钟）
         MaiScoreHubClient.LoginStatusResult? status = null;
-        var deadline = DateTime.UtcNow.AddMinutes(3);
+        var deadline     = DateTime.UtcNow.AddMinutes(10);
+        var pollFailures = 0;
         while (DateTime.UtcNow < deadline)
         {
             await Task.Delay(5000);
-            status = await msh.LoginStatusAsync(login.JobId);
+
+            try
+            {
+                status       = await msh.LoginStatusAsync(login.JobId);
+                pollFailures = 0;
+            }
+            catch (Exception e)
+            {
+                // 10 分钟要询问 ~120 次，个别瞬时失败（5xx/超时）不该让整个等待报废
+                if (++pollFailures < 6) continue;
+                message.Reply($"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
+                return;
+            }
+
             if (status.Done) break;
+
             if (status.Status is "failed" or "canceled")
             {
-                message.Reply($"同步失败：{status.Message ?? status.Status}");
+                message.Reply($"同步失败：{status.Message ?? status.Status}。{retryHint}");
                 return;
+            }
+
+            // 实测 botUserFriendCode 只在轮询的 job 里下发（login-request 不带）；
+            // 已是好友的任务也可能路过 wait_acceptance，所以措辞要两种情况都对
+            if (!announced && status.Stage == "wait_acceptance" && !string.IsNullOrEmpty(status.BotFriendCode))
+            {
+                message.Reply($"机器人账号（好友码 {status.BotFriendCode}）已发出好友申请：游戏里有待同意的申请就【同意】一下，已是好友则无需操作。我最多等 10 分钟，完成后自动抓分并同步。");
+                announced = true;
             }
         }
 
         if (status is not { Done: true })
         {
-            message.Reply("等待超时（多半是没及时同意好友申请）。同意后重试 `maimai 导` 即可。");
+            message.Reply($"等待超时（多半是没及时同意好友申请）。同意后{retryHint}");
             return;
         }
 
-        // JWT 可能来自 login-status 的 token，也可能来自 login-request 的 authToken（契约不明，两处都兜）
+        // 实测 JWT 在 login-status 完成时的根级 token；login-request 的 authToken 只是兜底
         var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
         if (string.IsNullOrEmpty(jwt))
         {
@@ -218,7 +326,7 @@ public partial class MaiMaiDx
 
         if (targets.Count == 0)
         {
-            message.Reply("华立成绩已抓取，但还没配置任何查分器令牌。请【私聊我】重新 `maimai 导` 设置令牌。");
+            message.Reply("华立成绩已抓取，但还没配置任何查分器令牌。请【私聊我】发送 `maimai 导 令牌` 完成设置。");
             return;
         }
 
