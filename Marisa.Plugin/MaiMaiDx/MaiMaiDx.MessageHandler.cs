@@ -405,6 +405,11 @@ public partial class MaiMaiDx
         // 抓分记录在 status 变为 completed 之后才落库，过早导出会推送旧记录或报 Sync not found
         if (!status.Done)
         {
+            // 抓分阶段单独计时：第一阶段需等待好友申请送达并被接受，MSH 机器人账号繁忙时好友申请
+            // 的发出会排队数分钟，可能已耗去第一阶段的大部分时间；若与抓分共用同一截止时间，抓分等待
+            // 会因预算所剩无几而超时。此处好友申请已被接受，仅需等待服务端抓分（其自带 30 分钟硬上限）
+            deadline = DateTime.UtcNow.AddMinutes(10);
+
             var crawlDone = false;
             while (DateTime.UtcNow < deadline)
             {
