@@ -346,7 +346,11 @@ public partial class MaiMaiDx
             announced = true;
         }
 
-        // 轮询直到完成 / 失败 / 超时；MSH 繁忙时 send_request 阶段排队可达数分钟，故超时设为 10 分钟
+        // 第一阶段：轮询 login-status 等 JWT 下发，直到拿到 token / 失败 / 超时。
+        // MSH 繁忙时 send_request 阶段排队可达数分钟，故总超时设为 10 分钟。
+        // 注意只轮询到拿到 token 为止：login-status 在抓分（update_score）期间每次调用都伴随
+        // 数据库写入与 JWT 签发，持续轮询会撞上服务端 30 秒以上的响应停滞（实测连续超时），
+        // MSH 自家前端同样在拿到 token 后就不再调用该接口
         MaiScoreHubClient.LoginStatusResult? status = null;
         var deadline     = DateTime.UtcNow.AddMinutes(10);
         var pollFailures = 0;
@@ -367,7 +371,7 @@ public partial class MaiMaiDx
                 return;
             }
 
-            if (status.Done) break;
+            if (status.Done || !string.IsNullOrEmpty(status.Token)) break;
 
             if (status.Status is "failed" or "canceled")
             {
@@ -383,18 +387,60 @@ public partial class MaiMaiDx
             }
         }
 
-        if (status is not { Done: true })
+        if (status == null || (!status.Done && string.IsNullOrEmpty(status.Token)))
         {
             ReplyAt(message, $"等待超时（可能未及时同意好友申请）。同意后{retryHint}");
             return;
         }
 
-        // 实测 JWT 位于 login-status 完成响应的根级 token 字段；login-request 的 authToken 仅作回退
+        // 实测 JWT 在 update_score（抓分开始）阶段即随 login-status 下发；login-request 的 authToken 仅作回退
         var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
         if (string.IsNullOrEmpty(jwt))
         {
-            ReplyAt(message, "成绩抓取完成，但未获取到登录凭据（MSH 的 token 下发方式可能已变更）。请向开发者反馈。");
+            ReplyAt(message, "登录完成，但未获取到登录凭据（MSH 的 token 下发方式可能已变更）。请向开发者反馈。");
             return;
+        }
+
+        // 第二阶段：抓分仍在进行则改用轻量的 GET /job/{id} 等任务完成——
+        // 抓分记录在 status 变为 completed 之后才落库，过早导出会推送旧记录或报 Sync not found
+        if (!status.Done)
+        {
+            var crawlDone = false;
+            while (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(5000);
+
+                MaiScoreHubClient.JobResult job;
+                try
+                {
+                    job          = await msh.GetJobAsync(login.JobId);
+                    pollFailures = 0;
+                }
+                catch (Exception e)
+                {
+                    if (++pollFailures < 6) continue;
+                    ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
+                    return;
+                }
+
+                if (job.Status == "completed")
+                {
+                    crawlDone = true;
+                    break;
+                }
+
+                if (job.Status is "failed" or "canceled")
+                {
+                    ReplyAt(message, $"同步失败：{job.Error ?? job.Status}。{retryHint}");
+                    return;
+                }
+            }
+
+            if (!crawlDone)
+            {
+                ReplyAt(message, $"等待超时（成绩抓取未完成）。稍后{retryHint}");
+                return;
+            }
         }
 
         // 设置新令牌（如有），随后查询 MSH 中已配置的查分器
