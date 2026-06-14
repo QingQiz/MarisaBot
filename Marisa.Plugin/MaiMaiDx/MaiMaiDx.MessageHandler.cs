@@ -331,6 +331,11 @@ public partial class MaiMaiDx
         ? "重试「mai 导」即可。"
         : "请重新发送「mai 导 落雪/水鱼 xxx」（失败时令牌可能未被保存）。";
 
+    /// <summary>轮询退避：前 1 分钟每 5 秒（保证状态切换灵敏），随后拉长到 10、20 秒，减轻 MSH 单实例负担。</summary>
+    private static int PollDelayMs(TimeSpan waited) =>
+        waited < TimeSpan.FromMinutes(1) ? 5000 :
+        waited < TimeSpan.FromMinutes(3) ? 10000 : 20000;
+
     /// <summary>跑一次完整同步：登录 → 轮询 → （可选设令牌）→ 推到所有已配置的查分器。</summary>
     private static async Task RunSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
     {
@@ -338,25 +343,30 @@ public partial class MaiMaiDx
 
         var retryHint = RetryHint(newTokens);
 
+        ReplyAt(message, "正在发送请求…");
+
         var login = await msh.LoginRequestAsync(friendCode);
         var announced = false;
         if (!string.IsNullOrEmpty(login.BotFriendCode))
         {
-            ReplyAt(message, $"Bot 账号（好友码{login.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
+            ReplyAt(message, $"Bot 账号（好友码{login.BotFriendCode}）已发出好友申请，请尽快到 NET 同意。服务繁忙时申请可能排队，若超时按提示重试即可。");
             announced = true;
         }
 
         // 第一阶段：轮询 login-status 等 JWT 下发，直到拿到 token / 失败 / 超时。
-        // MSH 繁忙时 send_request 阶段排队可达数分钟，故总超时设为 10 分钟。
+        // MSH 繁忙时 send_request 阶段排队可达数分钟，故总超时放宽到 15 分钟。
         // 注意只轮询到拿到 token 为止：login-status 在抓分（update_score）期间每次调用都伴随
         // 数据库写入与 JWT 签发，持续轮询会撞上服务端 30 秒以上的响应停滞（实测连续超时），
         // MSH 自家前端同样在拿到 token 后就不再调用该接口
         MaiScoreHubClient.LoginStatusResult? status = null;
-        var deadline     = DateTime.UtcNow.AddMinutes(10);
-        var pollFailures = 0;
+        var waitStart      = DateTime.UtcNow;
+        var deadline       = waitStart.AddMinutes(15);
+        var pollFailures   = 0;
+        var sawAcceptance  = false;
+        var queuedNotified = false;
         while (DateTime.UtcNow < deadline)
         {
-            await Task.Delay(5000);
+            await Task.Delay(PollDelayMs(DateTime.UtcNow - waitStart));
 
             try
             {
@@ -365,7 +375,7 @@ public partial class MaiMaiDx
             }
             catch (Exception e)
             {
-                // 10 分钟内约轮询 120 次，容忍偶发的瞬时失败（5xx/超时），连续多次失败才放弃
+                // 退避轮询下 15 分钟约 60 次，容忍偶发的瞬时失败（5xx/超时），连续多次失败才放弃
                 if (++pollFailures < 6) continue;
                 ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
                 return;
@@ -379,17 +389,29 @@ public partial class MaiMaiDx
                 return;
             }
 
+            if (status.Stage == "wait_acceptance") sawAcceptance = true;
+
             // 实测 botUserFriendCode 仅在轮询返回的 job 对象中下发（login-request 不携带），在等待好友同意阶段提示一次
             if (!announced && status.Stage == "wait_acceptance" && !string.IsNullOrEmpty(status.BotFriendCode))
             {
-                ReplyAt(message, $"Bot 账号（好友码{status.BotFriendCode}）已发出好友申请，去NET里同意一下，请在10分钟内完成操作。");
+                ReplyAt(message, $"Bot 账号（好友码{status.BotFriendCode}）已发出好友申请，请尽快到 NET 同意。服务繁忙时申请可能排队，若超时按提示重试即可。");
                 announced = true;
+            }
+
+            // 老用户（已是好友）不会触发好友申请提示，任务也常卡在 send_request 排队；等待超过 30 秒仍无进展时
+            // 一次性告知请求已被受理，避免整段静默后只见超时
+            if (!announced && !queuedNotified && DateTime.UtcNow - waitStart > TimeSpan.FromSeconds(30))
+            {
+                ReplyAt(message, "同步请求已受理，正在等待处理（繁忙时可能需要排队几分钟），请稍候。");
+                queuedNotified = true;
             }
         }
 
         if (status == null || (!status.Done && string.IsNullOrEmpty(status.Token)))
         {
-            ReplyAt(message, $"等待超时（可能未及时同意好友申请）。同意后{retryHint}");
+            ReplyAt(message, sawAcceptance
+                ? $"等待超时（可能未及时同意好友申请）。同意后{retryHint}"
+                : $"等待超时（服务繁忙，好友申请仍在排队、未能及时处理，与你是否同意无关）。稍后{retryHint}");
             return;
         }
 
@@ -401,6 +423,14 @@ public partial class MaiMaiDx
             return;
         }
 
+        // 一拿到 JWT 即把令牌存入 MSH：抓分等待可能超时，提前提交可避免本次令牌白费、被迫重发令牌
+        if (newTokens is { } t)
+        {
+            if (!string.IsNullOrWhiteSpace(t.Lxns)) await msh.SetTokenAsync(jwt, "lxns", t.Lxns!);
+            if (!string.IsNullOrWhiteSpace(t.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", t.DivingFish!);
+            retryHint = "重试「mai 导」即可。"; // 令牌已存入 MSH，后续失败无需再带令牌重发
+        }
+
         // 第二阶段：抓分仍在进行则改用轻量的 GET /job/{id} 等任务完成——
         // 抓分记录在 status 变为 completed 之后才落库，过早导出会推送旧记录或报 Sync not found
         if (!status.Done)
@@ -408,12 +438,13 @@ public partial class MaiMaiDx
             // 抓分阶段单独计时：第一阶段需等待好友申请送达并被接受，MSH 机器人账号繁忙时好友申请
             // 的发出会排队数分钟，可能已耗去第一阶段的大部分时间；若与抓分共用同一截止时间，抓分等待
             // 会因预算所剩无几而超时。此处好友申请已被接受，仅需等待服务端抓分（其自带 30 分钟硬上限）
-            deadline = DateTime.UtcNow.AddMinutes(10);
+            deadline = DateTime.UtcNow.AddMinutes(20);
+            var crawlStart = DateTime.UtcNow;
 
             var crawlDone = false;
             while (DateTime.UtcNow < deadline)
             {
-                await Task.Delay(5000);
+                await Task.Delay(PollDelayMs(DateTime.UtcNow - crawlStart));
 
                 MaiScoreHubClient.JobResult job;
                 try
@@ -443,18 +474,12 @@ public partial class MaiMaiDx
 
             if (!crawlDone)
             {
-                ReplyAt(message, $"等待超时（成绩抓取未完成）。稍后{retryHint}");
+                ReplyAt(message, $"等待超时（服务繁忙，成绩抓取未在限定时间内完成）。稍后{retryHint}");
                 return;
             }
         }
 
-        // 设置新令牌（如有），随后查询 MSH 中已配置的查分器
-        if (newTokens is { } t)
-        {
-            if (!string.IsNullOrWhiteSpace(t.Lxns)) await msh.SetTokenAsync(jwt, "lxns", t.Lxns!);
-            if (!string.IsNullOrWhiteSpace(t.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", t.DivingFish!);
-        }
-
+        // 查询 MSH 中已配置的查分器
         var profile = await msh.GetProfileAsync(jwt);
 
         var targets = new List<string>();

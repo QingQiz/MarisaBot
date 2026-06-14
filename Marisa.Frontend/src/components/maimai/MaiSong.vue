@@ -75,7 +75,7 @@
                     <div v-for="(chart, i) in song.Charts" :key="i"
                          class="chart-row relative h-[144px] rounded-[10px] overflow-hidden"
                          :style="rowStyle(i)">
-                        <!-- 行头双层 chip：难度名（难度色）+ 标级(定数)（向白混色提亮层） -->
+                        <!-- 行头双层 chip：难度名（难度色）+ 等级（向白混色提亮层；定数已移到徽章） -->
                         <div class="flex items-stretch">
                             <div class="diff-chip-long shrink-0" :style="{ color: !isUtage && i === 4 ? '#4a1d78' : '#fff' }">
                                 <span class="chip-name-seg"
@@ -83,18 +83,19 @@
                                     {{ isUtage ? '宴' : DIFF_NAMES[i] }}</span>
                                 <span class="chip-lv-seg tabular-nums"
                                       :style="{ background: lighten(rowColor(i), 0.16), color: !isUtage && i === 4 ? '#4a1d78' : '#fff', width: chipLvWidth }">
-                                    {{ isUtage ? chart.Level : `${chart.Level}(${chart.Constant.toFixed(1)})` }}</span>
+                                    {{ chart.Level }}</span>
                             </div>
-                            <!-- 谱师名义：行右上角；无谱师（-）不显示 -->
-                            <div v-if="chart.Charter !== '-'" class="flex items-center ml-auto pr-[14px] mt-[-2px] min-w-0">
-                                <div class="font-rodin leading-tight whitespace-nowrap text-white"
-                                     :style="charterStyle(chart.Charter, 300, 22, 13)">
-                                    {{ chart.Charter }}
+                            <!-- 谱师名义：行右上角；无谱师（- / N/A / 空，常见于 BASIC/ADVANCED）统一显示淡化的 N/A -->
+                            <div class="flex items-center ml-auto pr-[14px] mt-[-2px] min-w-0">
+                                <div class="font-rodin leading-tight whitespace-nowrap"
+                                     :class="hasCharter(chart.Charter) ? 'text-white' : 'text-white/40'"
+                                     :style="charterStyle(charterText(chart.Charter), 300, 22, 13)">
+                                    {{ charterText(chart.Charter) }}
                                 </div>
                             </div>
                         </div>
-                        <!-- 等级徽章：行右下，难度色描边 + 霓虹光晕 -->
-                        <div class="lv-badge" :style="lvBadgeStyle(i)">{{ chart.Level }}</div>
+                        <!-- 定数徽章：行右下，难度色描边 + 霓虹光晕（宴谱无定数则显示等级） -->
+                        <div class="lv-badge" :style="lvBadgeStyle(i)">{{ isUtage ? chart.Level : chart.Constant.toFixed(1) }}</div>
                         <!-- 物量区：在行头横条下界到行下界之间垂直居中 -->
                         <div class="absolute left-[12px] right-[10px] top-[38px] bottom-0 flex items-center pr-[124px] pl-[6px]">
                         <div class="flex items-end w-full">
@@ -443,27 +444,27 @@ function rowStyle(i: number) {
     }
 }
 
-// 行头右段统一宽度：取本曲所有难度中最长的「标级(定数)」文本计宽，
+// 行头右段统一宽度：取本曲所有难度中最长的等级 label 计宽（定数已移到徽章），
 // 左段定宽 132 + 右段统一 → 各行横条总宽一致
 const chipLvWidth = computed(() => {
-    const texts = song.value?.Charts.map(c =>
-        isUtage.value ? c.Level : `${c.Level}(${c.Constant.toFixed(1)})`) ?? []
-    const maxLen = Math.max(0, ...texts.map(t => t.length))
-    return `${Math.round(maxLen * 10.2) + 42}px`   // Torus 18px 数字/括号 ≈10.2px/字 + 左右 padding 42
+    const maxLen = Math.max(0, ...(song.value?.Charts.map(c => c.Level.length) ?? []))
+    return `${Math.round(maxLen * 10.2) + 46}px`   // Torus 18px 数字 ≈10.2px/字 + 左右 padding（含「+」余量）
 })
 
-// 等级徽章：深色底 + 难度色描边 + 同色大数字 + 霓虹光晕；超长标级（如 14+?）略缩字号
+// 定数徽章：深色底 + 难度色描边 + 同色大数字 + 霓虹光晕。非宴谱显示定数（带一位小数比纯
+// 等级宽）→ 统一缩到 34px 使各行字号一致；宴谱无定数仍显示等级，超长略缩
 function lvBadgeStyle(i: number) {
     const c = isUtage.value ? '#f04fc6' : DIFF_COLORS[i] ?? '#999'
-    const lv = song.value?.Charts[i]?.Level ?? ''
-    return {
+    const glow = {
         background: 'rgba(8, 8, 16, 0.35)',
         border: `2.5px solid ${c}`,
         color: c,
         boxShadow: `0 0 18px ${c}66, inset 0 0 12px ${c}2e`,
         textShadow: `0 0 10px ${c}88`,
-        ...(lv.length >= 4 ? {fontSize: '30px'} : {}),
     }
+    if (!isUtage.value) return {...glow, fontSize: '34px'}
+    const lv = song.value?.Charts[i]?.Level ?? ''
+    return {...glow, ...(lv.length >= 4 ? {fontSize: '30px'} : {})}
 }
 
 function textUnits(s: string, latin: number) {
@@ -472,10 +473,18 @@ function textUnits(s: string, latin: number) {
     return w
 }
 
+// 谱师缺省（- / N/A / 空，常见于 BASIC/ADVANCED）统一显示占位 N/A
+function hasCharter(charter: string) {
+    return !!charter && charter !== '-' && charter !== 'N/A'
+}
+
+function charterText(charter: string) {
+    return hasCharter(charter) ? charter : 'N/A'
+}
+
 // 谱师名义（纯日西文 → NewRodin EB）auto-shrink 完整显示
 function charterStyle(charter: string, budget: number, max: number, min: number) {
-    const s = charter === '-' ? '—' : charter
-    const u = Math.max(textUnits(s, 0.8), 1)
+    const u = Math.max(textUnits(charter, 0.8), 1)
     return {fontSize: `${Math.max(min, Math.min(max, Math.floor(budget / u)))}px`}
 }
 
@@ -663,7 +672,7 @@ function break50Loss(chart: Chart): string {
     font-weight: 900;
 }
 
-/* 行头双层 chip：左段难度色放难度名，右段淡化同色放 标级(定数)。
+/* 行头双层 chip：左段难度色放难度名，右段淡化同色放等级（定数已移到徽章）。
    宽度统一固定、内部分栏定宽 → 各行横条整齐对位 */
 .diff-chip-long {
     display: inline-flex;
