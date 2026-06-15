@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
 using Marisa.Database;
@@ -58,21 +59,463 @@ public partial class MaiMaiDx
 
             var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
 
-            if (bind != null)
+            realm.Write(() =>
             {
-                realm.Write(() => realm.Remove(bind));
-            }
-
-            realm.Write(() => realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0)
-            {
-                ServerName = servers[idx]
-            }));
+                if (bind == null)
+                    realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0) { ServerName = servers[idx] });
+                else
+                    bind.ServerName = servers[idx];
+            });
 
             message.Reply("好了");
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }, this);
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    #endregion
+
+    #region 推分同步（导）
+
+    private const string UsageText =
+        "用法：\n" +
+        "mai 导 —— 同步成绩到查分器（首次使用会引导设置）\n" +
+        "mai 导 <好友码> —— 绑定/换绑好友码\n" +
+        "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（可只填其中一个）\n" +
+        "令牌获取方法：\n\n" +
+        "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
+        "落雪：账号详情-个人API密钥\n\n" +
+        "建议发送令牌后立即「撤回」消息。";
+
+    private static readonly Regex SyncTokenArg = new(
+        @"(?<=^|\s)(?<key>落雪|水鱼|lxns|diving-fish|divingfish|df)[:：\s]+(?<val>\S+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>正在后台同步的用户集合，防止同一用户并发发起多个 MSH 任务。</summary>
+    private static readonly ConcurrentDictionary<long, byte> Syncing = new();
+
+    [MarisaPluginDoc("把成绩从NET导到查分器(水鱼/落雪)，首次使用会引导设置")]
+    [MarisaPluginCommand("传分", "导", "sync")]
+    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    private async Task<MarisaPluginTaskState> Sync(Message message)
+    {
+        var qq = message.Sender.Id;
+
+        string? friendCode;
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
+        }
+
+        var (fcArg, lxns, df, junk) = ParseSyncArgs(message.Command.ToString());
+        if (junk != null)
+        {
+            // 解析失败的原文不回显：其中可能包含真实令牌，而 bot 发出的消息用户无法撤回
+            ReplyAt(message, $"有解析失败的参数（请确认令牌前后有空格分隔）。\n{UsageText}");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var newTokens = lxns == null && df == null ? ((string? Lxns, string? DivingFish)?)null : (lxns, df);
+
+        if (newTokens != null && message.GroupInfo != null)
+        {
+            ReplyAt(message, "令牌解析成功。建议立即「撤回」含有令牌的消息。");
+        }
+
+        // 同步任务可能持续数分钟，期间拒绝新的指令；携带令牌的指令需明确告知未提交，避免用户误以为设置已生效
+        if (Syncing.ContainsKey(qq))
+        {
+            ReplyAt(message, newTokens == null
+                ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
+                : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 消息中携带好友码：执行绑定/换绑
+        if (fcArg != null)
+        {
+            PersistFriendCode(qq, fcArg);
+            friendCode = fcArg;
+        }
+
+        if (!string.IsNullOrWhiteSpace(friendCode))
+        {
+            StartSync(message, friendCode!, newTokens);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 首次使用：通过对话引导完成设置，先收集好友码，必要时再收集令牌。
+        // 实现为单个对话的状态机（ToBeContinued 表示继续当前对话）。注意不能在对话 handler 内
+        // 对同一 key 再次调用 AddDialogAsync：它会自旋等待 key 释放，而 key 要到 handler 返回
+        // 之后才会释放，二者互相等待形成死锁。
+        ReplyAt(message, newTokens == null
+            ? "「首次传分设置」先发送你的 maimai DX 好友码（NET-好友-你的好友号码，15 位数字）。\n" +
+              "发送请求后会有bot账号在NET里加好友，同意后自动传分到水鱼/落雪。"
+            : "令牌解析成功，还需要好友码：请发送你的 maimai DX 好友码（NET-好友-你的好友号码，15 位数字）。");
+
+        var pendingTokens = newTokens;
+        var startedAt = DateTime.UtcNow;
+        string? fc = null;
+        await DialogManager.AddDialogAsync((message.GroupInfo?.Id, qq), next =>
+        {
+            // 闲置超过 10 分钟的引导对话视为已放弃，避免长期驻留——否则用户日后偶然发送的
+            // 一串数字会被误认为好友码。返回 Canceled 会移除对话，并把该消息正常转交其它插件处理
+            if (DateTime.UtcNow - startedAt > TimeSpan.FromMinutes(10))
+            {
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
+
+            var input = next.Command.Trim().ToString();
+
+            // 第一步：收集好友码
+            if (fc == null)
+            {
+                if (input.Length != 15 || !input.All(char.IsAsciiDigit))
+                {
+                    ReplyAt(next, "好友码应为 15 位数字，解析失败，已退出设置。可重新发送「mai 导」。");
+                    return Task.FromResult(MarisaPluginTaskState.Canceled);
+                }
+
+                fc = input;
+                PersistFriendCode(next.Sender.Id, fc);
+                startedAt = DateTime.UtcNow; // 刷新计时：超时语义为「闲置 10 分钟」，而非从对话创建起算
+
+                if (pendingTokens != null)
+                {
+                    StartSync(next, fc, pendingTokens);
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                }
+
+                ReplyAt(next,
+                    "好友码已绑定。接下来请发送查分器的【导入令牌】（不是账号密码），一行一个，可只填其中一个：\n" +
+                    "落雪 xxx\n" +
+                    "水鱼 yyy\n" +
+                    "令牌获取方法：\n\n" +
+                    "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
+                    "落雪：账号详情-个人API密钥\n\n" +
+                    "建议发送令牌后立即「撤回」消息。如果不需要设置令牌，请发送「跳过」。");
+                return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+            }
+
+            // 第二步：收集令牌（或跳过）
+            if (input is "跳过" or "skip")
+            {
+                StartSync(next, fc, null);
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            var (fcExtra, lx, d, leftover) = ParseSyncArgs(input);
+            if (lx == null && d == null)
+            {
+                ReplyAt(next, "没有解析到令牌（格式：落雪 xxx / 水鱼 yyy），已退出设置。之后可随时发送「mai 导 落雪 xxx 水鱼 yyy」完成设置。");
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
+
+            if (leftover != null || fcExtra != null)
+            {
+                // 部分解析成功（如「水鱼yyy」缺少空格）时整体拒绝，避免用户误以为两个令牌都已设置；
+                // 原文不回显，其中可能包含真实令牌
+                ReplyAt(next, "部分参数解析失败（请确认令牌前后有空格分隔），已退出设置。可重新发送「mai 导 落雪 xxx 水鱼 yyy」。" +
+                              (next.GroupInfo != null ? "建议立即「撤回」含有令牌的消息。" : ""));
+                return Task.FromResult(MarisaPluginTaskState.Canceled);
+            }
+
+            if (next.GroupInfo != null)
+            {
+                ReplyAt(next, "令牌解析成功。建议立即「撤回」含有令牌的消息。");
+            }
+
+            StartSync(next, fc, (lx, d));
+            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        }, this);
+
+        return MarisaPluginTaskState.CompletedTask;
+
+        // 解析「导」命令的参数：15 位纯数字视为好友码，「落雪/水鱼 xxx」视为对应查分器的导入令牌；
+        // 无法解析的部分经 Junk 返回，Junk 非空时应回复用法说明，而不是猜测用户意图
+        static (string? Fc, string? Lxns, string? Df, string? Junk) ParseSyncArgs(string args)
+        {
+            string? lxnsTok = null, dfTok = null;
+
+            var rest = SyncTokenArg.Replace(args, m =>
+            {
+                var val = m.Groups["val"].Value;
+                // 令牌值均为 ASCII；匹配到非 ASCII 值（如「落雪 水鱼 yyy」缺少令牌值）时整段视为解析失败
+                if (val.Any(c => c > 127)) return m.Value;
+
+                if (m.Groups["key"].Value.ToLowerInvariant() is "落雪" or "lxns") lxnsTok = val;
+                else dfTok = val;
+                return " ";
+            });
+
+            string? fcVal = null;
+            var junkWords = new List<string>();
+            foreach (var w in rest.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (fcVal == null && w.Length == 15 && w.All(char.IsAsciiDigit)) fcVal = w;
+                else junkWords.Add(w);
+            }
+
+            return (fcVal, lxnsTok, dfTok, junkWords.Count == 0 ? null : string.Join(' ', junkWords));
+        }
+
+        // 仅持久化好友码；令牌不落库，仅经手转交 MSH
+        static void PersistFriendCode(long uid, string code)
+        {
+            using var realm = BotDbContext.OpenRealm();
+            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == uid);
+            realm.Write(() =>
+            {
+                if (bind == null)
+                {
+                    // ServerName 不能留空：空串会被 GetDataFetcher 路由到华立 fetcher，而该用户没有
+                    // AimeId，查询必定失败；新建记录时默认使用水鱼
+                    realm.AddWithAutoId(new MaiMaiDxBind(uid, 0) { FriendCode = code, ServerName = "DivingFish" });
+                }
+                else
+                {
+                    bind.FriendCode = code;
+                }
+            });
+        }
+    }
+
+    /// <summary>用 @ 用户代替引用回复：传分消息常落在已被撤回的令牌消息上，引用会显示「原消息已被撤回」。</summary>
+    private static void ReplyAt(Message message, string text)
+    {
+        if (message.GroupInfo == null)
+        {
+            message.Reply(text, false);
+        }
+        else
+        {
+            message.Send(new MessageDataAt(message.Sender.Id), new MessageDataText(" " + text));
+        }
+    }
+
+    /// <summary>
+    ///     在后台启动一次完整同步并立即返回。
+    ///     同步需要等待用户在游戏内同意好友申请（最长 10 分钟），不能阻塞消息处理管线：
+    ///     BotDriver 对每条消息有 10 分钟硬超时，且对话挂起期间会拦截该用户的所有后续消息。
+    /// </summary>
+    private static void StartSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
+    {
+        if (!Syncing.TryAdd(message.Sender.Id, 0))
+        {
+            ReplyAt(message, newTokens == null
+                ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
+                : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
+            return;
+        }
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await RunSync(message, friendCode, newTokens);
+            }
+            catch (Exception e)
+            {
+                ReplyAt(message, $"同步失败：{e.Message}。{RetryHint(newTokens)}");
+            }
+            finally
+            {
+                Syncing.TryRemove(message.Sender.Id, out _);
+            }
+        });
+    }
+
+    /// <summary>失败后的重试提示。令牌不落库，携带令牌的同步失败后需要用户重发令牌。</summary>
+    private static string RetryHint((string? Lxns, string? DivingFish)? newTokens) => newTokens == null
+        ? "重试「mai 导」即可。"
+        : "请重新发送「mai 导 落雪/水鱼 xxx」（失败时令牌可能未被保存）。";
+
+    /// <summary>轮询退避：前 1 分钟每 5 秒（保证状态切换灵敏），随后拉长到 10、20 秒，减轻 MSH 单实例负担。</summary>
+    private static int PollDelayMs(TimeSpan waited) =>
+        waited < TimeSpan.FromMinutes(1) ? 5000 :
+        waited < TimeSpan.FromMinutes(3) ? 10000 : 20000;
+
+    /// <summary>跑一次完整同步：登录 → 轮询 → （可选设令牌）→ 推到所有已配置的查分器。</summary>
+    private static async Task RunSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
+    {
+        var msh = new MaiScoreHubClient();
+
+        var retryHint = RetryHint(newTokens);
+
+        ReplyAt(message, "正在发送请求…");
+
+        var login = await msh.LoginRequestAsync(friendCode);
+        var announced = false;
+        if (!string.IsNullOrEmpty(login.BotFriendCode))
+        {
+            ReplyAt(message, $"Bot 账号（好友码{login.BotFriendCode}）已发出好友申请，请尽快到 NET 同意。服务繁忙时申请可能排队，若超时按提示重试即可。");
+            announced = true;
+        }
+
+        // 第一阶段：轮询 login-status 等 JWT 下发，直到拿到 token / 失败 / 超时。
+        // MSH 繁忙时 send_request 阶段排队可达数分钟，故总超时放宽到 15 分钟。
+        // 注意只轮询到拿到 token 为止：login-status 在抓分（update_score）期间每次调用都伴随
+        // 数据库写入与 JWT 签发，持续轮询会撞上服务端 30 秒以上的响应停滞（实测连续超时），
+        // MSH 自家前端同样在拿到 token 后就不再调用该接口
+        MaiScoreHubClient.LoginStatusResult? status = null;
+        var waitStart      = DateTime.UtcNow;
+        var deadline       = waitStart.AddMinutes(15);
+        var pollFailures   = 0;
+        var sawAcceptance  = false;
+        var queuedNotified = false;
+        while (DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(PollDelayMs(DateTime.UtcNow - waitStart));
+
+            try
+            {
+                status       = await msh.LoginStatusAsync(login.JobId);
+                pollFailures = 0;
+            }
+            catch (Exception e)
+            {
+                // 退避轮询下 15 分钟约 60 次，容忍偶发的瞬时失败（5xx/超时），连续多次失败才放弃
+                if (++pollFailures < 6) continue;
+                ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
+                return;
+            }
+
+            if (status.Done || !string.IsNullOrEmpty(status.Token)) break;
+
+            if (status.Status is "failed" or "canceled")
+            {
+                ReplyAt(message, $"同步失败：{status.Message ?? status.Status}。{retryHint}");
+                return;
+            }
+
+            if (status.Stage == "wait_acceptance") sawAcceptance = true;
+
+            // 实测 botUserFriendCode 仅在轮询返回的 job 对象中下发（login-request 不携带），在等待好友同意阶段提示一次
+            if (!announced && status.Stage == "wait_acceptance" && !string.IsNullOrEmpty(status.BotFriendCode))
+            {
+                ReplyAt(message, $"Bot 账号（好友码{status.BotFriendCode}）已发出好友申请，请尽快到 NET 同意。服务繁忙时申请可能排队，若超时按提示重试即可。");
+                announced = true;
+            }
+
+            // 老用户（已是好友）不会触发好友申请提示，任务也常卡在 send_request 排队；等待超过 30 秒仍无进展时
+            // 一次性告知请求已被受理，避免整段静默后只见超时
+            if (!announced && !queuedNotified && DateTime.UtcNow - waitStart > TimeSpan.FromSeconds(30))
+            {
+                ReplyAt(message, "同步请求已受理，正在等待处理（繁忙时可能需要排队几分钟），请稍候。");
+                queuedNotified = true;
+            }
+        }
+
+        if (status == null || (!status.Done && string.IsNullOrEmpty(status.Token)))
+        {
+            ReplyAt(message, sawAcceptance
+                ? $"等待超时（可能未及时同意好友申请）。同意后{retryHint}"
+                : $"等待超时（服务繁忙，好友申请仍在排队、未能及时处理，与你是否同意无关）。稍后{retryHint}");
+            return;
+        }
+
+        // 实测 JWT 在 update_score（抓分开始）阶段即随 login-status 下发；login-request 的 authToken 仅作回退
+        var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
+        if (string.IsNullOrEmpty(jwt))
+        {
+            ReplyAt(message, "登录完成，但未获取到登录凭据（MSH 的 token 下发方式可能已变更）。请向开发者反馈。");
+            return;
+        }
+
+        // 一拿到 JWT 即把令牌存入 MSH：抓分等待可能超时，提前提交可避免本次令牌白费、被迫重发令牌
+        if (newTokens is { } t)
+        {
+            if (!string.IsNullOrWhiteSpace(t.Lxns)) await msh.SetTokenAsync(jwt, "lxns", t.Lxns!);
+            if (!string.IsNullOrWhiteSpace(t.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", t.DivingFish!);
+            retryHint = "重试「mai 导」即可。"; // 令牌已存入 MSH，后续失败无需再带令牌重发
+        }
+
+        // 第二阶段：抓分仍在进行则改用轻量的 GET /job/{id} 等任务完成——
+        // 抓分记录在 status 变为 completed 之后才落库，过早导出会推送旧记录或报 Sync not found
+        if (!status.Done)
+        {
+            // 抓分阶段单独计时：第一阶段需等待好友申请送达并被接受，MSH 机器人账号繁忙时好友申请
+            // 的发出会排队数分钟，可能已耗去第一阶段的大部分时间；若与抓分共用同一截止时间，抓分等待
+            // 会因预算所剩无几而超时。此处好友申请已被接受，仅需等待服务端抓分（其自带 30 分钟硬上限）
+            deadline = DateTime.UtcNow.AddMinutes(20);
+            var crawlStart = DateTime.UtcNow;
+
+            var crawlDone = false;
+            while (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(PollDelayMs(DateTime.UtcNow - crawlStart));
+
+                MaiScoreHubClient.JobResult job;
+                try
+                {
+                    job          = await msh.GetJobAsync(login.JobId);
+                    pollFailures = 0;
+                }
+                catch (Exception e)
+                {
+                    if (++pollFailures < 6) continue;
+                    ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
+                    return;
+                }
+
+                if (job.Status == "completed")
+                {
+                    crawlDone = true;
+                    break;
+                }
+
+                if (job.Status is "failed" or "canceled")
+                {
+                    ReplyAt(message, $"同步失败：{job.Error ?? job.Status}。{retryHint}");
+                    return;
+                }
+            }
+
+            if (!crawlDone)
+            {
+                ReplyAt(message, $"等待超时（服务繁忙，成绩抓取未在限定时间内完成）。稍后{retryHint}");
+                return;
+            }
+        }
+
+        // 查询 MSH 中已配置的查分器
+        var profile = await msh.GetProfileAsync(jwt);
+
+        var targets = new List<string>();
+        if (profile.HasLxns) targets.Add("lxns");
+        if (profile.HasDivingFish) targets.Add("diving-fish");
+
+        if (targets.Count == 0)
+        {
+            ReplyAt(message, "成绩已抓取，但尚未配置任何查分器令牌。发送「mai 导 落雪 xxx 水鱼 yyy」完成设置（可只填其中一个，建议发送令牌后立即「撤回」消息）。");
+            return;
+        }
+
+        var sb = new StringBuilder("同步完成：\n");
+        foreach (var p in targets)
+        {
+            var name = p == "lxns" ? "落雪" : "水鱼";
+            try
+            {
+                var r = await msh.ExportAsync(jwt, p);
+
+                // 抓分记录在任务 completed 之后才异步落库，导出可能恰好跑在落库之前，稍候重试
+                for (var retry = 0; retry < 5 && !r.Success && r.Message == "Sync not found"; retry++)
+                {
+                    await Task.Delay(3000);
+                    r = await msh.ExportAsync(jwt, p);
+                }
+
+                sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
+            }
+            catch (Exception e)
+            {
+                sb.AppendLine($"{name} ❌ {e.Message}");
+            }
+        }
+
+        ReplyAt(message, sb.ToString().TrimEnd());
     }
 
     #endregion
@@ -248,7 +691,7 @@ public partial class MaiMaiDx
         "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
         "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
 
-    [MarisaPluginDoc("让 AI 锐评你的 b50。末尾可加文风名指定风格（如「锐评 电棍」），不加则随机；「锐评 列表」看可选文风", "`[查分器账号名 / @某人 / 留空]` `[文风名]`")]
+    [MarisaPluginDoc("让 AI 锐评你的 b50，可在末尾指定文风（「锐评 列表」查看）", "`[账号名/@某人]` `[文风名]`")]
     [MarisaPluginCommand("锐评", "roast")]
     private async Task<MarisaPluginTaskState> Roast(Message message)
     {

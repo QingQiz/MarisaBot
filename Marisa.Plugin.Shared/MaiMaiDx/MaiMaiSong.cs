@@ -107,6 +107,23 @@ public class MaiMaiSong : Song
     public override string GetImage()
     {
         var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
-        return new CacheableText(path, () => this.Draw().ToB64()).Value;
+        return new CacheableText(path, () =>
+        {
+            var ctx = new WebContext();
+            ctx.Put("SongData", new
+            {
+                Id, Title, Type,
+                Info.Artist, Info.Genre, Info.Bpm, Info.From, Info.IsNew,
+                Charts = Levels.Select((level, i) => new
+                {
+                    Level    = level,
+                    Constant = Constants[i],
+                    Charter  = Charters[i],
+                    Notes    = Charts[i].Notes,
+                    MaxDx    = Charts[i].Notes.Sum() * 3
+                }).ToList()
+            });
+            return WebApi.MaiMaiSong(ctx.Id).Result;
+        }).Value;
     }
 }
