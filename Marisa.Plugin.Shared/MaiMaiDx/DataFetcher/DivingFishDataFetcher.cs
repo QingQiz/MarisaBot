@@ -24,7 +24,7 @@ public class DivingFishDataFetcher : DataFetcher
         var raw = await FetchScores(message, false);
 
         var group = raw.Records
-            .Where(x => SongDb.SongIndexer.ContainsKey(x.Id))
+            .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
             .GroupBy(x => SongDb.SongIndexer[x.Id].Info.IsNew)
             .ToList();
 

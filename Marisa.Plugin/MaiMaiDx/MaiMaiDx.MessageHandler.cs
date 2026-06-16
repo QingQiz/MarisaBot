@@ -589,6 +589,7 @@ public partial class MaiMaiDx
         try
         {
             var scores = (await fetcher.GetScores(message))
+                .Where(kv => kv.Key.Id <= 100000)
                 .OrderByDescending(kv => kv.Value.Rating).ThenBy(x => x.Key.Id)
                 .Select(x => x.Value)
                 .ToList();
