@@ -251,9 +251,9 @@ public class MaiMaiDxPlateDataTest
         Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
     }
 
-    [TestCase(146, "maimai PLUS")]   // 39
-    [TestCase(731, "MiLK PLUS")]     // 妄想感傷代償連盟
-    [TestCase(792, "maimai FiNALE")] // ヒバナ
+    [TestCase(17,  "maimai")]        // Future
+    [TestCase(204, "maimai GreeN")]  // ナイト・オブ・ナイツ
+    [TestCase(838, "maimai FiNALE")] // 最終鬼畜妹フランドール・S
     public void FinaleAndEarlierPlateKeepsWhitelistedRemaster(long songId, string version)
     {
         var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
@@ -269,6 +269,44 @@ public class MaiMaiDxPlateDataTest
         var song = CreateSong(144, "maimai PLUS");
 
         Assert.That(PlateData.MatchPlate(plate, song, 4), Is.True);
+    }
+
+    // 复活曲：国服删后复活的歌不计入任何版本完成牌（所有难度，含「舞」）。
+    [TestCase("白", 688,   "maimai MiLK")]      // 麒麟
+    [TestCase("真", 146,   "maimai PLUS")]      // 39
+    [TestCase("熊", 10146, "maimai でらっくす")]  // 39（DX 谱）
+    [TestCase("菫", 853,   "maimai MURASAKi PLUS")] // 前前前世
+    public void RevivalSongExcludedFromItsVersionPlate(string plateKanji, long songId, string version)
+    {
+        var plate = MustParse($"{plateKanji}完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(songId, version);
+
+        Assert.That(PlateData.MatchPlate(plate, song, 3), Is.False);
+        Assert.That(PlateData.MatchPlate(plate, song, 0), Is.False);
+    }
+
+    // 复活曲在「舞」牌同样整曲排除——含原本在 Re:MASTER 白名单里的 ヒバナ/妄想感傷代償連盟。
+    [TestCase(792, "maimai FiNALE")] // ヒバナ
+    [TestCase(731, "MiLK PLUS")]     // 妄想感傷代償連盟
+    [TestCase(688, "maimai MiLK")]   // 麒麟
+    public void RevivalSongExcludedFromFinaleAndEarlierPlate(long songId, string version)
+    {
+        var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(songId, version);
+
+        Assert.That(PlateData.MatchPlate(plate, song, 3), Is.False);
+        Assert.That(PlateData.MatchPlate(plate, song, 4), Is.False);
+    }
+
+    // 「首发缺席→后补」类（按难度档表现不一致）暂不收录，仍计入对应版本牌。
+    [TestCase("橙", 382, "maimai ORANGE")] // おこちゃま戦争
+    [TestCase("白", 711, "maimai MiLK")]   // 拝啓ドッペルゲンガー
+    public void LaunchAbsentSongStillCountsForPlate(string plateKanji, long songId, string version)
+    {
+        var plate = MustParse($"{plateKanji}完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(songId, version);
+
+        Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
     }
 
     [Test]

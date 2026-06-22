@@ -162,6 +162,7 @@ public static class PlateData
     ];
 
     // diving-fish 只有歌曲级发布日期；「舞」的 Re:MASTER 采用白名单，避免后续 DX 时代追加旧曲白谱时自动误计入。
+    // 注：原列入的 39(146)/妄想感傷代償連盟(731)/ヒバナ(792) 是复活曲，已移至 RevivalSongEntries 整曲排除。
     private static readonly (long Id, string Title)[] FinaleAndEarlierRemasterEntries =
     [
         (17,  "Future"),
@@ -181,7 +182,6 @@ public static class PlateData
         (107, "ロミオとシンデレラ"),
         (143, "Fragrance"),
         (145, "Starlight Disco"),
-        (146, "39"),
         (198, "カゲロウデイズ"),
         (200, "Bad Apple!! feat nomico"),
         (204, "ナイト・オブ・ナイツ"),
@@ -205,13 +205,11 @@ public static class PlateData
         (513, "だんだん早くなる"),
         (532, "洗脳"),
         (589, "Panopticon"),
-        (731, "妄想感傷代償連盟"),
         (741, "インビジブル"),
         (756, "CYBER Sparks"),
         (759, "サドマミホリック"),
         (763, "はやくそれになりたい！"),
         (777, "花と、雪と、ドラムンベース。"),
-        (792, "ヒバナ"),
         (793, "ロキ"),
         (799, "QZKago Requiem"),
         (803, "Schwarzschild"),
@@ -230,6 +228,41 @@ public static class PlateData
 
     private static readonly HashSet<long> FinaleAndEarlierRemasterSongIds =
         FinaleAndEarlierRemasterEntries.Select(e => e.Id).ToHashSet();
+
+    /// <summary>
+    ///     复活曲：曾从国服删除、后又重新上线的歌。游戏不会把复活曲重新计入版本完成牌（姓名框），
+    ///     完成表同样整曲排除（所有难度，含「舞」）。来源：RemyWiki 舞萌DX 各版本(China)「Revived Songs」段
+    ///     ∩ diving-fish 现役曲库。仅收录在国服「删除→复活」过的；「首发缺席→后补」类（おこちゃま戦争 382 /
+    ///     拝啓ドッペルゲンガー 711）按难度档表现不一致，暂不收录。
+    /// </summary>
+    private static readonly (long Id, string Title)[] RevivalSongEntries =
+    [
+        (44,    "ハッピーシンセサイザ"),
+        (146,   "39"),
+        (185,   "＊ハロー、プラネット。"),
+        (189,   "弱虫モンブラン"),
+        (201,   "魔理沙は大変なものを盗んでいきました"),
+        (281,   "ダブルラリアット"),
+        (341,   "二息歩行"),
+        (419,   "ストリーミングハート"),
+        (451,   "頓珍漢の宴"),
+        (455,   "Counselor"),
+        (460,   "閃鋼のブリューナク"),
+        (524,   "Hand in Hand"),
+        (687,   "共感覚おばけ"),
+        (688,   "麒麟"),
+        (712,   "ミラクル・ショッピング"),
+        (731,   "妄想感傷代償連盟"),
+        (792,   "ヒバナ"),
+        (853,   "前前前世"),
+        (10146, "39"),
+        (11213, "Arty Party"),
+        (11253, "おジャ魔女カーニバル!!"),
+        (11267, "ディカディズム"),
+    ];
+
+    private static readonly HashSet<long> RevivalSongIds =
+        RevivalSongEntries.Select(e => e.Id).ToHashSet();
 
     /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
@@ -277,6 +310,12 @@ public static class PlateData
     public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx)
     {
         if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        // 复活曲不计入任何版本完成牌（含「舞」），整曲排除。
+        if (RevivalSongIds.Contains(song.Id))
         {
             return false;
         }
