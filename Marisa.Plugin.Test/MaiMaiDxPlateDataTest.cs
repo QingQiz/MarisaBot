@@ -241,7 +241,8 @@ public class MaiMaiDxPlateDataTest
     [TestCase(144, "maimai PLUS")]  // air's gravity
     [TestCase(240, "maimai GreeN")] // Beat of getting entangled
     [TestCase(261, "maimai GreeN")] // Death Scythe
-    public void FinaleAndEarlierPlateExcludesPostDxAddedRemaster(long songId, string version)
+    [TestCase(108, "maimai PLUS")]  // YA･DA･YO [Reborn]
+    public void FinaleAndEarlierPlateExcludesRemasterOutsideWhitelist(long songId, string version)
     {
         var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
         var song = CreateSong(songId, version);
@@ -253,7 +254,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase(146, "maimai PLUS")]   // 39
     [TestCase(731, "MiLK PLUS")]     // 妄想感傷代償連盟
     [TestCase(792, "maimai FiNALE")] // ヒバナ
-    public void FinaleAndEarlierPlateKeepsPreDxRemaster(long songId, string version)
+    public void FinaleAndEarlierPlateKeepsWhitelistedRemaster(long songId, string version)
     {
         var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
         var song = CreateSong(songId, version);

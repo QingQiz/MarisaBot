@@ -161,39 +161,75 @@ public static class PlateData
         "maimai FiNALE",
     ];
 
-    // diving-fish 只有歌曲级发布日期；这些旧版本歌曲的 Re:MASTER 是 DX 时代追加，不能计入「舞」。
-    private static readonly (long Id, string Title)[] PostDxAddedFinaleAndEarlierRemasterEntries =
+    // diving-fish 只有歌曲级发布日期；「舞」的 Re:MASTER 采用白名单，避免后续 DX 时代追加旧曲白谱时自动误计入。
+    private static readonly (long Id, string Title)[] FinaleAndEarlierRemasterEntries =
     [
-        (47,  "源平大戦絵巻テーマソング"),
-        (85,  "JACKY [Remix]"),
-        (111, "Sky High [Reborn]"),
-        (115, "DADDY MULK -Groove remix-"),
-        (131, "Link"),
-        (133, "We Gonna Party"),
-        (134, "Night Fly"),
-        (144, "air's gravity"),
-        (155, "泣き虫O'clock"),
-        (219, "記憶、記録"),
-        (239, "System “Z”"),
-        (240, "Beat of getting entangled"),
-        (248, "Backyun! －悪い女－"),
-        (252, "みんなのマイマイマー"),
-        (260, "LUCIA"),
-        (261, "Death Scythe"),
-        (328, "言ノ葉カルマ"),
-        (364, "D✪N’T  ST✪P  R✪CKIN’"),
-        (367, "Dragoon"),
-        (378, "planet dancer"),
-        (389, "FLOWER"),
-        (463, "FEEL the BEATS"),
-        (464, "Revive The Rave"),
-        (472, "アージェントシンメトリー"),
-        (629, "Limit Break"),
-        (704, "SPILL OVER COLORS"),
+        (17,  "Future"),
+        (22,  "In Chaos"),
+        (23,  "Crush On You"),
+        (24,  "Sun Dance"),
+        (58,  "Endless World"),
+        (61,  "Beat Of Mind"),
+        (62,  "檄！帝国華撃団(改)"),
+        (65,  "ZIGG-ZAGG"),
+        (66,  "ワールズエンド・ダンスホール"),
+        (70,  "ジングルベル"),
+        (71,  "マトリョシカ"),
+        (80,  "City Escape: Act1"),
+        (81,  "Rooftop Run: Act1"),
+        (100, "Tell Your World"),
+        (107, "ロミオとシンデレラ"),
+        (143, "Fragrance"),
+        (145, "Starlight Disco"),
+        (146, "39"),
+        (198, "カゲロウデイズ"),
+        (200, "Bad Apple!! feat nomico"),
+        (204, "ナイト・オブ・ナイツ"),
+        (226, "Blew Moon"),
+        (227, "Garakuta Doll Play"),
+        (247, "Danza zandA"),
+        (255, "Burning Hearts ～炎のANGEL～"),
+        (256, "いーあるふぁんくらぶ"),
+        (265, "Save This World νMIX"),
+        (266, "Living Universe"),
+        (282, "からくりピエロ"),
+        (295, "緋色のDance"),
+        (296, "明星ロケット"),
+        (299, "ロストワンの号哭"),
+        (301, "患部で止まってすぐ溶ける～狂気の優曇華院"),
+        (310, "エピクロスの虹はもう見えない"),
+        (312, "ってゐ！ ～えいえんてゐVer～"),
+        (365, "ガラテアの螺旋"),
+        (414, "若い力 -SEGA HARD GIRLS MIX-"),
+        (496, "AMAZING MIGHTYYYY!!!!"),
+        (513, "だんだん早くなる"),
+        (532, "洗脳"),
+        (589, "Panopticon"),
+        (731, "妄想感傷代償連盟"),
+        (741, "インビジブル"),
+        (756, "CYBER Sparks"),
+        (759, "サドマミホリック"),
+        (763, "はやくそれになりたい！"),
+        (777, "花と、雪と、ドラムンベース。"),
+        (792, "ヒバナ"),
+        (793, "ロキ"),
+        (799, "QZKago Requiem"),
+        (803, "Schwarzschild"),
+        (806, "ナイトメア☆パーティーナイト"),
+        (809, "結ンデ開イテ羅刹ト骸"),
+        (812, "Alea jacta est!"),
+        (816, "クレイジークレイジーダンサーズ"),
+        (818, "隠然"),
+        (820, "FFT"),
+        (825, "雷切-RAIKIRI-"),
+        (830, "立ち入り禁止"),
+        (833, "the EmpErroR"),
+        (834, "PANDORA PARADOXXX"),
+        (838, "最終鬼畜妹フランドール・S"),
     ];
 
-    private static readonly HashSet<long> PostDxAddedFinaleAndEarlierRemasterSongIds =
-        PostDxAddedFinaleAndEarlierRemasterEntries.Select(e => e.Id).ToHashSet();
+    private static readonly HashSet<long> FinaleAndEarlierRemasterSongIds =
+        FinaleAndEarlierRemasterEntries.Select(e => e.Id).ToHashSet();
 
     /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
@@ -246,11 +282,11 @@ public static class PlateData
         }
 
         return plate.Scope != PlateScope.FinaleAndEarlier
-               || !IsPostDxAddedFinaleAndEarlierRemaster(song.Id, levelIdx);
+               || IsFinaleAndEarlierChart(song.Id, levelIdx);
     }
 
-    public static bool IsPostDxAddedFinaleAndEarlierRemaster(long songId, int levelIdx) =>
-        levelIdx == 4 && PostDxAddedFinaleAndEarlierRemasterSongIds.Contains(songId);
+    public static bool IsFinaleAndEarlierChart(long songId, int levelIdx) =>
+        levelIdx != 4 || FinaleAndEarlierRemasterSongIds.Contains(songId);
 
     /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸）。报错而非"未识别"。</summary>
     public static readonly HashSet<string> BlockedPlateKanji = ["丸"];
