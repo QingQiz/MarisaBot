@@ -309,6 +309,17 @@ public class MaiMaiDxPlateDataTest
         Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
     }
 
+    // 魔理沙は…(201)：国服姓名框上线前因合规原因本地临时下架、上线当版复活、日亚服从未删——实测仍计入超牌，不入排除集。
+    [Test]
+    public void CnLocalCensorRevivalStillCountsForPlate()
+    {
+        var plate = MustParse("超完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(201, "maimai GreeN");
+
+        Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
+        Assert.That(PlateData.MatchPlate(plate, song, 0), Is.True);
+    }
+
     [Test]
     public void DefaultsToSssWhenThresholdMissingForCharter()
     {
