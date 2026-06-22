@@ -2,15 +2,17 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>
 ///     完成表（plate progress）所用的数据表 + 命令解析。
-///     语义：游戏内的"真极/熊将/鏡神/..."等称号，按 BASIC ~ MASTER 四个难度的成绩判定。
-///     不参与 Re:MASTER。
+///     支持版本代字、谱师、类别、作曲家、难度 label、定数等选择条件。
 /// </summary>
 public static class PlateData
 {
     public const string CommandSuffix = "完成表";
     private const string OptionalDaiSuffix = "代";
+    private const string FinaleAndEarlierPlateKanji = "舞";
 
     public enum Dimension { Achievement, Fc, Fs, DxScore }
+
+    public enum PlateScope { VersionGroup, FinaleAndEarlier }
 
     /// <summary>
     ///     阈值定义。用 ordinal value 比较：score 的对应字段 ≥ Level 即视作达标。
@@ -23,7 +25,7 @@ public static class PlateData
     public abstract record Selector(string Display)
     {
         /// <summary>版本。Versions 是 diving-fish basic_info.from 字段值集合。</summary>
-        public sealed record Plate(string Kanji, string[] Versions) : Selector(Kanji);
+        public sealed record Plate(string Kanji, string[] Versions, PlateScope Scope = PlateScope.VersionGroup) : Selector(Kanji);
 
         /// <summary>谱师。Name 与 song.Charters[i] substring 匹配。</summary>
         public sealed record Charter(string Name) : Selector(Name);
@@ -54,8 +56,10 @@ public static class PlateData
     /// </summary>
     public sealed record Query(IReadOnlyList<Selector> Selectors, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
 
-    /// <summary>默认难度：未指定时同时查 MASTER + Re:MASTER。</summary>
+    /// <summary>非版本查询的默认难度：MASTER + Re:MASTER。</summary>
     public static readonly IReadOnlyList<int> DefaultLevelIdxes = [3, 4];
+
+    private static readonly IReadOnlyList<int> DefaultPlateLevelIdxes = [3];
 
     /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
     public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
@@ -140,6 +144,93 @@ public static class PlateData
         _                     => 0,
     };
 
+    private static readonly string[] FinaleAndEarlierVersions =
+    [
+        "maimai",
+        "maimai PLUS",
+        "maimai GreeN",
+        "maimai GreeN PLUS",
+        "maimai ORANGE",
+        "maimai ORANGE PLUS",
+        "maimai PiNK",
+        "maimai PiNK PLUS",
+        "maimai MURASAKi",
+        "maimai MURASAKi PLUS",
+        "maimai MiLK",
+        "MiLK PLUS",
+        "maimai FiNALE",
+    ];
+
+    // diving-fish 只有歌曲级发布日期；「舞」的 Re:MASTER 采用白名单，避免后续 DX 时代追加旧曲白谱时自动误计入。
+    private static readonly (long Id, string Title)[] FinaleAndEarlierRemasterEntries =
+    [
+        (17,  "Future"),
+        (22,  "In Chaos"),
+        (23,  "Crush On You"),
+        (24,  "Sun Dance"),
+        (58,  "Endless World"),
+        (61,  "Beat Of Mind"),
+        (62,  "檄！帝国華撃団(改)"),
+        (65,  "ZIGG-ZAGG"),
+        (66,  "ワールズエンド・ダンスホール"),
+        (70,  "ジングルベル"),
+        (71,  "マトリョシカ"),
+        (80,  "City Escape: Act1"),
+        (81,  "Rooftop Run: Act1"),
+        (100, "Tell Your World"),
+        (107, "ロミオとシンデレラ"),
+        (143, "Fragrance"),
+        (145, "Starlight Disco"),
+        (146, "39"),
+        (198, "カゲロウデイズ"),
+        (200, "Bad Apple!! feat nomico"),
+        (204, "ナイト・オブ・ナイツ"),
+        (226, "Blew Moon"),
+        (227, "Garakuta Doll Play"),
+        (247, "Danza zandA"),
+        (255, "Burning Hearts ～炎のANGEL～"),
+        (256, "いーあるふぁんくらぶ"),
+        (265, "Save This World νMIX"),
+        (266, "Living Universe"),
+        (282, "からくりピエロ"),
+        (295, "緋色のDance"),
+        (296, "明星ロケット"),
+        (299, "ロストワンの号哭"),
+        (301, "患部で止まってすぐ溶ける～狂気の優曇華院"),
+        (310, "エピクロスの虹はもう見えない"),
+        (312, "ってゐ！ ～えいえんてゐVer～"),
+        (365, "ガラテアの螺旋"),
+        (414, "若い力 -SEGA HARD GIRLS MIX-"),
+        (496, "AMAZING MIGHTYYYY!!!!"),
+        (513, "だんだん早くなる"),
+        (532, "洗脳"),
+        (589, "Panopticon"),
+        (731, "妄想感傷代償連盟"),
+        (741, "インビジブル"),
+        (756, "CYBER Sparks"),
+        (759, "サドマミホリック"),
+        (763, "はやくそれになりたい！"),
+        (777, "花と、雪と、ドラムンベース。"),
+        (792, "ヒバナ"),
+        (793, "ロキ"),
+        (799, "QZKago Requiem"),
+        (803, "Schwarzschild"),
+        (806, "ナイトメア☆パーティーナイト"),
+        (809, "結ンデ開イテ羅刹ト骸"),
+        (812, "Alea jacta est!"),
+        (816, "クレイジークレイジーダンサーズ"),
+        (818, "隠然"),
+        (820, "FFT"),
+        (825, "雷切-RAIKIRI-"),
+        (830, "立ち入り禁止"),
+        (833, "the EmpErroR"),
+        (834, "PANDORA PARADOXXX"),
+        (838, "最終鬼畜妹フランドール・S"),
+    ];
+
+    private static readonly HashSet<long> FinaleAndEarlierRemasterSongIds =
+        FinaleAndEarlierRemasterEntries.Select(e => e.Id).ToHashSet();
+
     /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
     ///     繁简体差异（暁/晓 櫻/樱 菫/堇 輝/辉 華/华 鏡/镜）双向都收录指向同一个版本集合。
@@ -150,6 +241,7 @@ public static class PlateData
     /// </summary>
     public static readonly Dictionary<string, string[]> PlateVersionMap = new()
     {
+        ["舞"] = FinaleAndEarlierVersions,
         ["真"] = ["maimai", "maimai PLUS"],
         ["超"] = ["maimai GreeN"],
         ["檄"] = ["maimai GreeN PLUS"],
@@ -181,6 +273,20 @@ public static class PlateData
         ["镜"] = ["maimai でらっくす PRiSM"],
         ["彩"] = ["maimai でらっくす PRiSM PLUS"],
     };
+
+    public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx)
+    {
+        if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        return plate.Scope != PlateScope.FinaleAndEarlier
+               || IsFinaleAndEarlierChart(song.Id, levelIdx);
+    }
+
+    public static bool IsFinaleAndEarlierChart(long songId, int levelIdx) =>
+        levelIdx != 4 || FinaleAndEarlierRemasterSongIds.Contains(songId);
 
     /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸）。报错而非"未识别"。</summary>
     public static readonly HashSet<string> BlockedPlateKanji = ["丸"];
@@ -478,10 +584,13 @@ public static class PlateData
             return false;
         }
 
-        // 宴会場 special-case：宴谱（id > 100000）只有 1-2 个低 idx 谱面（没有 MASTER+Re:MASTER），
-        // 用 DefaultLevelIdxes=[3,4] 会把所有 宴会場 songs 过滤光。
-        // 用户未显式指定难度 (diffAt < 0) 且 selector 命中 Genre("宴会場") 时，扩展到全难度。
-        if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
+        if (diffAt < 0 && selectors.OfType<Selector.Plate>().FirstOrDefault() is { } plate)
+        {
+            levelIdxes = plate.Scope == PlateScope.FinaleAndEarlier
+                ? DefaultLevelIdxes
+                : DefaultPlateLevelIdxes;
+        }
+        else if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
         {
             levelIdxes = [0, 1, 2, 3, 4];
         }
@@ -504,7 +613,7 @@ public static class PlateData
         var raw = selectorPart;
         if (PlateVersionMap.TryGetValue(raw, out var versions))
         {
-            selector = new Selector.Plate(raw, versions);
+            selector = CreatePlateSelector(raw, versions);
             return true;
         }
         if (BlockedPlateKanji.Contains(raw))
@@ -519,7 +628,7 @@ public static class PlateData
             var stripped = raw[..^OptionalDaiSuffix.Length];
             if (PlateVersionMap.TryGetValue(stripped, out var versions2))
             {
-                selector = new Selector.Plate(stripped, versions2);
+                selector = CreatePlateSelector(stripped, versions2);
                 return true;
             }
             if (BlockedPlateKanji.Contains(stripped))
@@ -691,9 +800,14 @@ public static class PlateData
 
         if (bestStart < 0) return false;
         start = bestStart; length = bestLen;
-        selector = new Selector.Plate(bestKanji!, bestVersions!);
+        selector = CreatePlateSelector(bestKanji!, bestVersions!);
         return true;
     }
+
+    private static Selector.Plate CreatePlateSelector(string kanji, string[] versions) =>
+        new(kanji, versions, kanji == FinaleAndEarlierPlateKanji
+            ? PlateScope.FinaleAndEarlier
+            : PlateScope.VersionGroup);
 
     /// <summary>
     ///     找 workingPart 内"最佳"Genre alias 或全名匹配。优先级 (length DESC, rightmost) —
