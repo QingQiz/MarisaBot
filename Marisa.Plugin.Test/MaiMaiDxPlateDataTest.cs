@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using NUnit.Framework;
@@ -35,6 +36,36 @@ public class MaiMaiDxPlateDataTest
         return error!;
     }
 
+    private static MaiMaiSong CreateSong(long id, string version)
+    {
+        dynamic song = new ExpandoObject();
+        song.id = id.ToString();
+        song.title = $"song-{id}";
+        song.type = "SD";
+
+        dynamic basicInfo = new ExpandoObject();
+        basicInfo.title = $"song-{id}";
+        basicInfo.artist = "artist";
+        basicInfo.genre = "genre";
+        basicInfo.bpm = 120;
+        basicInfo.release_date = "2024-01-01";
+        basicInfo.from = version;
+        basicInfo.is_new = false;
+        song.basic_info = basicInfo;
+
+        song.ds = new[] { 3.0, 7.0, 10.0, 12.0, 13.0 };
+        song.level = new[] { "3", "7", "10", "12", "13" };
+        song.charts = Enumerable.Range(0, 5).Select(_ =>
+        {
+            dynamic chart = new ExpandoObject();
+            chart.notes = new long[] { 100, 10, 10, 0 };
+            chart.charter = "-";
+            return chart;
+        }).ToArray();
+
+        return new MaiMaiSong(song);
+    }
+
     [TestCase("真大将完成表",   "真",        13)]
     [TestCase("真将完成表",     "真",        12)]
     [TestCase("真代SSS+完成表", "真",        13)]
@@ -65,6 +96,32 @@ public class MaiMaiDxPlateDataTest
         var query = MustParse(raw);
         var plate = (PlateData.Selector.Plate)query.Selectors.Single();
         Assert.That(plate.Versions, Is.EquivalentTo(expected));
+    }
+
+    [Test]
+    public void FinaleAndEarlierPlateMapsToOldVersions()
+    {
+        var query = MustParse("舞将完成表");
+        var plate = query.Selectors.OfType<PlateData.Selector.Plate>().Single();
+
+        Assert.That(plate.Kanji, Is.EqualTo("舞"));
+        Assert.That(plate.Scope, Is.EqualTo(PlateData.PlateScope.FinaleAndEarlier));
+        Assert.That(plate.Versions, Is.EqualTo(new[]
+        {
+            "maimai",
+            "maimai PLUS",
+            "maimai GreeN",
+            "maimai GreeN PLUS",
+            "maimai ORANGE",
+            "maimai ORANGE PLUS",
+            "maimai PiNK",
+            "maimai PiNK PLUS",
+            "maimai MURASAKi",
+            "maimai MURASAKi PLUS",
+            "maimai MiLK",
+            "MiLK PLUS",
+            "maimai FiNALE",
+        }));
     }
 
     [TestCase("翠楼屋将完成表",     "翠楼屋", 12)]
@@ -161,6 +218,56 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Threshold.Level, Is.EqualTo(level));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+    }
+
+    [TestCase("舞完成表")]
+    [TestCase("舞代完成表")]
+    public void FinaleAndEarlierPlateDefaultsToMasterRemaster(string raw)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Scope,
+            Is.EqualTo(PlateData.PlateScope.FinaleAndEarlier));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
+
+    [Test]
+    public void FinaleAndEarlierPlateExplicitDifficultyKept()
+    {
+        var q = MustParse("舞红谱完成表");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));
+    }
+
+    [TestCase(144, "maimai PLUS")]  // air's gravity
+    [TestCase(240, "maimai GreeN")] // Beat of getting entangled
+    [TestCase(261, "maimai GreeN")] // Death Scythe
+    public void FinaleAndEarlierPlateExcludesPostDxAddedRemaster(long songId, string version)
+    {
+        var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(songId, version);
+
+        Assert.That(PlateData.MatchPlate(plate, song, 4), Is.False);
+        Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
+    }
+
+    [TestCase(146, "maimai PLUS")]   // 39
+    [TestCase(731, "MiLK PLUS")]     // 妄想感傷代償連盟
+    [TestCase(792, "maimai FiNALE")] // ヒバナ
+    public void FinaleAndEarlierPlateKeepsPreDxRemaster(long songId, string version)
+    {
+        var plate = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(songId, version);
+
+        Assert.That(PlateData.MatchPlate(plate, song, 4), Is.True);
+    }
+
+    [Test]
+    public void NormalVersionPlateDoesNotApplyFinaleAndEarlierRemasterExclusion()
+    {
+        var plate = MustParse("真完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+        var song = CreateSong(144, "maimai PLUS");
+
+        Assert.That(PlateData.MatchPlate(plate, song, 4), Is.True);
     }
 
     [Test]

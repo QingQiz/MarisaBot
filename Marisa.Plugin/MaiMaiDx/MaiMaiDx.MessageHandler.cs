@@ -999,42 +999,41 @@ public partial class MaiMaiDx
     }
 
     private const string PlateUsage =
-        "查询某个版本 / 谱师 / 类别 / 作曲家 / 难度 / 定数的完成情况，比如 mai 真大将完成表\n" +
+        "完成表用于查看指定范围内，还有哪些谱面没有达到目标成绩。\n" +
         "\n" +
-        "完整格式：mai (对象)(成绩)[难度]完成表\n" +
+        "用法：mai <范围><目标成绩><难度>完成表\n" +
+        "范围、目标成绩、难度的顺序不固定。\n" +
         "\n" +
-        "(对象) — 必填，下面六类中至少给 1 个；也可以同时给多个，要求歌曲全部满足才入选：\n" +
-        "  · 版本代字：真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 / 彩 …（后面加 '代' 也行，例如 熊代）\n" +
-        "  · 谱师名：例如 翠楼屋（合作谱 'サファ太 vs 翠楼屋' 也算上）\n" +
+        "范围必须填写，可以组合多个条件；组合时只保留同时满足所有条件的谱面。\n" +
+        "  · 版本代字：舞 / 真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 / 彩 等，可加“代”，如 熊代\n" +
+        "    舞表示 maimai 到 maimai FiNALE；DX 时代给旧曲追加的 Re:MASTER 不计入舞。\n" +
+        "  · 谱师：例如 翠楼屋。合作名义也会匹配，如 サファ太 vs 翠楼屋\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
-        "  · 作曲家：例如 HIMEHINA、DECO*27（合作名义 'sasakure.UK x DECO*27' 也算上）\n" +
-        "  · 难度 label：13 / 13+ / 14 / 14+ 等（游戏内显示难度）\n" +
-        "  · 定数：13.5 / 14.7 等（必含小数点，1 位小数）\n" +
-        "  注：同一类不能给两个（如 '镜代真'/'13+15'/'13+14.6' 会冲突报错）\n" +
+        "  · 作曲家：例如 HIMEHINA、DECO*27。合作名义也会匹配\n" +
+        "  · 难度等级：13 / 13+ / 14 / 14+ 等\n" +
+        "  · 定数：13.5 / 14.7 等，必须写 1 位小数\n" +
         "\n" +
-        "(成绩) — 不写就是 '将'（SSS）\n" +
+        "目标成绩不写时按 将（SSS）计算。\n" +
         "  · 将=SSS / 大将=SSS+\n" +
         "  · 神=AP / 理论值=AP+ / 极=FC\n" +
-        "  · 舞舞=FDX\n" +
-        "  · 也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
-        "  · DX 分星档：一星~五星（或 1星~5星），对应 max DX 的 85/90/93/95/97%\n" +
+        "  · 舞舞=FDX，也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
+        "  · DX 分星档：一星到五星，或 1星到5星\n" +
         "\n" +
-        "[难度] — 不写就是紫谱 + 白谱（MASTER + Re:MASTER）\n" +
-        "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱（白谱 = Re:MASTER）\n" +
+        "难度不写时，普通版本代字默认只查紫谱；舞和其他范围默认查紫谱 + 白谱。\n" +
+        "只查宴会场时默认查全难度。可以显式指定：\n" +
+        "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱\n" +
         "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
         "\n" +
-        "其他例子（字段顺序可以随便换）：\n" +
-        "  mai 真完成表             ← 阈值省略，默认 '将'\n" +
+        "示例：\n" +
+        "  mai 真完成表\n" +
+        "  mai 舞将完成表\n" +
         "  mai 翠楼屋将完成表\n" +
         "  mai HIMEHINA神完成表\n" +
-        "  mai 14+大将完成表        ← 难度 label\n" +
-        "  mai 13.5神完成表         ← 定数\n" +
-        "  mai 紫谱将真完成表       ← 字段顺序随便换\n" +
-        "  mai 镜代13+AP完成表      ← 版本 + 难度 组合\n" +
-        "  mai 镜代V家将完成表      ← 版本 + 类别 组合\n" +
-        "  mai 14+翠楼屋将完成表    ← 难度 + 谱师 组合\n" +
-        "  mai 镜代5星完成表        ← DX 分 5★ 完成情况\n" +
-        "  mai 14+四星完成表        ← Lv14+ 全谱拿到 4★ 的情况";
+        "  mai 14+大将完成表\n" +
+        "  mai 13.5神完成表\n" +
+        "  mai 紫谱将真完成表\n" +
+        "  mai 镜代V家将完成表\n" +
+        "  mai 14+四星完成表";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
@@ -1096,7 +1095,7 @@ public partial class MaiMaiDx
 
         List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
         {
-            // 完成表默认 MASTER + Re:MASTER；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
+            // 默认难度由解析层决定；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
             var levelIdxes = q.LevelIdxes;
             return SongDb.SongList
                 .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
@@ -1109,8 +1108,7 @@ public partial class MaiMaiDx
         // 单 chart × 单 selector 的命中判断；handler 用 Selectors.All(...) 求 AND 交集。
         static bool MatchSelector(PlateData.Selector sel, double constant, int levelIdx, MaiMaiSong song) => sel switch
         {
-            PlateData.Selector.Plate p =>
-                p.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)),
+            PlateData.Selector.Plate p => PlateData.MatchPlate(p, song, levelIdx),
 
             // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
             PlateData.Selector.Charter c =>

@@ -2,15 +2,17 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>
 ///     完成表（plate progress）所用的数据表 + 命令解析。
-///     语义：游戏内的"真极/熊将/鏡神/..."等称号，按 BASIC ~ MASTER 四个难度的成绩判定。
-///     不参与 Re:MASTER。
+///     支持版本代字、谱师、类别、作曲家、难度 label、定数等选择条件。
 /// </summary>
 public static class PlateData
 {
     public const string CommandSuffix = "完成表";
     private const string OptionalDaiSuffix = "代";
+    private const string FinaleAndEarlierPlateKanji = "舞";
 
     public enum Dimension { Achievement, Fc, Fs, DxScore }
+
+    public enum PlateScope { VersionGroup, FinaleAndEarlier }
 
     /// <summary>
     ///     阈值定义。用 ordinal value 比较：score 的对应字段 ≥ Level 即视作达标。
@@ -23,7 +25,7 @@ public static class PlateData
     public abstract record Selector(string Display)
     {
         /// <summary>版本。Versions 是 diving-fish basic_info.from 字段值集合。</summary>
-        public sealed record Plate(string Kanji, string[] Versions) : Selector(Kanji);
+        public sealed record Plate(string Kanji, string[] Versions, PlateScope Scope = PlateScope.VersionGroup) : Selector(Kanji);
 
         /// <summary>谱师。Name 与 song.Charters[i] substring 匹配。</summary>
         public sealed record Charter(string Name) : Selector(Name);
@@ -142,6 +144,57 @@ public static class PlateData
         _                     => 0,
     };
 
+    private static readonly string[] FinaleAndEarlierVersions =
+    [
+        "maimai",
+        "maimai PLUS",
+        "maimai GreeN",
+        "maimai GreeN PLUS",
+        "maimai ORANGE",
+        "maimai ORANGE PLUS",
+        "maimai PiNK",
+        "maimai PiNK PLUS",
+        "maimai MURASAKi",
+        "maimai MURASAKi PLUS",
+        "maimai MiLK",
+        "MiLK PLUS",
+        "maimai FiNALE",
+    ];
+
+    // diving-fish 只有歌曲级发布日期；这些旧版本歌曲的 Re:MASTER 是 DX 时代追加，不能计入「舞」。
+    private static readonly (long Id, string Title)[] PostDxAddedFinaleAndEarlierRemasterEntries =
+    [
+        (47,  "源平大戦絵巻テーマソング"),
+        (85,  "JACKY [Remix]"),
+        (111, "Sky High [Reborn]"),
+        (115, "DADDY MULK -Groove remix-"),
+        (131, "Link"),
+        (133, "We Gonna Party"),
+        (134, "Night Fly"),
+        (144, "air's gravity"),
+        (155, "泣き虫O'clock"),
+        (219, "記憶、記録"),
+        (239, "System “Z”"),
+        (240, "Beat of getting entangled"),
+        (248, "Backyun! －悪い女－"),
+        (252, "みんなのマイマイマー"),
+        (260, "LUCIA"),
+        (261, "Death Scythe"),
+        (328, "言ノ葉カルマ"),
+        (364, "D✪N’T  ST✪P  R✪CKIN’"),
+        (367, "Dragoon"),
+        (378, "planet dancer"),
+        (389, "FLOWER"),
+        (463, "FEEL the BEATS"),
+        (464, "Revive The Rave"),
+        (472, "アージェントシンメトリー"),
+        (629, "Limit Break"),
+        (704, "SPILL OVER COLORS"),
+    ];
+
+    private static readonly HashSet<long> PostDxAddedFinaleAndEarlierRemasterSongIds =
+        PostDxAddedFinaleAndEarlierRemasterEntries.Select(e => e.Id).ToHashSet();
+
     /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
     ///     繁简体差异（暁/晓 櫻/樱 菫/堇 輝/辉 華/华 鏡/镜）双向都收录指向同一个版本集合。
@@ -152,6 +205,7 @@ public static class PlateData
     /// </summary>
     public static readonly Dictionary<string, string[]> PlateVersionMap = new()
     {
+        ["舞"] = FinaleAndEarlierVersions,
         ["真"] = ["maimai", "maimai PLUS"],
         ["超"] = ["maimai GreeN"],
         ["檄"] = ["maimai GreeN PLUS"],
@@ -183,6 +237,20 @@ public static class PlateData
         ["镜"] = ["maimai でらっくす PRiSM"],
         ["彩"] = ["maimai でらっくす PRiSM PLUS"],
     };
+
+    public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx)
+    {
+        if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        return plate.Scope != PlateScope.FinaleAndEarlier
+               || !IsPostDxAddedFinaleAndEarlierRemaster(song.Id, levelIdx);
+    }
+
+    public static bool IsPostDxAddedFinaleAndEarlierRemaster(long songId, int levelIdx) =>
+        levelIdx == 4 && PostDxAddedFinaleAndEarlierRemasterSongIds.Contains(songId);
 
     /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸）。报错而非"未识别"。</summary>
     public static readonly HashSet<string> BlockedPlateKanji = ["丸"];
@@ -480,9 +548,11 @@ public static class PlateData
             return false;
         }
 
-        if (diffAt < 0 && selectors.OfType<Selector.Plate>().Any())
+        if (diffAt < 0 && selectors.OfType<Selector.Plate>().FirstOrDefault() is { } plate)
         {
-            levelIdxes = DefaultPlateLevelIdxes;
+            levelIdxes = plate.Scope == PlateScope.FinaleAndEarlier
+                ? DefaultLevelIdxes
+                : DefaultPlateLevelIdxes;
         }
         else if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
         {
@@ -507,7 +577,7 @@ public static class PlateData
         var raw = selectorPart;
         if (PlateVersionMap.TryGetValue(raw, out var versions))
         {
-            selector = new Selector.Plate(raw, versions);
+            selector = CreatePlateSelector(raw, versions);
             return true;
         }
         if (BlockedPlateKanji.Contains(raw))
@@ -522,7 +592,7 @@ public static class PlateData
             var stripped = raw[..^OptionalDaiSuffix.Length];
             if (PlateVersionMap.TryGetValue(stripped, out var versions2))
             {
-                selector = new Selector.Plate(stripped, versions2);
+                selector = CreatePlateSelector(stripped, versions2);
                 return true;
             }
             if (BlockedPlateKanji.Contains(stripped))
@@ -694,9 +764,14 @@ public static class PlateData
 
         if (bestStart < 0) return false;
         start = bestStart; length = bestLen;
-        selector = new Selector.Plate(bestKanji!, bestVersions!);
+        selector = CreatePlateSelector(bestKanji!, bestVersions!);
         return true;
     }
+
+    private static Selector.Plate CreatePlateSelector(string kanji, string[] versions) =>
+        new(kanji, versions, kanji == FinaleAndEarlierPlateKanji
+            ? PlateScope.FinaleAndEarlier
+            : PlateScope.VersionGroup);
 
     /// <summary>
     ///     找 workingPart 内"最佳"Genre alias 或全名匹配。优先级 (length DESC, rightmost) —
