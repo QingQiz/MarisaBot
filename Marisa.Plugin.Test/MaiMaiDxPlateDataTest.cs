@@ -145,10 +145,11 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
-    // 缺省 fallback：阈值未指定时默认 SSS（"将"）；难度未指定时默认 MASTER + Re:MASTER。
+    // 缺省 fallback：阈值未指定时默认 SSS（"将"）。难度未指定时，
+    // 版本代字查询默认 MASTER；其它查询默认 MASTER + Re:MASTER。
     // ──────────────────────────────────────────────────────────────────────
 
-    [TestCase("真完成表",   "真",   12)]   // selector=Plate, default SSS + (MASTER+Re:MASTER)
+    [TestCase("真完成表",   "真",   12)]   // selector=Plate, default SSS + MASTER
     [TestCase("真代完成表", "真",   12)]   // 含可选"代"
     [TestCase("熊完成表",   "熊",   12)]
     public void DefaultsToSssWhenThresholdMissingForPlate(string raw, string kanji, int level)
@@ -159,7 +160,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Achievement));
         Assert.That(q.Threshold.Level, Is.EqualTo(level));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
@@ -262,9 +263,9 @@ public class MaiMaiDxPlateDataTest
         // 单字"红"不在 difficulty alias map（避免跟未来代字冲突，要写就写"红谱"或"EXPERT"）。
         // multi-selector 解析下，"真代SSS+红完成表" 剥阈值后剩"真代红"
         //   → "真代" 作 Plate(真), 单字"红"作 Charter（catch-all，handler 找不到含"红"的谱师报 0 首）。
-        // LevelIdxes 仍是默认 MASTER+Re:MASTER ([3, 4])。
+        // 含版本代字，未显式指定难度时默认 MASTER。
         var q = MustParse("真代SSS+红完成表");
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}), "single '红' must not be parsed as difficulty");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}), "single '红' must not be parsed as difficulty");
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS+"));
         Assert.That(q.Selectors, Has.Exactly(2).Items);
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
@@ -426,6 +427,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
@@ -437,6 +439,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
@@ -448,6 +451,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Constant>().Single().Value, Is.EqualTo(14.6).Within(0.001));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
@@ -479,6 +483,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [TestCase("镜代13+AP完成表")]
@@ -494,6 +499,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -565,6 +571,15 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
     }
 
+    [Test]
+    public void PlateSelectorOverridesBanquetDefaultDifficulties()
+    {
+        var q = MustParse("宴代宴会场完成表");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("宴"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("宴会場"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     // DxScore 维度 — 5 个星档 threshold（1星-5星，对应 max DX 的 85/90/93/95/97%）
     // ──────────────────────────────────────────────────────────────────────
@@ -604,13 +619,14 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14+"));
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.DxScore));
         Assert.That(q.Threshold.Level, Is.EqualTo(5));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
-    public void DxScoreStar_DefaultLevelIdxes()
+    public void DxScoreStar_PlateDefaultsToMaster()
     {
         var q = MustParse("镜代5星完成表");
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}), "DxScore 没指定难度时仍默认 MASTER+Re:MASTER");
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
     [Test]
