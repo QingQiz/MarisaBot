@@ -24,15 +24,9 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
         var songList = GetSongList();
         var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
 
-        var newest = songList
-            .Select(s => s.Version)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderDescending(StringComparer.OrdinalIgnoreCase)
-            .Take(1)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
+        // 统一用 ChunithmVersion.IsCurrent（与 divingfish/Louis 一致），替代原先按版本名字典序取最新一版的脆弱写法。
         var div = scores.Values
-            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .GroupBy(x => ChunithmVersion.IsCurrent(versionMap.GetValueOrDefault(x.Id)))
             .ToList();
 
         var userData = await (await $"{ServerUri}ChuniServlet/GetUserDataApi".PostJsonAsync(new
