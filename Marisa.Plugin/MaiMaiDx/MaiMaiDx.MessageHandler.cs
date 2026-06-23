@@ -1006,10 +1006,12 @@ public partial class MaiMaiDx
         "\n" +
         "范围必须填写，可以组合多个条件；组合时只保留同时满足所有条件的谱面。\n" +
         "  · 版本代字：舞 / 真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 / 彩 等，可加“代”，如 熊代\n" +
-        "    舞表示 maimai 到 maimai FiNALE；DX 时代给旧曲追加的 Re:MASTER 不计入舞。\n" +
+        "    舞表示 maimai 到 maimai FiNALE（旧框）；DX 时代给旧曲追加的 Re:MASTER 不计入舞。\n" +
+        "    霸者：舞范围内全曲达成率 ≥ A（80%）的完整称号，直接写 霸者完成表。\n" +
         "  · 谱师：例如 翠楼屋。合作名义也会匹配，如 サファ太 vs 翠楼屋\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌\n" +
         "  · 作曲家：例如 HIMEHINA、DECO*27。合作名义也会匹配\n" +
+        "  · 复活曲：国服删后又复活的歌；可与版本代字组合，如 真代复活曲 = 首发自该版本的复活曲\n" +
         "  · 难度等级：13 / 13+ / 14 / 14+ 等\n" +
         "  · 定数：13.5 / 14.7 等，必须写 1 位小数\n" +
         "\n" +
@@ -1097,18 +1099,23 @@ public partial class MaiMaiDx
         {
             // 默认难度由解析层决定；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
             var levelIdxes = q.LevelIdxes;
+            // 带「复活曲」selector 时，版本牌放行复活曲（用于「真复活曲」= 首发自该版本的复活曲）。
+            var includeRevival = q.Selectors.Any(s => s is PlateData.Selector.Revival);
             return SongDb.SongList
                 .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
                 .Where(t => levelIdxes.Contains(t.i))
-                .Where(t => q.Selectors.All(sel => MatchSelector(sel, t.constant, t.i, t.song)))
+                .Where(t => q.Selectors.All(sel => MatchSelector(sel, t.constant, t.i, t.song, includeRevival)))
                 .Select(t => (t.constant, t.i, t.song))
                 .ToList();
         }
 
         // 单 chart × 单 selector 的命中判断；handler 用 Selectors.All(...) 求 AND 交集。
-        static bool MatchSelector(PlateData.Selector sel, double constant, int levelIdx, MaiMaiSong song) => sel switch
+        static bool MatchSelector(PlateData.Selector sel, double constant, int levelIdx, MaiMaiSong song, bool includeRevival) => sel switch
         {
-            PlateData.Selector.Plate p => PlateData.MatchPlate(p, song, levelIdx),
+            PlateData.Selector.Plate p => PlateData.MatchPlate(p, song, levelIdx, includeRevival),
+
+            // 复活曲集合（虚拟类别）。
+            PlateData.Selector.Revival => PlateData.IsRevivalSong(song.Id),
 
             // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
             PlateData.Selector.Charter c =>

@@ -271,6 +271,51 @@ public class MaiMaiDxPlateDataTest
         Assert.That(PlateData.MatchPlate(plate, song, 4), Is.True);
     }
 
+    // ──────────────────────────────────────────────────────────────────────
+    // 霸者：特例牌子——舞系同款歌曲（旧框），固定要求全曲达成率 ≥ 80%（A）。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void AllOldVersionsClearPlateImpliesAThreshold()
+    {
+        var q = MustParse("霸者完成表");
+        var plate = q.Selectors.OfType<PlateData.Selector.Plate>().Single();
+        Assert.That(plate.Kanji, Is.EqualTo("霸者"));
+        Assert.That(plate.Scope, Is.EqualTo(PlateData.PlateScope.FinaleAndEarlier));
+        // 与「舞」系同范围（旧框）
+        var wuVersions = MustParse("舞完成表").Selectors.OfType<PlateData.Selector.Plate>().Single().Versions;
+        Assert.That(plate.Versions, Is.EqualTo(wuVersions));
+        // 固定要求全曲达成率 ≥ A（80%）
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Achievement));
+        Assert.That(q.Threshold.Level, Is.EqualTo(5));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("A"));
+        // FinaleAndEarlier scope → 默认 MASTER + Re:MASTER
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
+
+    [Test]
+    public void AllOldVersionsClearPlateKeepsThresholdWithExplicitDifficulty()
+    {
+        var q = MustParse("霸者红谱完成表");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("霸者"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("A"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {2}));
+    }
+
+    [Test]
+    public void AllOldVersionsClearPlateRemasterAndRevivalHandling()
+    {
+        var plate = MustParse("霸者完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+
+        // 白名单内 Re:MASTER 计入（最終鬼畜妹フランドール・S 838）
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(838, "maimai FiNALE"), 4), Is.True);
+        // 白名单外 Re:MASTER 不计入，但 MASTER 计入（air's gravity 144）
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(144, "maimai PLUS"), 4), Is.False);
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(144, "maimai PLUS"), 3), Is.True);
+        // 复活曲整曲排除（ヒバナ 792）
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(792, "maimai FiNALE"), 3), Is.False);
+    }
+
     // 复活曲：国服删后复活的歌不计入任何版本完成牌（所有难度，含「舞」）。
     [TestCase("白", 688,   "maimai MiLK")]      // 麒麟
     [TestCase("真", 146,   "maimai PLUS")]      // 39
@@ -318,6 +363,63 @@ public class MaiMaiDxPlateDataTest
 
         Assert.That(PlateData.MatchPlate(plate, song, 3), Is.True);
         Assert.That(PlateData.MatchPlate(plate, song, 0), Is.True);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 复活曲：虚拟类别。独立查 = 全部复活曲；与版本代字组合 = 首发自该版本的复活曲。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [Test]
+    public void RevivalGenreParsesStandalone()
+    {
+        var q = MustParse("复活曲完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Revival>());
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));          // 默认阈值
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));         // 类别默认 MASTER + Re:MASTER
+    }
+
+    [Test]
+    public void RevivalGenreParsesWithThreshold()
+    {
+        var q = MustParse("复活曲神完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Revival>());
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fc));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));           // 神
+    }
+
+    [Test]
+    public void RevivalGenreCombinesWithVersionPlate()
+    {
+        // 真代复活曲 = Plate(真) ∩ Revival；难度默认仍是类别的 [3,4]（不被版本牌的单 MASTER 覆盖）。
+        var q = MustParse("真代复活曲完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Revival>().Any(), Is.True);
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+    }
+
+    [Test]
+    public void IsRevivalSongChecksList()
+    {
+        Assert.That(PlateData.IsRevivalSong(146), Is.True);    // 39（SD）
+        Assert.That(PlateData.IsRevivalSong(10146), Is.True);  // 39（DX）
+        Assert.That(PlateData.IsRevivalSong(44), Is.True);     // ハッピーシンセサイザ
+        Assert.That(PlateData.IsRevivalSong(204), Is.False);   // 非复活曲
+    }
+
+    // 「真代复活曲」= 首发自 maimai/maimai PLUS 的复活曲：含 39(SD,146) 与 快乐合成器(44)，不含 39(DX,10146)。
+    [Test]
+    public void RevivalGenreWithPlateFiltersByOriginVersion()
+    {
+        var plate = MustParse("真完成表").Selectors.OfType<PlateData.Selector.Plate>().Single();
+
+        // 查询带复活曲 → 绕过排除，按首发版本筛
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(146, "maimai PLUS"), 3, includeRevival: true), Is.True);          // 39 SD
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(44,  "maimai PLUS"), 3, includeRevival: true), Is.True);          // 快乐合成器
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(10146, "maimai でらっくす"), 3, includeRevival: true), Is.False); // 39 DX：版本不属真
+
+        // 普通真牌（不带复活曲）→ 复活曲仍整曲排除
+        Assert.That(PlateData.MatchPlate(plate, CreateSong(146, "maimai PLUS"), 3, includeRevival: false), Is.False);
     }
 
     [Test]
