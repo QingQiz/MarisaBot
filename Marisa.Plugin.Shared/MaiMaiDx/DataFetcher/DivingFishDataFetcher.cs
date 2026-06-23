@@ -1,5 +1,6 @@
 ﻿using Flurl.Http;
 using Marisa.Configuration;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
@@ -64,20 +65,17 @@ public class DivingFishDataFetcher : DataFetcher
 
         var response = await uri
             .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
-            .AllowHttpStatus("400,403")
+            .AllowHttpStatus("400,401,403")
             .GetAsync();
 
-        if (response.StatusCode is 400 or 403)
+        if (response.StatusCode is 400 or 401 or 403)
         {
-            var rep = await response.GetJsonAsync<DivingFishErrorResponse>();
-            var errorMessage = rep.Message ?? rep.Msg ?? "Unknown error";
-            throw new HttpRequestException(HttpRequestError.Unknown, $"[DivingFish] {response.StatusCode}: {errorMessage}");
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, body));
         }
 
         return await response.GetJsonAsync<DivingFishDxRatingResponse>();
     }
-
-    private sealed record DivingFishErrorResponse(string? Message, string? Msg);
 
     protected sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
 

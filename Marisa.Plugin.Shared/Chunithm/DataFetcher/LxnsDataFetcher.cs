@@ -2,6 +2,7 @@ using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.Interface;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
@@ -106,12 +107,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
         {
-            var errorJson = await playerResponse.GetStringAsync();
-            using var errorDoc = JsonDocument.Parse(errorJson);
-            var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
-                ? msg.GetString() ?? "Player not found"
-                : "Player not found";
-            throw new HttpRequestException($"[Lxns] {playerResponse.StatusCode}: {errorMessage}");
+            var body = await playerResponse.GetStringAsync();
+            throw new HttpRequestException(ProberError.Lxns(playerResponse.StatusCode, body));
         }
 
         var playerJson = await playerResponse.GetStringAsync();
@@ -127,12 +124,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         if (response.StatusCode is 400 or 401 or 403 or 404)
         {
-            var errorJson = await response.GetStringAsync();
-            using var errorDoc = JsonDocument.Parse(errorJson);
-            var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
-                ? msg.GetString() ?? "Unknown error"
-                : "Unknown error";
-            throw new HttpRequestException($"[Lxns] {response.StatusCode}: {errorMessage}");
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(ProberError.Lxns(response.StatusCode, body));
         }
 
         var jsonString = await response.GetStringAsync();
