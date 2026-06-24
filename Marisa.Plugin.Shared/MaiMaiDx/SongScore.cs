@@ -77,26 +77,29 @@ public class SongScore
         return JsonConvert.SerializeObject(this, Converter.Settings);
     }
 
+    /// <summary>
+    ///     达成率 → rating 系数表。每行 (达成率下限, 系数)，取「达成率 ≥ 下限」中下限最大的一行。
+    ///     含每段位临界次档（79.9999/96.9999/98.9999/99.9999/100.4999），与游戏一致。
+    ///     来源：Diving-Fish maimaidx-prober（MIT），即 MarisaBot 成绩源（水鱼）所用同一张表。
+    /// </summary>
+    private static readonly (decimal Threshold, decimal Coefficient)[] RatingCoefficientTable =
+    [
+        (0m, 0m), (10m, 1.6m), (20m, 3.2m), (30m, 4.8m), (40m, 6.4m),
+        (50m, 8.0m), (60m, 9.6m), (70m, 11.2m), (75m, 12.0m), (79.9999m, 12.8m),
+        (80m, 13.6m), (90m, 15.2m), (94m, 16.8m), (96.9999m, 17.6m), (97m, 20.0m),
+        (98m, 20.3m), (98.9999m, 20.6m), (99m, 20.8m), (99.5m, 21.1m), (99.9999m, 21.4m),
+        (100m, 21.6m), (100.4999m, 22.2m), (100.5m, 22.4m),
+    ];
+
     public static int B50Ra(decimal achievement, decimal constant)
     {
-        var baseRa = achievement switch
+        var coefficient = RatingCoefficientTable[0].Coefficient;
+        foreach (var (threshold, c) in RatingCoefficientTable)
         {
-            < 50     => 7.0m,
-            < 60     => 8.0m,
-            < 70     => 9.6m,
-            < 75     => 11.2m,
-            < 80     => 12.0m,
-            < 90     => 13.6m,
-            < 94     => 15.2m,
-            < 97     => 16.8m,
-            < 98     => 20.0m,
-            < 99     => 20.3m,
-            < 99.5m  => 20.8m,
-            < 100    => 21.1m,
-            < 100.5m => 21.6m,
-            _        => 22.4m
-        };
-        return (int)Math.Floor(constant * (Math.Min(100.5m, achievement) / 100) * baseRa);
+            if (achievement < threshold) break;
+            coefficient = c;
+        }
+        return (int)Math.Floor(constant * (Math.Min(100.5m, achievement) / 100) * coefficient);
     }
 
     public int B50Ra()
