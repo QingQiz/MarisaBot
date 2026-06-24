@@ -1,6 +1,7 @@
 ﻿using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.Interface;
+using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
@@ -76,13 +77,13 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
         var response = await uri
             .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
-            .AllowHttpStatus("403")
+            .AllowHttpStatus("400,401,403")
             .GetAsync();
 
-        if (response.StatusCode == 403)
+        if (response.StatusCode is 400 or 401 or 403)
         {
-            var rep = await response.GetJsonAsync();
-            throw new HttpRequestException("[DivingFish] 403: " + rep.message);
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body));
         }
 
         return await response.GetJsonAsync<ChunithmRating>();
