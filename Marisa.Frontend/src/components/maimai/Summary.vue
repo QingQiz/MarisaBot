@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useRoute} from 'vue-router'
-import {ref, computed} from 'vue'
+import {ref, computed, nextTick, watch} from 'vue'
 import axios from 'axios'
 import {context_get} from '@/GlobalVars'
 import type {GroupedSong, Score, PlateInfo} from '@/components/maimai/utils/summary_t'
@@ -40,16 +40,30 @@ axios.all([
 
 const allCharts = computed(() => grouped.value.flatMap(g => g.x))
 
-// 标题字号按字符数自适应 — 防止长标题被 stats-bar 挤出而截断
-// title-row 总宽 1250px (grid 1240 + border-overflow 10) - stats-bar 720px - gap 30px = 500px 给 title
-const titleFontSize = computed(() => {
-    const n = title.value?.length ?? 0
-    if (n <= 5)  return '72px'   // 5×72=360
-    if (n <= 7)  return '60px'   // 7×60=420
-    if (n <= 9)  return '50px'   // 9×50=450
-    if (n <= 11) return '42px'   // 11×42=462
-    return '36px'                // 12×36=432
-})
+// 标题真实测宽 auto-shrink：从 TITLE_MAX 起，按 scrollWidth/clientWidth 迭代缩到塞进 title
+// 弹性槽（title-row 1250px − stats-bar 720px − gap 30px ≈ 500px）。短标题保持 MAX、不再像按
+// 字符数估算那样把西文/短标题过度缩小留出空隙；长标题缩到刚好填满，与右侧 stats-bar 之间不留缝。
+const TITLE_MAX = 100
+const TITLE_MIN = 32
+const titleEl   = ref<HTMLElement | null>(null)
+const titleSize = ref(TITLE_MAX)
+
+async function fitTitle() {
+    const el = titleEl.value
+    if (!el) return
+    titleSize.value = TITLE_MAX
+    await nextTick()
+    try { await document.fonts.ready } catch { /* 测量兜底 */ }
+    await nextTick()
+    for (let pass = 0; pass < 5 && el.scrollWidth > el.clientWidth; pass++) {
+        const next = Math.floor(titleSize.value * el.clientWidth / el.scrollWidth)
+        titleSize.value = Math.max(TITLE_MIN, Math.min(next, titleSize.value - 1))
+        await nextTick()
+        if (titleSize.value <= TITLE_MIN) break
+    }
+}
+
+watch(data_fetched, v => { if (v) fitTitle() }, {flush: 'post'})
 
 function getScore(songId: number, levelIdx: number): Score | undefined {
     return scores.value[`(${songId}, ${levelIdx})`]
@@ -174,7 +188,7 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
 <template>
     <div class="mai-summary" v-if="data_fetched">
         <div class="title-row">
-            <span class="title" :style="{fontSize: titleFontSize}">{{ title }}</span>
+            <span class="title" ref="titleEl" :style="{fontSize: titleSize + 'px'}">{{ title }}</span>
             <StatsBar :charts="allCharts" :scores="scores" :detail="true" :plate="plate" class="title-stats"/>
         </div>
         <div class="groups">

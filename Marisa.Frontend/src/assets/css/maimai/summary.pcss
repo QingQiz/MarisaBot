@@ -39,7 +39,7 @@
 }
 
 .title {
-    /* font-size 由 JS computed titleFontSize 按字符数自适应 */
+    /* font-size 由 JS 真实测宽 auto-shrink（titleSize）控制 */
     font-weight: bold;
     line-height: 1.2;          /* 1 太紧，配合 overflow:hidden 会把 CJK descender 切掉 */
     flex: 1 1 auto;
