@@ -4,29 +4,29 @@ import { GroupSongInfo } from "../utils/summary_t";
 import { computed } from "vue";
 import { useOpData } from "./op_common";
 
-// 版本时间序 (来源: Wiki 追加日順)
+// 版本时间序 (来源: Wiki 追加日順), 从新到旧
 const versionOrder: [string, string, string][] = [
-    ["CHUNITHM",            "無印", "logo_chunithm.png"],
-    ["CHUNITHM PLUS",       "PLUS", "logo_chunithm_plus.png"],
-    ["CHUNITHM AIR",        "AIR",  "logo_air.png"],
-    ["CHUNITHM AIR PLUS",   "AIR+", "logo_air_plus.png"],
-    ["CHUNITHM STAR",       "STAR", "logo_star.png"],
-    ["CHUNITHM STAR PLUS",  "STAR+","logo_star_plus.png"],
-    ["CHUNITHM AMAZON",     "AMAZON","logo_amazon.png"],
-    ["CHUNITHM AMAZON PLUS","AMAZON+","logo_amazon_plus.png"],
-    ["CHUNITHM CRYSTAL",    "CRYSTAL","logo_crystal.png"],
-    ["CHUNITHM CRYSTAL PLUS","CRYSTAL+","logo_crystal_plus.png"],
-    ["CHUNITHM PARADISE",   "PARADISE","logo_paradise.png"],
-    ["CHUNITHM PARADISE LOST","PARADISE LOST","logo_paradise_lost.png"],
-    ["CHUNITHM NEW!!",      "NEW!!","logo_new.png"],
-    ["CHUNITHM NEW PLUS!!",  "NEW PLUS!!","logo_new_plus.png"],
-    ["CHUNITHM SUN",        "SUN",  "logo_sun.png"],
-    ["CHUNITHM SUN PLUS",   "SUN+", "logo_sun_plus.png"],
-    ["CHUNITHM LUMINOUS",   "LUMINOUS","logo_luminous.png"],
-    ["CHUNITHM LUMINOUS PLUS","LUMINOUS+","logo_luminous_plus.png"],
-    ["CHUNITHM VERSE",      "VERSE","logo_verse.png"],
-    ["CHUNITHM XVERSE",     "XVERSE","logo_xverse.png"],
     ["CHUNITHM XVERSEX",    "XVERSEX","logo_xversex.png"],
+    ["CHUNITHM XVERSE",     "XVERSE","logo_xverse.png"],
+    ["CHUNITHM VERSE",      "VERSE","logo_verse.png"],
+    ["CHUNITHM LUMINOUS PLUS","LUMINOUS+","logo_luminous_plus.png"],
+    ["CHUNITHM LUMINOUS",   "LUMINOUS","logo_luminous.png"],
+    ["CHUNITHM SUN PLUS",   "SUN+", "logo_sun_plus.png"],
+    ["CHUNITHM SUN",        "SUN",  "logo_sun.png"],
+    ["CHUNITHM NEW PLUS!!",  "NEW PLUS!!","logo_new_plus.png"],
+    ["CHUNITHM NEW!!",      "NEW!!","logo_new.png"],
+    ["CHUNITHM PARADISE LOST","PARADISE LOST","logo_paradise_lost.png"],
+    ["CHUNITHM PARADISE",   "PARADISE","logo_paradise.png"],
+    ["CHUNITHM CRYSTAL PLUS","CRYSTAL+","logo_crystal_plus.png"],
+    ["CHUNITHM CRYSTAL",    "CRYSTAL","logo_crystal.png"],
+    ["CHUNITHM AMAZON PLUS","AMAZON+","logo_amazon_plus.png"],
+    ["CHUNITHM AMAZON",     "AMAZON","logo_amazon.png"],
+    ["CHUNITHM STAR PLUS",  "STAR+","logo_star_plus.png"],
+    ["CHUNITHM STAR",       "STAR", "logo_star.png"],
+    ["CHUNITHM AIR PLUS",   "AIR+", "logo_air_plus.png"],
+    ["CHUNITHM AIR",        "AIR",  "logo_air.png"],
+    ["CHUNITHM PLUS",       "PLUS", "logo_chunithm_plus.png"],
+    ["CHUNITHM",            "無印", "logo_chunithm.png"],
 ];
 
 const { data_fetched, songs, filterBestOP, buildGroups } = useOpData();
