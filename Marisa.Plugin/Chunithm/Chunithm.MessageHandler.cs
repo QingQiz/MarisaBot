@@ -6,6 +6,7 @@ using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -60,6 +61,51 @@ public partial class Chunithm
 
                     if (idx is 0 or 1 or 2)
                     {
+                        if (idx == 2 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
+                        {
+                            // lxns OAuth 流程
+                            var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
+                            var state = Guid.NewGuid().ToString("N")[..8];
+                            var url = LxnsOAuth.GetAuthorizationUrl(challenge, state);
+
+                            next.Reply(
+                                $"请打开以下链接授权：\n{url}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
+
+                            var oauthKey = (next.GroupInfo?.Id, next.Sender.Id);
+                            DialogManager.RemoveDialog(oauthKey);
+                            if (!DialogManager.TryAddDialog(oauthKey, async codeMsg =>
+                            {
+                                try
+                                {
+                                    var token = await LxnsOAuth.ExchangeCode(codeMsg.Command.Trim().ToString(), verifier);
+                                    LxnsTokenStore.SaveToken(codeMsg.Sender.Id, token.AccessToken, token.RefreshToken,
+                                        (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+
+                                    using var realm = BotDbContext.OpenRealm();
+                                    var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == codeMsg.Sender.Id);
+                                    realm.Write(() =>
+                                    {
+                                        if (bind == null)
+                                            realm.AddWithAutoId(new ChunithmBind(codeMsg.Sender.Id, "lxns"));
+                                        else
+                                            bind.ServerName = "lxns";
+                                    });
+
+                                    codeMsg.Reply("Lxns OAuth 绑定成功！");
+                                }
+                                catch (Exception e)
+                                {
+                                    codeMsg.Reply($"绑定失败: {e.Message}");
+                                }
+                                return MarisaPluginTaskState.CompletedTask;
+                            }, this))
+                            {
+                                next.Reply("验证会话创建失败，请重新绑定");
+                            }
+
+                            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                        }
+
                         using var realm = BotDbContext.OpenRealm();
 
                         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id);

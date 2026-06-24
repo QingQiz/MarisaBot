@@ -1,5 +1,5 @@
-tempPath:     temp
-resourceRoot:
+tempPath:     D:\Marisa\MarisaBotTemp
+resourceRoot: D:\Marisa\MarisaBot-master\Marisa.Frontend\public\assets
 databasePath: bot.db
 ffmpegPath:
 
@@ -9,14 +9,16 @@ web:
 
 napCat:
   endpoint: ws://127.0.0.1:31001
-  token:
-  selfId:
+  token: 96110
+  selfId: 2035872327
 
 divingFish:
-  devToken:
+  devToken:     QpLSJafqZHA5lyNjucmrgi69CEPWhT0e
 
 lxns:
-  devToken:
+  devToken:     vJjiYA4eZBiFBC8Ev14DlH0drJEUemZnGMgsN05zEpg=
+  oauth:
+    clientId:   24b107b5-2519-40b5-a4e3-3827ee911663
 
 arcaea:
   resourcePath: arcaea
