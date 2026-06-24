@@ -63,6 +63,22 @@ public partial class Chunithm
                     {
                         if (idx == 2 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
                         {
+                            // 已有 Token → 直接绑定
+                            if (LxnsTokenStore.GetToken(next.Sender.Id) != null)
+                            {
+                                using var realm2 = BotDbContext.OpenRealm();
+                                var bind2 = realm2.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
+                                realm2.Write(() =>
+                                {
+                                    if (bind2 == null)
+                                        realm2.AddWithAutoId(new ChunithmBind(next.Sender.Id, "lxns"));
+                                    else
+                                        bind2.ServerName = "lxns";
+                                });
+                                next.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                            }
+
                             // lxns OAuth 流程
                             var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
                             var state = Guid.NewGuid().ToString("N")[..8];
@@ -75,6 +91,12 @@ public partial class Chunithm
                             DialogManager.RemoveDialog(oauthKey);
                             if (!DialogManager.TryAddDialog(oauthKey, async codeMsg =>
                             {
+                                var codeInput = codeMsg.Command.Trim().ToString();
+                                if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
+                                {
+                                    codeMsg.Reply("验证码格式错误，会话已关闭");
+                                    return MarisaPluginTaskState.CompletedTask;
+                                }
                                 try
                                 {
                                     var token = await LxnsOAuth.ExchangeCode(codeMsg.Command.Trim().ToString(), verifier);
@@ -102,6 +124,10 @@ public partial class Chunithm
                             {
                                 next.Reply("验证会话创建失败，请重新绑定");
                             }
+
+                            // 10 分钟超时自动关闭
+                            _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
+                                DialogManager.RemoveDialog(oauthKey));
 
                             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                         }
