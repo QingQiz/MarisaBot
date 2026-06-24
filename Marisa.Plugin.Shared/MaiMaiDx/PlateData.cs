@@ -8,7 +8,14 @@ public static class PlateData
 {
     public const string CommandSuffix = "完成表";
     private const string OptionalDaiSuffix = "代";
-    private const string FinaleAndEarlierPlateKanji = "舞";
+    private const string RevivalGenreToken = "复活曲";
+
+    /// <summary>
+    ///     歌曲范围为「旧框（FiNALE 及之前）」的牌子：舞将/舞极/舞神/舞舞舞 与 霸者。
+    ///     都覆盖同一批旧版本歌曲，均需打 Re:MASTER（走 <see cref="FinaleAndEarlierRemasterEntries"/> 白名单）。
+    ///     舞系的成绩要求由命令里写的档位决定；霸者是特例，固定要求全曲达成率 ≥ 80%（A）。
+    /// </summary>
+    private static readonly HashSet<string> FinaleAndEarlierPlateKanji = ["舞", "霸者"];
 
     public enum Dimension { Achievement, Fc, Fs, DxScore }
 
@@ -24,14 +31,23 @@ public static class PlateData
     /// </summary>
     public abstract record Selector(string Display)
     {
-        /// <summary>版本。Versions 是 diving-fish basic_info.from 字段值集合。</summary>
-        public sealed record Plate(string Kanji, string[] Versions, PlateScope Scope = PlateScope.VersionGroup) : Selector(Kanji);
+        /// <summary>
+        ///     版本。Versions 是 diving-fish basic_info.from 字段值集合。
+        ///     ImpliedThreshold：特例牌子（如霸者）固定自带的成绩要求；用户未显式给阈值时启用。
+        /// </summary>
+        public sealed record Plate(string Kanji, string[] Versions, PlateScope Scope = PlateScope.VersionGroup, Threshold? ImpliedThreshold = null) : Selector(Kanji);
 
         /// <summary>谱师。Name 与 song.Charters[i] substring 匹配。</summary>
         public sealed record Charter(string Name) : Selector(Name);
 
         /// <summary>类别。FullName 与 song.Info.Genre 精确匹配；Alias 是用户输入的别名（用于显示）。</summary>
         public sealed record Genre(string FullName, string Alias) : Selector(Alias);
+
+        /// <summary>
+        ///     复活曲集合（虚拟类别，匹配 <see cref="RevivalSongIds"/> 里的歌）。
+        ///     与版本代字组合时表示「首发自该版本的复活曲」——此时版本牌的复活曲排除被绕过。
+        /// </summary>
+        public sealed record Revival() : Selector(RevivalGenreToken);
 
         /// <summary>作曲家。Name 与 song.Info.Artist substring 匹配（song-level，非 chart-level）。</summary>
         public sealed record Artist(string Name) : Selector(Name);
@@ -161,7 +177,7 @@ public static class PlateData
         "maimai FiNALE",
     ];
 
-    // diving-fish 只有歌曲级发布日期；「舞」的 Re:MASTER 采用白名单，避免后续 DX 时代追加旧曲白谱时自动误计入。
+    // diving-fish 只有歌曲级发布日期；「舞/霸者」的 Re:MASTER 采用白名单，避免后续 DX 时代追加旧曲白谱时自动误计入。
     // 注：原列入的 39(146)/妄想感傷代償連盟(731)/ヒバナ(792) 是复活曲，已移至 RevivalSongEntries 整曲排除。
     private static readonly (long Id, string Title)[] FinaleAndEarlierRemasterEntries =
     [
@@ -265,6 +281,8 @@ public static class PlateData
     private static readonly HashSet<long> RevivalSongIds =
         RevivalSongEntries.Select(e => e.Id).ToHashSet();
 
+    public static bool IsRevivalSong(long songId) => RevivalSongIds.Contains(songId);
+
     /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
     ///     繁简体差异（暁/晓 櫻/樱 菫/堇 輝/辉 華/华 鏡/镜）双向都收录指向同一个版本集合。
@@ -275,8 +293,9 @@ public static class PlateData
     /// </summary>
     public static readonly Dictionary<string, string[]> PlateVersionMap = new()
     {
-        ["舞"] = FinaleAndEarlierVersions,
-        ["真"] = ["maimai", "maimai PLUS"],
+        ["舞"]   = FinaleAndEarlierVersions,
+        ["霸者"] = FinaleAndEarlierVersions, // 特例：舞系同款歌曲（旧框），固定要求全曲达成率 ≥ 80%（A）
+        ["真"]   = ["maimai", "maimai PLUS"],
         ["超"] = ["maimai GreeN"],
         ["檄"] = ["maimai GreeN PLUS"],
         ["橙"] = ["maimai ORANGE"],
@@ -308,15 +327,25 @@ public static class PlateData
         ["彩"] = ["maimai でらっくす PRiSM PLUS"],
     };
 
-    public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx)
+    /// <summary>
+    ///     牌名本身就固定了成绩要求的特例牌子（命令里不用、也不能再写档位）。
+    ///     霸者：舞系同款歌曲，全曲达成率 ≥ 80%（A）。
+    /// </summary>
+    private static readonly Dictionary<string, Threshold> NamedPlateImpliedThreshold = new()
+    {
+        ["霸者"] = new(Dimension.Achievement, 5, "A"),
+    };
+
+    public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx, bool includeRevival = false)
     {
         if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))
         {
             return false;
         }
 
-        // 复活曲不计入任何版本完成牌（含「舞」），整曲排除。
-        if (RevivalSongIds.Contains(song.Id))
+        // 复活曲不计入任何版本完成牌（含「舞/霸者」），整曲排除。
+        // 例外：查询里带「复活曲」selector 时（如「真复活曲」），意图是筛该版本首发的复活曲，故不排除。
+        if (!includeRevival && RevivalSongIds.Contains(song.Id))
         {
             return false;
         }
@@ -480,8 +509,7 @@ public static class PlateData
             }
         }
 
-        threshold ??= DefaultThreshold;
-
+        // 默认阈值延后到 selector 解析后再定（完整牌名如「霸者」可能自带阈值档）。
         var afterThreshold = thresholdAt >= 0
             ? (inner[..thresholdAt] + inner[(thresholdAt + thresholdLen)..]).Trim()
             : inner;
@@ -559,6 +587,12 @@ public static class PlateData
                 { matchStart = lStart; matchLen = lLen; matched = lSel; }
             }
 
+            if (TryFindRevivalInString(workingPart, out var rStart, out var rLen, out var rSel))
+            {
+                if (rLen > matchLen || (rLen == matchLen && rStart > matchStart))
+                { matchStart = rStart; matchLen = rLen; matched = rSel; }
+            }
+
             if (matchStart < 0) break;
 
             // 反查保护：版本代字/类别单字若嵌在更长且能对上某谱师/曲师名的片段里（如"隅田川星人"的"星"、"超七味"的"超"），它是名字的一部分而非 selector，否决匹配让整段落到下面 Charter/Artist
@@ -624,16 +658,29 @@ public static class PlateData
             return false;
         }
 
-        if (diffAt < 0 && selectors.OfType<Selector.Plate>().FirstOrDefault() is { } plate)
+        if (diffAt < 0)
         {
-            levelIdxes = plate.Scope == PlateScope.FinaleAndEarlier
-                ? DefaultLevelIdxes
-                : DefaultPlateLevelIdxes;
+            if (selectors.Any(s => s is Selector.Revival))
+            {
+                // 复活曲按类别处理：默认 MASTER + Re:MASTER（即便同时带版本代字也不用版本牌的单 MASTER 默认）。
+                levelIdxes = DefaultLevelIdxes;
+            }
+            else if (selectors.OfType<Selector.Plate>().FirstOrDefault() is { } plate)
+            {
+                levelIdxes = plate.Scope == PlateScope.FinaleAndEarlier
+                    ? DefaultLevelIdxes
+                    : DefaultPlateLevelIdxes;
+            }
+            else if (selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
+            {
+                levelIdxes = [0, 1, 2, 3, 4];
+            }
         }
-        else if (diffAt < 0 && selectors.OfType<Selector.Genre>().Any(g => g.FullName == "宴会場"))
-        {
-            levelIdxes = [0, 1, 2, 3, 4];
-        }
+
+        // 阈值缺省回落：特例牌子（霸者）固定自带的成绩要求优先，否则默认 SSS（将）。
+        threshold ??= selectors.OfType<Selector.Plate>()
+            .Select(p => p.ImpliedThreshold)
+            .FirstOrDefault(t => t is not null) ?? DefaultThreshold;
 
         query = new Query(selectors, threshold, levelIdxes);
         return true;
@@ -845,9 +892,19 @@ public static class PlateData
     }
 
     private static Selector.Plate CreatePlateSelector(string kanji, string[] versions) =>
-        new(kanji, versions, kanji == FinaleAndEarlierPlateKanji
-            ? PlateScope.FinaleAndEarlier
-            : PlateScope.VersionGroup);
+        new(kanji, versions,
+            FinaleAndEarlierPlateKanji.Contains(kanji) ? PlateScope.FinaleAndEarlier : PlateScope.VersionGroup,
+            NamedPlateImpliedThreshold.GetValueOrDefault(kanji));
+
+    /// <summary>找 workingPart 内最靠右的「复活曲」token。</summary>
+    private static bool TryFindRevivalInString(string s, out int start, out int length, out Selector? selector)
+    {
+        start = -1; length = 0; selector = null;
+        var idx = s.LastIndexOf(RevivalGenreToken, StringComparison.Ordinal);
+        if (idx < 0) return false;
+        start = idx; length = RevivalGenreToken.Length; selector = new Selector.Revival();
+        return true;
+    }
 
     /// <summary>
     ///     找 workingPart 内"最佳"Genre alias 或全名匹配。优先级 (length DESC, rightmost) —
