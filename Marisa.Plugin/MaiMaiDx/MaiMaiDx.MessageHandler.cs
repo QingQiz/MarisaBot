@@ -2,9 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using Marisa.Configuration;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -53,6 +55,77 @@ public partial class MaiMaiDx
             {
                 next.Reply("错误的序号，会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
+
+            if (idx == 1 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
+            {
+                // 已有 Token → 直接绑定
+                if (LxnsTokenStore.GetToken(next.Sender.Id) != null)
+                {
+                    using var realm2 = BotDbContext.OpenRealm();
+                    var bind2 = realm2.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
+                    realm2.Write(() =>
+                    {
+                        if (bind2 == null)
+                            realm2.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0) { ServerName = "lxns" });
+                        else
+                            bind2.ServerName = "lxns";
+                    });
+                    next.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                }
+
+                // lxns OAuth 流程
+                var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
+                var state = Guid.NewGuid().ToString("N")[..8];
+                var url = LxnsOAuth.GetAuthorizationUrl(challenge, state);
+
+                next.Reply(
+                    $"请打开以下链接授权：\n{url}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
+
+                var oauthKey = (next.GroupInfo?.Id, next.Sender.Id);
+                DialogManager.RemoveDialog(oauthKey);
+                if (!DialogManager.TryAddDialog(oauthKey, async codeMsg =>
+                {
+                    var codeInput = codeMsg.Command.Trim().ToString();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
+                    {
+                        codeMsg.Reply("验证码格式错误，会话已关闭");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                    try
+                    {
+                        var token = await LxnsOAuth.ExchangeCode(codeInput, verifier);
+                        LxnsTokenStore.SaveToken(codeMsg.Sender.Id, token.AccessToken, token.RefreshToken,
+                            (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+
+                        using var realm = BotDbContext.OpenRealm();
+                        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == codeMsg.Sender.Id);
+                        realm.Write(() =>
+                        {
+                            if (bind == null)
+                                realm.AddWithAutoId(new MaiMaiDxBind(codeMsg.Sender.Id, 0) { ServerName = "lxns" });
+                            else
+                                bind.ServerName = "lxns";
+                        });
+
+                        codeMsg.Reply("Lxns OAuth 绑定成功！");
+                    }
+                    catch (Exception e)
+                    {
+                        codeMsg.Reply($"绑定失败: {e.Message}");
+                    }
+                    return MarisaPluginTaskState.CompletedTask;
+                }, this))
+                {
+                    next.Reply("验证会话创建失败，请重新绑定");
+                }
+
+                // 10 分钟超时自动关闭
+                _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
+                    DialogManager.RemoveDialog(oauthKey));
+
+                return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
             }
 
             using var realm = BotDbContext.OpenRealm();

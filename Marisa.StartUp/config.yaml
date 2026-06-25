@@ -17,6 +17,8 @@ divingFish:
 
 lxns:
   devToken:
+  oauth:
+    clientId:
 
 arcaea:
   resourcePath: arcaea

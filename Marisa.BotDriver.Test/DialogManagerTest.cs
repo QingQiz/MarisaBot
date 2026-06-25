@@ -20,7 +20,7 @@ public class DialogManagerTest
         DialogManager.RemoveDialog(key);
 
         Assert.That(DialogManager.TryAddDialog(key, handler2), Is.True);
-        Assert.That(DialogManager.TryRestoreDialog(key, handler1), Is.False);
+        Assert.That(DialogManager.TryRestoreDialog(key, handler1, null), Is.False);
         Assert.That(DialogManager.TryGetDialog(key, out var restoredHandler), Is.True);
         Assert.That(restoredHandler, Is.SameAs(handler2));
 

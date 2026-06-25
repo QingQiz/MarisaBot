@@ -2,6 +2,7 @@ using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.Interface;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
@@ -11,6 +12,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 {
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/chunithm";
     private static List<ChunithmSong>? _songList;
+    private static readonly Dictionary<string, (DateTime Time, Dictionary<(long, int), ChunithmScore> Scores)> ScoresCache = new();
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
     internal static List<ChunithmSong> GetSharedSongList()
     {
@@ -91,9 +94,87 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         return await FetchScores(message);
     }
 
-    public override Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
     {
-        throw new NotSupportedException("[Lxns] 落雪不支持获取所有分数，该功能已禁用");
+        var (_, qq) = AtOrSelf(message, true);
+
+        // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
+        var oauthToken = await LxnsTokenStore.GetValidToken(qq);
+        if (oauthToken != null)
+        {
+            return await GetScoresViaOAuth(oauthToken);
+        }
+
+        // 无 OAuth token → 引导用户绑定
+        throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+
+        // === 以下 dev token 两阶段抓取已废弃 ===
+        /*
+        // 回落 dev token 两阶段抓取
+        var token = ConfigurationManager.Configuration.Lxns.DevToken;
+        ...
+        */
+    }
+
+    private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken)
+    {
+        var response = await "https://maimai.lxns.net/api/v0/user/chunithm/player/scores"
+            .WithOAuthBearerToken(oauthToken.AccessToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
+
+        if (response.StatusCode is 400 or 401 or 403 or 404)
+        {
+            var errorJson = await response.GetStringAsync();
+            using var errorDoc = JsonDocument.Parse(errorJson);
+            var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)
+                ? msg.GetString() ?? "Unknown error"
+                : "Unknown error";
+            throw new HttpRequestException($"[Lxns OAuth] {response.StatusCode}: {errorMessage}");
+        }
+
+        var jsonString = await response.GetStringAsync();
+        using var doc = JsonDocument.Parse(jsonString);
+        var root = doc.RootElement.TryGetProperty("data", out var data) ? data : doc.RootElement;
+
+        // 可能嵌套在 "scores" 键内
+        if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("scores", out var scArr))
+            root = scArr;
+
+        var lxnsSongs = GetSongList();
+        var lxnsSongById = lxnsSongs.ToDictionary(s => s.Id, s => s);
+        var lxnsSongByTitle = lxnsSongs.DistinctBy(s => s.Title).ToDictionary(s => s.Title, s => s);
+
+        var result = new Dictionary<(long Id, int LevelIdx), ChunithmScore>();
+        foreach (var s in root.EnumerateArray())
+        {
+            var lvlIdx = s.TryGetProperty("level_index", out var li) ? li.GetInt32() : -1;
+            // 只收 MASTER / ULTIMA
+            if (lvlIdx != 3 && lvlIdx != 4) continue;
+
+            var score = new ChunithmScore
+            {
+                Id = s.GetProperty("id").GetInt32(),
+                Title = s.GetProperty("song_name").GetString() ?? "",
+                LevelIndex = lvlIdx,
+                Level = s.TryGetProperty("level", out var lv) ? lv.GetString() ?? "" : "",
+                Achievement = s.TryGetProperty("score", out var ach) ? ach.GetInt32() : 0,
+                Fc = s.TryGetProperty("full_combo", out var fc) ? fc.GetString() ?? "" : "",
+                Constant = 0
+            };
+
+            var song = FindMatchingSong(score, SongDb, lxnsSongById, lxnsSongByTitle);
+            if (song != null)
+            {
+                score.Id = song.Id;
+                if (lvlIdx >= 0 && lvlIdx < song.Constants.Count)
+                    score.Constant = (decimal)song.Constants[lvlIdx];
+            }
+
+            result[(score.Id, lvlIdx)] = score;
+        }
+
+        return result;
     }
 
     private async Task<ChunithmRating> FetchScores(Message message)
