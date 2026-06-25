@@ -2,9 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using Marisa.Configuration;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util;
@@ -47,28 +49,93 @@ public partial class MaiMaiDx
             .Select(x => $"{x.i}. {x.x}"))
         );
 
-        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
+        var stat   = 0;
+        string? oauthVerifier = null;
+
+        MarisaPluginTaskState DoBind(Message msg, string srv)
         {
-            if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= servers.Length)
-            {
-                next.Reply("错误的序号，会话已关闭");
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-            }
-
             using var realm = BotDbContext.OpenRealm();
-
-            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
-
+            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == msg.Sender.Id);
             realm.Write(() =>
             {
                 if (bind == null)
-                    realm.AddWithAutoId(new MaiMaiDxBind(next.Sender.Id, 0) { ServerName = servers[idx] });
+                    realm.AddWithAutoId(new MaiMaiDxBind(msg.Sender.Id, 0) { ServerName = srv });
                 else
-                    bind.ServerName = servers[idx];
+                    bind.ServerName = srv;
             });
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
-            message.Reply("好了");
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), async next =>
+        {
+            switch (stat)
+            {
+                case 0:
+                {
+                    if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= servers.Length)
+                    {
+                        next.Reply("错误的序号，会话已关闭");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+
+                    if (idx == 1 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
+                    {
+                        // 已有 Token → 跳过 OAuth，统一由 DoBind 写入
+                        if (LxnsTokenStore.GetToken(next.Sender.Id) != null)
+                        {
+                            message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                            return DoBind(next, servers[idx]);
+                        }
+
+                        // lxns OAuth 流程：只做 token 获取，绑定写入通过状态机 fall through
+                        var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
+                        var state = Guid.NewGuid().ToString("N")[..8];
+                        var url = LxnsOAuth.GetAuthorizationUrl(challenge, state);
+
+                        message.Reply(
+                            $"请打开以下链接授权：\n{url}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
+
+                        oauthVerifier = verifier;
+                        stat = 10;
+
+                        // 10 分钟超时自动清理 dialog
+                        var oauthKey = (message.GroupInfo?.Id, message.Sender.Id);
+                        _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
+                            DialogManager.RemoveDialog(oauthKey));
+
+                        return MarisaPluginTaskState.ToBeContinued;
+                    }
+
+                    // 非 OAuth 绑定：统一经由 DoBind 写入
+                    message.Reply("好了");
+                    return DoBind(next, servers[idx]);
+                }
+                case 10:
+                {
+                    var codeInput = next.Command.Trim().ToString();
+                    if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
+                    {
+                        next.Reply("验证码格式错误，会话已关闭");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                    try
+                    {
+                        var token = await LxnsOAuth.ExchangeCode(next.Command.Trim().ToString(), oauthVerifier!);
+                        LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
+                            (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+
+                        message.Reply("Lxns OAuth 绑定成功！");
+                        return DoBind(next, "lxns");
+                    }
+                    catch (Exception e)
+                    {
+                        next.Reply($"绑定失败: {e.Message}");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                }
+            }
+
+            return MarisaPluginTaskState.CompletedTask;
         }, this);
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);

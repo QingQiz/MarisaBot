@@ -6,6 +6,7 @@ using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -37,16 +38,30 @@ public partial class Chunithm
             .Select(x => $"{x.i}. {x.x}"))
         );
 
-        /*
-         * 0 -> 检查输入的index
-         * 1 -> 检查输入的服务器地址
-         * 2 -> 询问access code
-         * 3 -> 检查输入的access code
-         */
         var stat   = 0;
         var server = "";
+        string? oauthVerifier = null;
 
-        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
+        MarisaPluginTaskState DoBind(Message msg, string srv)
+        {
+            using var realm = BotDbContext.OpenRealm();
+            var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == msg.Sender.Id);
+            realm.Write(() =>
+            {
+                if (bind == null)
+                {
+                    realm.AddWithAutoId(new ChunithmBind(msg.Sender.Id, srv));
+                }
+                else
+                {
+                    bind.ServerName = srv;
+                    bind.AccessCode = "";
+                }
+            });
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), async next =>
         {
             switch (stat)
             {
@@ -55,30 +70,41 @@ public partial class Chunithm
                     if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
                     {
                         next.Reply("错误的序号，会话已关闭");
-                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                        return MarisaPluginTaskState.CompletedTask;
                     }
 
-                    if (idx is 0 or 1 or 2)
+                    if (idx == 2 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
                     {
-                        using var realm = BotDbContext.OpenRealm();
-
-                        var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == next.Sender.Id);
-
-                        realm.Write(() =>
+                        // 已有 Token → 跳过 OAuth，统一由 DoBind 写入
+                        if (LxnsTokenStore.GetToken(next.Sender.Id) != null)
                         {
-                            if (bind == null)
-                            {
-                                realm.AddWithAutoId(new ChunithmBind(next.Sender.Id, fetchers[idx]));
-                            }
-                            else
-                            {
-                                bind.ServerName = fetchers[idx];
-                                bind.AccessCode = "";
-                            }
-                        });
+                            message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                            return DoBind(next, fetchers[idx]);
+                        }
 
+                        // lxns OAuth 流程：只做 token 获取，绑定写入通过状态机 fall through
+                        var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
+                        var state = Guid.NewGuid().ToString("N")[..8];
+                        var url = LxnsOAuth.GetAuthorizationUrl(challenge, state);
+
+                        message.Reply(
+                            $"请打开以下链接授权：\n{url}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
+
+                        oauthVerifier = verifier;
+                        stat = 10;
+
+                        // 10 分钟超时自动清理 dialog
+                        var oauthKey = (message.GroupInfo?.Id, message.Sender.Id);
+                        _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
+                            DialogManager.RemoveDialog(oauthKey));
+
+                        return MarisaPluginTaskState.ToBeContinued;
+                    }
+
+                    if (idx is 0 or 1)
+                    {
                         message.Reply("好了");
-                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                        return DoBind(next, fetchers[idx]);
                     }
 
                     if (idx == fetchers.Length - 1)
@@ -93,7 +119,7 @@ public partial class Chunithm
                         stat = 2;
                     }
 
-                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                    return MarisaPluginTaskState.ToBeContinued;
                 }
                 case 1:
                 {
@@ -106,13 +132,13 @@ public partial class Chunithm
                             server = hostStr;
                             message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
                             stat = 2;
-                            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                            return MarisaPluginTaskState.ToBeContinued;
                         }
                     }
                     catch (ArgumentException) {}
 
                     next.Reply($"无效的服务器地址{host}，会话已关闭");
-                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    return MarisaPluginTaskState.CompletedTask;
                 }
                 case 2:
                 {
@@ -121,7 +147,7 @@ public partial class Chunithm
                     if (accessCode.Length != 20)
                     {
                         next.Reply($"无效的Access Code: {accessCode}，长度应为20");
-                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                        return MarisaPluginTaskState.CompletedTask;
                     }
 
                     using var realm = BotDbContext.OpenRealm();
@@ -134,7 +160,7 @@ public partial class Chunithm
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
                         next.Reply($"该Access Code尚未在{server}中绑定");
-                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                        return MarisaPluginTaskState.CompletedTask;
                     }
 
                     realm.Write(() =>
@@ -146,11 +172,34 @@ public partial class Chunithm
 
                     message.Reply("好了");
 
-                    return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+                case 10:
+                {
+                    var codeInput = next.Command.Trim().ToString();
+                    if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
+                    {
+                        next.Reply("验证码格式错误，会话已关闭");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+                    try
+                    {
+                        var token = await LxnsOAuth.ExchangeCode(next.Command.Trim().ToString(), oauthVerifier!);
+                        LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
+                            (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+
+                        message.Reply("好了");
+                        return DoBind(next, "lxns");
+                    }
+                    catch (Exception e)
+                    {
+                        next.Reply($"绑定失败: {e.Message}");
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
                 }
             }
 
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            return MarisaPluginTaskState.CompletedTask;
         }, this);
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
