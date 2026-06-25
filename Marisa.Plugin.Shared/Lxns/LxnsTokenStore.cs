@@ -8,6 +8,7 @@ public static class LxnsTokenStore
     private static readonly string StorePath = Path.Combine(
         ConfigurationManager.Configuration.Chunithm.TempPath, "lxns_oauth_tokens.json");
 
+    private static readonly object LockObj = new();
     private static Dictionary<long, LxnsTokenRecord>? _cache;
 
     private static Dictionary<long, LxnsTokenRecord> Load()
@@ -35,14 +36,17 @@ public static class LxnsTokenStore
 
     public static void SaveToken(long qq, string accessToken, string refreshToken, int expiresIn)
     {
-        var store = Load();
-        store[qq] = new LxnsTokenRecord
+        lock (LockObj)
         {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn)
-        };
-        Save();
+            var store = Load();
+            store[qq] = new LxnsTokenRecord
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn)
+            };
+            Save();
+        }
     }
 
     public static LxnsToken? GetToken(long qq)
@@ -81,9 +85,12 @@ public static class LxnsTokenStore
 
     public static void RemoveToken(long qq)
     {
-        var store = Load();
-        store.Remove(qq);
-        Save();
+        lock (LockObj)
+        {
+            var store = Load();
+            store.Remove(qq);
+            Save();
+        }
     }
 
     public static void Invalidate()

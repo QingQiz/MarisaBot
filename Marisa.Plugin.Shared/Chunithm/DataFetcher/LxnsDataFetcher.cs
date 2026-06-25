@@ -12,8 +12,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 {
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/chunithm";
     private static List<ChunithmSong>? _songList;
-    private static readonly Dictionary<string, (DateTime Time, Dictionary<(long, int), ChunithmScore> Scores)> ScoresCache = new();
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
     internal static List<ChunithmSong> GetSharedSongList()
     {

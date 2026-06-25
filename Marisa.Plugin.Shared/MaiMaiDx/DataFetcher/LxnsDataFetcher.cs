@@ -10,8 +10,6 @@ namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/maimai";
-    private static readonly Dictionary<string, (DateTime Time, Dictionary<(long, int), SongScore> Scores)> ScoresCache = new();
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
     public override async Task<DxRating> GetRating(Message message)
     {
