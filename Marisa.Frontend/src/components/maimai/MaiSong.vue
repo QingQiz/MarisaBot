@@ -635,8 +635,10 @@ function break50Loss(chart: Chart): string {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 4px 22px rgba(0, 0, 0, 0.4);
     white-space: nowrap;
     overflow: hidden;
-    padding-block: 8px 10px;
-    margin-block: -8px -10px;
+    /* overflow 在 padding 边裁切，故底部 padding 是给降部（g/y/p 等）留的安全区，margin 抵消其布局影响。
+       字号 auto-shrink 到 110px，固定 10px 不够会切掉降部，底部改用 em 随字号缩放。 */
+    padding-block: 8px 0.22em;
+    margin-block: -8px -0.22em;
 }
 
 .artist-line {
