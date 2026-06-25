@@ -14,6 +14,8 @@ public class MaiMaiDxPlateDataTest
     [
         "翠楼屋", "サファ太 vs 翠楼屋", "Jack", "はっぴー", "ロシェ@ペンギン", "rioN", "rintaro soma",
         "超七味星人", "隅田川星人", // 名字含版本代字（超=GreeN / 星=UNiVERSE），验证反查保护
+        "Revo@LC",                 // 别名"Revo"是它的子串，验证 CharterAlias 反查保护
+        "JAQ", "Jack & Licorice Gunjyo", "群青リコリス", // Jack/群青リコリス 未设别名（可打），验证解析正确
     ];
 
     // 含合作名义"sasakure.UK x DECO*27"，验证 substring 命中；"HIMEHINA" 验证纯 artist 单边命中。
@@ -991,5 +993,164 @@ public class MaiMaiDxPlateDataTest
         Assert.That(query.Selectors, Has.None.InstanceOf<PlateData.Selector.Plate>());
         Assert.That(query.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("超七味星人"));
         Assert.That(query.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 谱师别名（CharterAlias）：中文 / 罗马音别名 → 一组 canonical 谱师 substring（OR 命中）。
+    // 别名内容是静态表，与 knownCharters 无关，故这些用例不依赖上面的 Charters fixture。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("沙发太完成表",   "沙发太", "サファ太")]
+    [TestCase("沙发太将完成表", "沙发太", "サファ太")]
+    [TestCase("企鹅完成表",     "企鹅",   "ペンギン")]
+    [TestCase("柠檬神完成表",   "柠檬",   "じゃこレモン")]
+    [TestCase("二大爷完成表",   "二大爷", "ニャイン")]
+    public void ParsesCharterAlias(string raw, string input, string expectedName)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.CharterAlias>());
+        var ca = (PlateData.Selector.CharterAlias)q.Selectors.Single();
+        Assert.That(ca.Input, Is.EqualTo(input));
+        Assert.That(ca.Names, Has.Member(expectedName));
+    }
+
+    [Test]
+    public void CharterAliasMergesAlterEgos()
+    {
+        // "沙发太" 合并本名 + 高难马甲；"哈皮" 合并 はっぴー + 緑風 犬三郎。
+        var sa = (PlateData.Selector.CharterAlias)MustParse("沙发太完成表").Selectors.Single();
+        Assert.That(sa.Names, Is.SupersetOf(new[] { "サファ太", "-ZONE- SaFaRi" }));
+
+        var happy = (PlateData.Selector.CharterAlias)MustParse("哈皮完成表").Selectors.Single();
+        Assert.That(happy.Names, Is.SupersetOf(new[] { "はっぴー", "緑風 犬三郎" }));
+    }
+
+    [Test]
+    public void CharterAliasCarriesExclusions()
+    {
+        // 「小鸟游」带反向排除：含「小鳥遊」却属 サファ太 的致敬独谱要剔除（匹配层用）。
+        var ca = (PlateData.Selector.CharterAlias)MustParse("小鸟游完成表").Selectors.Single();
+        Assert.That(ca.Names, Has.Member("Phoenix"));
+        Assert.That(ca.Exclude, Has.Member("サファ太 respects for 小鳥遊さん"));
+    }
+
+    [TestCase("华火职人完成表", "华火职人")] // 别名含版本代字「华」(= 熊華 でらっくす)
+    [TestCase("桃子猫完成表",   "桃子猫")]   // 别名含版本代字「桃」(= PiNK)
+    public void CharterAliasContainingPlateKanjiBeatsPlate(string raw, string input)
+    {
+        // 别名作为更长 token 靠长度压过单字代字，不被切成 Plate + 残字。
+        var q = MustParse(raw);
+        Assert.That(q.Selectors, Has.None.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(q.Selectors.OfType<PlateData.Selector.CharterAlias>().Single().Input, Is.EqualTo(input));
+    }
+
+    [Test]
+    public void CharterAliasSevenThreeBeatsConstant()
+    {
+        // "7.3" 与定数 7.3 同形，按谱师别名优先。
+        var q = MustParse("7.3完成表");
+        Assert.That(q.Selectors, Has.None.InstanceOf<PlateData.Selector.Constant>());
+        Assert.That(q.Selectors.OfType<PlateData.Selector.CharterAlias>().Single().Names, Has.Member("シチミヘルツ"));
+    }
+
+    [Test]
+    public void RealConstantStillParsesWhenNotAnAlias()
+    {
+        // 非别名的定数照常解析（回归：别名优先只影响 "7.3"）。
+        var q = MustParse("14.6完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Constant>());
+        Assert.That(((PlateData.Selector.Constant)q.Selectors.Single()).Value, Is.EqualTo(14.6).Within(0.001));
+    }
+
+    [Test]
+    public void CharterAliasCombinesWithVersionPlate()
+    {
+        // "真桃子猫将完成表" → Plate(真) ∩ CharterAlias(桃子猫)；「桃」不被当版本。
+        var q = MustParse("真桃子猫将完成表");
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.CharterAlias>().Single().Input, Is.EqualTo("桃子猫"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS"));
+    }
+
+    [Test]
+    public void CharterAliasYieldsToRealCharterNameItIsSubstringOf()
+    {
+        // 别名 "Revo" 是真名 "Revo@LC" 的子串：用户输完整真名时反查保护让整段走 precise Charter，
+        // 不切成 CharterAlias("Revo") + 残段。
+        var q = MustParse("Revo@LC完成表");
+        Assert.That(q.Selectors, Has.None.InstanceOf<PlateData.Selector.CharterAlias>());
+        Assert.That(((PlateData.Selector.Charter)q.Selectors.Single()).Name, Is.EqualTo("Revo@LC"));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 「定数」前缀：强制定数解析，与同形谱师别名「7.3」消歧。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("定数7.3完成表")]
+    public void ConstantPrefixForcesConstantOverAlias(string raw)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors, Has.None.InstanceOf<PlateData.Selector.CharterAlias>());
+        Assert.That(((PlateData.Selector.Constant)q.Selectors.Single()).Value, Is.EqualTo(7.3).Within(0.001));
+    }
+
+    [Test]
+    public void ConstantPrefixWorksForOrdinaryConstants()
+    {
+        // 普通定数加前缀也可（一般无需，但不应报错）。
+        var q = MustParse("定数14.6神完成表");
+        Assert.That(((PlateData.Selector.Constant)q.Selectors.Single()).Value, Is.EqualTo(14.6).Within(0.001));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+    }
+
+    [Test]
+    public void BareSevenThreeStillResolvesToCharterAliasNotConstant()
+    {
+        // 回归：无前缀的「7.3」仍按谱师别名（别名优先于同形定数）。
+        var q = MustParse("7.3完成表");
+        Assert.That(q.Selectors, Has.None.InstanceOf<PlateData.Selector.Constant>());
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.CharterAlias>());
+    }
+
+    // Jack / 群青リコリス 未设别名（本身可打）。验证其相关署名仍正确解析为 Charter。
+    [Test]
+    public void JaqParsesAsCharterNotThresholdA()
+    {
+        // 「JAQ」是 Jack 变体署名；中间「A」不能被当 Achievement 阈值剥成「JQ」。
+        var q = MustParse("JAQ完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(((PlateData.Selector.Charter)q.Selectors.Single()).Name, Is.EqualTo("JAQ"));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("SSS")); // 默认阈值，未误吞 A
+    }
+
+    [Test]
+    public void JackResolvesAsCharterAndMatchesCollab()
+    {
+        // 打「Jack」按 Charter 解析（小写 a/c 不被当阈值），substring 命中合作署名「Jack & Licorice Gunjyo」。
+        var q = MustParse("Jack完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+        var c = (PlateData.Selector.Charter)q.Selectors.Single();
+        Assert.That(c.Name, Is.EqualTo("Jack"));
+        Assert.That(Charters.Any(x => x.Contains(c.Name)), Is.True); // 含 "Jack & Licorice Gunjyo"
+    }
+
+    [Test]
+    public void GunjyoTypeableResolvesAsCharter()
+    {
+        // 群青リコリス 未设别名但可打：直接打名字按 Charter 解析（不被代字/别名误吞）。
+        var q = MustParse("群青リコリス完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+        Assert.That(((PlateData.Selector.Charter)q.Selectors.Single()).Name, Is.EqualTo("群青リコリス"));
+    }
+
+    [Test]
+    public void CharterAlterEgoMapResolvesShisui()
+    {
+        // 打本名「翠楼屋」时 handler 会并查马甲「翡翠マナ」（匹配层）；解析层仍是普通 Charter。
+        Assert.That(PlateData.CharterAlterEgos("翠楼屋"), Has.Member("翡翠マナ"));
+        Assert.That(PlateData.CharterAlterEgos("Jack"), Is.Empty);
+        var q = MustParse("翠楼屋将完成表");
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
     }
 }

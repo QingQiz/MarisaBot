@@ -40,6 +40,15 @@ public static class PlateData
         /// <summary>谱师。Name 与 song.Charters[i] substring 匹配。</summary>
         public sealed record Charter(string Name) : Selector(Name);
 
+        /// <summary>
+        ///     谱师别名：用户输中文 / 罗马音别名 → 一组 canonical 谱师 substring，与 song.Charters[i] 做 OR substring 匹配。
+        ///     一个别名映射多个 substring，用于合并同一谱师的本名、高难马甲与合作名义
+        ///     （如「沙发太」同时覆盖 サファ太 与马甲 -ZONE- SaFaRi）。Input 是用户输入的别名（用于显示）。
+        ///     Exclude：尽管含某 Name substring、但不属于本人的署名（如「サファ太 respects for 小鳥遊さん」
+        ///     含「小鳥遊」却是 サファ太 的致敬独谱），命中 Exclude 的 chart 不计入。
+        /// </summary>
+        public sealed record CharterAlias(IReadOnlyList<string> Names, IReadOnlyList<string> Exclude, string Input) : Selector(Input);
+
         /// <summary>类别。FullName 与 song.Info.Genre 精确匹配；Alias 是用户输入的别名（用于显示）。</summary>
         public sealed record Genre(string FullName, string Alias) : Selector(Alias);
 
@@ -379,6 +388,69 @@ public static class PlateData
     };
 
     /// <summary>
+    ///     谱师别名 → 一组 canonical 谱师 substring（与 song.Charters[i] 做 OR substring 匹配）。
+    ///     纯假名 / 难打的日文谱师名，给中文意译、昵称、罗马音、繁简等别名。值是多个 substring：
+    ///     合并同一谱师的本名、高难马甲、合作名义——substring 一侧用 OrdinalIgnoreCase，
+    ///     故大小写不敏感，且合作名义（"X vs サファ太"）会一并命中。别名内容由群友提供。
+    ///     注：「7.3」与定数 7.3 同形，裸「7.3」按谱师别名；定数 7.3 用「定数7.3」消歧。
+    /// </summary>
+    public static readonly Dictionary<string, string[]> CharterAliasMap = new()
+    {
+        ["哈皮"]       = ["はっぴー", "緑風 犬三郎", "原田ひろゆき", "シチミッピー", "鳩ホルぴー", "いぬっくまとボコっくま", "たかなっぴー", "Luxiいぬ", "“H”ack", "“H”ack underground", "PANDORA PARADOXXX", "Sukiyaki vs Happy"],
+        ["沙发太"]     = ["サファ太", "さふぁた", "Safari", "-ZONE- SaFaRi", "-ZONE-Phoenix", "Safata", "ボコ太", "鳩サファzhel", "サぴぴぴぴちネファ太太太太コ", "ﾚよ†ょ／∪ヽ”┠  (十,3､了ﾅﾆ", "PANDORA BOXXX", "Ruby", "project raputa", "Safazhel"],
+        ["maistar"]    = ["mai-Star"],
+        ["小鸟游"]     = ["小鳥遊", "Phoenix", "たかなっぴー", "Anomaly Labyrinth", "ネコトリサーカス団"],
+        ["谱面-100号"] = ["譜面-100号"],
+        ["谱面100号"]  = ["譜面-100号"],
+        ["100号"]      = ["譜面-100号"],
+        ["鸠"]         = ["鳩ホルダー", "The Dove", "鳩ホルぴー", "鳩サファzhel"],
+        ["鸽子"]       = ["鳩ホルダー", "The Dove", "鳩ホルぴー", "鳩サファzhel"],
+        ["企鹅"]       = ["ペンギン", "ものくロシェ"],
+        ["泸溪河"]     = ["Luxizhel", "BELiZHEL", "Luxiいぬ", "鳩サファzhel", "LuxiHertz", "Safazhel"],
+        ["二大爷"]     = ["ニャイン"],
+        ["7.3"]        = ["シチミヘルツ", "7.3", "Safata.Hz", "Safata.GHz", "超七味星人", "七味星人", "小鳥遊チミ", "シチミッピー", "あまくちヘルツ", "しちみりこりす", "SHICHIMI☆CAT", "Hz-R.Arrow", "LuxiHertz"],
+        ["隅田川"]     = ["隅田川星人", "The ALiEN", "超七味星人", "七味星人", "隅田川華火大会", "はっぴー星人"],
+        ["川哥"]       = ["隅田川星人", "The ALiEN", "超七味星人", "七味星人", "隅田川華火大会", "はっぴー星人"],
+        ["华火职人"]   = ["華火職人", "7.3連発華火", "ﾚよ†ょ／∪ヽ”┠  (十,3､了ﾅﾆ", "“Carpe diem” ＊ HAN∀BI", "隅田川華火大会"],
+        ["桃子猫"]     = ["ぴちネコ", "ロシアンブラック", "BLaCK rOSE dIsEASe pATiENT", "サぴぴぴぴちネファ太太太太コ", "チェシャ猫とハートのジャック", "SHICHIMI☆CAT", "ネコトリサーカス団", "R-blacX of JacQ", "SAFARi☆CAT"],
+        ["阿玛莉莉丝"] = ["アマリリス"],
+        ["柠檬"]       = ["じゃこレモン", "僕の檸檬本当上手"],
+        ["DP皆传"]     = ["チャン@DP皆伝", "Garakuta Scramble!", "舞舞10年ズ（チャンとはっぴー）"],
+        ["科技厨房"]   = ["Techno Kitchen"],
+        ["Revo"]       = ["Revo@LC"],
+        ["蟹棒君"]     = ["カマボコ", "ボコ太", "いぬっくまとボコっくま"],
+        ["蟹棒男"]     = ["カマボコ", "ボコ太", "いぬっくまとボコっくま"],
+        ["寿喜烧"]     = ["すきやき", "Sukiyaki vs Happy"],
+        ["叠返"]       = ["畳返し"],
+        ["红箭"]       = ["Redarrow", "red phoenix", "Hz-R.Arrow"],
+        ["甜口姜"]     = ["あまくちジンジャー", "あまくちヘルツ", "EL DiABLO"],
+        ["habakiri"]   = ["アミノハバキリ"],
+        ["hbkr"]       = ["アミノハバキリ"],
+        ["melonpop"]   = ["メロンポップ", "ずんだポップ"],
+    };
+
+    /// <summary>
+    ///     谱师别名的反向排除：某署名虽含别名的 Name substring，却不属于该谱师，命中即排除。
+    ///     如「サファ太 respects for 小鳥遊さん」含「小鳥遊」却是 サファ太 的致敬独谱，不计入「小鸟游」。
+    /// </summary>
+    public static readonly Dictionary<string, string[]> CharterAliasExclude = new()
+    {
+        ["小鸟游"] = ["サファ太 respects for 小鳥遊さん"],
+    };
+
+    /// <summary>
+    ///     可直接打出的谱师本名 → 其高难马甲等额外 substring。命中本名（精确 Charter）时一并匹配马甲，
+    ///     无需把本名设成别名（设成别名会改变其 selector 类型、撞坏既有用例）。
+    /// </summary>
+    public static readonly Dictionary<string, string[]> CharterAlterEgoMap = new()
+    {
+        ["翠楼屋"] = ["翡翠マナ"],
+    };
+
+    public static IEnumerable<string> CharterAlterEgos(string charterName) =>
+        CharterAlterEgoMap.TryGetValue(charterName, out var egos) ? egos : [];
+
+    /// <summary>
     ///     阈值表。第一项是用户输入的字符串（中文别名 + ASCII rank/fc/fs 缩写），第二项是阈值定义。
     ///     字符串后缀匹配走 longest match，所以排序时 longer-first。
     /// </summary>
@@ -575,6 +647,14 @@ public static class PlateData
                 { matchStart = gStart; matchLen = gLen; matched = gSel; }
             }
 
+            // 谱师别名作为一等 token，且在 Constant 之前检查：多字别名「华火职人」靠长度压过单字代字「华」，
+            // 同长度同位置时（「7.3」vs 定数 7.3）按先检查者胜出 → 别名优先。
+            if (TryFindRightmostCharterAliasInString(workingPart, out var caStart, out var caLen, out var caSel))
+            {
+                if (caLen > matchLen || (caLen == matchLen && caStart > matchStart))
+                { matchStart = caStart; matchLen = caLen; matched = caSel; }
+            }
+
             if (TryFindRightmostConstantInString(workingPart, out var cStart, out var cLen, out var cSel))
             {
                 if (cLen > matchLen || (cLen == matchLen && cStart > matchStart))
@@ -595,8 +675,9 @@ public static class PlateData
 
             if (matchStart < 0) break;
 
-            // 反查保护：版本代字/类别单字若嵌在更长且能对上某谱师/曲师名的片段里（如"隅田川星人"的"星"、"超七味"的"超"），它是名字的一部分而非 selector，否决匹配让整段落到下面 Charter/Artist
-            if (matched is Selector.Plate or Selector.Genre
+            // 反查保护：版本代字/类别/谱师别名若只是某真谱师/曲师名的一部分（如"隅田川星人"的"星"、
+            // "超七味"的"超"，或别名"Revo"嵌在真名"Revo@LC"里），它不是 selector，否决匹配让整段落到下面 Charter/Artist。
+            if (matched is Selector.Plate or Selector.Genre or Selector.CharterAlias
                 && workingPart.Length > matchLen
                 && (TryResolveCharterPrecise(workingPart, knownCharters, out _)
                     || TryResolveArtist(workingPart, knownArtists, out _)))
@@ -945,6 +1026,36 @@ public static class PlateData
     }
 
     /// <summary>
+    ///     找 workingPart 内最佳（length DESC, rightmost）谱师别名 key 匹配。
+    ///     OrdinalIgnoreCase：别名含 ASCII（maistar / Revo / 7.3）时大小写不敏感。
+    /// </summary>
+    private static bool TryFindRightmostCharterAliasInString(
+        string s, out int start, out int length, out Selector? selector)
+    {
+        start = -1; length = 0; selector = null;
+
+        int bestStart = -1, bestLen = 0;
+        string[]? bestNames = null;
+        string? bestKey = null;
+
+        foreach (var (alias, names) in CharterAliasMap)
+        {
+            var idx = s.LastIndexOf(alias, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0) continue;
+            if (alias.Length > bestLen || (alias.Length == bestLen && idx > bestStart))
+            {
+                bestStart = idx; bestLen = alias.Length; bestNames = names; bestKey = alias;
+            }
+        }
+
+        if (bestStart < 0) return false;
+        start = bestStart; length = bestLen;
+        var exclude = CharterAliasExclude.GetValueOrDefault(bestKey!, []);
+        selector = new Selector.CharterAlias(bestNames!, exclude, s.Substring(bestStart, bestLen));
+        return true;
+    }
+
+    /// <summary>
     ///     找 workingPart 内 rightmost Constant（X.Y 格式，1-15.x 范围）。
     ///     两侧不能是 ASCII 字母 / 数字 / 点号，避免吃到 charter/artist 名里的偶然数字（如 "DECO*27"）。
     ///     正则 alternation 顺序 (1[0-5]|[1-9]) 优先匹更长以保证 "14" 不被 "1" 吃。
@@ -953,12 +1064,15 @@ public static class PlateData
         string s, out int start, out int length, out Selector? selector)
     {
         start = -1; length = 0; selector = null;
-        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(1[0-5]|[1-9])\.\d");
+        // 可选「定数」前缀强制按定数解析，用于与同形谱师别名（如「7.3」）消歧：
+        // 「7.3完成表」走别名，「定数7.3完成表」走定数。前缀计入 token 长度，靠 longest-first 压过别名。
+        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(?:定数)?((?:1[0-5]|[1-9])\.\d)");
         for (var i = matches.Count - 1; i >= 0; i--)
         {
-            var m = matches[i];
-            if (!IsCompleteNumberToken(s, m.Index, m.Length)) continue;
-            if (!double.TryParse(m.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)) continue;
+            var m   = matches[i];
+            var num = m.Groups[1];   // 数字部分（不含前缀）；边界检查只针对数字两侧。
+            if (!IsCompleteNumberToken(s, num.Index, num.Length)) continue;
+            if (!double.TryParse(num.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)) continue;
             start = m.Index; length = m.Length;
             selector = new Selector.Constant(v);
             return true;
