@@ -190,7 +190,7 @@ public partial class Chunithm
                         LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
                             (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
 
-                        message.Reply("好了");
+                        message.Reply("Lxns OAuth 绑定成功！");
                         return DoBind(next, "lxns");
                     }
                     catch (Exception e)
