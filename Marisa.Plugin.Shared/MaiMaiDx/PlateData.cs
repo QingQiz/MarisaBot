@@ -392,7 +392,7 @@ public static class PlateData
     ///     纯假名 / 难打的日文谱师名，给中文意译、昵称、罗马音、繁简等别名。值是多个 substring：
     ///     合并同一谱师的本名、高难马甲、合作名义——substring 一侧用 OrdinalIgnoreCase，
     ///     故大小写不敏感，且合作名义（"X vs サファ太"）会一并命中。别名内容由群友提供。
-    ///     注：「7.3」与定数 7.3 同形，此处按谱师别名优先（定数 7.3 完成表不再可查）。
+    ///     注：「7.3」与定数 7.3 同形，裸「7.3」按谱师别名；定数 7.3 用「定数7.3」消歧。
     /// </summary>
     public static readonly Dictionary<string, string[]> CharterAliasMap = new()
     {
@@ -1064,9 +1064,9 @@ public static class PlateData
         string s, out int start, out int length, out Selector? selector)
     {
         start = -1; length = 0; selector = null;
-        // 可选「定数」/「定」前缀强制按定数解析，用于与同形谱师别名（如「7.3」）消歧：
+        // 可选「定数」前缀强制按定数解析，用于与同形谱师别名（如「7.3」）消歧：
         // 「7.3完成表」走别名，「定数7.3完成表」走定数。前缀计入 token 长度，靠 longest-first 压过别名。
-        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(?:定数|定)?((?:1[0-5]|[1-9])\.\d)");
+        var matches = System.Text.RegularExpressions.Regex.Matches(s, @"(?:定数)?((?:1[0-5]|[1-9])\.\d)");
         for (var i = matches.Count - 1; i >= 0; i--)
         {
             var m   = matches[i];

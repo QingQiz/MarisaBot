@@ -1084,11 +1084,10 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
-    // 「定数」/「定」前缀：强制定数解析，与同形谱师别名「7.3」消歧。
+    // 「定数」前缀：强制定数解析，与同形谱师别名「7.3」消歧。
     // ──────────────────────────────────────────────────────────────────────
 
     [TestCase("定数7.3完成表")]
-    [TestCase("定7.3完成表")]
     public void ConstantPrefixForcesConstantOverAlias(string raw)
     {
         var q = MustParse(raw);
