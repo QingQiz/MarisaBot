@@ -98,6 +98,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
             var exist = SongDb.SongIndexer.TryGetValue(data.Id, out var song);
 
             if (!exist || song == null) continue;
+            if (data.Index < 0 || data.Index >= song.Levels.Count) continue;
 
             ret[(data.Id, data.Index)] = new ChunithmScore
             {
