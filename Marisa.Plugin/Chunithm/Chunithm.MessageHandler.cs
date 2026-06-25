@@ -86,9 +86,11 @@ public partial class Chunithm
                         var (verifier, challenge) = LxnsOAuth.GeneratePkcePair();
                         var state = Guid.NewGuid().ToString("N")[..8];
                         var url = LxnsOAuth.GetAuthorizationUrl(challenge, state);
+                        var shortCode = ShortUrlStore.CreateShortUrl(url);
+                        var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
 
                         message.Reply(
-                            $"请打开以下链接授权：\n{url}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
+                            $"请打开以下链接授权：\n{shortUrl}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）");
 
                         oauthVerifier = verifier;
                         stat = 10;
