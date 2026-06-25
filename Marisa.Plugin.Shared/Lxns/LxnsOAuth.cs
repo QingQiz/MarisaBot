@@ -46,6 +46,7 @@ public static class LxnsOAuth
     public static async Task<LxnsToken> ExchangeCode(string code, string codeVerifier)
     {
         var response = await $"{OAuthBaseUrl}/token"
+            .AllowHttpStatus("400,401")
             .PostJsonAsync(new
             {
                 grant_type = "authorization_code",
@@ -59,8 +60,16 @@ public static class LxnsOAuth
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        // 兼容旧格式 data.access_token 和新格式顶层 access_token
-        if (root.TryGetProperty("data", out var d) && d.ValueKind == JsonValueKind.Object)
+        // 错误响应 (新 OAuth 标准格式)
+        if (root.TryGetProperty("error", out var err))
+        {
+            var desc = root.TryGetProperty("error_description", out var ed)
+                ? ed.GetString() : err.GetString();
+            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}");
+        }
+
+        // 优先读取顶层 fields (OAuth 2.0 标准), 回退 data 包装 (旧格式, 即将废弃)
+        if (!root.TryGetProperty("access_token", out _) && root.TryGetProperty("data", out var d) && d.ValueKind == JsonValueKind.Object)
             root = d;
 
         return new LxnsToken
@@ -76,6 +85,7 @@ public static class LxnsOAuth
     public static async Task<LxnsToken> RefreshToken(string refreshToken)
     {
         var response = await $"{OAuthBaseUrl}/token"
+            .AllowHttpStatus("400,401")
             .PostJsonAsync(new
             {
                 grant_type = "refresh_token",
@@ -87,7 +97,16 @@ public static class LxnsOAuth
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        if (root.TryGetProperty("data", out var d) && d.ValueKind == JsonValueKind.Object)
+        // 错误响应 (新 OAuth 标准格式)
+        if (root.TryGetProperty("error", out var err))
+        {
+            var desc = root.TryGetProperty("error_description", out var ed)
+                ? ed.GetString() : err.GetString();
+            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}");
+        }
+
+        // 优先读取顶层 fields, 回退 data 包装
+        if (!root.TryGetProperty("access_token", out _) && root.TryGetProperty("data", out var d) && d.ValueKind == JsonValueKind.Object)
             root = d;
 
         return new LxnsToken
