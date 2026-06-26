@@ -147,8 +147,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         foreach (var s in root.EnumerateArray())
         {
             var lvlIdx = s.TryGetProperty("level_index", out var li) ? li.GetInt32() : -1;
-            // 只收 MASTER / ULTIMA
-            if (lvlIdx != 3 && lvlIdx != 4) continue;
+            if (lvlIdx < 0) continue;
 
             var score = new ChunithmScore
             {
