@@ -208,20 +208,20 @@ onMounted(() => { nextTick(fitTitle); });
                     <div class="chart-rows">
                         <div v-for="(c, i) in song.Beatmaps" :key="i"
                              class="chart-row"
-                             :style="{ boxShadow: `inset 4px 0 0 ${DIFF_COLORS[c.LevelName] || '#fff'}` }">
+                              :class="{ 'row-ultima': c.LevelName === 'ULTIMA' }"
+                              :style="c.LevelName !== 'ULTIMA' ? { boxShadow: `inset 4px 0 0 ${DIFF_COLORS[c.LevelName] || '#fff'}` } : {}">
                             <div class="chart-row-top">
                                 <div class="diff-chip">
                                     <span class="diff-name"
                                           :style="c.LevelName === 'ULTIMA'
-                                            ? { backgroundColor: '#000', color: '#fff', border: '2px solid #FF3A3A' }
-                                            : { backgroundColor: DIFF_COLORS[c.LevelName] || '#888',
-                                                color: c.LevelName === 'ULTIMA' ? '#fff' : undefined }">
+                                            ? { backgroundColor: '#000', color: '#fff' }
+                                            : { backgroundColor: DIFF_COLORS[c.LevelName] || '#888', color: '#fff' }">
                                         {{ c.LevelName }}
                                     </span>
                                     <span class="diff-level"
                                           :style="c.LevelName === 'ULTIMA'
-                                            ? { backgroundColor: '#333', color: '#fff', border: '2px solid #FF3A3A' }
-                                            : { backgroundColor: DIFF_LIGHT[c.LevelName] || '#555', color: c.LevelName === 'ULTIMA' ? '#fff' : '#222' }">
+                                            ? { backgroundColor: '#000', color: '#fff' }
+                                            : { backgroundColor: DIFF_LIGHT[c.LevelName] || '#555', color: '#222' }">
                                         {{ c.LevelStr }}
                                     </span>
                                 </div>
@@ -236,6 +236,18 @@ onMounted(() => { nextTick(fitTitle); });
                                 <div class="note-cell">
                                     <div class="note-label">COMBO</div>
                                     <div class="note-value">{{ c.MaxCombo.toLocaleString() }}</div>
+                                </div>
+                                <div class="note-cell" v-if="c.MaxCombo > 0">
+                                    <div class="note-label">MISS</div>
+                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo * 101).toFixed(1) }}</div>
+                                </div>
+                                <div class="note-cell" v-if="c.MaxCombo > 0">
+                                    <div class="note-label">ATK</div>
+                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo * 51).toFixed(1) }}</div>
+                                </div>
+                                <div class="note-cell" v-if="c.MaxCombo > 0">
+                                    <div class="note-label">JST</div>
+                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo).toFixed(1) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -266,7 +278,7 @@ onMounted(() => { nextTick(fitTitle); });
 /* ── 顶栏 ── */
 .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; margin-left: 44px; margin-right: 44px; }
 
-.ver-logo { height: 60px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+.ver-logo { height: 90px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 
 .version-tag {
     font-weight: bold; font-size: 20px; letter-spacing: 0.15em; color: #fff;
@@ -389,6 +401,8 @@ onMounted(() => { nextTick(fitTitle); });
 
 .chart-row { position: relative; height: 112px; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.04); }
 
+.row-ultima { border-left: 4px solid #FF3A3A; }
+
 .chart-row-top { display: flex; align-items: stretch; }
 
 .diff-chip {
@@ -420,14 +434,14 @@ onMounted(() => { nextTick(fitTitle); });
 
 .const-ultima {
     color: #fff;
-    text-shadow: 0 0 8px #fff;
     border: 2px solid #FF3A3A;
     box-shadow: none;
+    text-shadow: none;
 }
 
 .note-row {
     position: absolute; left: 14px; right: 120px; top: 44px; bottom: 0;
-    display: flex; align-items: flex-end; padding-bottom: 12px;
+    display: flex; align-items: flex-end; justify-content: space-evenly; padding-bottom: 12px;
 }
 
 .note-cell { display: flex; flex-direction: column; align-items: center; }
@@ -435,6 +449,8 @@ onMounted(() => { nextTick(fitTitle); });
 .note-label { font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 0.1em; margin-bottom: 2px; }
 
 .note-value { font-weight: bold; font-size: 22px; color: #fff; }
+
+.note-loss-value { font-size: 18px; color: rgba(255,255,255,0.65); font-family: 'Torus', sans-serif; }
 
 .footer-text {
     display: block; margin-top: 20px; margin-left: 44px; font-size: 15px;
