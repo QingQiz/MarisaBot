@@ -24,6 +24,7 @@ import OpVersion from "@/components/chunithm/op/OpVersion.vue";
 import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
 import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
 import MaiSong from "@/components/maimai/MaiSong.vue";
+import MaiSongScore from "@/components/maimai/MaiSongScore.vue";
 
 
 const routes = [
@@ -33,6 +34,7 @@ const routes = [
     {path: '/maimai/recommend', component: Recommend},
     {path: '/maimai/summary', component: MaiMaiSummary},
     {path: '/maimai/song', component: MaiSong},
+    {path: '/maimai/song-score', component: MaiSongScore},
     {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},
