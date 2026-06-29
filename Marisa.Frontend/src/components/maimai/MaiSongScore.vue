@@ -47,10 +47,10 @@
             <div class="vc-tbl">
                 <div class="vc-head">
                     <div class="vc-h-diff"></div>
-                    <div class="vc-cells">
+                    <div class="vc-cells" :class="{ 'vc-cells--utg': isUtage }">
                         <div class="vc-h vc-h-c">达成率</div>
                         <div class="vc-h vc-h-c">评级</div>
-                        <div class="vc-h vc-h-c">Ra</div>
+                        <div v-if="!isUtage" class="vc-h vc-h-c">Ra</div>
                         <div class="vc-h vc-h-c">DX SCORE</div>
                         <div class="vc-h vc-h-c">DX%</div>
                         <div class="vc-h vc-h-c">DX星级</div>
@@ -62,10 +62,10 @@
                         <span class="vc-chip-name" :style="isUtage ? { fontFamily: `'Microsoft YaHei', sans-serif` } : undefined">{{ diffName(c.LevelIndex) }}</span>
                         <span class="vc-chip-ds tabular-nums">{{ isUtage ? c.Level : c.Constant.toFixed(1) }}</span>
                     </div>
-                    <div v-if="c.Played" class="vc-cells">
+                    <div v-if="c.Played" class="vc-cells" :class="{ 'vc-cells--utg': isUtage }">
                         <div class="vc-ach tabular-nums"><span class="vc-ach-int">{{ achInt(c) }}</span>.{{ achDec(c) }}<span class="vc-ach-pct">%</span></div>
                         <div class="vc-cell vc-cell-c"><img :src="rankIcon(c)" alt="" :style="rankStyle(c)" class="vc-rank"></div>
-                        <div class="vc-cell vc-cell-c vc-cell-ra tabular-nums">{{ isUtage ? '-' : c.Ra }}</div>
+                        <div v-if="!isUtage" class="vc-cell vc-cell-c vc-cell-ra tabular-nums">{{ c.Ra }}</div>
                         <div class="vc-cell vc-cell-c vc-cell-dx tabular-nums">{{ c.DxScore }}/{{ c.MaxDx }}</div>
                         <div class="vc-cell vc-cell-c vc-cell-rate tabular-nums">{{ dxRate(c) }}%</div>
                         <div class="vc-cell vc-cell-c"><img v-if="starN(c)" :src="starIcon(c)" alt="" class="vc-star"></div>
@@ -257,6 +257,8 @@ watch(song, async () => {
 .vc-chip-name { font-family: 'SEGA NewRodin',sans-serif; font-weight: 900; font-size: 13px; }
 .vc-chip-ds { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 25px; line-height: 1; }
 .vc-cells { flex: 1; min-width: 0; display: grid; grid-template-columns: 110px 94px 32px 88px 54px 44px 76px; justify-content: space-between; align-items: center; padding-left: 16px; padding-right: 18px; }
+/* 宴会场谱面无定数、Ra 无意义，去掉 Ra 列（表头与单元格均不渲染），列模板同步收成 6 列 */
+.vc-cells--utg { grid-template-columns: 110px 94px 88px 54px 44px 76px; }
 .vc-row .vc-cells { align-items: flex-start; padding-top: 11px; }
 .vc-ach { display: flex; align-items: baseline; justify-content: flex-start; font-family: 'Torus',sans-serif; font-weight: bold; font-size: 19px; line-height: 1; }
 .vc-ach-int { font-weight: 900; font-size: 31px; }
