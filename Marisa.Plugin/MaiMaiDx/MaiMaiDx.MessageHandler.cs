@@ -709,7 +709,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     单曲各难度成绩
     /// </summary>
-    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌名`/`别名`/`id`")]
+    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("info", "信息")]
     private async Task<MarisaPluginTaskState> SongInfo(Message message)
     {
