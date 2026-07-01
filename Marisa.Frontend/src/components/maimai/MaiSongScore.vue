@@ -74,7 +74,7 @@
                             <span class="vc-mslot"><img v-if="c.Fs" :src="fsIcon(c)" alt="" :style="markStyle(c.Fs)" class="vc-mark"></span>
                         </div>
                     </div>
-                    <div v-else class="vc-unplayed">无游玩记录</div>
+                    <div v-else class="vc-unplayed">No Play Record</div>
                 </div>
             </div>
 
@@ -274,5 +274,5 @@ watch(song, async () => {
 .vc-rank { display: block; }
 .vc-star { height: 28px; display: block; }
 .vc-mark { display: block; }
-.vc-unplayed { flex: 1; display: flex; align-items: center; padding-left: 20px; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 20px; color: rgba(255,255,255,0.3); letter-spacing: 0.22em; }
+.vc-unplayed { flex: 1; display: flex; align-items: center; padding-left: 20px; font-family: 'SEGA NewRodin', sans-serif; font-weight: bold; font-style: italic; font-size: 20px; color: rgba(255,255,255,0.3); letter-spacing: 0.22em; }
 </style>
