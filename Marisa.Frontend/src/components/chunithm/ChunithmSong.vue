@@ -158,9 +158,9 @@ onMounted(() => { nextTick(fitTitle); });
         <div class="text-white/40 text-3xl font-bold tracking-widest">CHUNITHM Song {{ id }}</div>
     </div>
     <div v-else class="chu-song w-[1240px] antialiased">
-        <div class="bg-layer" :style="{ background: `linear-gradient(168deg, ${themeColor}22 0%, #0e0418 62%, #060309 100%)` }"></div>
+        <div class="bg-layer" :style="{ background: `linear-gradient(168deg, #FDD50022 0%, #0e0418 62%, #060309 100%)` }"></div>
         <div class="stripe-layer"></div>
-        <div class="glow-layer" :style="{ background: `radial-gradient(620px 620px at 24% 30%, ${themeColor}30 0%, transparent 70%), radial-gradient(520px 420px at 88% 6%, ${themeColor}1c 0%, transparent 70%)` }"></div>
+        <div class="glow-layer" :style="{ background: `radial-gradient(620px 620px at 24% 30%, #FDD50030 0%, transparent 70%), radial-gradient(520px 420px at 88% 6%, #FDD5001c 0%, transparent 70%)` }"></div>
         <div class="inner">
             <!-- ── 顶栏：版本 logo → BPM → Genre → ID ── -->
             <header class="top-bar">
@@ -408,11 +408,11 @@ onMounted(() => { nextTick(fitTitle); });
 
 .tol-cell { flex: 1; display: flex; align-items: baseline; justify-content: center; gap: 8px; }
 
-.tol-icon { height: 28px; width: auto; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4)); }
+.tol-icon { height: 28px; width: auto; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4)); position: relative; top: 3px; }
 
 .tol-thresh { font-weight: bold; font-size: 30px; color: #22c55e; }
 
-.tol-delta { font-weight: bold; font-size: 26px; color: #f59e0b; }
+.tol-delta { font-weight: bold; font-size: 24px; color: #f59e0b; }
 
 /* ── 谱面表格 ── */
 .right-col { flex: 1; min-width: 0; }
@@ -445,13 +445,14 @@ onMounted(() => { nextTick(fitTitle); });
 
 .diff-chip {
     display: inline-flex; align-items: stretch; border-radius: 10px 0 14px 0;
-    overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.35); flex-shrink: 0;
 }
 
 .diff-name {
-    display: flex; align-items: center; padding: 0 18px; font-weight: bold;
+    display: flex; align-items: center; padding: 0 14px 0 18px; font-weight: bold;
     font-size: 20px; letter-spacing: 0.06em; color: #fff;
-    width: 136px; justify-content: center; box-sizing: border-box;
+    width: 220px; justify-content: flex-end; box-sizing: border-box;
+    white-space: nowrap;
 }
 
 .diff-level {
