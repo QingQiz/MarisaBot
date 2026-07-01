@@ -113,7 +113,7 @@ function getBorder(score: Score | undefined): string | null {
 function getMarker(score: Score, maxDx: number = 0): string | null {
     if (!plate.value) return null
     switch (plate.value.Dim) {
-        case 'Achievement': return `/assets/maimai/pic/rank_${score.rate}.png`
+        case 'Achievement': return `/assets/maimai/pic/rank_summary_${score.rate}.png`
         case 'Fc':          return score.fc ? `/assets/maimai/pic/icon_${score.fc}.png` : null
         case 'Fs': {
             if (!score.fs) return null
@@ -173,7 +173,7 @@ function groupMinRank(g: GroupedSong): string | null {
         if (sc.achievements < minA) minA = sc.achievements
     }
     if (!isFinite(minA)) return null
-    return `/assets/maimai/pic/rank_${calcRank(minA)}.png`
+    return `/assets/maimai/pic/rank_summary_${calcRank(minA)}.png`
 }
 
 function formatAch(a: number): {intPart: string, fracPart: string} {
@@ -216,7 +216,7 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
                             <!-- sum mode: 底部成绩 + 中心 rank（带边框） -->
                             <template v-else-if="!plate && score">
                                 <img v-if="getBorder(score)" :src="getBorder(score)!" class="border-img" alt=""/>
-                                <img :src="`/assets/maimai/pic/rank_${score.rate}.png`" class="sum-rank" alt=""/>
+                                <img :src="`/assets/maimai/pic/rank_summary_${score.rate}.png`" class="sum-rank" alt=""/>
                                 <div class="achievement-bar" :style="{color: fcColor(score.fc)}">
                                     <span class="ach-text"><span class="ach-int">{{ formatAch(score.achievements).intPart }}</span><span class="ach-frac">{{ formatAch(score.achievements).fracPart }}</span></span>
                                 </div>
