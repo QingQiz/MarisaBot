@@ -70,6 +70,40 @@ function bpmDomain(): string {
     return bpms[0]?.toString() || '';
 }
 
+// 卡片主题色: 取最高有效难度的颜色 (跳过 WORLD'S END 的 Constant=0)
+const themeColor = computed(() => {
+    const bms = song.value.Beatmaps as any[] | undefined;
+    if (!bms || bms.length === 0) return "#FDD500";
+    for (let i = bms.length - 1; i >= 0; i--) {
+        if (bms[i].Constant > 0) return DIFF_HEX[bms[i].LevelName] || "#FDD500";
+    }
+    return "#FDD500";
+});
+
+const DIFF_HEX: Record<string, string> = {
+    "BASIC"      : "#52e72b",
+    "ADVANCED"   : "#ffa801",
+    "EXPERT"     : "#ff5a66",
+    "MASTER"     : "#c64fe4",
+    "ULTIMA"     : "#FF3A3A",
+    "WORLD'S END": "#dbaaff",
+};
+
+// 谱面行渐变色
+function rowGradient(color: string) {
+    return `linear-gradient(90deg, ${color}26 0%, rgba(0,0,0,0.42) 34%, rgba(0,0,0,0.42) 100%)`;
+}
+
+// 扣分计算: JUSTICE=10000/combo, ATTACK=JUSTICE×51, MISS=JUSTICE×101
+function deduction(combo: number) {
+    const jst = 10000 / combo;
+    return {
+        miss: (jst * 101).toFixed(1),
+        atk:  (jst * 51).toFixed(1),
+        jst:  jst.toFixed(1),
+    };
+}
+
 function calcTol(N: number) {
     function cells(buffer: number) {
         const raw = buffer * N;
@@ -124,7 +158,9 @@ onMounted(() => { nextTick(fitTitle); });
         <div class="text-white/40 text-3xl font-bold tracking-widest">CHUNITHM Song {{ id }}</div>
     </div>
     <div v-else class="chu-song w-[1240px] antialiased">
+        <div class="bg-layer" :style="{ background: `linear-gradient(168deg, ${themeColor}22 0%, #0e0418 62%, #060309 100%)` }"></div>
         <div class="stripe-layer"></div>
+        <div class="glow-layer" :style="{ background: `radial-gradient(620px 620px at 24% 30%, ${themeColor}30 0%, transparent 70%), radial-gradient(520px 420px at 88% 6%, ${themeColor}1c 0%, transparent 70%)` }"></div>
         <div class="inner">
             <!-- ── 顶栏：版本 logo → BPM → Genre → ID ── -->
             <header class="top-bar">
@@ -206,10 +242,12 @@ onMounted(() => { nextTick(fitTitle); });
                     </div>
 
                     <div class="chart-rows">
-                        <div v-for="(c, i) in song.Beatmaps" :key="i"
-                             class="chart-row"
+                         <div v-for="(c, i) in song.Beatmaps" :key="i"
+                              class="chart-row"
                               :class="{ 'row-ultima': c.LevelName === 'ULTIMA' }"
-                              :style="c.LevelName !== 'ULTIMA' ? { boxShadow: `inset 4px 0 0 ${DIFF_COLORS[c.LevelName] || '#fff'}` } : {}">
+                              :style="c.LevelName !== 'ULTIMA'
+                                ? { background: rowGradient(DIFF_HEX[c.LevelName] || '#fff'), boxShadow: `inset 4px 0 0 ${DIFF_COLORS[c.LevelName] || '#fff'}`, border: '1px solid rgba(255,255,255,0.09)' }
+                                : {}">
                             <div class="chart-row-top">
                                 <div class="diff-chip">
                                     <span class="diff-name"
@@ -228,8 +266,7 @@ onMounted(() => { nextTick(fitTitle); });
                                 <div class="charter-text">{{ c.Charter }}</div>
                             </div>
                             <div v-if="c.Constant > 0" class="const-badge"
-                                 :class="{ 'const-ultima': c.LevelName === 'ULTIMA' }"
-                                 :style="c.LevelName === 'ULTIMA' ? {} : { color: DIFF_COLORS[c.LevelName] || '#fff' }">
+                                 :style="{ background: 'rgba(8,8,16,0.35)', border: `2.5px solid ${DIFF_COLORS[c.LevelName] || '#fff'}`, color: DIFF_COLORS[c.LevelName] || '#fff', boxShadow: `0 0 18px ${DIFF_COLORS[c.LevelName] || '#fff'}66`, textShadow: `0 0 10px ${DIFF_COLORS[c.LevelName] || '#fff'}88` }">
                                 {{ c.Constant.toFixed(1) }}
                             </div>
                             <div class="note-row">
@@ -237,18 +274,16 @@ onMounted(() => { nextTick(fitTitle); });
                                     <div class="note-label">COMBO</div>
                                     <div class="note-value">{{ c.MaxCombo.toLocaleString() }}</div>
                                 </div>
-                                <div class="note-cell" v-if="c.MaxCombo > 0">
-                                    <div class="note-label">MISS</div>
-                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo * 101).toFixed(1) }}</div>
-                                </div>
-                                <div class="note-cell" v-if="c.MaxCombo > 0">
-                                    <div class="note-label">ATK</div>
-                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo * 51).toFixed(1) }}</div>
-                                </div>
-                                <div class="note-cell" v-if="c.MaxCombo > 0">
-                                    <div class="note-label">JST</div>
-                                    <div class="note-value note-loss-value">{{ (10000 / c.MaxCombo).toFixed(1) }}</div>
-                                </div>
+                                <template v-if="c.MaxCombo > 0" v-for="[label, val, cls] in [
+                                    ['MISS', deduction(c.MaxCombo).miss, 'loss-miss'],
+                                    ['ATTACK', deduction(c.MaxCombo).atk, 'loss-attack'],
+                                    ['JUSTICE', deduction(c.MaxCombo).jst, 'loss-justice'],
+                                ]" :key="label">
+                                    <div class="note-cell">
+                                        <div class="note-label">{{ label }}</div>
+                                        <div class="note-value note-loss-value" :class="cls">{{ val }}</div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -265,6 +300,9 @@ onMounted(() => { nextTick(fitTitle); });
 
 .chu-song img { max-width: none; }
 
+.bg-layer { position: absolute; inset: 0; z-index: 0; }
+.glow-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
 .stripe-layer {
     position: absolute;
     inset: 0;
@@ -273,7 +311,7 @@ onMounted(() => { nextTick(fitTitle); });
     z-index: 0;
 }
 
-.inner { position: relative; z-index: 1; padding: 44px 48px 32px 48px; }
+.inner { position: relative; z-index: 3; padding: 44px 48px 32px 48px; }
 
 /* ── 顶栏 ── */
 .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; margin-left: 44px; margin-right: 44px; }
@@ -427,30 +465,26 @@ onMounted(() => { nextTick(fitTitle); });
 }
 
 .const-badge {
-    position: absolute; right: 12px; bottom: 10px; font-weight: bold; font-size: 30px;
-    padding: 4px 14px; border-radius: 12px; background: rgba(0,0,0,0.5);
-    text-shadow: 0 0 8px currentColor; box-shadow: 0 0 12px rgba(255,255,255,0.15);
-}
-
-.const-ultima {
-    color: #fff;
-    border: 2px solid #FF3A3A;
-    box-shadow: none;
-    text-shadow: none;
+    position: absolute; right: 12px; bottom: 10px; font-weight: bold; font-size: 34px;
+    padding: 4px 14px; border-radius: 12px;
 }
 
 .note-row {
     position: absolute; left: 14px; right: 120px; top: 44px; bottom: 0;
-    display: flex; align-items: flex-end; justify-content: space-evenly; padding-bottom: 12px;
+    display: flex; align-items: flex-end; padding-bottom: 12px;
 }
 
-.note-cell { display: flex; flex-direction: column; align-items: center; }
+.note-cell { flex: 1; display: flex; flex-direction: column; align-items: center; }
 
 .note-label { font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 0.1em; margin-bottom: 2px; }
 
 .note-value { font-weight: bold; font-size: 22px; color: #fff; }
 
-.note-loss-value { font-size: 18px; color: rgba(255,255,255,0.65); font-family: 'Torus', sans-serif; }
+.note-loss-value { font-size: 18px; font-family: 'Torus', sans-serif; }
+
+.loss-miss { color: rgba(255,255,255,0.5); }
+.loss-attack { color: #1AFE11; }
+.loss-justice { color: #E98807; }
 
 .footer-text {
     display: block; margin-top: 20px; margin-left: 44px; font-size: 15px;
