@@ -706,6 +706,60 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    /// <summary>
+    ///     单曲各难度成绩
+    /// </summary>
+    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginCommand("info", "信息")]
+    private async Task<MarisaPluginTaskState> SongInfo(Message message)
+    {
+        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
+        if (song == null) return MarisaPluginTaskState.CompletedTask;
+
+        var fetcher = GetDataFetcher(message);
+        var self    = message with { Command = "".AsMemory() };
+
+        // 只取这一首歌各难度的成绩：各查分器优先走自己的「单曲成绩接口」，避免拉取整个成绩表
+        var (nickname, scores) = await fetcher.GetSongScore(self, song);
+
+        var context = new WebContext();
+        context.Put("SongScore", new
+        {
+            Song = new
+            {
+                song.Id, song.Title, song.Type,
+                song.Info.Artist, song.Info.Genre, song.Info.Bpm, song.Info.From, song.Info.IsNew
+            },
+            Player = new
+            {
+                Nickname = nickname ?? ""
+            },
+            Charts = song.Levels.Select((level, i) =>
+            {
+                var played = scores.TryGetValue(i, out var sc);
+                return new
+                {
+                    LevelIndex  = i,
+                    Level       = level,
+                    Constant    = song.Constants[i],
+                    Charter     = song.Charters[i],
+                    MaxDx       = song.Charts[i].Notes.Sum() * 3,
+                    Played      = played,
+                    Achievement = played ? sc!.Achievement : (double?)null,
+                    Rank        = played ? sc!.Rank : null,
+                    Ra          = played ? sc!.Rating : (int?)null,
+                    Fc          = played ? sc!.Fc : null,
+                    Fs          = played ? sc!.Fs : null,
+                    DxScore     = played ? sc!.DxScore : (int?)null
+                };
+            }).ToList()
+        });
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiSongScore(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     #endregion
 
     #region 锐评 / roast

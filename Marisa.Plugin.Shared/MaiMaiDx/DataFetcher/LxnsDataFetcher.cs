@@ -98,6 +98,78 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         return result;
     }
 
+    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
+    {
+        var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
+        var empty   = new Dictionary<int, SongScore>();
+
+        // 玩家信息：拿昵称 + friend_code（单曲成绩接口按 friend_code 查，dev token 即可，无需 OAuth）
+        var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
+            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
+
+        if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
+        {
+            var body = await playerResponse.GetStringAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.Lxns(playerResponse.StatusCode, body));
+        }
+
+        var playerJson = await playerResponse.GetStringAsync();
+        using var playerDoc = JsonDocument.Parse(playerJson);
+        var data       = playerDoc.RootElement.GetProperty("data");
+        var friendCode = data.GetProperty("friend_code").GetInt64().ToString();
+        var playerName = data.GetProperty("name").GetString() ?? "";
+
+        // 宴会场（id > 100000）落雪单曲接口无对应，直接返回空成绩（卡片显示未游玩）
+        if (song.Id > 100000) return (playerName, empty);
+
+        var isDx     = song.Id >= 10000;                       // DX 谱 id 形如 1xxxx
+        var rawId    = isDx ? (int)(song.Id - 10000) : (int)song.Id;
+        var songType = isDx ? "dx" : "standard";
+
+        var response = await $"{BaseUrl}/player/{friendCode}/bests?song_id={rawId}&song_type={songType}"
+            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
+
+        if (response.StatusCode is 404) return (playerName, empty);   // 该曲无成绩
+        if (response.StatusCode is 400 or 401 or 403)
+        {
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.Lxns(response.StatusCode, body));
+        }
+
+        var jsonString = await response.GetStringAsync();
+        using var doc  = JsonDocument.Parse(jsonString);
+        var root       = doc.RootElement.TryGetProperty("data", out var d) ? d : doc.RootElement;
+
+        var scores = new Dictionary<int, SongScore>();
+        if (root.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var s in root.EnumerateArray())
+            {
+                var lvlIdx = s.TryGetProperty("level_index", out var li) ? li.GetInt32() : -1;
+                if (lvlIdx < 0) continue;
+
+                scores[lvlIdx] = new SongScore
+                {
+                    Id          = song.Id,
+                    LevelIdx    = lvlIdx,
+                    Level       = s.TryGetProperty("level", out var lv) ? lv.GetString() ?? "" : "",
+                    Achievement = s.TryGetProperty("achievements", out var ach) ? ach.GetDouble() : 0,
+                    DxScore     = s.TryGetProperty("dx_score", out var dx) ? dx.GetInt32() : 0,
+                    Fc          = s.TryGetProperty("fc", out var fc) ? fc.GetString() ?? "" : "",
+                    Fs          = s.TryGetProperty("fs", out var fs) ? fs.GetString() ?? "" : "",
+                    Type        = isDx ? "DX" : "SD",
+                    Constant    = lvlIdx < song.Constants.Count ? song.Constants[lvlIdx] : 0
+                };
+            }
+        }
+
+        return (playerName, scores);
+    }
+
     private async Task<DxRating> FetchScores(Message message)
     {
         var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
