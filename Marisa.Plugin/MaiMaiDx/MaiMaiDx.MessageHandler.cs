@@ -718,19 +718,9 @@ public partial class MaiMaiDx
 
         var fetcher = GetDataFetcher(message);
         var self    = message with { Command = "".AsMemory() };
-        var rating  = await fetcher.GetRating(self);
 
-        Dictionary<(long Id, int LevelIdx), SongScore> scores;
-        try
-        {
-            scores = await fetcher.GetScores(self);
-        }
-        catch (NotSupportedException)
-        {
-            scores = rating.OldScores.Concat(rating.NewScores)
-                .GroupBy(s => (s.Id, s.LevelIdx))
-                .ToDictionary(g => g.Key, g => g.First());
-        }
+        // 只取这一首歌各难度的成绩：各查分器优先走自己的「单曲成绩接口」，避免拉取整个成绩表
+        var (nickname, scores) = await fetcher.GetSongScore(self, song);
 
         var context = new WebContext();
         context.Put("SongScore", new
@@ -742,11 +732,11 @@ public partial class MaiMaiDx
             },
             Player = new
             {
-                rating.Nickname, rating.Rating
+                Nickname = nickname ?? ""
             },
             Charts = song.Levels.Select((level, i) =>
             {
-                var played = scores.TryGetValue((song.Id, i), out var sc);
+                var played = scores.TryGetValue(i, out var sc);
                 return new
                 {
                     LevelIndex  = i,

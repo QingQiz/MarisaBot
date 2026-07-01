@@ -31,7 +31,7 @@
                     <h1 ref="titleEl" class="mai-title" :style="{ fontSize: titleSize + 'px' }">{{ song.Title }}</h1>
                     <div class="flex items-baseline justify-between gap-4 mt-[10px]">
                         <div class="artist-line min-w-0">{{ song.Artist }}</div>
-                        <div class="player-inline shrink-0"><span class="player-label">PLAYER</span> {{ player.Nickname }}</div>
+                        <div v-if="player.Nickname" class="player-inline shrink-0"><span class="player-label">PLAYER</span> {{ player.Nickname }}</div>
                     </div>
                 </div>
             </div>
@@ -99,7 +99,7 @@ interface ChartScore {
 }
 interface ScoreData {
     Song: { Id: number; Title: string; Type: string; Artist: string; Genre: string; Bpm: number; From: string; IsNew: boolean }
-    Player: { Nickname: string; Rating: number }
+    Player: { Nickname: string }
     Charts: ChartScore[]
 }
 
@@ -107,7 +107,7 @@ const route = useRoute()
 const data  = ref<ScoreData | null>(null)
 
 const song   = computed(() => data.value?.Song ?? null)
-const player = computed(() => data.value?.Player ?? {Nickname: '', Rating: 0})
+const player = computed(() => data.value?.Player ?? {Nickname: ''})
 const charts = computed(() => data.value?.Charts ?? [])
 const isUtage = computed(() => (song.value?.Id ?? 0) > 100000)
 

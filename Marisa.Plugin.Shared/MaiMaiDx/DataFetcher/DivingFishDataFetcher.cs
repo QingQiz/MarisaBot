@@ -55,6 +55,36 @@ public class DivingFishDataFetcher : DataFetcher
             .ToDictionary(x => (x.Id, x.LevelIdx), x => x);
     }
 
+    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
+    {
+        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
+
+        var body = new Dictionary<string, object> { ["music_id"] = new[] { song.Id } };
+        if (username.IsWhiteSpace()) body["qq"] = qq;
+        else body["username"]                   = username;
+
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/dev/player/record"
+            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
+            .AllowHttpStatus("400,401,403")
+            .PostJsonAsync(body);
+
+        if (response.StatusCode is 400 or 401 or 403)
+        {
+            var errBody = await response.GetStringAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, errBody));
+        }
+
+        // 单曲接口返回 { "<music_id>": [ 各难度成绩 ] }，只含已游玩难度，且不含昵称
+        var byMusic = await response.GetJsonAsync<Dictionary<string, List<SongScore>>>();
+
+        var scores = byMusic.Values
+            .SelectMany(x => x)
+            .GroupBy(x => x.LevelIdx)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        return (null, scores);
+    }
+
     protected virtual async Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
     {
         var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
