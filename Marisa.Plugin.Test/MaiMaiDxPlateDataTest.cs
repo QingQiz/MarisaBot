@@ -654,25 +654,25 @@ public class MaiMaiDxPlateDataTest
     [Test]
     public void ParsesLevelLabel()
     {
-        // "14+神完成表" → Selector.Level("14+") + Fc=AP + 默认难度 [3, 4]
+        // "14+神完成表" → Selector.Level("14+") + Fc=AP + 指定等级 → 全难度 [0,1,2,3,4]
         var q = MustParse("14+神完成表");
         Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Level>());
         Assert.That(((PlateData.Selector.Level)q.Selectors.Single()).Label, Is.EqualTo("14+"));
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fc));
         Assert.That(q.Threshold.Level, Is.EqualTo(3));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));
     }
 
     [Test]
     public void ParsesConstant()
     {
-        // "14.9FDX完成表" → Selector.Constant(14.9) + Fs=FDX + 默认难度 [3, 4]
+        // "14.9FDX完成表" → Selector.Constant(14.9) + Fs=FDX + 指定定数 → 全难度 [0,1,2,3,4]
         var q = MustParse("14.9FDX完成表");
         Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Constant>());
         Assert.That(((PlateData.Selector.Constant)q.Selectors.Single()).Value, Is.EqualTo(14.9).Within(0.001));
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fs));
         Assert.That(q.Threshold.Level, Is.EqualTo(4));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3, 4}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -682,12 +682,22 @@ public class MaiMaiDxPlateDataTest
     [Test]
     public void MultiSelector_PlateAndLevel()
     {
-        // "镜代13+AP完成表" → Plate(镜) ∩ Level("13+") + Fc=AP
+        // "镜代13+AP完成表" → Plate(镜) ∩ Level("13+") + Fc=AP；指定等级 → 全难度 [0,1,2,3,4]
         var q = MustParse("镜代13+AP完成表");
         Assert.That(q.Selectors, Has.Exactly(2).Items);
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));
+    }
+
+    [Test]
+    public void MultiSelector_PlateLevelExplicitDifficulty()
+    {
+        // 显式写难度时以难度 token 为准：镜代 紫谱(MASTER) 13+ → 仅 [MASTER]，覆盖「含等级 → 全难度」默认
+        var q = MustParse("镜代紫谱13+完成表");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
     }
 
@@ -706,13 +716,13 @@ public class MaiMaiDxPlateDataTest
     [Test]
     public void MultiSelector_PlateAndConstant()
     {
-        // "镜代14.6神完成表" → Plate(镜) ∩ Constant(14.6) + AP
+        // "镜代14.6神完成表" → Plate(镜) ∩ Constant(14.6) + AP；指定定数 → 全难度 [0,1,2,3,4]
         var q = MustParse("镜代14.6神完成表");
         Assert.That(q.Selectors, Has.Exactly(2).Items);
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Constant>().Single().Value, Is.EqualTo(14.6).Within(0.001));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));
     }
 
     [Test]
@@ -744,7 +754,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("niconico & VOCALOID"));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));   // 含 Level → 全难度
     }
 
     [TestCase("镜代13+AP完成表")]
@@ -760,7 +770,7 @@ public class MaiMaiDxPlateDataTest
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
         Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP"));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));   // 含 Level → 全难度
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -873,14 +883,14 @@ public class MaiMaiDxPlateDataTest
     [Test]
     public void DxScoreStar_WithLevel_MultiSelector()
     {
-        // multi-selector: Plate(镜) ∩ Level("14+") + DxScore=5
+        // multi-selector: Plate(镜) ∩ Level("14+") + DxScore=5；指定等级 → 全难度 [0,1,2,3,4]
         var q = MustParse("镜代14+5星完成表");
         Assert.That(q.Selectors, Has.Exactly(2).Items);
         Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("镜"));
         Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14+"));
         Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.DxScore));
         Assert.That(q.Threshold.Level, Is.EqualTo(5));
-        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {3}));
+        Assert.That(q.LevelIdxes, Is.EquivalentTo(new[] {0, 1, 2, 3, 4}));
     }
 
     [Test]
