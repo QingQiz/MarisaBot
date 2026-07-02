@@ -1,5 +1,5 @@
 <template>
-    <div v-if="song" class="mai-score relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
+    <div v-if="song" class="mai-score mai-card relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
         <div class="absolute inset-0 pointer-events-none stripe-layer"></div>
         <div class="absolute inset-0 pointer-events-none" :style="glowStyle"></div>
 
@@ -91,6 +91,11 @@ import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import {dxScoreStar} from '@/components/maimai/utils/ordinal'
+import {
+    DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf,
+    VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc, typeBadgeSrc,
+    coverSrcOf, COVER_FALLBACK, bgKeyOf, cardBackground,
+} from '@/components/maimai/utils/song_card'
 
 interface ChartScore {
     LevelIndex: number; Level: string; Constant: number; Charter: string; MaxDx: number
@@ -109,16 +114,14 @@ const data  = ref<ScoreData | null>(null)
 const song   = computed(() => data.value?.Song ?? null)
 const player = computed(() => data.value?.Player ?? {Nickname: ''})
 const charts = computed(() => data.value?.Charts ?? [])
-const isUtage = computed(() => (song.value?.Id ?? 0) > 100000)
+const isUtage = computed(() => isUtageId(song.value?.Id ?? 0))
 
 axios.get(context_get, {params: {id: route.query.id, name: 'SongScore'}}).then(res => {
     data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data
 })
 
-const DIFF_NAMES  = ['BASIC', 'ADVANCED', 'EXPERT', 'MASTER', 'Re:MASTER']
-const DIFF_COLORS = ['#52e72b', '#ffa801', '#ff5a66', '#c64fe4', '#dbaaff']
 function diffName(i: number) { return isUtage.value ? '宴' : DIFF_NAMES[Math.min(i, 4)] }
-function diffColor(i: number) { return isUtage.value ? '#f73ee0' : DIFF_COLORS[Math.min(i, 4)] }
+function diffColor(i: number) { return isUtage.value ? UTAGE.main : DIFF_COLORS[Math.min(i, 4)] }
 
 const PIC = '/assets/maimai/pic'
 function rankIcon(c: ChartScore) { return `${PIC}/rank_${c.Rank}.png` }
@@ -136,37 +139,16 @@ const MARK_BASE = 29, RANK_BASE = 32
 function markStyle(_name: string | null) { return {height: MARK_BASE + 'px'} }
 function rankStyle(_c: ChartScore) { return {height: RANK_BASE + 'px'} }
 
-const typeBadge = computed(() => song.value?.Type === 'DX'
-    ? `${PIC}/mode_dx.png` : `${PIC}/mode_standard.png`)
+const typeBadge = computed(() => typeBadgeSrc(song.value?.Type))
 
 const coverSrc = ref('')
-watch(song, s => { if (s) coverSrc.value = `/assets/maimai/cover/${s.Id}.png` }, {immediate: true})
-function onCoverErr() { coverSrc.value = '/assets/maimai/cover/0.png' }
+watch(song, s => { if (s) coverSrc.value = coverSrcOf(s.Id) }, {immediate: true})
+function onCoverErr() { coverSrc.value = COVER_FALLBACK }
 
-// genre 简中 → NewRodin 覆盖的日/西文（同 MaiSong）
-const GENRE_MAP: Record<string, string> = {
-    '流行&动漫': 'POPS&アニメ', '舞萌': 'maimai', '其他游戏': 'ゲーム&バラエティ',
-    '音击&中二节奏': 'オンゲキ&CHUNITHM', '东方Project': '東方Project',
-}
-const genreDisplay = computed(() => GENRE_MAP[song.value?.Genre ?? ''] ?? song.value?.Genre ?? '')
+const genreDisplay = computed(() => genreDisplayOf(song.value?.Genre))
 
-// 版本 logo（同 MaiSong）
-const VERSION_CODE: Record<string, number> = {
-    'maimai': 100, 'maimai PLUS': 110, 'maimai GreeN': 120, 'maimai GreeN PLUS': 130,
-    'maimai ORANGE': 140, 'maimai ORANGE PLUS': 150, 'maimai PiNK': 160, 'maimai PiNK PLUS': 170,
-    'maimai MURASAKi': 180, 'maimai MURASAKi PLUS': 185, 'maimai MiLK': 190, 'MiLK PLUS': 195,
-    'maimai FiNALE': 199, 'maimai でらっくす': 200, 'maimai でらっくす Splash': 214,
-    'maimai でらっくす UNiVERSE': 220, 'maimai でらっくす FESTiVAL': 230, 'maimai でらっくす BUDDiES': 240,
-    'maimai でらっくす PRiSM': 250, 'maimai でらっくす PRiSM PLUS': 255,
-}
-const LOGO_BBOX_LEFT: Record<number, number> = {
-    100: 22, 110: 21, 120: 20, 130: 20, 140: 20, 150: 14, 160: 21, 170: 21, 180: 28, 185: 19,
-    190: 21, 195: 32, 199: 24, 200: 49, 214: 54, 220: 55, 230: 50, 240: 78, 250: 79, 255: 50,
-}
-const versionLogo = computed(() => {
-    const code = VERSION_CODE[song.value?.From ?? '']
-    return code ? `/assets/maimai/version/Ver${code}.png` : '/assets/maimai/version/maimaidx.png'
-})
+const versionLogo = computed(() => versionLogoSrc(song.value?.From))
+// 版本 logo 视觉左对齐（60px 高 / 素材 160px）
 const logoStyle = computed(() => {
     const code = VERSION_CODE[song.value?.From ?? '']
     const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (60 / 160) : 0
@@ -175,17 +157,9 @@ const logoStyle = computed(() => {
 
 // 背景按最高难度上色（有 Re:MASTER 取白谱档、宴会场取宴），跟 mai song 一致
 const topIdx = computed(() => Math.max(0, charts.value.length - 1))
-const DIFF_KEYS = ['BSC', 'ADV', 'EXP', 'MST', 'MST_Re']
-const BG_GRADIENTS: Record<string, [string, string]> = {
-    BSC: ['#123a0a', '#04120a'], ADV: ['#3a2706', '#140d03'], EXP: ['#3d0d14', '#16060a'],
-    MST: ['#2c0b44', '#0e0418'], MST_Re: ['#33204f', '#120a20'], UTG: ['#3d0c35', '#150412'], DMY: ['#222633', '#0a0c12'],
-}
-const topKey = computed(() => isUtage.value ? 'UTG' : DIFF_KEYS[topIdx.value] ?? 'DMY')
-const themeMain = computed(() => isUtage.value ? '#f73ee0' : DIFF_COLORS[topIdx.value] ?? '#999')
-const rootStyle = computed(() => {
-    const [c1, c2] = BG_GRADIENTS[topKey.value] ?? BG_GRADIENTS['DMY']
-    return {background: `linear-gradient(168deg, ${c1} 0%, ${c2} 62%, #060309 100%)`}
-})
+const topKey = computed(() => bgKeyOf(topIdx.value, isUtage.value))
+const themeMain = computed(() => themeMainOf(topIdx.value, isUtage.value))
+const rootStyle = computed(() => cardBackground(topKey.value))
 const glowStyle = computed(() => ({
     background: `radial-gradient(720px 520px at 18% 8%, ${themeMain.value}2e 0%, transparent 70%),
                  radial-gradient(560px 480px at 92% 4%, ${themeMain.value}1c 0%, transparent 70%)`,
@@ -217,18 +191,18 @@ watch(song, async () => {
 }, {flush: 'post'})
 </script>
 
+<style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
+
 <style scoped lang="postcss">
-.mai-score { color: #fff; background-color: #0e0418; }
-.mai-score img { max-width: none; }
 .stripe-layer { background: repeating-linear-gradient(-38deg, rgba(255,255,255,0.025) 0 3px, transparent 3px 26px); }
 
 /* top meta pills */
-.id-pill, .bpm-pill { font-family: 'Torus', sans-serif; color: #fff; background: rgba(35,37,69,0.82); border-radius: 9999px; box-shadow: 0 4px 12px rgba(35,37,69,0.25); }
+.id-pill, .bpm-pill { font-family: 'Torus', sans-serif; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
 .id-pill { font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; }
 .bpm-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 10px; }
 .bpm-num { font-weight: bold; font-size: 16px; }
-.meta-chip { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: bold; font-size: 14px; color: #454867; padding: 4px 12px; border-radius: 9999px; background: rgba(255,255,255,0.72); box-shadow: 0 0 0 1px rgba(255,255,255,0.85); white-space: nowrap; }
-.new-chip { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; padding: 4px 11px 3px 13px; border-radius: 9999px; background: linear-gradient(135deg,#ffb02c,#ff5a66); box-shadow: 0 3px 10px rgba(255,90,102,0.45); }
+.meta-chip { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: bold; font-size: 14px; color: var(--chip-ink); padding: 4px 12px; border-radius: 9999px; background: var(--chip-bg); box-shadow: var(--chip-ring); white-space: nowrap; }
+.new-chip { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; padding: 4px 11px 3px 13px; border-radius: 9999px; background: var(--new-chip-bg); box-shadow: var(--new-chip-shadow); }
 
 .cover-frame { padding: 5px; border-radius: 22px; background: rgba(255,255,255,0.78); box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 8px 20px -12px rgba(0,0,0,0.5); }
 .mai-title { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: 700; line-height: 1; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; padding-block: 6px 8px; margin-block: -6px -8px; }
@@ -237,8 +211,6 @@ watch(song, async () => {
 .player-label { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); }
 
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
-.font-torus { font-family: 'Torus','LXGW WenKai',sans-serif; font-variant-numeric: tabular-nums; }
-.font-rodin { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: 900; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 
 /* shared row text */

@@ -1,0 +1,31 @@
+/* MaiSong / MaiSongScore 卡片公用样式。
+   两卡尺寸体系各自独立，此处只放公用颜色变量与取值完全一致的基础类；
+   各卡通过 <style scoped src> 引入，作用域互不泄漏。 */
+
+.mai-card {
+    color: #fff;
+    background-color: #0e0418;
+
+    /* 顶栏 pill / chip 配色 */
+    --pill-bg: rgba(35, 37, 69, 0.82);
+    --pill-shadow: 0 4px 12px rgba(35, 37, 69, 0.25);
+    --chip-ink: #454867;
+    --chip-bg: rgba(255, 255, 255, 0.72);
+    --chip-ring: 0 0 0 1px rgba(255, 255, 255, 0.85);
+    --new-chip-bg: linear-gradient(135deg, #ffb02c 0%, #ff5a66 100%);
+    --new-chip-shadow: 0 3px 10px rgba(255, 90, 102, 0.45);
+}
+
+.mai-card img {
+    max-width: none;
+}
+
+.font-torus {
+    font-family: 'Torus', 'LXGW WenKai', sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+.font-rodin {
+    font-family: 'SEGA NewRodin', 'LXGW WenKai', sans-serif;
+    font-weight: 900;
+}

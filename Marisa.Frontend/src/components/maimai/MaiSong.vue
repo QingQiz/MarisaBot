@@ -1,5 +1,5 @@
 <template>
-    <div v-if="song" class="mai-song relative w-[1240px] overflow-hidden antialiased"
+    <div v-if="song" class="mai-song mai-card relative w-[1240px] overflow-hidden antialiased"
          :class="{ 'is-utage': isUtage }" :style="rootStyle">
         <!-- 机台斜纹 + 难度主题色辉光 -->
         <div class="absolute inset-0 pointer-events-none stripe-layer"></div>
@@ -139,6 +139,11 @@ import {computed, nextTick, ref, watch, watchEffect} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
+import {
+    DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf,
+    VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc, typeBadgeSrc,
+    coverSrcOf, COVER_FALLBACK, bgKeyOf, cardBackground,
+} from '@/components/maimai/utils/song_card'
 
 interface Chart {
     Level: string
@@ -160,16 +165,9 @@ interface Song {
     Charts: Chart[]
 }
 
-const DIFF_NAMES  = ['BASIC', 'ADVANCED', 'EXPERT', 'MASTER', 'Re:MASTER']
-const DIFF_COLORS = ['#52e72b', '#ffa801', '#ff5a66', '#c64fe4', '#dbaaff']
-const DIFF = [
-    {name: 'BASIC',     main: '#52e72b', deep: '#2f9e12'},
-    {name: 'ADVANCED',  main: '#ffa801', deep: '#c77f00'},
-    {name: 'EXPERT',    main: '#ff5a66', deep: '#e02b3a'},
-    {name: 'MASTER',    main: '#c64fe4', deep: '#9a2dbb'},
-    {name: 'Re:MASTER', main: '#dbaaff', deep: '#8e4ed1'},
-] as const
-const UTAGE = {name: '宴', main: '#f73ee0', deep: '#c41fb4'} as const
+// 难度深色（描边/阴影用），main 色沿用公用 DIFF_COLORS
+const DIFF_DEEP = ['#2f9e12', '#c77f00', '#e02b3a', '#9a2dbb', '#8e4ed1']
+const DIFF = DIFF_NAMES.map((name, i) => ({name, main: DIFF_COLORS[i], deep: DIFF_DEEP[i]}))
 
 const route = useRoute()
 const song  = ref<Song | null>(null)
@@ -178,11 +176,11 @@ axios.get(context_get, {params: {id: route.query.id, name: 'SongData'}}).then(re
     song.value = res.data
 })
 
-const isUtage = computed(() => (song.value?.Id ?? 0) > 100000)
+const isUtage = computed(() => isUtageId(song.value?.Id ?? 0))
 const topIdx  = computed(() => (song.value?.Charts.length ?? 1) - 1)
 
 const theme = computed(() => {
-    const main = isUtage.value ? UTAGE.main : DIFF_COLORS[topIdx.value] ?? '#999'
+    const main = themeMainOf(topIdx.value, isUtage.value)
     const onMain = !isUtage.value && topIdx.value === 4 ? '#4a1d78' : '#ffffff'
     return {main, onMain}
 })
@@ -191,47 +189,12 @@ function DiffOf(i: number) {
     return isUtage.value ? UTAGE : DIFF[Math.min(i, DIFF.length - 1)]
 }
 
-// genre：简中类别名映射成 NewRodin 字库覆盖的日/西文
-const GENRE_MAP: Record<string, string> = {
-    '流行&动漫':          'POPS&アニメ',
-    '舞萌':               'maimai',
-    '其他游戏':           'ゲーム&バラエティ',
-    '音击&中二节奏':      'オンゲキ&CHUNITHM',
-    '东方Project':        '東方Project',
-}
-const genreDisplay = computed(() => GENRE_MAP[song.value?.Genre ?? ''] ?? song.value?.Genre ?? '')
+const genreDisplay = computed(() => genreDisplayOf(song.value?.Genre))
 
-// 版本 logo：diving-fish from 字符串 → 游戏内版本标题素材编号。
-// DX 时代本传与 PLUS 共用一张（国服 from 已并代）；特例 Splash 用 214
-const VERSION_CODE: Record<string, number> = {
-    'maimai': 100,                  'maimai PLUS': 110,
-    'maimai GreeN': 120,            'maimai GreeN PLUS': 130,
-    'maimai ORANGE': 140,           'maimai ORANGE PLUS': 150,
-    'maimai PiNK': 160,             'maimai PiNK PLUS': 170,
-    'maimai MURASAKi': 180,         'maimai MURASAKi PLUS': 185,
-    'maimai MiLK': 190,             'MiLK PLUS': 195,
-    'maimai FiNALE': 199,
-    'maimai でらっくす': 200,        'maimai でらっくす Splash': 214,
-    'maimai でらっくす UNiVERSE': 220, 'maimai でらっくす FESTiVAL': 230,
-    'maimai でらっくす BUDDiES': 240, 'maimai でらっくす PRiSM': 250,
-    'maimai でらっくす PRiSM PLUS': 255,
-}
+const versionLogo = computed(() => versionLogoSrc(song.value?.From))
 
-const versionLogo = computed(() => {
-    const code = VERSION_CODE[song.value?.From ?? '']
-    return code
-        ? `/assets/maimai/version/Ver${code}.png`
-        : '/assets/maimai/version/maimaidx.png'
-})
-
-// 版本 logo 视觉左对齐：素材内部左侧透明留白（像素实测 alpha bbox）按显示倍率补偿，
+// 版本 logo 视觉左对齐：素材左侧透明留白按显示倍率（68px 高 / 素材 160px）补偿，
 // 使可见字形左缘 = 标题左缘 92px
-const LOGO_BBOX_LEFT: Record<number, number> = {
-    100: 22, 110: 21, 120: 20, 130: 20, 140: 20, 150: 14, 160: 21, 170: 21,
-    180: 28, 185: 19, 190: 21, 195: 32, 199: 24, 200: 49, 210: 15, 214: 54,
-    215: 10, 220: 55, 225: 24, 230: 50, 235: 78, 240: 78, 245: 46, 250: 79, 255: 50,
-}
-
 const logoStyle = computed(() => {
     const code = VERSION_CODE[song.value?.From ?? '']
     const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (68 / 160) : 5 * (68 / 292)
@@ -254,17 +217,15 @@ async function FitHeader() {
     }
 }
 
-const typeBadge = computed(() => song.value?.Type === 'DX'
-    ? '/assets/maimai/pic/mode_dx.png'
-    : '/assets/maimai/pic/mode_standard.png')
+const typeBadge = computed(() => typeBadgeSrc(song.value?.Type))
 
 const coverSrc = ref('')
 watchEffect(() => {
-    if (song.value) coverSrc.value = `/assets/maimai/cover/${song.value.Id}.png`
+    if (song.value) coverSrc.value = coverSrcOf(song.value.Id)
 })
 
 function OnCoverError() {
-    coverSrc.value = '/assets/maimai/cover/0.png'
+    coverSrc.value = COVER_FALLBACK
 }
 
 // 标题真实测宽 auto-shrink
@@ -396,24 +357,10 @@ const starInfos = computed(() => {
     return charts.length === 5 ? [starOf(3), starOf(4)] : [starOf(charts.length - 1)]
 })
 
-// ── 难度主题暗色背景 ──
-const DIFF_KEYS = ['BSC', 'ADV', 'EXP', 'MST', 'MST_Re']
-const BG_GRADIENTS: Record<string, [string, string]> = {
-    BSC:    ['#123a0a', '#04120a'],
-    ADV:    ['#3a2706', '#140d03'],
-    EXP:    ['#3d0d14', '#16060a'],
-    MST:    ['#2c0b44', '#0e0418'],
-    MST_Re: ['#33204f', '#120a20'],
-    UTG:    ['#3d0c35', '#150412'],
-    DMY:    ['#222633', '#0a0c12'],
-}
+// ── 难度主题暗色背景（公用 bgKeyOf / cardBackground）──
+const topKey = computed(() => bgKeyOf(topIdx.value, isUtage.value))
 
-const topKey = computed(() => isUtage.value ? 'UTG' : DIFF_KEYS[topIdx.value] ?? 'DMY')
-
-const rootStyle = computed(() => {
-    const [c1, c2] = BG_GRADIENTS[topKey.value] ?? BG_GRADIENTS['DMY']
-    return {background: `linear-gradient(168deg, ${c1} 0%, ${c2} 62%, #060309 100%)`}
-})
+const rootStyle = computed(() => cardBackground(topKey.value))
 
 const glowStyle = computed(() => ({
     background: `radial-gradient(620px 620px at 24% 30%, ${theme.value.main}30 0%, transparent 70%),
@@ -432,7 +379,7 @@ function starBlockStyle(i: number) {
 
 // 行主题色：宴谱粉、普通难度按 index
 function rowColor(i: number) {
-    return isUtage.value ? '#f73ee0' : DIFF_COLORS[i] ?? '#999'
+    return themeMainOf(i, isUtage.value)
 }
 
 function rowStyle(i: number) {
@@ -535,16 +482,9 @@ function break50Loss(chart: Chart): string {
 
 </script>
 
+<style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
+
 <style scoped lang="postcss">
-.mai-song {
-    color: #fff;
-    background-color: #0e0418;
-}
-
-.mai-song img {
-    max-width: none;
-}
-
 /* 机台斜纹 */
 .stripe-layer {
     background: repeating-linear-gradient(
@@ -561,10 +501,10 @@ function break50Loss(chart: Chart): string {
     font-size: 22px;
     letter-spacing: 0.08em;
     color: #fff;
-    background: rgba(35, 37, 69, 0.82);
+    background: var(--pill-bg);
     padding: 5px 18px;
     border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(35, 37, 69, 0.25);
+    box-shadow: var(--pill-shadow);
 }
 
 .bpm-pill {
@@ -572,10 +512,10 @@ function break50Loss(chart: Chart): string {
     align-items: center;
     gap: 9px;
     color: #fff;
-    background: rgba(35, 37, 69, 0.82);
+    background: var(--pill-bg);
     padding: 5px 18px 5px 14px;
     border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(35, 37, 69, 0.25);
+    box-shadow: var(--pill-shadow);
 }
 
 .bpm-num {
@@ -606,8 +546,8 @@ function break50Loss(chart: Chart): string {
     color: #fff;
     padding: 5px 14px 4px 16px;
     border-radius: 9999px;
-    background: linear-gradient(135deg, #ffb02c 0%, #ff5a66 100%);
-    box-shadow: 0 3px 10px rgba(255, 90, 102, 0.45);
+    background: var(--new-chip-bg);
+    box-shadow: var(--new-chip-shadow);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -616,11 +556,11 @@ function break50Loss(chart: Chart): string {
     font-weight: bold;
     font-size: 17px;
     letter-spacing: 0.05em;
-    color: #454867;
+    color: var(--chip-ink);
     padding: 5px 16px;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85),
+    background: var(--chip-bg);
+    box-shadow: var(--chip-ring),
                 0 3px 10px rgba(90, 40, 120, 0.15);
     backdrop-filter: blur(8px);
 }
@@ -662,16 +602,6 @@ function break50Loss(chart: Chart): string {
     border-radius: 9999px;
     padding: 4px 22px;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(90, 40, 120, 0.25);
-}
-
-.font-torus {
-    font-family: 'Torus', 'LXGW WenKai', sans-serif;
-    font-variant-numeric: tabular-nums;
-}
-
-.font-rodin {
-    font-family: 'SEGA NewRodin', 'LXGW WenKai', sans-serif;
-    font-weight: 900;
 }
 
 /* 行头双层 chip：左段难度色放难度名，右段淡化同色放等级（定数已移到徽章）。
