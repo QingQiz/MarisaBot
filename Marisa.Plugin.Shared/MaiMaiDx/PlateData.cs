@@ -741,7 +741,13 @@ public static class PlateData
 
         if (diffAt < 0)
         {
-            if (selectors.Any(s => s is Selector.Revival))
+            if (selectors.Any(s => s is Selector.Level or Selector.Constant))
+            {
+                // 指定了等级/定数：该等级/定数的谱面可能分布在任意难度（如 6+ 只在 BASIC/ADVANCED，
+                // 13+ 在 EXPERT/MASTER/Re:MASTER），全难度都查——此时版本代字的「仅 MASTER」默认不适用。
+                levelIdxes = [0, 1, 2, 3, 4];
+            }
+            else if (selectors.Any(s => s is Selector.Revival))
             {
                 // 复活曲按类别处理：默认 MASTER + Re:MASTER（即便同时带版本代字也不用版本牌的单 MASTER 默认）。
                 levelIdxes = DefaultLevelIdxes;
