@@ -38,8 +38,8 @@ export interface GroupedSong {
 
 /** plate 模式下 server 传过来的查询信息。sum 模式时为 null。 */
 export interface PlateInfo {
-    /** "Achievement" / "Fc" / "Fs" */
-    Dim: 'Achievement' | 'Fc' | 'Fs'
+    /** "Achievement" / "Fc" / "Fs" / "DxScore" */
+    Dim: 'Achievement' | 'Fc' | 'Fs' | 'DxScore'
     /** 比较时的 ordinal level（≥ 这个值算达成） */
     Level: number
     /** 标题里显示的阈值名（"SSS+" / "AP" / "FDX" 等） */

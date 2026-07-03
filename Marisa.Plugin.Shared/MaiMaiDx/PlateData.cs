@@ -76,8 +76,6 @@ public static class PlateData
 
     /// <summary>
     ///     完整查询：一组 Selectors（AND 合取——所有 selector 都命中的 chart 才入选）+ 阈值 + 难度。
-    ///     当前 TryParse 阶段返回 Selectors.Count == 1（与历史单 selector 行为等价）；
-    ///     multi-selector 解析在后续 commit 启用。
     /// </summary>
     public sealed record Query(IReadOnlyList<Selector> Selectors, Threshold Threshold, IReadOnlyList<int> LevelIdxes);
 
@@ -637,7 +635,7 @@ public static class PlateData
             }
             else if (pErr != null)
             {
-                error = pErr;       // 丸/彩 这种已知不支持，立刻返回
+                error = pErr;       // 丸 这种已知不支持，立刻返回
                 return false;
             }
 
