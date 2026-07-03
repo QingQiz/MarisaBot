@@ -1163,4 +1163,35 @@ public class MaiMaiDxPlateDataTest
         var q = MustParse("翠楼屋将完成表");
         Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
     }
+
+    // ---- 游戏内成就姓名框贴图映射 ----
+
+    [TestCase("樱将完成表", "UI_Plate_006125.png")]    // 简体代字同样命中
+    [TestCase("櫻将完成表", "UI_Plate_006125.png")]
+    [TestCase("櫻SSS完成表", "UI_Plate_006125.png")]   // 按 (Dim, Level) 判，不看用户敲的别名
+    [TestCase("超极完成表", "UI_Plate_006104.png")]
+    [TestCase("真极完成表", "UI_Plate_006101.png")]    // 真系只占 6101-6103 三号
+    [TestCase("真神完成表", "UI_Plate_006102.png")]
+    [TestCase("真舞舞完成表", "UI_Plate_006103.png")]
+    [TestCase("霸者完成表", "UI_Plate_006148.png")]    // 固有阈值 A
+    [TestCase("舞舞舞完成表", "UI_Plate_006152.png")]  // 舞系 + 舞舞
+    [TestCase("熊极完成表", "UI_Plate_055101.png")]    // DX 时代块内后四位是 5101（编号体系例外）
+    [TestCase("熊舞舞完成表", "UI_Plate_055104.png")]
+    [TestCase("华神完成表", "UI_Plate_109103.png")]
+    [TestCase("镜将完成表", "UI_Plate_559102.png")]
+    public void NamePlateImageResolves(string raw, string expected)
+    {
+        Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.EqualTo(expected));
+    }
+
+    [TestCase("真将完成表")]      // 真系历来无「将」
+    [TestCase("樱大将完成表")]    // 大将(SSS+)没有对应姓名框
+    [TestCase("彩将完成表")]      // 彩(1.60)素材未随包体发布
+    [TestCase("霸者神完成表")]    // 覆盖固有阈值后不再是「霸者」姓名框
+    [TestCase("镜代V家将完成表")] // 多 selector 不出牌
+    [TestCase("翠楼屋将完成表")]  // 非版本代字查询
+    public void NamePlateImageAbsent(string raw)
+    {
+        Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.Null);
+    }
 }

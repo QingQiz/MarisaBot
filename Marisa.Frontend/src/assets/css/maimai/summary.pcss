@@ -52,6 +52,20 @@
     flex: 0 0 720px;         /* 固定大条宽度 720px，永远贴 grid 右边界（留出空间给长标题） */
 }
 
+/* 游戏内成就姓名框（「樱将完成表」这类查询）：原尺寸居中独立一行放在标题下方。
+   注意本文件有 .mai-summary img { max-width: none }，此处用显式 width 而非 max-width。 */
+.nameplate-row {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 16px;
+    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
+}
+
+.nameplate-row img {
+    width: 720px;            /* 原尺寸 720×116 */
+    height: 116px;
+}
+
 .groups {
     display: flex;
     flex-direction: column;

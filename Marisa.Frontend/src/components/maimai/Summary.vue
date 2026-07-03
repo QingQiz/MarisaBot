@@ -40,6 +40,10 @@ axios.all([
 
 const allCharts = computed(() => grouped.value.flatMap(g => g.x))
 
+// 游戏内成就姓名框（「樱将完成表」这类查询才有；无对应姓名框时 null，布局回落纯文本标题）
+const nameplateSrc = computed(() =>
+    plate.value?.NamePlateImg ? `/assets/maimai/pic/plate/${plate.value.NamePlateImg}` : null)
+
 // 标题真实测宽 auto-shrink：从 TITLE_MAX 起，按 scrollWidth/clientWidth 迭代缩到塞进 title
 // 弹性槽（title-row 1250px − stats-bar 720px − gap 30px ≈ 500px）。短标题保持 MAX、不再像按
 // 字符数估算那样把西文/短标题过度缩小留出空隙；长标题缩到刚好填满，与右侧 stats-bar 之间不留缝。
@@ -190,6 +194,9 @@ function formatAch(a: number): {intPart: string, fracPart: string} {
         <div class="title-row">
             <span class="title" ref="titleEl" :style="{fontSize: titleSize + 'px'}">{{ title }}</span>
             <StatsBar :charts="allCharts" :scores="scores" :detail="true" :plate="plate" class="title-stats"/>
+        </div>
+        <div v-if="nameplateSrc" class="nameplate-row">
+            <img :src="nameplateSrc" alt=""/>
         </div>
         <div class="groups">
             <div class="group" v-for="g in grouped" :key="g.Key">

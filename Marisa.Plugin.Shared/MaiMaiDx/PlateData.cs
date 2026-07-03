@@ -343,6 +343,62 @@ public static class PlateData
         ["霸者"] = new(Dimension.Achievement, 5, "A"),
     };
 
+    /// <summary>
+    ///     游戏内成就姓名框贴图：版本代字 → 该版「極」牌贴图 id。極/将/神/舞舞 为连续 4 号。
+    ///     真系历来无「将」且只占 6101-6103 三号，在 <see cref="NamePlateImage"/> 里单独处理；
+    ///     彩(1.60)的姓名框素材尚未随包体发布，出了再补。
+    /// </summary>
+    private static readonly Dictionary<string, int> NamePlateKiwamiId = new()
+    {
+        ["超"] = 6104, ["檄"] = 6108, ["橙"] = 6112, ["暁"] = 6116, ["晓"] = 6116,
+        ["桃"] = 6120, ["櫻"] = 6124, ["樱"] = 6124, ["紫"] = 6128, ["菫"] = 6132, ["堇"] = 6132,
+        ["白"] = 6136, ["雪"] = 6140, ["輝"] = 6144, ["辉"] = 6144, ["舞"] = 6149,
+        ["熊"] = 55101, ["華"] = 109101, ["华"] = 109101, ["爽"] = 159101, ["煌"] = 209101,
+        ["宙"] = 259101, ["星"] = 309101, ["祭"] = 359101, ["祝"] = 409101,
+        ["双"] = 459101, ["宴"] = 509101, ["鏡"] = 559101, ["镜"] = 559101,
+    };
+
+    /// <summary>
+    ///     查询对应的游戏内姓名框贴图文件名；无对应姓名框时为 null。
+    ///     仅当查询恰为「单个版本代字 + 極/将/神/舞舞 之一的阈值」时命中；霸者用其固有阈值（A）。
+    /// </summary>
+    public static string? NamePlateImage(Query query)
+    {
+        if (query.Selectors is not [Selector.Plate plate]) return null;
+
+        var (dim, level) = (query.Threshold.Dim, query.Threshold.Level);
+
+        if (plate.Kanji == "霸者")
+        {
+            return dim == Dimension.Achievement && level == 5 ? PlateImageName(6148) : null;
+        }
+
+        var offset = (dim, level) switch
+        {
+            (Dimension.Fc, 1)           => 0, // 極 = FC
+            (Dimension.Achievement, 12) => 1, // 将 = SSS
+            (Dimension.Fc, 3)           => 2, // 神 = AP
+            (Dimension.Fs, 4)           => 3, // 舞舞 = FDX
+            _                           => -1,
+        };
+        if (offset < 0) return null;
+
+        if (plate.Kanji == "真")
+        {
+            return offset switch
+            {
+                0 => PlateImageName(6101),
+                2 => PlateImageName(6102),
+                3 => PlateImageName(6103),
+                _ => null,
+            };
+        }
+
+        return NamePlateKiwamiId.TryGetValue(plate.Kanji, out var kiwami) ? PlateImageName(kiwami + offset) : null;
+    }
+
+    private static string PlateImageName(int id) => $"UI_Plate_{id:D6}.png";
+
     public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx, bool includeRevival = false)
     {
         if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))

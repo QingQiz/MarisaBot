@@ -44,4 +44,6 @@ export interface PlateInfo {
     Level: number
     /** 标题里显示的阈值名（"SSS+" / "AP" / "FDX" 等） */
     DisplayName: string
+    /** 游戏内成就姓名框贴图文件名（如 "UI_Plate_006125.png"）；查询无对应姓名框时为 null */
+    NamePlateImg: string | null
 }

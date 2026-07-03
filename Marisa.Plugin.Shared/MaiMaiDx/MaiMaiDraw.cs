@@ -88,9 +88,10 @@ public static class MaiMaiDraw
         ctx.Put("Title", title);
         ctx.Put("Plate", new
         {
-            Dim         = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs" / "DxScore"
-            Level       = query.Threshold.Level,
-            DisplayName = query.Threshold.DisplayName,
+            Dim          = query.Threshold.Dim.ToString(),  // "Achievement" / "Fc" / "Fs" / "DxScore"
+            Level        = query.Threshold.Level,
+            DisplayName  = query.Threshold.DisplayName,
+            NamePlateImg = PlateData.NamePlateImage(query),  // 游戏内成就姓名框贴图；无对应时 null
         });
         return await WebApi.MaiMaiSummary(ctx.Id);
     }
