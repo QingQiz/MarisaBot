@@ -65,8 +65,8 @@ function pct(n: number, total: number): string {
     return `${total ? n / total * 100 : 0}%`
 }
 
-const overallPct = computed(() => {
-    // 中央完成率按命令的阈值维度动态算：
+const overallText = computed(() => {
+    // 中央完成度按命令的阈值维度动态算：
     // - plate.Dim = Achievement → 按达成率 (achievementOrdinal)
     // - plate.Dim = Fc          → 按 fc 字段 (fcOrdinal)
     // - plate.Dim = Fs          → 按 fs 字段 (fsOrdinal)
@@ -75,7 +75,6 @@ const overallPct = computed(() => {
     const dim       = props.plate?.Dim   ?? 'Achievement'
     const threshold = props.plate?.Level ?? 12   // 12 = SSS
     const total = props.charts.length
-    if (!total) return '0.00%'
 
     let done = 0
     for (const c of props.charts) {
@@ -87,7 +86,7 @@ const overallPct = computed(() => {
                 :                          dxScoreStar(sc.dxScore, c.Item3.MaxDx)
         if (lv >= threshold) done++
     }
-    return (done / total * 100).toFixed(2) + '%'
+    return `${done}/${total}`
 })
 </script>
 
@@ -122,7 +121,7 @@ const overallPct = computed(() => {
                 <div class="seg pl"   :style="{width: pct(fcStat.oth,    fcStat.total)}"></div>
                 <div class="seg np"   :style="{width: pct(fcStat.np,     fcStat.total)}"></div>
             </div>
-            <div class="overlay">{{ overallPct }}</div>
+            <div class="overlay">{{ overallText }}</div>
         </div>
 
         <div v-if="detail" class="detail-row">
