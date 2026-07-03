@@ -184,10 +184,12 @@ watch(song, async () => {
 .tt-list { display: flex; flex-direction: column; gap: 8px; }
 .tt-row { display: flex; align-items: center; gap: 16px; min-height: 44px; border-radius: 10px; padding: 7px 16px 7px 10px; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
 /* 游戏内称号底板（UI_CMN_Shougou_* 276×36）：底层整图拉伸铺满（素材中段横向均匀，拉伸无损、
-   只有端帽会变形），再用 ::before/::after 把两端各 14px 盖上按原比例缩放的端帽（素材实测端帽 16px，
-   等比缩到高 32 后 ≈14px）。覆盖式没有分区拼缝，长称号圆角也不变形。 */
-.tt-plate { position: relative; flex: 0 0 auto; display: inline-block; min-width: 200px; max-width: 400px; height: 32px; line-height: 32px; padding: 0 22px; text-align: center; background-size: 100% 100%; font-family: 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; color: #3b3b3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt-plate::before, .tt-plate::after { content: ''; position: absolute; top: 0; bottom: 0; width: 14px; background-image: inherit; background-size: auto 100%; background-repeat: no-repeat; }
+   只有端帽会变形），再用 ::before/::after 盖上按原比例缩放的端帽（素材实测端帽 16px，等比缩到
+   高 32 后 ≈14px）。覆盖宽度取 24px ≥ 底层帽被拉到最宽时的 16/276×max-width ≈ 23.2px，保证长称号
+   下拉变形的帽尾不外露；超出真实端帽的部分显示的是等比图的均匀中段，与底层无缝。端帽 z-index
+   垫在文字之下，避免盖住贴边的文字。 */
+.tt-plate { position: relative; z-index: 0; flex: 0 0 auto; display: inline-block; min-width: 200px; max-width: 400px; height: 32px; line-height: 32px; padding: 0 22px; text-align: center; background-size: 100% 100%; font-family: 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; color: #3b3b3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-plate::before, .tt-plate::after { content: ''; position: absolute; z-index: -1; top: 0; bottom: 0; width: 24px; background-image: inherit; background-size: auto 100%; background-repeat: no-repeat; }
 .tt-plate::before { left: 0; background-position: left center; }
 .tt-plate::after { right: 0; background-position: right center; }
 /* 超长条件（如歌曲组展开列全部曲名）完整换行展示，不省略 */
