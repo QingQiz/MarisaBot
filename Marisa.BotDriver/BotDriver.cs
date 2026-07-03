@@ -80,29 +80,39 @@ public abstract class BotDriver(
 
     protected async Task ProcMessageStep(Message message)
     {
-        var res = await Policy.TimeoutAsync(TimeSpan.FromMinutes(10), TimeoutStrategy.Pessimistic).ExecuteAndCaptureAsync(async () =>
+        try
         {
-            Logger.Info("{0}", message.ToString());
-            var toInvoke = MessageDispatcher.Dispatch(message);
-
-            foreach (var (plugin, method, m2) in toInvoke)
+            var res = await Policy.TimeoutAsync(TimeSpan.FromMinutes(10), TimeoutStrategy.Pessimistic).ExecuteAndCaptureAsync(async () =>
             {
-                var state = await MessageDispatcher.Invoke(plugin, method, m2);
+                Logger.Info("{0}", message.ToString());
+                var toInvoke = MessageDispatcher.Dispatch(message);
 
-                if (state == MarisaPluginTaskState.CompletedTask) break;
+                foreach (var (plugin, method, m2) in toInvoke)
+                {
+                    var state = await MessageDispatcher.Invoke(plugin, method, m2);
+
+                    if (state == MarisaPluginTaskState.CompletedTask) break;
+                }
+            });
+
+            if (res.Outcome != OutcomeType.Failure) return;
+
+            if (res.FinalException is TimeoutRejectedException)
+            {
+                message.Reply("Cancelled due to timeout (10min)");
+                Logger.Error("Handler timed out. Caused by message: {0}", message);
             }
-        });
-
-        if (res.Outcome != OutcomeType.Failure) return;
-
-        if (res.FinalException is TimeoutRejectedException)
-        {
-            message.Reply("Cancelled due to timeout (10min)");
-            Logger.Error("Handler timed out. Caused by message: {0}", message);
+            else
+            {
+                // 分发/触发匹配阶段（不在 DependencyInjectInvoke 的 try/catch 内）抛出的异常：
+                // 记录而非抛回无人 await 的任务，否则会被静默丢弃
+                Logger.Error(res.FinalException, "Dispatch failed. Caused by message: {0}", message);
+            }
         }
-        else
+        catch (Exception e)
         {
-            throw res.FinalException;
+            // 兜底：本任务是即发即弃的，任何逃逸异常都必须在此消化，避免成为未观测异常
+            Logger.Error(e, "Unexpected error while processing message: {0}", message);
         }
     }
 

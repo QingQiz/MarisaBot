@@ -27,10 +27,14 @@ public partial class MaiMaiDx
         GetRecommend(DxRating rating, int targetRating)
     {
         var listOld = rating.OldScores
-            .Select(score => (SongDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .Select(score => (Song: SongDb.GetSongById(score.Id), score.LevelIdx, score.Achievement, score.Rating))
+            .Where(x => x.Song != null)
+            .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
             .ToList();
         var listNew = rating.NewScores
-            .Select(score => (SongDb.GetSongById(score.Id)!, score.LevelIdx, score.Achievement, score.Rating))
+            .Select(score => (Song: SongDb.GetSongById(score.Id), score.LevelIdx, score.Achievement, score.Rating))
+            .Where(x => x.Song != null)
+            .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
             .ToList();
 
         var raOld = rating.OldScores.Sum(s => s.Ra());
@@ -128,6 +132,8 @@ public partial class MaiMaiDx
         bool Update1(IList<(MaiMaiSong Song, int Idx, double Achievement, int Rating)> list, ref int raSum,
             IEnumerable<MaiMaiSong> songList, int cap)
         {
+            if (list.Count == 0) return false;
+
             var (oldSong, oldIdx, oldAchievement, oldRa) = list.MinBy(x => x.Rating);
 
             idSet.Remove((oldSong.Id, oldIdx));

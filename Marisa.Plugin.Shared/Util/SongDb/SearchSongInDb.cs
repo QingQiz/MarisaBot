@@ -168,14 +168,14 @@ public static class SearchSongInDb
     {
         try
         {
-            var regex = new Regex(artist.ToString(), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var regex = UserRegex.Create(artist.ToString());
 
             var res = db.SongList.Where(s => regex.IsMatch(s.Artist)).ToList();
 
             if (res.Count != 0)
                 return res.ToList();
         }
-        catch (RegexParseException)
+        catch (Exception e) when (e is RegexParseException or RegexMatchTimeoutException)
         {
         }
 

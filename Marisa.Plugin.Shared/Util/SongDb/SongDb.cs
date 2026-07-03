@@ -198,10 +198,10 @@ public class SongDb<TSong> : ICanReset where TSong : Song
 
         try
         {
-            var regex = new Regex(alias.ToString(), RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            var regex = UserRegex.Create(alias.ToString());
             key = SongAlias.Keys.Where(a => regex.IsMatch(a.Span)).ToList();
         }
-        catch (RegexParseException) {}
+        catch (Exception e) when (e is RegexParseException or RegexMatchTimeoutException) {}
 
         return Result();
 
@@ -259,6 +259,9 @@ public class SongDb<TSong> : ICanReset where TSong : Song
     /// <returns>成功与否</returns>
     public bool SetSongAlias(ReadOnlyMemory<char> name, ReadOnlyMemory<char> alias)
     {
+        // 别名不允许含制表符/换行，否则会破坏别名 TSV 文件的行/列结构
+        if (alias.Span.IndexOfAny('\t', '\n', '\r') >= 0) return false;
+
         lock (SongAlias)
         {
             ReadOnlyMemory<char> title;

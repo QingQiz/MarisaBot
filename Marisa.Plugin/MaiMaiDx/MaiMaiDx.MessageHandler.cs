@@ -1313,10 +1313,14 @@ public partial class MaiMaiDx
         var current = new
         {
             OldScores = rating.OldScores
-                .Select(x => (SongDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating))
+                .Select(x => (Song: SongDb.GetSongById(x.Id), x.LevelIdx, x.Achievement, x.Rating))
+                .Where(x => x.Song != null)
+                .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
                 .OrderByDescending(x => x.Item4),
             NewScores = rating.NewScores
-                .Select(x => (SongDb.GetSongById(x.Id)!, x.LevelIdx, x.Achievement, x.Rating))
+                .Select(x => (Song: SongDb.GetSongById(x.Id), x.LevelIdx, x.Achievement, x.Rating))
+                .Where(x => x.Song != null)
+                .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
                 .OrderByDescending(x => x.Item4)
         };
 
@@ -1489,6 +1493,11 @@ public partial class MaiMaiDx
             }
 
             var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelNameAll.Count;
+            if (levelIdx >= song.Charts.Count)
+            {
+                next.Reply("该谱面没有这个难度，会话已关闭");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            }
             var (x, y) = song.NoteScore(levelIdx);
 
             var tolerance = (int)((101 - achievement) / (0.2 * x));

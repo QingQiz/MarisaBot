@@ -790,7 +790,7 @@ public partial class Chunithm
             var command = next.Command.Trim();
 
             // 第一位是idx，后面是预期达成率
-            if (!int.TryParse(command[..1].Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
+            if (command.Length == 0 || !int.TryParse(command[..1].Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
                 next.Reply("错误的选择，请选择前面的编号。会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.Canceled);

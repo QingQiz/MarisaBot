@@ -36,20 +36,20 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
         }
     }
 
-    private static bool TryParseCommand(Message message, bool withBpRank, bool allowRange, out OsuCommandParser.OsuCommand? command)
+    private static async Task<OsuCommandParser.OsuCommand?> ResolveCommand(Message message, bool withBpRank, bool allowRange)
     {
-        command = ParseCommand(message, withBpRank, allowRange);
+        var command = await ParseCommand(message, withBpRank, allowRange);
 
         if (command == null)
         {
             message.Reply("错误的命令格式");
-            return false;
+            return null;
         }
 
         if (string.IsNullOrWhiteSpace(command.Name))
         {
             message.Reply("未绑定，请使用 `osu! bind 用户名` 绑定");
-            return false;
+            return null;
         }
 
         if (command.Rank == null)
@@ -59,10 +59,10 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
                 : new OsuCommandParser.OsuCommand(command.Name, null, command.Mode);
         }
 
-        return true;
+        return command;
     }
 
-    private static OsuCommandParser.OsuCommand? ParseCommand(Message message, bool withBpRank, bool allowRange)
+    private static async Task<OsuCommandParser.OsuCommand?> ParseCommand(Message message, bool withBpRank, bool allowRange)
     {
         var command = OsuCommandParser.Parse(message.Command.ToString());
 
@@ -81,11 +81,11 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
             return null;
         }
 
-        using var realm = BotDbContext.OpenRealm();
-
         // 没设置名字，那就是查自己或者查@的人
         if (string.IsNullOrWhiteSpace(command.Name))
         {
+            using var realm = BotDbContext.OpenRealm();
+
             OsuBind? bind;
             // @了人
             if (message.MessageChain?.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) is MessageDataAt at)
@@ -108,23 +108,26 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
 
             return new OsuCommandParser.OsuCommand(bind.OsuUserName, command.Rank, mode);
         }
+
         // 有设置名字，那么要检查GameMode
-        else
+        // 设置了mode的话就直接返回
+        if (command.Mode != null) return command;
+
+        // 从数据库取该用户名的 GameMode（在 await 前关闭 realm，避免跨线程访问 Realm）
+        string? gameMode;
+        using (var realm = BotDbContext.OpenRealm())
         {
-            // 设置了mode的话就直接返回
-            if (command.Mode != null) return command;
-
-            var bind = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == command.Name);
-
-            // 没被绑定，说明我们不知道这个人的GameMode，需要请求OsuApi来拿
-            if (bind == null)
-            {
-                var u = OsuApi.GetUserInfoByName(command.Name).Result;
-                return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(u.Playmode.ToLower()));
-            }
-
-            return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(bind.GameMode));
+            gameMode = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == command.Name)?.GameMode;
         }
+
+        // 没被绑定，说明我们不知道这个人的GameMode，需要请求OsuApi来拿
+        if (gameMode == null)
+        {
+            var u = await OsuApi.GetUserInfoByName(command.Name);
+            return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(u.Playmode.ToLower()));
+        }
+
+        return new OsuCommandParser.OsuCommand(command.Name, command.Rank, OsuApi.ModeList.IndexOf(gameMode));
     }
 
     /// <summary>
@@ -134,11 +137,14 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
     /// <returns></returns>
     private static async Task<long> GetOsuIdByName(string name)
     {
-        using var realm = BotDbContext.OpenRealm();
+        // 在 await 前关闭 realm，避免续体在别的线程 dispose Realm（Realm 线程亲和）
+        long? boundId;
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            boundId = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == name)?.OsuUserId;
+        }
 
-        var u = realm.All<OsuBind>().FirstOrDefault(o => o.OsuUserName == name);
-
-        if (u != null) return u.OsuUserId;
+        if (boundId != null) return boundId.Value;
 
         var id = await OsuApi.GetUserInfoByName(name);
 

@@ -21,9 +21,10 @@ public record BestScoreLouis
     public long LastModified { get; set; }
 #pragma warning restore CS8618
 
-    public ChunithmScore ToChunithmScore(IndexerT indexer)
+    public ChunithmScore? ToChunithmScore(IndexerT indexer)
     {
-        var song = indexer[MusicId];
+        if (!indexer.TryGetValue(MusicId, out var song)) return null;
+        if (LevelIndex < 0 || LevelIndex >= song.Constants.Count || LevelIndex >= song.Levels.Count) return null;
 
         return new ChunithmScore
         {

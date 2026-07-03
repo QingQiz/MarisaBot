@@ -97,6 +97,8 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         var json = await response.GetJsonAsync<BestScoreLouis[]>();
 
         return json.Select(x => x.ToChunithmScore(Indexer))
+            .Where(x => x != null)
+            .Select(x => x!)
             .DistinctBy(x => (x.Id, (int)x.LevelIndex))
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }

@@ -81,7 +81,8 @@ public partial class Osu
     [MarisaPluginCommand("info")]
     private async Task<MarisaPluginTaskState> Info(Message message)
     {
-        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, false, false);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
         if (DebounceCheck(message, command!.Name))
         {
@@ -115,9 +116,10 @@ public partial class Osu
     [MarisaPluginCommand("recommend", "什么推分", "打什么推分", "打什么歌推分")]
     private async Task<MarisaPluginTaskState> Recommend(Message message)
     {
-        if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, false, false);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
-            if (command!.Mode is not (0 or 3))
+        if (command.Mode is not (0 or 3))
         {
             message.Reply("目前只支持 osu 和 mania 模式");
             return MarisaPluginTaskState.CompletedTask;
@@ -139,7 +141,8 @@ public partial class Osu
     [MarisaPluginCommand("pr")]
     private async Task<MarisaPluginTaskState> RecentPass(Message message)
     {
-        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, true, false);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
         message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode!.Value,
             command.Rank?.Start, true, false)));
@@ -151,7 +154,8 @@ public partial class Osu
     [MarisaPluginCommand("recent", "rec", "re")]
     private async Task<MarisaPluginTaskState> Recent(Message message)
     {
-        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, true, false);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
         message.Reply(MessageDataImage.FromBase64(await WebApi.OsuScore(command!.Name, command.Mode!.Value,
             command.Rank?.Start, true, true)));
@@ -163,7 +167,8 @@ public partial class Osu
     [MarisaPluginCommand("bp")]
     private async Task<MarisaPluginTaskState> BestPerformance(Message message)
     {
-        if (!TryParseCommand(message, true, true, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, true, true);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
         if (command!.Rank?.End == null)
         {
@@ -222,7 +227,8 @@ public partial class Osu
     [MarisaPluginCommand("todaybp", "tdbp")]
     private async Task<MarisaPluginTaskState> TodayBp(Message message)
     {
-        if (!TryParseCommand(message, true, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+        var command = await ResolveCommand(message, true, false);
+        if (command == null) return MarisaPluginTaskState.CompletedTask;
 
         var recentScores =
             (await OsuApi.GetScores(await GetOsuIdByName(command!.Name), OsuApi.OsuScoreType.Best,
@@ -233,7 +239,7 @@ public partial class Osu
 
         if (!(recentScores?.Any() ?? false))
         {
-            message.Reply($"最近24小时内在 {OsuApi.GetModeName(command.Mode!.Value)} 上未恰到分");
+            message.Reply($"最近{command.Rank?.Start ?? 24}小时内在 {OsuApi.GetModeName(command.Mode!.Value)} 上未恰到分");
         }
         else
         {
@@ -262,7 +268,8 @@ public partial class Osu
 
         if (message.Command.IsWhiteSpace())
         {
-            if (!TryParseCommand(message, false, false, out var command)) return MarisaPluginTaskState.CompletedTask;
+            var command = await ResolveCommand(message, false, false);
+            if (command == null) return MarisaPluginTaskState.CompletedTask;
 
             var id = await GetOsuIdByName(command!.Name);
             var scores = await OsuApi.GetScores(

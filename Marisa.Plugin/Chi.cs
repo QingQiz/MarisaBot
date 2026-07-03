@@ -322,7 +322,7 @@ public class Chi : MarisaPluginBase
             {
                 return value.RandomTake(1).First();
             }
-            return _data.Values.SelectMany(x => x).RandomTake(1).First();
+            return _data.Values.SelectMany(x => x).RandomTake(1).FirstOrDefault() ?? "还没有可选的，先给我加点吃的吧";
         }
     }
 

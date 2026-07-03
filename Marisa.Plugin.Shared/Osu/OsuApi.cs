@@ -383,7 +383,7 @@ public static partial class OsuApi
                 var lines = File.ReadLines(f)
                     .SkipWhile(l => !l.Trim().Equals("[Metadata]", StringComparison.OrdinalIgnoreCase))
                     .Skip(1)
-                    .TakeWhile(l => l.Trim()[0] != '[');
+                    .TakeWhile(l => !l.Trim().StartsWith('['));
                 foreach (var line in lines)
                 {
                     if (!line.Trim().StartsWith("BeatmapID:", StringComparison.OrdinalIgnoreCase)) continue;

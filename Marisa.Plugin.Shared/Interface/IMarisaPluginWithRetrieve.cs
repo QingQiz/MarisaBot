@@ -81,7 +81,12 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         var name  = names[0].Trim();
         var alias = names[1].Trim();
 
-        message.Reply(SongDb.SetSongAlias(name, alias) ? "Success" : $"不存在的歌曲：{name}");
+        message.Reply(
+            alias.Span.IndexOfAny('\t', '\n', '\r') >= 0
+                ? "别名不能包含制表符或换行"
+                : SongDb.SetSongAlias(name, alias)
+                    ? "Success"
+                    : $"不存在的歌曲：{name}");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -382,9 +387,12 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                 return false;
             }
 
-            var cmp  = GetComparer<int>(op);
-            var aInt = a.Last() == '+' ? int.Parse(a[..^1]) : int.Parse(a);
-            var bInt = b.Last() == '+' ? int.Parse(b[..^1]) : int.Parse(b);
+            var cmp = GetComparer<int>(op);
+            if (!int.TryParse(a.Last() == '+' ? a[..^1] : a, out var aInt) ||
+                !int.TryParse(b.Last() == '+' ? b[..^1] : b, out var bInt))
+            {
+                return false;
+            }
             if (aInt != bInt)
             {
                 return cmp(aInt, bInt);
