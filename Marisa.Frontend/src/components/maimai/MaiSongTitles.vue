@@ -182,7 +182,7 @@ watch(song, async () => {
 
 /* ── 称号列表 ── */
 .tt-list { display: flex; flex-direction: column; gap: 8px; }
-.tt-row { display: flex; align-items: center; gap: 16px; height: 44px; border-radius: 10px; padding: 0 16px 0 10px; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
+.tt-row { display: flex; align-items: center; gap: 16px; min-height: 44px; border-radius: 10px; padding: 7px 16px 7px 10px; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
 /* 游戏内称号底板（UI_CMN_Shougou_* 276×36）：底层整图拉伸铺满（素材中段横向均匀，拉伸无损、
    只有端帽会变形），再用 ::before/::after 把两端各 14px 盖上按原比例缩放的端帽（素材实测端帽 16px，
    等比缩到高 32 后 ≈14px）。覆盖式没有分区拼缝，长称号圆角也不变形。 */
@@ -190,7 +190,8 @@ watch(song, async () => {
 .tt-plate::before, .tt-plate::after { content: ''; position: absolute; top: 0; bottom: 0; width: 14px; background-image: inherit; background-size: auto 100%; background-repeat: no-repeat; }
 .tt-plate::before { left: 0; background-position: left center; }
 .tt-plate::after { right: 0; background-position: right center; }
-.tt-cond { flex: 1 1 auto; min-width: 0; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 超长条件（如歌曲组展开列全部曲名）完整换行展示，不省略 */
+.tt-cond { flex: 1 1 auto; min-width: 0; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; line-height: 1.4; color: rgba(255,255,255,0.75); overflow-wrap: break-word; }
 .tt-state { flex: 0 0 auto; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 14px; letter-spacing: 0.08em; }
 .tt-ok { color: #ffd700; }
 .tt-no { color: rgba(255,255,255,0.38); }
