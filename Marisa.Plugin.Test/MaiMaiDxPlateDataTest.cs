@@ -1179,6 +1179,8 @@ public class MaiMaiDxPlateDataTest
     [TestCase("熊舞舞完成表", "UI_Plate_055104.png")]
     [TestCase("华神完成表", "UI_Plate_109103.png")]
     [TestCase("镜将完成表", "UI_Plate_559102.png")]
+    [TestCase("彩将完成表", "UI_Plate_609102.png")]
+    [TestCase("彩舞舞完成表", "UI_Plate_609104.png")]
     public void NamePlateImageResolves(string raw, string expected)
     {
         Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.EqualTo(expected));
@@ -1186,7 +1188,6 @@ public class MaiMaiDxPlateDataTest
 
     [TestCase("真将完成表")]      // 真系历来无「将」
     [TestCase("樱大将完成表")]    // 大将(SSS+)没有对应姓名框
-    [TestCase("彩将完成表")]      // 彩(1.60)素材未随包体发布
     [TestCase("霸者神完成表")]    // 覆盖固有阈值后不再是「霸者」姓名框
     [TestCase("镜代V家将完成表")] // 多 selector 不出牌
     [TestCase("翠楼屋将完成表")]  // 非版本代字查询
