@@ -716,6 +716,33 @@ public partial class MaiMaiDx
         var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
         if (song == null) return MarisaPluginTaskState.CompletedTask;
 
+        var context = await BuildSongScoreContext(message, song);
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiSongScore(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     单曲可解锁称号
+    /// </summary>
+    [MarisaPluginDoc("查询某首歌可解锁的游戏内称号", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginCommand("称号", "title")]
+    private async Task<MarisaPluginTaskState> SongTitles(Message message)
+    {
+        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
+        if (song == null) return MarisaPluginTaskState.CompletedTask;
+
+        var context = await BuildSongScoreContext(message, song);
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiSongTitles(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     单曲成绩 WebContext（info 与 称号 共用；称号页用各难度成绩判定达成状态）
+    /// </summary>
+    private async Task<WebContext> BuildSongScoreContext(Message message, MaiMaiSong song)
+    {
         var fetcher = GetDataFetcher(message);
         var self    = message with { Command = "".AsMemory() };
 
@@ -755,9 +782,7 @@ public partial class MaiMaiDx
             }).ToList()
         });
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiSongScore(context.Id)));
-
-        return MarisaPluginTaskState.CompletedTask;
+        return context;
     }
 
     #endregion

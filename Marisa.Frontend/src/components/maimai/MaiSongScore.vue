@@ -78,24 +78,6 @@
                 </div>
             </div>
 
-            <!-- ── 可解锁称号（该曲无关联称号时整段隐藏） ── -->
-            <template v-if="songTitles.length">
-                <div class="flex items-center gap-4 mt-8 mb-4">
-                    <span class="section-tag">可解锁称号</span>
-                    <span class="font-rodin text-[18px] tracking-[0.28em] text-white/70 whitespace-nowrap">TITLES</span>
-                    <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
-                </div>
-                <div class="tt-list">
-                    <div v-for="t in songTitles" :key="t.id" class="tt-row">
-                        <span class="tt-plate" :style="titlePlate(t)">{{ t.name }}</span>
-                        <span class="tt-cond">{{ t.text }}</span>
-                        <span v-if="titleAchieved(t) === true" class="tt-state tt-ok">已达成</span>
-                        <span v-else-if="titleAchieved(t) === false" class="tt-state tt-no">未达成</span>
-                        <span v-else class="tt-state tt-na">—</span>
-                    </div>
-                </div>
-            </template>
-
             <footer class="mt-7">
                 <span class="footer-text">MARISA BOT · SONG INFO</span>
             </footer>
@@ -108,7 +90,7 @@ import {computed, nextTick, ref, watch} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
-import {achievementOrdinal, dxScoreStar, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
+import {dxScoreStar} from '@/components/maimai/utils/ordinal'
 import {
     DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf,
     VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc, typeBadgeSrc,
@@ -137,48 +119,6 @@ const isUtage = computed(() => isUtageId(song.value?.Id ?? 0))
 axios.get(context_get, {params: {id: route.query.id, name: 'SongScore'}}).then(res => {
     data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data
 })
-
-// ── 可解锁称号：静态表按歌 id 查（削除曲的 key 查不到，天然随曲库走）──
-interface SongTitle {
-    id: number; name: string; rare: string; text: string; norm: string
-    /** 条件限定的难度下标；-1 = 全难度/任意难度 */
-    diffIdx: number
-    /** 达成判定：dim=rank/fc/fs/play + ordinal 门槛 + scope(all=所有难度/one=任一或指定难度)；null=查分器数据无法判定 */
-    check: { dim: string; lv: number; scope: string } | null
-}
-
-const titlesDb = ref<Record<string, SongTitle[]> | null>(null)
-axios.get('/assets/maimai/song_titles.json')
-    .then(r => { titlesDb.value = r.data })
-    .catch(() => { titlesDb.value = {} })
-
-const RARE_ORDER: Record<string, number> = {Rainbow: 0, Gold: 1, Silver: 2, Bronze: 3, Normal: 4}
-const songTitles = computed<SongTitle[]>(() => {
-    if (!song.value || !titlesDb.value) return []
-    const list = titlesDb.value[String(song.value.Id)] ?? []
-    return [...list].sort((a, b) => (RARE_ORDER[a.rare] ?? 9) - (RARE_ORDER[b.rare] ?? 9) || a.id - b.id)
-})
-
-function titleOrd(c: ChartScore, dim: string): number {
-    switch (dim) {
-        case 'rank': return achievementOrdinal(c.Achievement ?? 0)
-        case 'fc':   return fcOrdinal(c.Fc ?? '')
-        case 'fs':   return fsOrdinal(c.Fs ?? '')
-        case 'dx':   return dxScoreStar(c.DxScore ?? 0, c.MaxDx)
-        default:     return c.Played ? 1 : 0   // play：游玩过即达成
-    }
-}
-
-/** true=已达成 false=未达成 null=无法判定（MISS 数/流速/对战等查分器不可知，仅展示条件） */
-function titleAchieved(t: SongTitle): boolean | null {
-    if (!t.check) return null
-    const pool = t.diffIdx >= 0 ? charts.value.filter(c => c.LevelIndex === t.diffIdx) : charts.value
-    if (!pool.length) return false
-    const hit = (c: ChartScore) => c.Played && titleOrd(c, t.check!.dim) >= t.check!.lv
-    return t.check.scope === 'all' ? pool.every(hit) : pool.some(hit)
-}
-
-function titlePlate(t: SongTitle) { return {backgroundImage: `url(${PIC}/shougou/UI_CMN_Shougou_${t.rare}.png)`} }
 
 function diffName(i: number) { return isUtage.value ? '宴' : DIFF_NAMES[Math.min(i, 4)] }
 function diffColor(i: number) { return isUtage.value ? UTAGE.main : DIFF_COLORS[Math.min(i, 4)] }
@@ -307,15 +247,4 @@ watch(song, async () => {
 .vc-star { height: 28px; display: block; }
 .vc-mark { display: block; }
 .vc-unplayed { flex: 1; display: flex; align-items: center; padding-left: 20px; font-family: 'SEGA NewRodin', sans-serif; font-weight: bold; font-size: 20px; color: rgba(255,255,255,0.3); letter-spacing: 0.22em; }
-
-/* ───── 可解锁称号 ───── */
-.tt-list { display: flex; flex-direction: column; gap: 8px; }
-.tt-row { display: flex; align-items: center; gap: 16px; height: 44px; border-radius: 10px; padding: 0 16px 0 10px; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
-/* 游戏内称号底板（UI_CMN_Shougou_* 276×36）横向拉伸铺满、名字压印其上 */
-.tt-plate { flex: 0 0 auto; display: inline-block; min-width: 200px; max-width: 400px; height: 32px; line-height: 32px; padding: 0 22px; text-align: center; background-size: 100% 100%; font-family: 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; color: #3b3b3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt-cond { flex: 1 1 auto; min-width: 0; font-family: 'Torus', 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt-state { flex: 0 0 auto; font-family: 'Torus', 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; letter-spacing: 0.08em; }
-.tt-ok { color: #ffd700; }
-.tt-no { color: rgba(255,255,255,0.38); }
-.tt-na { color: rgba(255,255,255,0.22); }
 </style>
