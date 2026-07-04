@@ -1264,20 +1264,13 @@ public partial class MaiMaiDx
             // 复活曲集合（虚拟类别）。
             PlateData.Selector.Revival => PlateData.IsRevivalSong(song.Id),
 
-            // substring 匹配：兼容 "サファ太 vs 翠楼屋" 这种合作谱师名义。
-            // 本名命中后再并查其高难马甲（如打"翠楼屋"也带出"翡翠マナ"）。
             PlateData.Selector.Charter c =>
                 levelIdx < song.Charters.Count
-                && (song.Charters[levelIdx].Contains(c.Name, StringComparison.OrdinalIgnoreCase)
-                    || PlateData.CharterAlterEgos(c.Name).Any(e =>
-                        song.Charters[levelIdx].Contains(e, StringComparison.OrdinalIgnoreCase))),
+                && PlateData.MatchCharter(song.Charters[levelIdx], c.Name),
 
-            // 谱师别名：任一 canonical substring 命中即可（OR），覆盖本名 / 高难马甲 / 合作名义；
-            // 但命中 Exclude 的署名（含 substring 却不属本人）要剔除。
             PlateData.Selector.CharterAlias ca =>
                 levelIdx < song.Charters.Count
-                && ca.Names.Any(n => song.Charters[levelIdx].Contains(n, StringComparison.OrdinalIgnoreCase))
-                && !ca.Exclude.Any(x => song.Charters[levelIdx].Contains(x, StringComparison.OrdinalIgnoreCase)),
+                && PlateData.MatchCharter(song.Charters[levelIdx], ca.Names, ca.Exclude),
 
             // song-level substring 匹配，兼容 "sasakure.UK x DECO*27" 这种合作作曲名义。
             PlateData.Selector.Artist a =>
@@ -1287,7 +1280,7 @@ public partial class MaiMaiDx
             // 谱师 ∪ 作曲家：处理 "rintaro soma" 这种身兼两职的人。
             PlateData.Selector.CharterOrArtist ca =>
                 (levelIdx < song.Charters.Count
-                 && song.Charters[levelIdx].Contains(ca.Name, StringComparison.OrdinalIgnoreCase))
+                 && PlateData.MatchCharter(song.Charters[levelIdx], ca.Name))
                 || (!string.IsNullOrEmpty(song.Info.Artist)
                     && song.Info.Artist.Contains(ca.Name, StringComparison.OrdinalIgnoreCase)),
 

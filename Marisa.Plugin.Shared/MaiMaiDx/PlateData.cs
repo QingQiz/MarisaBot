@@ -449,7 +449,7 @@ public static class PlateData
     /// </summary>
     public static readonly Dictionary<string, string[]> CharterAliasMap = new()
     {
-        ["哈皮"]       = ["はっぴー", "緑風 犬三郎", "原田ひろゆき", "シチミッピー", "鳩ホルぴー", "いぬっくまとボコっくま", "たかなっぴー", "Luxiいぬ", "“H”ack", "“H”ack underground", "PANDORA PARADOXXX", "Sukiyaki vs Happy"],
+        ["哈皮"]       = ["はっぴー", "緑風 犬三郎", "原田ひろゆき", "シチミッピー", "鳩ホルぴー", "いぬっくまとボコっくま", "たかなっぴー", "Luxiいぬ", "“H”ack", "“H”ack underground", "PANDORA PARADOXXX", "Sukiyaki vs Happy", "舞舞10年ズ"],
         ["沙发太"]     = ["サファ太", "さふぁた", "Safari", "-ZONE- SaFaRi", "-ZONE-Phoenix", "Safata", "ボコ太", "鳩サファzhel", "サぴぴぴぴちネファ太太太太コ", "ﾚよ†ょ／∪ヽ”┠  (十,3､了ﾅﾆ", "PANDORA BOXXX", "Ruby", "project raputa", "Safazhel"],
         ["maistar"]    = ["mai-Star"],
         ["小鸟游"]     = ["小鳥遊", "Phoenix", "たかなっぴー", "Anomaly Labyrinth", "ネコトリサーカス団"],
@@ -468,7 +468,7 @@ public static class PlateData
         ["桃子猫"]     = ["ぴちネコ", "ロシアンブラック", "BLaCK rOSE dIsEASe pATiENT", "サぴぴぴぴちネファ太太太太コ", "チェシャ猫とハートのジャック", "SHICHIMI☆CAT", "ネコトリサーカス団", "R-blacX of JacQ", "SAFARi☆CAT"],
         ["阿玛莉莉丝"] = ["アマリリス"],
         ["柠檬"]       = ["じゃこレモン", "僕の檸檬本当上手"],
-        ["DP皆传"]     = ["チャン@DP皆伝", "Garakuta Scramble!", "舞舞10年ズ（チャンとはっぴー）"],
+        ["DP皆传"]     = ["チャン@DP皆伝", "Garakuta Scramble!", "舞舞10年ズ"],
         ["科技厨房"]   = ["Techno Kitchen"],
         ["Revo"]       = ["Revo@LC"],
         ["蟹棒君"]     = ["カマボコ", "ボコ太", "いぬっくまとボコっくま"],
@@ -492,16 +492,59 @@ public static class PlateData
     };
 
     /// <summary>
-    ///     可直接打出的谱师本名 → 其高难马甲等额外 substring。命中本名（精确 Charter）时一并匹配马甲，
-    ///     无需把本名设成别名（设成别名会改变其 selector 类型、撞坏既有用例）。
+    ///     谱师身份名（本名/独立马甲）→ 该谱师全部名义 + 反向排除，仅匹配层使用（解析层不感知）。
+    ///     合作名义（七味星人、鳩サファzhel 等）不收——精确打合作名义仍只查该署名。
     /// </summary>
-    public static readonly Dictionary<string, string[]> CharterAlterEgoMap = new()
-    {
-        ["翠楼屋"] = ["翡翠マナ"],
-    };
+    public static readonly Dictionary<string, (string[] Names, string[] Exclude)> CharterIdentityMap = BuildCharterIdentityMap();
 
-    public static IEnumerable<string> CharterAlterEgos(string charterName) =>
-        CharterAlterEgoMap.TryGetValue(charterName, out var egos) ? egos : [];
+    private static Dictionary<string, (string[] Names, string[] Exclude)> BuildCharterIdentityMap()
+    {
+        // (别名 key, 身份名列表)。无中文别名的谱师（翠楼屋），名义组即身份列表。
+        (string AliasKey, string[] Identities)[] groups =
+        [
+            ("哈皮",     ["はっぴー", "緑風 犬三郎", "原田ひろゆき", "“H”ack", "“H”ack underground", "PANDORA PARADOXXX"]),
+            ("沙发太",   ["サファ太", "さふぁた", "Safari", "-ZONE- SaFaRi", "Safata", "PANDORA BOXXX", "Ruby", "project raputa"]),
+            ("小鸟游",   ["小鳥遊", "小鳥遊さん", "Phoenix", "Anomaly Labyrinth"]),
+            ("鸠",       ["鳩ホルダー", "The Dove"]),
+            ("企鹅",     ["ペンギン", "ロシェ@ペンギン", "ロシェ＠ペンギン"]),
+            ("泸溪河",   ["Luxizhel", "BELiZHEL"]),
+            ("7.3",      ["シチミヘルツ", "7.3Hz", "7.3GHz"]),
+            ("隅田川",   ["隅田川星人", "The ALiEN"]),
+            ("华火职人", ["華火職人", "“Carpe diem” ＊ HAN∀BI"]),
+            ("桃子猫",   ["ぴちネコ", "ロシアンブラック", "BLaCK rOSE dIsEASe pATiENT"]),
+            ("柠檬",     ["じゃこレモン", "僕の檸檬本当上手"]),
+            ("DP皆传",   ["チャン@DP皆伝", "Garakuta Scramble!"]),
+            ("蟹棒君",   ["カマボコ", "カマボコ君"]),
+            ("寿喜烧",   ["すきやき", "すきやき奉行"]),
+            ("红箭",     ["Redarrow"]),
+            ("甜口姜",   ["あまくちジンジャー", "EL DiABLO"]),
+            ("melonpop", ["メロンポップ", "ずんだポップ"]),
+            ("翠楼屋",   ["翠楼屋", "翡翠マナ"]),
+        ];
+
+        var map = new Dictionary<string, (string[], string[])>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (aliasKey, identities) in groups)
+        {
+            var names   = CharterAliasMap.GetValueOrDefault(aliasKey) ?? identities;
+            var exclude = CharterAliasExclude.GetValueOrDefault(aliasKey, []);
+            foreach (var identity in identities) map.Add(identity, (names, exclude));
+        }
+        return map;
+    }
+
+    /// <summary>
+    ///     精确 Charter 的匹配谓词：输入恰为某身份名（忽略大小写）时按该人全部名义并集（含反向排除）匹配，
+    ///     使真名查询与别名查询结果一致；否则单一 substring（兼容 "サファ太 vs 翠楼屋" 这种合作署名）。
+    /// </summary>
+    public static bool MatchCharter(string signedCharter, string input) =>
+        CharterIdentityMap.TryGetValue(input, out var person)
+            ? MatchCharter(signedCharter, person.Names, person.Exclude)
+            : signedCharter.Contains(input, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>名义组 OR 命中且不落 Exclude。CharterAlias selector 与身份查询共用。</summary>
+    public static bool MatchCharter(string signedCharter, IReadOnlyList<string> names, IReadOnlyList<string> exclude) =>
+        names.Any(n => signedCharter.Contains(n, StringComparison.OrdinalIgnoreCase))
+        && !exclude.Any(x => signedCharter.Contains(x, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     ///     阈值表。第一项是用户输入的字符串（中文别名 + ASCII rank/fc/fs 缩写），第二项是阈值定义。
@@ -702,13 +745,17 @@ public static class PlateData
 
             // 谱师别名作为一等 token，且在 Constant 之前检查：多字别名「华火职人」靠长度压过单字代字「华」，
             // 同长度同位置时（「7.3」vs 定数 7.3）按先检查者胜出 → 别名优先。
-            if (TryFindRightmostCharterAliasInString(workingPart, out var caStart, out var caLen, out var caSel))
+            // 别名/定数 token 嵌在 workingPart 内出现的某个真谱师名/身份名里时（如「隅田川星人 13」
+            // 的「隅田川」）不参与竞争：让等级等 token 先剥，真名整段落到 precise Charter。
+            if (TryFindRightmostCharterAliasInString(workingPart, out var caStart, out var caLen, out var caSel)
+                && !TokenEmbeddedInCharterName(workingPart, caStart, caLen, knownCharters))
             {
                 if (caLen > matchLen || (caLen == matchLen && caStart > matchStart))
                 { matchStart = caStart; matchLen = caLen; matched = caSel; }
             }
 
-            if (TryFindRightmostConstantInString(workingPart, out var cStart, out var cLen, out var cSel))
+            if (TryFindRightmostConstantInString(workingPart, out var cStart, out var cLen, out var cSel)
+                && !TokenEmbeddedInCharterName(workingPart, cStart, cLen, knownCharters))
             {
                 if (cLen > matchLen || (cLen == matchLen && cStart > matchStart))
                 { matchStart = cStart; matchLen = cLen; matched = cSel; }
@@ -923,6 +970,18 @@ public static class PlateData
     }
 
     private static bool IsAsciiLetter(char c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
+
+    /// <summary>候选 token 区间被 workingPart 内出现的某个更长真谱师名/身份名覆盖时，它是名字的一部分而非 selector。</summary>
+    private static bool TokenEmbeddedInCharterName(
+        string s, int start, int length, IReadOnlyCollection<string> knownCharters)
+    {
+        return knownCharters.Concat(CharterIdentityMap.Keys).Any(name =>
+        {
+            if (name.Length <= length) return false;
+            var i = s.IndexOf(name, Math.Max(0, start + length - name.Length), StringComparison.OrdinalIgnoreCase);
+            return i >= 0 && i <= start;
+        });
+    }
 
     /// <summary>
     ///     精确 charter 匹配：当且仅当 selectorPart 是某个已知 charter 名的 substring 时命中。
