@@ -48,7 +48,6 @@
                     <div v-if="chart.score_rank" class="stat">
                         <div class="stat-k">同定数难度</div>
                         <div class="stat-v tabular-nums">#{{ chart.score_rank.rank }} <span class="rank-of">/ {{ chart.score_rank.of }}</span></div>
-                        <div v-if="chart.score_rank.scope !== 'ds'" class="stat-sub">同等级排名</div>
                     </div>
                     <div v-if="chart.badge" class="stat">
                         <div class="stat-k">{{ chart.badge.label }}</div>
@@ -151,7 +150,7 @@ const badgeValue = computed(() => {
 })
 const badgeSub = computed(() => {
     const b = chart.value.badge!
-    return `${b.scope === 'ds' ? '同定数' : '同等级'} · AP 达成率 ${b.ap_rate_pct.toFixed(1)}%`
+    return `同定数 · AP 达成率 ${b.ap_rate_pct.toFixed(1)}%`
 })
 
 // ── 曲线绘制 ──
