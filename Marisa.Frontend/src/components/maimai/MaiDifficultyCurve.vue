@@ -45,9 +45,10 @@
                         <div class="stat-k">综合体感定数</div>
                         <div class="stat-v" :style="{ color: accent }">{{ fittedPooled }}</div>
                     </div>
-                    <div class="stat">
-                        <div class="stat-k">同等级百分位</div>
-                        <div class="stat-v">前 {{ topPct }}%</div>
+                    <div v-if="chart.score_rank" class="stat">
+                        <div class="stat-k">同定数难度</div>
+                        <div class="stat-v tabular-nums">#{{ chart.score_rank.rank }} <span class="rank-of">/ {{ chart.score_rank.of }}</span></div>
+                        <div v-if="chart.score_rank.scope !== 'ds'" class="stat-sub">同等级排名</div>
                     </div>
                     <div v-if="chart.badge" class="stat">
                         <div class="stat-k">{{ chart.badge.label }}</div>
@@ -104,13 +105,13 @@ import {
 } from '@/components/maimai/utils/song_card'
 
 interface Badge {
-    label: string; of: number; scope: string; basis: string
+    label: string; rank: number; of: number; scope: string; basis: string
     ap_rate_pct: number; n: number; population: string
-    rank?: number; quartile?: number
 }
+interface ScoreRank { rank: number; of: number; scope: string }
 interface CurveChart {
     li: number; ds: number; kind: string; curve: number[][]
-    badge: Badge | null; pooled: number | null; band_pct: number | null; n: number
+    badge: Badge | null; score_rank: ScoreRank | null; pooled: number | null; n: number
 }
 interface CurveSong {
     title: string; type: string; artist: string; bpm: number; genre: string; ver: string
@@ -143,15 +144,10 @@ const accent = computed(() => chart.value.li >= 3 ? DIFF_COLORS[4] : diffColor.v
 
 const fittedPooled = computed(() =>
     (chart.value.ds + (chart.value.pooled ?? 0)).toFixed(2))
-const topPct = computed(() =>
-    Math.max(1, Math.round(100 - (chart.value.band_pct ?? 0))))
 
-const QUARTILE_TEXT: Record<number, string> = {1: '前 25%', 2: '25–50%', 3: '50–75%', 4: '后 25%'}
 const badgeValue = computed(() => {
     const b = chart.value.badge!
-    return b.rank != null
-        ? `#${b.rank} <span class="badge-of">/ ${b.of}</span>`
-        : QUARTILE_TEXT[b.quartile ?? 4]
+    return `#${b.rank} <span class="badge-of">/ ${b.of}</span>`
 })
 const badgeSub = computed(() => {
     const b = chart.value.badge!
@@ -264,6 +260,7 @@ watch(song, async () => {
 .stat-v { font-family: 'SEGA NewRodin','Microsoft YaHei',sans-serif; font-weight: 800; font-size: 27px; margin-top: 3px; white-space: nowrap; }
 .stat-sub { font-family: 'Microsoft YaHei',sans-serif; font-size: 11.5px; color: rgba(255,255,255,0.5); margin-top: 2px; }
 .stat-v :deep(.badge-of) { font-size: 16px; opacity: 0.55; }
+.rank-of { font-size: 16px; opacity: 0.55; }
 
 .tick { fill: #fff; fill-opacity: 0.55; font-size: 13px; font-family: 'SEGA NewRodin',sans-serif; }
 .axis { fill: #fff; fill-opacity: 0.4; font-size: 12px; font-family: 'Microsoft YaHei',sans-serif; }
