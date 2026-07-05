@@ -75,7 +75,7 @@
                         <circle :cx="endPt.x" :cy="endPt.y" r="4.5" :fill="accent"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="8" :fill="accent" opacity="0.25"/>
                         <text :x="ML" :y="MT - 4" class="axis">{{ yAxisLabel }}</text>
-                        <text :x="SVG_W - MR" :y="svgH - 6" text-anchor="end" class="axis">玩家 DX RATING</text>
+                        <text :x="(ML + SVG_W - MR) / 2" :y="svgH - 2" text-anchor="middle" class="axis-en">DX Rating</text>
                     </svg>
                 </div>
             </div>
@@ -195,8 +195,8 @@ const xTicks = computed(() => {
     return out
 })
 const refY = computed(() => isDsKind.value ? Y(chart.value.ds) : Y(50))
-const refLabel = computed(() => isDsKind.value ? `官方定数 ${chart.value.ds.toFixed(1)}` : '带内中位')
-const yAxisLabel = computed(() => isDsKind.value ? '体感定数' : '带内百分位')
+const refLabel = computed(() => isDsKind.value ? `官方定数 ${chart.value.ds.toFixed(1)}` : '同等级中位')
+const yAxisLabel = computed(() => isDsKind.value ? '体感定数' : '同等级难度百分位')
 
 // ── 头部素材（同 MaiSongScore） ──
 const typeBadge = computed(() => typeBadgeSrc(song.value?.type))
@@ -263,6 +263,7 @@ watch(song, async () => {
 
 .tick { fill: #fff; fill-opacity: 0.55; font-size: 13px; font-family: 'SEGA NewRodin',sans-serif; }
 .axis { fill: #fff; fill-opacity: 0.4; font-size: 12px; font-family: 'Microsoft YaHei',sans-serif; }
+.axis-en { fill: #fff; fill-opacity: 0.45; font-size: 13px; font-weight: bold; font-family: 'Torus',sans-serif; letter-spacing: 0.08em; }
 .ref { fill: #fff; fill-opacity: 0.6; font-size: 12.5px; font-family: 'Microsoft YaHei',sans-serif; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 </style>
