@@ -26,6 +26,7 @@ import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
 import MaiSong from "@/components/maimai/MaiSong.vue";
 import MaiSongScore from "@/components/maimai/MaiSongScore.vue";
 import MaiSongTitles from "@/components/maimai/MaiSongTitles.vue";
+import MaiDifficultyCurve from "@/components/maimai/MaiDifficultyCurve.vue";
 
 
 const routes = [
@@ -37,6 +38,7 @@ const routes = [
     {path: '/maimai/song', component: MaiSong},
     {path: '/maimai/song-score', component: MaiSongScore},
     {path: '/maimai/song-titles', component: MaiSongTitles},
+    {path: '/maimai/difficulty-curve', component: MaiDifficultyCurve},
     {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},

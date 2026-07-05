@@ -723,6 +723,21 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
+    ///     体感难度曲线
+    /// </summary>
+    [MarisaPluginDoc("查询谱面的体感难度曲线（按玩家段位统计）", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginCommand("curve", "曲线")]
+    private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
+    {
+        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
+        if (song == null) return MarisaPluginTaskState.CompletedTask;
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurve(song.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     单曲可解锁称号
     /// </summary>
     [MarisaPluginDoc("查询某首歌可解锁的游戏内称号", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
