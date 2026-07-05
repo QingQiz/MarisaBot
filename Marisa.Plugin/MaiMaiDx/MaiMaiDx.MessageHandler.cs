@@ -723,9 +723,9 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
-    ///     体感难度曲线
+    ///     拟合难度曲线
     /// </summary>
-    [MarisaPluginDoc("查询谱面的体感难度曲线（按玩家段位统计）", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询谱面的拟合难度曲线（按玩家段位统计）", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("curve", "曲线")]
     private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
     {

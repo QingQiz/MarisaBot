@@ -30,7 +30,7 @@
 
             <!-- ── section tag + difficulty chip ── -->
             <div class="flex items-center gap-4 mt-7 mb-4">
-                <span class="section-tag" :style="{ background: diffColor }">体感难度</span>
+                <span class="section-tag" :style="{ background: diffColor }">难度曲线</span>
                 <span class="font-rodin text-[18px] tracking-[0.28em] text-white/70 whitespace-nowrap">DIFFICULTY CURVE</span>
                 <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
                 <span class="diff-chip font-rodin" :style="{ color: diffColor, borderColor: diffColor }">
@@ -42,7 +42,7 @@
             <div class="flex gap-5 items-stretch">
                 <div class="w-[218px] shrink-0 flex flex-col gap-3">
                     <div v-if="isDsKind" class="stat">
-                        <div class="stat-k">综合体感定数</div>
+                        <div class="stat-k">综合拟合定数</div>
                         <div class="stat-v" :style="{ color: accent }">{{ fittedPooled }}</div>
                     </div>
                     <div v-if="chart.score_rank" class="stat">
@@ -83,14 +83,14 @@
             </div>
 
             <footer class="mt-5 flex items-baseline justify-between gap-4">
-                <span class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）· 曲线为各段位玩家的体感难度估计</span>
+                <span class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）· 曲线为各段位玩家的拟合难度，算法与水鱼拟合定数不同</span>
                 <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
             </footer>
         </div>
     </div>
 
     <div v-else-if="noData" class="mai-curve mai-card w-[840px] px-12 py-10 antialiased">
-        <div class="text-[26px] font-bold">暂无体感难度曲线数据</div>
+        <div class="text-[26px] font-bold">暂无难度曲线数据</div>
         <div class="mt-3 text-[16px] text-white/60">数据覆盖 Lv11 及以上的常规谱面，宴会场谱面与收录后新增的曲目暂不支持。</div>
     </div>
 </template>
@@ -198,7 +198,7 @@ const xTicks = computed(() => {
 })
 const refY = computed(() => isDsKind.value ? Y(chart.value.ds) : Y(50))
 const refLabel = computed(() => isDsKind.value ? `官方定数 ${chart.value.ds.toFixed(1)}` : '同等级中位')
-const yAxisLabel = computed(() => isDsKind.value ? '体感定数' : '同等级难度百分位')
+const yAxisLabel = computed(() => isDsKind.value ? '拟合定数' : '同等级难度百分位')
 // y 轴标签竖排、绘图区垂直居中
 const yLabelStart = computed(() => {
     const mid = (MT + svgH - MB) / 2
