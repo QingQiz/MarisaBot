@@ -152,7 +152,7 @@ const badgeValue = computed(() => {
 })
 const badgeSub = computed(() => {
     const b = chart.value.badge!
-    return `同定数 · AP 达成率 ${b.ap_rate_pct.toFixed(1)}%`
+    return `同定数 AP 达成率 ${b.ap_rate_pct.toFixed(1)}%`
 })
 
 // ── 曲线绘制 ──
@@ -259,7 +259,7 @@ watch(song, async () => {
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
 .diff-chip { font-size: 17px; font-weight: 900; padding: 3px 14px; border: 2px solid; border-radius: 9999px; background: rgba(8,8,16,0.4); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
-.foot-note { font-family: 'Microsoft YaHei',sans-serif; font-size: 12px; color: rgba(255,255,255,0.4); }
+.foot-note { font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
 
 .stat { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 10px 14px; text-align: center; }
 .stat-k { font-family: 'Microsoft YaHei',sans-serif; font-size: 13px; color: rgba(255,255,255,0.6); }
