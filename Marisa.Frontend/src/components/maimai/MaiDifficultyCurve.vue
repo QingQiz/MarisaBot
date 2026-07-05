@@ -74,7 +74,9 @@
                               stroke-linejoin="round" stroke-linecap="round"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="4.5" :fill="accent"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="8" :fill="accent" opacity="0.25"/>
-                        <text :x="ML" :y="MT - 4" class="axis">{{ yAxisLabel }}</text>
+                        <text class="axis" text-anchor="middle">
+                            <tspan v-for="(ch, i) in yAxisLabel" :key="i" x="13" :y="yLabelStart + i * 17">{{ ch }}</tspan>
+                        </text>
                         <text :x="(ML + SVG_W - MR) / 2" :y="svgH - 2" text-anchor="middle" class="axis-en">DX Rating</text>
                     </svg>
                 </div>
@@ -154,7 +156,7 @@ const badgeSub = computed(() => {
 })
 
 // ── 曲线绘制 ──
-const SVG_W = 545, ML = 62, MR = 16, MT = 18, MB = 40
+const SVG_W = 545, ML = 78, MR = 16, MT = 18, MB = 40
 const svgH = 302
 const X0 = 10200, X1 = 16800
 
@@ -197,6 +199,11 @@ const xTicks = computed(() => {
 const refY = computed(() => isDsKind.value ? Y(chart.value.ds) : Y(50))
 const refLabel = computed(() => isDsKind.value ? `官方定数 ${chart.value.ds.toFixed(1)}` : '同等级中位')
 const yAxisLabel = computed(() => isDsKind.value ? '体感定数' : '同等级难度百分位')
+// y 轴标签竖排、绘图区垂直居中
+const yLabelStart = computed(() => {
+    const mid = (MT + svgH - MB) / 2
+    return mid - (yAxisLabel.value.length - 1) * 17 / 2 + 5
+})
 
 // ── 头部素材（同 MaiSongScore） ──
 const typeBadge = computed(() => typeBadgeSrc(song.value?.type))
