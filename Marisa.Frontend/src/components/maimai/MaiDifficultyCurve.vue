@@ -69,7 +69,10 @@
                         <line :x1="ML" :y1="refY" :x2="SVG_W - MR" :y2="refY"
                               stroke="#fff" :stroke-opacity="isDsKind ? 0.45 : 0.35"
                               stroke-dasharray="7 6" stroke-width="1.5"/>
-                        <text :x="ML + 8" :y="refY - 7" class="ref">{{ refLabel }}</text>
+                        <text :x="ML + 8" :y="refY - 7">
+                            <tspan class="ref">{{ isDsKind ? '官方定数 ' : refLabel }}</tspan>
+                            <tspan v-if="isDsKind" class="ref-num">{{ chart.ds.toFixed(1) }}</tspan>
+                        </text>
                         <path :d="curvePath" fill="none" :stroke="accent" stroke-width="3"
                               stroke-linejoin="round" stroke-linecap="round"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="4.5" :fill="accent"/>
@@ -82,9 +85,12 @@
                 </div>
             </div>
 
-            <footer class="mt-5 flex items-baseline justify-between gap-4">
-                <span class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）· 曲线为各段位玩家的拟合难度，算法与水鱼拟合定数不同</span>
-                <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
+            <footer class="mt-5">
+                <div class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）</div>
+                <div class="flex items-baseline justify-between gap-4">
+                    <span class="foot-note">曲线为各段位玩家的拟合难度，算法与水鱼拟合定数不同</span>
+                    <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
+                </div>
             </footer>
         </div>
     </div>
@@ -171,8 +177,19 @@ function Y(v: number) {
     return MT + (1 - (v - lo) / (hi - lo)) * (svgH - MT - MB)
 }
 
-const curvePath = computed(() =>
-    'M' + chart.value.curve.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(' L'))
+// Catmull-Rom 平滑（曲线穿过全部数据点，仅显示层）
+const curvePath = computed(() => {
+    const pts = chart.value.curve.map(p => ({x: X(p[0]), y: Y(p[1])}))
+    if (pts.length < 3) return 'M' + pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')
+    let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
+    for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)]
+        d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+           + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+           + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
+    }
+    return d
+})
 const bandPoints = computed(() => {
     const c = chart.value.curve
     const up = c.map(p => `${X(p[0]).toFixed(1)},${Y(p[1] + 2 * (p[2] ?? 0)).toFixed(1)}`)
@@ -272,5 +289,6 @@ watch(song, async () => {
 .axis { fill: #fff; fill-opacity: 0.4; font-size: 12px; font-family: 'Microsoft YaHei',sans-serif; }
 .axis-en { fill: #fff; fill-opacity: 0.45; font-size: 13px; font-weight: bold; font-family: 'Torus',sans-serif; letter-spacing: 0.08em; }
 .ref { fill: #fff; fill-opacity: 0.6; font-size: 12.5px; font-family: 'Microsoft YaHei',sans-serif; }
+.ref-num { fill: #fff; fill-opacity: 0.6; font-size: 13px; font-weight: bold; font-family: 'Torus',sans-serif; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 </style>
