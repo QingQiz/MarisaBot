@@ -1266,4 +1266,33 @@ public class MaiMaiDxPlateDataTest
     {
         Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.Null);
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 难度别名前缀剥离（curve 等按曲命令的可选难度前缀）。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("白谱 系ぎて",       4, "系ぎて")]
+    [TestCase("紫谱潘",            3, "潘")]      // 空格可选
+    [TestCase("红谱11663",         2, "11663")]   // 歌曲 id 同样可接
+    [TestCase("mst 潘",            3, "潘")]      // 大小写不敏感
+    [TestCase("Re:MASTER 系ぎて",  4, "系ぎて")]
+    [TestCase("EXP1",              2, "1")]       // ASCII token 后随数字满足词边界
+    public void DifficultyPrefixStrips(string input, int idx, string rest)
+    {
+        var ok = PlateData.TryStripDifficultyPrefix(input.AsMemory(), out var levelIdx, out var remaining);
+        Assert.That(ok, Is.True);
+        Assert.That(levelIdx, Is.EqualTo(idx));
+        Assert.That(remaining.ToString(), Is.EqualTo(rest));
+    }
+
+    [TestCase("MASTERPIECE")]          // ASCII token 后随字母不算前缀
+    [TestCase("白い雪のプリンセスは")] // 单字色名不收录，「白」开头的歌名不受影响
+    [TestCase("紫谱")]                 // 剥离后为空：整串按歌名
+    [TestCase("系ぎて")]
+    public void DifficultyPrefixLeavesSongQueryIntact(string input)
+    {
+        var ok = PlateData.TryStripDifficultyPrefix(input.AsMemory(), out _, out var remaining);
+        Assert.That(ok, Is.False);
+        Assert.That(remaining.ToString(), Is.EqualTo(input));
+    }
 }

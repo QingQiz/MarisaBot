@@ -725,14 +725,29 @@ public partial class MaiMaiDx
     /// <summary>
     ///     拟合难度曲线
     /// </summary>
-    [MarisaPluginDoc("查询谱面的拟合难度曲线（按玩家段位统计）", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询谱面的拟合难度曲线（按玩家段位统计），缺省展示 MASTER 难度", "可选难度前缀（如`白谱`、`红谱`）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("curve", "曲线")]
     private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
     {
-        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
+        var command = message.Command.Trim();
+
+        int? levelIdx = null;
+        if (PlateData.TryStripDifficultyPrefix(command, out var idx, out var rest))
+        {
+            levelIdx = idx;
+            command  = rest;
+        }
+
+        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(command), message, false, true);
         if (song == null) return MarisaPluginTaskState.CompletedTask;
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurve(song.Id)));
+        if (levelIdx >= song.Charts.Count)
+        {
+            message.Reply($"该谱面没有 {MaiMaiSong.LevelNameAll[levelIdx.Value]} 难度");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurve(song.Id, levelIdx)));
 
         return MarisaPluginTaskState.CompletedTask;
     }

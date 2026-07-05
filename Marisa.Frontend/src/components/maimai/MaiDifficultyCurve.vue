@@ -1,5 +1,5 @@
 <template>
-    <div v-if="song" class="mai-curve mai-card relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
+    <div v-if="song && picked" class="mai-curve mai-card relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
         <div class="absolute inset-0 pointer-events-none stripe-layer"></div>
         <div class="absolute inset-0 pointer-events-none" :style="glowStyle"></div>
 
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <div v-else-if="noData" class="mai-curve mai-card w-[840px] px-12 py-10 antialiased">
+    <div v-else-if="noData || song" class="mai-curve mai-card w-[840px] px-12 py-10 antialiased">
         <div class="text-[26px] font-bold">暂无难度曲线数据</div>
         <div class="mt-3 text-[16px] text-white/60">数据覆盖 Lv11 及以上的常规谱面，宴会场谱面与收录后新增的曲目暂不支持。</div>
     </div>
@@ -136,12 +136,13 @@ axios.get('/assets/maimai/difficulty_curves.json').then(res => {
     else noData.value = true
 })
 
-// 展示定数最高的谱面；idx 查询参数可指定难度
-const chart = computed<CurveChart>(() => {
+// idx 查询参数显式指定难度（该难度无数据则走兜底卡）；缺省取 MASTER，无 MASTER 数据时取定数最高
+const picked = computed<CurveChart | undefined>(() => {
     const cs = song.value!.charts
-    const byIdx = cs.find(c => c.li === Number(route.query.idx))
-    return byIdx ?? cs.reduce((a, b) => b.ds > a.ds ? b : a)
+    if (route.query.idx !== undefined) return cs.find(c => c.li === Number(route.query.idx))
+    return cs.find(c => c.li === 3) ?? cs.reduce((a, b) => b.ds > a.ds ? b : a)
 })
+const chart = computed<CurveChart>(() => picked.value!)
 
 const isDsKind = computed(() => chart.value.kind === 'fitted_ds')
 const diffName  = computed(() => DIFF_NAMES[Math.min(chart.value.li, 4)])

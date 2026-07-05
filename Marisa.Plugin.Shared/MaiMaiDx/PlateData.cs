@@ -629,6 +629,32 @@ public static class PlateData
             .OrderByDescending(t => t.Key.Length).ToArray();
 
     /// <summary>
+    ///     从命令开头剥离难度别名前缀（「白谱 歌名」「MST歌名」）。仅句首匹配、最长优先；
+    ///     含 ASCII 字母的 token 沿用词边界规则（后随字符不能是 ASCII 字母，防止吞掉
+    ///     MASTERPIECE 这类歌名开头）；剥离后剩余部分为空时不算匹配（「紫谱」单独出现按歌名处理）。
+    /// </summary>
+    public static bool TryStripDifficultyPrefix(ReadOnlyMemory<char> input, out int levelIdx, out ReadOnlyMemory<char> rest)
+    {
+        foreach (var (token, idx) in DifficultyEntriesLongestFirst)
+        {
+            if (input.Length <= token.Length) continue;
+            if (!input.Span.StartsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
+            if (token.Any(IsAsciiLetter) && IsAsciiLetter(input.Span[token.Length])) continue;
+
+            var remaining = input[token.Length..].Trim();
+            if (remaining.IsEmpty) continue;
+
+            levelIdx = idx;
+            rest     = remaining;
+            return true;
+        }
+
+        levelIdx = -1;
+        rest     = input;
+        return false;
+    }
+
+    /// <summary>
     ///     解析完整命令字符串（剥过 plugin 前缀后的部分）。
     ///     成功返回 (true, query, null)，失败返回 (false, null, error)。
     /// </summary>
