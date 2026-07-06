@@ -613,7 +613,7 @@ public static class PlateData
     /// <summary>
     ///     难度别名表。**故意不收单字**（绿/黄/红/紫/白），因为这些字跟代字（紫=MURASAKi、白=MiLK）
     ///     或者用户预期的别名会冲突。要写中文必须双字"绿谱/黄谱/红谱/紫谱/白谱"
-    ///     （单字色名仅 <see cref="TryStripDifficultyPrefix"/> 在句首且后随空格时接受）。
+    ///     （单字色名仅 <see cref="TryStripDifficultyAffix"/> 在句首/句尾剥离时接受）。
     ///     Re:MASTER 是合法的 difficulty（用户显式指定时才走），但不是所有歌都有该难度。
     /// </summary>
     public static readonly Dictionary<string, int> DifficultyAliasMap = new(StringComparer.OrdinalIgnoreCase)
@@ -629,58 +629,91 @@ public static class PlateData
         DifficultyAliasMap.Select(kv => (kv.Key, kv.Value))
             .OrderByDescending(t => t.Key.Length).ToArray();
 
-    /// <summary>单字色名（仅句首前缀接受）。不进 <see cref="DifficultyAliasMap"/>：完成表的
+    /// <summary>单字色名（仅句首/句尾剥离接受）。不进 <see cref="DifficultyAliasMap"/>：完成表的
     /// anywhere 匹配下单字与版本代字冲突（紫=MURASAKi、白=MiLK）。</summary>
     private static readonly (char Color, int LevelIdx)[] SingleColorEntries =
         [('绿', 0), ('黄', 1), ('红', 2), ('紫', 3), ('白', 4)];
 
     /// <summary>
-    ///     从命令开头剥离难度别名前缀（「白谱 歌名」「MST歌名」）。仅句首匹配、最长优先；
-    ///     含 ASCII 字母的 token 沿用词边界规则（后随字符不能是 ASCII 字母，防止吞掉
-    ///     MASTERPIECE 这类歌名开头）；剥离后剩余部分为空时不算匹配（「紫谱」单独出现按歌名处理）。
-    ///     单字色名仅在后随空白时接受（「紫 潘」）——无此约束「白金ディスコ」「红莲华」这类
-    ///     以色字开头的歌名/别名会被误剥成难度。
+    ///     从查询串句首或句尾剥离难度别名（「白谱 歌名」「歌名 白谱」「紫歌名」「歌名紫」，
+    ///     空格均可省略）。纯语法层，不判断剩余部分像不像歌名——调用方须整串优先：先按完整
+    ///     输入搜歌，无结果时才用剥离结果重搜（「白金ディスコ」这类以色字开头的歌名靠整串
+    ///     匹配保护）。含 ASCII 字母的 token 保留词边界规则（紧邻字符不能是 ASCII 字母，
+    ///     防止吞掉 MASTERPIECE 这类歌名）；剥离后剩余部分为空时不算匹配。
     /// </summary>
-    public static bool TryStripDifficultyPrefix(ReadOnlyMemory<char> input, out int levelIdx, out ReadOnlyMemory<char> rest)
+    public static bool TryStripDifficultyAffix(ReadOnlyMemory<char> input, out int levelIdx, out ReadOnlyMemory<char> rest)
     {
+        levelIdx = -1;
+        rest     = input;
+
+        // 整串恰为难度词（「紫谱」单独出现）不算查询，防单字路径把「谱」当歌名
+        if (DifficultyAliasMap.ContainsKey(input.ToString())) return false;
+
         foreach (var (token, idx) in DifficultyEntriesLongestFirst)
         {
             if (input.Length <= token.Length) continue;
-            if (!input.Span.StartsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
-            if (token.Any(IsAsciiLetter) && IsAsciiLetter(input.Span[token.Length])) continue;
 
-            var remaining = input[token.Length..].Trim();
-            if (remaining.IsEmpty) continue;
+            var needBoundary = token.Any(IsAsciiLetter);
 
-            levelIdx = idx;
-            rest     = remaining;
-            return true;
-        }
-
-        if (input.Length > 2 && char.IsWhiteSpace(input.Span[1]))
-        {
-            foreach (var (color, idx) in SingleColorEntries)
+            if (input.Span.StartsWith(token, StringComparison.OrdinalIgnoreCase)
+                && !(needBoundary && IsAsciiLetter(input.Span[token.Length])))
             {
-                if (input.Span[0] != color) continue;
+                var remaining = input[token.Length..].Trim();
+                if (!remaining.IsEmpty)
+                {
+                    levelIdx = idx;
+                    rest     = remaining;
+                    return true;
+                }
+            }
 
-                var remaining = input[1..].Trim();
-                if (remaining.IsEmpty) continue;
-
-                levelIdx = idx;
-                rest     = remaining;
-                return true;
+            if (input.Span.EndsWith(token, StringComparison.OrdinalIgnoreCase)
+                && !(needBoundary && IsAsciiLetter(input.Span[input.Length - token.Length - 1])))
+            {
+                var remaining = input[..^token.Length].Trim();
+                if (!remaining.IsEmpty)
+                {
+                    levelIdx = idx;
+                    rest     = remaining;
+                    return true;
+                }
             }
         }
 
-        levelIdx = -1;
-        rest     = input;
+        foreach (var (color, idx) in SingleColorEntries)
+        {
+            if (input.Length < 2) break;
+
+            if (input.Span[0] == color)
+            {
+                var remaining = input[1..].Trim();
+                if (!remaining.IsEmpty)
+                {
+                    levelIdx = idx;
+                    rest     = remaining;
+                    return true;
+                }
+            }
+
+            if (input.Span[^1] == color)
+            {
+                var remaining = input[..^1].Trim();
+                if (!remaining.IsEmpty)
+                {
+                    levelIdx = idx;
+                    rest     = remaining;
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
     /// <summary>
     ///     对话上下文（消息内无歌名混杂，如容错率的难度询问）的宽松难度前缀：
-    ///     在 <see cref="TryStripDifficultyPrefix"/> 基础上解除单字色名的空格约束、
-    ///     额外接受难度全名首字母（B/A/E/M/R），且剩余部分可为空。
+    ///     词表同 <see cref="TryStripDifficultyAffix"/> 但仅句首匹配，额外接受难度全名
+    ///     首字母（B/A/E/M/R），且剩余部分可为空。
     /// </summary>
     public static bool TryStripDifficultyPrefixLoose(ReadOnlyMemory<char> input, out int levelIdx, out ReadOnlyMemory<char> rest)
     {

@@ -1268,38 +1268,42 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
-    // 难度别名前缀剥离（curve 等按曲命令的可选难度前缀）。
+    // 难度别名剥离（curve 等按曲命令的可选难度字段，句首/句尾均可、空格可省略）。
+    // 纯语法层测试：「白金ディスコ」这类以色字开头的真实歌名由调用方保护——handler
+    // 整串优先搜歌，仅无结果时才用剥离结果重搜。
     // ──────────────────────────────────────────────────────────────────────
 
     [TestCase("白谱 系ぎて",       4, "系ぎて")]
-    [TestCase("紫谱潘",            3, "潘")]      // 双字/全名/缩写空格可选
+    [TestCase("系ぎて 白谱",       4, "系ぎて")]  // 难度字段可在曲名后
+    [TestCase("系ぎて白谱",        4, "系ぎて")]
+    [TestCase("紫谱潘",            3, "潘")]      // 空格可省略
+    [TestCase("紫潘",              3, "潘")]      // 单字色名免空格
+    [TestCase("潘紫",              3, "潘")]
     [TestCase("红谱11663",         2, "11663")]   // 歌曲 id 同样可接
+    [TestCase("11663 红谱",        2, "11663")]
     [TestCase("mst 潘",            3, "潘")]      // 大小写不敏感
     [TestCase("MAS潘",             3, "潘")]      // 社区惯用缩写；最长优先保证不抢 MASTER
     [TestCase("Re:MASTER 系ぎて",  4, "系ぎて")]
-    [TestCase("remas 系ぎて",      4, "系ぎて")]  // 免冒号缩写
+    [TestCase("潘 remas",          4, "潘")]      // 免冒号缩写，后缀同样可用
     [TestCase("ReMASTER系ぎて",    4, "系ぎて")]
     [TestCase("EXP1",              2, "1")]       // ASCII token 后随数字满足词边界
-    [TestCase("紫 潘",             3, "潘")]      // 单字色名 + 空格
-    [TestCase("白 系ぎて",         4, "系ぎて")]
-    public void DifficultyPrefixStrips(string input, int idx, string rest)
+    [TestCase("白金ディスコ",      4, "金ディスコ")] // 语法层会剥；整串优先搜歌保证实际按歌名处理
+    public void DifficultyAffixStrips(string input, int idx, string rest)
     {
-        var ok = PlateData.TryStripDifficultyPrefix(input.AsMemory(), out var levelIdx, out var remaining);
+        var ok = PlateData.TryStripDifficultyAffix(input.AsMemory(), out var levelIdx, out var remaining);
         Assert.That(ok, Is.True);
         Assert.That(levelIdx, Is.EqualTo(idx));
         Assert.That(remaining.ToString(), Is.EqualTo(rest));
     }
 
-    [TestCase("MASTERPIECE")]          // ASCII token 后随字母不算前缀
-    [TestCase("白い雪のプリンセスは")] // 单字色名后无空格：「白」开头的歌名不受影响
-    [TestCase("白金ディスコ")]
-    [TestCase("红莲华")]               // 别名以色字开头同样不受影响
-    [TestCase("紫潘")]                 // 单字色名必须后随空格
-    [TestCase("紫谱")]                 // 剥离后为空：整串按歌名
+    [TestCase("MASTERPIECE")]  // ASCII token 后随字母不算前缀
+    [TestCase("TRUEMASTER")]   // 句尾 token 前是字母同样不算
+    [TestCase("紫谱")]         // 剥离后为空：整串按歌名
+    [TestCase("白")]
     [TestCase("系ぎて")]
-    public void DifficultyPrefixLeavesSongQueryIntact(string input)
+    public void DifficultyAffixLeavesSongQueryIntact(string input)
     {
-        var ok = PlateData.TryStripDifficultyPrefix(input.AsMemory(), out _, out var remaining);
+        var ok = PlateData.TryStripDifficultyAffix(input.AsMemory(), out _, out var remaining);
         Assert.That(ok, Is.False);
         Assert.That(remaining.ToString(), Is.EqualTo(input));
     }

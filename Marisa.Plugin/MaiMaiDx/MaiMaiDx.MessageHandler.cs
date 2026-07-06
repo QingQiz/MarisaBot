@@ -725,20 +725,28 @@ public partial class MaiMaiDx
     /// <summary>
     ///     拟合难度曲线
     /// </summary>
-    [MarisaPluginDoc("查询谱面的拟合难度曲线", "可选难度前缀（如`白谱`）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询谱面的拟合难度曲线", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("curve", "曲线")]
     private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
     {
         var command = message.Command.Trim();
 
+        // 整串优先：完整输入能搜到歌就按纯歌名处理（保护「白金ディスコ」这类以色字开头的
+        // 歌名），无结果时再尝试剥离句首/句尾的难度字段重搜
+        var searchResult = SongDb.SearchSong(command);
+
         int? levelIdx = null;
-        if (PlateData.TryStripDifficultyPrefix(command, out var idx, out var rest))
+        if (searchResult.Count == 0 && PlateData.TryStripDifficultyAffix(command, out var idx, out var rest))
         {
-            levelIdx = idx;
-            command  = rest;
+            var stripped = SongDb.SearchSong(rest);
+            if (stripped.Count != 0)
+            {
+                levelIdx     = idx;
+                searchResult = stripped;
+            }
         }
 
-        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(command), message, false, true);
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false, true);
         if (song == null) return MarisaPluginTaskState.CompletedTask;
 
         if (levelIdx >= song.Charts.Count)
