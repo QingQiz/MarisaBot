@@ -205,7 +205,6 @@ watch(song, async () => {
 .new-chip { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; padding: 4px 11px 3px 13px; border-radius: 9999px; background: var(--new-chip-bg); box-shadow: var(--new-chip-shadow); }
 
 .cover-frame { padding: 5px; border-radius: 22px; background: rgba(255,255,255,0.78); box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 8px 20px -12px rgba(0,0,0,0.5); }
-.mai-title { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: 700; line-height: 1; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; overflow: hidden; padding-block: 6px 8px; margin-block: -6px -8px; }
 .artist-line { flex: 1; min-width: 0; font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-size: 20px; font-weight: bold; color: rgba(255,255,255,0.8); margin-top: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .player-inline { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; }
 .player-label { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); }
