@@ -784,19 +784,40 @@ public partial class MaiMaiDx
     private static readonly (string Alias, bool IsLevel)[] RankAliases =
         [("level", true), ("lv", true), ("base", false), ("b", false)];
 
+    /// <summary>严格解析等级（纯数字可带尾加号，禁符号/空白/前导零；加号等级最高 14+），
+    /// 输出规范串。宽松的 int.TryParse 会放行 "+13"/"013"/"13 +" 并把原串透传进卡面标题。</summary>
     private static bool TryParseRankLevel(string value, out string level)
     {
-        level = value;
-        var core = value.EndsWith('+') ? value[..^1] : value;
-        return int.TryParse(core, out var lv) && lv is >= 1 and <= 15;
+        level = "";
+        var plus = value.EndsWith('+');
+        var core = plus ? value[..^1] : value;
+
+        if (core.Length is 0 or > 2 || !core.All(char.IsAsciiDigit) || core[0] == '0') return false;
+
+        var lv = int.Parse(core);
+        if (lv < 1 || lv > (plus ? 14 : 15)) return false;
+
+        level = plus ? $"{lv}+" : $"{lv}";
+        return true;
     }
 
+    /// <summary>严格解析定数（X 或 X.X，一位小数，禁符号/千分位/NaN），输出规范串。
+    /// 宽松的 double.TryParse 会放行 "NaN"（穿过范围守卫）、"14.75"（静默取整成 14.8）、
+    /// zh-CN 下的 "1,4"（千分位解析成 14）。</summary>
     private static bool TryParseRankConstant(string value, out string ds)
     {
         ds = "";
-        if (!double.TryParse(value, out var v) || v is < 1 or > 15) return false;
+        var dot = value.IndexOf('.');
+        var ip  = dot < 0 ? value : value[..dot];
+        var fp  = dot < 0 ? "0" : value[(dot + 1)..];
 
-        ds = v.ToString("0.0");
+        if (ip.Length is 0 or > 2 || !ip.All(char.IsAsciiDigit) || ip[0] == '0') return false;
+        if (fp.Length != 1 || !char.IsAsciiDigit(fp[0])) return false;
+
+        var v = int.Parse(ip) + (fp[0] - '0') / 10.0;
+        if (v is < 1 or > 15) return false;
+
+        ds = $"{ip}.{fp}";
         return true;
     }
 
