@@ -49,7 +49,6 @@ export const VERSION_CODE: Record<string, number> = {
     'maimai でらっくす UNiVERSE': 220, 'maimai でらっくす FESTiVAL': 230,
     'maimai でらっくす BUDDiES': 240, 'maimai でらっくす PRiSM': 250,
     'maimai でらっくす PRiSM PLUS': 255,
-    'maimai でらっくす CiRCLE': 260,  'maimai でらっくす CiRCLE PLUS': 265,
 }
 
 // 版本 logo 素材内部左侧透明留白（像素实测 alpha bbox）。
@@ -58,7 +57,6 @@ export const LOGO_BBOX_LEFT: Record<number, number> = {
     100: 22, 110: 21, 120: 20, 130: 20, 140: 20, 150: 14, 160: 21, 170: 21,
     180: 28, 185: 19, 190: 21, 195: 32, 199: 24, 200: 49, 210: 15, 214: 54,
     215: 10, 220: 55, 225: 24, 230: 50, 235: 78, 240: 78, 245: 46, 250: 79, 255: 50,
-    260: 17, 265: 20,
 }
 
 export function versionLogoSrc(from: string | undefined) {

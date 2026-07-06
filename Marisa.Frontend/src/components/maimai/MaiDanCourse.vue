@@ -1,10 +1,13 @@
 <template>
     <MaiCardShell v-if="course" class="mai-dan" :bg-key="bgKey" :accent="accent">
-        <!-- ── top meta bar ── -->
-        <MaiSongMetaBar :from="verMeta.from">
+        <!-- ── top meta bar：日服版本 logo（国服年版一档罩两代，区分不了 0.05 版本档） ── -->
+        <header class="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+            <img :src="verLogo" @error="verLogo = LOGO_FALLBACK" :alt="verMeta.name" :style="logoStyle"
+                 class="h-[50px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
+            <div class="flex-1"></div>
             <span v-if="isFuture" class="future-chip" :style="{ color: accent, borderColor: accent }">{{ FUTURE_LABEL }}</span>
             <img :src="modeBadge" :alt="modeName" class="h-[52px] drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
-        </MaiSongMetaBar>
+        </header>
 
         <!-- ── dan heading（游戏内段位艺术字，已裁 alpha bbox） ── -->
         <div class="flex items-center justify-between gap-6 mt-5">
@@ -59,11 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from 'vue'
+import {computed, ref, watchEffect} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
-import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
 import MaiCover from '@/components/maimai/MaiCover.vue'
 import {DIFF_NAMES, DIFF_COLORS, themeMainOf, bgKeyOf} from '@/components/maimai/utils/song_card'
 
@@ -76,20 +78,21 @@ interface DanCourse {
     life: number; recover: number; damage: number[]; songs: DanSong[]
 }
 
-// 版本档 → 显示名 + 版本 logo 素材键
-const VER_META: Record<string, { name: string; from: string }> = {
-    '1.17': {name: 'Splash PLUS',   from: 'maimai でらっくす Splash'},
-    '1.20': {name: 'UNiVERSE',      from: 'maimai でらっくす UNiVERSE'},
-    '1.25': {name: 'UNiVERSE PLUS', from: 'maimai でらっくす UNiVERSE'},
-    '1.30': {name: 'FESTiVAL',      from: 'maimai でらっくす FESTiVAL'},
-    '1.35': {name: 'FESTiVAL PLUS', from: 'maimai でらっくす FESTiVAL'},
-    '1.40': {name: 'BUDDiES',       from: 'maimai でらっくす BUDDiES'},
-    '1.45': {name: 'BUDDiES PLUS',  from: 'maimai でらっくす BUDDiES'},
-    '1.50': {name: 'PRiSM',         from: 'maimai でらっくす PRiSM'},
-    '1.55': {name: 'PRiSM PLUS',    from: 'maimai でらっくす PRiSM PLUS'},
-    '1.60': {name: 'CiRCLE',        from: 'maimai でらっくす CiRCLE'},
-    '1.65': {name: 'CiRCLE PLUS',   from: 'maimai でらっくす CiRCLE PLUS'},
+// 版本档 → 显示名 + 日服 logo 素材号 + 素材左侧透明留白（alpha bbox 实测，用于视觉左对齐）
+const VER_META: Record<string, { name: string; code: number; trim: number }> = {
+    '1.17': {name: 'Splash PLUS',   code: 215, trim: 8},
+    '1.20': {name: 'UNiVERSE',      code: 220, trim: 24},
+    '1.25': {name: 'UNiVERSE PLUS', code: 225, trim: 23},
+    '1.30': {name: 'FESTiVAL',      code: 230, trim: 19},
+    '1.35': {name: 'FESTiVAL PLUS', code: 235, trim: 19},
+    '1.40': {name: 'BUDDiES',       code: 240, trim: 42},
+    '1.45': {name: 'BUDDiES PLUS',  code: 245, trim: 45},
+    '1.50': {name: 'PRiSM',         code: 250, trim: 29},
+    '1.55': {name: 'PRiSM PLUS',    code: 255, trim: 1},
+    '1.60': {name: 'CiRCLE',        code: 260, trim: 17},
+    '1.65': {name: 'CiRCLE PLUS',   code: 265, trim: 20},
 }
+const LOGO_FALLBACK = '/assets/maimai/version/maimaidx.png'
 const FUTURE_VERSIONS = ['1.60', '1.65']
 const FUTURE_LABEL = '未来版本'
 
@@ -104,7 +107,10 @@ axios.get('/assets/maimai/dan_courses.json').then(r => {
     loaded.value = true
 })
 
-const verMeta  = computed(() => VER_META[ver] ?? {name: ver, from: ''})
+const verMeta  = computed(() => VER_META[ver] ?? {name: ver, code: 0, trim: 0})
+const verLogo  = ref('')
+watchEffect(() => { verLogo.value = `/assets/maimai/version/jp/Ver${verMeta.value.code}.png` })
+const logoStyle = computed(() => ({marginLeft: `${(-verMeta.value.trim * (50 / 160)).toFixed(1)}px`}))
 const isFuture = computed(() => FUTURE_VERSIONS.includes(ver))
 const modeName = computed(() => course.value?.mode === 2 ? '真段位認定' : '段位認定')
 

@@ -2,7 +2,7 @@
     <header class="flex items-center gap-2 flex-nowrap whitespace-nowrap">
         <img :src="versionLogo" :style="logoStyle" class="h-[50px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
         <div class="flex-1"></div>
-        <img v-if="type" :src="typeBadge" class="h-9 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
+        <img :src="typeBadge" class="h-9 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
         <slot/>
     </header>
 </template>
