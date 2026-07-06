@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>
@@ -9,6 +11,15 @@ public static class DanData
 {
     /// <summary>缺省版本 = 国服现行对应档（1.55 PRiSM PLUS）。</summary>
     public const string DefaultVersion = "1.55";
+
+    /// <summary>渲染缓存键的数据指纹：dan_courses.json 内容 MD5，数据更新后旧缓存自然失效。</summary>
+    public static string DataHash => DataHashLazy.Value;
+
+    private static readonly Lazy<string> DataHashLazy = new(() =>
+    {
+        var bytes = File.ReadAllBytes(Path.Join(ResourceManager.ResourcePath, "dan_courses.json"));
+        return Convert.ToHexString(MD5.HashData(bytes));
+    });
 
     /// <summary>版本档全集（与 dan_courses.json 的 version 字段一致）。</summary>
     private static readonly string[] Versions =
