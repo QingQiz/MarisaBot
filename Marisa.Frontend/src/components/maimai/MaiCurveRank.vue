@@ -119,10 +119,9 @@ const legend = computed(() => isDsKind.value
 // 列数按体量：>240 三列、>80 两列，卡宽随列数
 const colCount = computed(() => rows.value.length > 240 ? 3 : rows.value.length > 80 ? 2 : 1)
 const cardWidth = computed(() => [840, 840, 1000, 1400][colCount.value])
-const columns = computed(() => {
-    const per = Math.ceil(rows.value.length / colCount.value)
-    return Array.from({length: colCount.value}, (_, i) => rows.value.slice(i * per, (i + 1) * per))
-})
+// 行优先排布：#1 #2 #3 横向读、#4 换行（review 意见）
+const columns = computed(() =>
+    Array.from({length: colCount.value}, (_, c) => rows.value.filter((_, i) => i % colCount.value === c)))
 
 // 主题固定走紫谱档（排名跨难度，无单一难度归属）
 const bgKey = bgKeyOf(3, false)
