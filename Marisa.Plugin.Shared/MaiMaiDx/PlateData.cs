@@ -629,7 +629,7 @@ public static class PlateData
         DifficultyAliasMap.Select(kv => (kv.Key, kv.Value))
             .OrderByDescending(t => t.Key.Length).ToArray();
 
-    /// <summary>单字色名（曲线等按曲命令的前缀专用）。不进 <see cref="DifficultyAliasMap"/>：完成表的
+    /// <summary>单字色名（仅句首前缀接受）。不进 <see cref="DifficultyAliasMap"/>：完成表的
     /// anywhere 匹配下单字与版本代字冲突（紫=MURASAKi、白=MiLK）。</summary>
     private static readonly (char Color, int LevelIdx)[] SingleColorEntries =
         [('绿', 0), ('黄', 1), ('红', 2), ('紫', 3), ('白', 4)];
@@ -668,6 +668,41 @@ public static class PlateData
 
                 levelIdx = idx;
                 rest     = remaining;
+                return true;
+            }
+        }
+
+        levelIdx = -1;
+        rest     = input;
+        return false;
+    }
+
+    /// <summary>
+    ///     对话上下文（消息内无歌名混杂，如容错率的难度询问）的宽松难度前缀：
+    ///     在 <see cref="TryStripDifficultyPrefix"/> 基础上解除单字色名的空格约束、
+    ///     额外接受难度全名首字母（B/A/E/M/R），且剩余部分可为空。
+    /// </summary>
+    public static bool TryStripDifficultyPrefixLoose(ReadOnlyMemory<char> input, out int levelIdx, out ReadOnlyMemory<char> rest)
+    {
+        foreach (var (token, idx) in DifficultyEntriesLongestFirst)
+        {
+            if (!input.Span.StartsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
+            if (token.Any(IsAsciiLetter) && input.Length > token.Length && IsAsciiLetter(input.Span[token.Length])) continue;
+
+            levelIdx = idx;
+            rest     = input[token.Length..].Trim();
+            return true;
+        }
+
+        if (!input.IsEmpty)
+        {
+            var head = input.Span[0];
+            var ci   = Array.FindIndex(SingleColorEntries, e => e.Color == head);
+
+            levelIdx = ci >= 0 ? SingleColorEntries[ci].LevelIdx : "BAEMR".IndexOf(char.ToUpperInvariant(head));
+            if (levelIdx >= 0)
+            {
+                rest = input[1..].Trim();
                 return true;
             }
         }

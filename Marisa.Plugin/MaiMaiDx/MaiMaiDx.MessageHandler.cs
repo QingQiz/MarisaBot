@@ -725,7 +725,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     拟合难度曲线
     /// </summary>
-    [MarisaPluginDoc("查询谱面的拟合难度曲线（按玩家段位统计），缺省展示 MASTER 难度", "可选难度前缀（如`白谱`/`紫`/`MAS`，单字色名后需空格）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询谱面的拟合难度曲线，缺省 MASTER 难度", "可选难度前缀（如`白谱`）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
     [MarisaPluginCommand("curve", "曲线")]
     private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
     {
@@ -1509,24 +1509,13 @@ public partial class MaiMaiDx
         {
             var command = next.Command.Trim();
 
-            var levelName   = MaiMaiSong.LevelNameAll.Concat(MaiMaiSong.LevelNameZh).ToList();
-            var level       = levelName.FirstOrDefault(n => command.StartsWith(n, StringComparison.OrdinalIgnoreCase));
-            var levelPrefix = level ?? "";
-            if (level != null) goto RightLabel;
-
-            level = levelName.FirstOrDefault(n =>
-                command.StartsWith(n[0].ToString(), StringComparison.OrdinalIgnoreCase));
-            if (level != null)
+            if (!PlateData.TryStripDifficultyPrefixLoose(command, out var levelIdx, out var rest))
             {
-                levelPrefix = command.Span[0].ToString();
-                goto RightLabel;
+                next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、缩写、颜色或全名首字母");
+                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-
-            RightLabel:
-            var parseSuccess = double.TryParse(command[levelPrefix.Length..].Span, out var achievement);
+            var parseSuccess = double.TryParse(rest.Span, out var achievement);
 
             if (!parseSuccess)
             {
@@ -1540,7 +1529,6 @@ public partial class MaiMaiDx
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var levelIdx = levelName.IndexOf(level) % MaiMaiSong.LevelNameAll.Count;
             if (levelIdx >= song.Charts.Count)
             {
                 next.Reply("该谱面没有这个难度，会话已关闭");

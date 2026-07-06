@@ -1303,4 +1303,28 @@ public class MaiMaiDxPlateDataTest
         Assert.That(ok, Is.False);
         Assert.That(remaining.ToString(), Is.EqualTo(input));
     }
+
+    // 宽松变体（容错率对话等无歌名混杂的上下文）：单字免空格、接受首字母、剩余可为空。
+    [TestCase("紫100.5",        3, "100.5")]
+    [TestCase("m100",           3, "100")]
+    [TestCase("r99.5",          4, "99.5")]
+    [TestCase("MAS100",         3, "100")]
+    [TestCase("Re:Master 100",  4, "100")]
+    [TestCase("绿谱100",        0, "100")]
+    [TestCase("master",         3, "")]     // 剩余为空由达成率解析处理
+    public void LooseDifficultyPrefixStrips(string input, int idx, string rest)
+    {
+        var ok = PlateData.TryStripDifficultyPrefixLoose(input.AsMemory(), out var levelIdx, out var remaining);
+        Assert.That(ok, Is.True);
+        Assert.That(levelIdx, Is.EqualTo(idx));
+        Assert.That(remaining.ToString(), Is.EqualTo(rest));
+    }
+
+    [TestCase("100.5")]
+    [TestCase("x100")]
+    [TestCase("")]
+    public void LooseDifficultyPrefixRejectsNonDifficulty(string input)
+    {
+        Assert.That(PlateData.TryStripDifficultyPrefixLoose(input.AsMemory(), out _, out _), Is.False);
+    }
 }
