@@ -165,15 +165,18 @@ function Y(v: number) {
     return MT + (1 - (v - lo) / (hi - lo)) * (svgH - MT - MB)
 }
 
-// Catmull-Rom 平滑（曲线穿过全部数据点，仅显示层）
+// Catmull-Rom 平滑（曲线穿过全部数据点，仅显示层）。控制点 y 钳制在数据极值包络内：
+// 样条在极值附近会过冲、戳出 MAX/MIN 参考线（贝塞尔曲线不出控制点凸包，钳完即不越界）
 const curvePath = computed(() => {
     const pts = chart.value.curve.map(p => ({x: X(p[0]), y: Y(p[1])}))
     if (pts.length < 3) return 'M' + pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')
+    const yTop = Math.min(...pts.map(p => p.y)), yBot = Math.max(...pts.map(p => p.y))
+    const cy = (v: number) => Math.min(Math.max(v, yTop), yBot)
     let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
     for (let i = 0; i < pts.length - 1; i++) {
         const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)]
-        d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
-           + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+        d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${cy(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+           + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${cy(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
            + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
     }
     return d
