@@ -28,7 +28,6 @@
 
             <!-- ── section tag ── -->
             <div class="flex items-center gap-4 mt-8 mb-5">
-                <span class="section-tag">可解锁称号</span>
                 <span class="font-rodin text-[18px] tracking-[0.28em] text-white/70 whitespace-nowrap">TITLES</span>
                 <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
                 <span class="tt-stat tabular-nums">{{ achievedCount }} / {{ songTitles.length }} 已达成</span>
@@ -177,22 +176,27 @@ watch(song, async () => {
 .artist-line { flex: 1; min-width: 0; font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-size: 19px; font-weight: bold; color: rgba(255,255,255,0.8); margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .player-inline { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; }
 .player-label { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); }
-.section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; background: #c9971c; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .tt-stat { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.6); white-space: nowrap; }
 
 /* ── 称号列表 ── */
 .tt-list { display: flex; flex-direction: column; gap: 8px; }
-.tt-row { display: flex; align-items: center; gap: 16px; height: 44px; border-radius: 10px; padding: 0 16px 0 10px; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
+/* 左侧不留内缩进，底板左缘与上方 TITLES 分隔行对齐（朋友 review 诉求） */
+.tt-row { display: flex; align-items: center; gap: 16px; min-height: 44px; border-radius: 10px; padding: 7px 16px 7px 0; background: rgba(0,0,0,0.30); border: 1px solid rgba(255,255,255,0.08); }
 /* 游戏内称号底板（UI_CMN_Shougou_* 276×36）：底层整图拉伸铺满（素材中段横向均匀，拉伸无损、
-   只有端帽会变形），再用 ::before/::after 把两端各 14px 盖上按原比例缩放的端帽（素材实测端帽 16px，
-   等比缩到高 32 后 ≈14px）。覆盖式没有分区拼缝，长称号圆角也不变形。 */
-.tt-plate { position: relative; flex: 0 0 auto; display: inline-block; min-width: 200px; max-width: 400px; height: 32px; line-height: 32px; padding: 0 22px; text-align: center; background-size: 100% 100%; font-family: 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; color: #3b3b3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tt-plate::before, .tt-plate::after { content: ''; position: absolute; top: 0; bottom: 0; width: 14px; background-image: inherit; background-size: auto 100%; background-repeat: no-repeat; }
+   只有端帽会变形），再用 ::before/::after 盖上按原比例缩放的端帽（素材实测端帽 16px，等比缩到
+   高 32 后 ≈14px）。覆盖宽度取 24px ≥ 底层帽被拉到最宽时的 16/276×max-width ≈ 23.2px，保证长称号
+   下拉变形的帽尾不外露；超出真实端帽的部分显示的是等比图的均匀中段，与底层无缝。端帽 z-index
+   垫在文字之下，避免盖住贴边的文字。 */
+/* line-height 27px（非 32）：雅黑字形在行盒内天然偏下 + 底板亮面因下缘厚唇偏上，实测文字比
+   亮面中线低 2.5px，缩小行高把单行文字上提 (32-27)/2=2.5px 后与亮面竖直居中。 */
+.tt-plate { position: relative; z-index: 0; flex: 0 0 auto; display: inline-block; min-width: 200px; max-width: 400px; height: 32px; line-height: 27px; padding: 0 22px; text-align: center; background-size: 100% 100%; font-family: 'Microsoft YaHei', sans-serif; font-weight: bold; font-size: 14px; color: #3b3b3b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-plate::before, .tt-plate::after { content: ''; position: absolute; z-index: -1; top: 0; bottom: 0; width: 24px; background-image: inherit; background-size: auto 100%; background-repeat: no-repeat; }
 .tt-plate::before { left: 0; background-position: left center; }
 .tt-plate::after { right: 0; background-position: right center; }
-.tt-cond { flex: 1 1 auto; min-width: 0; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 超长条件（如歌曲组展开列全部曲名）完整换行展示，不省略 */
+.tt-cond { flex: 1 1 auto; min-width: 0; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; line-height: 1.4; color: rgba(255,255,255,0.75); overflow-wrap: break-word; }
 .tt-state { flex: 0 0 auto; font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 14px; letter-spacing: 0.08em; }
 .tt-ok { color: #ffd700; }
 .tt-no { color: rgba(255,255,255,0.38); }

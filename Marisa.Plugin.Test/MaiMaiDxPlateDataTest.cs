@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -1154,14 +1155,84 @@ public class MaiMaiDxPlateDataTest
         Assert.That(((PlateData.Selector.Charter)q.Selectors.Single()).Name, Is.EqualTo("群青リコリス"));
     }
 
-    [Test]
-    public void CharterAlterEgoMapResolvesShisui()
+    // ──────────────────────────────────────────────────────────────────────
+    // 谱师身份并集（CharterIdentityMap + MatchCharter）：精确输入某身份名时按人级并集匹配，
+    // 使真名查询与别名查询同集。解析层不感知（selector 类型不变）。
+    // ──────────────────────────────────────────────────────────────────────
+
+    // 同一人的不同身份互相带出（含合作署名）；大小写不敏感。
+    [TestCase("The ALiEN",  "隅田川星人",     true)]
+    [TestCase("The ALiEN",  "隅田川華火大会", true)]
+    [TestCase("the alien",  "隅田川星人",     true)]
+    [TestCase("隅田川星人", "The ALiEN",      true)]
+    [TestCase("隅田川星人", "The ALiEN vs. Phoenix", true)]
+    [TestCase("翠楼屋",     "翡翠マナ",       true)]
+    [TestCase("翡翠マナ",   "翠楼屋",         true)]
+    [TestCase("Phoenix",    "小鳥遊さん",     true)]
+    [TestCase("BELiZHEL",   "Luxizhel",       true)]
+    [TestCase("ロシェ＠ペンギン", "ロシェ@ペンギン", true)]           // 全角＠身份（实际署名写法），与半角同人
+    [TestCase("チャン@DP皆伝", "舞舞10年ズ ～ファイナル～", true)]   // 短子串「舞舞10年ズ」覆盖两种合作署名
+    [TestCase("はっぴー",       "舞舞10年ズ ～ファイナル～", true)]
+    // 合作名义不是身份：精确打合作名义仍只查该署名。
+    [TestCase("七味星人",   "隅田川星人",     false)]
+    [TestCase("七味星人",   "超七味星人",     true)]  // substring 命中，非身份并集
+    // 非身份输入退化为单一 substring。
+    [TestCase("Jack",       "Jack & Licorice Gunjyo", true)]
+    [TestCase("Jack",       "隅田川星人",     false)]
+    public void MatchCharterUnifiesIdentitiesOfSamePerson(string input, string signed, bool expected)
     {
-        // 打本名「翠楼屋」时 handler 会并查马甲「翡翠マナ」（匹配层）；解析层仍是普通 Charter。
-        Assert.That(PlateData.CharterAlterEgos("翠楼屋"), Has.Member("翡翠マナ"));
-        Assert.That(PlateData.CharterAlterEgos("Jack"), Is.Empty);
+        Assert.That(PlateData.MatchCharter(signed, input), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void MatchCharterAppliesExcludeToIdentityQueries()
+    {
+        // 「サファ太 respects for 小鳥遊さん」是 サファ太 的致敬独谱：身份查询（小鳥遊/Phoenix）要剔除，
+        // 但按 サファ太 身份查询要命中。
+        const string respects = "サファ太 respects for 小鳥遊さん";
+        Assert.That(PlateData.MatchCharter(respects, "小鳥遊"),  Is.False);
+        Assert.That(PlateData.MatchCharter(respects, "Phoenix"), Is.False);
+        Assert.That(PlateData.MatchCharter(respects, "サファ太"), Is.True);
+    }
+
+    [Test]
+    public void CharterIdentityMapIsConsistent()
+    {
+        // 每个身份名必须与其名义组相关（身份是某名义的 substring 或反之），防止身份挂错组。
+        foreach (var (identity, (names, _)) in PlateData.CharterIdentityMap)
+        {
+            Assert.That(names.Any(n =>
+                    n.Contains(identity, StringComparison.OrdinalIgnoreCase)
+                    || identity.Contains(n, StringComparison.OrdinalIgnoreCase)),
+                Is.True, $"身份「{identity}」与其名义组无关联");
+        }
+    }
+
+    [Test]
+    public void IdentityQueryKeepsCharterSelectorType()
+    {
+        // 身份并集只在匹配层生效，解析层契约不变：真名输入仍是普通 Charter selector。
         var q = MustParse("翠楼屋将完成表");
         Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Charter>());
+    }
+
+    // 别名/定数 token 嵌在真名里时不参与竞争：与等级组合的真名查询不被切开（否则静默丢同人署名）。
+    [TestCase("隅田川星人14完成表", "隅田川星人")] // 「隅田川星人」内嵌别名 key「隅田川」
+    [TestCase("7.3Hz 14完成表",     "7.3Hz")]     // 「7.3Hz」内嵌别名/定数同形 token「7.3」
+    public void IdentityNameEmbeddingAliasKeySurvivesComboQuery(string raw, string charter)
+    {
+        var q = MustParse(raw);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo(charter));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14"));
+    }
+
+    [Test]
+    public void AliasComboWithLevelStillParsesAsAlias()
+    {
+        // 别名不嵌在任何真名里时，组合查询照常走别名（回归）。
+        var q = MustParse("川哥14完成表");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.CharterAlias>().Single().Input, Is.EqualTo("川哥"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14"));
     }
 
     // ---- 游戏内成就姓名框贴图映射 ----
