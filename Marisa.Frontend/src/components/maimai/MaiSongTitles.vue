@@ -1,9 +1,7 @@
 <template>
     <MaiCardShell v-if="song" class="mai-titles" :bg-key="topKey" :accent="themeMain">
             <!-- ── top meta bar（比 info 卡精简：只留类型徽章 + ID） ── -->
-            <MaiSongMetaBar :from="song.From" :type="song.Type">
-                <div class="id-pill tabular-nums">ID {{ song.Id }}</div>
-            </MaiSongMetaBar>
+            <MaiSongMetaBar :from="song.From" :type="song.Type" :song-id="song.Id"/>
 
             <!-- ── cover + 标题 ── -->
             <div class="flex items-end gap-5 mt-7">
@@ -119,7 +117,6 @@ const themeMain = computed(() => themeMainOf(topIdx.value, isUtage.value))
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-.id-pill { font-family: 'Torus', sans-serif; font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .tt-stat { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.6); white-space: nowrap; }

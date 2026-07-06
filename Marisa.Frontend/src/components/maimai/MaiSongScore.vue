@@ -1,19 +1,8 @@
 <template>
     <MaiCardShell v-if="song" class="mai-score" :bg-key="topKey" :accent="themeMain">
             <!-- ── top meta bar ── -->
-            <MaiSongMetaBar :from="song.From" :type="song.Type">
-                <span v-if="song.IsNew" class="new-chip">NEW</span>
-                <div class="bpm-pill">
-                    <svg class="w-[18px] h-[18px] translate-y-[1px]" viewBox="0 0 24 24" fill="none">
-                        <path d="M9.4 3h5.2c.5 0 .9.33 1 .8l3.1 14.6c.13.62-.34 1.2-1 1.2H6.3c-.66 0-1.13-.58-1-1.2L8.4 3.8c.1-.47.5-.8 1-.8z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
-                        <path d="M12 15.2 17.6 5.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-                        <circle cx="12" cy="15.6" r="1.5" fill="currentColor"/>
-                    </svg>
-                    <span class="bpm-num tabular-nums">{{ song.Bpm }}</span>
-                </div>
-                <span class="meta-chip">{{ genreDisplay }}</span>
-                <div class="id-pill tabular-nums">ID {{ song.Id }}</div>
-            </MaiSongMetaBar>
+            <MaiSongMetaBar :from="song.From" :type="song.Type" :song-id="song.Id"
+                            :bpm="song.Bpm" :genre="song.Genre" :is-new="song.IsNew"/>
 
             <!-- ── cover + 标题（标题占满封面右侧整宽，曲师 + 玩家名同行） ── -->
             <div class="flex items-end gap-5 mt-7">
@@ -76,7 +65,7 @@ import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import {dxScoreStar} from '@/components/maimai/utils/ordinal'
-import {DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf, bgKeyOf} from '@/components/maimai/utils/song_card'
+import {DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, bgKeyOf} from '@/components/maimai/utils/song_card'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
 import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
@@ -124,8 +113,6 @@ const MARK_BASE = 29, RANK_BASE = 32
 function markStyle(_name: string | null) { return {height: MARK_BASE + 'px'} }
 function rankStyle(_c: ChartScore) { return {height: RANK_BASE + 'px'} }
 
-const genreDisplay = computed(() => genreDisplayOf(song.value?.Genre))
-
 // 背景按最高难度上色（有 Re:MASTER 取白谱档、宴会场取宴），跟 mai song 一致
 const topIdx = computed(() => Math.max(0, charts.value.length - 1))
 const topKey = computed(() => bgKeyOf(topIdx.value, isUtage.value))
@@ -145,14 +132,6 @@ function rowStyle(i: number) {
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-/* top meta pills */
-.id-pill, .bpm-pill { font-family: 'Torus', sans-serif; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
-.id-pill { font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; }
-.bpm-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 10px; }
-.bpm-num { font-weight: bold; font-size: 16px; }
-.meta-chip { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: bold; font-size: 14px; color: var(--chip-ink); padding: 4px 12px; border-radius: 9999px; background: var(--chip-bg); box-shadow: var(--chip-ring); white-space: nowrap; }
-.new-chip { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; padding: 4px 11px 3px 13px; border-radius: 9999px; background: var(--new-chip-bg); box-shadow: var(--new-chip-shadow); }
-
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 

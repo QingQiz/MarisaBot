@@ -1,14 +1,8 @@
 <template>
     <MaiCardShell v-if="song && picked" class="mai-curve" :bg-key="bgKey" :accent="accent" pad-bottom="pb-8">
             <!-- ── top meta bar ── -->
-            <MaiSongMetaBar :from="song.ver" :type="song.type">
-                <div class="bpm-pill">
-                    <span class="bpm-label">BPM</span>
-                    <span class="bpm-num tabular-nums">{{ song.bpm }}</span>
-                </div>
-                <span class="meta-chip">{{ genreDisplay }}</span>
-                <div class="id-pill tabular-nums">ID {{ songId }}</div>
-            </MaiSongMetaBar>
+            <MaiSongMetaBar :from="song.ver" :type="song.type" :song-id="songId"
+                            :bpm="song.bpm" :genre="song.genre"/>
 
             <!-- ── cover + title ── -->
             <div class="flex items-end gap-5 mt-7">
@@ -53,6 +47,13 @@
                             <line :x1="t.x" :y1="MT" :x2="t.x" :y2="svgH - MB" stroke="#fff" stroke-opacity="0.05"/>
                             <text :x="t.x" :y="svgH - MB + 22" text-anchor="middle" class="tick">{{ t.v }}</text>
                         </g>
+                        <g v-for="mm in minMaxMarks" :key="mm.lbl">
+                            <line :x1="ML" :y1="Y(mm.v)" :x2="SVG_W - MR" :y2="Y(mm.v)"
+                                  :stroke="accent" stroke-opacity="0.35" stroke-dasharray="2 5" stroke-width="1.2"/>
+                            <text :x="SVG_W - MR - 16" :y="Y(mm.v) + mm.dy" text-anchor="end" class="mm-label">
+                                {{ mm.lbl }} {{ mm.v.toFixed(isDsKind ? 2 : 1) }}
+                            </text>
+                        </g>
                         <line :x1="ML" :y1="refY" :x2="SVG_W - MR" :y2="refY"
                               stroke="#fff" :stroke-opacity="isDsKind ? 0.45 : 0.35"
                               stroke-dasharray="7 6" stroke-width="1.5"/>
@@ -91,7 +92,7 @@
 import {computed, ref} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
-import {DIFF_NAMES, DIFF_COLORS, genreDisplayOf, bgKeyOf} from '@/components/maimai/utils/song_card'
+import {DIFF_NAMES, DIFF_COLORS, bgKeyOf} from '@/components/maimai/utils/song_card'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
 import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
@@ -188,6 +189,15 @@ const endPt = computed(() => {
     return {x: X(p[0]), y: Y(p[1])}
 })
 
+// 最大/最小参考线（QingQiz 建议）：标签分别外扩到线上方/下方，曲线扁平时也不互撞
+const minMaxMarks = computed(() => {
+    const ys = chart.value.curve.map(p => p[1])
+    return [
+        {lbl: 'MAX', v: Math.max(...ys), dy: -6},
+        {lbl: 'MIN', v: Math.min(...ys), dy: 14},
+    ]
+})
+
 const yTicks = computed(() => {
     if (!isDsKind.value) return [0, 25, 50, 75, 100].map(v => ({v, y: Y(v), label: String(v)}))
     const [lo, hi] = yDomain.value
@@ -221,19 +231,12 @@ const yLabelStart = computed(() => {
     return mid - (yAxisLabel.value.length - 1) * 17 / 2 + 5
 })
 
-const genreDisplay = computed(() => genreDisplayOf(song.value?.genre))
 const bgKey = computed(() => bgKeyOf(chart.value?.li ?? 3, false))
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-.id-pill, .bpm-pill { font-family: 'Torus', sans-serif; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
-.id-pill { font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; }
-.bpm-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; }
-.bpm-label { font-weight: bold; font-size: 12px; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); }
-.bpm-num { font-weight: bold; font-size: 16px; }
-.meta-chip { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: bold; font-size: 14px; color: var(--chip-ink); padding: 4px 12px; border-radius: 9999px; background: var(--chip-bg); box-shadow: var(--chip-ring); white-space: nowrap; }
 
 .diff-chip { font-size: 17px; font-weight: 900; padding: 3px 14px; border: 2px solid; border-radius: 9999px; background: rgba(8,8,16,0.4); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
@@ -250,6 +253,7 @@ const bgKey = computed(() => bgKeyOf(chart.value?.li ?? 3, false))
 .axis { fill: #fff; fill-opacity: 0.4; font-size: 12px; font-family: 'Microsoft YaHei',sans-serif; }
 .axis-en { fill: #fff; fill-opacity: 0.45; font-size: 13px; font-weight: bold; font-family: 'Torus',sans-serif; letter-spacing: 0.08em; }
 .ref { fill: #fff; fill-opacity: 0.6; font-size: 12.5px; font-family: 'Microsoft YaHei',sans-serif; }
+.mm-label { fill: #fff; fill-opacity: 0.55; font-size: 11px; font-weight: bold; font-family: 'Torus',sans-serif; letter-spacing: 0.05em; }
 .ref-num { fill: #fff; fill-opacity: 0.6; font-size: 13px; font-weight: bold; font-family: 'Torus',sans-serif; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 </style>
