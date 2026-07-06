@@ -1,29 +1,14 @@
 <template>
-    <div v-if="song" class="mai-titles mai-card relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
-        <div class="absolute inset-0 pointer-events-none stripe-layer"></div>
-        <div class="absolute inset-0 pointer-events-none" :style="glowStyle"></div>
-
-        <div class="relative px-12 pt-9 pb-10">
+    <MaiCardShell v-if="song" class="mai-titles" :bg-key="topKey" :accent="themeMain">
             <!-- ── top meta bar（比 info 卡精简：只留类型徽章 + ID） ── -->
-            <header class="flex items-center gap-2 flex-nowrap whitespace-nowrap">
-                <img :src="versionLogo" :style="logoStyle" class="h-[50px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
-                <div class="flex-1"></div>
-                <img :src="typeBadge" class="h-9 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
+            <MaiSongMetaBar :from="song.From" :type="song.Type">
                 <div class="id-pill tabular-nums">ID {{ song.Id }}</div>
-            </header>
+            </MaiSongMetaBar>
 
             <!-- ── cover + 标题 ── -->
             <div class="flex items-end gap-5 mt-7">
-                <div class="cover-frame shrink-0">
-                    <img :src="coverSrc" @error="onCoverErr" alt="" class="block w-[112px] h-[112px] object-cover rounded-[14px]">
-                </div>
-                <div class="flex-1 min-w-0 pb-1">
-                    <h1 ref="titleEl" class="mai-title" :style="{ fontSize: titleSize + 'px' }">{{ song.Title }}</h1>
-                    <div class="flex items-baseline justify-between gap-4 mt-[10px]">
-                        <div class="artist-line min-w-0">{{ song.Artist }}</div>
-                        <div v-if="player.Nickname" class="player-inline shrink-0"><span class="player-label">PLAYER</span> {{ player.Nickname }}</div>
-                    </div>
-                </div>
+                <MaiCover :song-id="song.Id" :size="112" :frame-radius="19" :img-radius="14"/>
+                <MaiSongHeading :title="song.Title" :artist="song.Artist" :max="72" :min="26" :player="player.Nickname"/>
             </div>
 
             <!-- ── section tag ── -->
@@ -47,20 +32,20 @@
             <footer class="mt-7">
                 <span class="footer-text">MARISA BOT · SONG TITLES</span>
             </footer>
-        </div>
-    </div>
+    </MaiCardShell>
 </template>
 
 <script setup lang="ts">
-import {computed, nextTick, ref, watch} from 'vue'
+import {computed, ref} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import {achievementOrdinal, dxScoreStar, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
-import {
-    themeMainOf, VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc, typeBadgeSrc,
-    coverSrcOf, COVER_FALLBACK, bgKeyOf, cardBackground, isUtageId,
-} from '@/components/maimai/utils/song_card'
+import {themeMainOf, bgKeyOf, isUtageId} from '@/components/maimai/utils/song_card'
+import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
+import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
+import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
+import MaiCover from '@/components/maimai/MaiCover.vue'
 
 interface ChartScore {
     LevelIndex: number; Level: string; Constant: number; Charter: string; MaxDx: number
@@ -125,54 +110,16 @@ function titleAchieved(t: SongTitle): boolean | null {
 const PIC = '/assets/maimai/pic'
 function titlePlate(t: SongTitle) { return {backgroundImage: `url(${PIC}/shougou/UI_CMN_Shougou_${t.rare}.png)`} }
 
-const typeBadge = computed(() => typeBadgeSrc(song.value?.Type))
-const coverSrc = ref('')
-watch(song, s => { if (s) coverSrc.value = coverSrcOf(s.Id) }, {immediate: true})
-function onCoverErr() { coverSrc.value = COVER_FALLBACK }
-
-const versionLogo = computed(() => versionLogoSrc(song.value?.From))
-const logoStyle = computed(() => {
-    const code = VERSION_CODE[song.value?.From ?? '']
-    const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (60 / 160) : 0
-    return {marginLeft: `${(-trim).toFixed(1)}px`}
-})
-
 const isUtage = computed(() => isUtageId(song.value?.Id ?? 0))
 const topIdx = computed(() => Math.max(0, charts.value.length - 1))
 const topKey = computed(() => bgKeyOf(topIdx.value, isUtage.value))
 const themeMain = computed(() => themeMainOf(topIdx.value, isUtage.value))
-const rootStyle = computed(() => cardBackground(topKey.value))
-const glowStyle = computed(() => ({
-    background: `radial-gradient(720px 520px at 18% 8%, ${themeMain.value}2e 0%, transparent 70%),
-                 radial-gradient(560px 480px at 92% 4%, ${themeMain.value}1c 0%, transparent 70%)`,
-}))
-
-const TITLE_MAX = 72, TITLE_MIN = 26
-const titleEl = ref<HTMLElement | null>(null)
-const titleSize = ref(TITLE_MAX)
-watch(song, async () => {
-    if (!song.value) return
-    titleSize.value = TITLE_MAX
-    await nextTick()
-    try { await (document as any).fonts.ready } catch { /* ignore */ }
-    const el = titleEl.value
-    for (let p = 0; el && p < 5 && el.scrollWidth > el.clientWidth; p++) {
-        titleSize.value = Math.max(TITLE_MIN, Math.floor(titleSize.value * el.clientWidth / el.scrollWidth) - 1)
-        await nextTick()
-    }
-}, {flush: 'post'})
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-.stripe-layer { background: repeating-linear-gradient(-38deg, rgba(255,255,255,0.025) 0 3px, transparent 3px 26px); }
-
 .id-pill { font-family: 'Torus', sans-serif; font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
-.cover-frame { padding: 5px; border-radius: 19px; background: rgba(255,255,255,0.78); box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 8px 20px -12px rgba(0,0,0,0.5); }
-.artist-line { flex: 1; min-width: 0; font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-size: 19px; font-weight: bold; color: rgba(255,255,255,0.8); margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-inline { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; }
-.player-label { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .tt-stat { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.6); white-space: nowrap; }

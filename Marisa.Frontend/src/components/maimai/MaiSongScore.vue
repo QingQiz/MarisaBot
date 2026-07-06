@@ -1,14 +1,7 @@
 <template>
-    <div v-if="song" class="mai-score mai-card relative w-[840px] overflow-hidden antialiased" :style="rootStyle">
-        <div class="absolute inset-0 pointer-events-none stripe-layer"></div>
-        <div class="absolute inset-0 pointer-events-none" :style="glowStyle"></div>
-
-        <div class="relative px-12 pt-9 pb-10">
+    <MaiCardShell v-if="song" class="mai-score" :bg-key="topKey" :accent="themeMain">
             <!-- ── top meta bar ── -->
-            <header class="flex items-center gap-2 flex-nowrap whitespace-nowrap">
-                <img :src="versionLogo" :style="logoStyle" class="h-[50px] shrink-0 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
-                <div class="flex-1"></div>
-                <img :src="typeBadge" class="h-9 drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
+            <MaiSongMetaBar :from="song.From" :type="song.Type">
                 <span v-if="song.IsNew" class="new-chip">NEW</span>
                 <div class="bpm-pill">
                     <svg class="w-[18px] h-[18px] translate-y-[1px]" viewBox="0 0 24 24" fill="none">
@@ -20,20 +13,13 @@
                 </div>
                 <span class="meta-chip">{{ genreDisplay }}</span>
                 <div class="id-pill tabular-nums">ID {{ song.Id }}</div>
-            </header>
+            </MaiSongMetaBar>
 
             <!-- ── cover + 标题（标题占满封面右侧整宽，曲师 + 玩家名同行） ── -->
             <div class="flex items-end gap-5 mt-7">
-                <div class="cover-frame shrink-0">
-                    <img :src="coverSrc" @error="onCoverErr" alt="" class="block w-[132px] h-[132px] object-cover rounded-[16px]">
-                </div>
-                <div class="flex-1 min-w-0 pb-1">
-                    <h1 ref="titleEl" class="mai-title" :style="{ fontSize: titleSize + 'px' }">{{ song.Title }}</h1>
-                    <div class="flex items-baseline justify-between gap-4 mt-[10px]">
-                        <div class="artist-line min-w-0">{{ song.Artist }}</div>
-                        <div v-if="player.Nickname" class="player-inline shrink-0"><span class="player-label">PLAYER</span> {{ player.Nickname }}</div>
-                    </div>
-                </div>
+                <MaiCover :song-id="song.Id" :size="132" :frame-radius="22" :img-radius="16"/>
+                <MaiSongHeading :title="song.Title" :artist="song.Artist" :max="84" :min="28"
+                                :artist-size="20" :artist-top="12" :player="player.Nickname"/>
             </div>
 
             <!-- ── section tag ── -->
@@ -81,21 +67,20 @@
             <footer class="mt-7">
                 <span class="footer-text">MARISA BOT · SONG INFO</span>
             </footer>
-        </div>
-    </div>
+    </MaiCardShell>
 </template>
 
 <script setup lang="ts">
-import {computed, nextTick, ref, watch} from 'vue'
+import {computed, ref} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import {dxScoreStar} from '@/components/maimai/utils/ordinal'
-import {
-    DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf,
-    VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc, typeBadgeSrc,
-    coverSrcOf, COVER_FALLBACK, bgKeyOf, cardBackground,
-} from '@/components/maimai/utils/song_card'
+import {DIFF_NAMES, DIFF_COLORS, UTAGE, isUtageId, themeMainOf, genreDisplayOf, bgKeyOf} from '@/components/maimai/utils/song_card'
+import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
+import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
+import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
+import MaiCover from '@/components/maimai/MaiCover.vue'
 
 interface ChartScore {
     LevelIndex: number; Level: string; Constant: number; Charter: string; MaxDx: number
@@ -139,31 +124,12 @@ const MARK_BASE = 29, RANK_BASE = 32
 function markStyle(_name: string | null) { return {height: MARK_BASE + 'px'} }
 function rankStyle(_c: ChartScore) { return {height: RANK_BASE + 'px'} }
 
-const typeBadge = computed(() => typeBadgeSrc(song.value?.Type))
-
-const coverSrc = ref('')
-watch(song, s => { if (s) coverSrc.value = coverSrcOf(s.Id) }, {immediate: true})
-function onCoverErr() { coverSrc.value = COVER_FALLBACK }
-
 const genreDisplay = computed(() => genreDisplayOf(song.value?.Genre))
-
-const versionLogo = computed(() => versionLogoSrc(song.value?.From))
-// 版本 logo 视觉左对齐（60px 高 / 素材 160px）
-const logoStyle = computed(() => {
-    const code = VERSION_CODE[song.value?.From ?? '']
-    const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (60 / 160) : 0
-    return {marginLeft: `${(-trim).toFixed(1)}px`}
-})
 
 // 背景按最高难度上色（有 Re:MASTER 取白谱档、宴会场取宴），跟 mai song 一致
 const topIdx = computed(() => Math.max(0, charts.value.length - 1))
 const topKey = computed(() => bgKeyOf(topIdx.value, isUtage.value))
 const themeMain = computed(() => themeMainOf(topIdx.value, isUtage.value))
-const rootStyle = computed(() => cardBackground(topKey.value))
-const glowStyle = computed(() => ({
-    background: `radial-gradient(720px 520px at 18% 8%, ${themeMain.value}2e 0%, transparent 70%),
-                 radial-gradient(560px 480px at 92% 4%, ${themeMain.value}1c 0%, transparent 70%)`,
-}))
 
 function rowStyle(i: number) {
     const c = diffColor(i)
@@ -174,28 +140,11 @@ function rowStyle(i: number) {
     }
 }
 
-// 标题真实测宽 auto-shrink（同 MaiSong 思路，简化）
-const TITLE_MAX = 84, TITLE_MIN = 28
-const titleEl = ref<HTMLElement | null>(null)
-const titleSize = ref(TITLE_MAX)
-watch(song, async () => {
-    if (!song.value) return
-    titleSize.value = TITLE_MAX
-    await nextTick()
-    try { await (document as any).fonts.ready } catch { /* ignore */ }
-    const el = titleEl.value
-    for (let p = 0; el && p < 5 && el.scrollWidth > el.clientWidth; p++) {
-        titleSize.value = Math.max(TITLE_MIN, Math.floor(titleSize.value * el.clientWidth / el.scrollWidth) - 1)
-        await nextTick()
-    }
-}, {flush: 'post'})
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-.stripe-layer { background: repeating-linear-gradient(-38deg, rgba(255,255,255,0.025) 0 3px, transparent 3px 26px); }
-
 /* top meta pills */
 .id-pill, .bpm-pill { font-family: 'Torus', sans-serif; color: #fff; background: var(--pill-bg); border-radius: 9999px; box-shadow: var(--pill-shadow); }
 .id-pill { font-weight: bold; font-size: 16px; letter-spacing: 0.06em; padding: 3px 12px; }
@@ -203,11 +152,6 @@ watch(song, async () => {
 .bpm-num { font-weight: bold; font-size: 16px; }
 .meta-chip { font-family: 'SEGA NewRodin','LXGW WenKai',sans-serif; font-weight: bold; font-size: 14px; color: var(--chip-ink); padding: 4px 12px; border-radius: 9999px; background: var(--chip-bg); box-shadow: var(--chip-ring); white-space: nowrap; }
 .new-chip { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; padding: 4px 11px 3px 13px; border-radius: 9999px; background: var(--new-chip-bg); box-shadow: var(--new-chip-shadow); }
-
-.cover-frame { padding: 5px; border-radius: 22px; background: rgba(255,255,255,0.78); box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 8px 20px -12px rgba(0,0,0,0.5); }
-.artist-line { flex: 1; min-width: 0; font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-size: 20px; font-weight: bold; color: rgba(255,255,255,0.8); margin-top: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-inline { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); white-space: nowrap; }
-.player-label { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.18em; color: rgba(255,255,255,0.45); }
 
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
