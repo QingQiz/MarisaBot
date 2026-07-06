@@ -760,6 +760,39 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("某等级全部谱面的拟合难度排名", "`等级`（如`13+`）")]
+    [MarisaPluginSubCommand(nameof(SongDifficultyCurve))]
+    [MarisaPluginCommand("等级")]
+    private static async Task<MarisaPluginTaskState> SongDifficultyCurveRankByLevel(Message message)
+    {
+        var level = message.Command.Trim().ToString();
+        var core  = level.EndsWith('+') ? level[..^1] : level;
+
+        if (!int.TryParse(core, out var lv) || lv is < 1 or > 15)
+        {
+            message.Reply("等级应为 1-15，可带加号（如13+）");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("level", level)));
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("某定数全部谱面的拟合难度排名", "`定数`（如`14.7`）")]
+    [MarisaPluginSubCommand(nameof(SongDifficultyCurve))]
+    [MarisaPluginCommand("定数")]
+    private static async Task<MarisaPluginTaskState> SongDifficultyCurveRankByConstant(Message message)
+    {
+        if (!double.TryParse(message.Command.Trim().Span, out var ds) || ds is < 1 or > 15)
+        {
+            message.Reply("定数应为 1.0-15.0（如14.7）");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("ds", ds.ToString("0.0"))));
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     /// <summary>
     ///     单曲可解锁称号
     /// </summary>
