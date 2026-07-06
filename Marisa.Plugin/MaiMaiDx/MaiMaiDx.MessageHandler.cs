@@ -734,7 +734,8 @@ public partial class MaiMaiDx
 
         // 排名查询的英文别名（lv/base 等）不注册为子命令：命令匹配是裸前缀，会吞掉这些字母
         // 开头的歌名查询。改为验证门禁——别名后跟合法等级/定数才当排名，否则整串按歌名处理
-        foreach (var (alias, isLevel) in RankAliases)
+        (string Alias, bool IsLevel)[] rankAliases = [("level", true), ("lv", true), ("base", false), ("b", false)];
+        foreach (var (alias, isLevel) in rankAliases)
         {
             if (!command.Span.StartsWith(alias, StringComparison.OrdinalIgnoreCase)) continue;
 
@@ -777,11 +778,6 @@ public partial class MaiMaiDx
 
         return MarisaPluginTaskState.CompletedTask;
     }
-
-    /// <summary>排名查询别名。英文短词（lv/base/b）会与歌名开头撞车，只在父命令内联、
-    /// 经值合法性门禁后生效；中文词无碰撞，注册为子命令以便值非法时给出明确报错。</summary>
-    private static readonly (string Alias, bool IsLevel)[] RankAliases =
-        [("level", true), ("lv", true), ("base", false), ("b", false)];
 
     /// <summary>排名图与玩家无关、只随曲线数据变化：按（查询, 数据版本哈希）落盘缓存，
     /// 数据随前端更新后旧文件名失效（同 MaiMaiSong.GetImage 的带哈希缓存惯例）。</summary>
