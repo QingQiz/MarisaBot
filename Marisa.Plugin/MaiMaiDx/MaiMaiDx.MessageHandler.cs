@@ -761,6 +761,24 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
+    ///     段位認定曲目表
+    /// </summary>
+    [MarisaPluginDoc("查询段位认定的曲目与判定规则", "可选`版本`（缺省国服现行）+ `段位名`，如：`prism 十段`")]
+    [MarisaPluginCommand("dan", "段位表", "段位")]
+    private async Task<MarisaPluginTaskState> DanCourse(Message message)
+    {
+        if (!DanData.TryParse(message.Command.ToString(), out var version, out var dani, out var error))
+        {
+            message.Reply(error!);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDanCourse(version, dani)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     单曲可解锁称号
     /// </summary>
     [MarisaPluginDoc("查询某首歌可解锁的游戏内称号", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
