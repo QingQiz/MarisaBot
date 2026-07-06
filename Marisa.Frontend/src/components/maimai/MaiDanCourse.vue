@@ -4,7 +4,6 @@
         <MaiSongMetaBar :from="verMeta.from">
             <span v-if="isFuture" class="future-chip" :style="{ color: accent, borderColor: accent }">{{ FUTURE_LABEL }}</span>
             <img :src="modeBadge" :alt="modeName" class="h-[52px] drop-shadow-[0_3px_8px_rgba(0,0,0,0.4)]">
-            <div class="id-pill tabular-nums">Ver {{ ver }}</div>
         </MaiSongMetaBar>
 
         <!-- ── dan heading（游戏内段位艺术字，已裁 alpha bbox） ── -->
