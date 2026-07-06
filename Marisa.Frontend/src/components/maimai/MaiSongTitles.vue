@@ -1,9 +1,7 @@
 <template>
     <MaiCardShell v-if="song" class="mai-titles" :bg-key="topKey" :accent="themeMain">
             <!-- ── top meta bar（比 info 卡精简：只留类型徽章 + ID） ── -->
-            <MaiSongMetaBar :from="song.From" :type="song.Type">
-                <div class="id-pill tabular-nums">ID {{ song.Id }}</div>
-            </MaiSongMetaBar>
+            <MaiSongMetaBar :from="song.From" :type="song.Type" :song-id="song.Id"/>
 
             <!-- ── cover + 标题 ── -->
             <div class="flex items-end gap-5 mt-7">
