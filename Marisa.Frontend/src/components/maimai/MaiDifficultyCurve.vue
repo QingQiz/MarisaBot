@@ -28,10 +28,9 @@
                 </div>
             </div>
 
-            <!-- ── section tag + difficulty chip ── -->
+            <!-- ── section divider + difficulty chip ── -->
             <div class="flex items-center gap-4 mt-7 mb-4">
-                <span class="section-tag" :style="{ background: diffColor }">难度曲线</span>
-                <span class="font-rodin text-[18px] tracking-[0.28em] text-white/70 whitespace-nowrap">DIFFICULTY CURVE</span>
+                <span class="font-rodin text-[20px] tracking-[0.28em] text-white/70 whitespace-nowrap">DIFFICULTY CURVE</span>
                 <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
                 <span class="diff-chip font-rodin" :style="{ color: diffColor, borderColor: diffColor }">
                     {{ diffName }} {{ chart.ds.toFixed(1) }}
@@ -69,7 +68,7 @@
                         <line :x1="ML" :y1="refY" :x2="SVG_W - MR" :y2="refY"
                               stroke="#fff" :stroke-opacity="isDsKind ? 0.45 : 0.35"
                               stroke-dasharray="7 6" stroke-width="1.5"/>
-                        <text :x="ML + 8" :y="refY - 7">
+                        <text :x="ML + 8" :y="refLabelY">
                             <tspan class="ref">{{ isDsKind ? '官方定数 ' : refLabel }}</tspan>
                             <tspan v-if="isDsKind" class="ref-num">{{ chart.ds.toFixed(1) }}</tspan>
                         </text>
@@ -77,7 +76,7 @@
                               stroke-linejoin="round" stroke-linecap="round"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="4.5" :fill="accent"/>
                         <circle :cx="endPt.x" :cy="endPt.y" r="8" :fill="accent" opacity="0.25"/>
-                        <text class="axis" text-anchor="middle">
+                        <text v-if="!isDsKind" class="axis" text-anchor="middle">
                             <tspan v-for="(ch, i) in yAxisLabel" :key="i" x="13" :y="yLabelStart + i * 17">{{ ch }}</tspan>
                         </text>
                         <text :x="(ML + SVG_W - MR) / 2" :y="svgH - 2" text-anchor="middle" class="axis-en">DX Rating</text>
@@ -215,8 +214,20 @@ const xTicks = computed(() => {
     return out
 })
 const refY = computed(() => isDsKind.value ? Y(chart.value.ds) : Y(50))
+// 参考线标签放线上还是线下：取标签 x 跨度内曲线离两个候选位置更远的一侧（End Time 这类
+// 曲线贴着参考线走的谱，固定放线上会被整段盖住）
+const refLabelY = computed(() => {
+    const above = refY.value - 7, below = refY.value + 16
+    const pts = chart.value.curve
+        .map(p => ({x: X(p[0]), y: Y(p[1])}))
+        .filter(p => p.x <= ML + 190)
+    if (!pts.length) return above
+    const clearance = (baseline: number) => Math.min(...pts.map(p => Math.abs(p.y - (baseline - 5))))
+    return clearance(above) >= clearance(below) ? above : below
+})
 const refLabel = computed(() => isDsKind.value ? `官方定数 ${chart.value.ds.toFixed(1)}` : '同等级中位')
-const yAxisLabel = computed(() => isDsKind.value ? '拟合定数' : '同等级难度百分位')
+// 百分位模式坐标轴含义不自明，保留竖排说明；拟合定数模式删（QingQiz 反馈）
+const yAxisLabel = computed(() => '同等级难度百分位')
 // y 轴标签竖排、绘图区垂直居中
 const yLabelStart = computed(() => {
     const mid = (MT + svgH - MB) / 2
@@ -273,7 +284,6 @@ watch(song, async () => {
 .cover-frame { padding: 5px; border-radius: 20px; background: rgba(255,255,255,0.78); box-shadow: 0 0 0 1px rgba(255,255,255,0.8), 0 8px 20px -12px rgba(0,0,0,0.5); }
 .artist-line { font-family: 'Torus','SEGA Maru Gothic','LXGW WenKai',sans-serif; font-size: 19px; font-weight: bold; color: rgba(255,255,255,0.8); margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
 .diff-chip { font-size: 17px; font-weight: 900; padding: 3px 14px; border: 2px solid; border-radius: 9999px; background: rgba(8,8,16,0.4); white-space: nowrap; }
 .footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 .foot-note { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
