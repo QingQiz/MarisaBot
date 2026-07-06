@@ -621,7 +621,7 @@ public static class PlateData
         ["BASIC"]     = 0, ["BSC"] = 0, ["绿谱"] = 0,
         ["ADVANCED"]  = 1, ["ADV"] = 1, ["黄谱"] = 1,
         ["EXPERT"]    = 2, ["EXP"] = 2, ["红谱"] = 2,
-        ["MASTER"]    = 3, ["MST"] = 3, ["紫谱"] = 3,
+        ["MASTER"]    = 3, ["MST"] = 3, ["MAS"] = 3, ["紫谱"] = 3,
         ["Re:MASTER"] = 4, ["ReMASTER"] = 4, ["ReMAS"] = 4, ["白谱"] = 4,
     };
 

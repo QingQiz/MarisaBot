@@ -1275,6 +1275,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("紫谱潘",            3, "潘")]      // 双字/全名/缩写空格可选
     [TestCase("红谱11663",         2, "11663")]   // 歌曲 id 同样可接
     [TestCase("mst 潘",            3, "潘")]      // 大小写不敏感
+    [TestCase("MAS潘",             3, "潘")]      // 社区惯用缩写；最长优先保证不抢 MASTER
     [TestCase("Re:MASTER 系ぎて",  4, "系ぎて")]
     [TestCase("remas 系ぎて",      4, "系ぎて")]  // 免冒号缩写
     [TestCase("ReMASTER系ぎて",    4, "系ぎて")]
