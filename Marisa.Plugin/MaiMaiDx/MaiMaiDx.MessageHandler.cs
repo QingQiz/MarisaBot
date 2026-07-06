@@ -709,7 +709,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     单曲各难度成绩
     /// </summary>
-    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("info", "信息")]
     private async Task<MarisaPluginTaskState> SongInfo(Message message)
     {
@@ -725,7 +725,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     拟合难度曲线
     /// </summary>
-    [MarisaPluginDoc("查询谱面的拟合难度曲线", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询谱面的拟合难度曲线", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("curve", "曲线")]
     private async Task<MarisaPluginTaskState> SongDifficultyCurve(Message message)
     {
@@ -763,7 +763,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     单曲可解锁称号
     /// </summary>
-    [MarisaPluginDoc("查询某首歌可解锁的游戏内称号", "`歌曲名` 或 `歌曲别名` 或 `歌曲id` 或表达式（例如`const>10`）")]
+    [MarisaPluginDoc("查询某首歌可解锁的游戏内称号", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("称号", "title")]
     private async Task<MarisaPluginTaskState> SongTitles(Message message)
     {
