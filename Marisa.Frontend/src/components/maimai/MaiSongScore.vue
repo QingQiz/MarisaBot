@@ -133,7 +133,6 @@ function rowStyle(i: number) {
 
 <style scoped lang="postcss">
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: 0.1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); white-space: nowrap; }
-.footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 
 /* shared row text */
 .tabular-nums { font-variant-numeric: tabular-nums; }

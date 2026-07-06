@@ -242,8 +242,6 @@ const bgKey = computed(() => bgKeyOf(chart.value?.li ?? 3, false))
 <style scoped lang="postcss">
 
 .diff-chip { font-size: 17px; font-weight: 900; padding: 3px 14px; border: 2px solid; border-radius: 9999px; background: rgba(8,8,16,0.4); white-space: nowrap; }
-.footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
-.foot-note { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.45); }
 
 .stat { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 10px 14px; text-align: center; }
 .stat-k { font-family: 'Microsoft YaHei',sans-serif; font-size: 13px; color: rgba(255,255,255,0.6); }

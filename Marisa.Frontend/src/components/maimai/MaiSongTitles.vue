@@ -117,7 +117,6 @@ const themeMain = computed(() => themeMainOf(topIdx.value, isUtage.value))
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 
 <style scoped lang="postcss">
-.footer-text { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 12px; letter-spacing: 0.4em; color: rgba(255,255,255,0.45); }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .tt-stat { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 15px; color: rgba(255,255,255,0.6); white-space: nowrap; }
 
