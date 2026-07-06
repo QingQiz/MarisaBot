@@ -731,6 +731,25 @@ public partial class MaiMaiDx
     {
         var command = message.Command.Trim();
 
+        // 排名查询的英文别名（lv/base 等）不注册为子命令：命令匹配是裸前缀，会吞掉这些字母
+        // 开头的歌名查询。改为验证门禁——别名后跟合法等级/定数才当排名，否则整串按歌名处理
+        foreach (var (alias, isLevel) in RankAliases)
+        {
+            if (!command.Span.StartsWith(alias, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var value = command[alias.Length..].Trim().ToString();
+            if (isLevel && TryParseRankLevel(value, out var level))
+            {
+                message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("level", level)));
+                return MarisaPluginTaskState.CompletedTask;
+            }
+            if (!isLevel && TryParseRankConstant(value, out var ds))
+            {
+                message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("ds", ds)));
+                return MarisaPluginTaskState.CompletedTask;
+            }
+        }
+
         // 整串优先：完整输入能搜到歌就按纯歌名处理（保护「白金ディスコ」这类以色字开头的
         // 歌名），无结果时再尝试剥离句首/句尾的难度字段重搜
         var searchResult = SongDb.SearchSong(command);
@@ -760,15 +779,33 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("某等级全部谱面的拟合难度排名", "`等级`（如`13+`）")]
+    /// <summary>排名查询别名。英文短词（lv/base/b）会与歌名开头撞车，只在父命令内联、
+    /// 经值合法性门禁后生效；中文词无碰撞，注册为子命令以便值非法时给出明确报错。</summary>
+    private static readonly (string Alias, bool IsLevel)[] RankAliases =
+        [("level", true), ("lv", true), ("base", false), ("b", false)];
+
+    private static bool TryParseRankLevel(string value, out string level)
+    {
+        level = value;
+        var core = value.EndsWith('+') ? value[..^1] : value;
+        return int.TryParse(core, out var lv) && lv is >= 1 and <= 15;
+    }
+
+    private static bool TryParseRankConstant(string value, out string ds)
+    {
+        ds = "";
+        if (!double.TryParse(value, out var v) || v is < 1 or > 15) return false;
+
+        ds = v.ToString("0.0");
+        return true;
+    }
+
+    [MarisaPluginDoc("某等级全部谱面的拟合难度排名", "`等级`（如`13+`；别名`lv`）")]
     [MarisaPluginSubCommand(nameof(SongDifficultyCurve))]
     [MarisaPluginCommand("等级")]
     private static async Task<MarisaPluginTaskState> SongDifficultyCurveRankByLevel(Message message)
     {
-        var level = message.Command.Trim().ToString();
-        var core  = level.EndsWith('+') ? level[..^1] : level;
-
-        if (!int.TryParse(core, out var lv) || lv is < 1 or > 15)
+        if (!TryParseRankLevel(message.Command.Trim().ToString(), out var level))
         {
             message.Reply("等级应为 1-15，可带加号（如13+）");
             return MarisaPluginTaskState.CompletedTask;
@@ -778,18 +815,18 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("某定数全部谱面的拟合难度排名", "`定数`（如`14.7`）")]
+    [MarisaPluginDoc("某定数全部谱面的拟合难度排名", "`定数`（如`14.7`；别名`base`）")]
     [MarisaPluginSubCommand(nameof(SongDifficultyCurve))]
     [MarisaPluginCommand("定数")]
     private static async Task<MarisaPluginTaskState> SongDifficultyCurveRankByConstant(Message message)
     {
-        if (!double.TryParse(message.Command.Trim().Span, out var ds) || ds is < 1 or > 15)
+        if (!TryParseRankConstant(message.Command.Trim().ToString(), out var ds))
         {
             message.Reply("定数应为 1.0-15.0（如14.7）");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("ds", ds.ToString("0.0"))));
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiDifficultyCurveRank("ds", ds)));
         return MarisaPluginTaskState.CompletedTask;
     }
 
