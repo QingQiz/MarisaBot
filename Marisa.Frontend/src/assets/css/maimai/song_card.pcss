@@ -1,5 +1,5 @@
-/* MaiSong / MaiSongScore 卡片公用样式。
-   两卡尺寸体系各自独立，此处只放公用颜色变量与取值完全一致的基础类；
+/* maimai 歌曲卡片公用样式。
+   各卡尺寸体系各自独立，此处只放公用颜色变量与取值完全一致的基础类；
    各卡通过 <style scoped src> 引入，作用域互不泄漏。 */
 
 .mai-card {
@@ -28,4 +28,20 @@
 .font-rodin {
     font-family: 'SEGA NewRodin', 'LXGW WenKai', sans-serif;
     font-weight: 900;
+}
+
+/* 卡片主标题（字号由各卡 auto-shrink 内联控制）。
+   overflow 在 padding 边裁切，底部 padding 是给降部（g/y/p 等）留的安全区、margin 抵消其布局影响；
+   固定像素在大字号下不够用，底部随字号用 em。
+   MaiSong 主卡标题阴影/安全区取值不同，自留 .mai-song-title 不走此类。 */
+.mai-title {
+    font-family: 'SEGA NewRodin', 'LXGW WenKai', sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    padding-block: 6px 0.22em;
+    margin-block: -6px -0.22em;
 }
