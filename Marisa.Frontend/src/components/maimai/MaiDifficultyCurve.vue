@@ -74,7 +74,7 @@
             </div>
 
             <footer class="mt-5">
-                <div class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）</div>
+                <div class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）；Rating 轴按活跃玩家口径校准</div>
                 <div class="flex items-baseline justify-between gap-4">
                     <span class="foot-note">曲线为各段位玩家的拟合难度，算法与水鱼拟合定数不同</span>
                     <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
@@ -152,14 +152,23 @@ const badgeSub = computed(() => {
 // ── 曲线绘制 ──
 const SVG_W = 545, ML = 78, MR = 16, MT = 18, MB = 40
 const svgH = 302
-const X0 = 10200, X1 = 16800
+
+// 横轴按曲线支持范围截取：数据轴修复后支持窗为各谱自身人群的 rating 区间，
+// 高难谱不再有低段假支持，固定全域会留大片空白
+const xDomain = computed<[number, number]>(() => {
+    const c = chart.value.curve
+    return [c[0][0] - 300, c[c.length - 1][0] + 300]
+})
 
 const yDomain = computed<[number, number]>(() => {
     if (!isDsKind.value) return [-6, 106]
     const ys = chart.value.curve.map(p => p[1])
     return [Math.min(...ys, chart.value.ds) - 0.18, Math.max(...ys, chart.value.ds) + 0.18]
 })
-function X(v: number) { return ML + (v - X0) / (X1 - X0) * (SVG_W - ML - MR) }
+function X(v: number) {
+    const [x0, x1] = xDomain.value
+    return ML + (v - x0) / (x1 - x0) * (SVG_W - ML - MR)
+}
 function Y(v: number) {
     const [lo, hi] = yDomain.value
     return MT + (1 - (v - lo) / (hi - lo)) * (svgH - MT - MB)
@@ -209,8 +218,10 @@ const yTicks = computed(() => {
     return out
 })
 const xTicks = computed(() => {
+    const [x0, x1] = xDomain.value
+    const step = x1 - x0 <= 3200 ? 500 : 1000
     const out = []
-    for (let v = 11000; v <= 16000; v += 1000) out.push({v, x: X(v)})
+    for (let v = Math.ceil(x0 / step) * step; v <= x1; v += step) out.push({v, x: X(v)})
     return out
 })
 const refY = computed(() => isDsKind.value ? Y(chart.value.ds) : Y(50))
