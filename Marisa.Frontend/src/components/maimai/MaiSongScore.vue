@@ -148,12 +148,13 @@ function rowStyle(i: number) {
 .vc-chip { width: 116px; flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: rgba(8,8,16,0.34); }
 .vc-chip::after { content: ''; position: absolute; right: -1.5px; top: 11px; bottom: 11px; width: 4px; border-radius: 2px; background: currentColor; }
 .vc-chip-name { font-family: 'SEGA NewRodin',sans-serif; font-weight: 900; font-size: 13px; }
-.vc-chip-ds { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 25px; line-height: 1; }
+/* margin-top: -7px = 调节台手调值（朋友 -10px 起、复看后回 3px）：收掉 Torus 25px 的顶部字面留白，定数与难度名收拢成组 */
+.vc-chip-ds { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 25px; line-height: 1; margin-top: -7px; }
 .vc-cells { flex: 1; min-width: 0; display: grid; grid-template-columns: 110px 94px 32px 88px 54px 44px 76px; justify-content: space-between; align-items: center; padding-left: 16px; padding-right: 18px; }
 /* 宴会场谱面无定数、Ra 无意义，去掉 Ra 列（表头与单元格均不渲染），列模板同步收成 6 列 */
 .vc-cells--utg { grid-template-columns: 110px 94px 88px 54px 44px 76px; }
-.vc-row .vc-cells { align-items: flex-start; padding-top: 11px; }
-.vc-ach { display: flex; align-items: baseline; justify-content: flex-start; font-family: 'Torus',sans-serif; font-weight: bold; font-size: 19px; line-height: 1; }
+/* top: -2.5px = QingQiz 调节台手调值：几何居中后 Torus 大数字字形在 em 盒内偏下，上提回正 */
+.vc-ach { display: flex; align-items: baseline; justify-content: flex-start; font-family: 'Torus',sans-serif; font-weight: bold; font-size: 19px; line-height: 1; position: relative; top: -2.5px; }
 .vc-ach-int { font-weight: 900; font-size: 31px; }
 .vc-ach-pct { font-size: 14px; opacity: 0.62; margin-left: 1px; }
 .vc-cell { display: flex; align-items: center; }
