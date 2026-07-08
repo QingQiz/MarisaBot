@@ -73,12 +73,9 @@
                 </div>
             </div>
 
-            <footer class="mt-5">
-                <div class="foot-note">数据来源：水鱼查分器（diving-fish.com）成绩聚合统计（n={{ chart.n.toLocaleString() }}）；Rating 轴按活跃玩家口径校准</div>
-                <div class="flex items-baseline justify-between gap-4">
-                    <span class="foot-note">曲线为各段位玩家的拟合难度，算法与水鱼拟合定数不同</span>
-                    <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
-                </div>
+            <footer class="mt-5 flex items-baseline justify-between gap-6">
+                <div class="foot-note min-w-0 whitespace-nowrap">数据来源：水鱼查分器</div>
+                <span class="footer-text shrink-0">MARISA BOT · DIFFICULTY CURVE</span>
             </footer>
     </MaiCardShell>
 
