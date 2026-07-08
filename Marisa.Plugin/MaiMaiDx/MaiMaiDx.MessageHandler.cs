@@ -423,11 +423,10 @@ public partial class MaiMaiDx
             announced = true;
         }
 
-        // 第一阶段：轮询 login-status 等 JWT 下发，直到拿到 token / 失败 / 超时。
+        // 第一阶段：轮询登录任务等 JWT 下发，直到拿到 token / 失败 / 超时。
         // MSH 繁忙时 send_request 阶段排队可达数分钟，故总超时放宽到 15 分钟。
-        // 注意只轮询到拿到 token 为止：login-status 在抓分（update_score）期间每次调用都伴随
-        // 数据库写入与 JWT 签发，持续轮询会撞上服务端 30 秒以上的响应停滞（实测连续超时），
-        // MSH 自家前端同样在拿到 token 后就不再调用该接口
+        // 新版任务模型中登录任务只负责建立好友关系，JWT 在好友关系确认（任务 completed）时下发，
+        // 抓分由第二阶段单独创建的 update_score 任务完成
         MaiScoreHubClient.LoginStatusResult? status = null;
         var waitStart      = DateTime.UtcNow;
         var deadline       = waitStart.AddMinutes(15);
@@ -485,7 +484,7 @@ public partial class MaiMaiDx
             return;
         }
 
-        // 实测 JWT 在 update_score（抓分开始）阶段即随 login-status 下发；login-request 的 authToken 仅作回退
+        // JWT 随登录任务完成（好友关系确认）下发；创建登录任务时的 authToken 仅作回退
         var jwt = !string.IsNullOrEmpty(status.Token) ? status.Token! : login.AuthToken;
         if (string.IsNullOrEmpty(jwt))
         {
@@ -501,52 +500,58 @@ public partial class MaiMaiDx
             retryHint = "重试「mai 导」即可。"; // 令牌已存入 MSH，后续失败无需再带令牌重发
         }
 
-        // 第二阶段：抓分仍在进行则改用轻量的 GET /job/{id} 等任务完成——
-        // 抓分记录在 status 变为 completed 之后才落库，过早导出会推送旧记录或报 Sync not found
-        if (!status.Done)
+        // 第二阶段：创建独立的抓分任务并等待完成。登录任务不再包含抓分，把登录任务号作为
+        // 好友关系凭证传入可立即开始抓分。抓分阶段单独计时：第一阶段需等待好友申请送达并被
+        // 接受，繁忙时可能已耗去大部分时间，共用截止时间会使抓分预算所剩无几
+        string crawlJobId;
+        try
         {
-            // 抓分阶段单独计时：第一阶段需等待好友申请送达并被接受，MSH 机器人账号繁忙时好友申请
-            // 的发出会排队数分钟，可能已耗去第一阶段的大部分时间；若与抓分共用同一截止时间，抓分等待
-            // 会因预算所剩无几而超时。此处好友申请已被接受，仅需等待服务端抓分（其自带 30 分钟硬上限）
-            deadline = DateTime.UtcNow.AddMinutes(20);
-            var crawlStart = DateTime.UtcNow;
+            crawlJobId = await msh.CreateUpdateScoreJobAsync(jwt, login.JobId);
+        }
+        catch (Exception e)
+        {
+            ReplyAt(message, $"同步失败：创建抓分任务未成功（{e.Message}）。{retryHint}");
+            return;
+        }
 
-            var crawlDone = false;
-            while (DateTime.UtcNow < deadline)
+        deadline = DateTime.UtcNow.AddMinutes(20);
+        var crawlStart = DateTime.UtcNow;
+
+        var crawlDone = false;
+        while (DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(PollDelayMs(DateTime.UtcNow - crawlStart));
+
+            MaiScoreHubClient.JobResult job;
+            try
             {
-                await Task.Delay(PollDelayMs(DateTime.UtcNow - crawlStart));
-
-                MaiScoreHubClient.JobResult job;
-                try
-                {
-                    job          = await msh.GetJobAsync(login.JobId);
-                    pollFailures = 0;
-                }
-                catch (Exception e)
-                {
-                    if (++pollFailures < 6) continue;
-                    ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
-                    return;
-                }
-
-                if (job.Status == "completed")
-                {
-                    crawlDone = true;
-                    break;
-                }
-
-                if (job.Status is "failed" or "canceled")
-                {
-                    ReplyAt(message, $"同步失败：{job.Error ?? job.Status}。{retryHint}");
-                    return;
-                }
+                job          = await msh.GetJobAsync(jwt, crawlJobId);
+                pollFailures = 0;
             }
-
-            if (!crawlDone)
+            catch (Exception e)
             {
-                ReplyAt(message, $"等待超时（服务繁忙，成绩抓取未在限定时间内完成）。稍后{retryHint}");
+                if (++pollFailures < 6) continue;
+                ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
                 return;
             }
+
+            if (job.Status == "completed")
+            {
+                crawlDone = true;
+                break;
+            }
+
+            if (job.Status is "failed" or "canceled")
+            {
+                ReplyAt(message, $"同步失败：{job.Error ?? job.Status}。{retryHint}");
+                return;
+            }
+        }
+
+        if (!crawlDone)
+        {
+            ReplyAt(message, $"等待超时（服务繁忙，成绩抓取未在限定时间内完成）。稍后{retryHint}");
+            return;
         }
 
         // 查询 MSH 中已配置的查分器
@@ -568,14 +573,8 @@ public partial class MaiMaiDx
             var name = p == "lxns" ? "落雪" : "水鱼";
             try
             {
+                // 导出为异步任务，ExportAsync 内部轮询至终态后返回该查分器的回执
                 var r = await msh.ExportAsync(jwt, p);
-
-                // 抓分记录在任务 completed 之后才异步落库，导出可能恰好跑在落库之前，稍候重试
-                for (var retry = 0; retry < 5 && !r.Success && r.Message == "Sync not found"; retry++)
-                {
-                    await Task.Delay(3000);
-                    r = await msh.ExportAsync(jwt, p);
-                }
 
                 sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
             }

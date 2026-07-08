@@ -8,10 +8,12 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 ///     用于 <c>maimai 导</c> 命令把玩家的华立成绩推到他【本人】的水鱼 / 落雪查分器。
 ///     MSH 官方开放接入（公开 OpenAPI + 全开 CORS）；我们带一个专门的 User-Agent 表明身份。
 ///     契约见 https://github.com/bakapiano/maimai-score-hub/blob/main/shared/openapi/openapi.yaml
+///     2026-07 起 MSH 迁移到 /api/v1 并拆分任务模型：登录任务只负责建立好友关系并下发 JWT，
+///     抓分是独立的 update_score 任务（POST /me/dxnet-jobs），向查分器导出为异步任务需轮询结果。
 /// </summary>
 public class MaiScoreHubClient
 {
-    public const string BaseUrl = "https://maimai.bakapiano.com/api";
+    public const string BaseUrl = "https://maimai.bakapiano.com/api/v1";
 
     private const string UserAgent = "MarisaBot-maimai-sync/1.0 (+https://github.com/QingQiz/MarisaBot)";
 
@@ -26,49 +28,53 @@ public class MaiScoreHubClient
 
     public sealed record LoginStatusResult(bool Done, string Status, string? Stage, string? Token, string? Message, string? BotFriendCode);
 
-    public sealed record ProfileResult(bool HasLxns, bool HasDivingFish, bool AutoLxns, bool AutoDivingFish);
+    public sealed record ProfileResult(bool HasLxns, bool HasDivingFish);
 
     public sealed record ExportResult(bool Success, int Exported, int Scores, string? Message);
 
     public sealed record JobResult(string Status, string? Stage, string? Error);
 
-    /// <summary>POST /auth/login-request — 用好友码发起登录+抓分任务。</summary>
+    private static string? S(JsonElement e, string k) =>
+        e.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+    /// <summary>POST /auth/login-requests — 用好友码发起登录任务（Bot 向用户发好友申请）。</summary>
     public async Task<LoginRequestResult> LoginRequestAsync(string friendCode)
     {
-        var json = await Req("/auth/login-request")
-            .PostJsonAsync(new { friendCode, skipUpdateScore = false, useIdleUpdate = false })
+        var json = await Req("/auth/login-requests")
+            .PostJsonAsync(new { friendCode, method = "bot_sends_request" })
             .ReceiveString();
 
         using var doc = JsonDocument.Parse(json);
         var root  = doc.RootElement;
-        var jobId = root.TryGetProperty("jobId", out var j) ? j.GetString() ?? "" : "";
+        var jobId = S(root, "jobId") ?? "";
 
-        string? bot = null;
-        if (root.TryGetProperty("job", out var job) && job.ValueKind == JsonValueKind.Object &&
-            job.TryGetProperty("botUserFriendCode", out var b) && b.ValueKind == JsonValueKind.String)
+        // Bot 好友码可能位于根级（botFriendCode）或嵌套任务对象（botUserFriendCode，任务被
+        // 调度前为空），两处都取
+        var bot = S(root, "botFriendCode");
+        if (bot == null && root.TryGetProperty("job", out var job) && job.ValueKind == JsonValueKind.Object)
         {
-            bot = b.GetString();
+            bot = S(job, "botUserFriendCode");
         }
 
-        var authToken = root.TryGetProperty("authToken", out var a) && a.ValueKind == JsonValueKind.String ? a.GetString() : null;
-        var msg = root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String ? m.GetString() : null;
-        return new LoginRequestResult(jobId, bot, authToken, msg);
+        var authToken = S(root, "authToken") ?? S(root, "token");
+        return new LoginRequestResult(jobId, bot, authToken, S(root, "message"));
     }
 
-    /// <summary>GET /auth/login-status?jobId= — 轮询任务，完成时附带 JWT。</summary>
+    /// <summary>
+    ///     GET /auth/login-requests/{jobId} — 轮询登录任务。好友关系确认（status 变为
+    ///     completed）时响应为根级 {status, token, user}；进行中为 {status, job}，
+    ///     stage / 失败原因 / Bot 好友码位于嵌套的 job 对象。
+    /// </summary>
     public async Task<LoginStatusResult> LoginStatusAsync(string jobId)
     {
-        var json = await Req("/auth/login-status").SetQueryParam("jobId", jobId).GetStringAsync();
+        var json = await Req($"/auth/login-requests/{jobId}").GetStringAsync();
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        string? S(JsonElement e, string k) => e.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
-
         var status = S(root, "status") ?? "";
         var token  = S(root, "token");
 
-        // 实测 stage / 失败原因 / 机器人好友码均位于嵌套的 job 对象中（根级没有这些字段；完成时 job 整体缺失）
         string? stage = null, error = null, botFriendCode = null;
         if (root.TryGetProperty("job", out var job) && job.ValueKind == JsonValueKind.Object)
         {
@@ -77,82 +83,155 @@ public class MaiScoreHubClient
             botFriendCode = S(job, "botUserFriendCode");
         }
 
-        // token 在 update_score（抓分进行中）阶段就会随响应下发，不能作为完成依据：
-        // 抓分记录要等 status 变为 completed 之后才创建，过早导出会报 Sync not found（首次使用必现）
-        var done = status == "completed";
+        var done = status == "completed" || !string.IsNullOrEmpty(token);
 
         return new LoginStatusResult(done, status, stage, token, error ?? S(root, "message"), botFriendCode);
     }
 
     /// <summary>
-    ///     GET /job/{jobId} — 轻量的任务状态查询（无需鉴权）。
-    ///     login-status 在抓分期间每次调用都伴随数据库写入与 JWT 签发，持续轮询会撞上服务端长时间停滞；
-    ///     MSH 自家前端跟踪抓分进度用的就是本接口。
+    ///     POST /me/dxnet-jobs（Bearer）— 创建抓分任务。登录任务不再包含抓分，须在好友关系
+    ///     确认后单独创建；friendshipJobId 传刚完成的登录任务号作为好友关系凭证，服务端可
+    ///     立即开始抓分而无需等待 Bot 好友列表快照刷新。
     /// </summary>
-    public async Task<JobResult> GetJobAsync(string jobId)
+    public async Task<string> CreateUpdateScoreJobAsync(string jwt, string friendshipJobId)
     {
-        var json = await Req($"/job/{jobId}").GetStringAsync();
+        var resp = await Authed("/me/dxnet-jobs", jwt)
+            .AllowHttpStatus("400-499")
+            .PostJsonAsync(new { jobType = "update_score", friendshipJobId });
+
+        var json = await resp.GetStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        if (resp.StatusCode >= 400)
+        {
+            throw new InvalidOperationException(S(root, "message") ?? S(root, "error") ?? $"HTTP {resp.StatusCode}");
+        }
+
+        var jobId = S(root, "jobId");
+        if (string.IsNullOrEmpty(jobId)) throw new InvalidOperationException("创建抓分任务失败（响应中无任务号）");
+        return jobId!;
+    }
+
+    /// <summary>GET /me/dxnet-jobs/{jobId}（Bearer）— 查询抓分任务状态。</summary>
+    public async Task<JobResult> GetJobAsync(string jwt, string jobId)
+    {
+        var json = await Authed($"/me/dxnet-jobs/{jobId}", jwt).GetStringAsync();
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        string? S(string k) => root.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
-
-        return new JobResult(S("status") ?? "", S("stage"), S("error"));
+        return new JobResult(S(root, "status") ?? "", S(root, "stage"), S(root, "error"));
     }
 
-    /// <summary>GET /users/profile（Bearer）— 看 MSH 里已配置了哪些查分器令牌。</summary>
+    /// <summary>GET /me（Bearer）— 看 MSH 里已配置了哪些查分器令牌。</summary>
     public async Task<ProfileResult> GetProfileAsync(string jwt)
     {
-        var json = await Authed("/users/profile", jwt).GetStringAsync();
+        var json = await Authed("/me", jwt).GetStringAsync();
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
         bool B(string k) => root.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.True;
 
-        return new ProfileResult(B("hasLxnsImportToken"), B("hasDivingFishImportToken"), B("autoExportLxns"), B("autoExportDivingFish"));
+        return new ProfileResult(B("hasLxnsImportToken"), B("hasDivingFishImportToken"));
     }
 
-    /// <summary>PATCH /users/profile（Bearer）— 设置某查分器导入令牌并开启自动导出。</summary>
+    /// <summary>
+    ///     PATCH /me（Bearer）— 设置某查分器的导入令牌。抓分完成后向已配置令牌的查分器
+    ///     推送由本客户端显式触发；不改动 autoUpdate（那是 MSH 的定时自动更新开关，
+    ///     是否开启应由用户在网站上自行决定）。
+    /// </summary>
     public async Task SetTokenAsync(string jwt, string prober, string token)
     {
         object body = prober == "lxns"
-            ? new { lxnsImportToken = token, autoExportLxns = true }
-            : new { divingFishImportToken = token, autoExportDivingFish = true };
+            ? new { lxnsImportToken = token }
+            : new { divingFishImportToken = token };
 
-        await Authed("/users/profile", jwt).PatchJsonAsync(body);
+        await Authed("/me", jwt).PatchJsonAsync(body);
     }
 
-    /// <summary>POST /sync/latest/{prober}（Bearer）— 把抓到的成绩推到用户自己的查分器。</summary>
+    /// <summary>
+    ///     POST /me/sync/latest/exports/{prober}（Bearer）— 把抓到的成绩推到用户自己的查分器。
+    ///     导出已改为异步任务：创建后轮询 GET /me/sync/prober-export-jobs/{id} 直至终态，
+    ///     单查分器的回执位于任务 result 的对应字段（divingFish / lxns）。
+    /// </summary>
     public async Task<ExportResult> ExportAsync(string jwt, string prober)
     {
-        var path = prober == "lxns" ? "/sync/latest/lxns" : "/sync/latest/diving-fish";
+        var path = prober == "lxns" ? "/me/sync/latest/exports/lxns" : "/me/sync/latest/exports/diving-fish";
 
-        var json = await Authed(path, jwt)
+        var resp = await Authed(path, jwt)
             .AllowHttpStatus("400-499")
-            .PostJsonAsync(new { })
-            .ReceiveString();
+            .PostJsonAsync(new { });
 
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        var json = await resp.GetStringAsync();
 
-        int I(string k) => root.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var n) ? n : 0;
-
-        // 实测返回（HTTP 201）无顶层 success 字段：{"status":200,"scores":N,"exported":N,"response":{...}}
-        var success = root.TryGetProperty("status", out var s) && s.ValueKind == JsonValueKind.Number &&
-                      s.TryGetInt32(out var code) && code == 200;
-
-        // 查分器的回执位于嵌套的 response 对象中（水鱼为 message="更新成功"，落雪仅有 success 标志）；出错时回退到顶层 message
-        string? msg = null;
-        if (root.TryGetProperty("response", out var resp) && resp.ValueKind == JsonValueKind.Object &&
-            resp.TryGetProperty("message", out var rm) && rm.ValueKind == JsonValueKind.String)
+        if (resp.StatusCode >= 400)
         {
-            msg = rm.GetString();
+            using var err = JsonDocument.Parse(json);
+            return new ExportResult(false, 0, 0, S(err.RootElement, "message") ?? S(err.RootElement, "error") ?? $"HTTP {resp.StatusCode}");
         }
 
-        msg ??= root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String ? m.GetString() : null;
+        string exportJobId;
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            if (TryParseExportJob(root, prober, out var immediate)) return immediate;
+            exportJobId = S(root, "exportJobId") ?? "";
+        }
 
-        return new ExportResult(success, I("exported"), I("scores"), msg);
+        if (exportJobId.Length == 0) return new ExportResult(false, 0, 0, "创建导出任务失败（响应中无任务号）");
+
+        // 队列繁忙时导出任务需要排队，容忍偶发的查询失败，最长等待 5 分钟
+        var deadline = DateTime.UtcNow.AddMinutes(5);
+        var failures = 0;
+        while (DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(3000);
+
+            string body;
+            try
+            {
+                body     = await Authed($"/me/sync/prober-export-jobs/{exportJobId}", jwt).GetStringAsync();
+                failures = 0;
+            }
+            catch
+            {
+                if (++failures >= 6) return new ExportResult(false, 0, 0, "查询导出任务状态失败");
+                continue;
+            }
+
+            using var doc = JsonDocument.Parse(body);
+            if (TryParseExportJob(doc.RootElement, prober, out var result)) return result;
+        }
+
+        return new ExportResult(false, 0, 0, "导出任务等待超时");
+    }
+
+    /// <summary>任务达到终态时解析对应查分器的回执；job 既可能是响应根级也可能嵌套于 job 字段。</summary>
+    private static bool TryParseExportJob(JsonElement root, string prober, out ExportResult result)
+    {
+        var job = root.TryGetProperty("job", out var j) && j.ValueKind == JsonValueKind.Object ? j : root;
+
+        var status = S(job, "status") ?? S(root, "status") ?? "";
+        if (status is not ("completed" or "partial_failed" or "failed" or "skipped"))
+        {
+            result = default!;
+            return false;
+        }
+
+        var key = prober == "lxns" ? "lxns" : "divingFish";
+        if (job.TryGetProperty("result", out var r) && r.ValueKind == JsonValueKind.Object &&
+            r.TryGetProperty(key, out var pr) && pr.ValueKind == JsonValueKind.Object)
+        {
+            int I(string k) => pr.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var n) ? n : 0;
+
+            var ok = S(pr, "status") == "success";
+            result = new ExportResult(ok, I("exported"), I("scores"), S(pr, "message"));
+            return true;
+        }
+
+        result = new ExportResult(status == "completed", 0, 0, S(job, "error") ?? status);
+        return true;
     }
 }
