@@ -1268,6 +1268,36 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    // ジングルベル(SD, 70)：圣诞期间限定出身，游戏内三个真牌（真極/真神/真舞舞）的
+    // 条件历来不含它；真将不存在、舞/霸者与其余查询照常计入。
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("真极完成表")]
+    [TestCase("真神完成表")]
+    [TestCase("真舞舞完成表")]
+    [TestCase("真极红谱完成表")]  // 显示牌子的难度子视图同样排除
+    public void JingleBellExcludedFromRealShinPlates(string raw)
+    {
+        Assert.That(PlateData.IsPlateExcludedSong(MustParse(raw), CreateSong(70, "maimai")), Is.True);
+    }
+
+    [TestCase("真将完成表")]   // 真将不是真实存在的牌子
+    [TestCase("真完成表")]     // 默认阈值=将
+    [TestCase("舞极完成表")]   // 舞系计入
+    [TestCase("舞舞舞完成表")]
+    [TestCase("霸者完成表")]
+    public void JingleBellKeptOutsideRealShinPlates(string raw)
+    {
+        Assert.That(PlateData.IsPlateExcludedSong(MustParse(raw), CreateSong(70, "maimai")), Is.False);
+    }
+
+    [Test]
+    public void ShinPlateExclusionOnlyTargetsJingleBell()
+    {
+        Assert.That(PlateData.IsPlateExcludedSong(MustParse("真极完成表"), CreateSong(17, "maimai")), Is.False);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     // 难度别名剥离（curve 等按曲命令的可选难度字段，句首/句尾均可、空格可省略）。
     // 纯语法层测试：「白金ディスコ」这类以色字开头的真实歌名由调用方保护——handler
     // 整串优先搜歌，仅无结果时才用剥离结果重搜。

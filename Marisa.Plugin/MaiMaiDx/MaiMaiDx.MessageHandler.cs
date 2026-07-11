@@ -1343,6 +1343,7 @@ public partial class MaiMaiDx
                 .SelectMany(song => song.Constants.Select((constant, i) => (constant, i, song)))
                 .Where(t => levelIdxes.Contains(t.i))
                 .Where(t => q.Selectors.All(sel => MatchSelector(sel, t.constant, t.i, t.song, includeRevival)))
+                .Where(t => !PlateData.IsPlateExcludedSong(q, t.song))
                 .Select(t => (t.constant, t.i, t.song))
                 .ToList();
         }

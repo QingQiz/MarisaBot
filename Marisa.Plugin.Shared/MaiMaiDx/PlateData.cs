@@ -291,6 +291,18 @@ public static class PlateData
     public static bool IsRevivalSong(long songId) => RevivalSongIds.Contains(songId);
 
     /// <summary>
+    ///     ジングルベル(SD, 70)出身是圣诞期间限定（ORANGE PLUS 起才常驻），游戏内三个真牌
+    ///     （真極/真神/真舞舞）的条件历来不含它；舞/霸者则计入。仅当查询就是显示真实牌子的
+    ///     真代完成表（<see cref="NamePlateImage"/> 命中）时整曲排除。
+    /// </summary>
+    private const long JingleBellSdSongId = 70;
+
+    public static bool IsPlateExcludedSong(Query query, MaiMaiSong song) =>
+        song.Id == JingleBellSdSongId
+        && query.Selectors is [Selector.Plate { Kanji: "真" }]
+        && NamePlateImage(query) != null;
+
+    /// <summary>
     ///     代字 → diving-fish 版本字符串集合。
     ///     繁简体差异（暁/晓 櫻/樱 菫/堇 輝/辉 華/华 鏡/镜）双向都收录指向同一个版本集合。
     ///     真：两个 from 字段都查（旧版 PLUS 在 diving-fish 是独立条目）。
