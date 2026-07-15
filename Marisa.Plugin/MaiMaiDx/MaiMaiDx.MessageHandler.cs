@@ -723,6 +723,44 @@ public partial class MaiMaiDx
     }
 
     /// <summary>
+    ///     谱面预览
+    /// </summary>
+    [MarisaPluginDoc("谱面预览，回复在线播放页链接", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
+    [MarisaPluginCommand("chart", "谱面", "预览", "preview")]
+    private async Task<MarisaPluginTaskState> SongChartPreview(Message message)
+    {
+        var command = message.Command.Trim();
+
+        var searchResult = SongDb.SearchSong(command);
+
+        int? levelIdx = null;
+        if (searchResult.Count == 0 && PlateData.TryStripDifficultyAffix(command, out var idx, out var rest))
+        {
+            var stripped = SongDb.SearchSong(rest);
+            if (stripped.Count != 0)
+            {
+                levelIdx     = idx;
+                searchResult = stripped;
+            }
+        }
+
+        var song = await SongDb.MultiPageSelectResult(searchResult, message, false, true);
+        if (song == null) return MarisaPluginTaskState.CompletedTask;
+
+        if (levelIdx >= song.Levels.Count)
+        {
+            message.Reply($"该谱面没有 {MaiMaiSong.LevelNameAll[levelIdx.Value]} 难度");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var url = $"{ShortUrlStore.GetPublicBaseUrl()}/maimai/chart?id={song.Id}" +
+                  (levelIdx == null ? "" : $"&difficulty={levelIdx}");
+        message.Reply($"[{song.Type}] {song.Title}\n{url}");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
     ///     拟合难度曲线
     /// </summary>
     [MarisaPluginDoc("查询谱面的拟合难度曲线", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
