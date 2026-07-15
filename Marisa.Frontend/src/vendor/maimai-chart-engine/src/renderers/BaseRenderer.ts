@@ -1,0 +1,241 @@
+import { Point2D, RendererConfig, TouchPosition, ButtonPosition } from "../types";
+import {
+  BASE_ANGLE,
+  BUTTON_ANGLE_OFFSET,
+  BUTTON_ANGLE_STEP,
+  NOTE_STROKE_WIDTH_RATIO,
+  COLORS,
+  DDR_DARKEN_RATIO,
+} from "../utils/constants";
+
+export function mixHexColor(color: string, target: string, amount: number): string {
+  const parse = (value: string) => Number.parseInt(value, 16);
+  const r = parse(color.slice(1, 3));
+  const g = parse(color.slice(3, 5));
+  const b = parse(color.slice(5, 7));
+  const tr = parse(target.slice(1, 3));
+  const tg = parse(target.slice(3, 5));
+  const tb = parse(target.slice(5, 7));
+  const mix = (from: number, to: number) => Math.round(from + (to - from) * amount);
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(mix(r, tr))}${toHex(mix(g, tg))}${toHex(mix(b, tb))}`;
+}
+
+export function getGradientColors(
+  ddrColor: string | null,
+  isBreak: boolean,
+  isSimultaneous: boolean,
+): [string, string] {
+  if (ddrColor) {
+    return [ddrColor, mixHexColor(ddrColor, COLORS.BLACK, DDR_DARKEN_RATIO)];
+  }
+  if (isBreak) {
+    return [COLORS.BREAK_GRADIENT_START, COLORS.BREAK_GRADIENT_END];
+  }
+  if (isSimultaneous) {
+    return [COLORS.SIMULTANEOUS_GRADIENT_START, COLORS.SIMULTANEOUS_GRADIENT_END];
+  }
+  return [COLORS.TAP_GRADIENT_START, COLORS.TAP_GRADIENT_END];
+}
+
+export interface RenderContext {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  centerX: number;
+  centerY: number;
+  radius: number;
+  hiSpeed: number;
+  baseApproachTimeMs: number;
+  config: RendererConfig;
+}
+
+export abstract class BaseRenderer {
+  protected context: RenderContext;
+
+  constructor(context: RenderContext) {
+    this.context = context;
+  }
+
+  updateContext(context: Partial<RenderContext>): void {
+    Object.assign(this.context, context);
+  }
+
+  protected mirrorPosition(position: ButtonPosition): ButtonPosition {
+    const mode = this.context.config.mirrorMode;
+    if (mode === "none") return position;
+
+    const mirrorH = [0, 8, 7, 6, 5, 4, 3, 2, 1];
+    const mirrorV = [0, 4, 3, 2, 1, 8, 7, 6, 5];
+    const rotate180 = [0, 5, 6, 7, 8, 1, 2, 3, 4];
+
+    switch (mode) {
+      case "horizontal":
+        return mirrorH[position] as ButtonPosition;
+      case "vertical":
+        return mirrorV[position] as ButtonPosition;
+      case "rotate180":
+        return rotate180[position] as ButtonPosition;
+      default:
+        return position;
+    }
+  }
+
+  protected mirrorTouchPosition(touchPosition: TouchPosition): TouchPosition {
+    const mode = this.context.config.mirrorMode;
+    if (mode === "none") return touchPosition;
+
+    const region = touchPosition[0];
+    const sensorNum = touchPosition.length > 1 ? parseInt(touchPosition[1]) : 0;
+
+    if (region === "C") {
+      return touchPosition;
+    }
+
+    const mirrorMaps: Record<string, Record<string, number[]>> = {
+      horizontal: {
+        AB: [0, 8, 7, 6, 5, 4, 3, 2, 1],
+        DE: [0, 1, 8, 7, 6, 5, 4, 3, 2],
+      },
+      vertical: {
+        AB: [0, 4, 3, 2, 1, 8, 7, 6, 5],
+        DE: [0, 5, 4, 3, 2, 1, 8, 7, 6],
+      },
+      rotate180: {
+        ABDE: [0, 5, 6, 7, 8, 1, 2, 3, 4],
+      },
+    };
+
+    const map = mirrorMaps[mode];
+    if (!map) return touchPosition;
+
+    let key: string;
+    if (mode === "rotate180") {
+      key = "ABDE";
+    } else {
+      key = region === "A" || region === "B" ? "AB" : "DE";
+    }
+
+    const mapping = map[key];
+    if (!mapping) return touchPosition;
+
+    const mirroredSensorNum = mapping[sensorNum];
+    return `${region}${mirroredSensorNum}` as TouchPosition;
+  }
+
+  protected getButtonAngle(position: ButtonPosition): number {
+    const mirroredPos = this.mirrorPosition(position);
+    return BASE_ANGLE + BUTTON_ANGLE_OFFSET + (mirroredPos - 1) * BUTTON_ANGLE_STEP;
+  }
+
+  protected getButtonPosition(position: ButtonPosition): Point2D {
+    const angle = this.getButtonAngle(position);
+    return {
+      x: this.context.centerX + Math.cos(angle) * this.context.radius,
+      y: this.context.centerY + Math.sin(angle) * this.context.radius,
+    };
+  }
+
+  protected getApproachTimeMs(): number {
+    if (this.context.config.alwaysKeepHiSpeed) {
+      return (
+        this.context.baseApproachTimeMs / (this.context.hiSpeed / this.context.config.playbackSpeed)
+      );
+    }
+
+    return this.context.baseApproachTimeMs / this.context.hiSpeed;
+  }
+
+  protected distanceToCenter(x: number, y: number): number {
+    return Math.sqrt(Math.pow(x - this.context.centerX, 2) + Math.pow(y - this.context.centerY, 2));
+  }
+
+  protected scaleByRadius(ratio: number): number {
+    return ratio * this.context.radius;
+  }
+
+  protected getNoteStrokeWidth(): number {
+    return this.scaleByRadius(NOTE_STROKE_WIDTH_RATIO);
+  }
+
+  protected stroke(color: string, width?: number): void {
+    const ctx = this.context.ctx;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width ?? this.getNoteStrokeWidth();
+    ctx.stroke();
+  }
+
+  protected durationToMs(duration: number, bpm: number): number {
+    return (60000 * duration) / bpm;
+  }
+
+  protected getDdrColor(timing: number): string | null {
+    if (!this.context.config.ddrColorMode) {
+      return null;
+    }
+
+    const epsilon = 0.001;
+    const fractional = Math.abs(timing % 1);
+
+    // 节拍（1/1）
+    if (fractional < epsilon || fractional > 1 - epsilon) {
+      return COLORS.DDR_RED;
+    }
+
+    // 半节拍（1/2）
+    const halfFrac = Math.abs(timing % 0.5);
+    if (halfFrac < epsilon || halfFrac > 0.499) {
+      return COLORS.DDR_BLUE;
+    }
+
+    // 四分之一节拍（1/4）
+    const quarterFrac = Math.abs(timing % 0.25);
+    if (quarterFrac < epsilon || quarterFrac > 0.249) {
+      return COLORS.DDR_YELLOW;
+    }
+
+    // 扩展模式颜色
+    if (this.context.config.ddrColorExtended) {
+      // 八分之一节拍（1/8）
+      const eighthFrac = Math.abs(timing % 0.125);
+      if (eighthFrac < epsilon || eighthFrac > 0.124) {
+        return COLORS.DDR_ORANGE;
+      }
+
+      // 六分之一节拍（1/6）
+      const sixthFrac = 1 / 6;
+      const sixthRemainder = Math.abs(timing % sixthFrac);
+      if (sixthRemainder < epsilon || sixthRemainder > sixthFrac - epsilon) {
+        return COLORS.DDR_CYAN;
+      }
+    }
+
+    return COLORS.DDR_GREEN;
+  }
+
+  protected withContext(drawFn: () => void): void {
+    this.context.ctx.save();
+    try {
+      drawFn();
+    } finally {
+      this.context.ctx.restore();
+    }
+  }
+
+  protected drawCircle(x: number, y: number, radius: number): void {
+    this.context.ctx.beginPath();
+    this.context.ctx.arc(x, y, radius, 0, Math.PI * 2);
+  }
+
+  protected mixHexColor(color: string, target: string, amount: number): string {
+    return mixHexColor(color, target, amount);
+  }
+
+  protected drawRing(x: number, y: number, innerRadius: number, outerRadius: number): void {
+    this.context.ctx.beginPath();
+    this.context.ctx.arc(x, y, outerRadius, 0, Math.PI * 2, false);
+    this.context.ctx.arc(x, y, innerRadius, 0, Math.PI * 2, true);
+    this.context.ctx.closePath();
+  }
+}
+
+export default BaseRenderer;
