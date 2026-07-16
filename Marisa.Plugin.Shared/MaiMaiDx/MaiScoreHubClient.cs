@@ -13,7 +13,10 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 /// </summary>
 public class MaiScoreHubClient
 {
-    public const string BaseUrl = "https://maimai.bakapiano.com/api/v1";
+    // 2026-07 中旬 MSH 迁移域名：旧域名 maimai.bakapiano.com 对全部路径返回 308 跳转，
+    // 而 HttpClient 跨主机重定向时按安全惯例剥除 Authorization 头，导致所有带 Bearer 的
+    // 调用在旧域名下必现 Missing bearer token，故必须直连新域名
+    public const string BaseUrl = "https://maiscorehub.bakapiano.com/api/v1";
 
     private const string UserAgent = "MarisaBot-maimai-sync/1.0 (+https://github.com/QingQiz/MarisaBot)";
 
