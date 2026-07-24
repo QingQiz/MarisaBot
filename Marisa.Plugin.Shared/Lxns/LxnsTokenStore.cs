@@ -66,18 +66,16 @@ public static class LxnsTokenStore
         var token = GetToken(qq);
         if (token == null) return null;
 
-        if (token.IsExpired)
+        try
         {
-            try
-            {
-                token = await LxnsOAuth.RefreshToken(token.RefreshToken);
-                SaveToken(qq, token.AccessToken, token.RefreshToken,
-                    (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
-            }
-            catch
-            {
-                return null;
-            }
+            token = await LxnsOAuth.RefreshToken(token.RefreshToken);
+            SaveToken(qq, token.AccessToken, token.RefreshToken,
+                (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+        }
+        catch
+        {
+            RemoveToken(qq);
+            return null;
         }
 
         return token;
