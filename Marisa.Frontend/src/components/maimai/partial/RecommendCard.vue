@@ -1,7 +1,6 @@
 <template>
     <article class="recommend-row" :style="{'--diff-color': diffColor}">
         <div class="diff-bar"></div>
-        <div v-if="showStep" class="step-badge">{{ item.Step }}</div>
         <img :src="cover" @error="onCoverError" alt="" class="cover">
 
         <div class="content min-w-0">
@@ -11,7 +10,10 @@
                 <span class="diff-chip" :style="{color: diffColor, borderColor: diffColor}">
                     {{ diffName }} {{ item.Constant.toFixed(1) }}
                 </span>
-                <span class="action-chip">{{ item.Action === 'upgrade' ? '提升成绩' : `进入 ${item.Bucket === 'old' ? 'B35' : 'B15'}` }}</span>
+                <span class="action-chip" :class="{'plan-action-chip': showStep}">
+                    <template v-if="showStep"><span class="step-label">STEP {{ stepNumber }}</span><span class="step-separator">·</span></template>
+                    {{ actionLabel }}
+                </span>
             </div>
 
             <div class="metrics mt-2">
@@ -59,6 +61,8 @@ function onCoverError() { cover.value = COVER_FALLBACK }
 
 const diffColor = computed(() => DIFF_COLORS[Math.min(props.item.LevelIndex, 4)] ?? '#999')
 const diffName = computed(() => DIFF_NAMES[Math.min(props.item.LevelIndex, 4)] ?? props.item.Level)
+const stepNumber = computed(() => props.item.Step.toString().padStart(2, '0'))
+const actionLabel = computed(() => props.item.Action === 'upgrade' ? '提升成绩' : `进入 ${props.item.Bucket === 'old' ? 'B35' : 'B15'}`)
 const difficultyText = computed(() => {
     const d = props.item.Difficulty!
     if (d.Kind === 'fitted_ds') {
@@ -75,7 +79,6 @@ const difficultyText = computed(() => {
 <style scoped lang="postcss">
 .recommend-row { position: relative; display: flex; align-items: center; gap: 14px; min-height: 116px; padding: 12px 14px 12px 18px; border-radius: 15px; overflow: hidden; background: rgba(0,0,0,0.29); border: 1px solid rgba(255,255,255,0.10); box-shadow: inset 0 1px 0 rgba(255,255,255,0.035); }
 .diff-bar { position: absolute; inset: 10px auto 10px 6px; width: 4px; border-radius: 9999px; background: var(--diff-color); box-shadow: 0 0 10px color-mix(in srgb, var(--diff-color) 45%, transparent); }
-.step-badge { position: absolute; top: 7px; left: 8px; z-index: 2; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 9999px; background: var(--diff-color); color: #fff; font-family: 'Torus',sans-serif; font-weight: 900; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
 .cover { flex: 0 0 88px; width: 88px; height: 88px; object-fit: cover; border-radius: 12px; box-shadow: 0 0 0 3px rgba(255,255,255,0.78), 0 7px 16px -8px rgba(0,0,0,0.8); }
 .content { flex: 1 1 auto; }
 .song-title { flex: 1 1 auto; min-width: 0; font-family: 'SEGA NewRodin','Microsoft YaHei',sans-serif; font-weight: 800; font-size: 20px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 3px rgba(0,0,0,0.45); }
@@ -83,6 +86,9 @@ const difficultyText = computed(() => {
 .type-chip { font-family: 'Torus',sans-serif; font-weight: 900; font-size: 10px; color: #ffbd47; border: 1px solid #ffbd4777; padding: 1px 6px; }
 .diff-chip { font-family: 'SEGA NewRodin',sans-serif; font-weight: 900; font-size: 11px; border: 1px solid; padding: 1px 7px; background: rgba(0,0,0,0.22); }
 .action-chip { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 10px; color: rgba(255,255,255,0.66); background: rgba(255,255,255,0.08); padding: 2px 7px; }
+.plan-action-chip { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.055); }
+.step-label { font-family: 'Torus',sans-serif; font-weight: 900; color: var(--diff-color); }
+.step-separator { margin: 0 3px; color: rgba(255,255,255,0.28); }
 .metrics { display: flex; align-items: center; gap: 18px; }
 .metric { display: flex; align-items: baseline; gap: 6px; min-width: 0; font-family: 'Torus','Microsoft YaHei',sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .achievement-metric { flex: 1 1 auto; }
