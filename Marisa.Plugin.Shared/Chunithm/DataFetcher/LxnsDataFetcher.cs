@@ -123,7 +123,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         if (response.StatusCode is 400 or 401 or 403 or 404)
         {
-            // 401/403: token 已失效, 清除缓存让下次 bind 重新授权
             if (response.StatusCode is 401 or 403)
                 LxnsTokenStore.RemoveToken(qq);
 
