@@ -100,7 +100,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         var oauthToken = await LxnsTokenStore.GetValidToken(qq);
         if (oauthToken != null)
         {
-            return await GetScoresViaOAuth(oauthToken);
+            return await GetScoresViaOAuth(oauthToken, qq);
         }
 
         // 无 OAuth token → 引导用户绑定
@@ -114,7 +114,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         */
     }
 
-    private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken)
+    private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)
     {
         var response = await "https://maimai.lxns.net/api/v0/user/chunithm/player/scores"
             .WithOAuthBearerToken(oauthToken.AccessToken)
@@ -123,6 +123,9 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
         if (response.StatusCode is 400 or 401 or 403 or 404)
         {
+            if (response.StatusCode is 401 or 403)
+                LxnsTokenStore.RemoveToken(qq);
+
             var errorJson = await response.GetStringAsync();
             using var errorDoc = JsonDocument.Parse(errorJson);
             var errorMessage = errorDoc.RootElement.TryGetProperty("message", out var msg)

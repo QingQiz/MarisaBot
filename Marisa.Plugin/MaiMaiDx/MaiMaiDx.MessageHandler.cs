@@ -81,8 +81,8 @@ public partial class MaiMaiDx
 
                     if (idx == 1 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
                     {
-                        // 已有 Token → 跳过 OAuth，统一由 DoBind 写入
-                        if (LxnsTokenStore.GetToken(next.Sender.Id) != null)
+                        // 已有有效 Token → 跳过 OAuth
+                        if (LxnsTokenStore.GetValidToken(next.Sender.Id).GetAwaiter().GetResult() != null)
                         {
                             message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
                             return DoBind(next, servers[idx]);
