@@ -1450,39 +1450,19 @@ public partial class MaiMaiDx
             Command = "".AsMemory()
         });
 
-        var (old, @new, success) = GetRecommend(rating, target);
-
-        if (!success)
+        var result = CreateRecommendationEngine().BuildPlan(rating, target);
+        switch (result.Status)
         {
-            message.Reply("no way");
-            return MarisaPluginTaskState.CompletedTask;
+            case MaiMaiRecommendationPlanStatus.AlreadyReached:
+                message.Reply($"当前 Rating 已达到 {rating.Rating}，无需推分到 {target}");
+                return MarisaPluginTaskState.CompletedTask;
+            case MaiMaiRecommendationPlanStatus.Unreachable:
+                message.Reply($"按照当前成绩无法规划到 Rating {target}");
+                return MarisaPluginTaskState.CompletedTask;
         }
 
-        var current = new
-        {
-            OldScores = rating.OldScores
-                .Select(x => (Song: SongDb.GetSongById(x.Id), x.LevelIdx, x.Achievement, x.Rating))
-                .Where(x => x.Song != null)
-                .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
-                .OrderByDescending(x => x.Item4),
-            NewScores = rating.NewScores
-                .Select(x => (Song: SongDb.GetSongById(x.Id), x.LevelIdx, x.Achievement, x.Rating))
-                .Where(x => x.Song != null)
-                .Select(x => (x.Song!, x.LevelIdx, x.Achievement, x.Rating))
-                .OrderByDescending(x => x.Item4)
-        };
-
-        var recommend = new
-        {
-            OldScores = old.OrderByDescending(x => x.Item4),
-            NewScores = @new.OrderByDescending(x => x.Item4)
-        };
-
         var context = new WebContext();
-
-        context.Put("current", current);
-        context.Put("recommend", recommend);
-
+        context.Put("recommendation", result.Data);
         message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiRecommend(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
@@ -1510,15 +1490,17 @@ public partial class MaiMaiDx
     {
         var fetcher   = GetDataFetcher(message);
         var rating    = await fetcher.GetRating(message);
-        var recommend = rating.DrawRecommendCard(SongDb.SongList);
+        var recommend = CreateRecommendationEngine().BuildQuick(rating);
 
-        if (recommend == null)
+        if (recommend.Items.Count == 0)
         {
             message.Reply("您无分可恰");
         }
         else
         {
-            message.Reply(MessageDataImage.FromBase64(recommend.ToB64()));
+            var context = new WebContext();
+            context.Put("recommendation", recommend);
+            message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiRecommend(context.Id)));
         }
 
         return MarisaPluginTaskState.CompletedTask;
