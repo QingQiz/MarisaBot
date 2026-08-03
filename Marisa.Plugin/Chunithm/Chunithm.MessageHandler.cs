@@ -569,11 +569,11 @@ public partial class Chunithm
         var opCeil = Math.Ceiling(overPower * 100) / 100;
 
         message.Reply(
-            $"Song Count    : {songCount}\n" +
-            $"Max OverPower : {opCeil:F2}\n" +
-            $"Rainbow Line  : {rainbow:F2}\n" +
-            $"Platinum Line : {platinum:F2}\n" +
-            $"Gold Line     : {gold:F2}"
+            $"歌曲数量    : {songCount}\n" +
+            $"最大OP      : {opCeil:F2}\n" +
+            $"彩虹底板    : {rainbow:F2}\n" +
+            $"白金底板    : {platinum:F2}\n" +
+            $"黄金底板    : {gold:F2}"
         );
 
         return MarisaPluginTaskState.CompletedTask;
