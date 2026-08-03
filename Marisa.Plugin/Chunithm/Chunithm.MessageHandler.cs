@@ -539,16 +539,22 @@ public partial class Chunithm
     [MarisaPluginCommand("border", "分数线")]
     private async Task<MarisaPluginTaskState> ChuOpBorder(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-        var songs = fetcher.GetSongList();
+        var songs = LxnsDataFetcher.GetSharedSongList();
 
         double maxLevelSum = 0;
         var songCount = 0;
 
         foreach (var song in songs)
         {
-            // 取所有难度定数的最大值 (跳过 WORLD'S END 的 0)
-            var maxConst = song.Constants.Count > 0 ? song.Constants.Max() : 0;
+            // 取 BAS/ADV/EXP/MAS/ULT 中的最高定数, 排除 WORLD'S END
+            var maxConst = 0d;
+            for (var i = 0; i < song.Constants.Count; i++)
+            {
+                if (song.DiffNames[i] == ChunithmSong.LevelLabel[5]) continue;
+
+                maxConst = Math.Max(maxConst, song.Constants[i]);
+            }
+
             // 排除定数 < 9.0 的数据
             if (maxConst < 9.0) continue;
 

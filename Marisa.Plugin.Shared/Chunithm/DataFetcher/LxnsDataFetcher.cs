@@ -13,7 +13,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/chunithm";
     private static List<ChunithmSong>? _songList;
 
-    internal static List<ChunithmSong> GetSharedSongList()
+    public static List<ChunithmSong> GetSharedSongList()
     {
         if (_songList != null) return _songList;
 
