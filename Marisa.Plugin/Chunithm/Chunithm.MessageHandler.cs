@@ -530,8 +530,47 @@ public partial class Chunithm
     [MarisaPluginCommand("op")]
     private static async Task<MarisaPluginTaskState> ChuOp(Message message)
     {
-        message.Reply("子命令: base / genre / level / version");
+        message.Reply("子命令: base / genre / level / version / border");
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
+    }
+
+    [MarisaPluginDoc("获取全曲 OverPower 分数线", "彩虹/白金/金线")]
+    [MarisaPluginSubCommand(nameof(ChuOp))]
+    [MarisaPluginCommand("border", "分数线")]
+    private async Task<MarisaPluginTaskState> ChuOpBorder(Message message)
+    {
+        var fetcher = await GetDataFetcher(message);
+        var songs = fetcher.GetSongList();
+
+        double maxLevelSum = 0;
+        var songCount = 0;
+
+        foreach (var song in songs)
+        {
+            // 取所有难度定数的最大值 (跳过 WORLD'S END 的 0)
+            var maxConst = song.Constants.Count > 0 ? song.Constants.Max() : 0;
+            // 排除定数 < 9.0 的数据
+            if (maxConst < 9.0) continue;
+
+            maxLevelSum += maxConst;
+            songCount++;
+        }
+
+        var overPower = maxLevelSum * 5 + songCount * 15;
+        var rainbow = Math.Ceiling(overPower * 0.995 * 100) / 100;
+        var platinum = Math.Ceiling(overPower * 0.99 * 100) / 100;
+        var gold = Math.Ceiling(overPower * 0.975 * 100) / 100;
+        var opCeil = Math.Ceiling(overPower * 100) / 100;
+
+        message.Reply(
+            $"Song Count    : {songCount}\n" +
+            $"Max OverPower : {opCeil:F2}\n" +
+            $"Rainbow Line  : {rainbow:F2}\n" +
+            $"Platinum Line : {platinum:F2}\n" +
+            $"Gold Line     : {gold:F2}"
+        );
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     [MarisaPluginDoc("获取OverPower统计 (按定数范围)", "`定数1`-`定数2` 如 12.5-13.2")]
