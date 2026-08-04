@@ -537,7 +537,7 @@ public partial class Chunithm
     [MarisaPluginDoc("获取全曲 OverPower 分数线", "彩虹/白金/金线")]
     [MarisaPluginSubCommand(nameof(ChuOp))]
     [MarisaPluginCommand("border", "分数线")]
-    private async Task<MarisaPluginTaskState> ChuOpBorder(Message message)
+    private static MarisaPluginTaskState ChuOpBorder(Message message)
     {
         var songs = LxnsDataFetcher.GetSharedSongList();
 
