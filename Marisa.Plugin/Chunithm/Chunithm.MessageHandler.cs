@@ -275,6 +275,13 @@ public partial class Chunithm
 
     #region 汇总 / summary
 
+    private static string ParseSortFlag(ref string cmd)
+    {
+        if (cmd.EndsWith(" -d")) { cmd = cmd[..^3]; return "desc"; }
+        if (cmd.EndsWith(" -a")) { cmd = cmd[..^3]; return "asc"; }
+        return "";
+    }
+
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
@@ -289,9 +296,12 @@ public partial class Chunithm
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> SummaryBase(Message message)
     {
-        var constants = message.Command.Split('-').Select(x =>
+        var cmd = message.Command.Trim().ToString();
+        var sort = ParseSortFlag(ref cmd);
+
+        var constants = cmd.Split('-').Select(x =>
         {
-            var res = double.TryParse(x.Trim().Span, out var c);
+            var res = double.TryParse(x.Trim(), out var c);
             return res ? c : -1;
         }).ToList();
 
@@ -325,7 +335,7 @@ public partial class Chunithm
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -337,12 +347,13 @@ public partial class Chunithm
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
     {
+        var cmd = message.Command.Trim().ToString();
+        var sort = ParseSortFlag(ref cmd);
+
         var fetcher = await GetDataFetcher(message);
-
         var genres = fetcher.GetSongList().Select(song => song.Genre).Distinct().ToArray();
-
         var genre = genres.FirstOrDefault(p =>
-            message.Command.Trim().Equals(p, StringComparison.OrdinalIgnoreCase));
+            cmd.Equals(p, StringComparison.OrdinalIgnoreCase));
 
         if (genre == null)
         {
@@ -361,7 +372,7 @@ public partial class Chunithm
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.song.Levels[x.i]);
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -373,6 +384,9 @@ public partial class Chunithm
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
+        var cmd = message.Command.Trim().ToString();
+        var sort = ParseSortFlag(ref cmd);
+
         var fetcher = await GetDataFetcher(message);
         var songList = fetcher.GetSongList();
 
@@ -418,7 +432,7 @@ public partial class Chunithm
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
 
             replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
@@ -429,7 +443,9 @@ public partial class Chunithm
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
     {
-        var lv = message.Command.Trim().ToString();
+        var cmd = message.Command.Trim().ToString();
+        var sort = ParseSortFlag(ref cmd);
+        var lv = cmd;
 
         if (LevelRegex().IsMatch(lv))
         {
@@ -464,7 +480,7 @@ public partial class Chunithm
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores);
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
 
         message.Reply(MessageDataImage.FromBase64(im));
 

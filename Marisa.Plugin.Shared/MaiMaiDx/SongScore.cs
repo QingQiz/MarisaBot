@@ -203,4 +203,35 @@ public class SongScore
 
         return -1;
     }
+
+    /// <summary>
+    ///     获取适合作为实际游玩目标的下一条推分线。境界达成率仍参与精确 Rating 计算，
+    ///     但推荐时提升到紧邻的正常段位目标。
+    /// </summary>
+    public static double NextRecommendedRa(double achievement, double constant)
+    {
+        if (achievement >= 100.5) return -1;
+        return NormalizeRecommendedAchievement(NextRa(achievement, constant));
+    }
+
+    /// <summary>获取超过指定单曲 Rating 的实际推荐达成率。</summary>
+    public static double NextRecommendedAchievement(double constant, long minRa)
+    {
+        return NormalizeRecommendedAchievement(NextAchievement(constant, minRa));
+    }
+
+    private static double NormalizeRecommendedAchievement(double achievement)
+    {
+        if (achievement < 0) return achievement;
+
+        return (int)Math.Round(achievement * 10000, MidpointRounding.AwayFromZero) switch
+        {
+            799999  => 80,
+            969999  => 97,
+            989999  => 99,
+            999999  => 100,
+            1004999 => 100.5,
+            _       => Math.Min(achievement, 100.5)
+        };
+    }
 }

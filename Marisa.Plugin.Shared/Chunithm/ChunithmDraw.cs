@@ -6,12 +6,13 @@ public static class ChunithmDraw
 {
     public static async Task<string> DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, ChunithmSong Song)>> groupedSong,
-        IReadOnlyDictionary<(long SongId, int LevelIdx), ChunithmScore> scores)
+        IReadOnlyDictionary<(long SongId, int LevelIdx), ChunithmScore> scores,
+        string sort = "")
     {
         var ctx = new WebContext();
         ctx.Put("GroupedSongs", groupedSong.Select(x => new { x.Key, x }).ToArray());
         ctx.Put("Scores", scores);
 
-        return await WebApi.ChunithmSummary(ctx.Id);
+        return await WebApi.ChunithmSummary(ctx.Id, sort);
     }
 }

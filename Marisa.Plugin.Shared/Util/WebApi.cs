@@ -224,9 +224,11 @@ public static class WebApi
         return await RenderUrl("/chunithm/song?id=" + id);
     }
 
-    public static async Task<string> ChunithmSummary(Guid contextId)
+    public static async Task<string> ChunithmSummary(Guid contextId, string sort = "")
     {
-        return await RenderUrl("/chunithm/summary?id=" + contextId);
+        var url = $"/chunithm/summary?id={contextId}";
+        if (!string.IsNullOrWhiteSpace(sort)) url += "&sort=" + sort;
+        return await RenderUrl(url);
     }
 
     public static async Task<string> ChunithmOverPowerAll(Guid contextId)

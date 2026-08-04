@@ -22,8 +22,16 @@ axios.all([
     grouped.value = data[0].data
     scores.value  = data[1].data
 
+    const sort = route.query.sort as string | undefined;
     for (let i = 0; i < grouped.value.length; i++) {
         grouped.value[i].x.sort((a, b) => {
+            if (sort === 'asc' || sort === 'desc') {
+                const sa = GetScore(a.Item3.Id, a.Item2);
+                const sb = GetScore(b.Item3.Id, b.Item2);
+                const va = sa ? sa.score : 0;
+                const vb = sb ? sb.score : 0;
+                return sort === 'asc' ? va - vb : vb - va;
+            }
             if (a.Item2 != b.Item2) return a.Item2 - b.Item2;
             return a.Item3.Id - b.Item3.Id;
         }).reverse()
