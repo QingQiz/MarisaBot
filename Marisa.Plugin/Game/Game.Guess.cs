@@ -368,7 +368,9 @@ public partial class Game
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
-            var guess = songs.FirstOrDefault(s => s.Title.Equals(mNext.Command.Trim().ToString(), StringComparison.OrdinalIgnoreCase));
+            var input = mNext.Command.Trim().ToString();
+            var guess = songs.FirstOrDefault(s => s.Title.Equals(input, StringComparison.OrdinalIgnoreCase))
+                ?? songs.FirstOrDefault(s => s.Title.Contains(input, StringComparison.OrdinalIgnoreCase));
             if (guess == null)
             {
                 mNext.Reply("曲库里没有这首歌");
