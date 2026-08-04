@@ -35,4 +35,22 @@ public class MaiMaiDxRatingTest
     {
         Assert.That(SongScore.B50Ra((decimal)achievement, (decimal)constant), Is.EqualTo(expected));
     }
+
+    [TestCase(79.9998, 12.0, 79.9999, 80.0)]
+    [TestCase(96.9998, 13.5, 96.9999, 97.0)]
+    [TestCase(98.9998, 10.0, 98.9999, 99.0)]
+    [TestCase(99.9998, 13.0, 99.9999, 100.0)]
+    [TestCase(100.4998, 14.0, 100.4999, 100.5)]
+    public void RecommendationSkipsBoundaryAchievement(
+        double current,
+        double constant,
+        double exact,
+        double recommended)
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(SongScore.NextRa(current, constant), Is.EqualTo(exact).Within(0.000001));
+            Assert.That(SongScore.NextRecommendedRa(current, constant), Is.EqualTo(recommended));
+        });
+    }
 }
