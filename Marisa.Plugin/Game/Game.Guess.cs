@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
+using Marisa.BotDriver.DI;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
@@ -329,9 +330,11 @@ public partial class Game
     [MarisaPluginDoc("friberg 猜歌游戏，仅群聊可用", "`guess friberg 数据库名`，可写多个，用`:`分隔")]
     [MarisaPluginSubCommand(nameof(Guess))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "friberg")]
-    private MarisaPluginTaskState GuessFriberg(Message message)
+    private MarisaPluginTaskState GuessFriberg(Message message, DictionaryProvider provider)
     {
         if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
+        var botQq = (long)provider["QQ"];
 
         var dbNames = message.Command.Split(':').Select(x => x.Trim()).Where(x => !x.IsEmpty).ToArray();
 
@@ -360,10 +363,12 @@ public partial class Game
         var answer = songs.RandomTake();
         var tries = FribergMaxTries;
         var rows = new List<object>();
+        var game = dbNames.First().ToString().ToLower() == "maimai" ? "maimai" : "chunithm";
 
         async Task<MessageDataImage> Render()
         {
             var ctx = new WebContext();
+            ctx.Put("FribergGame", game);
             ctx.Put("FribergRows", rows);
             ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries });
             return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
@@ -371,13 +376,20 @@ public partial class Game
 
         var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
+            // 只有 @bot 的消息才参与游戏，其余交给其它插件
+            if (!mNext.IsAt(botQq))
+            {
+                return MarisaPluginTaskState.NoResponse;
+            }
+
             if (mNext.Command.Span is "结束游戏")
             {
                 mNext.Reply($"答案是：{answer.Title}", false);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
-            var guess = songs.FirstOrDefault(s => s.Title.Equals(mNext.Command.Trim().ToString(), StringComparison.OrdinalIgnoreCase));
+            var input = mNext.Command.Trim();
+            var guess = SearchSong(songs, input);
             if (guess == null)
             {
                 mNext.Reply("曲库里没有这首歌");
@@ -387,14 +399,14 @@ public partial class Game
             if (guess.Title.Equals(answer.Title, StringComparison.OrdinalIgnoreCase))
             {
                 rows.Add(CompareRow(answer, answer));
-                mNext.Reply(await Render(), false);
+                mNext.Reply(await Render());
                 mNext.Reply($"猜对了！答案是：{answer.Title}", false);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
             rows.Add(CompareRow(guess, answer));
             tries--;
-            mNext.Reply(await Render(), false);
+            mNext.Reply(await Render());
 
             if (tries <= 0)
             {
@@ -415,6 +427,32 @@ public partial class Game
         }
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    /// <summary>
+    ///     仿 SongDb.SearchSong 的模糊匹配：先精确、再包含、最后正则
+    /// </summary>
+    private static Song? SearchSong(List<Song> songs, ReadOnlyMemory<char> input)
+    {
+        var keyword = input.Trim().ToString();
+
+        if (string.IsNullOrWhiteSpace(keyword)) return null;
+
+        var exact = songs.FirstOrDefault(s => s.Title.Equals(keyword, StringComparison.OrdinalIgnoreCase));
+        if (exact != null) return exact;
+
+        var contains = songs.FirstOrDefault(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+        if (contains != null) return contains;
+
+        try
+        {
+            var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
+            return songs.FirstOrDefault(s => regex.IsMatch(s.Title));
+        }
+        catch (RegexParseException)
+        {
+            return null;
+        }
     }
 
     private static object CompareRow(Song guess, Song answer)

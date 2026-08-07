@@ -3,6 +3,7 @@ import {ref} from "vue";
 import axios from "axios";
 import {context_get} from "@/GlobalVars";
 import {useRoute} from "vue-router";
+import {VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc} from "@/components/maimai/utils/song_card";
 
 interface FribergCell {
     Value: string;
@@ -23,15 +24,18 @@ const route = useRoute()
 const id    = ref(route.query.id)
 
 const data_fetched = ref(false)
-const rows  = ref([] as FribergRow[])
-const tries = ref({Tries: 0, Max: 0})
+const game   = ref('maimai')
+const rows   = ref([] as FribergRow[])
+const tries  = ref({Tries: 0, Max: 0})
 
 axios.all([
+    axios.get(context_get, {params: {id: id.value, name: 'FribergGame'}}),
     axios.get(context_get, {params: {id: id.value, name: 'FribergRows'}}),
     axios.get(context_get, {params: {id: id.value, name: 'FribergTries'}}),
 ]).then(data => {
-    rows.value  = data[0].data
-    tries.value = data[1].data
+    game.value = data[0].data
+    rows.value = data[1].data
+    tries.value = data[2].data
 }).finally(() => {
     data_fetched.value = true
 })
@@ -55,11 +59,23 @@ function cellClass(status: string) {
             return 'wrong'
     }
 }
+
+// 版本栏：maimai 用官方版本 logo 图片，chunithm 无素材则回退文本
+function versionImg(src: string) {
+    if (game.value !== 'maimai') return null
+    return versionLogoSrc(src)
+}
+
+function versionLogoStyle(src: string) {
+    const code = VERSION_CODE[src ?? '']
+    const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (60 / 160) : 0
+    return {marginLeft: `${(-trim).toFixed(1)}px`}
+}
 </script>
 
 <template>
     <div v-if="data_fetched" class="container">
-        <div class="title">FRIBERG</div>
+        <div class="title">{{ game === 'maimai' ? '弗一把（舞萌版）' : '弗一把（中二版）' }}</div>
         <div class="subtitle">猜歌游戏 · 剩余次数 {{ tries.Max - tries.Tries }} / {{ tries.Max }}</div>
         <div class="grid">
             <div class="row header">
@@ -68,7 +84,14 @@ function cellClass(status: string) {
             <div v-for="(row, i) in rows" :key="i" class="row">
                 <div v-for="c in columns" :key="c.key" class="cell"
                      :class="cellClass(row[c.key].Status)">
-                    {{ row[c.key].Value }}<span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
+                    <template v-if="c.key === 'Version' && versionImg(row[c.key].Value)">
+                        <img :src="versionImg(row[c.key].Value)" :style="versionLogoStyle(row[c.key].Value)"
+                             class="version-logo">
+                        <span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
+                    </template>
+                    <template v-else>
+                        {{ row[c.key].Value }}<span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
+                    </template>
                 </div>
             </div>
             <div v-if="rows.length === 0" class="row">
@@ -161,5 +184,10 @@ function cellClass(status: string) {
 .arrow {
     font-weight: bold;
     margin-left: 4px;
+}
+
+.version-logo {
+    height: 34px;
+    vertical-align: middle;
 }
 </style>
