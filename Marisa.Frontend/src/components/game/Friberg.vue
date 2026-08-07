@@ -5,6 +5,39 @@ import {context_get} from "@/GlobalVars";
 import {useRoute} from "vue-router";
 import {VERSION_CODE, LOGO_BBOX_LEFT, versionLogoSrc} from "@/components/maimai/utils/song_card";
 
+// 版本时间序 (来源: OpVersion.vue), 从新到旧
+const chuVersionOrder: [string, string][] = [
+    ["CHUNITHM XVERSEX",        "logo_xversex.png"],
+    ["CHUNITHM XVERSE",         "logo_xverse.png"],
+    ["CHUNITHM VERSE",          "logo_verse.png"],
+    ["CHUNITHM LUMINOUS PLUS",  "logo_luminous_plus.png"],
+    ["CHUNITHM LUMINOUS",       "logo_luminous.png"],
+    ["CHUNITHM SUN PLUS",       "logo_sun_plus.png"],
+    ["CHUNITHM SUN",            "logo_sun.png"],
+    ["CHUNITHM NEW PLUS!!",     "logo_new_plus.png"],
+    ["CHUNITHM NEW!!",          "logo_new.png"],
+    ["CHUNITHM PARADISE LOST",  "logo_paradise_lost.png"],
+    ["CHUNITHM PARADISE",       "logo_paradise.png"],
+    ["CHUNITHM CRYSTAL PLUS",   "logo_crystal_plus.png"],
+    ["CHUNITHM CRYSTAL",        "logo_crystal.png"],
+    ["CHUNITHM AMAZON PLUS",    "logo_amazon_plus.png"],
+    ["CHUNITHM AMAZON",         "logo_amazon.png"],
+    ["CHUNITHM STAR PLUS",      "logo_star_plus.png"],
+    ["CHUNITHM STAR",           "logo_star.png"],
+    ["CHUNITHM AIR PLUS",       "logo_air_plus.png"],
+    ["CHUNITHM AIR",            "logo_air.png"],
+    ["CHUNITHM PLUS",           "logo_chunithm_plus.png"],
+    ["CHUNITHM",                "logo_chunithm.png"],
+];
+
+function chuVersionLogoPath(v: string): string {
+    const key = v.replace(/!!/g, "");
+    for (const [k, logo] of chuVersionOrder) {
+        if (k.replace(/!!/g, "") === key) return `/assets/chunithm/pic/${logo}`;
+    }
+    return "";
+}
+
 interface FribergCell {
     Value: string;
     Status: string;
@@ -60,13 +93,14 @@ function cellClass(status: string) {
     }
 }
 
-// 版本栏：maimai 用官方版本 logo 图片，chunithm 无素材则回退文本
+// 版本栏：maimai 用官方版本 logo 图片，chunithm 用 logo_*.png，未命中回退文本
 function versionImg(src: string) {
-    if (game.value !== 'maimai') return null
-    return versionLogoSrc(src)
+    if (game.value === 'maimai') return versionLogoSrc(src)
+    return chuVersionLogoPath(src) || null
 }
 
 function versionLogoStyle(src: string) {
+    if (game.value !== 'maimai') return {}
     const code = VERSION_CODE[src ?? '']
     const trim = code ? (LOGO_BBOX_LEFT[code] ?? 0) * (60 / 160) : 0
     return {marginLeft: `${(-trim).toFixed(1)}px`}
