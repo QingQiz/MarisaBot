@@ -359,38 +359,50 @@ public partial class Game
 
         var answer = songs.RandomTake();
         var tries = FribergMaxTries;
+        var rows = new List<object>();
 
-        var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), mNext =>
+        async Task<MessageDataImage> Render()
+        {
+            var ctx = new WebContext();
+            ctx.Put("FribergRows", rows);
+            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries });
+            return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
+        }
+
+        var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
             if (mNext.Command.Span is "结束游戏")
             {
                 mNext.Reply($"答案是：{answer.Title}", false);
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                return MarisaPluginTaskState.CompletedTask;
             }
 
             var guess = songs.FirstOrDefault(s => s.Title.Equals(mNext.Command.Trim().ToString(), StringComparison.OrdinalIgnoreCase));
             if (guess == null)
             {
                 mNext.Reply("曲库里没有这首歌");
-                return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+                return MarisaPluginTaskState.ToBeContinued;
             }
 
             if (guess.Title.Equals(answer.Title, StringComparison.OrdinalIgnoreCase))
             {
+                rows.Add(CompareRow(answer, answer));
+                mNext.Reply(await Render(), false);
                 mNext.Reply($"猜对了！答案是：{answer.Title}", false);
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                return MarisaPluginTaskState.CompletedTask;
             }
 
+            rows.Add(CompareRow(guess, answer));
             tries--;
-            mNext.Reply($"{CompareInfo(guess, answer)}\n剩余次数：{tries}");
+            mNext.Reply(await Render(), false);
 
             if (tries <= 0)
             {
                 mNext.Reply($"次数用完了！答案是：{answer.Title}", false);
-                return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+                return MarisaPluginTaskState.CompletedTask;
             }
 
-            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+            return MarisaPluginTaskState.ToBeContinued;
         }, this);
 
         if (res)
@@ -405,26 +417,33 @@ public partial class Game
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    private static string CompareInfo(Song guess, Song answer)
+    private static object CompareRow(Song guess, Song answer)
     {
         var (gTitle, gArtist, gGenre, gVersion, gConstant, gBpm) = FribergInfo(guess);
         var (aTitle, aArtist, aGenre, aVersion, aConstant, aBpm) = FribergInfo(answer);
 
-        return
-            $"曲名：{gTitle} {CompareFlag(gTitle, aTitle)}\n" +
-            $"作者：{gArtist} {CompareFlag(gArtist, aArtist)}\n" +
-            $"流派：{gGenre} {CompareFlag(gGenre, aGenre)}\n" +
-            $"版本：{gVersion} {CompareVersion(gVersion, aVersion)}\n" +
-            $"定数：{gConstant:F1} {CompareNear(gConstant, aConstant, ConstantNear)}\n" +
-            $"bpm：{gBpm:0.##} {CompareNear(gBpm, aBpm, BpmNear)}";
+        return new
+        {
+            Title = CompareCell(gTitle, aTitle),
+            Artist = CompareCell(gArtist, aArtist),
+            Genre = CompareCell(gGenre, aGenre),
+            Version = CompareVersion(gVersion, aVersion),
+            Constant = CompareNear(gConstant, aConstant, ConstantNear),
+            Bpm = CompareNear(gBpm, aBpm, BpmNear)
+        };
     }
 
-    private static string CompareFlag(string guess, string answer)
+    private static object CompareCell(string guess, string answer)
     {
-        return guess.Equals(answer, StringComparison.OrdinalIgnoreCase) ? "✔" : "❌";
+        return new
+        {
+            Value = guess,
+            Status = guess.Equals(answer, StringComparison.OrdinalIgnoreCase) ? "correct" : "wrong",
+            Arrow = ""
+        };
     }
 
-    private static string CompareVersion(string guess, string answer)
+    private static object CompareVersion(string guess, string answer)
     {
         var gIdx = Array.IndexOf(MaiVersionOrder, guess);
         var aIdx = Array.IndexOf(MaiVersionOrder, answer);
@@ -436,19 +455,39 @@ public partial class Game
             aIdx = Array.IndexOf(ChuVersionOrder, answer);
         }
 
-        if (gIdx == -1 || aIdx == -1) return "❌";
-        if (Math.Abs(gIdx - aIdx) > VersionNear) return "❌";
+        if (gIdx == -1 || aIdx == -1)
+        {
+            return new { Value = guess, Status = "wrong", Arrow = "" };
+        }
 
-        // ↑ 正确答案版本比猜测歌曲早；↓ 反之代表晚
-        return aIdx < gIdx ? "❓↑" : "❓↓";
+        if (gIdx == aIdx)
+        {
+            return new { Value = guess, Status = "correct", Arrow = "" };
+        }
+
+        if (Math.Abs(gIdx - aIdx) > VersionNear)
+        {
+            return new { Value = guess, Status = "wrong", Arrow = "" };
+        }
+
+        // ← 正确答案版本比猜测歌曲早；→ 反之代表晚
+        return new { Value = guess, Status = "near", Arrow = aIdx < gIdx ? "←" : "→" };
     }
 
-    private static string CompareNear(double guess, double answer, double near)
+    private static object CompareNear(double guess, double answer, double near)
     {
-        if (Math.Abs(guess - answer) > near) return "❌";
+        if (guess.Equals(answer))
+        {
+            return new { Value = guess, Status = "correct", Arrow = "" };
+        }
+
+        if (Math.Abs(guess - answer) > near)
+        {
+            return new { Value = guess, Status = "wrong", Arrow = "" };
+        }
 
         // ↑ 正确答案对应值大于猜测歌曲；↓ 反之
-        return answer > guess ? "❓↑" : "❓↓";
+        return new { Value = guess, Status = "near", Arrow = answer > guess ? "↑" : "↓" };
     }
 
     private static (string Title, string Artist, string Genre, string Version, double Constant, double Bpm) FribergInfo(Song song)

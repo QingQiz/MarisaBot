@@ -261,6 +261,11 @@ public static class WebApi
         return await RenderUrl("/chunithm/preview?id=" + contextId);
     }
 
+    public static async Task<string> Friberg(Guid contextId)
+    {
+        return await RenderUrl("/game/friberg?id=" + contextId);
+    }
+
     public static async Task<string> ChunithmBest(Guid contextId, bool b50)
     {
         if (b50)

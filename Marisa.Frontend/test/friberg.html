@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Friberg 猜歌游戏 - 示例</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+
+        .container { width: 860px; }
+
+        h1 {
+            font-size: 28px;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        /* ===== 表格 ===== */
+        .grid {
+            border: 2px solid #3a3a3c;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1.6fr 1.2fr 1fr 1.2fr 0.9fr 0.9fr;
+            border-bottom: 2px solid #3a3a3c;
+            background: #000;
+        }
+
+        .row:last-child { border-bottom: none; }
+
+        .row.header {
+            background: #1a1a1a;
+            font-size: 13px;
+            color: #999;
+            user-select: none;
+        }
+
+        .cell {
+            padding: 14px 10px;
+            border-right: 2px solid #3a3a3c;
+            text-align: center;
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cell:last-child { border-right: none; }
+
+        /* ===== 状态配色 ===== */
+        .cell.correct { background: #6aaa64; color: #fff; }
+        .cell.near    { background: #c9a958; color: #000; }
+        .cell.wrong   { background: #000;     color: #fff; }
+
+        .cell.near .arrow { color: #000; font-weight: bold; }
+        .cell.correct .arrow { color: #fff; font-weight: bold; }
+
+        /* ===== 输入区 ===== */
+        .input-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: #1a1a1a;
+            border: 2px solid #3a3a3c;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 15px;
+            padding: 12px 14px;
+            outline: none;
+        }
+
+        .input-bar input:focus { border-color: #6aaa64; }
+
+        .input-bar button {
+            background: #6aaa64;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            padding: 0 28px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .input-bar button:hover { background: #5a9459; }
+
+        .guess-count {
+            margin-top: 14px;
+            color: #888;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>FRIBERG</h1>
+    <div class="subtitle">猜歌游戏 · 每次猜测一行，结果以颜色提示 · 答案：Grievous Lady (MASTER 14.6)</div>
+
+    <div class="grid">
+        <div class="row header">
+            <div class="cell">曲名</div>
+            <div class="cell">作者</div>
+            <div class="cell">流派</div>
+            <div class="cell">版本</div>
+            <div class="cell">定数</div>
+            <div class="cell">BPM</div>
+        </div>
+        <div id="board"></div>
+    </div>
+
+    <div class="input-bar">
+        <input id="guess-input" type="text" placeholder="输入歌名进行猜测..." maxlength="40">
+        <button id="guess-btn">猜测</button>
+    </div>
+    <div class="guess-count" id="guess-count">已猜测 0 / 10 次</div>
+</div>
+
+<script>
+    // 模拟示例数据：每次猜测的一行结果
+    // status: correct=绿色 / near=棕黄(❓→●) / wrong=黑色(错误)
+    const sampleGuesses = [
+        {
+            title:  {value: 'End Time',               status: 'wrong'},
+            artist: {value: 'Cres.',                  status: 'wrong'},
+            genre:  {value: '其他游戏',                 status: 'correct'},
+            version:{value: 'maimai finale',           status: 'wrong'},
+            constant:{value: '14.6',                   status: 'near',  arrow: '→'},
+            bpm:    {value: '180',                    status: 'wrong'},
+        },
+        {
+            title:  {value: 'Grievous Lady',          status: 'near'},
+            artist: {value: 'Team Grimoire',          status: 'near'},
+            genre:  {value: 'VARIETY',                status: 'correct'},
+            version:{value: 'CHUNITHM',               status: 'near',  arrow: '←'},
+            constant:{value: '14.6',                  status: 'correct'},
+            bpm:    {value: '210',                    status: 'near',  arrow: '→'},
+        },
+        {
+            title:  {value: 'Grievous Lady',          status: 'correct'},
+            artist: {value: 'Team Grimoire',          status: 'correct'},
+            genre:  {value: 'VARIETY',                status: 'correct'},
+            version:{value: 'CHUNITHM PARADISE',      status: 'near',  arrow: '←'},
+            constant:{value: '14.6',                  status: 'correct'},
+            bpm:    {value: '210',                    status: 'correct'},
+        },
+    ];
+
+    const board = document.getElementById('board');
+    const input = document.getElementById('guess-input');
+    const btn   = document.getElementById('guess-btn');
+    const count = document.getElementById('guess-count');
+
+    let guesses = [...sampleGuesses];
+
+    function render() {
+        board.innerHTML = '';
+        for (const g of guesses) {
+            const row = document.createElement('div');
+            row.className = 'row';
+            for (const key of ['title', 'artist', 'genre', 'version', 'constant', 'bpm']) {
+                const cell = document.createElement('div');
+                const item = g[key];
+                cell.className = `cell ${item.status}`;
+                cell.textContent = item.arrow ? `${item.value} ${item.arrow}` : item.value;
+                row.appendChild(cell);
+            }
+            board.appendChild(row);
+        }
+        count.textContent = `已猜测 ${guesses.length} / 10 次`;
+    }
+
+    // 随机生成一行用于演示交互
+    const pool = [
+        ['Grievous Lady', 'Team Grimoire', 'VARIETY', 'CHUNITHM PARADISE', '14.6', '210', 'correct'],
+        ['End Time', 'Cres.', '其他游戏', 'maimai finale', '14.6', '180', 'wrong'],
+        ['Titania', 'xi', 'ORIENTAL', 'CHUNITHM PLUS', '14.6', '222', 'near'],
+    ];
+
+    function randomGuess() {
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const keys = ['title', 'artist', 'genre', 'version', 'constant', 'bpm'];
+        const g = {};
+        for (let i = 0; i < keys.length; i++) {
+            g[keys[i]] = {value: pick[i], status: pick[6]};
+            if (keys[i] === 'version' && pick[6] !== 'correct') {
+                g[keys[i]].arrow = Math.random() < 0.5 ? '←' : '→';
+            }
+            if ((keys[i] === 'constant' || keys[i] === 'bpm') && pick[6] !== 'correct') {
+                g[keys[i]].arrow = Math.random() < 0.5 ? '←' : '→';
+            }
+        }
+        return g;
+    }
+
+    btn.addEventListener('click', () => {
+        if (!input.value.trim() || guesses.length >= 10) return;
+        guesses.push(randomGuess());
+        input.value = '';
+        render();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') btn.click();
+    });
+
+    render();
+</script>
+</body>
+</html>
