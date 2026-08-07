@@ -331,8 +331,7 @@ public partial class Game
     [MarisaPluginSubCommand(nameof(Guess))]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "friberg")]
     private MarisaPluginTaskState GuessFriberg(Message message, DictionaryProvider provider)
-    {
-        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+    {        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
 
         var botQq = (long)provider["QQ"];
 
@@ -453,6 +452,26 @@ public partial class Game
         {
             return null;
         }
+    }
+
+    [MarisaPluginDoc("弗一把 猜歌游戏，仅群聊可用", "`:game 弗一把 舞萌` / `:game 弗一把 中二`")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "弗一把")]
+    private MarisaPluginTaskState Friberg(Message message, DictionaryProvider provider)
+    {
+        var db = message.Command.Trim().ToString() switch
+        {
+            "" or "maimai" or "舞萌"       => "maimai",
+            "chunithm" or "中二"           => "chunithm",
+            _                              => null
+        };
+
+        if (db == null)
+        {
+            message.Reply("弗一把 支持：舞萌 / 中二");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        return GuessFriberg(message with { Command = db.AsMemory() }, provider);
     }
 
     private static object CompareRow(Song guess, Song answer)
