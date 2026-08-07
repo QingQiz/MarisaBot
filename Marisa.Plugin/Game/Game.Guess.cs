@@ -114,9 +114,18 @@ public partial class Game
 
     [MarisaPluginDoc("一种新的猜歌游戏，仅群聊可用", "`数据库名`，可写多个，用`:`分隔")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "guess")]
-    private MarisaPluginTaskState Guess(Message message)
+    private MarisaPluginTaskState Guess(Message message, DictionaryProvider provider)
     {
         if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
+        // 兼容旧格式 :game guess friberg maimai，转发给 friberg
+        var first = message.Command.Trim().ToString();
+        if (first.StartsWith("friberg", StringComparison.OrdinalIgnoreCase) || first.StartsWith("弗一把"))
+        {
+            var prefixLen = first.StartsWith("friberg", StringComparison.OrdinalIgnoreCase) ? "friberg".Length : "弗一把".Length;
+            var rest = message.Command.Trim().Slice(prefixLen).TrimStart();
+            return GuessFriberg(message with { Command = rest }, provider);
+        }
 
         if (!ReadTitles(message, out var songName, out var marisaPluginTaskState)) return marisaPluginTaskState;
 
@@ -326,18 +335,23 @@ public partial class Game
         },
         _ => throw new ArgumentOutOfRangeException(nameof(idx), idx, null)
     };
-
     [MarisaPluginDoc("friberg 猜歌游戏，仅群聊可用", "`guess friberg 数据库名`，可写多个，用`:`分隔")]
-    [MarisaPluginSubCommand(nameof(Guess))]
-    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "friberg")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "friberg", "弗一把")]
     private MarisaPluginTaskState GuessFriberg(Message message, DictionaryProvider provider)
-    {        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+    {
+        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
 
         var botQq = (long)provider["QQ"];
 
-        var dbNames = message.Command.Split(':').Select(x => x.Trim()).Where(x => !x.IsEmpty).ToArray();
+        var dbNames = message.Command.Split(':').Select(x => x.Trim()).Where(x => !x.IsEmpty)
+            .Select(x => x.ToString() switch
+            {
+                "舞萌"     => "maimai",
+                "中二"     => "chunithm",
+                var other  => other
+            }).ToArray();
 
-        if (dbNames.Length == 0 || dbNames.Any(x => x.ToString() != "maimai" && x.ToString() != "chunithm"))
+        if (dbNames.Length == 0 || dbNames.Any(x => x != "maimai" && x != "chunithm"))
         {
             message.Reply("friberg 仅支持 maimai / chunithm 数据库");
             return MarisaPluginTaskState.CompletedTask;
@@ -346,7 +360,7 @@ public partial class Game
         var songs = new List<Song>();
         for (var i = 0; i < GuessDbName.Count; i++)
         {
-            if (dbNames.Contains(GuessDbName[i], StringComparison.OrdinalIgnoreCase))
+            if (dbNames.Contains(GuessDbName[i], StringComparer.OrdinalIgnoreCase))
             {
                 songs.AddRange(FribergDbReader(i)());
             }
@@ -362,7 +376,7 @@ public partial class Game
         var answer = songs.RandomTake();
         var tries = FribergMaxTries;
         var rows = new List<object>();
-        var game = dbNames.First().ToString().ToLower() == "maimai" ? "maimai" : "chunithm";
+        var game = dbNames.First() == "maimai" ? "maimai" : "chunithm";
 
         async Task<MessageDataImage> Render()
         {
@@ -452,26 +466,6 @@ public partial class Game
         {
             return null;
         }
-    }
-
-    [MarisaPluginDoc("弗一把 猜歌游戏，仅群聊可用", "`:game 弗一把 舞萌` / `:game 弗一把 中二`")]
-    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "弗一把")]
-    private MarisaPluginTaskState Friberg(Message message, DictionaryProvider provider)
-    {
-        var db = message.Command.Trim().ToString() switch
-        {
-            "" or "maimai" or "舞萌"       => "maimai",
-            "chunithm" or "中二"           => "chunithm",
-            _                              => null
-        };
-
-        if (db == null)
-        {
-            message.Reply("弗一把 支持：舞萌 / 中二");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        return GuessFriberg(message with { Command = db.AsMemory() }, provider);
     }
 
     private static object CompareRow(Song guess, Song answer)
