@@ -387,6 +387,8 @@ public partial class Game
             return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
         }
 
+        var pendingList = new List<Song>();
+
         var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
             // 只有 @bot 的消息才参与游戏，其余交给其它插件
@@ -395,44 +397,85 @@ public partial class Game
                 return MarisaPluginTaskState.NoResponse;
             }
 
+            // 在候选列表状态下，玩家回 ID 选择
+            if (pendingList.Count != 0)
+            {
+                if (long.TryParse(mNext.Command.Trim().Span, out var id))
+                {
+                    var selected = pendingList.FirstOrDefault(s => s.Id == id);
+                    if (selected != null)
+                    {
+                        pendingList.Clear();
+                        return await GuessAndReply(selected);
+                    }
+                }
+
+                mNext.Reply("请发送列表中的歌曲 id");
+                return MarisaPluginTaskState.ToBeContinued;
+            }
+
             if (mNext.Command.Span is "结束游戏")
             {
-                mNext.Reply($"答案是：{answer.Title}", false);
+                rows.Add(CompareRow(answer, answer));
+                mNext.Reply(await Render());
+                mNext.Reply($"游戏结束！答案是：{answer.Title}", false);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
             var input = mNext.Command.Trim();
-            var guess = SearchSong(songs, input);
-            if (guess == null)
+            if (input.IsWhiteSpace())
+            {
+                mNext.Reply("@机器人发送歌名进行猜测");
+                return MarisaPluginTaskState.ToBeContinued;
+            }
+
+            var matches = SearchSongs(songs, input);
+            if (matches.Count == 0)
             {
                 mNext.Reply("曲库里没有这首歌");
                 return MarisaPluginTaskState.ToBeContinued;
             }
 
-            if (guess.Title.Equals(answer.Title, StringComparison.OrdinalIgnoreCase))
+            if (matches.Count == 1)
             {
-                rows.Add(CompareRow(answer, answer));
-                mNext.Reply(await Render());
-                mNext.Reply($"猜对了！答案是：{answer.Title}", false);
-                return MarisaPluginTaskState.CompletedTask;
+                return await GuessAndReply(matches[0]);
             }
 
-            rows.Add(CompareRow(guess, answer));
-            tries--;
-            mNext.Reply(await Render());
-
-            if (tries <= 0)
-            {
-                mNext.Reply($"次数用完了！答案是：{answer.Title}", false);
-                return MarisaPluginTaskState.CompletedTask;
-            }
+            // 多个候选：回复列表，等待玩家回 id
+            pendingList = matches;
+            mNext.Reply(string.Join('\n', matches.Select(s => $"[ID:{s.Id}, Lv:{s.MaxLevel()}] -> {s.Title}")) + "\n发送歌曲 id 进一步选择");
 
             return MarisaPluginTaskState.ToBeContinued;
+
+            async Task<MarisaPluginTaskState> GuessAndReply(Song guess)
+            {
+                if (guess.Title.Equals(answer.Title, StringComparison.OrdinalIgnoreCase))
+                {
+                    rows.Add(CompareRow(answer, answer));
+                    mNext.Reply(await Render());
+                    mNext.Reply($"猜对了！答案是：{answer.Title}", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                rows.Add(CompareRow(guess, answer));
+                tries--;
+                mNext.Reply(await Render());
+
+                if (tries <= 0)
+                {
+                    rows.Add(CompareRow(answer, answer));
+                    mNext.Reply(await Render());
+                    mNext.Reply($"次数用完了！答案是：{answer.Title}", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                return MarisaPluginTaskState.ToBeContinued;
+            }
         }, this);
 
         if (res)
         {
-            message.Reply($"friberg 猜歌游戏开始！\n答案是曲库中的一首歌\n发送歌名进行猜测，共 {FribergMaxTries} 次机会\n发送\"结束游戏\"结束", false);
+            message.Reply($"friberg 猜歌游戏开始！\n答案是曲库中的一首歌\n@机器人发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@机器人发送\"结束游戏\"结束游戏", false);
         }
         else
         {
@@ -443,29 +486,26 @@ public partial class Game
     }
 
     /// <summary>
-    ///     仿 SongDb.SearchSong 的模糊匹配：先精确、再包含、最后正则
+    ///     仿 maisong 的搜索：正则优先，正则失败回退包含匹配
     /// </summary>
-    private static Song? SearchSong(List<Song> songs, ReadOnlyMemory<char> input)
+    private static List<Song> SearchSongs(List<Song> songs, ReadOnlyMemory<char> input)
     {
         var keyword = input.Trim().ToString();
-
-        if (string.IsNullOrWhiteSpace(keyword)) return null;
-
-        var exact = songs.FirstOrDefault(s => s.Title.Equals(keyword, StringComparison.OrdinalIgnoreCase));
-        if (exact != null) return exact;
-
-        var contains = songs.FirstOrDefault(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase));
-        if (contains != null) return contains;
+        if (string.IsNullOrWhiteSpace(keyword)) return [];
 
         try
         {
             var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
-            return songs.FirstOrDefault(s => regex.IsMatch(s.Title));
+            var res = songs.Where(s => regex.IsMatch(s.Title)).ToList();
+            if (res.Count != 0) return res;
         }
         catch (RegexParseException)
         {
-            return null;
         }
+
+        return songs
+            .Where(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     private static object CompareRow(Song guess, Song answer)
