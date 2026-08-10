@@ -480,7 +480,8 @@ public partial class Game
             Genre = CompareCell(gGenre, aGenre),
             Version = CompareVersion(gVersion, aVersion),
             Constant = CompareNear(gConstant, aConstant, ConstantNear),
-            Bpm = CompareNear(gBpm, aBpm, BpmNear)
+            Bpm = CompareNear(gBpm, aBpm, BpmNear),
+            Extra = CompareExtra(guess, answer)
         };
     }
 
@@ -506,27 +507,33 @@ public partial class Game
             aIdx = Array.IndexOf(ChuVersionOrder, answer);
         }
 
+        var display = ShortVersion(guess);
+
         if (gIdx == -1 || aIdx == -1)
         {
-            return new { Value = guess, Status = "wrong", Arrow = "" };
+            return new { Value = display, Status = "wrong", Arrow = "" };
         }
 
         if (gIdx == aIdx)
         {
-            return new { Value = guess, Status = "correct", Arrow = "" };
-        }
-
-        if (Math.Abs(gIdx - aIdx) > VersionNear)
-        {
-            return new { Value = guess, Status = "wrong", Arrow = "" };
+            return new { Value = display, Status = "correct", Arrow = "" };
         }
 
         // ← 正确答案版本比猜测歌曲早；→ 反之代表晚
-        return new { Value = guess, Status = "near", Arrow = aIdx < gIdx ? "←" : "→" };
+        var arrow = aIdx < gIdx ? "←" : "→";
+        if (Math.Abs(gIdx - aIdx) > VersionNear)
+        {
+            return new { Value = display, Status = "wrong", Arrow = arrow };
+        }
+
+        return new { Value = display, Status = "near", Arrow = arrow };
     }
 
     private static object CompareNear(double guess, double answer, double near)
     {
+        // ↑ 正确答案对应值大于猜测歌曲；↓ 反之
+        var arrow = answer > guess ? "↑" : "↓";
+
         if (guess.Equals(answer))
         {
             return new { Value = guess, Status = "correct", Arrow = "" };
@@ -534,11 +541,45 @@ public partial class Game
 
         if (Math.Abs(guess - answer) > near)
         {
-            return new { Value = guess, Status = "wrong", Arrow = "" };
+            return new { Value = guess, Status = "wrong", Arrow = arrow };
         }
 
-        // ↑ 正确答案对应值大于猜测歌曲；↓ 反之
-        return new { Value = guess, Status = "near", Arrow = answer > guess ? "↑" : "↓" };
+        return new { Value = guess, Status = "near", Arrow = arrow };
+    }
+
+    /// <summary>
+    ///     版本显示名：去掉 maimai / CHUNITHM 前缀
+    /// </summary>
+    private static string ShortVersion(string version)
+    {
+        if (version is "maimai" or "CHUNITHM") return "無印";
+
+        const string maiPrefix = "maimai ";
+        const string chuPrefix = "CHUNITHM ";
+        if (version.StartsWith(maiPrefix)) return version[maiPrefix.Length..];
+        if (version.StartsWith(chuPrefix)) return version[chuPrefix.Length..];
+        return version;
+    }
+
+    private static object CompareExtra(Song guess, Song answer)
+    {
+        var gHas = HasExtra(guess);
+        var aHas = HasExtra(answer);
+
+        var label = guess is MaiMaiSong ? "ReM" : "Ult";
+        return new
+        {
+            Value = gHas ? $"有{label}谱面" : $"无{label}谱面",
+            Status = gHas == aHas ? "correct" : "wrong",
+            Arrow = ""
+        };
+    }
+
+    private static bool HasExtra(Song song)
+    {
+        return song.DiffNames.Any(x =>
+            x.Equals("Re:Master", StringComparison.OrdinalIgnoreCase) ||
+            x.Equals("ULTIMA", StringComparison.OrdinalIgnoreCase));
     }
 
     private static (string Title, string Artist, string Genre, string Version, double Constant, double Bpm) FribergInfo(Song song)
