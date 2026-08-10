@@ -108,23 +108,19 @@ function cellClass(status: string) {
 }
 
 .grid {
+    display: grid;
+    grid-template-columns: repeat(7, max-content);
     border: 2px solid #3a3a3c;
     border-radius: 8px;
     overflow: hidden;
 }
 
+/* 行不再自建 grid，子单元格直接参与 .grid 布局，整表列对齐 */
 .row {
-    display: grid;
-    grid-template-columns: repeat(7, max-content);
-    border-bottom: 2px solid #3a3a3c;
-    background: #000000;
+    display: contents;
 }
 
-.row:last-child {
-    border-bottom: none;
-}
-
-.row.header {
+.row.header .cell {
     background: #1a1a1a;
     font-size: 18px;
     color: #999999;
@@ -135,6 +131,7 @@ function cellClass(status: string) {
     min-width: 60px;
     padding: 14px 10px;
     border-right: 2px solid #3a3a3c;
+    border-bottom: 2px solid #3a3a3c;
     text-align: center;
     font-size: 20px;
     line-height: 1.5;
@@ -142,8 +139,12 @@ function cellClass(status: string) {
     overflow-wrap: anywhere;
 }
 
-.cell:last-child {
+.cell:nth-child(7n) {
     border-right: none;
+}
+
+.cell:nth-last-child(-n+7) {
+    border-bottom: none;
 }
 
 .cell.correct {
