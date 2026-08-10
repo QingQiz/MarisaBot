@@ -399,7 +399,7 @@ public partial class Game
                 return MarisaPluginTaskState.NoResponse;
             }
 
-            // 在候选列表状态下，玩家回 ID 选择
+            // 在候选列表状态下，只有回复列表内 id 才走选择逻辑；否则清空列表，把当前消息当作新指令处理
             if (pendingList.Count != 0)
             {
                 if (long.TryParse(mNext.Command.Trim().Span, out var id))
@@ -412,8 +412,7 @@ public partial class Game
                     }
                 }
 
-                mNext.Reply("请发送列表中的歌曲 id");
-                return MarisaPluginTaskState.ToBeContinued;
+                pendingList.Clear();
             }
 
             if (mNext.Command.Span is "结束游戏")
