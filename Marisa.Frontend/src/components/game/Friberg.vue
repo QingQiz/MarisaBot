@@ -47,7 +47,7 @@ const columns = computed(() => [
     {key: 'Version',  label: '版本'},
     {key: 'Constant', label: '定数'},
     {key: 'Bpm',      label: 'BPM'},
-    {key: 'Extra',    label: game.value === 'maimai' ? 'ReM' : 'ULT'},
+    {key: 'Extra',    label: game.value === 'maimai' ? 'ReM谱面' : 'Ult谱面'},
 ] as { key: keyof FribergRow, label: string }[])
 
 function cellClass(status: string) {

@@ -358,7 +358,7 @@ public partial class Game
         }
 
         var songs = new List<Song>();
-        var aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var aliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         for (var i = 0; i < GuessDbName.Count; i++)
         {
             if (dbNames.Contains(GuessDbName[i], StringComparer.OrdinalIgnoreCase))
@@ -488,24 +488,40 @@ public partial class Game
     }
 
     /// <summary>
-    ///     仿 maisong 的搜索：正则优先，正则失败回退包含匹配；先查别名库，命中则替换为真实歌名
+    ///     仿 maisong (SongDb.SearchSong) 的搜索：id 筛选 → 精确 → 别名包含 → 正则 → 包含
     /// </summary>
-    private static List<Song> SearchSongs(List<Song> songs, IReadOnlyDictionary<string, string> aliases, ReadOnlyMemory<char> input)
+    private static List<Song> SearchSongs(List<Song> songs, IReadOnlyDictionary<string, List<string>> aliases, ReadOnlyMemory<char> input)
     {
         var keyword = input.Trim().ToString();
         if (string.IsNullOrWhiteSpace(keyword)) return [];
 
-        // 别名库优先：别名命中时用真实歌名搜索
-        var realTitle = aliases.GetValueOrDefault(keyword, keyword);
+        // id 筛选：纯数字 / id1111
+        if (long.TryParse(keyword, out var id))
+        {
+            return songs.Where(s => s.Id == id).ToList();
+        }
+        if (keyword.StartsWith("id", StringComparison.OrdinalIgnoreCase) &&
+            long.TryParse(keyword[2..].Trim(), out var songId))
+        {
+            return songs.Where(s => s.Id == songId).ToList();
+        }
 
-        var byRealTitle = MatchByTitle(songs, realTitle);
-        if (byRealTitle.Count != 0) return byRealTitle;
+        // 1. 精确命中歌名
+        var exact = songs.Where(s => s.Title.Equals(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (exact.Count != 0) return exact;
 
-        return MatchByTitle(songs, keyword);
-    }
+        // 2. 别名包含匹配（仿 SongDb.SearchSongByAlias）
+        var aliasTitles = aliases
+            .Where(kv => kv.Key.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(kv => kv.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (aliasTitles.Count != 0)
+        {
+            return songs.Where(s => aliasTitles.Contains(s.Title, StringComparer.OrdinalIgnoreCase)).ToList();
+        }
 
-    private static List<Song> MatchByTitle(List<Song> songs, string keyword)
-    {
+        // 3. 正则匹配歌名
         try
         {
             var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
@@ -516,15 +532,16 @@ public partial class Game
         {
         }
 
+        // 4. 包含匹配歌名
         return songs
             .Where(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 
     /// <summary>
-    ///     读取 aliases.tsv 构建 别名 -> 真实歌名 映射（格式同 SongDb.GetSongAliases，TSV 第一列为真实歌名）
+    ///     读取 aliases.tsv 构建 别名 -> 真实歌名列表 映射（格式同 SongDb.GetSongAliases，TSV 第一列为真实歌名）
     /// </summary>
-    private static void LoadAliases(Dictionary<string, string> aliases, string dbName)
+    private static void LoadAliases(Dictionary<string, List<string>> aliases, string dbName)
     {
         var path = dbName == "maimai"
             ? Marisa.Plugin.Shared.MaiMaiDx.ResourceManager.ResourcePath + "/aliases.tsv"
@@ -546,7 +563,12 @@ public partial class Game
 
                 foreach (var alias in titles.Skip(1))
                 {
-                    aliases.TryAdd(alias, titles[0]);
+                    if (!aliases.TryGetValue(alias, out var list))
+                    {
+                        list = [];
+                        aliases[alias] = list;
+                    }
+                    list.Add(titles[0]);
                 }
             }
         }
@@ -663,10 +685,9 @@ public partial class Game
         var gHas = HasExtra(guess);
         var aHas = HasExtra(answer);
 
-        var label = guess is MaiMaiSong ? "ReM" : "Ult";
         return new
         {
-            Value = gHas ? $"有{label}谱面" : $"无{label}谱面",
+            Value = gHas ? "有" : "无",
             Status = gHas == aHas ? "correct" : "wrong",
             Arrow = ""
         };
