@@ -358,11 +358,13 @@ public partial class Game
         }
 
         var songs = new List<Song>();
+        var aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         for (var i = 0; i < GuessDbName.Count; i++)
         {
             if (dbNames.Contains(GuessDbName[i], StringComparer.OrdinalIgnoreCase))
             {
                 songs.AddRange(FribergDbReader(i)());
+                LoadAliases(aliases, GuessDbName[i]);
             }
         }
 
@@ -425,11 +427,11 @@ public partial class Game
             var input = mNext.Command.Trim();
             if (input.IsWhiteSpace())
             {
-                mNext.Reply("@机器人发送歌名进行猜测");
+                mNext.Reply("@魔理沙发送歌名进行猜测");
                 return MarisaPluginTaskState.ToBeContinued;
             }
 
-            var matches = SearchSongs(songs, input);
+            var matches = SearchSongs(songs, aliases, input);
             if (matches.Count == 0)
             {
                 mNext.Reply("曲库里没有这首歌");
@@ -475,7 +477,7 @@ public partial class Game
 
         if (res)
         {
-            message.Reply($"friberg 猜歌游戏开始！\n答案是曲库中的一首歌\n@机器人发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@机器人发送\"结束游戏\"结束游戏", false);
+            message.Reply($"friberg 猜歌游戏开始！\n答案是曲库中的一首歌\n@魔理沙发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
         }
         else
         {
@@ -486,13 +488,24 @@ public partial class Game
     }
 
     /// <summary>
-    ///     仿 maisong 的搜索：正则优先，正则失败回退包含匹配
+    ///     仿 maisong 的搜索：正则优先，正则失败回退包含匹配；先查别名库，命中则替换为真实歌名
     /// </summary>
-    private static List<Song> SearchSongs(List<Song> songs, ReadOnlyMemory<char> input)
+    private static List<Song> SearchSongs(List<Song> songs, IReadOnlyDictionary<string, string> aliases, ReadOnlyMemory<char> input)
     {
         var keyword = input.Trim().ToString();
         if (string.IsNullOrWhiteSpace(keyword)) return [];
 
+        // 别名库优先：别名命中时用真实歌名搜索
+        var realTitle = aliases.GetValueOrDefault(keyword, keyword);
+
+        var byRealTitle = MatchByTitle(songs, realTitle);
+        if (byRealTitle.Count != 0) return byRealTitle;
+
+        return MatchByTitle(songs, keyword);
+    }
+
+    private static List<Song> MatchByTitle(List<Song> songs, string keyword)
+    {
         try
         {
             var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
@@ -506,6 +519,40 @@ public partial class Game
         return songs
             .Where(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
             .ToList();
+    }
+
+    /// <summary>
+    ///     读取 aliases.tsv 构建 别名 -> 真实歌名 映射（格式同 SongDb.GetSongAliases，TSV 第一列为真实歌名）
+    /// </summary>
+    private static void LoadAliases(Dictionary<string, string> aliases, string dbName)
+    {
+        var path = dbName == "maimai"
+            ? Marisa.Plugin.Shared.MaiMaiDx.ResourceManager.ResourcePath + "/aliases.tsv"
+            : ResourceManager.ResourcePath + "/aliases.tsv";
+
+        try
+        {
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var titles = line
+                    .Split('\t')
+                    .Select(x => x.AsMemory().Trim().UnEscapeTsvCell().ToString())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                if (titles.Count < 2) continue;
+
+                foreach (var alias in titles.Skip(1))
+                {
+                    aliases.TryAdd(alias, titles[0]);
+                }
+            }
+        }
+        catch (IOException)
+        {
+        }
     }
 
     private static object CompareRow(Song guess, Song answer)
