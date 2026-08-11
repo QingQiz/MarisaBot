@@ -319,15 +319,14 @@ public partial class Game
     private const int VersionNear = 2;
 
     /// <summary>
-    ///     各难度猜测次数上限：初级 6、中级 8、上级/超上级 10
+    ///     各难度猜测次数上限：初级 6、中级 6、上级 6、超上级 8
     /// </summary>
     private static int FribergMaxTries(int lv)
     {
         return lv switch
         {
-            0 => 6,
-            1 => 8,
-            _ => 10
+            3 => 8,
+            _ => 6
         };
     }
 

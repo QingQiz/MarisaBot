@@ -65,7 +65,7 @@ function cellClass(status: string) {
 <template>
     <div v-if="data_fetched" class="container">
         <div class="title">{{ game === 'maimai' ? '弗一把（舞萌版）' : '弗一把（中二版）' }}</div>
-        <div class="subtitle">猜歌游戏 · 剩余次数 {{ tries.Max - tries.Tries }} / {{ tries.Max }}</div>
+        <div class="subtitle">猜歌游戏 · 已猜次数 {{ tries.Tries }} / {{ tries.Max }}</div>
         <div class="grid">
             <div class="row header">
                 <div v-for="c in columns" :key="c.key" class="cell">{{ c.label }}</div>
