@@ -426,7 +426,7 @@ public partial class Game
 
                 if (int.TryParse(choice, out var lv) && lv is >= 0 and <= 3)
                 {
-                    var filtered = FilterByDifficulty(songs, lv);
+                    var filtered = FilterByDifficulty(songs, lv, game);
                     if (filtered.Count == 0)
                     {
                         mNext.Reply("该难度下没有歌曲，游戏结束", false);
@@ -529,12 +529,16 @@ public partial class Game
 
         if (res)
         {
+            var lv0 = game == "maimai" ? "14" : "14+";
+            var lv1 = game == "maimai" ? "13+" : "14";
+            var lv2 = game == "maimai" ? "13" : "13+";
+
             message.Reply(
                 "friberg 猜歌游戏开始！\n" +
                 "请选择难度（回复数字序号）：\n" +
-                "0. 初级（紫谱定数 >= 14）\n" +
-                "1. 中级（>= 13+）\n" +
-                "2. 上级（>= 13）\n" +
+                $"0. 初级（紫谱定数 >= {lv0}）\n" +
+                $"1. 中级（>= {lv1}）\n" +
+                $"2. 上级（>= {lv2}）\n" +
                 "3. 超上级（无限制）",
                 false
             );
@@ -547,13 +551,14 @@ public partial class Game
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    private static List<Song> FilterByDifficulty(List<Song> songs, int lv)
+    private static List<Song> FilterByDifficulty(List<Song> songs, int lv, string game)
     {
         return lv switch
         {
-            0 => songs.Where(s => FribergInfo(s).Constant >= 14.0).ToList(),
-            1 => songs.Where(s => FribergInfo(s).Constant >= 13.5).ToList(),
-            2 => songs.Where(s => FribergInfo(s).Constant >= 13.0).ToList(),
+            // 舞萌 14 / 13+ / 13；中二对应加半级 14+ / 14 / 13+
+            0 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 14.0 : 14.5)).ToList(),
+            1 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.5 : 14.0)).ToList(),
+            2 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.0 : 13.5)).ToList(),
             _ => songs.ToList()
         };
     }
