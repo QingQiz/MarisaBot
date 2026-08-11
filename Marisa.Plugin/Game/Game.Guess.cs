@@ -405,6 +405,7 @@ public partial class Game
         }
 
         var pendingList = new List<Song>();
+        var guessedIds = new HashSet<long>();
 
         var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
@@ -495,14 +496,24 @@ public partial class Game
                 return await GuessAndReply(matches[0]);
             }
 
-            // 多个候选：回复列表，等待玩家回 id
+            // 多个候选：回复列表（最多 10 条），等待玩家回 id
             pendingList = matches;
-            mNext.Reply(string.Join('\n', matches.Select(s => $"[ID:{s.Id}, Lv:{s.MaxLevel()}] -> {s.Title}")) + "\n发送歌曲 id 进一步选择");
+            var display = matches.Take(10).Select(s => $"[ID:{s.Id}, Lv:{s.MaxLevel()}] -> {s.Title}").ToList();
+            mNext.Reply(string.Join('\n', display) +
+                        (matches.Count > 10 ? "\n仅显示前十条，请说请你要找啥。" : "") +
+                        "\n发送歌曲 id 进一步选择");
 
             return MarisaPluginTaskState.ToBeContinued;
 
             async Task<MarisaPluginTaskState> GuessAndReply(Song guess)
             {
+                // 重复猜测：不计数
+                if (!guessedIds.Add(guess.Id))
+                {
+                    mNext.Reply("猜过啦");
+                    return MarisaPluginTaskState.ToBeContinued;
+                }
+
                 if (guess.Title.Equals(answer!.Title, StringComparison.OrdinalIgnoreCase))
                 {
                     rows.Add(CompareRow(answer, answer));
@@ -564,24 +575,40 @@ public partial class Game
     }
 
     /// <summary>
-    ///     仿 maisong (SongDb.SearchSong) 的搜索：id 筛选 → 精确 → 别名包含 → 正则 → 包含
+    ///     仿 maisong (SongDb.SearchSong) 的搜索：
+    ///     id1111 前缀明确按 id 查；纯数字时 id 匹配与文本匹配（精确/别名/正则/包含）平级合并；
+    ///     其余按 精确 → 别名包含 → 正则 → 包含 优先级
     /// </summary>
     private static List<Song> SearchSongs(List<Song> songs, IReadOnlyDictionary<string, List<string>> aliases, ReadOnlyMemory<char> input)
     {
         var keyword = input.Trim().ToString();
         if (string.IsNullOrWhiteSpace(keyword)) return [];
 
-        // id 筛选：纯数字 / id1111
-        if (long.TryParse(keyword, out var id))
-        {
-            return songs.Where(s => s.Id == id).ToList();
-        }
+        // id1111 前缀：明确按 id 查
         if (keyword.StartsWith("id", StringComparison.OrdinalIgnoreCase) &&
             long.TryParse(keyword[2..].Trim(), out var songId))
         {
             return songs.Where(s => s.Id == songId).ToList();
         }
 
+        // 纯数字：id 匹配与文本匹配平级合并（如 2085 → id2085 的曲 + TECHNOPOLIS 2085）
+        if (long.TryParse(keyword, out var id))
+        {
+            return songs.Where(s => s.Id == id)
+                .Concat(MatchText(songs, aliases, keyword))
+                .DistinctBy(s => s.Id)
+                .ToList();
+        }
+
+        // 非数字：精确 → 别名包含 → 正则 → 包含
+        return MatchText(songs, aliases, keyword);
+    }
+
+    /// <summary>
+    ///     文本匹配：精确 → 别名包含 → 正则（失败回退包含），取第一个非空来源
+    /// </summary>
+    private static List<Song> MatchText(List<Song> songs, IReadOnlyDictionary<string, List<string>> aliases, string keyword)
+    {
         // 1. 精确命中歌名
         var exact = songs.Where(s => s.Title.Equals(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
         if (exact.Count != 0) return exact;
@@ -597,7 +624,7 @@ public partial class Game
             return songs.Where(s => aliasTitles.Contains(s.Title, StringComparer.OrdinalIgnoreCase)).ToList();
         }
 
-        // 3. 正则匹配歌名
+        // 3. 正则匹配歌名（失败回退包含）
         try
         {
             var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
