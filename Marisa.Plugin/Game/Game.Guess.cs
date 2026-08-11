@@ -375,7 +375,9 @@ public partial class Game
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var answer = songs.RandomTake();
+        var hostId = message.Sender.Id;
+        var waitingDifficulty = true;
+        Song? answer = null;
         var tries = FribergMaxTries;
         var rows = new List<object>();
         var game = dbNames.First() == "maimai" ? "maimai" : "chunithm";
@@ -393,6 +395,43 @@ public partial class Game
 
         var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
+            // 难度选择阶段：只有开局者可回复数字序号（无需 @bot），0123 以外结束游戏
+            if (waitingDifficulty)
+            {
+                if (mNext.Sender.Id != hostId)
+                {
+                    return MarisaPluginTaskState.NoResponse;
+                }
+
+                var choice = mNext.Command.Trim().ToString();
+
+                if (choice == "结束游戏")
+                {
+                    mNext.Reply("游戏结束", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                if (int.TryParse(choice, out var lv) && lv is >= 0 and <= 3)
+                {
+                    var filtered = FilterByDifficulty(songs, lv);
+                    if (filtered.Count == 0)
+                    {
+                        mNext.Reply("该难度下没有歌曲，游戏结束", false);
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+
+                    answer = filtered.RandomTake();
+                    waitingDifficulty = false;
+
+                    mNext.Reply(await Render());
+                    mNext.Reply($"难度已选择，猜歌开始！\n@魔理沙发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
+                    return MarisaPluginTaskState.ToBeContinued;
+                }
+
+                mNext.Reply("不存在的选项，游戏结束", false);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
             // 只有 @bot 的消息才参与游戏，其余交给其它插件
             if (!mNext.IsAt(botQq))
             {
@@ -417,9 +456,9 @@ public partial class Game
 
             if (mNext.Command.Span is "结束游戏")
             {
-                rows.Add(CompareRow(answer, answer));
+                rows.Add(CompareRow(answer!, answer!));
                 mNext.Reply(await Render());
-                mNext.Reply($"游戏结束！答案是：{answer.Title}", false);
+                mNext.Reply($"游戏结束！答案是：{answer!.Title}", false);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
@@ -450,7 +489,7 @@ public partial class Game
 
             async Task<MarisaPluginTaskState> GuessAndReply(Song guess)
             {
-                if (guess.Title.Equals(answer.Title, StringComparison.OrdinalIgnoreCase))
+                if (guess.Title.Equals(answer!.Title, StringComparison.OrdinalIgnoreCase))
                 {
                     rows.Add(CompareRow(answer, answer));
                     mNext.Reply(await Render());
@@ -476,7 +515,16 @@ public partial class Game
 
         if (res)
         {
-            message.Reply($"friberg 猜歌游戏开始！\n答案是曲库中的一首歌\n@魔理沙发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
+            message.Reply(
+                "friberg 猜歌游戏开始！\n" +
+                "请选择难度（回复数字序号）：\n" +
+                "0. 初级（紫谱定数 >= 14）\n" +
+                "1. 中级（>= 13+）\n" +
+                "2. 上级（>= 13）\n" +
+                "3. 超上级（无限制）\n" +
+                "只有发起者可以选择难度",
+                false
+            );
         }
         else
         {
@@ -484,6 +532,17 @@ public partial class Game
         }
 
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    private static List<Song> FilterByDifficulty(List<Song> songs, int lv)
+    {
+        return lv switch
+        {
+            0 => songs.Where(s => FribergInfo(s).Constant >= 14.0).ToList(),
+            1 => songs.Where(s => FribergInfo(s).Constant >= 13.5).ToList(),
+            2 => songs.Where(s => FribergInfo(s).Constant >= 13.0).ToList(),
+            _ => songs.ToList()
+        };
     }
 
     /// <summary>
@@ -681,8 +740,25 @@ public partial class Game
 
     private static object CompareExtra(Song guess, Song answer)
     {
-        var gHas = HasExtra(guess);
-        var aHas = HasExtra(answer);
+        var gIdx = GetExtraIdx(guess);
+        var aIdx = GetExtraIdx(answer);
+
+        var gHas = gIdx >= 0;
+        var aHas = aIdx >= 0;
+
+        // 答案有该谱面且选项也有：显示选项定数，相等绿、不等黄
+        if (aHas && gHas)
+        {
+            var gc = guess.Constants[gIdx];
+            var ac = answer.Constants[aIdx];
+
+            return new
+            {
+                Value = gc.ToString("F1"),
+                Status = Math.Abs(gc - ac) < 0.0001 ? "correct" : "near",
+                Arrow = ""
+            };
+        }
 
         return new
         {
@@ -692,9 +768,9 @@ public partial class Game
         };
     }
 
-    private static bool HasExtra(Song song)
+    private static int GetExtraIdx(Song song)
     {
-        return song.DiffNames.Any(x =>
+        return song.DiffNames.FindIndex(x =>
             x.Equals("Re:Master", StringComparison.OrdinalIgnoreCase) ||
             x.Equals("ULTIMA", StringComparison.OrdinalIgnoreCase));
     }

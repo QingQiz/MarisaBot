@@ -45,7 +45,7 @@ const columns = computed(() => [
     {key: 'Artist',   label: '作者'},
     {key: 'Genre',    label: '流派'},
     {key: 'Version',  label: '版本'},
-    {key: 'Constant', label: '定数'},
+    {key: 'Constant', label: 'Mas定数'},
     {key: 'Bpm',      label: 'BPM'},
     {key: 'Extra',    label: game.value === 'maimai' ? 'ReM谱面' : 'Ult谱面'},
 ] as { key: keyof FribergRow, label: string }[])
