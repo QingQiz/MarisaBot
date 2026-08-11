@@ -555,9 +555,9 @@ public partial class Game
     {
         return lv switch
         {
-            // 舞萌 14 / 13+ / 13；中二对应加半级 14+ / 14 / 13+
+            // 舞萌 14 / 13+(>=13.6) / 13；中二对应加半级 14+ / 14 / 13+(>=13.5)
             0 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 14.0 : 14.5)).ToList(),
-            1 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.5 : 14.0)).ToList(),
+            1 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.6 : 14.0)).ToList(),
             2 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.0 : 13.5)).ToList(),
             _ => songs.ToList()
         };
