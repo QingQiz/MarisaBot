@@ -500,7 +500,7 @@ public partial class Game
             pendingList = matches;
             var display = matches.Take(10).Select(s => $"[ID:{s.Id}, Lv:{s.MaxLevel()}] -> {s.Title}").ToList();
             mNext.Reply(string.Join('\n', display) +
-                        (matches.Count > 10 ? "\n仅显示前十条，请说请你要找啥。" : "") +
+                        (matches.Count > 10 ? "\n仅显示前十条，请说清你要找啥。" : "") +
                         "\n发送歌曲 id 进一步选择");
 
             return MarisaPluginTaskState.ToBeContinued;
