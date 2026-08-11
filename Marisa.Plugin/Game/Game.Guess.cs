@@ -716,7 +716,7 @@ public partial class Game
 
     /// <summary>
     ///     版本显示名：去掉 maimai / maimai でらっくす / CHUNITHM 前缀；
-    ///     舞萌 DX 初代显示 DX无印，DX PLUS 显示 DX无印PLUS
+    ///     舞萌 DX 初代显示 DX，DX PLUS 显示 DX PLUS
     /// </summary>
     private static string ShortVersion(string version)
     {
@@ -725,8 +725,8 @@ public partial class Game
 
         const string dxPrefix = "maimai でらっくす ";
         if (version.StartsWith(dxPrefix)) return version[dxPrefix.Length..];
-        if (version == "maimai でらっくす") return "DX无印";
-        if (version == "maimai でらっくす PLUS") return "DX无印PLUS";
+        if (version == "maimai でらっくす") return "DX";
+        if (version == "maimai でらっくす PLUS") return "DX PLUS";
 
         if (version == "maimai") return "無印";
         if (version.StartsWith("maimai ")) return version["maimai ".Length..];
