@@ -314,10 +314,22 @@ public partial class Game
         "CHUNITHM VERSE", "CHUNITHM XVERSE", "CHUNITHM XVERSEX"
     ];
 
-    private const int FribergMaxTries = 10;
     private const double ConstantNear = 0.3;
     private const double BpmNear = 10;
     private const int VersionNear = 2;
+
+    /// <summary>
+    ///     各难度猜测次数上限：初级 6、中级 8、上级/超上级 10
+    /// </summary>
+    private static int FribergMaxTries(int lv)
+    {
+        return lv switch
+        {
+            0 => 6,
+            1 => 8,
+            _ => 10
+        };
+    }
 
     private static readonly Func<int, Func<List<Song>>> FribergDbReader = idx => idx switch
     {
@@ -378,7 +390,8 @@ public partial class Game
         var hostId = message.Sender.Id;
         var waitingDifficulty = true;
         Song? answer = null;
-        var tries = FribergMaxTries;
+        var difficulty = 3;
+        var tries = 0;
         var rows = new List<object>();
         var game = dbNames.First() == "maimai" ? "maimai" : "chunithm";
 
@@ -387,7 +400,7 @@ public partial class Game
             var ctx = new WebContext();
             ctx.Put("FribergGame", game);
             ctx.Put("FribergRows", rows);
-            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries });
+            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries(difficulty) });
             return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
         }
 
@@ -422,9 +435,10 @@ public partial class Game
 
                     answer = filtered.RandomTake();
                     waitingDifficulty = false;
+                    difficulty = lv;
+                    tries = FribergMaxTries(lv);
 
-                    mNext.Reply(await Render());
-                    mNext.Reply($"难度已选择，猜歌开始！\n@魔理沙发送歌名进行猜测，共 {FribergMaxTries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
+                    mNext.Reply($"难度已选择，猜歌开始！\n@魔理沙发送歌名进行猜测，共 {tries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
                     return MarisaPluginTaskState.ToBeContinued;
                 }
 
