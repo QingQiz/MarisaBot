@@ -692,7 +692,8 @@ public partial class Game
             aIdx = Array.IndexOf(ChuVersionOrder, answer);
         }
 
-        var display = ShortVersion(guess);
+        // Value 传原始版本名，前端据此映射版本 logo 图片
+        var display = guess;
 
         if (gIdx == -1 || aIdx == -1)
         {
@@ -730,30 +731,6 @@ public partial class Game
         }
 
         return new { Value = guess, Status = "near", Arrow = arrow };
-    }
-
-    /// <summary>
-    ///     版本显示名：舞萌 DX 系列用国服命名（舞萌DX 202x），其余去掉 maimai / CHUNITHM 前缀
-    /// </summary>
-    private static string ShortVersion(string version)
-    {
-        if (version == "CHUNITHM") return "無印";
-        if (version.StartsWith("CHUNITHM ")) return version["CHUNITHM ".Length..];
-
-        if (version == "maimai") return "無印";
-        if (version.StartsWith("maimai ")) version = version["maimai ".Length..];
-
-        return version switch
-        {
-            "でらっくす"            => "舞萌DX",
-            "でらっくす Splash"     => "舞萌DX 2020",
-            "でらっくす UNiVERSE"   => "舞萌DX 2021",
-            "でらっくす FESTiVAL"   => "舞萌DX 2022",
-            "でらっくす BUDDiES"    => "舞萌DX 2023",
-            "でらっくす PRiSM"      => "舞萌DX 2024",
-            "でらっくす PRiSM PLUS" => "舞萌DX 2025",
-            _                      => version
-        };
     }
 
     private static object CompareExtra(Song guess, Song answer)
