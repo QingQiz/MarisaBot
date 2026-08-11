@@ -137,6 +137,9 @@ function cellClass(status: string) {
     line-height: 1.5;
     word-break: break-all;
     overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cell:nth-child(7n) {
