@@ -3,46 +3,6 @@ import {computed, ref} from "vue";
 import axios from "axios";
 import {context_get} from "@/GlobalVars";
 import {useRoute} from "vue-router";
-import {versionLogoSrc} from "@/components/maimai/utils/song_card";
-
-// 版本时间序 (来源: OpVersion.vue), 从新到旧
-const chuVersionOrder: [string, string][] = [
-    ["CHUNITHM XVERSEX",        "logo_xversex.png"],
-    ["CHUNITHM XVERSE",         "logo_xverse.png"],
-    ["CHUNITHM VERSE",          "logo_verse.png"],
-    ["CHUNITHM LUMINOUS PLUS",  "logo_luminous_plus.png"],
-    ["CHUNITHM LUMINOUS",       "logo_luminous.png"],
-    ["CHUNITHM SUN PLUS",       "logo_sun_plus.png"],
-    ["CHUNITHM SUN",            "logo_sun.png"],
-    ["CHUNITHM NEW PLUS!!",     "logo_new_plus.png"],
-    ["CHUNITHM NEW!!",          "logo_new.png"],
-    ["CHUNITHM PARADISE LOST",  "logo_paradise_lost.png"],
-    ["CHUNITHM PARADISE",       "logo_paradise.png"],
-    ["CHUNITHM CRYSTAL PLUS",   "logo_crystal_plus.png"],
-    ["CHUNITHM CRYSTAL",        "logo_crystal.png"],
-    ["CHUNITHM AMAZON PLUS",    "logo_amazon_plus.png"],
-    ["CHUNITHM AMAZON",         "logo_amazon.png"],
-    ["CHUNITHM STAR PLUS",      "logo_star_plus.png"],
-    ["CHUNITHM STAR",           "logo_star.png"],
-    ["CHUNITHM AIR PLUS",       "logo_air_plus.png"],
-    ["CHUNITHM AIR",            "logo_air.png"],
-    ["CHUNITHM PLUS",           "logo_chunithm_plus.png"],
-    ["CHUNITHM",                "logo_chunithm.png"],
-];
-
-function chuVersionLogoPath(v: string): string {
-    const key = v.replace(/!!/g, "");
-    for (const [k, logo] of chuVersionOrder) {
-        if (k.replace(/!!/g, "") === key) return `/assets/chunithm/pic/${logo}`;
-    }
-    return "";
-}
-
-// 版本栏：maimai 用官方版本 logo 图片，chunithm 用 logo_*.png，未命中返回空（回退文本）
-function versionImg(src: string) {
-    if (game.value === 'maimai') return versionLogoSrc(src)
-    return chuVersionLogoPath(src)
-}
 
 interface FribergCell {
     Value: string;
@@ -113,13 +73,7 @@ function cellClass(status: string) {
             <div v-for="(row, i) in rows" :key="i" class="row">
                 <div v-for="c in columns" :key="c.key" class="cell"
                      :class="cellClass(row[c.key].Status)">
-                    <template v-if="c.key === 'Version' && versionImg(row[c.key].Value)">
-                        <img :src="versionImg(row[c.key].Value)" class="version-logo">
-                        <span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
-                    </template>
-                    <template v-else>
-                        {{ row[c.key].Value }}<span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
-                    </template>
+                    {{ row[c.key].Value }}<span v-if="row[c.key].Arrow" class="arrow">{{ row[c.key].Arrow }}</span>
                 </div>
             </div>
             <div v-if="rows.length === 0" class="row">
@@ -218,10 +172,5 @@ function cellClass(status: string) {
 .arrow {
     font-weight: bold;
     margin-left: 4px;
-}
-
-.version-logo {
-    height: 34px;
-    object-fit: contain;
 }
 </style>

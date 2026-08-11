@@ -692,8 +692,7 @@ public partial class Game
             aIdx = Array.IndexOf(ChuVersionOrder, answer);
         }
 
-        // Value 传原始版本名，前端据此映射版本 logo 图片
-        var display = guess;
+        var display = ShortVersion(guess);
 
         if (gIdx == -1 || aIdx == -1)
         {
@@ -713,6 +712,26 @@ public partial class Game
         }
 
         return new { Value = display, Status = "near", Arrow = arrow };
+    }
+
+    /// <summary>
+    ///     版本显示名：去掉 maimai / maimai でらっくす / CHUNITHM 前缀；
+    ///     舞萌 DX 初代显示 DX无印，DX PLUS 显示 DX无印PLUS
+    /// </summary>
+    private static string ShortVersion(string version)
+    {
+        if (version == "CHUNITHM") return "無印";
+        if (version.StartsWith("CHUNITHM ")) return version["CHUNITHM ".Length..];
+
+        const string dxPrefix = "maimai でらっくす ";
+        if (version.StartsWith(dxPrefix)) return version[dxPrefix.Length..];
+        if (version == "maimai でらっくす") return "DX无印";
+        if (version == "maimai でらっくす PLUS") return "DX无印PLUS";
+
+        if (version == "maimai") return "無印";
+        if (version.StartsWith("maimai ")) return version["maimai ".Length..];
+
+        return version;
     }
 
     private static object CompareNear(double guess, double answer, double near)
