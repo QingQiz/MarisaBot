@@ -26,7 +26,7 @@ const id    = ref(route.query.id)
 const data_fetched = ref(false)
 const game   = ref('maimai')
 const rows   = ref([] as FribergRow[])
-const tries  = ref({Tries: 0, Max: 0})
+const tries  = ref({Tries: 0, Max: 0, Difficulty: 0})
 
 axios.all([
     axios.get(context_get, {params: {id: id.value, name: 'FribergGame'}}),
@@ -50,6 +50,12 @@ const columns = computed(() => [
     {key: 'Extra',    label: game.value === 'maimai' ? 'ReM谱面' : 'Ult谱面'},
 ] as { key: keyof FribergRow, label: string }[])
 
+const difficultyNames = ['初级', '中级', '上级', '超上级']
+
+function difficultyName(d: number) {
+    return difficultyNames[d] ?? ''
+}
+
 function cellClass(status: string) {
     switch (status) {
         case 'correct':
@@ -65,7 +71,7 @@ function cellClass(status: string) {
 <template>
     <div v-if="data_fetched" class="container">
         <div class="title">{{ game === 'maimai' ? '弗一把（舞萌版）' : '弗一把（中二版）' }}</div>
-        <div class="subtitle">猜歌游戏 · 已猜次数 {{ tries.Tries }} / {{ tries.Max }}</div>
+        <div class="subtitle">猜歌游戏 · 难度-{{ difficultyName(tries.Difficulty) }} · 剩余猜测 {{ tries.Max - tries.Tries }} / {{ tries.Max }}</div>
         <div class="grid">
             <div class="row header">
                 <div v-for="c in columns" :key="c.key" class="cell">{{ c.label }}</div>

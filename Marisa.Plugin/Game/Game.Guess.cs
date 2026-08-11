@@ -399,7 +399,7 @@ public partial class Game
             var ctx = new WebContext();
             ctx.Put("FribergGame", game);
             ctx.Put("FribergRows", rows);
-            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries(difficulty) });
+            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries(difficulty), Difficulty = difficulty });
             return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
         }
 
