@@ -405,6 +405,7 @@ public partial class Game
 
         var pendingList = new List<Song>();
         var guessedIds = new HashSet<long>();
+        var cooldown = DateTime.MinValue;
 
         var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
         {
@@ -506,6 +507,14 @@ public partial class Game
 
             async Task<MarisaPluginTaskState> GuessAndReply(Song guess)
             {
+                // 冷却期：任意玩家猜测后 5 秒内全群不能再次猜测，防止撞车
+                if (DateTime.Now - cooldown < TimeSpan.FromSeconds(5))
+                {
+                    mNext.Reply("猜太快啦，慢点慢点");
+                    return MarisaPluginTaskState.ToBeContinued;
+                }
+                cooldown = DateTime.Now;
+
                 // 重复猜测：不计数
                 if (!guessedIds.Add(guess.Id))
                 {
