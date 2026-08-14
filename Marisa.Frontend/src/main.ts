@@ -30,6 +30,7 @@ import MaiDifficultyCurve from "@/components/maimai/MaiDifficultyCurve.vue";
 import MaiChartPreview from "@/components/maimai/MaiChartPreview.vue";
 import MaiCurveRank from "@/components/maimai/MaiCurveRank.vue";
 import MaiDanCourse from "@/components/maimai/MaiDanCourse.vue";
+import Friberg from "@/components/game/Friberg.vue";
 
 
 const routes = [
@@ -54,6 +55,7 @@ const routes = [
     {path: '/chunithm/op-version', component: OpVersion},
     {path: '/chunithm/preview', component: ChunithmPreview},
     {path: '/chunithm/song', component: ChunithmSong},
+    {path: '/game/friberg', component: Friberg},
     {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},
     {path: '/osu/recommend', component: OsuRecommend},

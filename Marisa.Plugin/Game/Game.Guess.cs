@@ -3,10 +3,12 @@ using System.Dynamic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
+using Marisa.BotDriver.DI;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util;
+using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 using ResourceManager = Marisa.Plugin.Shared.Chunithm.ResourceManager;
 
@@ -112,9 +114,18 @@ public partial class Game
 
     [MarisaPluginDoc("一种新的猜歌游戏，仅群聊可用", "`数据库名`，可写多个，用`:`分隔")]
     [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "guess")]
-    private MarisaPluginTaskState Guess(Message message)
+    private MarisaPluginTaskState Guess(Message message, DictionaryProvider provider)
     {
         if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
+        // 兼容旧格式 :game guess friberg maimai，转发给 friberg
+        var first = message.Command.Trim().ToString();
+        if (first.StartsWith("friberg", StringComparison.OrdinalIgnoreCase) || first.StartsWith("弗一把"))
+        {
+            var prefixLen = first.StartsWith("friberg", StringComparison.OrdinalIgnoreCase) ? "friberg".Length : "弗一把".Length;
+            var rest = message.Command.Trim().Slice(prefixLen).TrimStart();
+            return GuessFriberg(message with { Command = rest }, provider);
+        }
 
         if (!ReadTitles(message, out var songName, out var marisaPluginTaskState)) return marisaPluginTaskState;
 
@@ -280,4 +291,558 @@ public partial class Game
 
     [GeneratedRegex("^[|a-zA-Z0-9,./?():;'\"*!@#$%^&-_=+`~<> ]+$")]
     private static partial Regex SongTitleMatcher();
+
+    #region Friberg
+
+    private static readonly string[] MaiVersionOrder =
+    [
+        "maimai", "maimai PLUS", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE",
+        "maimai ORANGE PLUS", "maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi",
+        "maimai MURASAKi PLUS", "maimai MiLK", "MiLK PLUS", "maimai FiNALE",
+        "maimai でらっくす", "maimai でらっくす Splash", "maimai でらっくす UNiVERSE",
+        "maimai でらっくす FESTiVAL", "maimai でらっくす BUDDiES",
+        "maimai でらっくす PRiSM", "maimai でらっくす PRiSM PLUS"
+    ];
+
+    private static readonly string[] ChuVersionOrder =
+    [
+        "CHUNITHM", "CHUNITHM PLUS", "CHUNITHM AIR", "CHUNITHM AIR PLUS",
+        "CHUNITHM STAR", "CHUNITHM STAR PLUS", "CHUNITHM AMAZON", "CHUNITHM AMAZON PLUS",
+        "CHUNITHM CRYSTAL", "CHUNITHM CRYSTAL PLUS", "CHUNITHM PARADISE",
+        "CHUNITHM PARADISE LOST", "CHUNITHM NEW!!", "CHUNITHM NEW PLUS!!",
+        "CHUNITHM SUN", "CHUNITHM SUN PLUS", "CHUNITHM LUMINOUS", "CHUNITHM LUMINOUS PLUS",
+        "CHUNITHM VERSE", "CHUNITHM XVERSE", "CHUNITHM XVERSEX"
+    ];
+
+    private const double ConstantNear = 0.3;
+    private const double BpmNear = 10;
+    private const int VersionNear = 2;
+
+    /// <summary>
+    ///     各难度猜测次数上限：初级 6、中级 6、上级 6、超上级 8
+    /// </summary>
+    private static int FribergMaxTries(int lv)
+    {
+        return lv switch
+        {
+            3 => 8,
+            _ => 6
+        };
+    }
+
+    private static readonly Func<int, Func<List<Song>>> FribergDbReader = idx => idx switch
+    {
+        0 => () =>
+        {
+            var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
+            return data.Select(d => (Song)new MaiMaiSong(d)).ToList();
+        },
+        1 => () =>
+        {
+            var data =
+                JsonConvert.DeserializeObject<ExpandoObject[]>(
+                    File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")) as dynamic[];
+            return data!.Select(d => (Song)new ChunithmSong(d)).ToList();
+        },
+        _ => throw new ArgumentOutOfRangeException(nameof(idx), idx, null)
+    };
+    [MarisaPluginDoc("friberg 猜歌游戏，仅群聊可用", "`guess friberg 数据库名`，可写多个，用`:`分隔")]
+    [MarisaPluginCommand(StringComparison.OrdinalIgnoreCase, "friberg", "弗一把")]
+    private MarisaPluginTaskState GuessFriberg(Message message, DictionaryProvider provider)
+    {
+        if (message.GroupInfo == null) return MarisaPluginTaskState.CompletedTask;
+
+        var botQq = (long)provider["QQ"];
+
+        var dbNames = message.Command.Split(':').Select(x => x.Trim()).Where(x => !x.IsEmpty)
+            .Select(x => x.ToString() switch
+            {
+                "舞萌"     => "maimai",
+                "中二"     => "chunithm",
+                var other  => other
+            }).ToArray();
+
+        if (dbNames.Length == 0 || dbNames.Any(x => x != "maimai" && x != "chunithm"))
+        {
+            message.Reply("friberg 仅支持 maimai / chunithm 数据库");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var songs = new List<Song>();
+        var aliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < GuessDbName.Count; i++)
+        {
+            if (dbNames.Contains(GuessDbName[i], StringComparer.OrdinalIgnoreCase))
+            {
+                songs.AddRange(FribergDbReader(i)());
+                LoadAliases(aliases, GuessDbName[i]);
+            }
+        }
+
+        songs = songs.Where(s => FribergInfo(s).Constant > 0).ToList();
+        if (songs.Count == 0)
+        {
+            message.Reply("曲库为空");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var hostId = message.Sender.Id;
+        var waitingDifficulty = true;
+        Song? answer = null;
+        var difficulty = 3;
+        var tries = 0;
+        var rows = new List<object>();
+        var game = dbNames.First() == "maimai" ? "maimai" : "chunithm";
+
+        async Task<MessageDataImage> Render()
+        {
+            var ctx = new WebContext();
+            ctx.Put("FribergGame", game);
+            ctx.Put("FribergRows", rows);
+            ctx.Put("FribergTries", new { Tries = tries, Max = FribergMaxTries(difficulty), Difficulty = difficulty });
+            return MessageDataImage.FromBase64(await WebApi.Friberg(ctx.Id));
+        }
+
+        var pendingList = new List<Song>();
+        var guessedIds = new HashSet<long>();
+
+        var res = DialogManager.TryAddDialog((message.GroupInfo?.Id, null), async mNext =>
+        {
+            // 难度选择阶段：只有开局者可回复数字序号（无需 @bot），0123 以外结束游戏
+            if (waitingDifficulty)
+            {
+                if (mNext.Sender.Id != hostId)
+                {
+                    return MarisaPluginTaskState.NoResponse;
+                }
+
+                var choice = mNext.Command.Trim().ToString();
+
+                if (choice == "结束游戏")
+                {
+                    mNext.Reply("游戏结束", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                if (int.TryParse(choice, out var lv) && lv is >= 0 and <= 3)
+                {
+                    var filtered = FilterByDifficulty(songs, lv, game);
+                    if (filtered.Count == 0)
+                    {
+                        mNext.Reply("该难度下没有歌曲，游戏结束", false);
+                        return MarisaPluginTaskState.CompletedTask;
+                    }
+
+                    answer = filtered.RandomTake();
+                    waitingDifficulty = false;
+                    difficulty = lv;
+                    tries = FribergMaxTries(lv);
+
+                    mNext.Reply($"难度已选择，猜歌开始！\n@魔理沙发送歌名进行猜测，共 {tries} 次机会\n@魔理沙发送\"结束游戏\"结束游戏", false);
+                    return MarisaPluginTaskState.ToBeContinued;
+                }
+
+                mNext.Reply("不存在的选项，游戏结束", false);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            // 只有 @bot 的消息才参与游戏，其余交给其它插件
+            if (!mNext.IsAt(botQq))
+            {
+                return MarisaPluginTaskState.NoResponse;
+            }
+
+            // 在候选列表状态下，只有回复列表内 id 才走选择逻辑；否则清空列表，把当前消息当作新指令处理
+            if (pendingList.Count != 0)
+            {
+                if (long.TryParse(mNext.Command.Trim().Span, out var id))
+                {
+                    var selected = pendingList.FirstOrDefault(s => s.Id == id);
+                    if (selected != null)
+                    {
+                        pendingList.Clear();
+                        return await GuessAndReply(selected);
+                    }
+                }
+
+                pendingList.Clear();
+            }
+
+            if (mNext.Command.Span is "结束游戏")
+            {
+                rows.Add(CompareRow(answer!, answer!));
+                mNext.Reply(await Render());
+                mNext.Reply($"游戏结束！答案是：{answer!.Title}", false);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var input = mNext.Command.Trim();
+            if (input.IsWhiteSpace())
+            {
+                mNext.Reply("@魔理沙发送歌名进行猜测");
+                return MarisaPluginTaskState.ToBeContinued;
+            }
+
+            var matches = SearchSongs(songs, aliases, input);
+            if (matches.Count == 0)
+            {
+                mNext.Reply("曲库里没有这首歌");
+                return MarisaPluginTaskState.ToBeContinued;
+            }
+
+            if (matches.Count == 1)
+            {
+                return await GuessAndReply(matches[0]);
+            }
+
+            // 多个候选：回复列表（最多 10 条），等待玩家回 id
+            pendingList = matches;
+            var display = matches.Take(10).Select(s => $"[ID:{s.Id}, Lv:{s.MaxLevel()}] -> {s.Title}").ToList();
+            mNext.Reply(string.Join('\n', display) +
+                        (matches.Count > 10 ? "\n仅显示前十条，请说清你要找啥。" : "") +
+                        "\n发送歌曲 id 进一步选择");
+
+            return MarisaPluginTaskState.ToBeContinued;
+
+            async Task<MarisaPluginTaskState> GuessAndReply(Song guess)
+            {
+                // 重复猜测：不计数
+                if (!guessedIds.Add(guess.Id))
+                {
+                    mNext.Reply("猜过啦");
+                    return MarisaPluginTaskState.ToBeContinued;
+                }
+
+                if (guess.Title.Equals(answer!.Title, StringComparison.OrdinalIgnoreCase))
+                {
+                    rows.Add(CompareRow(answer, answer));
+                    mNext.Reply(await Render());
+                    mNext.Reply($"猜对了！答案是：{answer.Title}", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                rows.Add(CompareRow(guess, answer));
+                tries--;
+                mNext.Reply(await Render());
+
+                if (tries <= 0)
+                {
+                    rows.Add(CompareRow(answer, answer));
+                    mNext.Reply(await Render());
+                    mNext.Reply($"次数用完了！答案是：{answer.Title}", false);
+                    return MarisaPluginTaskState.CompletedTask;
+                }
+
+                return MarisaPluginTaskState.ToBeContinued;
+            }
+        }, this);
+
+        if (res)
+        {
+            var lv0 = game == "maimai" ? "14" : "14+";
+            var lv1 = game == "maimai" ? "13+" : "14";
+            var lv2 = game == "maimai" ? "13" : "13+";
+
+            message.Reply(
+                "friberg 猜歌游戏开始！\n" +
+                "请选择难度（回复数字序号）：\n" +
+                $"0. 初级（紫谱定数 >= {lv0}）\n" +
+                $"1. 中级（>= {lv1}）\n" +
+                $"2. 上级（>= {lv2}）\n" +
+                "3. 超上级（无限制）",
+                false
+            );
+        }
+        else
+        {
+            message.Reply("？");
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    private static List<Song> FilterByDifficulty(List<Song> songs, int lv, string game)
+    {
+        return lv switch
+        {
+            // 舞萌 14 / 13+(>=13.6) / 13；中二对应加半级 14+ / 14 / 13+(>=13.5)
+            0 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 14.0 : 14.5)).ToList(),
+            1 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.6 : 14.0)).ToList(),
+            2 => songs.Where(s => FribergInfo(s).Constant >= (game == "maimai" ? 13.0 : 13.5)).ToList(),
+            _ => songs.ToList()
+        };
+    }
+
+    /// <summary>
+    ///     仿 maisong (SongDb.SearchSong) 的搜索：
+    ///     id1111 前缀明确按 id 查；纯数字时 id 匹配与文本匹配（精确/别名/正则/包含）平级合并；
+    ///     其余按 精确 → 别名包含 → 正则 → 包含 优先级
+    /// </summary>
+    private static List<Song> SearchSongs(List<Song> songs, IReadOnlyDictionary<string, List<string>> aliases, ReadOnlyMemory<char> input)
+    {
+        var keyword = input.Trim().ToString();
+        if (string.IsNullOrWhiteSpace(keyword)) return [];
+
+        // id1111 前缀：明确按 id 查
+        if (keyword.StartsWith("id", StringComparison.OrdinalIgnoreCase) &&
+            long.TryParse(keyword[2..].Trim(), out var songId))
+        {
+            return songs.Where(s => s.Id == songId).ToList();
+        }
+
+        // 纯数字：id 匹配与文本匹配平级合并（如 2085 → id2085 的曲 + TECHNOPOLIS 2085）
+        if (long.TryParse(keyword, out var id))
+        {
+            return songs.Where(s => s.Id == id)
+                .Concat(MatchText(songs, aliases, keyword))
+                .DistinctBy(s => s.Id)
+                .ToList();
+        }
+
+        // 非数字：精确 → 别名包含 → 正则 → 包含
+        return MatchText(songs, aliases, keyword);
+    }
+
+    /// <summary>
+    ///     文本匹配：精确 → 别名包含 → 正则（失败回退包含），取第一个非空来源
+    /// </summary>
+    private static List<Song> MatchText(List<Song> songs, IReadOnlyDictionary<string, List<string>> aliases, string keyword)
+    {
+        // 1. 精确命中歌名
+        var exact = songs.Where(s => s.Title.Equals(keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (exact.Count != 0) return exact;
+
+        // 2. 别名包含匹配（仿 SongDb.SearchSongByAlias）
+        var aliasTitles = aliases
+            .Where(kv => kv.Key.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(kv => kv.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (aliasTitles.Count != 0)
+        {
+            return songs.Where(s => aliasTitles.Contains(s.Title, StringComparer.OrdinalIgnoreCase)).ToList();
+        }
+
+        // 3. 正则匹配歌名（失败回退包含）
+        try
+        {
+            var regex = new Regex(keyword, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(200));
+            var res = songs.Where(s => regex.IsMatch(s.Title)).ToList();
+            if (res.Count != 0) return res;
+        }
+        catch (RegexParseException)
+        {
+        }
+
+        // 4. 包含匹配歌名
+        return songs
+            .Where(s => s.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    /// <summary>
+    ///     读取 aliases.tsv 构建 别名 -> 真实歌名列表 映射（格式同 SongDb.GetSongAliases，TSV 第一列为真实歌名）
+    /// </summary>
+    private static void LoadAliases(Dictionary<string, List<string>> aliases, string dbName)
+    {
+        var path = dbName == "maimai"
+            ? Marisa.Plugin.Shared.MaiMaiDx.ResourceManager.ResourcePath + "/aliases.tsv"
+            : ResourceManager.ResourcePath + "/aliases.tsv";
+
+        try
+        {
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var titles = line
+                    .Split('\t')
+                    .Select(x => x.AsMemory().Trim().UnEscapeTsvCell().ToString())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                if (titles.Count < 2) continue;
+
+                foreach (var alias in titles.Skip(1))
+                {
+                    if (!aliases.TryGetValue(alias, out var list))
+                    {
+                        list = [];
+                        aliases[alias] = list;
+                    }
+                    list.Add(titles[0]);
+                }
+            }
+        }
+        catch (IOException)
+        {
+        }
+    }
+
+    private static object CompareRow(Song guess, Song answer)
+    {
+        var (gTitle, gArtist, gGenre, gVersion, gConstant, gBpm) = FribergInfo(guess);
+        var (aTitle, aArtist, aGenre, aVersion, aConstant, aBpm) = FribergInfo(answer);
+
+        return new
+        {
+            Title = CompareCell(gTitle, aTitle),
+            Artist = CompareCell(gArtist, aArtist),
+            Genre = CompareCell(gGenre, aGenre),
+            Version = CompareVersion(gVersion, aVersion),
+            Constant = CompareNear(gConstant, aConstant, ConstantNear),
+            Bpm = CompareNear(gBpm, aBpm, BpmNear),
+            Extra = CompareExtra(guess, answer)
+        };
+    }
+
+    private static object CompareCell(string guess, string answer)
+    {
+        return new
+        {
+            Value = guess,
+            Status = guess.Equals(answer, StringComparison.OrdinalIgnoreCase) ? "correct" : "wrong",
+            Arrow = ""
+        };
+    }
+
+    private static object CompareVersion(string guess, string answer)
+    {
+        var gIdx = Array.IndexOf(MaiVersionOrder, guess);
+        var aIdx = Array.IndexOf(MaiVersionOrder, answer);
+        var isMai = gIdx != -1 || aIdx != -1;
+
+        if (!isMai)
+        {
+            gIdx = Array.IndexOf(ChuVersionOrder, guess);
+            aIdx = Array.IndexOf(ChuVersionOrder, answer);
+        }
+
+        var display = ShortVersion(guess);
+
+        if (gIdx == -1 || aIdx == -1)
+        {
+            return new { Value = display, Status = "wrong", Arrow = "" };
+        }
+
+        if (gIdx == aIdx)
+        {
+            return new { Value = display, Status = "correct", Arrow = "" };
+        }
+
+        // ← 正确答案版本比猜测歌曲早；→ 反之代表晚
+        var arrow = aIdx < gIdx ? "←" : "→";
+        if (Math.Abs(gIdx - aIdx) > VersionNear)
+        {
+            return new { Value = display, Status = "wrong", Arrow = arrow };
+        }
+
+        return new { Value = display, Status = "near", Arrow = arrow };
+    }
+
+    /// <summary>
+    ///     版本显示名：去掉 maimai / maimai でらっくす / CHUNITHM 前缀；
+    ///     舞萌 DX 初代显示 DX，DX PLUS 显示 DX PLUS
+    /// </summary>
+    private static string ShortVersion(string version)
+    {
+        if (version == "CHUNITHM") return "無印";
+        if (version.StartsWith("CHUNITHM ")) return version["CHUNITHM ".Length..];
+
+        const string dxPrefix = "maimai でらっくす ";
+        if (version.StartsWith(dxPrefix)) return version[dxPrefix.Length..];
+        if (version == "maimai でらっくす") return "DX";
+        if (version == "maimai でらっくす PLUS") return "DX PLUS";
+
+        if (version == "maimai") return "無印";
+        if (version.StartsWith("maimai ")) return version["maimai ".Length..];
+
+        return version;
+    }
+
+    private static object CompareNear(double guess, double answer, double near)
+    {
+        // ↑ 正确答案对应值大于猜测歌曲；↓ 反之
+        var arrow = answer > guess ? "↑" : "↓";
+
+        if (guess.Equals(answer))
+        {
+            return new { Value = guess, Status = "correct", Arrow = "" };
+        }
+
+        if (Math.Abs(guess - answer) > near)
+        {
+            return new { Value = guess, Status = "wrong", Arrow = arrow };
+        }
+
+        return new { Value = guess, Status = "near", Arrow = arrow };
+    }
+
+    private static object CompareExtra(Song guess, Song answer)
+    {
+        var gIdx = GetExtraIdx(guess);
+        var aIdx = GetExtraIdx(answer);
+
+        var gHas = gIdx >= 0;
+        var aHas = aIdx >= 0;
+
+        // 答案有该谱面且选项也有：显示选项定数，相等绿、不等黄
+        if (aHas && gHas)
+        {
+            var gc = guess.Constants[gIdx];
+            var ac = answer.Constants[aIdx];
+
+            return new
+            {
+                Value = gc.ToString("F1"),
+                Status = Math.Abs(gc - ac) < 0.0001 ? "correct" : "near",
+                Arrow = ""
+            };
+        }
+
+        return new
+        {
+            Value = gHas ? "有" : "无",
+            Status = gHas == aHas ? "correct" : "wrong",
+            Arrow = ""
+        };
+    }
+
+    private static int GetExtraIdx(Song song)
+    {
+        return song.DiffNames.FindIndex(x =>
+            x.Equals("Re:Master", StringComparison.OrdinalIgnoreCase) ||
+            x.Equals("ULTIMA", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static (string Title, string Artist, string Genre, string Version, double Constant, double Bpm) FribergInfo(Song song)
+    {
+        return song switch
+        {
+            MaiMaiSong mai => (
+                mai.Title, mai.Artist, mai.Info.Genre, mai.Info.From,
+                GetConstant(mai), mai.Info.Bpm
+            ),
+            ChunithmSong chu => (
+                chu.Title, chu.Artist, chu.Genre, chu.Version,
+                GetConstant(chu), GetBpm(chu)
+            ),
+            _ => (song.Title, song.Artist, "", song.Version, GetConstant(song), song.Bpm)
+        };
+    }
+
+    private static double GetConstant(Song song)
+    {
+        var idx = song.DiffNames.FindIndex(x => x.Equals("MASTER", StringComparison.OrdinalIgnoreCase));
+        return idx >= 0 && idx < song.Constants.Count ? song.Constants[idx] : 0;
+    }
+
+    private static double GetBpm(ChunithmSong song)
+    {
+        var idx = song.DiffNames.FindIndex(x => x.Equals("MASTER", StringComparison.OrdinalIgnoreCase));
+        if (idx < 0 || idx >= song.BpmList.Count) return 0;
+        return song.BpmList[idx].FirstOrDefault();
+    }
+
+    #endregion
 }
