@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Net;
 using System.Text.Json;
 using Marisa.Configuration;
 
@@ -5,11 +7,17 @@ namespace Marisa.Plugin.Shared.Lxns;
 
 public static class LxnsTokenStore
 {
-    private static readonly string StorePath = Path.Combine(
-        ConfigurationManager.Configuration.Chunithm.TempPath, "lxns_oauth_tokens.json");
-
     private static readonly object LockObj = new();
     private static Dictionary<long, LxnsTokenRecord>? _cache;
+
+    // 可被测试重定向；生产环境保持默认（chunithm temp 目录）
+    private static string? _storePath;
+
+    private static string StorePath => _storePath ??= Path.Combine(
+        ConfigurationManager.Configuration.Chunithm.TempPath, "lxns_oauth_tokens.json");
+
+    // 每个 qq 一把刷新锁：防止并发刷新用同一 refresh token（lxns 刷新会轮换 token，旧 token 立即失效）
+    private static readonly ConcurrentDictionary<long, SemaphoreSlim> RefreshLocks = new();
 
     private static Dictionary<long, LxnsTokenRecord> Load()
     {
@@ -66,19 +74,46 @@ public static class LxnsTokenStore
         var token = GetToken(qq);
         if (token == null) return null;
 
-        try
+        // access token 未过期（留 60 秒余量）直接复用，避免频繁刷新
+        if (DateTime.UtcNow < token.ExpiresAt.AddSeconds(-60))
         {
-            token = await LxnsOAuth.RefreshToken(token.RefreshToken);
-            SaveToken(qq, token.AccessToken, token.RefreshToken,
-                (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
-        }
-        catch
-        {
-            RemoveToken(qq);
-            return null;
+            return token;
         }
 
-        return token;
+        // 同一 qq 的刷新串行化：并发查询时只有一个能 refresh，其余等待后复用新 token
+        var refreshLock = RefreshLocks.GetOrAdd(qq, _ => new SemaphoreSlim(1, 1));
+        await refreshLock.WaitAsync();
+        try
+        {
+            // 等待期间可能已被其他请求刷新，先复查
+            token = GetToken(qq);
+            if (token == null) return null;
+            if (DateTime.UtcNow < token.ExpiresAt.AddSeconds(-60))
+            {
+                return token;
+            }
+
+            try
+            {
+                token = await LxnsOAuth.RefreshToken(token.RefreshToken);
+                SaveToken(qq, token.AccessToken, token.RefreshToken,
+                    (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
+                return token;
+            }
+            catch (Exception e)
+            {
+                // 仅当明确是 token 失效（400/401）时才删除；网络/服务器错误保留 token，避免误删
+                if (e is HttpRequestException { StatusCode: HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized })
+                {
+                    RemoveToken(qq);
+                }
+                throw;
+            }
+        }
+        finally
+        {
+            refreshLock.Release();
+        }
     }
 
     public static void RemoveToken(long qq)
