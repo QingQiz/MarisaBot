@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -65,7 +66,8 @@ public static class LxnsOAuth
         {
             var desc = root.TryGetProperty("error_description", out var ed)
                 ? ed.GetString() : err.GetString();
-            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}");
+            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}",
+                inner: null, statusCode: HttpStatusCode.BadRequest);
         }
 
         // 优先读取顶层 fields (OAuth 2.0 标准), 回退 data 包装 (旧格式, 即将废弃)
@@ -102,7 +104,8 @@ public static class LxnsOAuth
         {
             var desc = root.TryGetProperty("error_description", out var ed)
                 ? ed.GetString() : err.GetString();
-            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}");
+            throw new HttpRequestException($"[Lxns OAuth] {err.GetString()}: {desc}",
+                inner: null, statusCode: HttpStatusCode.BadRequest);
         }
 
         // 优先读取顶层 fields, 回退 data 包装
