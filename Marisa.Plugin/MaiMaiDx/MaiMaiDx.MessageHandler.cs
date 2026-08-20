@@ -6,6 +6,7 @@ using Marisa.Configuration;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
@@ -79,6 +80,43 @@ public partial class MaiMaiDx
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
+                    // DivingFish OAuth 设备码绑定
+                    if (idx == 0 && DivingFishOAuth.IsConfigured)
+                    {
+                        // 已有有效 Token → 跳过绑定
+                        if (await DivingFishTokenStore.GetValidToken(next.Sender.Id) != null)
+                        {
+                            message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
+                            return DoBind(next, servers[idx]);
+                        }
+
+                        string url;
+                        try
+                        {
+                            url = await DivingFishOAuth.StartBinding(next.Sender.Id.ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            next.Reply($"绑定链接生成失败: {e.Message}");
+                            return MarisaPluginTaskState.CompletedTask;
+                        }
+
+                        var shortCode = ShortUrlStore.CreateShortUrl(url);
+                        var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
+
+                        message.Reply(
+                            $"请打开以下链接授权：\n{shortUrl}\n\n完成授权后回复任意消息确认绑定（链接 10 分钟内有效）");
+
+                        stat = 20;
+
+                        // 10 分钟超时自动清理 dialog
+                        var oauthKey = (message.GroupInfo?.Id, message.Sender.Id);
+                        _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
+                            DialogManager.RemoveDialog(oauthKey));
+
+                        return MarisaPluginTaskState.ToBeContinued;
+                    }
+
                     if (idx == 1 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
                     {
                         // 已有有效 Token → 跳过 OAuth
@@ -135,6 +173,19 @@ public partial class MaiMaiDx
                         next.Reply($"绑定失败: {e.Message}");
                         return MarisaPluginTaskState.CompletedTask;
                     }
+                }
+                case 20:
+                {
+                    // DivingFish 设备码绑定确认：尝试换票，成功即绑定完成
+                    var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id);
+                    if (token != null)
+                    {
+                        message.Reply("DivingFish OAuth 绑定成功！");
+                        return DoBind(next, "DivingFish");
+                    }
+
+                    next.Reply("尚未检测到授权，请先打开链接完成授权，或回复任意内容重试");
+                    return MarisaPluginTaskState.ToBeContinued;
                 }
             }
 

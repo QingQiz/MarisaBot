@@ -1,5 +1,6 @@
 ﻿using Flurl.Http;
 using Marisa.Configuration;
+using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
@@ -10,28 +11,49 @@ public class DivingFishDataFetcher : DataFetcher
     public const int OldScoreLimit = 35;
     public const int NewScoreLimit = 15;
 
-    // TODO 下面的内容以后再来写吧！
-    // private readonly Dictionary<int, List<DiffData?>> _diffDict;
-    // private readonly List<Rank> _raRankList;
-
     public DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : base(songDb)
     {
-        // _diffDict   = FetchDiffData().Result;
-        // _raRankList = FetchRaRankList().Result.OrderByDescending(x => x.Ra).ToList();
     }
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        var raw = await FetchScores(message, false);
+        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
 
-        var group = raw.Records
+        // OAuth 模式：指定了 username 时走公开 /query/player（b50，无需验证）
+        if (DivingFishOAuth.IsConfigured && !username.IsWhiteSpace())
+        {
+            var raw = await FetchScoresByUsername(username);
+
+            return new DxRating
+            {
+                Nickname = raw.Nickname,
+                OldScores = raw.Records
+                    .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
+                    .Where(x => !SongDb.SongIndexer[x.Id].Info.IsNew)
+                    .OrderByDescending(x => x.Rating)
+                    .ThenByDescending(x => x.Id)
+                    .Take(OldScoreLimit)
+                    .ToList(),
+                NewScores = raw.Records
+                    .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
+                    .Where(x => SongDb.SongIndexer[x.Id].Info.IsNew)
+                    .OrderByDescending(x => x.Rating)
+                    .ThenByDescending(x => x.Id)
+                    .Take(NewScoreLimit)
+                    .ToList()
+            };
+        }
+
+        var raw2 = await FetchScores(message, false);
+
+        var group = raw2.Records
             .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
             .GroupBy(x => SongDb.SongIndexer[x.Id].Info.IsNew)
             .ToList();
 
         return new DxRating
         {
-            Nickname = raw.Nickname,
+            Nickname = raw2.Nickname,
             OldScores = group.FirstOrDefault(x => !x.Key)?
                             .OrderByDescending(x => x.Rating)
                             .ThenByDescending(x => x.Id)
@@ -57,19 +79,35 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
     {
+        // OAuth 模式：查询对象由 token 决定，body 只带 music_id；DevToken 模式：附带 qq/username
         var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
 
         var body = new Dictionary<string, object> { ["music_id"] = new[] { song.Id } };
-        if (username.IsWhiteSpace()) body["qq"] = qq;
-        else body["username"]                   = username;
+        if (!DivingFishOAuth.IsConfigured && username.IsWhiteSpace()) body["qq"] = qq;
+        else if (!DivingFishOAuth.IsConfigured) body["username"] = username;
 
-        var response = await "https://www.diving-fish.com/api/maimaidxprober/dev/player/record"
-            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
-            .AllowHttpStatus("400,401,403")
-            .PostJsonAsync(body);
+        var req = "https://www.diving-fish.com/api/maimaidxprober/player/record"
+            .AllowHttpStatus("400,401,403,429");
 
-        if (response.StatusCode is 400 or 401 or 403)
+        if (DivingFishOAuth.IsConfigured)
         {
+            var token = await GetTokenOrReply(message, qq);
+            if (token == null) return (null, new Dictionary<int, SongScore>());
+            req = req.WithHeader("Authorization", $"Bearer {token}");
+        }
+        else
+        {
+            req = req.WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken);
+        }
+
+        var response = await req.PostJsonAsync(body);
+
+        if (response.StatusCode is 400 or 401 or 403 or 429)
+        {
+            if (response.StatusCode == 401 && DivingFishOAuth.IsConfigured)
+            {
+                DivingFishTokenStore.RemoveToken(qq);
+            }
             var errBody = await response.GetStringAsync();
             throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, errBody));
         }
@@ -85,20 +123,20 @@ public class DivingFishDataFetcher : DataFetcher
         return (null, scores);
     }
 
-    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
+    /// <summary>
+    ///     公开端点 /query/player：按用户名查 b50（无需验证，用户隐私决定可否查询）
+    /// </summary>
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScoresByUsername(ReadOnlyMemory<char> username)
     {
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player"
+            .AllowHttpStatus("400,403")
+            .PostJsonAsync(new
+            {
+                username = username.ToString(),
+                b50 = "1"
+            });
 
-        var uri = username.IsWhiteSpace()
-            ? $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?qq={qq}"
-            : $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?username={username}";
-
-        var response = await uri
-            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
-            .AllowHttpStatus("400,401,403")
-            .GetAsync();
-
-        if (response.StatusCode is 400 or 401 or 403)
+        if (response.StatusCode is 400 or 403)
         {
             var body = await response.GetStringAsync();
             throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, body));
@@ -107,41 +145,72 @@ public class DivingFishDataFetcher : DataFetcher
         return await response.GetJsonAsync<DivingFishDxRatingResponse>();
     }
 
-    protected sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
+    {
+        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
 
-    // public DiffData GetFitDiff(int songId, int levelIdx)
-    // {
-    //     return _diffDict[songId][levelIdx] ?? throw new KeyNotFoundException("No data found for this song and level.");
-    // }
-    //
-    // public List<int> GetRaRank()
-    // {
-    //     return _raRankList.Select(x => x.Ra).ToList();
-    // }
-    //
-    // private async Task<List<Rank>> FetchRaRankList()
-    // {
-    //     var json = await "https://www.diving-fish.com/api/maimaidxprober/rating_ranking".GetStringAsync();
-    //
-    //     return JArray.Parse(json).Select(x => x.ToObject<Rank>()).ToList()!;
-    // }
-    //
-    // private async Task<Dictionary<int, List<DiffData?>>> FetchDiffData()
-    // {
-    //     var json = await "https://www.diving-fish.com/api/maimaidxprober/chart_stats".GetStringAsync();
-    //
-    //     return JObject.Parse(json).SelectToken("$.charts")!.ToObject<Dictionary<int, List<DiffData?>>>()!;
-    // }
-    //
-    // private record Rank([JsonProperty("username")] string Username, [JsonProperty("ra")] int Ra);
-    //
-    // public record DiffData(
-    //     [JsonProperty("cnt")] int PlayCount,
-    //     [JsonProperty("fit_diff")] double FitDiff,
-    //     [JsonProperty("avg")] double AvgAchievement,
-    //     [JsonProperty("avg_dx")] double AvgDxScore,
-    //     [JsonProperty("std_dev")] double Std,
-    //     [JsonProperty("dist")] int[] RankCount,
-    //     [JsonProperty("fc_dist")] int[] FcCount
-    // );
+        // OAuth 模式：查询对象由 token 决定，URL 不带 qq/username
+        if (DivingFishOAuth.IsConfigured)
+        {
+            var token = await GetTokenOrReply(message, qq);
+            if (token == null) return new DivingFishDxRatingResponse("", []);
+
+            var response = await "https://www.diving-fish.com/api/maimaidxprober/player/records"
+                .WithHeader("Authorization", $"Bearer {token}")
+                .AllowHttpStatus("400,401,403,429")
+                .GetAsync();
+
+            if (response.StatusCode is 400 or 401 or 403 or 429)
+            {
+                if (response.StatusCode == 401) DivingFishTokenStore.RemoveToken(qq);
+                var body = await response.GetStringAsync();
+                throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, body));
+            }
+
+            return await response.GetJsonAsync<DivingFishDxRatingResponse>();
+        }
+
+        // DevToken 模式（废弃端点，过渡期兼容）
+        var uri = username.IsWhiteSpace()
+            ? $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?qq={qq}"
+            : $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?username={username}";
+
+        var devResponse = await uri
+            .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
+            .AllowHttpStatus("400,401,403")
+            .GetAsync();
+
+        if (devResponse.StatusCode is 400 or 401 or 403)
+        {
+            var body = await devResponse.GetStringAsync();
+            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(devResponse.StatusCode, body));
+        }
+
+        return await devResponse.GetJsonAsync<DivingFishDxRatingResponse>();
+    }
+
+    /// <summary>
+    ///     获取 OAuth token；未绑定时回复绑定提示并返回 null
+    /// </summary>
+    private static async Task<string?> GetTokenOrReply(Message message, long qq)
+    {
+        var token = await DivingFishTokenStore.GetValidToken(qq);
+        if (token != null) return token.AccessToken;
+
+        string url;
+        try
+        {
+            url = await DivingFishOAuth.StartBinding(qq.ToString());
+        }
+        catch (Exception e)
+        {
+            message.Reply($"绑定链接生成失败: {e.Message}");
+            return null;
+        }
+
+        message.Reply($"未绑定水鱼账号，请先完成绑定：\n{url}\n\n链接 10 分钟内有效，完成授权后重新发送查询指令");
+        return null;
+    }
+
+    protected sealed record DivingFishDxRatingResponse(string Nickname, List<SongScore> Records);
 }

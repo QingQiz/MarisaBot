@@ -33,6 +33,7 @@ public static class ProberError
         {
             400 or 401 => NotBound(prober),
             403        => PrivacyHint,
+            429        => "今日查询次数已达上限，请明天再试",
             _          => Fallback(prober, statusCode, message ?? msg),
         };
     }
