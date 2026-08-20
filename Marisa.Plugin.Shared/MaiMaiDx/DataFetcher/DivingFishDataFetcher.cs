@@ -91,7 +91,7 @@ public class DivingFishDataFetcher : DataFetcher
 
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq);
+            var token = await GetTokenOrReply(message, qq, "maimai");
             if (token == null) return (null, new Dictionary<int, SongScore>());
             req = req.WithHeader("Authorization", $"Bearer {token}");
         }
@@ -106,7 +106,7 @@ public class DivingFishDataFetcher : DataFetcher
         {
             if (response.StatusCode == 401 && DivingFishOAuth.IsConfigured)
             {
-                DivingFishTokenStore.RemoveToken(qq);
+                DivingFishTokenStore.RemoveToken(qq, "maimai");
             }
             var errBody = await response.GetStringAsync();
             throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, errBody));
@@ -152,7 +152,7 @@ public class DivingFishDataFetcher : DataFetcher
         // OAuth 模式：查询对象由 token 决定，URL 不带 qq/username
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq);
+            var token = await GetTokenOrReply(message, qq, "maimai");
             if (token == null) return new DivingFishDxRatingResponse("", []);
 
             var response = await "https://www.diving-fish.com/api/maimaidxprober/player/records"
@@ -162,7 +162,7 @@ public class DivingFishDataFetcher : DataFetcher
 
             if (response.StatusCode is 400 or 401 or 403 or 429)
             {
-                if (response.StatusCode == 401) DivingFishTokenStore.RemoveToken(qq);
+                if (response.StatusCode == 401) DivingFishTokenStore.RemoveToken(qq, "maimai");
                 var body = await response.GetStringAsync();
                 throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, body));
             }
@@ -192,15 +192,15 @@ public class DivingFishDataFetcher : DataFetcher
     /// <summary>
     ///     获取 OAuth token；未绑定时回复绑定提示并返回 null
     /// </summary>
-    private static async Task<string?> GetTokenOrReply(Message message, long qq)
+    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game)
     {
-        var token = await DivingFishTokenStore.GetValidToken(qq);
+        var token = await DivingFishTokenStore.GetValidToken(qq, game);
         if (token != null) return token.AccessToken;
 
         string url;
         try
         {
-            url = await DivingFishOAuth.StartBinding(qq.ToString());
+            url = await DivingFishOAuth.StartBinding(qq.ToString(), game);
         }
         catch (Exception e)
         {

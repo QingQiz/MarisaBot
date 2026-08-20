@@ -89,7 +89,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         // OAuth 模式：查询对象由 token 决定，URL 不带 qq/username
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq);
+            var token = await GetTokenOrReply(message, qq, "chunithm");
             if (token == null) return new ChunithmRating();
 
             var response = await "https://www.diving-fish.com/api/chunithmprober/player/records"
@@ -99,7 +99,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
             if (response.StatusCode is 400 or 401 or 403 or 429)
             {
-                if (response.StatusCode == 401) DivingFishTokenStore.RemoveToken(qq);
+                if (response.StatusCode == 401) DivingFishTokenStore.RemoveToken(qq, "chunithm");
                 var body = await response.GetStringAsync();
                 throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body));
             }
@@ -129,15 +129,15 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     /// <summary>
     ///     获取 OAuth token；未绑定时回复绑定提示并返回 null
     /// </summary>
-    private static async Task<string?> GetTokenOrReply(Message message, long qq)
+    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game)
     {
-        var token = await DivingFishTokenStore.GetValidToken(qq);
+        var token = await DivingFishTokenStore.GetValidToken(qq, game);
         if (token != null) return token.AccessToken;
 
         string url;
         try
         {
-            url = await DivingFishOAuth.StartBinding(qq.ToString());
+            url = await DivingFishOAuth.StartBinding(qq.ToString(), game);
         }
         catch (Exception e)
         {

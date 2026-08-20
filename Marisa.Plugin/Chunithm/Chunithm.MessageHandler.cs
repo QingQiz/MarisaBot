@@ -107,7 +107,7 @@ public partial class Chunithm
                     if (idx == 0 && DivingFishOAuth.IsConfigured)
                     {
                         // 已有有效 Token → 跳过绑定
-                        if (await DivingFishTokenStore.GetValidToken(next.Sender.Id) != null)
+                        if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm") != null)
                         {
                             message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
                             return DoBind(next, fetchers[idx]);
@@ -116,7 +116,7 @@ public partial class Chunithm
                         string url;
                         try
                         {
-                            url = await DivingFishOAuth.StartBinding(next.Sender.Id.ToString());
+                            url = await DivingFishOAuth.StartBinding(next.Sender.Id.ToString(), "chunithm");
                         }
                         catch (Exception e)
                         {
@@ -239,7 +239,7 @@ public partial class Chunithm
                 case 20:
                 {
                     // DivingFish 设备码绑定确认：尝试换票，成功即绑定完成
-                    var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id);
+                    var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm");
                     if (token != null)
                     {
                         message.Reply("DivingFish OAuth 绑定成功！");

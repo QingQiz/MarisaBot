@@ -84,7 +84,7 @@ public partial class MaiMaiDx
                     if (idx == 0 && DivingFishOAuth.IsConfigured)
                     {
                         // 已有有效 Token → 跳过绑定
-                        if (await DivingFishTokenStore.GetValidToken(next.Sender.Id) != null)
+                        if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "maimai") != null)
                         {
                             message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
                             return DoBind(next, servers[idx]);
@@ -93,7 +93,7 @@ public partial class MaiMaiDx
                         string url;
                         try
                         {
-                            url = await DivingFishOAuth.StartBinding(next.Sender.Id.ToString());
+                            url = await DivingFishOAuth.StartBinding(next.Sender.Id.ToString(), "maimai");
                         }
                         catch (Exception e)
                         {
@@ -177,7 +177,7 @@ public partial class MaiMaiDx
                 case 20:
                 {
                     // DivingFish 设备码绑定确认：尝试换票，成功即绑定完成
-                    var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id);
+                    var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id, "maimai");
                     if (token != null)
                     {
                         message.Reply("DivingFish OAuth 绑定成功！");
