@@ -16,18 +16,22 @@ public static class DivingFishTokenStore
     private static readonly ConcurrentDictionary<(long Qq, string Game), SemaphoreSlim> FetchLocks = new();
 
     /// <summary>
-    ///     获取有效 token：缓存有效则复用，否则现场换票（未绑定返回 null）
+    ///     获取有效 token，按需换票：
+    ///     1. 缓存有未过期 token → 直接复用（不换票）
+    ///     2. 缓存无/过期 → 换票试探绑定：已绑定则换票成功返回 token；未绑定返回 null
+    ///     3. 换票因限流/网络/凭据错误失败 → 抛出原异常（≠ 未绑定，调用方不应引导绑定）
     /// </summary>
     public static async Task<DivingFishToken?> GetValidToken(long qq, string game)
     {
         var key = (qq, game);
 
-        // 留 30 秒余量
+        // 1. 有票直接用
         if (Cache.TryGetValue(key, out var cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
         {
             return cached;
         }
 
+        // 2. 无票 → 换票（检测是否绑定）
         var fetchLock = FetchLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
         await fetchLock.WaitAsync();
         try
@@ -38,16 +42,14 @@ public static class DivingFishTokenStore
                 return cached;
             }
 
-            try
-            {
-                var token = await DivingFishOAuth.FetchTokenByQq(qq, game);
-                Cache[key] = token;
-                return token;
-            }
-            catch (DivingFishNotBoundException)
-            {
-                return null;
-            }
+            var token = await DivingFishOAuth.FetchTokenByQq(qq, game);
+            Cache[key] = token;
+            return token;
+        }
+        catch (DivingFishNotBoundException)
+        {
+            // 未绑定（或账号不存在）：返回 null，由调用方引导绑定
+            return null;
         }
         finally
         {

@@ -190,12 +190,26 @@ public class DivingFishDataFetcher : DataFetcher
     }
 
     /// <summary>
-    ///     获取 OAuth token；未绑定时回复绑定提示并返回 null
+    ///     获取 OAuth token：
+    ///     已绑定 → 换票成功返回 token；
+    ///     未绑定 → 回复绑定链接并返回 null；
+    ///     换票失败（限流/网络/凭据错误）→ 回复错误并返回 null（不引导绑定）
     /// </summary>
     private static async Task<string?> GetTokenOrReply(Message message, long qq, string game)
     {
-        var token = await DivingFishTokenStore.GetValidToken(qq, game);
-        if (token != null) return token.AccessToken;
+        string? token;
+        try
+        {
+            // 返回 null = 未绑定；抛异常 = 换票失败（限流/网络/凭据错误）
+            token = (await DivingFishTokenStore.GetValidToken(qq, game))?.AccessToken;
+        }
+        catch (Exception e)
+        {
+            message.Reply($"水鱼查分暂不可用：{e.Message}");
+            return null;
+        }
+
+        if (token != null) return token;
 
         string url;
         try
