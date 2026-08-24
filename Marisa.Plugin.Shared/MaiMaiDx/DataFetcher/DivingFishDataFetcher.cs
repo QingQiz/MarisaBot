@@ -18,20 +18,24 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
+        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
 
         // OAuth 模式：查 b50
         if (DivingFishOAuth.IsConfigured)
         {
-            // 1. 指定了 username：走公开 /query/player（无需验证、服务端已截好 b50）
-            if (!username.IsWhiteSpace())
+            // 1. 优先走公开 /query/player（form-urlencoded，无需验证、不耗配额、服务端已截好 b50）
+            //    qq 或 username 都能查；400 user not exists（QQ 未绑定）/403 隐私 → 回落 OAuth
+            try
             {
-                return ToDxRating(await FetchScoresByUsername(username));
+                return username.IsWhiteSpace()
+                    ? ToDxRating(await FetchScoresByQq(qq))
+                    : ToDxRating(await FetchScoresByUsername(username));
             }
-
-            // 2. 查本人（OAuth）：/query/player 按 qq 查要求账号绑定 QQ（OAuth 用户未必绑定），
-            //    只能走 Bearer /player/records 全量 + 本地分组截取 b35+b15
-            return ToDxRating(await FetchScores(message, false));
+            catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Forbidden)
+            {
+                // 2. 回落 OAuth：Bearer /player/records 全量 + 本地分组截取 b35+b15
+                return ToDxRating(await FetchScores(message, false));
+            }
         }
 
         // DevToken 模式（废弃端点，过渡期兼容）：全量本地截取
@@ -121,16 +125,39 @@ public class DivingFishDataFetcher : DataFetcher
     }
 
     /// <summary>
-    ///     公开端点 /query/player：按用户名查 b50（无需验证，用户隐私决定可否查询）
+    ///     公开端点 /query/player：按用户名查 b50（form-urlencoded，无需验证，用户隐私决定可否查询）
     /// </summary>
     protected virtual async Task<DivingFishDxRatingResponse> FetchScoresByUsername(ReadOnlyMemory<char> username)
     {
         var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player"
             .AllowHttpStatus("400,403")
-            .PostJsonAsync(new
+            .PostUrlEncodedAsync(new Dictionary<string, string>
             {
-                username = username.ToString(),
-                b50 = "1"
+                ["username"] = username.ToString(),
+                ["b50"] = "1"
+            });
+
+        if (response.StatusCode is 400 or 403)
+        {
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body),
+                null, (HttpStatusCode)response.StatusCode);
+        }
+
+        return await response.GetJsonAsync<DivingFishDxRatingResponse>();
+    }
+
+    /// <summary>
+    ///     公开端点 /query/player：按 QQ 号查 b50（form-urlencoded，无需验证，用户隐私决定可否查询）
+    /// </summary>
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScoresByQq(long qq)
+    {
+        var response = await "https://www.diving-fish.com/api/maimaidxprober/query/player"
+            .AllowHttpStatus("400,403")
+            .PostUrlEncodedAsync(new Dictionary<string, string>
+            {
+                ["qq"] = qq.ToString(),
+                ["b50"] = "1"
             });
 
         if (response.StatusCode is 400 or 403)
