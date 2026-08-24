@@ -34,12 +34,47 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             return raw;
         }
 
+        // 完整成绩（/player/records 或 /dev/player/records）：按版本新旧分组，旧取 30、新取 20
         var json = await FetchScores(message, false);
         json.DataSource = "DivingFish";
         json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
         json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
 
-        return json;
+        return GroupBestAndRecent(json);
+    }
+
+    /// <summary>
+    ///     把完整成绩按版本新旧分组：旧版本取 rating 前 30 作为 Best，新版本取前 20 作为 Recent。
+    ///     水鱼 OAuth 的 /player/records 返回全量成绩，必须截取，否则前端会渲染全部记录。
+    /// </summary>
+    private static ChunithmRating GroupBestAndRecent(ChunithmRating raw)
+    {
+        var allScores = raw.Records.Best.Concat(raw.Records.Recent);
+
+        var songList = LxnsDataFetcher.GetSharedSongList();
+        var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
+
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
+        };
+
+        var div = allScores
+            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .ToList();
+
+        return new ChunithmRating
+        {
+            DataSource = raw.DataSource,
+            Username = raw.Username,
+            Records = new Records
+            {
+                Best = div.FirstOrDefault(x => !x.Key)?
+                           .OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
+                Recent = div.FirstOrDefault(x => x.Key)?
+                             .OrderByDescending(x => x.Rating).Take(20).ToArray() ?? []
+            }
+        };
     }
 
     public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
