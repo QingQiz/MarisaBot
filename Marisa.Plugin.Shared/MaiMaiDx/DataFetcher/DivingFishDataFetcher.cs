@@ -1,4 +1,5 @@
-﻿using Flurl.Http;
+﻿using System.Net;
+using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Util;
@@ -17,43 +18,39 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<DxRating> GetRating(Message message)
     {
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
+        var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
 
-        // OAuth 模式：指定了 username 时走公开 /query/player（b50，无需验证）
-        if (DivingFishOAuth.IsConfigured && !username.IsWhiteSpace())
+        // OAuth 模式：查 b50
+        if (DivingFishOAuth.IsConfigured)
         {
-            var raw = await FetchScoresByUsername(username);
-
-            return new DxRating
+            // 1. 指定了 username：走公开 /query/player（无需验证、服务端已截好 b50）
+            if (!username.IsWhiteSpace())
             {
-                Nickname = raw.Nickname,
-                OldScores = raw.Records
-                    .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
-                    .Where(x => !SongDb.SongIndexer[x.Id].Info.IsNew)
-                    .OrderByDescending(x => x.Rating)
-                    .ThenByDescending(x => x.Id)
-                    .Take(OldScoreLimit)
-                    .ToList(),
-                NewScores = raw.Records
-                    .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
-                    .Where(x => SongDb.SongIndexer[x.Id].Info.IsNew)
-                    .OrderByDescending(x => x.Rating)
-                    .ThenByDescending(x => x.Id)
-                    .Take(NewScoreLimit)
-                    .ToList()
-            };
+                return ToDxRating(await FetchScoresByUsername(username));
+            }
+
+            // 2. 查本人（OAuth）：/query/player 按 qq 查要求账号绑定 QQ（OAuth 用户未必绑定），
+            //    只能走 Bearer /player/records 全量 + 本地分组截取 b35+b15
+            return ToDxRating(await FetchScores(message, false));
         }
 
-        var raw2 = await FetchScores(message, false);
+        // DevToken 模式（废弃端点，过渡期兼容）：全量本地截取
+        return ToDxRating(await FetchScores(message, false));
+    }
 
-        var group = raw2.Records
+    /// <summary>
+    ///     把成绩记录按新旧分组，旧取 35（b35）、新取 15（b15）
+    /// </summary>
+    private DxRating ToDxRating(DivingFishDxRatingResponse raw)
+    {
+        var group = raw.Records
             .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
             .GroupBy(x => SongDb.SongIndexer[x.Id].Info.IsNew)
             .ToList();
 
         return new DxRating
         {
-            Nickname = raw2.Nickname,
+            Nickname = raw.Nickname,
             OldScores = group.FirstOrDefault(x => !x.Key)?
                             .OrderByDescending(x => x.Rating)
                             .ThenByDescending(x => x.Id)
@@ -139,7 +136,8 @@ public class DivingFishDataFetcher : DataFetcher
         if (response.StatusCode is 400 or 403)
         {
             var body = await response.GetStringAsync();
-            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.DivingFish(response.StatusCode, body));
+            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body),
+                null, (HttpStatusCode)response.StatusCode);
         }
 
         return await response.GetJsonAsync<DivingFishDxRatingResponse>();

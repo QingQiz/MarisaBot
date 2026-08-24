@@ -1,4 +1,5 @@
-﻿using Flurl.Http;
+﻿using System.Net;
+using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Interface;
@@ -24,23 +25,35 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     {
         var (username, _) = AtOrSelf(message, false);
 
-        // OAuth 模式：指定了 username 时走公开 /query/player（b30+n20，无需验证）
-        if (DivingFishOAuth.IsConfigured && !username.IsWhiteSpace())
+        // OAuth 模式：查 b30+n20
+        if (DivingFishOAuth.IsConfigured)
         {
-            var raw = await FetchScoresByUsername(username);
-            raw.DataSource = "DivingFish";
-            raw.Records.Best = NormalizeRecords(raw.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-            raw.Records.Recent = NormalizeRecords(raw.Records.Recent).ToArray();
-            return raw;
+            // 1. 指定了 username：走公开 /query/player（无需验证、服务端已截好 b30+n20）
+            if (!username.IsWhiteSpace())
+            {
+                var raw = await FetchScoresByUsername(username);
+                raw.DataSource = "DivingFish";
+                raw.Records.Best = NormalizeRecords(raw.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+                raw.Records.Recent = NormalizeRecords(raw.Records.Recent).ToArray();
+                return raw;
+            }
+
+            // 2. 查本人（OAuth）：/query/player 按 qq 查要求账号绑定 QQ（OAuth 用户未必绑定），
+            //    只能走 Bearer /player/records 全量 + 本地按版本分组截取 b30+n20
+            var json = await FetchScores(message, false);
+            json.DataSource = "DivingFish";
+            json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+            json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
+            return GroupBestAndRecent(json);
         }
 
-        // 完整成绩（/player/records 或 /dev/player/records）：按版本新旧分组，旧取 30、新取 20
-        var json = await FetchScores(message, false);
-        json.DataSource = "DivingFish";
-        json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-        json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
+        // DevToken 模式（废弃端点，过渡期兼容）：完整成绩按版本分组截取
+        var devJson = await FetchScores(message, false);
+        devJson.DataSource = "DivingFish";
+        devJson.Records.Best = NormalizeRecords(devJson.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+        devJson.Records.Recent = NormalizeRecords(devJson.Records.Recent).ToArray();
 
-        return GroupBestAndRecent(json);
+        return GroupBestAndRecent(devJson);
     }
 
     /// <summary>
@@ -111,7 +124,8 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         if (response.StatusCode is 400 or 403)
         {
             var body = await response.GetStringAsync();
-            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body));
+            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body),
+                null, (HttpStatusCode)response.StatusCode);
         }
 
         return await response.GetJsonAsync<ChunithmRating>();
