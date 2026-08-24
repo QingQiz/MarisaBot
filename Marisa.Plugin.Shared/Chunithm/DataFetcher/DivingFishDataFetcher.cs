@@ -25,11 +25,14 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     {
         var (username, qq) = AtOrSelf(message, false);
 
+        // 是否"查自己"：没给用户名、没@别人（qq 即发送者）
+        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
+
         // OAuth 模式：查 b30+n20
         if (DivingFishOAuth.IsConfigured)
         {
             // 1. 优先走公开 /query/player（form-urlencoded，无需验证、不耗配额、服务端已截好 b30+n20）
-            //    qq 或 username 都能查；400 user not exists（QQ 未绑定）/403 隐私 → 回落 OAuth
+            //    qq 或 username 都能查；400 user not exists（QQ 未绑定）/403 隐私
             try
             {
                 var raw = username.IsWhiteSpace()
@@ -43,7 +46,11 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             }
             catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Forbidden)
             {
-                // 2. 回落 OAuth：Bearer /player/records 全量 + 本地按版本分组截取 b30+n20
+                // 2. 只有"查自己"才回落 OAuth：Bearer /player/records 全量 + 本地截取 b30+n20。
+                //    @别人 / 用户名查询是查他人数据，OAuth token 只代表发送者本人，不能代他人换票，
+                //    直接抛出公开接口的错误（QQ 未绑定 / 未公开成绩）。
+                if (!isSelf) throw;
+
                 var json = await FetchScores(message, false);
                 json.DataSource = "DivingFish";
                 json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
@@ -161,14 +168,15 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     protected virtual async Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
     {
         var (username, qq) = AtOrSelf(message, qqOnly);
+        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
 
         // OAuth 模式：查询对象由 token 决定，URL 不带 qq/username
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq, "chunithm");
+            var token = await GetTokenOrReply(message, qq, "chunithm", isSelf);
             if (token == null)
             {
-                // 未绑定：GetTokenOrReply 已回复绑定提示；返回空对象，上层正常结束（空 b30 图）
+                // 未绑定：GetTokenOrReply 已回复提示；返回空对象，上层正常结束（空 b30 图）
                 return new ChunithmRating();
             }
 
@@ -209,10 +217,11 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     /// <summary>
     ///     获取 OAuth token：
     ///     已绑定 → 换票成功返回 token；
-    ///     未绑定 → 回复绑定链接并返回 null；
+    ///     未绑定查自己 → 回复绑定链接并返回 null；
+    ///     未绑定查别人（@/用户名）→ 提示对方未绑定，不发绑定链接（不能代他人授权）；
     ///     换票失败（限流/网络/凭据错误）→ 回复错误并返回 null（不引导绑定）
     /// </summary>
-    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game)
+    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game, bool isSelf)
     {
         string? token;
         try
@@ -227,6 +236,13 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         }
 
         if (token != null) return token;
+
+        // 查别人：未绑定，提示发送者，不生成绑定链接（绑定链接应只发给主动授权的本人）
+        if (!isSelf)
+        {
+            message.Reply($"该用户未绑定水鱼查分器");
+            return null;
+        }
 
         string url;
         try

@@ -92,7 +92,8 @@ public class DivingFishDataFetcher : DataFetcher
 
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq, "maimai");
+            var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
+            var token = await GetTokenOrReply(message, qq, "maimai", isSelf);
             if (token == null) return (null, new Dictionary<int, SongScore>());
             req = req.WithHeader("Authorization", $"Bearer {token}");
         }
@@ -177,7 +178,8 @@ public class DivingFishDataFetcher : DataFetcher
         // OAuth 模式：查询对象由 token 决定，URL 不带 qq/username
         if (DivingFishOAuth.IsConfigured)
         {
-            var token = await GetTokenOrReply(message, qq, "maimai");
+            var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
+            var token = await GetTokenOrReply(message, qq, "maimai", isSelf);
             if (token == null) return new DivingFishDxRatingResponse("", []);
 
             var response = await "https://www.diving-fish.com/api/maimaidxprober/player/records"
@@ -217,10 +219,11 @@ public class DivingFishDataFetcher : DataFetcher
     /// <summary>
     ///     获取 OAuth token：
     ///     已绑定 → 换票成功返回 token；
-    ///     未绑定 → 回复绑定链接并返回 null；
+    ///     未绑定查自己 → 回复绑定链接并返回 null；
+    ///     未绑定查别人（@/用户名）→ 提示对方未绑定，不发绑定链接（不能代他人授权）；
     ///     换票失败（限流/网络/凭据错误）→ 回复错误并返回 null（不引导绑定）
     /// </summary>
-    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game)
+    private static async Task<string?> GetTokenOrReply(Message message, long qq, string game, bool isSelf)
     {
         string? token;
         try
@@ -235,6 +238,13 @@ public class DivingFishDataFetcher : DataFetcher
         }
 
         if (token != null) return token;
+
+        // 查别人：未绑定，提示发送者，不生成绑定链接（绑定链接应只发给主动授权的本人）
+        if (!isSelf)
+        {
+            message.Reply($"该用户未绑定水鱼查分器");
+            return null;
+        }
 
         string url;
         try
