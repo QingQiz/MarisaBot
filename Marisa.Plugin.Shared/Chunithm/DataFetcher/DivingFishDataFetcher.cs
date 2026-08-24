@@ -166,7 +166,11 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         if (DivingFishOAuth.IsConfigured)
         {
             var token = await GetTokenOrReply(message, qq, "chunithm");
-            if (token == null) return new ChunithmRating();
+            if (token == null)
+            {
+                // 未绑定：GetTokenOrReply 已回复绑定提示；返回空对象，上层正常结束（空 b30 图）
+                return new ChunithmRating();
+            }
 
             var response = await "https://www.diving-fish.com/api/chunithmprober/player/records"
                 .WithHeader("Authorization", $"Bearer {token}")
