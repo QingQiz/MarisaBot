@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Marisa.Configuration;
 
 namespace Marisa.Plugin.Shared.DivingFish;
@@ -18,6 +19,34 @@ public static class DivingFishOAuth
     private const string AuthBaseUrl = "https://auth.diving-fish.com";
 
     private const string OnBehalfOfGrantType = "urn:diving-fish:params:oauth:grant-type:on-behalf-of";
+
+    /// <summary>水鱼域名强制直连（绕过系统代理，代理仅用于 GitHub 等）</summary>
+    static DivingFishOAuth()
+    {
+        FlurlHttp.ConfigureClient(AuthBaseUrl, cli => cli.Settings.HttpClientFactory = new NoProxyClientFactory());
+        FlurlHttp.ConfigureClient("https://www.diving-fish.com", cli => cli.Settings.HttpClientFactory = new NoProxyClientFactory());
+    }
+
+    /// <summary>禁用系统代理的 HttpClient 工厂</summary>
+    private sealed class NoProxyClientFactory : DefaultHttpClientFactory
+    {
+        public override HttpMessageHandler CreateMessageHandler()
+        {
+            var handler = base.CreateMessageHandler();
+
+            switch (handler)
+            {
+                case HttpClientHandler h:
+                    h.UseProxy = false;
+                    break;
+                case SocketsHttpHandler s:
+                    s.UseProxy = false;
+                    break;
+            }
+
+            return handler;
+        }
+    }
 
     /// <summary>scope 按游戏区分：maimai / chunithm</summary>
     public static string ScopeOf(string game)
