@@ -106,6 +106,13 @@ public partial class Chunithm
 
                     if (idx == 0 && DivingFishOAuth.IsConfigured)
                     {
+                        // 水鱼绑定仅限私聊，避免授权链接在群里被转发（防钓鱼）
+                        if (next.Type is not (MessageType.FriendMessage or MessageType.TempMessage))
+                        {
+                            next.Reply("水鱼绑定请私聊进行：给机器人发送 bind 或 绑定");
+                            return MarisaPluginTaskState.CompletedTask;
+                        }
+
                         // 已有有效 Token → 跳过绑定
                         if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm") != null)
                         {
