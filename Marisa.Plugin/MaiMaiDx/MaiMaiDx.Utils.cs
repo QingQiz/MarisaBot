@@ -108,6 +108,14 @@ public partial class MaiMaiDx
 
         var bind = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
 
+        // 查自己（未指定用户名/未@）且本地无绑定：不应默认回落 DivingFish OAuth 换票——
+        // 若攻击者已用本应用授权绑定，换票会命中攻击者账号，读到他人数据。
+        // 必须显式走绑定流程后才有合法 token。
+        if (bind == null && message.Command.IsWhiteSpace())
+        {
+            throw new HttpRequestException("请先使用 bind 绑定查分器后再查询");
+        }
+
         if (bind == null)
         {
             return GetDataFetcher(DataFetcherType.DivingFish);
