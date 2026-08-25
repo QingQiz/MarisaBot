@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
@@ -97,7 +98,17 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         var (_, qq) = AtOrSelf(message, true);
 
         // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
-        var oauthToken = await LxnsTokenStore.GetValidToken(qq);
+        LxnsToken? oauthToken;
+        try
+        {
+            oauthToken = await LxnsTokenStore.GetValidToken(qq);
+        }
+        catch (Exception e) when (e is HttpRequestException { StatusCode: HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized })
+        {
+            // refresh token 已失效（invalid_grant 等）：GetValidToken 已删除本地 token，引导重新绑定
+            throw new HttpRequestException("[Lxns] OAuth 授权已失效，请重新使用 bind → 选择 lxns 完成授权");
+        }
+
         if (oauthToken != null)
         {
             return await GetScoresViaOAuth(oauthToken, qq);
