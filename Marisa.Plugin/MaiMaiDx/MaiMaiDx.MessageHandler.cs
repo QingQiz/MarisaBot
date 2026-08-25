@@ -53,6 +53,7 @@ public partial class MaiMaiDx
 
         var stat   = 0;
         string? oauthVerifier = null;
+        string? dfNickname = null;
 
         MarisaPluginTaskState DoBind(Message msg, string srv)
         {
@@ -183,16 +184,40 @@ public partial class MaiMaiDx
                 }
                 case 20:
                 {
-                    // DivingFish 设备码绑定确认：尝试换票，成功即绑定完成
+                    // DivingFish 设备码绑定确认：尝试换票
                     var token = await DivingFishTokenStore.GetValidToken(next.Sender.Id, "maimai");
                     if (token != null)
                     {
-                        message.Reply("DivingFish OAuth 绑定成功！");
-                        return DoBind(next, "DivingFish");
+                        // 获取授权账号昵称，二次确认（防攻击者抢绑）
+                        dfNickname = await DivingFishOAuth.FetchNickname(token.AccessToken, "maimai");
+                        if (string.IsNullOrWhiteSpace(dfNickname))
+                        {
+                            // 获取昵称失败：直接绑定（弱校验）
+                            message.Reply("DivingFish OAuth 绑定成功！");
+                            return DoBind(next, "DivingFish");
+                        }
+
+                        next.Reply($"检测到水鱼账号昵称：{dfNickname}\n请确认这是你的账号（回复 确认 完成绑定，或回复 取消 中止）");
+                        stat = 21;
+                        return MarisaPluginTaskState.ToBeContinued;
                     }
 
                     next.Reply("尚未检测到授权，请先打开链接完成授权，或回复任意内容重试");
                     return MarisaPluginTaskState.ToBeContinued;
+                }
+                case 21:
+                {
+                    // 水鱼昵称二次确认
+                    if (next.Command.Trim().Span.Equals("确认", StringComparison.OrdinalIgnoreCase))
+                    {
+                        message.Reply($"DivingFish OAuth 绑定成功！（昵称：{dfNickname}）");
+                        return DoBind(next, "DivingFish");
+                    }
+
+                    // 取消：清除本地 token，提示去水鱼撤销（服务器侧绑定无法由 bot 解除）
+                    DivingFishTokenStore.RemoveToken(next.Sender.Id, "maimai");
+                    next.Reply("已取消绑定。如授权给了错误账号，请登录水鱼账号设置中撤销本应用授权");
+                    return MarisaPluginTaskState.CompletedTask;
                 }
             }
 

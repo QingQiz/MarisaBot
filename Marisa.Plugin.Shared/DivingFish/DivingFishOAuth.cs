@@ -180,6 +180,31 @@ public static class DivingFishOAuth
         };
     }
 
+    /// <summary>
+    ///     获取授权账号的水鱼昵称（用于绑定二次确认）。
+    ///     通过查分器 /player/records 返回的 nickname 字段（无需额外 scope）。
+    /// </summary>
+    public static async Task<string?> FetchNickname(string accessToken, string game)
+    {
+        var url = game == "chunithm"
+            ? "https://www.diving-fish.com/api/chunithmprober/player/records"
+            : "https://www.diving-fish.com/api/maimaidxprober/player/records";
+
+        try
+        {
+            var body = await url
+                .WithHeader("Authorization", $"Bearer {accessToken}")
+                .AllowHttpStatus("400,401,403,429")
+                .GetStringAsync();
+
+            return TryReadField(body, "nickname") ?? TryReadField(body, "username");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static string? TryReadField(string body, string field)
     {
         try
