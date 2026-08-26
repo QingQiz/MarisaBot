@@ -217,8 +217,8 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     /// <summary>
     ///     获取 OAuth token：
     ///     已绑定 → 换票成功返回 token；
-    ///     未绑定查自己 → 回复绑定链接并返回 null；
-    ///     未绑定查别人（@/用户名）→ 提示对方未绑定，不发绑定链接（不能代他人授权）；
+    ///     未绑定查自己 → 提示用 bind 绑定并返回 null；
+    ///     未绑定查别人（@/用户名）→ 提示对方未绑定；
     ///     换票失败（限流/网络/凭据错误）→ 回复错误并返回 null（不引导绑定）
     /// </summary>
     private static async Task<string?> GetTokenOrReply(Message message, long qq, string game, bool isSelf)
@@ -237,25 +237,14 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
         if (token != null) return token;
 
-        // 查别人：未绑定，提示发送者，不生成绑定链接（绑定链接应只发给主动授权的本人）
+        // 查别人：未绑定，提示发送者（不能代他人授权）
         if (!isSelf)
         {
             message.Reply($"该用户未绑定水鱼查分器");
             return null;
         }
 
-        string url;
-        try
-        {
-            url = await DivingFishOAuth.StartBinding(qq.ToString(), game);
-        }
-        catch (Exception e)
-        {
-            message.Reply($"绑定链接生成失败: {e.Message}");
-            return null;
-        }
-
-        message.Reply($"未绑定水鱼账号，请先完成绑定：\n{url}\n\n链接 10 分钟内有效，完成授权后重新发送查询指令");
+        message.Reply("未绑定水鱼查分器，请先使用 bind 命令完成绑定后再查询");
         return null;
     }
 

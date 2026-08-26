@@ -11,8 +11,10 @@ public static class ShortUrlStore
 
     public static string CreateShortUrl(string url, TimeSpan? ttl = null)
     {
-        // 临时：关闭短链，直接返回原始 URL（测试用；测试完调回短链）
-        return url;
+        ttl ??= TimeSpan.FromMinutes(30);
+        var code = GenerateCode(6);
+        Store[code] = new Entry(url, DateTime.UtcNow + ttl.Value);
+        return code;
     }
 
     public static string? GetUrl(string code)
@@ -47,17 +49,7 @@ public static class ShortUrlStore
     /// <summary>
     /// 获取短链的完整 URL
     /// </summary>
-    public static string GetShortUrl(string code)
-    {
-        // 临时：CreateShortUrl 直接返回原始 URL，这里原样返回（测试用）
-        if (code.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            code.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            return code;
-        }
-
-        return $"{GetPublicBaseUrl()}/go/{code}";
-    }
+    public static string GetShortUrl(string code) => $"{GetPublicBaseUrl()}/go/{code}";
 
     private static string GenerateCode(int length)
     {

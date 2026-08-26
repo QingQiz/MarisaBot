@@ -54,12 +54,123 @@ public static class DivingFishOAuth
         return game == "chunithm" ? "chunithm.records.read" : "prober.records.read";
     }
 
+    /// <summary>OAuth 授权端点</summary>
+    public const string AuthorizeUrl = "https://auth.diving-fish.com/oauth/authorize";
+
+    /// <summary>OAuth userinfo 端点（取 sub）</summary>
+    public const string UserinfoUrl = "https://auth.diving-fish.com/oauth/userinfo";
+
     private static string ClientId => ConfigurationManager.Configuration.DivingFish.ClientId ?? "";
 
     private static string ClientSecret => ConfigurationManager.Configuration.DivingFish.ClientSecret ?? "";
 
     public static bool IsConfigured =>
         !string.IsNullOrWhiteSpace(ClientId) && !string.IsNullOrWhiteSpace(ClientSecret);
+
+    // ── PKCE ──
+
+    /// <summary>生成 PKCE verifier 与 S256 challenge</summary>
+    public static (string Verifier, string Challenge) GeneratePkce()
+    {
+        var verifier = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
+        var challenge = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(verifier)))
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
+        return (verifier, challenge);
+    }
+
+    /// <summary>
+    ///     构造授权码 authorize 链接（强制 PKCE S256 + state + redirect_uri）。
+    ///     scope = openid + 游戏读取权限（openid 用于 callback 取 sub 做绑定确认）。
+    /// </summary>
+    public static string BuildAuthorizeUrl(string state, string codeChallenge, string game)
+    {
+        var redirectUri = ConfigurationManager.Configuration.DivingFish.RedirectUri ?? "";
+        var scope = $"openid {ScopeOf(game)}";
+        var query = $"response_type=code&client_id={Uri.EscapeDataString(ClientId)}" +
+                    $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+                    $"&scope={Uri.EscapeDataString(scope)}" +
+                    $"&state={Uri.EscapeDataString(state)}" +
+                    $"&code_challenge={codeChallenge}" +
+                    "&code_challenge_method=S256";
+        return $"{AuthorizeUrl}?{query}";
+    }
+
+    /// <summary>
+    ///     授权码换取令牌（回调时使用），并解析 sub（userinfo）。
+    ///     返回 token 与 sub。
+    /// </summary>
+    public static async Task<(DivingFishToken Token, string Sub, string Username)> ExchangeAuthCode(string code, string verifier)
+    {
+        var redirectUri = ConfigurationManager.Configuration.DivingFish.RedirectUri ?? "";
+
+        var response = await $"{AuthBaseUrl}/oauth/token"
+            .AllowHttpStatus("400,401")
+            .PostUrlEncodedAsync(new Dictionary<string, string>
+            {
+                ["grant_type"] = "authorization_code",
+                ["code"] = code,
+                ["redirect_uri"] = redirectUri,
+                ["client_id"] = ClientId,
+                ["client_secret"] = ClientSecret,
+                ["code_verifier"] = verifier
+            });
+
+        var body = await response.GetStringAsync();
+
+        if (response.StatusCode != 200)
+        {
+            var err = TryReadField(body, "error") ?? response.StatusCode.ToString();
+            var desc = TryReadField(body, "error_description");
+            throw new HttpRequestException($"[DivingFish OAuth] 换码失败({err}): {desc ?? body}");
+        }
+
+        var accessToken = TryReadField(body, "access_token");
+        var expiresIn = TryReadField(body, "expires_in");
+        if (accessToken == null || !int.TryParse(expiresIn, out var seconds))
+        {
+            throw new HttpRequestException($"[DivingFish OAuth] 换码响应异常: {body}");
+        }
+
+        var token = new DivingFishToken
+        {
+            AccessToken = accessToken,
+            ExpiresAt = DateTime.UtcNow.AddSeconds(seconds)
+        };
+
+        // 取 sub：userinfo（稳定用户 ID）与 username
+        var (sub, username) = await FetchUserInfo(token.AccessToken);
+        if (string.IsNullOrWhiteSpace(sub))
+        {
+            throw new HttpRequestException("[DivingFish OAuth] 无法获取用户 sub");
+        }
+
+        return (token, sub, username ?? "");
+    }
+
+    /// <summary>
+    ///     通过 userinfo 端点获取 sub 与 username（需 openid/profile scope 的 token）
+    /// </summary>
+    public static async Task<(string? Sub, string? Username)> FetchUserInfo(string accessToken)
+    {
+        try
+        {
+            var body = await UserinfoUrl
+                .WithHeader("Authorization", $"Bearer {accessToken}")
+                .AllowHttpStatus("400,401,403")
+                .GetStringAsync();
+
+            return (TryReadField(body, "sub"), TryReadField(body, "preferred_username") ?? TryReadField(body, "nickname"));
+        }
+        catch
+        {
+            return (null, null);
+        }
+    }
 
     /// <summary>
     ///     用户标识 ref 摘要：sha256($"{clientId}:{externalId}")，externalId 为应用侧标识（如 QQ 号）。

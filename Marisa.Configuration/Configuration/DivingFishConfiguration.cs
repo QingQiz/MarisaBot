@@ -7,6 +7,7 @@ public class DivingFishConfiguration
     private string? _devToken;
     private string? _clientId;
     private string? _clientSecret;
+    private string? _redirectUri;
 
     public string DevToken
     {
@@ -30,7 +31,16 @@ public class DivingFishConfiguration
         set => _clientSecret = value;
     }
 
+    /// <summary>OAuth 授权码回调地址（公网 HTTPS，须与控制台登记完全一致）</summary>
+    public string? RedirectUri
+    {
+        get => _redirectUri;
+        set => _redirectUri = value;
+    }
+
     internal string? ClientIdRaw => _clientId;
 
     internal string? ClientSecretRaw => _clientSecret;
+
+    internal string? RedirectUriRaw => _redirectUri;
 }

@@ -143,6 +143,7 @@ public static class ConfigurationManager
         WarnIfEmpty("divingFish.devToken", config.DivingFish?.DevTokenRaw);
         WarnIfEmpty("divingFish.clientId", config.DivingFish?.ClientIdRaw);
         WarnIfEmpty("divingFish.clientSecret", config.DivingFish?.ClientSecretRaw);
+        WarnIfEmpty("divingFish.redirectUri", config.DivingFish?.RedirectUriRaw);
         WarnIfEmpty("lxns.devToken", config.Lxns?.DevTokenRaw);
         WarnIfEmpty("openai.apiKey", config.OpenAi?.ApiKeyRaw);
         WarnIfEmpty("chunithm.tokenLouis", config.Chunithm?.TokenLouisRaw);
