@@ -16,6 +16,7 @@ divingFish:
   devToken:
   clientId:
   clientSecret:
+  redirectUri:
 
 lxns:
   devToken:
