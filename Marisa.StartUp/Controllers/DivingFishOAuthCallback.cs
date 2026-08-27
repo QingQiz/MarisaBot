@@ -55,7 +55,7 @@ public class DivingFishOAuthCallback : Controller
 <h2>水鱼账号绑定确认</h2>
 <p>授权成功！你的水鱼账号：<b>{EscapeHtml(username)}</b></p>
 <p>绑定目标：QQ <b>{pending.Qq}</b>（群 {pending.GroupId}）</p>
-<p>以下是一次性确认码，<b>请复制后在原 QQ 的原群发送给机器人</b>：</p>
+<p>以下是一次性确认码，<b>请复制后发送给机器人</b>（必须在原 QQ 的原群发送）：</p>
 <p style=""font-size:24px;letter-spacing:2px;background:#f0f0f0;padding:12px;border-radius:6px""><code>{proofCode}</code></p>
 <p style=""color:#c00"">⚠ 不要将确认码发给任何人！5 分钟内有效，仅能使用一次。</p>
 </body></html>";

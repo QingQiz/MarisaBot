@@ -116,10 +116,12 @@ public partial class MaiMaiDx
                         DivingFishPendingAuth.Add(state, next.Sender.Id, next.GroupInfo?.Id ?? 0, verifier, "maimai", generation);
 
                         var authorizeUrl = DivingFishOAuth.BuildAuthorizeUrl(state, challenge, "maimai");
+                        var shortCode = ShortUrlStore.CreateShortUrl(authorizeUrl);
+                        var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
 
                         message.Reply(
-                            $"请打开以下链接登录水鱼账号并授权：\n{authorizeUrl}\n\n" +
-                            $"授权完成后浏览器会显示一次性确认码，请复制后回复「确认 <确认码>」完成绑定（链接 10 分钟内有效）");
+                            $"请打开以下链接登录水鱼账号并授权：\n{shortUrl}\n\n" +
+                            $"授权完成后浏览器会显示一次性确认码，请复制后直接发送给机器人完成绑定（链接 10 分钟内有效）");
 
                         stat = 20;
 
@@ -190,11 +192,10 @@ public partial class MaiMaiDx
                 }
                 case 20:
                 {
-                    // 接收一次性确认码：格式「确认 <C>」
-                    var cmd = next.Command.Trim().ToString();
-                    if (cmd.StartsWith("确认", StringComparison.Ordinal))
+                    // 接收一次性确认码：直接回复确认码本身（32 位大写 hex）
+                    var code = next.Command.Trim().ToString();
+                    if (Regex.IsMatch(code, @"^[0-9A-F]{32}$"))
                     {
-                        var code = cmd["确认".Length..].Trim();
                         var proof = DivingFishBindingProof.Consume(code, next.Sender.Id, next.GroupInfo?.Id ?? 0);
                         if (proof == null)
                         {
