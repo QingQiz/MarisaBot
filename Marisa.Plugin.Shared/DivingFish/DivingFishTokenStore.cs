@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Text;
-using System.Text.Json;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.DivingFish;
 
@@ -8,99 +6,86 @@ namespace Marisa.Plugin.Shared.DivingFish;
 
 /// <summary>
 ///     水鱼 OAuth access token 缓存（按 sub + game 缓存）。
-///     绑定由 DivingFishOAuthBind（QQ → sub）记录；换票用 on-behalf-of subject=sub。
-///     存量用户（旧设备码绑定，水鱼侧已有 ref 映射）在无 verified 绑定时，
-///     先用 ref 换票检测，成功后自动迁移 sub 到绑定表（status=unverified）。
+///     绑定由 DivingFishOAuthBind（QQ → sub + refresh_token）记录；
+///     日常查分用 refresh_token 刷新（grant_type=refresh_token，授权码接入方式下无 on-behalf-of）。
+///     水鱼 refresh token 强制轮换：刷新串行化（每 sub 一把锁），并原子持久化新 token。
 /// </summary>
 public static class DivingFishTokenStore
 {
     // (sub, game) -> token
     private static readonly ConcurrentDictionary<(string Sub, string Game), DivingFishToken> Cache = new();
 
-    // (sub, game) -> 刷新锁
-    private static readonly ConcurrentDictionary<(string Sub, string Game), SemaphoreSlim> FetchLocks = new();
+    // (sub) -> 刷新锁：并发查询时同一用户只能有一个刷新，防 refresh token 轮换冲突
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> FetchLocks = new();
 
     /// <summary>
     ///     获取有效 token：
-    ///     1. 有绑定（verified 或已迁移的 unverified）→ 用 sub 换票；
-    ///     2. 无绑定 → 用旧 ref 映射探测（存量迁移），成功则提取 sub 存入绑定表；
-    ///     3. 都失败（未绑定）返回 null。
+    ///     1. 查绑定表得 sub + refresh_token；
+    ///     2. 无绑定 → null；
+    ///     3. 有缓存 access token 未过期 → 复用；
+    ///     4. 否则用 refresh_token 刷新，并持久化新 refresh_token（强制轮换）。
     /// </summary>
     public static async Task<DivingFishToken?> GetValidToken(long qq, string game)
     {
-        string? sub = null;
-
-        // 1. 查已绑定的 sub（verified 或存量迁移的 unverified 都可用）
+        string? sub;
+        string? refreshToken;
         using (var realm = BotDbContext.OpenRealm())
         {
             var bind = realm.All<DivingFishOAuthBind>()
                 .FirstOrDefault(x => x.Qq == qq && x.Sub != "");
-            if (bind != null && !string.IsNullOrWhiteSpace(bind.Sub))
-            {
-                sub = bind.Sub;
-            }
+            if (bind == null || string.IsNullOrWhiteSpace(bind.Sub)) return null;
+            sub = bind.Sub;
+            refreshToken = bind.RefreshToken;
         }
 
-        // 2. 有 sub → 正常换票
-        if (sub != null)
-        {
-            return await FetchTokenForSub(sub, game, qq);
-        }
+        if (string.IsNullOrWhiteSpace(refreshToken)) return null;
 
-        // 3. 无绑定 → 存量迁移检测：用旧 ref 映射换票，成功后提取 sub 持久化
-        return await FetchTokenForSub(null, game, qq, useRef: true);
-    }
+        var key = (sub, game);
 
-    private static async Task<DivingFishToken?> FetchTokenForSub(
-        string? sub, string game, long qq, bool useRef = false)
-    {
-        string subject;
-        if (useRef)
-        {
-            subject = "ref:" + DivingFishOAuth.SubjectRef(qq.ToString());
-        }
-        else
-        {
-            subject = "sub:" + sub;
-        }
-
-        var cacheKey = (subject, game);
-
-        // 有票直接用
-        if (Cache.TryGetValue(cacheKey, out var cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
+        // 1. 有票直接用
+        if (Cache.TryGetValue(key, out var cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
         {
             return cached;
         }
 
-        var fetchLock = FetchLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
+        // 2. 无票 → 刷新（按 sub 串行化）
+        var fetchLock = FetchLocks.GetOrAdd(sub, _ => new SemaphoreSlim(1, 1));
         await fetchLock.WaitAsync();
         try
         {
-            if (Cache.TryGetValue(cacheKey, out cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
+            if (Cache.TryGetValue(key, out cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
             {
                 return cached;
             }
 
-            var token = await DivingFishOAuth.FetchToken(subject, game);
-
-            // 存量迁移：ref 换票成功后提取 sub，写入绑定表（unverified），下次走 sub
-            if (useRef)
+            // 刷新前重新读 refresh_token（可能已被其他请求轮换）
+            using (var realm = BotDbContext.OpenRealm())
             {
-                var extractedSub = ExtractSub(token.AccessToken);
-                if (!string.IsNullOrWhiteSpace(extractedSub))
+                var bind = realm.All<DivingFishOAuthBind>().FirstOrDefault(x => x.Qq == qq && x.Sub != "");
+                if (bind != null && !string.IsNullOrWhiteSpace(bind.RefreshToken))
                 {
-                    PersistMigratedBind(qq, extractedSub, game);
-                    Cache.TryRemove(cacheKey, out _);
-                    cacheKey = ("sub:" + extractedSub, game);
+                    refreshToken = bind.RefreshToken;
                 }
             }
 
-            Cache[cacheKey] = token;
+            var token = await DivingFishOAuth.RefreshToken(refreshToken);
+            Cache[key] = token;
+
+            // 持久化新 refresh_token（强制轮换：旧 token 已作废）
+            using (var realm = BotDbContext.OpenRealm())
+            {
+                var bind = realm.All<DivingFishOAuthBind>().FirstOrDefault(x => x.Qq == qq && x.Sub != "");
+                if (bind != null)
+                {
+                    realm.Write(() =>
+                    {
+                        bind.RefreshToken = token.RefreshToken;
+                        bind.Scopes = DivingFishOAuth.ScopeOf(game);
+                    });
+                }
+            }
+
             return token;
-        }
-        catch (DivingFishNotBoundException)
-        {
-            return null;
         }
         finally
         {
@@ -108,64 +93,16 @@ public static class DivingFishTokenStore
         }
     }
 
-    /// <summary>从 access token JWT 的 payload 提取 sub（水鱼用户 ID）</summary>
-    private static string? ExtractSub(string accessToken)
-    {
-        try
-        {
-            var parts = accessToken.Split('.');
-            if (parts.Length < 2) return null;
-
-            var payload = parts[1].Replace('-', '+').Replace('_', '/');
-            while (payload.Length % 4 != 0) payload += '=';
-
-            var json = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
-            using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.TryGetProperty("sub", out var s) ? s.GetString() : null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    /// <summary>存量迁移：把 QQ → sub 写入绑定表（unverified，供后续正式确认）</summary>
-    private static void PersistMigratedBind(long qq, string sub, string game)
-    {
-        using var realm = BotDbContext.OpenRealm();
-        var existing = realm.All<DivingFishOAuthBind>().FirstOrDefault(x => x.Qq == qq);
-        realm.Write(() =>
-        {
-            if (existing == null)
-            {
-                realm.AddWithAutoId(new DivingFishOAuthBind
-                {
-                    Qq = qq,
-                    Sub = sub,
-                    Username = "",
-                    Scopes = DivingFishOAuth.ScopeOf(game),
-                    Status = "unverified",
-                    VerifiedAt = DateTimeOffset.Now
-                });
-            }
-            else if (existing.Status != "verified")
-            {
-                existing.Sub = sub;
-                existing.Scopes = DivingFishOAuth.ScopeOf(game);
-            }
-        });
-    }
-
     /// <summary>
-    ///     令牌失效（401）时清除缓存，下次请求重新换票
+    ///     令牌失效（401）时清除缓存，下次请求重新刷新
     /// </summary>
     public static void RemoveToken(long qq, string game)
     {
         using var realm = BotDbContext.OpenRealm();
         var bind = realm.All<DivingFishOAuthBind>()
-            .FirstOrDefault(x => x.Qq == qq);
+            .FirstOrDefault(x => x.Qq == qq && x.Sub != "");
         if (bind == null || string.IsNullOrWhiteSpace(bind.Sub)) return;
 
-        Cache.TryRemove(("sub:" + bind.Sub, game), out _);
+        Cache.TryRemove((bind.Sub, game), out _);
     }
 }

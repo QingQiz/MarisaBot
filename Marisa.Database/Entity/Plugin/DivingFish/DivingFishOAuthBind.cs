@@ -27,6 +27,9 @@ public partial class DivingFishOAuthBind : IRealmObject, IHaveId
     /// <summary>已授予的 scope（空格分隔）</summary>
     public string Scopes { get; set; } = "";
 
+    /// <summary>授权码流程换取到的 refresh token（30 天，强制轮换，每次刷新后更新）</summary>
+    public string RefreshToken { get; set; } = "";
+
     /// <summary>状态：verified / unverified</summary>
     public string Status { get; set; } = "verified";
 

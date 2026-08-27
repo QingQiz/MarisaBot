@@ -131,6 +131,7 @@ public static class DivingFishOAuth
 
         var accessToken = TryReadField(body, "access_token");
         var expiresIn = TryReadField(body, "expires_in");
+        var refreshToken = TryReadField(body, "refresh_token");
         var idToken = TryReadField(body, "id_token");
         if (accessToken == null || !int.TryParse(expiresIn, out var seconds))
         {
@@ -140,6 +141,7 @@ public static class DivingFishOAuth
         var token = new DivingFishToken
         {
             AccessToken = accessToken,
+            RefreshToken = refreshToken ?? "",
             ExpiresAt = DateTime.UtcNow.AddSeconds(seconds)
         };
 
@@ -378,11 +380,54 @@ public static class DivingFishOAuth
     {
         return FetchToken("ref:" + SubjectRef(qq.ToString()), game);
     }
+    /// <summary>
+    ///     刷新令牌（grant_type=refresh_token）：access token 过期后用 refresh token 续期。
+    ///     水鱼 refresh token 强制轮换：每次刷新签发新 refresh token，旧 token 立即作废，
+    ///     且并发刷新会吊销整条链。调用方必须串行化并持久化新 token。
+    /// </summary>
+    public static async Task<DivingFishToken> RefreshToken(string refreshToken)
+    {
+        var response = await $"{AuthBaseUrl}/oauth/token"
+            .AllowHttpStatus("400,401,429")
+            .PostUrlEncodedAsync(new Dictionary<string, string>
+            {
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = refreshToken,
+                ["client_id"] = ClientId,
+                ["client_secret"] = ClientSecret
+            });
+
+        var body = await response.GetStringAsync();
+
+        if (response.StatusCode != 200)
+        {
+            var err = TryReadField(body, "error") ?? response.StatusCode.ToString();
+            var desc = TryReadField(body, "error_description");
+            throw new HttpRequestException($"[DivingFish OAuth] 刷新失败({err}): {desc ?? body}");
+        }
+
+        var accessToken = TryReadField(body, "access_token");
+        var expiresIn = TryReadField(body, "expires_in");
+        var newRefresh = TryReadField(body, "refresh_token");
+        if (accessToken == null || !int.TryParse(expiresIn, out var seconds))
+        {
+            throw new HttpRequestException($"[DivingFish OAuth] 刷新响应异常: {body}");
+        }
+
+        return new DivingFishToken
+        {
+            AccessToken = accessToken,
+            // 强制轮换：优先取新签发的 refresh token，缺失则沿用旧值（不应发生）
+            RefreshToken = newRefresh ?? refreshToken,
+            ExpiresAt = DateTime.UtcNow.AddSeconds(seconds)
+        };
+    }
 }
 
 public class DivingFishToken
 {
     public string AccessToken { get; set; } = "";
+    public string RefreshToken { get; set; } = "";
     public DateTime ExpiresAt { get; set; }
 
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;

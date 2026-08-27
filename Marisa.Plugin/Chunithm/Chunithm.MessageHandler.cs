@@ -263,6 +263,7 @@ public partial class Chunithm
                                     Qq = next.Sender.Id,
                                     Sub = proof.Sub,
                                     Username = proof.Username,
+                                    RefreshToken = proof.RefreshToken,
                                     Scopes = proof.Scope,
                                     Status = "verified",
                                     VerifiedAt = DateTimeOffset.Now
@@ -272,6 +273,7 @@ public partial class Chunithm
                             {
                                 bind.Sub = proof.Sub;
                                 bind.Username = proof.Username;
+                                bind.RefreshToken = proof.RefreshToken;
                                 bind.Scopes = proof.Scope;
                                 bind.Status = "verified";
                                 bind.VerifiedAt = DateTimeOffset.Now;

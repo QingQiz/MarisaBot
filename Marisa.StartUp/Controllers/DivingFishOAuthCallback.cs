@@ -31,12 +31,13 @@ public class DivingFishOAuthCallback : Controller
             return Content(SimpleHtml("回调已过期", "该授权请求已过期或已被使用，请重新发起绑定"), "text/html; charset=utf-8");
         }
 
-        string sub, username;
+        string sub, username, refreshToken;
         try
         {
-            var (_, s, u) = await DivingFishOAuth.ExchangeAuthCode(code, pending.CodeVerifier);
+            var (token, s, u) = await DivingFishOAuth.ExchangeAuthCode(code, pending.CodeVerifier);
             sub = s;
             username = u;
+            refreshToken = token.RefreshToken;
         }
         catch (Exception e)
         {
@@ -45,7 +46,7 @@ public class DivingFishOAuthCallback : Controller
 
         // 生成一次性证明 C（至少 128-bit）
         var proofCode = DivingFishBindingProof.Issue(
-            pending.Qq.ToString(), pending.GroupId.ToString(), sub, username, pending.Game,
+            pending.Qq.ToString(), pending.GroupId.ToString(), sub, username, refreshToken, pending.Game,
             DivingFishOAuth.ScopeOf(pending.Game), pending.Generation);
 
         var html = $@"<!DOCTYPE html>

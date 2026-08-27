@@ -22,6 +22,7 @@ public static class DivingFishBindingProof
         public required long GroupId { get; init; }
         public required string Sub { get; init; }
         public required string Username { get; init; }
+        public required string RefreshToken { get; init; }
         public required string Game { get; init; }
         public required string Scope { get; init; }
         public DateTime ExpiresAt { get; init; } = DateTime.UtcNow.AddSeconds(MaxTtlSeconds);
@@ -33,7 +34,7 @@ public static class DivingFishBindingProof
     /// <summary>
     ///     生成一次性证明码 C（至少 128-bit 随机），仅返回明文，hash 存内存。
     /// </summary>
-    public static string Issue(string qq, string groupId, string sub, string username, string game, string scope, int generation)
+    public static string Issue(string qq, string groupId, string sub, string username, string refreshToken, string game, string scope, int generation)
     {
         var code = Convert.ToHexString(RandomNumberGenerator.GetBytes(16)); // 128-bit
         Store[code] = new ProofEntry
@@ -43,6 +44,7 @@ public static class DivingFishBindingProof
             GroupId = long.TryParse(groupId, out var g) ? g : 0,
             Sub = sub,
             Username = username,
+            RefreshToken = refreshToken,
             Game = game,
             Scope = scope,
             Generation = generation
