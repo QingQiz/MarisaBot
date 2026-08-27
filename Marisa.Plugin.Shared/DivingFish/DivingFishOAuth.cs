@@ -85,7 +85,7 @@ public static class DivingFishOAuth
 
     /// <summary>
     ///     构造授权码 authorize 链接（强制 PKCE S256 + state + redirect_uri）。
-    ///     scope = openid + 游戏读取权限（openid 用于 callback 取 sub 做绑定确认）。
+    ///     scope = openid + 游戏读取权限（openid 保证有 id_token，回调可从其中取 sub/用户名）。
     /// </summary>
     public static string BuildAuthorizeUrl(string state, string codeChallenge, string game)
     {
@@ -131,6 +131,7 @@ public static class DivingFishOAuth
 
         var accessToken = TryReadField(body, "access_token");
         var expiresIn = TryReadField(body, "expires_in");
+        var idToken = TryReadField(body, "id_token");
         if (accessToken == null || !int.TryParse(expiresIn, out var seconds))
         {
             throw new HttpRequestException($"[DivingFish OAuth] 换码响应异常: {body}");
@@ -142,14 +143,43 @@ public static class DivingFishOAuth
             ExpiresAt = DateTime.UtcNow.AddSeconds(seconds)
         };
 
-        // 取 sub：userinfo（稳定用户 ID）与 username
+        // 取 sub 与 username：优先 userinfo；username 兜底从 id_token JWT 提取
         var (sub, username) = await FetchUserInfo(token.AccessToken);
+        if (string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(idToken))
+        {
+            username = ExtractClaim(idToken, "preferred_username")
+                       ?? ExtractClaim(idToken, "nickname")
+                       ?? ExtractClaim(idToken, "name");
+        }
         if (string.IsNullOrWhiteSpace(sub))
         {
             throw new HttpRequestException("[DivingFish OAuth] 无法获取用户 sub");
         }
 
         return (token, sub, username ?? "");
+    }
+
+    /// <summary>从 JWT payload 提取指定 claim（不验签，仅用于展示用户名）</summary>
+    private static string? ExtractClaim(string jwt, string claim)
+    {
+        try
+        {
+            var parts = jwt.Split('.');
+            if (parts.Length < 2) return null;
+
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            while (payload.Length % 4 != 0) payload += '=';
+
+            var json = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty(claim, out var v) && v.ValueKind == JsonValueKind.String
+                ? v.GetString()
+                : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -164,7 +194,11 @@ public static class DivingFishOAuth
                 .AllowHttpStatus("400,401,403")
                 .GetStringAsync();
 
-            return (TryReadField(body, "sub"), TryReadField(body, "preferred_username") ?? TryReadField(body, "nickname"));
+            var sub = TryReadField(body, "sub");
+            var username = TryReadField(body, "preferred_username")
+                           ?? TryReadField(body, "nickname")
+                           ?? TryReadField(body, "name");
+            return (sub, username);
         }
         catch
         {
