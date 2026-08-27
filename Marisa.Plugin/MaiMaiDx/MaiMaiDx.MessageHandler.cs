@@ -83,12 +83,12 @@ public partial class MaiMaiDx
                     // DivingFish OAuth 授权码绑定
                     if (idx == 0 && DivingFishOAuth.IsConfigured)
                     {
-                        // 已有有效绑定 → 跳过
+                        // 已有有效绑定且含 refresh_token（可查分）→ 跳过
                         using (var rr = BotDbContext.OpenRealm())
                         {
                             var existing = rr.All<Marisa.Database.Entity.Plugin.DivingFish.DivingFishOAuthBind>()
                                 .FirstOrDefault(x => x.Qq == next.Sender.Id && x.Status == "verified");
-                            if (existing != null)
+                            if (existing != null && !string.IsNullOrWhiteSpace(existing.RefreshToken))
                             {
                                 message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
                                 return DoBind(next, servers[idx]);
