@@ -284,8 +284,8 @@ public partial class Chunithm
                         return DoBind(next, "DivingFish");
                     }
 
-                    next.Reply("格式错误：请回复「确认 <浏览器显示的确认码>」。或回复任意内容重试");
-                    return MarisaPluginTaskState.ToBeContinued;
+                    next.Reply("确认码格式错误，会话已关闭。请重新使用 bind 命令发起绑定");
+                    return MarisaPluginTaskState.CompletedTask;
                 }
                 case 21:
                 {
