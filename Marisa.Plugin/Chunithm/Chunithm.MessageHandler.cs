@@ -106,16 +106,30 @@ public partial class Chunithm
 
                     if (idx == 0 && DivingFishOAuth.IsConfigured)
                     {
-                        // 已有有效绑定且含 refresh_token（可查分）→ 跳过
-                        using (var rr = BotDbContext.OpenRealm())
+                        // 已有有效绑定且含 refresh_token（可查分）→ 跳过；
+                        // 用 GetValidToken 实测刷新，水鱼侧解绑/撤销后 refresh_token 失效 → 不跳过，走授权码流程
+                        var dfValid = false;
+                        try
                         {
-                            var existing = rr.All<Marisa.Database.Entity.Plugin.DivingFish.DivingFishOAuthBind>()
-                                .FirstOrDefault(x => x.Qq == next.Sender.Id && x.Status == "verified");
-                            if (existing != null && !string.IsNullOrWhiteSpace(existing.RefreshToken))
+                            using (var rr = BotDbContext.OpenRealm())
                             {
-                                message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
-                                return DoBind(next, fetchers[idx]);
+                                var existing = rr.All<Marisa.Database.Entity.Plugin.DivingFish.DivingFishOAuthBind>()
+                                    .FirstOrDefault(x => x.Qq == next.Sender.Id && x.Status == "verified");
+                                if (existing != null && !string.IsNullOrWhiteSpace(existing.RefreshToken))
+                                {
+                                    dfValid = await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm") != null;
+                                }
                             }
+                        }
+                        catch
+                        {
+                            // 刷新失败（refresh_token 已失效/解绑）→ 不跳过
+                        }
+
+                        if (dfValid)
+                        {
+                            message.Reply("DivingFish OAuth 绑定成功！(已授权，跳过认证)");
+                            return DoBind(next, fetchers[idx]);
                         }
 
                         // 授权码 + PKCE：生成 state / verifier，保存待确认状态，发官方 authorize 链接
