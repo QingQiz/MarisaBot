@@ -34,7 +34,7 @@ public static class DivingFishTokenStore
         using (var realm = BotDbContext.OpenRealm())
         {
             var bind = realm.All<DivingFishOAuthBind>()
-                .FirstOrDefault(x => x.Qq == qq && x.Sub.Length > 0);
+                .FirstOrDefault(x => x.Qq == qq && x.Sub != "");
             if (bind != null && !string.IsNullOrWhiteSpace(bind.Sub))
             {
                 sub = bind.Sub;
