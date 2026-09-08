@@ -223,6 +223,8 @@ public class MaiMaiDxPlateDataTest
             Check($"{name}神完成表", name, "AP", PlateData.DefaultLevelIdxes);
             Check($"MST{name}完成表", name, "SSS", [3]);
             Check($"{name}MST完成表", name, "SSS", [3]);
+            Check($"红谱/紫谱 {name}完成表", name, "SSS", [2, 3]);
+            Check($"{name} EXP/Re:MASTER完成表", name, "SSS", [2, 4]);
         }
 
         Assert.That(failures, Is.Empty, string.Join(Environment.NewLine, failures));
@@ -643,6 +645,217 @@ public class MaiMaiDxPlateDataTest
     public void RemasterDifficultyParsing(string raw, int expectedLevelIdx)
     {
         Assert.That(MustParse(raw).LevelIdxes, Is.EquivalentTo(new[] {expectedLevelIdx}));
+    }
+
+    [TestCase("真代13红谱/紫谱理论值完成表")]
+    [TestCase("红谱/紫谱理论值真代13完成表")]
+    [TestCase("理论值13真代红谱/紫谱完成表")]
+    public void MultiDifficulty_UserCommandParsesExactQuery(string raw)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.Selectors, Has.Exactly(2).Items);
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13"));
+        Assert.That(q.Threshold.Dim, Is.EqualTo(PlateData.Dimension.Fc));
+        Assert.That(q.Threshold.Level, Is.EqualTo(4));
+        Assert.That(q.Threshold.DisplayName, Is.EqualTo("AP+"));
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {2, 3}), "difficulty OR set must be canonical and sorted");
+    }
+
+    [TestCase("真13+红谱/紫谱完成表")]
+    [TestCase("真红谱/紫谱13+完成表")]
+    public void MultiDifficulty_LevelPlusIsNotTreatedAsAListConnector(string raw)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("13+"));
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {2, 3}));
+    }
+
+    [TestCase("真红谱/紫谱完成表",     new[] {2, 3})]
+    [TestCase("真红谱或紫谱完成表",    new[] {2, 3})]
+    [TestCase("真红谱、紫谱完成表",    new[] {2, 3})]
+    [TestCase("真红谱／紫谱完成表",    new[] {2, 3})]
+    [TestCase("真红谱 紫谱完成表",     new[] {2, 3})]
+    [TestCase("真红谱紫谱完成表",      new[] {2, 3})]
+    [TestCase("真EXP/MST完成表",       new[] {2, 3})]
+    [TestCase("真exp 或 mst完成表",    new[] {2, 3})]
+    [TestCase("真EXPERT/紫谱/ReMAS完成表", new[] {2, 3, 4})]
+    public void MultiDifficulty_ListsAcceptSupportedConnectorsAndAliases(string raw, int[] expected)
+    {
+        Assert.That(MustParse(raw).LevelIdxes, Is.EqualTo(expected));
+    }
+
+    [TestCase("真红-紫谱完成表",          new[] {2, 3})]
+    [TestCase("真红-白谱完成表",          new[] {2, 3, 4})]
+    [TestCase("真红谱-白谱完成表",        new[] {2, 3, 4})]
+    [TestCase("真红谱 - 白谱完成表",      new[] {2, 3, 4})]
+    [TestCase("真EXP-MST完成表",           new[] {2, 3})]
+    [TestCase("真红谱－白谱完成表",        new[] {2, 3, 4})]
+    [TestCase("真黄-紫谱/白谱完成表",      new[] {1, 2, 3, 4})]
+    [TestCase("真绿-白谱完成表",           new[] {0, 1, 2, 3, 4})]
+    public void MultiDifficulty_RangesAreInclusiveAndComposeWithLists(string raw, int[] expected)
+    {
+        Assert.That(MustParse(raw).LevelIdxes, Is.EqualTo(expected));
+    }
+
+    [TestCase("真紫谱/红谱完成表",                  new[] {2, 3})]
+    [TestCase("真白谱/红谱/MST/BSC完成表",          new[] {0, 2, 3, 4})]
+    [TestCase("真MST/MASTER/紫谱/EXP/EXPERT完成表", new[] {2, 3})]
+    [TestCase("真Re:MASTER/白谱/ReMAS完成表",       new[] {4})]
+    public void MultiDifficulty_IsSortedAndDeduplicatesAliases(string raw, int[] expected)
+    {
+        Assert.That(MustParse(raw).LevelIdxes, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void MultiDifficulty_LongestMatchProtectsRemaster()
+    {
+        var q = MustParse("真Re:MASTER/MASTER完成表");
+
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {3, 4}));
+        Assert.That(q.Selectors, Has.Exactly(1).InstanceOf<PlateData.Selector.Plate>());
+    }
+
+    [TestCase("真M红谱ST完成表", "MST")]
+    [TestCase("真EX红谱PERT完成表", "EXPERT")]
+    public void MultiDifficulty_RemovalDoesNotSynthesizeAnotherDifficultyToken(string raw, string remainder)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {2}));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo(remainder));
+    }
+
+    [Test]
+    public void MultiDifficulty_AdjacentAsciiWordsAreNotSplitIntoDifficultyTokens()
+    {
+        var q = MustParse("真EXPERTMASTER完成表");
+
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {3}), "plate default must remain when no bounded token exists");
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("真"));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("EXPERTMASTER"));
+    }
+
+    [TestCase("真红谱/紫谱完成表",       new[] {2, 3})]
+    [TestCase("13红谱/紫谱完成表",      new[] {2, 3})]
+    [TestCase("14.6红谱/紫谱完成表",    new[] {2, 3})]
+    [TestCase("宴会场红谱/白谱完成表",  new[] {2, 4})]
+    [TestCase("复活曲红谱/白谱完成表",  new[] {2, 4})]
+    [TestCase("舞绿谱/白谱完成表",      new[] {0, 4})]
+    [TestCase("霸者红谱/紫谱完成表",    new[] {2, 3})]
+    public void MultiDifficulty_ExplicitSetOverridesEveryImplicitDefault(string raw, int[] expected)
+    {
+        Assert.That(MustParse(raw).LevelIdxes, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void MultiDifficulty_PreservesSelectorAndSpecialThresholdInteractions()
+    {
+        var level = MustParse("13红谱/紫谱完成表");
+        Assert.That(level.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Level>());
+
+        var constant = MustParse("14.6红谱/紫谱完成表");
+        Assert.That(constant.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Constant>());
+
+        var banquet = MustParse("宴会场红谱/白谱完成表");
+        Assert.That(banquet.Selectors.OfType<PlateData.Selector.Genre>().Single().FullName, Is.EqualTo("宴会場"));
+
+        var revival = MustParse("复活曲红谱/白谱完成表");
+        Assert.That(revival.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Revival>());
+
+        var finale = MustParse("舞绿谱/白谱完成表");
+        Assert.That(finale.Selectors.OfType<PlateData.Selector.Plate>().Single().Scope,
+            Is.EqualTo(PlateData.PlateScope.FinaleAndEarlier));
+
+        var allClear = MustParse("霸者红谱/紫谱完成表");
+        Assert.That(allClear.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo("霸者"));
+        Assert.That(allClear.Threshold.DisplayName, Is.EqualTo("A"));
+    }
+
+    [TestCase("真完成表",      new[] {3})]
+    [TestCase("13完成表",      new[] {0, 1, 2, 3, 4})]
+    [TestCase("14.6完成表",    new[] {0, 1, 2, 3, 4})]
+    [TestCase("宴会场完成表",  new[] {0, 1, 2, 3, 4})]
+    [TestCase("复活曲完成表",  new[] {3, 4})]
+    [TestCase("舞完成表",      new[] {3, 4})]
+    [TestCase("霸者完成表",    new[] {3, 4})]
+    public void MultiDifficulty_FeatureLeavesExistingDefaultsUnchanged(string raw, int[] expected)
+    {
+        Assert.That(MustParse(raw).LevelIdxes, Is.EqualTo(expected));
+    }
+
+    [TestCase("真白谱-红谱完成表")]
+    [TestCase("真MST-EXP完成表")]
+    [TestCase("真红谱/完成表")]
+    [TestCase("真/红谱完成表")]
+    [TestCase("真红谱或完成表")]
+    [TestCase("真红谱、完成表")]
+    [TestCase("真红谱－完成表")]
+    [TestCase("真红谱//紫谱完成表")]
+    [TestCase("真红谱/或紫谱完成表")]
+    [TestCase("真红谱--紫谱完成表")]
+    [TestCase("真红谱-紫谱-白谱完成表")]
+    [TestCase("真红谱+紫谱完成表")]
+    [TestCase("真红谱,紫谱完成表")]
+    [TestCase("真红谱，紫谱完成表")]
+    [TestCase("真红/紫谱完成表")]
+    [TestCase("真红谱/紫完成表")]
+    [TestCase("真红谱/UNKNOWN完成表")]
+    public void MultiDifficulty_RejectsDescendingDanglingAndMalformedExpressions(string raw)
+    {
+        var error = MustFail(raw);
+
+        Assert.That(error.Kind, Is.EqualTo(PlateData.ErrorKind.InvalidDifficulty));
+        Assert.That(error.Detail, Is.Not.Null.And.Not.Empty);
+    }
+
+    [Test]
+    public void MultiDifficulty_ValidExpressionStillRequiresAScopeSelector()
+    {
+        Assert.That(MustFail("红谱/紫谱完成表").Kind, Is.EqualTo(PlateData.ErrorKind.UnknownSelector));
+    }
+
+    [TestCase("紫红谱完成表", "紫", 2)]
+    [TestCase("紫白谱完成表", "紫", 4)]
+    [TestCase("白红谱完成表", "白", 2)]
+    [TestCase("白紫谱完成表", "白", 3)]
+    public void MultiDifficulty_ConcatenatedPlateKanjiAndDifficultyKeepLegacyMeaning(
+        string raw, string plateKanji, int expectedLevelIdx)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Plate>());
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Plate>().Single().Kanji, Is.EqualTo(plateKanji));
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {expectedLevelIdx}));
+    }
+
+    [TestCase("真绿完成表", "绿")]
+    [TestCase("真黄完成表", "黄")]
+    [TestCase("真红完成表", "红")]
+    public void MultiDifficulty_BareColorsOutsideRangesRemainCharterText(string raw, string charter)
+    {
+        var q = MustParse(raw);
+
+        Assert.That(q.LevelIdxes, Is.EqualTo(new[] {3}));
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo(charter));
+    }
+
+    [TestCase("红谱/白谱 SAMBA MASTER 佐藤完成表", "SAMBA MASTER 佐藤", new[] {2, 4})]
+    [TestCase("ちょむP <advanced mix> EXP/MST完成表", "ちょむP <advanced mix>", new[] {2, 3})]
+    public void MultiDifficulty_ExternalExpressionDoesNotSplitReservedWordsInsideKnownNames(
+        string raw, string expectedArtist, int[] expectedLevelIdxes)
+    {
+        var (charters, artists) = LoadKnownNames();
+        var ok = PlateData.TryParse(raw, charters, artists, out var q, out var error);
+
+        Assert.That(ok, Is.True, $"parse failed for '{raw}': {error?.Kind}/{error?.Detail}");
+        Assert.That(q!.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Artist>());
+        Assert.That(q.Selectors.OfType<PlateData.Selector.Artist>().Single().Name, Is.EqualTo(expectedArtist));
+        Assert.That(q.LevelIdxes, Is.EqualTo(expectedLevelIdxes));
     }
 
     // ──────────────────────────────────────────────────────────────────────

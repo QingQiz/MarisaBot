@@ -1399,10 +1399,10 @@ public partial class MaiMaiDx
     private const string PlateUsage =
         "完成表用于查看指定范围内，还有哪些谱面没有达到目标成绩。\n" +
         "\n" +
-        "用法：mai <范围><目标成绩><难度>完成表\n" +
-        "范围、目标成绩、难度的顺序不固定。\n" +
+        "用法：mai <范围><目标成绩><谱面难度>完成表\n" +
+        "范围、目标成绩、谱面难度的顺序不固定。\n" +
         "\n" +
-        "范围必须填写，可以组合多个条件；组合时只保留同时满足所有条件的谱面。\n" +
+        "范围必须填写；多个范围条件需同时满足，多个谱面难度满足任一即可。\n" +
         "  · 版本代字：舞 / 真 / 超 / 橙 / 暁 / 熊 / 華 / 鏡 / 彩 等，可加“代”，如 熊代\n" +
         "  · 谱师：例如 翠楼屋。合作名义也会匹配，如 サファ太 vs 翠楼屋\n" +
         "  · 类别：术力口 / V家 / 东方 / 击中 / 流行 / 动漫 / 其他 / 宴会场 / 舞萌 / 复活曲\n" +
@@ -1416,10 +1416,11 @@ public partial class MaiMaiDx
         "  · 舞舞=FDX，也可以直接写 SSS+ / SS / FC+ / AP+ / FDX+ 等\n" +
         "  · DX 分星档：一星到五星，或 1星到5星\n" +
         "\n" +
-        "难度不写时，普通版本代字默认只查紫谱；舞和其他范围默认查紫谱 + 白谱。\n" +
-        "只查宴会场时默认查全难度。可以显式指定：\n" +
-        "  · 绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱\n" +
-        "  · 或英文缩写 BSC / ADV / EXP / MST\n" +
+        "谱面难度不写时，普通版本代字默认只查紫谱；舞和其他范围默认查紫谱和白谱。\n" +
+        "指定等级或定数时，或只查宴会场时，默认查全难度。可显式指定一个或多个谱面难度：\n" +
+        "  · 单项：绿谱 / 黄谱 / 红谱 / 紫谱 / 白谱，或 BSC / ADV / EXP / MST / Re:MASTER\n" +
+        "  · 多项：用 / 连接，如 红谱/紫谱、EXP/MST；也支持“或”“、”，中文可直接连写，如 红谱紫谱\n" +
+        "  · 区间：用 - 表示从低到高并包含两端，如 红谱-白谱、EXP-MST\n" +
         "\n" +
         "示例：\n" +
         "  mai 真完成表\n" +
@@ -1430,14 +1431,14 @@ public partial class MaiMaiDx
         "  mai HIMEHINA神完成表\n" +
         "  mai 14+大将完成表\n" +
         "  mai 13.5神完成表\n" +
-        "  mai 紫谱将真完成表\n" +
+        "  mai 真代13红谱/紫谱理论值完成表\n" +
         "  mai 镜代V家将完成表\n" +
         "  mai 14+四星完成表";
 
     public static MarisaPluginTrigger.PluginTrigger PlateTrigger => (message, _) =>
         message.Command.EndsWith(PlateData.CommandSuffix);
 
-    [MarisaPluginDoc("查询版本/谱师/类别/作曲家/难度/定数的完成表")]
+    [MarisaPluginDoc("按版本/谱师/类别/作曲家/等级/定数筛选完成表，支持多谱面难度")]
     [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(PlateTrigger))]
     private async Task<MarisaPluginTaskState> Plate(Message message)
     {
@@ -1486,15 +1487,16 @@ public partial class MaiMaiDx
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
             PlateData.ErrorKind.UnsupportedPlate     => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/难度/定数：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 难度 / 定数",
+            PlateData.ErrorKind.InvalidDifficulty    => $"谱面难度格式错误：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/等级/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 等级 / 定数",
             PlateData.ErrorKind.ConflictingSelector  => $"{err.Detail}只能指定一次",
             _                                        => "命令格式错误",
         };
 
         List<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectCharts(PlateData.Query q)
         {
-            // 默认难度由解析层决定；用户显式给难度（红谱/EXPERT/...）则单元素 list 限定。
+            // 默认难度由解析层决定；用户显式给出一个或多个谱面难度时，按解析得到的集合限定。
             var levelIdxes = q.LevelIdxes;
             // 带「复活曲」selector 时，版本牌放行复活曲（用于「真复活曲」= 首发自该版本的复活曲）。
             var includeRevival = q.Selectors.Any(s => s is PlateData.Selector.Revival);

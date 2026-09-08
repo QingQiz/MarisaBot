@@ -87,7 +87,7 @@ public static class PlateData
     /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
     public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
 
-    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector, ConflictingSelector }
+    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector, ConflictingSelector, InvalidDifficulty }
 
     public sealed record ParseError(ErrorKind Kind, string? Detail = null);
 
@@ -625,7 +625,7 @@ public static class PlateData
     /// <summary>
     ///     难度别名表。**故意不收单字**（绿/黄/红/紫/白），因为这些字跟代字（紫=MURASAKi、白=MiLK）
     ///     或者用户预期的别名会冲突。要写中文必须双字"绿谱/黄谱/红谱/紫谱/白谱"
-    ///     （单字色名仅 <see cref="TryStripDifficultyAffix"/> 在句首/句尾剥离时接受）。
+    ///     单字色名仅在句首/句尾剥离或「红-白谱」这类闭区间中接受。
     ///     Re:MASTER 是合法的 difficulty（用户显式指定时才走），但不是所有歌都有该难度。
     /// </summary>
     public static readonly Dictionary<string, int> DifficultyAliasMap = new(StringComparer.OrdinalIgnoreCase)
@@ -641,8 +641,7 @@ public static class PlateData
         DifficultyAliasMap.Select(kv => (kv.Key, kv.Value))
             .OrderByDescending(t => t.Key.Length).ToArray();
 
-    /// <summary>单字色名（仅句首/句尾剥离接受）。不进 <see cref="DifficultyAliasMap"/>：完成表的
-    /// anywhere 匹配下单字与版本代字冲突（紫=MURASAKi、白=MiLK）。</summary>
+    /// <summary>单字色名不进 <see cref="DifficultyAliasMap"/>，避免与版本代字冲突。</summary>
     private static readonly (char Color, int LevelIdx)[] SingleColorEntries =
         [('绿', 0), ('黄', 1), ('红', 2), ('紫', 3), ('白', 4)];
 
@@ -821,25 +820,16 @@ public static class PlateData
             ? (parsePart[..thresholdAt] + parsePart[(thresholdAt + thresholdLen)..]).Trim()
             : parsePart;
 
-        // 2. 难度 token（可选，同样 anywhere + rightmost + 同样的 ASCII letter 边界规则）。
-        //    缺省时回落到 DefaultLevelIdxes ([3, 4] = MASTER + Re:MASTER)；显式给一个就是单元素。
-        IReadOnlyList<int> levelIdxes = DefaultLevelIdxes;
-        int diffAt = -1, diffLen = 0;
-        foreach (var (token, idx) in DifficultyEntriesLongestFirst)
+        // 2. 难度集合：在原字符串上从左到右扫描一次，避免删除旧 token 后拼出新 token。
+        //    列表内是 OR；区间为低到高的闭区间。任意显式集合都覆盖默认难度。
+        if (!TryExtractDifficulties(afterThreshold, out var explicitLevelIdxes, out var selectorPart, out var difficultyError))
         {
-            var pos = FindBoundedRightmost(afterThreshold, token);
-            if (pos >= 0)
-            {
-                levelIdxes = [idx];
-                diffAt     = pos;
-                diffLen    = token.Length;
-                break;
-            }
+            error = difficultyError;
+            return false;
         }
 
-        var selectorPart = diffAt >= 0
-            ? (afterThreshold[..diffAt] + afterThreshold[(diffAt + diffLen)..]).Trim()
-            : afterThreshold;
+        var difficultyExplicit = explicitLevelIdxes.Count > 0;
+        IReadOnlyList<int> levelIdxes = difficultyExplicit ? explicitLevelIdxes : DefaultLevelIdxes;
 
         if (selectorPart.Length == 0 && selectors.Count == 0)
         {
@@ -977,7 +967,7 @@ public static class PlateData
             return false;
         }
 
-        if (diffAt < 0)
+        if (!difficultyExplicit)
         {
             if (selectors.Any(s => s is Selector.Level or Selector.Constant))
             {
@@ -1009,6 +999,204 @@ public static class PlateData
 
         query = new Query(selectors, threshold, levelIdxes);
         return true;
+
+        bool TryExtractDifficulties(
+            string source,
+            out IReadOnlyList<int> explicitLevels,
+            out string remaining,
+            out ParseError? parseError)
+        {
+            var levels = new SortedSet<int>();
+            var spans = new List<(int Start, int Length)>();
+
+            for (var at = 0; at < source.Length;)
+            {
+                if (TryMatchDifficultyRange(source, at, out var rangeLength, out var from, out var to))
+                {
+                    var rangeText = source.Substring(at, rangeLength);
+                    if (from > to)
+                    {
+                        explicitLevels = [];
+                        remaining = source;
+                        parseError = new(ErrorKind.InvalidDifficulty,
+                            $"{rangeText}（区间应从低难度写到高难度）");
+                        return false;
+                    }
+
+                    for (var levelIdx = from; levelIdx <= to; levelIdx++) levels.Add(levelIdx);
+                    spans.Add((at, rangeLength));
+                    at += rangeLength;
+                    continue;
+                }
+
+                if (TryMatchDifficultyToken(source, at, out var tokenLength, out var level, out _))
+                {
+                    levels.Add(level);
+                    spans.Add((at, tokenLength));
+                    at += tokenLength;
+                    continue;
+                }
+
+                at++;
+            }
+
+            if (spans.Count == 0)
+            {
+                explicitLevels = [];
+                remaining = source;
+                parseError = null;
+                return true;
+            }
+
+            var remove = new bool[source.Length];
+            foreach (var span in spans) MarkRemoved(span.Start, span.Length);
+
+            var leading = source[..spans[0].Start].TrimEnd();
+            if (EndsWithDifficultyConnector(leading))
+            {
+                explicitLevels = [];
+                remaining = source;
+                parseError = InvalidConnectorError();
+                return false;
+            }
+
+            for (var i = 1; i < spans.Count; i++)
+            {
+                var previousEnd = spans[i - 1].Start + spans[i - 1].Length;
+                var gapLength = spans[i].Start - previousEnd;
+                var gap = source.Substring(previousEnd, gapLength);
+                var trimmedGap = gap.Trim();
+
+                if (trimmedGap.Length == 0 || IsDifficultyListConnector(trimmedGap))
+                {
+                    MarkRemoved(previousEnd, gapLength);
+                    continue;
+                }
+
+                if (trimmedGap == "+" ||
+                    StartsWithDifficultyConnector(trimmedGap) || EndsWithDifficultyConnector(trimmedGap))
+                {
+                    explicitLevels = [];
+                    remaining = source;
+                    parseError = InvalidConnectorError();
+                    return false;
+                }
+            }
+
+            var last = spans[^1];
+            var trailing = source[(last.Start + last.Length)..].TrimStart();
+            if (StartsWithDifficultyConnector(trailing))
+            {
+                explicitLevels = [];
+                remaining = source;
+                parseError = InvalidConnectorError();
+                return false;
+            }
+
+            var builder = new System.Text.StringBuilder(source.Length);
+            for (var i = 0; i < source.Length; i++)
+            {
+                if (!remove[i]) builder.Append(source[i]);
+            }
+
+            explicitLevels = levels.ToArray();
+            remaining = builder.ToString().Trim();
+            parseError = null;
+            return true;
+
+            void MarkRemoved(int start, int length)
+            {
+                for (var i = start; i < start + length; i++) remove[i] = true;
+            }
+        }
+
+        bool TryMatchDifficultyRange(
+            string source,
+            int start,
+            out int length,
+            out int from,
+            out int to)
+        {
+            length = 0;
+            from = -1;
+            to = -1;
+
+            var leftLength = 0;
+            if (!TryMatchDifficultyToken(source, start, out leftLength, out from, out _))
+            {
+                var color = SingleColorEntries.FirstOrDefault(entry => entry.Color == source[start]);
+                if (color == default) return false;
+                leftLength = 1;
+                from = color.LevelIdx;
+            }
+
+            var hyphenAt = SkipWhitespace(source, start + leftLength);
+            if (hyphenAt >= source.Length || source[hyphenAt] is not ('-' or '－')) return false;
+
+            var rightAt = SkipWhitespace(source, hyphenAt + 1);
+            if (!TryMatchDifficultyToken(source, rightAt, out var rightLength, out to, out var rightToken)) return false;
+
+            // 单字色名只允许中文缩写区间「红-紫谱」；列表项仍必须是完整 token。
+            if (leftLength == 1 && (rightToken.Length != 2 || rightToken[1] != '谱')) return false;
+
+            length = rightAt + rightLength - start;
+            return true;
+        }
+
+        bool TryMatchDifficultyToken(
+            string source,
+            int start,
+            out int length,
+            out int levelIdx,
+            out string token)
+        {
+            foreach (var entry in DifficultyEntriesLongestFirst)
+            {
+                if (start + entry.Token.Length > source.Length) continue;
+                if (!source.AsSpan(start, entry.Token.Length)
+                        .Equals(entry.Token.AsSpan(), StringComparison.OrdinalIgnoreCase)) continue;
+
+                if (entry.Token.Any(IsAsciiLetter))
+                {
+                    var before = start > 0 ? source[start - 1] : '\0';
+                    var after = start + entry.Token.Length < source.Length
+                        ? source[start + entry.Token.Length]
+                        : '\0';
+                    if (IsAsciiLetter(before) || IsAsciiLetter(after)) continue;
+                }
+
+                length = entry.Token.Length;
+                levelIdx = entry.LevelIdx;
+                token = entry.Token;
+                return true;
+            }
+
+            length = 0;
+            levelIdx = -1;
+            token = string.Empty;
+            return false;
+        }
+
+        int SkipWhitespace(string source, int start)
+        {
+            while (start < source.Length && char.IsWhiteSpace(source[start])) start++;
+            return start;
+        }
+
+        bool IsDifficultyListConnector(string value) => value is "/" or "／" or "、" or "或";
+
+        bool StartsWithDifficultyConnector(string value) =>
+            value.StartsWith('/') || value.StartsWith('／') || value.StartsWith('、') ||
+            value.StartsWith('或') || value.StartsWith('-') || value.StartsWith('－') ||
+            value.StartsWith(',') || value.StartsWith('，');
+
+        bool EndsWithDifficultyConnector(string value) =>
+            value.EndsWith('/') || value.EndsWith('／') || value.EndsWith('、') ||
+            value.EndsWith('或') || value.EndsWith('-') || value.EndsWith('－') ||
+            value.EndsWith(',') || value.EndsWith('，');
+
+        ParseError InvalidConnectorError() =>
+            new(ErrorKind.InvalidDifficulty, "连接符两侧必须是谱面难度");
 
         bool TryExtractKnownName(string input, out int start, out int length, out Selector? selector)
         {
