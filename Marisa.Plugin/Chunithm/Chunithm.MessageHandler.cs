@@ -131,9 +131,11 @@ public partial class Chunithm
                             pending.State,
                             pending.CodeChallenge,
                             "chunithm");
+                        var shortCode = ShortUrlStore.CreateShortUrl(authorizeUrl);
+                        var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
 
                         next.Reply(MessageChain.FromSensitiveText(
-                            $"请打开水鱼官方授权链接并登录你自己的账号（10 分钟内有效）：\n{authorizeUrl}\n\n" +
+                            $"请打开水鱼官方授权链接并登录你自己的账号（10 分钟内有效）：\n{shortUrl}\n\n" +
                             "浏览器授权后会显示一次性确认码，请复制并发送到当前会话。"));
 
                         stat = 20;
