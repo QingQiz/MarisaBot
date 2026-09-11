@@ -14,6 +14,18 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiDxDivingFishDataFetcherTest
 {
+    [TestCase("白", "maimai MiLK")]
+    [TestCase("雪", "MiLK PLUS")]
+    [TestCase("maimai MiLK", "maimai MiLK")]
+    [TestCase("不存在的版本", null)]
+    public void ResolveSummaryVersion_Should_Resolve_Alias_And_Exact_Version(string input, string? expected)
+    {
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("ResolveSummaryVersion", BindingFlags.NonPublic | BindingFlags.Static);
+        var actual = (string?)method!.Invoke(null, [input, new[] { "maimai MiLK", "MiLK PLUS" }]);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     [Test]
     public void BuildVersionList_Should_Deduplicate_And_Keep_Chronological_Order()
     {

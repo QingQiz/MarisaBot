@@ -105,6 +105,11 @@ public class DispatcherTest
             {
                 Type = MessageType.TempMessage
             }, typeof(MaiMaiDx), null).SetName("temp");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver白");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver白");
         }
     }
 

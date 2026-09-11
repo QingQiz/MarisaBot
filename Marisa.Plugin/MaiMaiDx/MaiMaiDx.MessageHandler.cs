@@ -1322,6 +1322,20 @@ public partial class MaiMaiDx
     {
         var versions = Versions;
 
+        var versionArg = message.Command.Trim().ToString();
+        if (versionArg.Length > 0)
+        {
+            var version = ResolveSummaryVersion(versionArg, versions);
+            if (version == null)
+            {
+                message.Reply("错误的版本：" + versionArg);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            await ReplyVersionSummary(message, version);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         if (versions.Length == 0)
         {
             message.Reply("暂无可用版本数据");
