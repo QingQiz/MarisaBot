@@ -105,6 +105,9 @@ public class DispatcherTest
             {
                 Type = MessageType.TempMessage
             }, typeof(MaiMaiDx), null).SetName("temp");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver");
         }
     }
 
@@ -119,6 +122,8 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("chu sum b 15")), typeof(Chunithm), "SummarySongBpm").SetName("chu sum b");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum bpm 15")), typeof(MaiMaiDx), "SummarySongBase").SetName("chu sum bpm");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver with attached difficulty");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai 双星含金量分析")), typeof(MaiMaiDx), "FilteredValueAnalysis").SetName("mai rejects invented double star rank");
 

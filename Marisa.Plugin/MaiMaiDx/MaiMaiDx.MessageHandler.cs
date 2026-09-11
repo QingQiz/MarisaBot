@@ -1317,7 +1317,8 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("获取版本的成绩汇总，使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
-    [MarisaPluginCommand("version", "ver")]
+    // 版本命令不接参数；严格匹配可避免诸如“ver白”被误认为命令后缀，意外开启版本选择对话。
+    [MarisaPluginCommand(true, "version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
         var versions = Versions;
