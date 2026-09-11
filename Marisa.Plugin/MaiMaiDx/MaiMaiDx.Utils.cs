@@ -23,6 +23,20 @@ public partial class MaiMaiDx
         return VersionOrderHelper.BuildVersionList(songs, song => song.Version, song => song.Id);
     }
 
+    private static string? ResolveSummaryVersion(string input, IReadOnlyList<string> versions)
+    {
+        var key = input.Trim();
+        var direct = versions.FirstOrDefault(v => v.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (direct != null) return direct;
+
+        if (!PlateData.PlateVersionMap.TryGetValue(key, out var mapped) || mapped.Length != 1)
+        {
+            return null;
+        }
+
+        return versions.FirstOrDefault(v => v.Equals(mapped[0], StringComparison.OrdinalIgnoreCase));
+    }
+
     #region 等级/定数解析
 
     /// <summary>严格解析等级（纯数字可带尾加号，禁符号/空白/前导零；加号等级最高 14+），

@@ -1317,11 +1317,24 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("获取版本的成绩汇总，使用对话选择版本")]
     [MarisaPluginSubCommand(nameof(Summary))]
-    // 版本命令不接参数；严格匹配可避免诸如“ver白”被误认为命令后缀，意外开启版本选择对话。
-    [MarisaPluginCommand(true, "version", "ver")]
+    [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
         var versions = Versions;
+
+        var versionArg = message.Command.Trim().ToString();
+        if (versionArg.Length > 0)
+        {
+            var version = ResolveSummaryVersion(versionArg, versions);
+            if (version == null)
+            {
+                message.Reply("错误的版本：" + versionArg);
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            await ReplyVersionSummary(message, version);
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         if (versions.Length == 0)
         {
