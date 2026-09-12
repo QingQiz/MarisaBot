@@ -50,6 +50,30 @@ public class MaiMaiDxDivingFishDataFetcherTest
     }
 
     [Test]
+    public void BuildRating_Should_Split_OAuth_Scores_By_Release_And_Keep_Top_35_15()
+    {
+        var songDb = CreateSongDb();
+        var fetcher = new LxnsDataFetcher(songDb);
+        var scores = Enumerable.Range(1, 40)
+            .Select(i => CreateSongScore(i, 10.0 + i / 100.0, 100 + i))
+            .Concat(Enumerable.Range(1001, 20)
+                .Select(i => CreateSongScore(i, 11.0 + i / 1000.0, 200 + i)))
+            .ToDictionary(score => (score.Id, score.LevelIdx));
+        var method = typeof(LxnsDataFetcher).GetMethod("BuildRating", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var rating = (DxRating)method!.Invoke(fetcher, [scores, "tester"])!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(rating.Nickname, Is.EqualTo("tester"));
+            Assert.That(rating.OldScores, Has.Count.EqualTo(35));
+            Assert.That(rating.NewScores, Has.Count.EqualTo(15));
+            Assert.That(rating.OldScores.Select(x => x.Id), Is.EquivalentTo(Enumerable.Range(6, 35).Select(i => (long)i)));
+            Assert.That(rating.NewScores.Select(x => x.Id), Is.EquivalentTo(Enumerable.Range(1006, 15).Select(i => (long)i)));
+        });
+    }
+
+    [Test]
     public void BuildVersionList_Should_Prefer_Version_Whose_Majority_Ids_Are_Smaller()
     {
         var songs = new List<MaiMaiSong>
