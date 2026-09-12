@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
@@ -13,6 +14,15 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 
     public override async Task<DxRating> GetRating(Message message)
     {
+        var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
+        if (username.IsWhiteSpace() && qq == message.Sender.Id)
+        {
+            var token = await GetRequiredOAuthToken(qq);
+            var scores = await GetScoresViaOAuth(token, qq);
+            var nickname = await GetNicknameViaOAuth(token, qq);
+            return BuildRating(scores, nickname);
+        }
+
         return await FetchScores(message);
     }
 
@@ -21,14 +31,8 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
 
         // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
-        var oauthToken = await LxnsTokenStore.GetValidToken(qq);
-        if (oauthToken != null)
-        {
-            return await GetScoresViaOAuth(oauthToken, qq);
-        }
-
-        // 无 OAuth token → 引导用户绑定
-        throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+        var oauthToken = await GetRequiredOAuthToken(qq);
+        return await GetScoresViaOAuth(oauthToken, qq);
 
         // === 以下 dev token 两阶段抓取已废弃 ===
         /*
@@ -103,8 +107,18 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 
     public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
     {
-        var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
+        var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
         var empty   = new Dictionary<int, SongScore>();
+
+        if (username.IsWhiteSpace() && qq == message.Sender.Id)
+        {
+            var token = await GetRequiredOAuthToken(qq);
+            var oauthScores = await GetScoresViaOAuth(token, qq);
+            var nickname = await GetNicknameViaOAuth(token, qq);
+            return (nickname, oauthScores
+                .Where(x => x.Key.Id == song.Id)
+                .ToDictionary(x => x.Key.LevelIdx, x => x.Value));
+        }
 
         // 玩家信息：拿昵称 + friend_code（单曲成绩接口按 friend_code 查，dev token 即可，无需 OAuth）
         var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
@@ -171,6 +185,80 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         }
 
         return (playerName, scores);
+    }
+
+    private async Task<LxnsToken> GetRequiredOAuthToken(long qq)
+    {
+        try
+        {
+            return await LxnsTokenStore.GetValidToken(qq)
+                   ?? throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+        }
+        catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized)
+        {
+            throw new HttpRequestException("[Lxns] OAuth 授权已失效，请重新使用 bind → 选择 lxns 完成授权");
+        }
+    }
+
+    private async Task<string> GetNicknameViaOAuth(LxnsToken token, long qq)
+    {
+        var response = await "https://maimai.lxns.net/api/v0/user/maimai/player"
+            .WithOAuthBearerToken(token.AccessToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
+
+        if (response.StatusCode is 400 or 401 or 403 or 404)
+        {
+            if (response.StatusCode is 401 or 403)
+                LxnsTokenStore.RemoveToken(qq);
+
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException($"[Lxns OAuth] {response.StatusCode}: {ReadErrorMessage(body)}");
+        }
+
+        using var doc = JsonDocument.Parse(await response.GetStringAsync());
+        var root = doc.RootElement.TryGetProperty("data", out var data) ? data : doc.RootElement;
+        return root.TryGetProperty("name", out var name) && name.ValueKind == JsonValueKind.String
+            ? name.GetString() ?? ""
+            : root.TryGetProperty("nickname", out var nickname) && nickname.ValueKind == JsonValueKind.String
+                ? nickname.GetString() ?? ""
+                : "";
+    }
+
+    private DxRating BuildRating(Dictionary<(long Id, int LevelIdx), SongScore> scores, string nickname)
+    {
+        var groups = scores.Values
+            .Where(x => x.Id <= 100000 && SongDb.SongIndexer.ContainsKey(x.Id))
+            .GroupBy(x => SongDb.SongIndexer[x.Id].Info.IsNew)
+            .ToList();
+
+        return new DxRating
+        {
+            Nickname = nickname,
+            OldScores = TopScores(groups.FirstOrDefault(x => !x.Key), DivingFishDataFetcher.OldScoreLimit),
+            NewScores = TopScores(groups.FirstOrDefault(x => x.Key), DivingFishDataFetcher.NewScoreLimit)
+        };
+
+        static List<SongScore> TopScores(IEnumerable<SongScore>? source, int limit) => source?
+            .OrderByDescending(x => x.Rating)
+            .ThenByDescending(x => x.Id)
+            .Take(limit)
+            .ToList() ?? [];
+    }
+
+    private static string ReadErrorMessage(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String
+                ? message.GetString() ?? "Unknown error"
+                : "Unknown error";
+        }
+        catch
+        {
+            return "Unknown error";
+        }
     }
 
     private async Task<DxRating> FetchScores(Message message)
