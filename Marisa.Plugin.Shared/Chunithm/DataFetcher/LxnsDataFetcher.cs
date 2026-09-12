@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
@@ -89,6 +90,15 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
+        var (username, qq) = AtOrSelf(message, false);
+        if (username.IsWhiteSpace() && qq == message.Sender.Id)
+        {
+            var token = await GetRequiredOAuthToken(qq);
+            var scores = await GetScoresViaOAuth(token, qq);
+            var nickname = await GetNicknameViaOAuth(token, qq);
+            return BuildRating(scores, nickname);
+        }
+
         return await FetchScores(message);
     }
 
@@ -97,14 +107,8 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         var (_, qq) = AtOrSelf(message, true);
 
         // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
-        var oauthToken = await LxnsTokenStore.GetValidToken(qq);
-        if (oauthToken != null)
-        {
-            return await GetScoresViaOAuth(oauthToken, qq);
-        }
-
-        // 无 OAuth token → 引导用户绑定
-        throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+        var oauthToken = await GetRequiredOAuthToken(qq);
+        return await GetScoresViaOAuth(oauthToken, qq);
 
         // === 以下 dev token 两阶段抓取已废弃 ===
         /*
@@ -175,6 +179,84 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         }
 
         return result;
+    }
+
+    private async Task<LxnsToken> GetRequiredOAuthToken(long qq)
+    {
+        try
+        {
+            return await LxnsTokenStore.GetValidToken(qq)
+                   ?? throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+        }
+        catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized)
+        {
+            throw new HttpRequestException("[Lxns] OAuth 授权已失效，请重新使用 bind → 选择 lxns 完成授权");
+        }
+    }
+
+    private async Task<string> GetNicknameViaOAuth(LxnsToken token, long qq)
+    {
+        var response = await "https://maimai.lxns.net/api/v0/user/chunithm/player"
+            .WithOAuthBearerToken(token.AccessToken)
+            .AllowHttpStatus("400,401,403,404")
+            .GetAsync();
+
+        if (response.StatusCode is 400 or 401 or 403 or 404)
+        {
+            if (response.StatusCode is 401 or 403)
+                LxnsTokenStore.RemoveToken(qq);
+
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException($"[Lxns OAuth] {response.StatusCode}: {ReadErrorMessage(body)}");
+        }
+
+        using var doc = JsonDocument.Parse(await response.GetStringAsync());
+        var root = doc.RootElement.TryGetProperty("data", out var data) ? data : doc.RootElement;
+        return root.TryGetProperty("name", out var name) && name.ValueKind == JsonValueKind.String
+            ? name.GetString() ?? ""
+            : root.TryGetProperty("nickname", out var nickname) && nickname.ValueKind == JsonValueKind.String
+                ? nickname.GetString() ?? ""
+                : "";
+    }
+
+    private ChunithmRating BuildRating(Dictionary<(long Id, int LevelIdx), ChunithmScore> scores, string nickname)
+    {
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
+        };
+        var versionMap = GetSongList().ToDictionary(x => x.Id, x => x.Version);
+        var groups = scores.Values
+            .Where(x => versionMap.ContainsKey(x.Id))
+            .GroupBy(x => newest.Contains(versionMap[x.Id]));
+
+        return new ChunithmRating
+        {
+            DataSource = "Lxns",
+            Username = nickname,
+            Records = new Records
+            {
+                Best = groups.FirstOrDefault(x => !x.Key)?
+                           .OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
+                Recent = groups.FirstOrDefault(x => x.Key)?
+                             .OrderByDescending(x => x.Rating).Take(20).ToArray() ?? []
+            }
+        };
+    }
+
+    private static string ReadErrorMessage(string body)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String
+                ? message.GetString() ?? "Unknown error"
+                : "Unknown error";
+        }
+        catch
+        {
+            return "Unknown error";
+        }
     }
 
     private async Task<ChunithmRating> FetchScores(Message message)
