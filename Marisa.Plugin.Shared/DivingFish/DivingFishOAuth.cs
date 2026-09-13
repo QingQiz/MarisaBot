@@ -13,6 +13,8 @@ public static class DivingFishOAuth
     private const string DiscoveryUrl = AuthBaseUrl + "/.well-known/openid-configuration";
     private const string OnBehalfOfGrantType = "urn:diving-fish:params:oauth:grant-type:on-behalf-of";
 
+    public const string CallbackPath = "/oauth/callback/divingfish";
+
     private static readonly Uri AuthBaseUri = new(AuthBaseUrl);
     private static readonly SemaphoreSlim DiscoveryGate = new(1, 1);
     private static DiscoveryCache? _discoveryCache;
@@ -439,7 +441,7 @@ public static class DivingFishOAuth
     private static bool IsAllowedRedirectUri(string redirectUri)
     {
         if (!Uri.TryCreate(redirectUri, UriKind.Absolute, out var uri)) return false;
-        if (!uri.AbsolutePath.Equals("/oauth/callback/divingfish", StringComparison.Ordinal) || !string.IsNullOrEmpty(uri.Fragment))
+        if (!uri.AbsolutePath.Equals(CallbackPath, StringComparison.Ordinal) || !string.IsNullOrEmpty(uri.Fragment))
         {
             return false;
         }

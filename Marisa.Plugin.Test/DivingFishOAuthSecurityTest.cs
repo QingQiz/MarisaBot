@@ -72,6 +72,13 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
+    public void CallbackPath_Matches_Configured_RedirectUri()
+    {
+        Assert.That(DivingFishOAuth.CallbackPath, Is.EqualTo("/oauth/callback/divingfish"));
+        Assert.That(DivingFishOAuth.CanAuthorize, Is.True);
+    }
+
+    [Test]
     public void SubjectRef_SameClientAndExternalId_IsStableLowercaseSha256()
     {
         const string expected = "7be34ed48f3de4511cfb3987c08091ea28d59cc5ba0695bce6a60c40dff1fa75";

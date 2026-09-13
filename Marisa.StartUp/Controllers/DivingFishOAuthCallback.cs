@@ -9,7 +9,7 @@ public class DivingFishOAuthCallback : Controller
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    [HttpGet("/oauth/callback/divingfish")]
+    [HttpGet(DivingFishOAuth.CallbackPath)]
     public async Task<IActionResult> Callback(
         [FromQuery] string? code,
         [FromQuery] string? state,
