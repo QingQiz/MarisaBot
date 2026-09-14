@@ -94,36 +94,6 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
-    public void DeviceBindingConfirmation_Consumes_Once()
-    {
-        var code = DivingFishDeviceBindingConfirmation.Issue(
-            "waterfish-sub",
-            "maimai",
-            DivingFishOAuth.ScopeOf("maimai"));
-
-        Assert.That(
-            DivingFishDeviceBindingConfirmation.Consume(code).IsSuccess,
-            Is.True);
-        Assert.That(
-            DivingFishDeviceBindingConfirmation.Consume(code).Status,
-            Is.EqualTo(DivingFishDeviceBindingConfirmation.ConsumeStatus.NotFound));
-    }
-
-    [Test]
-    public async Task DeviceBindingConfirmation_ConcurrentConsume_OnlyOne_Succeeds()
-    {
-        var code = DivingFishDeviceBindingConfirmation.Issue(
-            "waterfish-sub",
-            "maimai",
-            DivingFishOAuth.ScopeOf("maimai"));
-
-        var results = await RunConcurrently(() =>
-            DivingFishDeviceBindingConfirmation.Consume(code));
-
-        Assert.That(results.Count(x => x.IsSuccess), Is.EqualTo(1));
-    }
-
-    [Test]
     public void BindingService_Allows_Same_Subject_For_Different_Qq()
     {
         var firstQq = Interlocked.Increment(ref _identitySeed);
