@@ -77,15 +77,6 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
-    public void DeviceSubjectRef_Is_Bare_Lowercase_Sha256()
-    {
-        var subjectRef = DivingFishOAuth.DeviceSubjectRef(123456789);
-
-        Assert.That(subjectRef, Does.Match("^[0-9a-f]{64}$"));
-        Assert.That(subjectRef, Does.Not.StartWith("ref:"));
-    }
-
-    [Test]
     public void SubjectRef_SameClientAndExternalId_IsStableLowercaseSha256()
     {
         const string expected = "7be34ed48f3de4511cfb3987c08091ea28d59cc5ba0695bce6a60c40dff1fa75";

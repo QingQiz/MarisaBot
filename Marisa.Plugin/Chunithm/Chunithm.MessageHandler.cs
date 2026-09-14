@@ -124,7 +124,6 @@ public partial class Chunithm
                         {
                             var device = await DivingFishOAuth.StartDeviceAuthorization(
                                 "chunithm",
-                                    DivingFishOAuth.DeviceSubjectRef(next.Sender.Id),
                                 DeviceBindingLabel(next.Sender.Id));
                             next.Reply(MessageChain.FromSensitiveText(
                                     $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n授权完成后，Bot 会在这里发送确认码。"));
