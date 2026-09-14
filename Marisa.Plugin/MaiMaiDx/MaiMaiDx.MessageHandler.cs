@@ -54,6 +54,7 @@ public partial class MaiMaiDx
         var stat   = 0;
         string? oauthVerifier = null;
         (string Sub, string Game, string Scope)? pendingDeviceBinding = null;
+        CancellationTokenSource? deviceBindingTimeout = null;
 
         MarisaPluginTaskState DoBind(Message msg, string srv)
         {
@@ -103,19 +104,24 @@ public partial class MaiMaiDx
                                 "maimai",
                                 DeviceBindingLabel(next.Sender.Id));
                             next.Reply(MessageChain.FromSensitiveText(
-                                $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n授权完成后，Bot 会在这里发送确认码。"));
+                                $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}"));
 
                             stat = 30;
                             var deviceKey = (message.GroupInfo?.Id, message.Sender.Id);
-                            _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
-                                DialogManager.RemoveDialog(deviceKey));
+                            deviceBindingTimeout = new CancellationTokenSource();
+                            _ = Task.Delay(TimeSpan.FromMinutes(10), deviceBindingTimeout.Token).ContinueWith(t =>
+                            {
+                                if (t.IsCanceled) return;
+                                DialogManager.RemoveDialog(deviceKey);
+                                message.Reply("绑定已取消");
+                            });
                             _ = Task.Run(async () =>
                             {
                                 try
                                 {
                                     var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "maimai");
                                     pendingDeviceBinding = (result.Sub, "maimai", result.Token.Scope);
-                                    message.Reply("如果是你本人完成的绑定，请回复“收到”。");
+                                    message.Reply("绑定已完成，如果是你本人完成了绑定请回复收到");
                                 }
                                 catch (Exception e)
                                 {
@@ -187,19 +193,22 @@ public partial class MaiMaiDx
                 {
                     if (!string.Equals(next.Command.Trim().ToString(), "收到", StringComparison.Ordinal))
                     {
-                        next.Reply("如果是你本人完成的绑定，请回复“收到”。");
-                        return MarisaPluginTaskState.ToBeContinued;
+                        deviceBindingTimeout?.Cancel();
+                        next.Reply("绑定已取消");
+                        return MarisaPluginTaskState.CompletedTask;
                     }
 
                     if (pendingDeviceBinding is not { } entry)
                     {
-                        next.Reply("这次绑定已经失效，请重新发起绑定。");
+                        deviceBindingTimeout?.Cancel();
+                        next.Reply("绑定已取消");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
+                    deviceBindingTimeout?.Cancel();
                     pendingDeviceBinding = null;
                     DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, "", entry.Scope, entry.Game);
-                    next.Reply("好的，DivingFish 绑定成功。");
+                    next.Reply("ok");
                     return MarisaPluginTaskState.CompletedTask;
                 }
             }
