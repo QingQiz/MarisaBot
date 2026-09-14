@@ -45,7 +45,6 @@ public class DivingFishOAuthSecurityTest
             divingFish:
               clientId: "test-client-id"
               clientSecret: "test-client-secret"
-              redirectUri: "https://bot.example.test/oauth/callback/divingfish"
             """);
 
         ConfigurationManager.SetConfigFilePath(configPath);
@@ -72,6 +71,21 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
+    public void DeviceCodeMode_IsAvailable_With_Confidential_Client()
+    {
+        Assert.That(DivingFishOAuth.CanUseDeviceCode, Is.True);
+    }
+
+    [Test]
+    public void DeviceSubjectRef_Is_Bare_Lowercase_Sha256()
+    {
+        var subjectRef = DivingFishOAuth.DeviceSubjectRef(123456789);
+
+        Assert.That(subjectRef, Does.Match("^[0-9a-f]{64}$"));
+        Assert.That(subjectRef, Does.Not.StartWith("ref:"));
+    }
+
+    [Test]
     public void SubjectRef_SameClientAndExternalId_IsStableLowercaseSha256()
     {
         const string expected = "7be34ed48f3de4511cfb3987c08091ea28d59cc5ba0695bce6a60c40dff1fa75";
@@ -89,56 +103,33 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
-    public async Task PendingAuth_ConcurrentAcquire_OnlyOneAttemptSucceeds()
+    public void DeviceBindingConfirmation_Consumes_Once()
     {
-        var pending = DivingFishPendingAuth.Begin("maimai");
+        var code = DivingFishDeviceBindingConfirmation.Issue(
+            "waterfish-sub",
+            "maimai",
+            DivingFishOAuth.ScopeOf("maimai"));
 
-        var results = await RunConcurrently(() => DivingFishPendingAuth.AcquireForCallback(pending.State));
-        var acquired = results.Where(x => x.IsAcquired).ToArray();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(acquired, Has.Length.EqualTo(1));
-            Assert.That(results.Count(x => x.Status == DivingFishPendingAuth.AcquireStatus.InProgress),
-                Is.EqualTo(ConcurrentAttemptCount - 1));
-        });
-
-        var code = DivingFishBindingConfirmation.Issue(
-            acquired[0].Entry!, "sub", "tester", DivingFishOAuth.ScopeOf("maimai"));
-        Assert.That(code, Is.Not.Null);
-        Assert.That(DivingFishBindingConfirmation.Consume(code!).Status,
-            Is.EqualTo(DivingFishBindingConfirmation.ConsumeStatus.Success));
+        Assert.That(
+            DivingFishDeviceBindingConfirmation.Consume(code).IsSuccess,
+            Is.True);
+        Assert.That(
+            DivingFishDeviceBindingConfirmation.Consume(code).Status,
+            Is.EqualTo(DivingFishDeviceBindingConfirmation.ConsumeStatus.NotFound));
     }
 
     [Test]
-    public async Task BindingConfirmation_ConcurrentConsume_OnlyOneAttemptSucceeds()
+    public async Task DeviceBindingConfirmation_ConcurrentConsume_OnlyOne_Succeeds()
     {
-        var code = IssueConfirmation("maimai");
+        var code = DivingFishDeviceBindingConfirmation.Issue(
+            "waterfish-sub",
+            "maimai",
+            DivingFishOAuth.ScopeOf("maimai"));
 
-        var results = await RunConcurrently(() => DivingFishBindingConfirmation.Consume(code));
+        var results = await RunConcurrently(() =>
+            DivingFishDeviceBindingConfirmation.Consume(code));
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(results.Count(x => x.IsSuccess), Is.EqualTo(1));
-            Assert.That(results.Count(x => x.Status == DivingFishBindingConfirmation.ConsumeStatus.NotFound),
-                Is.EqualTo(ConcurrentAttemptCount - 1));
-        });
-    }
-
-    [Test]
-    public void PendingAuth_Does_Not_Supersede_Another_Flow()
-    {
-        var first = DivingFishPendingAuth.Begin("maimai");
-        var second = DivingFishPendingAuth.Begin("chunithm");
-
-        var firstAcquire = DivingFishPendingAuth.AcquireForCallback(first.State);
-        var secondAcquire = DivingFishPendingAuth.AcquireForCallback(second.State);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(firstAcquire.IsAcquired, Is.True);
-            Assert.That(secondAcquire.IsAcquired, Is.True);
-        });
+        Assert.That(results.Count(x => x.IsSuccess), Is.EqualTo(1));
     }
 
     [Test]
@@ -157,18 +148,6 @@ public class DivingFishOAuthSecurityTest
             .Where(x => x.Sub == sub)
             .ToList();
         Assert.That(bindings.Select(x => x.Qq), Is.EquivalentTo(new[] { firstQq, secondQq }));
-    }
-
-    private static string IssueConfirmation(string game)
-    {
-        var start = DivingFishPendingAuth.Begin(game);
-        var acquired = DivingFishPendingAuth.AcquireForCallback(start.State);
-        Assert.That(acquired.IsAcquired, Is.True);
-
-        var code = DivingFishBindingConfirmation.Issue(
-            acquired.Entry!, "sub", "tester", DivingFishOAuth.ScopeOf(game));
-        Assert.That(code, Is.Not.Null);
-        return code!;
     }
 
     private static async Task<T[]> RunConcurrently<T>(Func<T> action)

@@ -10,6 +10,12 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
+    private static string DeviceBindingLabel(long qq)
+    {
+        var value = qq.ToString();
+        return value.Length > 4 ? $"QQ {value[..2]}****{value[^2..]}" : $"QQ {value}";
+    }
+
     private DataFetcher GetDataFetcher(string name, string? accessCode)
     {
         try

@@ -44,7 +44,6 @@
     - 需要补充里面的一些 token（可以先不补充，但是有些功能会失效）
         - `clientId`和`clientSecret`为osu!的API的token，可以在osu的用户设置界面进行申请
         - 水鱼查分使用 OAuth，需要配置 `divingFish.clientId`、`divingFish.clientSecret` 和公网 HTTPS
-          `divingFish.redirectUri`，回调路径为 `/oauth/callback/divingfish`
         - `divingFish.devToken` 只用于旧接口过渡；水鱼计划于 **2026-10-01** 退役 DevToken 接口，
           新部署不应再依赖它
     - 配置 Marisa 连接 OneBot 后端（需要与 NapCat 等框架的 OneBot 配置一致）：

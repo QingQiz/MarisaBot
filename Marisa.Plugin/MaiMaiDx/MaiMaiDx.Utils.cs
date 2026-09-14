@@ -9,6 +9,12 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    private static string DeviceBindingLabel(long qq)
+    {
+        var value = qq.ToString();
+        return value.Length > 4 ? $"QQ {value[..2]}****{value[^2..]}" : $"QQ {value}";
+    }
+
     private string[]? _versions;
 
     private string[] Versions => _versions ??= BuildVersionList(SongDb.SongList);
