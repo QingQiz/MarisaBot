@@ -29,17 +29,17 @@ public class LoggerSecurityTest
         LogManager.ReconfigExistingLoggers();
 
         var hosting = LogManager.GetLogger("Microsoft.AspNetCore.Hosting.Diagnostics");
-        hosting.Info("Request starting GET /oauth/callback/divingfish?code={0}", sentinel);
+        hosting.Info("Request starting GET /health?code={0}", sentinel);
         hosting.Warn("hosting warning control");
         LogManager.GetLogger("Marisa.StartUp.HttpAccess")
-            .Info("HTTP GET /oauth/callback/divingfish responded 200 in 1.0 ms");
+            .Info("HTTP GET /health responded 200 in 1.0 ms");
         LogManager.Flush();
 
         Assert.Multiple(() =>
         {
             Assert.That(memory.Logs, Has.None.Contains(sentinel));
             Assert.That(memory.Logs, Has.Some.Contains("hosting warning control"));
-            Assert.That(memory.Logs, Has.Some.Contains("HTTP GET /oauth/callback/divingfish responded 200"));
+            Assert.That(memory.Logs, Has.Some.Contains("HTTP GET /health responded 200"));
         });
     }
 }

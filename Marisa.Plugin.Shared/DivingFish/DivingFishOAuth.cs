@@ -7,13 +7,11 @@ using Marisa.Configuration;
 
 namespace Marisa.Plugin.Shared.DivingFish;
 
-public static partial class DivingFishOAuth
+public static class DivingFishOAuth
 {
     private const string AuthBaseUrl = "https://auth.diving-fish.com";
     private const string DiscoveryUrl = AuthBaseUrl + "/.well-known/openid-configuration";
     private const string OnBehalfOfGrantType = "urn:diving-fish:params:oauth:grant-type:on-behalf-of";
-
-    public const string CallbackPath = "/oauth/callback/divingfish";
 
     private static readonly Uri AuthBaseUri = new(AuthBaseUrl);
     private static readonly SemaphoreSlim DiscoveryGate = new(1, 1);
@@ -21,12 +19,9 @@ public static partial class DivingFishOAuth
 
     private static string ClientId => ConfigurationManager.Configuration.DivingFish.ClientId ?? "";
     private static string ClientSecret => ConfigurationManager.Configuration.DivingFish.ClientSecret ?? "";
-    private static string RedirectUri => ConfigurationManager.Configuration.DivingFish.RedirectUri ?? "";
 
     public static bool IsConfigured =>
         !string.IsNullOrWhiteSpace(ClientId) && !string.IsNullOrWhiteSpace(ClientSecret);
-
-    public static bool CanAuthorize => IsConfigured && IsAllowedRedirectUri(RedirectUri);
 
     public static bool CanUseDeviceCode => IsConfigured;
 
@@ -138,124 +133,6 @@ public static partial class DivingFishOAuth
         if (string.Equals(game, "maimai", StringComparison.OrdinalIgnoreCase)) return "prober.records.read";
         if (string.Equals(game, "chunithm", StringComparison.OrdinalIgnoreCase)) return "chunithm.records.read";
         throw new ArgumentOutOfRangeException(nameof(game), game, "仅支持 maimai 或 chunithm");
-    }
-
-    public static string AuthorizationScopeOf(string game)
-    {
-        return $"openid profile {ScopeOf(game)}";
-    }
-
-    public static async Task<string> BuildAuthorizeUrl(string state, string codeChallenge, string game)
-    {
-        if (!CanAuthorize)
-        {
-            throw new InvalidOperationException("[DivingFish OAuth] 授权回调地址或客户端凭据未正确配置");
-        }
-
-        if (string.IsNullOrWhiteSpace(state) || string.IsNullOrWhiteSpace(codeChallenge))
-        {
-            throw new ArgumentException("OAuth state 与 PKCE challenge 不能为空");
-        }
-
-        var endpoints = await GetEndpoints();
-        var query = $"response_type=code&client_id={Uri.EscapeDataString(ClientId)}" +
-                    $"&redirect_uri={Uri.EscapeDataString(RedirectUri)}" +
-                    $"&scope={Uri.EscapeDataString(AuthorizationScopeOf(game))}" +
-                    $"&state={Uri.EscapeDataString(state)}" +
-                    $"&code_challenge={Uri.EscapeDataString(codeChallenge)}" +
-                    "&code_challenge_method=S256";
-        return $"{endpoints.AuthorizationEndpoint}?{query}";
-    }
-
-    public static async Task<(DivingFishToken Token, string Sub, string Username)> ExchangeAuthCode(
-        string code,
-        string verifier,
-        string game)
-    {
-        if (!CanAuthorize)
-        {
-            throw new InvalidOperationException("[DivingFish OAuth] 授权回调地址或客户端凭据未正确配置");
-        }
-
-        var endpoints = await GetEndpoints();
-        using var response = await endpoints.TokenEndpoint
-            .AllowAnyHttpStatus()
-            .PostUrlEncodedAsync(new Dictionary<string, string>
-            {
-                ["grant_type"] = "authorization_code",
-                ["code"] = code,
-                ["redirect_uri"] = RedirectUri,
-                ["client_id"] = ClientId,
-                ["client_secret"] = ClientSecret,
-                ["code_verifier"] = verifier
-            });
-
-        var body = await response.GetStringAsync();
-        if (response.StatusCode != 200)
-        {
-            throw OAuthFailure("换码", response.StatusCode, body);
-        }
-
-        var token = ParseTokenResponse(body, AuthorizationScopeOf(game), "换码");
-        var (sub, username) = await FetchUserInfo(token.AccessToken, endpoints.UserinfoEndpoint);
-        return (token, sub, username);
-    }
-
-    public static async Task<(string Sub, string Username)> FetchUserInfo(string accessToken)
-    {
-        var endpoints = await GetEndpoints();
-        return await FetchUserInfo(accessToken, endpoints.UserinfoEndpoint);
-    }
-
-    private static async Task<(string Sub, string Username)> FetchUserInfo(
-        string accessToken,
-        string userinfoEndpoint)
-    {
-        using var response = await userinfoEndpoint
-            .WithOAuthBearerToken(accessToken)
-            .AllowAnyHttpStatus()
-            .GetAsync();
-        var body = await response.GetStringAsync();
-
-        if (response.StatusCode != 200)
-        {
-            throw OAuthFailure("userinfo", response.StatusCode, body);
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(body);
-            var root = document.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                throw OAuthProtocolFailure("userinfo", "响应不是 JSON object");
-            }
-
-            var sub = ReadString(root, "sub");
-            if (string.IsNullOrWhiteSpace(sub))
-            {
-                throw OAuthProtocolFailure("userinfo", "缺少 sub");
-            }
-
-            try
-            {
-                _ = SubjectForSub(sub);
-            }
-            catch (ArgumentException)
-            {
-                throw OAuthProtocolFailure("userinfo", "sub 格式无效");
-            }
-
-            var username = ReadString(root, "preferred_username")
-                           ?? ReadString(root, "nickname")
-                           ?? ReadString(root, "name")
-                           ?? "";
-            return (sub, username);
-        }
-        catch (JsonException)
-        {
-            throw OAuthProtocolFailure("userinfo", "响应不是有效 JSON");
-        }
     }
 
     public static async Task<DivingFishToken> FetchToken(string subject, string game)
@@ -375,9 +252,7 @@ public static partial class DivingFishOAuth
                 }
 
                 endpoints = new OAuthEndpoints(
-                    ReadHttpsEndpoint(root, "authorization_endpoint"),
                     ReadHttpsEndpoint(root, "token_endpoint"),
-                    ReadHttpsEndpoint(root, "userinfo_endpoint"),
                     ReadHttpsEndpoint(root, "device_authorization_endpoint"));
             }
             catch (JsonException)
@@ -623,17 +498,6 @@ public static partial class DivingFishOAuth
         return !string.IsNullOrWhiteSpace(sub) && sub.Length <= 255 && sub.All(c => !char.IsControl(c));
     }
 
-    private static bool IsAllowedRedirectUri(string redirectUri)
-    {
-        if (!Uri.TryCreate(redirectUri, UriKind.Absolute, out var uri)) return false;
-        if (!uri.AbsolutePath.Equals(CallbackPath, StringComparison.Ordinal) || !string.IsNullOrEmpty(uri.Fragment))
-        {
-            return false;
-        }
-
-        if (uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) return true;
-        return uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) && uri.IsLoopback;
-    }
 
     private static void EnsureClientCredentials()
     {
@@ -644,9 +508,7 @@ public static partial class DivingFishOAuth
     }
 
     private sealed record OAuthEndpoints(
-        string AuthorizationEndpoint,
         string TokenEndpoint,
-        string UserinfoEndpoint,
         string DeviceAuthorizationEndpoint);
 
     private sealed record DiscoveryCache(OAuthEndpoints Endpoints, DateTimeOffset ExpiresAt);
