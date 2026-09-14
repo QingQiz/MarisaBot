@@ -127,7 +127,7 @@ public partial class Chunithm
                                     DivingFishOAuth.DeviceSubjectRef(next.Sender.Id),
                                 DeviceBindingLabel(next.Sender.Id));
                             next.Reply(MessageChain.FromSensitiveText(
-                                $"请打开水鱼设备授权链接并确认绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n确认后 Bot 会自动完成绑定。"));
+                                    $"请打开水鱼设备授权链接并确认绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n授权完成后，请等待 Bot 发送确认码。"));
 
                             stat = 30;
                             var deviceKey = (message.GroupInfo?.Id, message.Sender.Id);
@@ -139,7 +139,6 @@ public partial class Chunithm
                                 {
                                     var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "chunithm");
                                     var confirmationCode = DivingFishDeviceBindingConfirmation.Issue(
-                                        message.Sender.Id,
                                         result.Sub,
                                         "chunithm",
                                         result.Token.Scope);
@@ -260,12 +259,10 @@ public partial class Chunithm
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
-                    var result = DivingFishDeviceBindingConfirmation.Consume(code, next.Sender.Id);
+                    var result = DivingFishDeviceBindingConfirmation.Consume(code);
                     if (!result.IsSuccess)
                     {
-                        next.Reply(result.Status == DivingFishDeviceBindingConfirmation.ConsumeStatus.WrongUser
-                            ? "该确认码只能由发起绑定的 QQ 提交"
-                            : "确认码无效或已过期，请重新绑定");
+                        next.Reply("确认码无效或已过期，请重新绑定");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
