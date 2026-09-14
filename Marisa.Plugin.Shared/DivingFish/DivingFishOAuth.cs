@@ -7,7 +7,7 @@ using Marisa.Configuration;
 
 namespace Marisa.Plugin.Shared.DivingFish;
 
-public static class DivingFishOAuth
+public static partial class DivingFishOAuth
 {
     private const string AuthBaseUrl = "https://auth.diving-fish.com";
     private const string DiscoveryUrl = AuthBaseUrl + "/.well-known/openid-configuration";
@@ -27,6 +27,111 @@ public static class DivingFishOAuth
         !string.IsNullOrWhiteSpace(ClientId) && !string.IsNullOrWhiteSpace(ClientSecret);
 
     public static bool CanAuthorize => IsConfigured && IsAllowedRedirectUri(RedirectUri);
+
+    public static bool CanUseDeviceCode => IsConfigured;
+
+    public sealed record DeviceAuthorization(
+        string DeviceCode,
+        string UserCode,
+        string VerificationUri,
+        string VerificationUriComplete,
+        int ExpiresIn,
+        int Interval);
+
+    public sealed record DeviceTokenAuthorization(DivingFishToken Token, string Sub);
+
+    public static async Task<DeviceAuthorization> StartDeviceAuthorization(
+        string game,
+        string subjectRef,
+        string bindingLabel)
+    {
+        EnsureClientCredentials();
+        if (subjectRef.Length != 64 || !subjectRef.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f'))
+        {
+            throw new ArgumentException("设备码绑定必须使用小写 SHA-256 用户标识", nameof(subjectRef));
+        }
+
+        if (string.IsNullOrWhiteSpace(bindingLabel))
+        {
+            throw new ArgumentException("设备码绑定必须包含展示标签", nameof(bindingLabel));
+        }
+
+        var endpoints = await GetEndpoints();
+        using var response = await endpoints.DeviceAuthorizationEndpoint
+            .AllowAnyHttpStatus()
+            .PostUrlEncodedAsync(new Dictionary<string, string>
+            {
+                ["client_id"] = ClientId,
+                ["client_secret"] = ClientSecret,
+                ["scope"] = ScopeOf(game),
+                ["subject_ref"] = subjectRef,
+                ["binding_label"] = bindingLabel
+            });
+
+        var body = await response.GetStringAsync();
+        if (response.StatusCode != 200)
+        {
+            throw OAuthFailure("设备码绑定", response.StatusCode, body);
+        }
+
+        return ParseDeviceAuthorizationResponse(body);
+    }
+
+    public static async Task<DeviceTokenAuthorization> WaitForDeviceAuthorization(
+        DeviceAuthorization authorization,
+        string game,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(authorization);
+        EnsureClientCredentials();
+        var endpoints = await GetEndpoints();
+        var interval = Math.Max(1, authorization.Interval);
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresIn);
+
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(interval), cancellationToken);
+            using var response = await endpoints.TokenEndpoint
+                .AllowAnyHttpStatus()
+                .PostUrlEncodedAsync(new Dictionary<string, string>
+                {
+                    ["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code",
+                    ["device_code"] = authorization.DeviceCode,
+                    ["client_id"] = ClientId,
+                    ["client_secret"] = ClientSecret
+                }, cancellationToken: cancellationToken);
+
+            var body = await response.GetStringAsync();
+            if (response.StatusCode == 200)
+            {
+                var token = ParseTokenResponse(body, ScopeOf(game), "设备码换票");
+                var sub = ReadDeviceTokenSubject(body);
+                return new DeviceTokenAuthorization(token, sub);
+            }
+
+            var error = TryReadSafeErrorCode(body);
+            if (response.StatusCode == 400 && error == "authorization_pending") continue;
+            if (response.StatusCode == 400 && error == "slow_down")
+            {
+                interval += 5;
+                continue;
+            }
+
+            if (response.StatusCode == 400 && error is "access_denied" or "expired_token")
+            {
+                throw new HttpRequestException("[DivingFish OAuth] 设备码绑定已被拒绝或过期");
+            }
+
+            if (response.StatusCode == 401)
+            {
+                throw new HttpRequestException("[DivingFish OAuth] 客户端凭据无效或应用已停用");
+            }
+
+            throw OAuthFailure("设备码换票", response.StatusCode, body);
+        }
+
+        throw new HttpRequestException("[DivingFish OAuth] 设备码绑定已过期，请重新发起绑定");
+    }
 
     public static string ScopeOf(string game)
     {
@@ -202,6 +307,12 @@ public static class DivingFishOAuth
         return "ref:" + SubjectRef(qq.ToString(CultureInfo.InvariantCulture));
     }
 
+    public static string DeviceSubjectRef(long qq)
+    {
+        if (qq <= 0) throw new ArgumentOutOfRangeException(nameof(qq), qq, "QQ 必须为正整数");
+        return SubjectRef(qq.ToString(CultureInfo.InvariantCulture));
+    }
+
     public static string SubjectForSub(string sub)
     {
         if (!IsValidSub(sub)) throw new ArgumentException("水鱼 sub 格式无效", nameof(sub));
@@ -266,7 +377,8 @@ public static class DivingFishOAuth
                 endpoints = new OAuthEndpoints(
                     ReadHttpsEndpoint(root, "authorization_endpoint"),
                     ReadHttpsEndpoint(root, "token_endpoint"),
-                    ReadHttpsEndpoint(root, "userinfo_endpoint"));
+                    ReadHttpsEndpoint(root, "userinfo_endpoint"),
+                    ReadHttpsEndpoint(root, "device_authorization_endpoint"));
             }
             catch (JsonException)
             {
@@ -362,6 +474,79 @@ public static class DivingFishOAuth
         {
             throw OAuthProtocolFailure(operation, "响应不是有效 JSON");
         }
+    }
+
+    private static DeviceAuthorization ParseDeviceAuthorizationResponse(string body)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                throw OAuthProtocolFailure("设备码绑定", "响应不是 JSON object");
+            }
+
+            var deviceCode = ReadString(root, "device_code");
+            var userCode = ReadString(root, "user_code");
+            var verificationUri = ReadString(root, "verification_uri");
+            var verificationUriComplete = ReadString(root, "verification_uri_complete");
+            var expiresIn = ReadPositiveInteger(root, "expires_in");
+            var interval = ReadPositiveInteger(root, "interval");
+            if (string.IsNullOrWhiteSpace(deviceCode) || string.IsNullOrWhiteSpace(userCode) ||
+                string.IsNullOrWhiteSpace(verificationUri) || string.IsNullOrWhiteSpace(verificationUriComplete) ||
+                expiresIn is null || interval is null)
+            {
+                throw OAuthProtocolFailure("设备码绑定", "响应缺少有效字段");
+            }
+
+            return new DeviceAuthorization(
+                deviceCode,
+                userCode,
+                verificationUri,
+                verificationUriComplete,
+                expiresIn.Value,
+                interval.Value);
+        }
+        catch (JsonException)
+        {
+            throw OAuthProtocolFailure("设备码绑定", "响应不是有效 JSON");
+        }
+    }
+
+    private static string ReadDeviceTokenSubject(string body)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(body);
+            var sub = ReadString(document.RootElement, "sub");
+            if (string.IsNullOrWhiteSpace(sub) || !IsValidSub(sub))
+            {
+                throw OAuthProtocolFailure("设备码换票", "响应缺少有效 sub");
+            }
+
+            return sub;
+        }
+        catch (JsonException)
+        {
+            throw OAuthProtocolFailure("设备码换票", "响应不是有效 JSON");
+        }
+    }
+
+    private static int? ReadPositiveInteger(JsonElement root, string property)
+    {
+        if (!root.TryGetProperty(property, out var value)) return null;
+        if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var number) && number > 0)
+        {
+            return number;
+        }
+
+        if (value.ValueKind == JsonValueKind.String && int.TryParse(value.GetString(), out number) && number > 0)
+        {
+            return number;
+        }
+
+        return null;
     }
 
     private static int? ReadPositiveExpiresIn(JsonElement root)
@@ -461,7 +646,8 @@ public static class DivingFishOAuth
     private sealed record OAuthEndpoints(
         string AuthorizationEndpoint,
         string TokenEndpoint,
-        string UserinfoEndpoint);
+        string UserinfoEndpoint,
+        string DeviceAuthorizationEndpoint);
 
     private sealed record DiscoveryCache(OAuthEndpoints Endpoints, DateTimeOffset ExpiresAt);
 

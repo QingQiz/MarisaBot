@@ -98,7 +98,33 @@ public partial class MaiMaiDx
 
                         if (!DivingFishOAuth.CanAuthorize)
                         {
-                            next.Reply("机器人尚未配置有效的 HTTPS 水鱼 OAuth 回调地址，请联系管理员。");
+                            var device = await DivingFishOAuth.StartDeviceAuthorization(
+                                "maimai",
+                                DivingFishOAuth.DeviceSubjectRef(next.Sender.Id),
+                                DeviceBindingLabel(next.Sender.Id));
+                            next.Reply(MessageChain.FromSensitiveText(
+                                $"请打开水鱼设备授权链接并确认绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n确认后 Bot 会自动完成绑定。"));
+
+                            var deviceKey = (message.GroupInfo?.Id, message.Sender.Id);
+                            DialogManager.RemoveDialog(deviceKey);
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "maimai");
+                                    DivingFishBindingService.Commit(
+                                        message.Sender.Id,
+                                        result.Sub,
+                                        "",
+                                        result.Token.Scope,
+                                        "maimai");
+                                    message.Reply("DivingFish OAuth 绑定成功！");
+                                }
+                                catch (Exception e)
+                                {
+                                    message.Reply($"DivingFish OAuth 绑定失败：{e.Message}");
+                                }
+                            });
                             return MarisaPluginTaskState.CompletedTask;
                         }
 
