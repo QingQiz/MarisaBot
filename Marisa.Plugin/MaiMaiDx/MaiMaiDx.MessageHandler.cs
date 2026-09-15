@@ -977,6 +977,7 @@ public partial class MaiMaiDx
                 LevelIndex = levelIdx,
                 Level = song.Levels[levelIdx],
                 Constant = song.Constants[levelIdx],
+                MaxDx = song.Charts[levelIdx].Notes.Sum() * 3,
                 Players = new[]
                 {
                     new { Nickname = selfLabel, Played = selfScore != null, Score = selfScore },

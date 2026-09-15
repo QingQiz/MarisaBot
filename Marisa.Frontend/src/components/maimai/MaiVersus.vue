@@ -17,14 +17,25 @@
             <span class="level">{{ data.Level }} · {{ data.Constant.toFixed(1) }}</span>
         </div>
         <div class="players">
-            <div v-for="(player, index) in data.Players" :key="player.Nickname" class="player" :class="{winner: data.Winner === player.Nickname}">
+            <div v-for="player in data.Players" :key="player.Nickname" class="player" :class="{winner: data.Winner === player.Nickname}">
                 <div class="player-head"><span>{{ player.Nickname }}</span><b v-if="data.Winner === player.Nickname">WIN</b></div>
                 <template v-if="player.Played && player.Score">
-                    <div class="achievement">{{ player.Score.Achievement.toFixed(4) }}<small>%</small></div>
-                    <div class="details">{{ player.Score.Rank }} · Ra {{ player.Score.Rating }} · DX {{ player.Score.DxScore }}</div>
-                    <div class="marks">{{ markText(player.Score) }}</div>
+                    <div class="score-main">
+                        <div class="achievement">{{ player.Score.Achievement.toFixed(4) }}<small>%</small></div>
+                        <img :src="rankIcon(player.Score)" class="rank" alt="">
+                    </div>
+                    <div class="metrics">
+                        <div><span>Ra</span><b>{{ player.Score.Rating }}</b></div>
+                        <div><span>DX SCORE</span><b>{{ player.Score.DxScore }}<small>/{{ data.MaxDx }}</small></b></div>
+                        <div><span>DX%</span><b>{{ dxRate(player.Score) }}%</b></div>
+                    </div>
+                    <div class="marks">
+                        <span v-if="player.Score.Fc"><img :src="fcIcon(player.Score.Fc)" alt=""></span>
+                        <span v-if="player.Score.Fs"><img :src="fsIcon(player.Score.Fs)" alt=""></span>
+                        <span v-if="starN(player.Score)"><img :src="starIcon(player.Score)" alt=""></span>
+                    </div>
                 </template>
-                <div v-else class="unplayed">未游玩</div>
+                <div v-else class="unplayed"><span class="unplayed-mark">—</span>未游玩</div>
             </div>
         </div>
         <footer class="mt-7"><span class="footer-text">MARISA BOT · VERSUS</span></footer>
@@ -36,6 +47,7 @@ import {computed, ref} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
+import {dxScoreStar} from '@/components/maimai/utils/ordinal'
 import {DIFF_COLORS, bgKeyOf, themeMainOf} from '@/components/maimai/utils/song_card'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
@@ -44,7 +56,7 @@ import MaiCover from '@/components/maimai/MaiCover.vue'
 
 interface Score { Achievement: number; Rank: string; Rating: number; DxScore: number; Fc: string; Fs: string }
 interface Player { Nickname: string; Played: boolean; Score: Score | null }
-interface VersusData { Song: {Id: number; Title: string; Type: string; Artist: string; Genre: string; Bpm: number; From: string; IsNew: boolean}; LevelIndex: number; Level: string; Constant: number; Players: Player[]; Winner: string }
+interface VersusData { Song: {Id: number; Title: string; Type: string; Artist: string; Genre: string; Bpm: number; From: string; IsNew: boolean}; LevelIndex: number; Level: string; Constant: number; MaxDx: number; Players: Player[]; Winner: string }
 const route = useRoute()
 const data = ref<VersusData | null>(null)
 axios.get(context_get, {params: {id: route.query.id, name: 'versus'}}).then(res => { data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data })
@@ -52,7 +64,13 @@ const bgKey = computed(() => bgKeyOf(data.value?.LevelIndex ?? 3, false))
 const accent = computed(() => themeMainOf(data.value?.LevelIndex ?? 3, false))
 const diffName = computed(() => ['绿谱', '黄谱', '红谱', '紫谱', '白谱'][data.value?.LevelIndex ?? 3])
 const diffColor = computed(() => DIFF_COLORS[data.value?.LevelIndex ?? 3])
-function markText(score: Score) { return [score.Fc, score.Fs].filter(Boolean).join(' / ') || '—' }
+const PIC = '/assets/maimai/pic'
+function rankIcon(score: Score) { return `${PIC}/rank_${score.Rank.toLowerCase().replaceAll('+', 'p')}.png` }
+function fcIcon(name: string) { return `${PIC}/icon_${name}.png` }
+function fsIcon(name: string) { return `${PIC}/icon_${name}.png` }
+function starN(score: Score) { return dxScoreStar(score.DxScore, data.value?.MaxDx ?? 0) }
+function starIcon(score: Score) { return `${PIC}/music_icon_dxstar_${starN(score)}.png` }
+function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data.value.MaxDx * 100).toFixed(1) : '0.0' }
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
@@ -62,13 +80,24 @@ function markText(score: Score) { return [score.Fc, score.Fs].filter(Boolean).jo
 .difficulty { font-family:'Microsoft YaHei',sans-serif; font-size:27px; font-weight:900; }
 .level { font:700 20px 'Torus',sans-serif; color:rgba(255,255,255,.64); }
 .players { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.player { min-height:190px; padding:20px 24px; border:1px solid rgba(255,255,255,.15); border-radius:16px; background:rgba(8,8,16,.34); }
-.player.winner { border-color:rgba(255,255,255,.75); box-shadow:inset 5px 0 0 #c64fe4, 0 0 22px rgba(198,79,228,.2); }
-.player-head { display:flex; justify-content:space-between; align-items:center; font:700 21px 'Microsoft YaHei',sans-serif; }
+.player { min-height:228px; padding:18px 22px 16px; border:1px solid rgba(255,255,255,.15); border-radius:16px; background:linear-gradient(105deg,rgba(8,8,16,.58),rgba(8,8,16,.25)); position:relative; overflow:hidden; }
+.player::before { content:''; position:absolute; inset:0 auto 0 0; width:5px; background:rgba(255,255,255,.2); }
+.player.winner { border-color:rgba(255,255,255,.78); box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 0 22px rgba(198,79,228,.22); }
+.player.winner::before { background:#c64fe4; }
+.player-head { display:flex; justify-content:space-between; align-items:center; font:700 21px 'Microsoft YaHei',sans-serif; position:relative; }
 .player-head b { font:700 14px 'Torus',sans-serif; letter-spacing:.12em; color:#ffe45c; }
-.achievement { margin-top:22px; font:900 39px 'Torus',sans-serif; letter-spacing:.02em; }
+.score-main { margin-top:13px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.achievement { font:900 39px 'Torus',sans-serif; letter-spacing:.02em; line-height:1; }
 .achievement small { margin-left:3px; font-size:17px; opacity:.65; }
-.details,.marks { margin-top:7px; font:700 17px 'Torus','Microsoft YaHei',sans-serif; color:rgba(255,255,255,.75); }
-.marks { color:rgba(255,255,255,.55); }
-.unplayed { margin-top:55px; font:700 22px 'SEGA NewRodin',sans-serif; letter-spacing:.16em; color:rgba(255,255,255,.35); }
+.rank { height:34px; width:auto; display:block; }
+.metrics { display:grid; grid-template-columns:.6fr 1.4fr 1fr; gap:10px; margin-top:15px; padding:9px 0 8px; border-top:1px solid rgba(255,255,255,.14); border-bottom:1px solid rgba(255,255,255,.14); }
+.metrics div { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.metrics span { font:700 11px 'Torus',sans-serif; letter-spacing:.04em; color:rgba(255,255,255,.5); white-space:nowrap; }
+.metrics b { font:800 18px 'Torus',sans-serif; white-space:nowrap; }
+.metrics small { font-size:11px; color:rgba(255,255,255,.55); }
+.marks { margin-top:9px; height:32px; display:flex; align-items:center; gap:8px; }
+.marks span { display:flex; align-items:center; height:32px; }
+.marks img { display:block; max-height:32px; max-width:76px; }
+.unplayed { height:142px; display:flex; align-items:center; justify-content:center; gap:10px; font:700 21px 'SEGA NewRodin',sans-serif; letter-spacing:.14em; color:rgba(255,255,255,.34); }
+.unplayed-mark { font:400 35px 'Torus',sans-serif; color:rgba(255,255,255,.22); }
 </style>
