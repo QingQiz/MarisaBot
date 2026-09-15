@@ -980,14 +980,27 @@ public partial class MaiMaiDx
                 MaxDx = song.Charts[levelIdx].Notes.Sum() * 3,
                 Players = new[]
                 {
-                    new { Nickname = selfLabel, Played = selfScore != null, Score = selfScore },
-                    new { Nickname = opponentLabel, Played = opponentScore != null, Score = opponentScore }
+                    new { Nickname = selfLabel, Played = selfScore != null, Score = ProjectScore(selfScore) },
+                    new { Nickname = opponentLabel, Played = opponentScore != null, Score = ProjectScore(opponentScore) }
                 },
                 Winner = winner
             }
         });
         message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiVersus(context.Id)));
         return MarisaPluginTaskState.CompletedTask;
+
+        object? ProjectScore(SongScore? score)
+        {
+            return score == null ? null : new
+            {
+                score.Achievement,
+                Rank = SongScore.CalcRank(score.Achievement),
+                Rating = song.Ra(levelIdx, score.Achievement),
+                score.DxScore,
+                score.Fc,
+                score.Fs
+            };
+        }
 
         async Task<BattleData> FetchBattleData(Message target, bool allowUsername, bool selfQuery)
         {

@@ -9,7 +9,6 @@
         </div>
         <div class="flex items-center gap-4 mt-8 mb-4">
             <span class="section-tag">玩家对战</span>
-            <span class="font-rodin text-[18px] tracking-[0.28em] text-white/70">VERSUS</span>
             <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
         </div>
         <div class="difficulty-line">
@@ -48,7 +47,7 @@ import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import {dxScoreStar} from '@/components/maimai/utils/ordinal'
-import {DIFF_COLORS, bgKeyOf, themeMainOf} from '@/components/maimai/utils/song_card'
+import {DIFF_NAMES, DIFF_COLORS, bgKeyOf, themeMainOf} from '@/components/maimai/utils/song_card'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
 import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
@@ -62,7 +61,7 @@ const data = ref<VersusData | null>(null)
 axios.get(context_get, {params: {id: route.query.id, name: 'versus'}}).then(res => { data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data })
 const bgKey = computed(() => bgKeyOf(data.value?.LevelIndex ?? 3, false))
 const accent = computed(() => themeMainOf(data.value?.LevelIndex ?? 3, false))
-const diffName = computed(() => ['绿谱', '黄谱', '红谱', '紫谱', '白谱'][data.value?.LevelIndex ?? 3])
+const diffName = computed(() => DIFF_NAMES[data.value?.LevelIndex ?? 3])
 const diffColor = computed(() => DIFF_COLORS[data.value?.LevelIndex ?? 3])
 const PIC = '/assets/maimai/pic'
 function rankIcon(score: Score) { return `${PIC}/rank_${score.Rank.toLowerCase().replaceAll('+', 'p')}.png` }
@@ -77,8 +76,8 @@ function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data
 <style scoped lang="postcss">
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: .1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.8); white-space: nowrap; }
 .difficulty-line { display:flex; align-items:baseline; gap:16px; margin-bottom:12px; }
-.difficulty { font-family:'Microsoft YaHei',sans-serif; font-size:27px; font-weight:900; }
-.level { font:700 20px 'Torus',sans-serif; color:rgba(255,255,255,.64); }
+.difficulty { font-family:'SEGA NewRodin',sans-serif; font-size:25px; font-weight:900; letter-spacing:.03em; }
+.level { font:700 21px 'Torus',sans-serif; color:rgba(255,255,255,.72); }
 .players { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .player { min-height:228px; padding:18px 22px 16px; border:1px solid rgba(255,255,255,.15); border-radius:16px; background:linear-gradient(105deg,rgba(8,8,16,.58),rgba(8,8,16,.25)); position:relative; overflow:hidden; }
 .player::before { content:''; position:absolute; inset:0 auto 0 0; width:5px; background:rgba(255,255,255,.2); }
@@ -90,11 +89,12 @@ function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data
 .achievement { font:900 39px 'Torus',sans-serif; letter-spacing:.02em; line-height:1; }
 .achievement small { margin-left:3px; font-size:17px; opacity:.65; }
 .rank { height:34px; width:auto; display:block; }
-.metrics { display:grid; grid-template-columns:.6fr 1.4fr 1fr; gap:10px; margin-top:15px; padding:9px 0 8px; border-top:1px solid rgba(255,255,255,.14); border-bottom:1px solid rgba(255,255,255,.14); }
-.metrics div { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; margin-top:15px; padding:9px 0 8px; border-top:1px solid rgba(255,255,255,.14); border-bottom:1px solid rgba(255,255,255,.14); }
+.metrics div + div { border-left:1px solid rgba(255,255,255,.12); }
+.metrics div { min-width:0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; padding:0 6px; }
 .metrics span { font:700 11px 'Torus',sans-serif; letter-spacing:.04em; color:rgba(255,255,255,.5); white-space:nowrap; }
 .metrics b { font:800 18px 'Torus',sans-serif; white-space:nowrap; }
-.metrics small { font-size:11px; color:rgba(255,255,255,.55); }
+.metrics small { margin-left:4px; font-size:11px; color:rgba(255,255,255,.55); }
 .marks { margin-top:9px; height:32px; display:flex; align-items:center; gap:8px; }
 .marks span { display:flex; align-items:center; height:32px; }
 .marks img { display:block; max-height:32px; max-width:76px; }
