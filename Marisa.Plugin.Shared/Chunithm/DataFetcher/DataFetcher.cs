@@ -45,24 +45,36 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
         return (username, qq);
     }
 
+    private static HashSet<string>? _latestVersions;
+
     /// <summary>
     ///     从水鱼 latest_version 接口获取当前"新版本"集合（New Best 20 依据），
-    ///     供各查分器统一使用，避免版本更新后硬编码失效。
+    ///     运行时缓存，供各查分器统一使用，避免版本更新后硬编码失效。
     /// </summary>
     protected static async Task<HashSet<string>> FetchLatestVersions()
     {
+        if (_latestVersions != null) return _latestVersions;
+
         var response = await "https://www.diving-fish.com/api/chunithmprober/latest_version"
             .GetJsonAsync<LatestVersionResponse>();
 
         var newest = response.Versions
             .Where(version => !string.IsNullOrWhiteSpace(version))
-            .Select(version => version.Trim())
+            .Select(NormalizeVersion)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         if (newest.Count == 0) throw new InvalidDataException("水鱼 latest_version 返回了空版本列表");
 
-        return newest;
+        return _latestVersions = newest;
     }
+
+    /// <summary>
+    ///     版本名规范化：忽略连字符差异（水鱼带连字符如 CHUNITHM X-VERSE，本地/Louis 不带）
+    /// </summary>
+    protected static string NormalizeVersion(string version) => version.Replace("-", "").Trim();
+
+    /// <summary>清除 latest_version 运行时缓存</summary>
+    protected static void ResetLatestVersionsCache() => _latestVersions = null;
 
     private sealed class LatestVersionResponse
     {

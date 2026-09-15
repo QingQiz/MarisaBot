@@ -224,7 +224,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         var versionMap = GetSongList().ToDictionary(x => x.Id, x => x.Version);
         var groups = scores.Values
             .Where(x => versionMap.ContainsKey(x.Id))
-            .GroupBy(x => newest.Contains(versionMap[x.Id]));
+            .GroupBy(x => newest.Contains(NormalizeVersion(versionMap[x.Id])));
 
         return new ChunithmRating
         {
@@ -385,5 +385,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
     public void Reset()
     {
         _songList = null;
+        ResetLatestVersionsCache();
     }
 }

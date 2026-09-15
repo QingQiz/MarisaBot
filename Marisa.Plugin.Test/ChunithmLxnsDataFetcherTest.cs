@@ -17,9 +17,9 @@ public class ChunithmLxnsDataFetcherTest
     {
         var songs = new[]
         {
-            CreateSong(1, "old", "CHUNITHM VERSE"),
-            CreateSong(2, "new-one", "CHUNITHM X-VERSE"),
-            CreateSong(3, "new-two", "CHUNITHM X-VERSE-X")
+            CreateSong(1, "old", "CHUNITHM A"),
+            CreateSong(2, "new-one", "CHUNITHM B"),
+            CreateSong(3, "new-two", "CHUNITHM C")
         };
         var fetcher = new TestLxnsDataFetcher(new SongDb<ChunithmSong>("", "", () => songs.ToList()), songs);
         var scores = new Dictionary<(long Id, int LevelIdx), ChunithmScore>
@@ -29,7 +29,7 @@ public class ChunithmLxnsDataFetcherTest
             [(3, 0)] = CreateScore(3, "new-two", 1000000)
         };
         var method = typeof(LxnsDataFetcher).GetMethod("BuildRating", BindingFlags.NonPublic | BindingFlags.Instance);
-        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CHUNITHM X-VERSE", "CHUNITHM X-VERSE-X" };
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CHUNITHM B", "CHUNITHM C" };
 
         var rating = (ChunithmRating)method!.Invoke(fetcher, [scores, "tester", newest])!;
 

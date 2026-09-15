@@ -72,7 +72,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         var newest = await FetchLatestVersions();
 
         var div = allScores
-            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .GroupBy(x => newest.Contains(NormalizeVersion(versionMap.GetValueOrDefault(x.Id, ""))))
             .ToList();
 
         return new ChunithmRating
@@ -245,5 +245,6 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     public void Reset()
     {
         _songTitleIndexer = null;
+        ResetLatestVersionsCache();
     }
 }

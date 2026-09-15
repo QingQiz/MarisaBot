@@ -51,13 +51,10 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         var songList = GetSongList();
         var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
 
-        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "CHUNITHM XVERSE", "CHUNITHM XVERSEX"
-        };
+        var newest = await FetchLatestVersions();
 
         var div = scores.Values
-            .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
+            .GroupBy(x => newest.Contains(NormalizeVersion(versionMap.GetValueOrDefault(x.Id, ""))))
             .ToList();
 
         return new ChunithmRating
@@ -107,5 +104,6 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
     {
         _cachedSongList = null;
         _indexer = null;
+        ResetLatestVersionsCache();
     }
 }
