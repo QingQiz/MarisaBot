@@ -29,13 +29,9 @@
                         <div><span>DX%</span><b>{{ dxRate(player.Score) }}%</b></div>
                     </div>
                     <div class="marks">
-                        <div class="completion-marks">
-                            <img v-if="player.Score.Fc" :src="fcIcon(player.Score.Fc)" alt="">
-                            <img v-if="player.Score.Fs" :src="fsIcon(player.Score.Fs)" alt="">
-                        </div>
-                        <div class="dx-stars">
-                            <img v-if="starN(player.Score)" :src="starIcon(player.Score)" alt="">
-                        </div>
+                        <img v-if="player.Score.Fc" :src="fcIcon(player.Score.Fc)" alt="">
+                        <img v-if="player.Score.Fs" :src="fsIcon(player.Score.Fs)" alt="">
+                        <img v-if="starN(player.Score)" :src="starIcon(player.Score)" alt="">
                     </div>
                 </template>
                 <div v-else class="unplayed"><span class="unplayed-mark">—</span>未游玩</div>
@@ -99,9 +95,7 @@ function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data
 .metrics span { font:700 11px 'Torus',sans-serif; letter-spacing:.04em; color:rgba(255,255,255,.5); white-space:nowrap; }
 .metrics b { font:800 18px 'Torus',sans-serif; white-space:nowrap; }
 .metrics small { margin-left:4px; font-size:11px; color:rgba(255,255,255,.55); }
-.marks { margin-top:9px; height:32px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:center; }
-.completion-marks { grid-column:1; display:flex; align-items:center; justify-content:center; gap:8px; }
-.dx-stars { grid-column:2 / span 2; display:flex; align-items:center; justify-content:center; }
+.marks { margin-top:9px; height:32px; display:flex; align-items:center; justify-content:center; gap:8px; }
 .marks img { display:block; max-height:32px; max-width:76px; }
 .unplayed { height:142px; display:flex; align-items:center; justify-content:center; gap:10px; font:700 21px 'SEGA NewRodin',sans-serif; letter-spacing:.14em; color:rgba(255,255,255,.34); }
 .unplayed-mark { font:400 35px 'Torus',sans-serif; color:rgba(255,255,255,.22); }
