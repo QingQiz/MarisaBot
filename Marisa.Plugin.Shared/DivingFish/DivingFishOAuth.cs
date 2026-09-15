@@ -37,15 +37,9 @@ public static class DivingFishOAuth
 
     public static async Task<DeviceAuthorization> StartDeviceAuthorization(
         string game,
-        string subjectRef,
         string bindingLabel)
     {
         EnsureClientCredentials();
-        if (subjectRef.Length != 64 || !subjectRef.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f'))
-        {
-            throw new ArgumentException("设备码绑定必须使用小写 SHA-256 用户标识", nameof(subjectRef));
-        }
-
         if (string.IsNullOrWhiteSpace(bindingLabel))
         {
             throw new ArgumentException("设备码绑定必须包含展示标签", nameof(bindingLabel));
@@ -59,7 +53,6 @@ public static class DivingFishOAuth
                 ["client_id"] = ClientId,
                 ["client_secret"] = ClientSecret,
                 ["scope"] = ScopeOf(game),
-                ["subject_ref"] = subjectRef,
                 ["binding_label"] = bindingLabel
             });
 
@@ -182,12 +175,6 @@ public static class DivingFishOAuth
     {
         if (qq <= 0) throw new ArgumentOutOfRangeException(nameof(qq), qq, "QQ 必须为正整数");
         return "ref:" + SubjectRef(qq.ToString(CultureInfo.InvariantCulture));
-    }
-
-    public static string DeviceSubjectRef(long qq)
-    {
-        if (qq <= 0) throw new ArgumentOutOfRangeException(nameof(qq), qq, "QQ 必须为正整数");
-        return SubjectRef(qq.ToString(CultureInfo.InvariantCulture));
     }
 
     public static string SubjectForSub(string sub)

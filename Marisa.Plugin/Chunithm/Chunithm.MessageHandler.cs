@@ -42,6 +42,8 @@ public partial class Chunithm
         var stat   = 0;
         var server = "";
         string? oauthVerifier = null;
+        (string Sub, string Game, string Scope)? pendingDeviceBinding = null;
+        CancellationTokenSource? deviceBindingTimeout = null;
 
         MarisaPluginTaskState DoBind(Message msg, string srv)
         {
@@ -124,26 +126,26 @@ public partial class Chunithm
                         {
                             var device = await DivingFishOAuth.StartDeviceAuthorization(
                                 "chunithm",
-                                    DivingFishOAuth.DeviceSubjectRef(next.Sender.Id),
                                 DeviceBindingLabel(next.Sender.Id));
                             next.Reply(MessageChain.FromSensitiveText(
-                                    $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}\n授权完成后，Bot 会在这里发送确认码。"));
+                                    $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}"));
 
                             stat = 30;
                             var deviceKey = (message.GroupInfo?.Id, message.Sender.Id);
-                            _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ =>
-                                DialogManager.RemoveDialog(deviceKey));
+                            deviceBindingTimeout = new CancellationTokenSource();
+                            _ = Task.Delay(TimeSpan.FromMinutes(10), deviceBindingTimeout.Token).ContinueWith(t =>
+                            {
+                                if (t.IsCanceled) return;
+                                DialogManager.RemoveDialog(deviceKey);
+                                message.Reply("绑定已取消");
+                            });
                             _ = Task.Run(async () =>
                             {
                                 try
                                 {
                                     var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "chunithm");
-                                    var confirmationCode = DivingFishDeviceBindingConfirmation.Issue(
-                                        result.Sub,
-                                        "chunithm",
-                                        result.Token.Scope);
-                                    message.Reply(MessageChain.FromSensitiveText(
-                                        $"水鱼账号授权已完成，请发送以下确认码完成绑定（5 分钟内有效）：\n{confirmationCode}"));
+                                    pendingDeviceBinding = (result.Sub, "chunithm", result.Token.Scope);
+                                    message.Reply("绑定已完成，如果是你本人完成了绑定请回复收到");
                                 }
                                 catch (Exception e)
                                 {
@@ -252,23 +254,24 @@ public partial class Chunithm
                 }
                 case 30:
                 {
-                    var code = next.Command.Trim().ToString();
-                    if (!Regex.IsMatch(code, "^[0-9A-Fa-f]{32}$"))
+                    if (!string.Equals(next.Command.Trim().ToString(), "收到", StringComparison.Ordinal))
                     {
-                        next.Reply("确认码格式错误，会话已关闭");
+                        deviceBindingTimeout?.Cancel();
+                        next.Reply("绑定已取消");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
-                    var result = DivingFishDeviceBindingConfirmation.Consume(code);
-                    if (!result.IsSuccess)
+                    if (pendingDeviceBinding is not { } entry)
                     {
-                        next.Reply("确认码无效或已过期，请重新绑定");
+                        deviceBindingTimeout?.Cancel();
+                        next.Reply("绑定已取消");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
-                    var entry = result.Entry!;
+                    deviceBindingTimeout?.Cancel();
+                    pendingDeviceBinding = null;
                     DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, "", entry.Scope, entry.Game);
-                    next.Reply("DivingFish OAuth 绑定成功！");
+                    next.Reply("ok");
                     return MarisaPluginTaskState.CompletedTask;
                 }
             }

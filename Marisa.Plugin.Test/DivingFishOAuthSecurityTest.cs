@@ -77,15 +77,6 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
-    public void DeviceSubjectRef_Is_Bare_Lowercase_Sha256()
-    {
-        var subjectRef = DivingFishOAuth.DeviceSubjectRef(123456789);
-
-        Assert.That(subjectRef, Does.Match("^[0-9a-f]{64}$"));
-        Assert.That(subjectRef, Does.Not.StartWith("ref:"));
-    }
-
-    [Test]
     public void SubjectRef_SameClientAndExternalId_IsStableLowercaseSha256()
     {
         const string expected = "7be34ed48f3de4511cfb3987c08091ea28d59cc5ba0695bce6a60c40dff1fa75";
@@ -100,36 +91,6 @@ public class DivingFishOAuthSecurityTest
             Assert.That(first, Does.Match("^[0-9a-f]{64}$"));
             Assert.That(DivingFishOAuth.SubjectRef("123456788"), Is.Not.EqualTo(first));
         });
-    }
-
-    [Test]
-    public void DeviceBindingConfirmation_Consumes_Once()
-    {
-        var code = DivingFishDeviceBindingConfirmation.Issue(
-            "waterfish-sub",
-            "maimai",
-            DivingFishOAuth.ScopeOf("maimai"));
-
-        Assert.That(
-            DivingFishDeviceBindingConfirmation.Consume(code).IsSuccess,
-            Is.True);
-        Assert.That(
-            DivingFishDeviceBindingConfirmation.Consume(code).Status,
-            Is.EqualTo(DivingFishDeviceBindingConfirmation.ConsumeStatus.NotFound));
-    }
-
-    [Test]
-    public async Task DeviceBindingConfirmation_ConcurrentConsume_OnlyOne_Succeeds()
-    {
-        var code = DivingFishDeviceBindingConfirmation.Issue(
-            "waterfish-sub",
-            "maimai",
-            DivingFishOAuth.ScopeOf("maimai"));
-
-        var results = await RunConcurrently(() =>
-            DivingFishDeviceBindingConfirmation.Consume(code));
-
-        Assert.That(results.Count(x => x.IsSuccess), Is.EqualTo(1));
     }
 
     [Test]
