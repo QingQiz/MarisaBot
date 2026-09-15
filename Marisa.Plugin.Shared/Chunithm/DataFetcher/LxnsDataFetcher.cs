@@ -96,7 +96,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             var token = await GetRequiredOAuthToken(qq);
             var scores = await GetScoresViaOAuth(token, qq);
             var nickname = await GetNicknameViaOAuth(token, qq);
-            return BuildRating(scores, nickname);
+            return BuildRating(scores, nickname, await FetchLatestVersions());
         }
 
         return await FetchScores(message);
@@ -219,16 +219,12 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
                 : "";
     }
 
-    private ChunithmRating BuildRating(Dictionary<(long Id, int LevelIdx), ChunithmScore> scores, string nickname)
+    private ChunithmRating BuildRating(Dictionary<(long Id, int LevelIdx), ChunithmScore> scores, string nickname, HashSet<string> newest)
     {
-        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
-        };
         var versionMap = GetSongList().ToDictionary(x => x.Id, x => x.Version);
         var groups = scores.Values
             .Where(x => versionMap.ContainsKey(x.Id))
-            .GroupBy(x => newest.Contains(versionMap[x.Id]));
+            .GroupBy(x => newest.Contains(NormalizeVersion(versionMap[x.Id])));
 
         return new ChunithmRating
         {
@@ -389,5 +385,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
     public void Reset()
     {
         _songList = null;
+        ResetLatestVersionsCache();
     }
 }

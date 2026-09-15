@@ -210,10 +210,9 @@ public class ChunithmDivingFishDataFetcherTest
     }
 
     [Test]
-    public async Task LatestVersion_Should_Be_Queried_For_Every_Rating()
+    public async Task LatestVersion_Should_Be_Cached_Across_Ratings()
     {
         using var httpTest = new HttpTest();
-        httpTest.RespondWithJson(new { version = new[] { "CHUNITHM CURRENT" } });
         httpTest.RespondWithJson(new { version = new[] { "CHUNITHM CURRENT" } });
         var songDb = CreateSongDbWithSongs(CreateSong(2, "new-song", "CHUNITHM CURRENT"));
         var fetcher = new TestDivingFishDataFetcher(songDb, new ChunithmRating
@@ -229,7 +228,7 @@ public class ChunithmDivingFishDataFetcherTest
 
         Assert.That(httpTest.CallLog.Count(call =>
             call.Request.Url.ToString().EndsWith("/api/chunithmprober/latest_version", StringComparison.Ordinal)),
-            Is.EqualTo(2));
+            Is.EqualTo(1));
     }
 
     [Test]
