@@ -221,11 +221,15 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     private ChunithmRating BuildRating(Dictionary<(long Id, int LevelIdx), ChunithmScore> scores, string nickname)
     {
-        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
-        };
-        var versionMap = GetSongList().ToDictionary(x => x.Id, x => x.Version);
+        var songList = GetSongList();
+
+        // 动态取最近 2 个版本作为 New Best 20（版本按歌曲 ID 时间序排序），避免版本更新后硬编码失效
+        var newest = VersionOrderHelper
+            .BuildVersionList(songList, s => s.Version, s => s.Id)
+            .TakeLast(2)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var versionMap = songList.ToDictionary(x => x.Id, x => x.Version);
         var groups = scores.Values
             .Where(x => versionMap.ContainsKey(x.Id))
             .GroupBy(x => newest.Contains(versionMap[x.Id]));

@@ -53,7 +53,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
         var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "CHUNITHM LUMINOUS PLUS", "CHUNITHM VERSE"
+            "CHUNITHM XVERSE", "CHUNITHM XVERSEX"
         };
 
         var div = scores.Values

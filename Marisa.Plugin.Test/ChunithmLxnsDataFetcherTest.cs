@@ -16,9 +16,9 @@ public class ChunithmLxnsDataFetcherTest
     {
         var songs = new[]
         {
-            CreateSong(1, "old", "CHUNITHM LUMINOUS"),
-            CreateSong(2, "new-one", "CHUNITHM LUMINOUS PLUS"),
-            CreateSong(3, "new-two", "CHUNITHM VERSE")
+            CreateSong(1, "old", "CHUNITHM VERSE"),
+            CreateSong(2, "new-one", "CHUNITHM X-VERSE"),
+            CreateSong(3, "new-two", "CHUNITHM X-VERSE-X")
         };
         var fetcher = new TestLxnsDataFetcher(new SongDb<ChunithmSong>("", "", () => songs.ToList()), songs);
         var scores = new Dictionary<(long Id, int LevelIdx), ChunithmScore>

@@ -31,18 +31,22 @@ const versionOrder: [string, string, string][] = [
 
 const { data_fetched, songs, filterBestOP, buildGroups } = useOpData();
 
+function normalizeVersion(v: string): string {
+    return v.replace(/-/g, "").replace(/!!/g, "");
+}
+
 function versionLabel(v: string): string {
-    const key = v.replace(/!!/g, "");
+    const key = normalizeVersion(v);
     for (const [k, label] of versionOrder) {
-        if (k.replace(/!!/g, "") === key) return label;
+        if (normalizeVersion(k) === key) return label;
     }
     return stripChunithm(v) || v;
 }
 
 function versionLogoPath(v: string): string {
-    const key = v.replace(/!!/g, "");
+    const key = normalizeVersion(v);
     for (const [k, , logo] of versionOrder) {
-        if (k.replace(/!!/g, "") === key) return `/assets/chunithm/pic/${logo}`;
+        if (normalizeVersion(k) === key) return `/assets/chunithm/pic/${logo}`;
     }
     return "";
 }
