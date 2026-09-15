@@ -13,7 +13,7 @@
         </div>
         <div class="difficulty-line">
             <span class="difficulty" :style="{color: diffColor}">{{ diffName }}</span>
-            <span class="level">{{ data.Level }} · {{ data.Constant.toFixed(1) }}</span>
+            <span class="level">{{ data.Level }}</span>
         </div>
         <div class="players">
             <div v-for="player in data.Players" :key="player.Nickname" class="player" :class="{winner: data.Winner === player.Nickname}">
