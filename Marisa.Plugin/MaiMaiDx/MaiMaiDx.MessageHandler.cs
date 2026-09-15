@@ -936,27 +936,47 @@ public partial class MaiMaiDx
 
         var selfScore = selfData.Scores.GetValueOrDefault((song.Id, levelIdx));
         var opponentScore = opponentData.Scores.GetValueOrDefault((song.Id, levelIdx));
-        if (selfScore == null || opponentScore == null)
+        if ((selfScore == null && selfData.Partial) || (opponentScore == null && opponentData.Partial))
         {
-            if (selfData.Partial || opponentData.Partial)
+            if (opponentQq is not null && opponentData.Partial)
             {
-                message.Reply("水鱼 OAuth 只能查询对手公开的 B50；该谱面没有可公开比较的成绩");
+                new MessageBuilder(message)
+                    .Text("水鱼 OAuth 暂时无法查询该曲的完整成绩，请先让对手发送 mai 绑定完成授权")
+                    .At(opponentQq.Value)
+                    .Reply();
                 return MarisaPluginTaskState.CompletedTask;
             }
 
-            message.Reply("指定的谱面不是双方都已游玩且当前可查询的成绩");
+            message.Reply("该谱面的成绩暂时无法查询");
             return MarisaPluginTaskState.CompletedTask;
         }
 
         var selfLabel = selfData.Nickname ?? $"QQ {message.Sender.Id}";
         var opponentLabel = opponentData.Nickname ?? opponentName ?? $"QQ {opponentQq}";
-        var winner = selfScore.Achievement == opponentScore.Achievement
+        var winner = selfScore == null && opponentScore == null
+            ? "双方均未游玩"
+            : selfScore == null ? opponentLabel
+            : opponentScore == null ? selfLabel
+            : selfScore.Achievement == opponentScore.Achievement
             ? "平局"
             : selfScore.Achievement > opponentScore.Achievement ? selfLabel : opponentLabel;
-        message.Reply($"对战结果\n歌曲：{song.Title}\n难度：{MaiMaiSong.LevelNameZh[levelIdx]}谱（{song.Levels[levelIdx]}）\n" +
-                      $"{selfLabel}：{FormatScore(selfScore)}\n" +
-                      $"{opponentLabel}：{FormatScore(opponentScore)}\n" +
-                      $"结果：{winner}");
+        var context = new WebContext(new
+        {
+            versus = new
+            {
+                Song = new { song.Id, song.Title, song.Type, song.Info.Artist, song.Info.Genre, song.Info.Bpm, song.Info.From, song.Info.IsNew },
+                LevelIndex = levelIdx,
+                Level = song.Levels[levelIdx],
+                Constant = song.Constants[levelIdx],
+                Players = new[]
+                {
+                    new { Nickname = selfLabel, Played = selfScore != null, Score = selfScore },
+                    new { Nickname = opponentLabel, Played = opponentScore != null, Score = opponentScore }
+                },
+                Winner = winner
+            }
+        });
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiVersus(context.Id)));
         return MarisaPluginTaskState.CompletedTask;
 
         async Task<BattleData> FetchBattleData(Message target, bool allowUsername, bool selfQuery)
@@ -1069,13 +1089,6 @@ public partial class MaiMaiDx
                     .Select(x => $"[ID:{x.Id}, Lv:{x.MaxLevel()}] -> {x.Title}");
                 return string.Join('\n', rows) + $"\n第 {index + 1}/{total} 页，发送歌曲 id 选择，或 p1/p2 翻页";
             }
-        }
-
-        static string FormatScore(SongScore score)
-        {
-            var marks = string.Join("/", new[] { FcLabel(score.Fc), FsLabel(score.Fs) }.Where(x => !string.IsNullOrEmpty(x)));
-            return $"{score.Achievement:0.0000}%（{score.Rank}，Ra {score.Rating}，DX {score.DxScore}" +
-                   (marks.Length == 0 ? "" : $"，{marks}") + ")";
         }
 
     }
