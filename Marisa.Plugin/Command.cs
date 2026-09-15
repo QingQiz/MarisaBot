@@ -25,7 +25,7 @@ public class Command : MarisaPluginBase
 
         if (!Commander.Contains(m.Sender.Id))
         {
-            m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            m.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -61,7 +61,7 @@ public class Command : MarisaPluginBase
         {
             if (proc.HasExited)
             {
-                message.Reply("Shell已经退出了");
+                message.Reply("Shell 已退出。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -70,7 +70,7 @@ public class Command : MarisaPluginBase
             if (command is "退出" || command.Equals("exit", StringComparison.OrdinalIgnoreCase))
             {
                 TryCloseShell();
-                message.Reply("Shell退出了");
+                message.Reply("Shell 已退出。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -89,7 +89,7 @@ public class Command : MarisaPluginBase
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }, this);
 
-        m.Reply($"Shell启动了；发送“退出”可关闭，空闲 {idleTimeout.TotalMinutes:0} 分钟会自动退出。长输出会分段发送，若命令等待输入可继续直接发送内容。");
+        m.Reply($"Shell 已启动。发送“退出”可关闭；空闲 {idleTimeout.TotalMinutes:0} 分钟会自动退出。长输出会分段发送，命令等待输入时可继续发送内容。");
 
         return MarisaPluginTaskState.CompletedTask;
 
@@ -154,7 +154,7 @@ public class Command : MarisaPluginBase
                 {
                     DialogManager.RemoveDialog(dialogKey);
                     TryCloseShellCore();
-                    m.Reply("Shell因超时已退出。", false);
+                    m.Reply("Shell 因超时已退出。", false);
                     return;
                 }
 
@@ -323,14 +323,14 @@ public class Command : MarisaPluginBase
     {
         if (!Commander.Contains(m.Sender.Id))
         {
-            m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            m.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
         var startInfo = CreateRestartStartInfo();
 
         Process.Start(startInfo);
-        m.Reply("正在重启");
+        m.Reply("正在重启。");
 
         _ = Task.Run(async () =>
         {
@@ -374,7 +374,7 @@ public class Command : MarisaPluginBase
     {
         if (!Commander.Contains(m.Sender.Id))
         {
-            m.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            m.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -387,7 +387,7 @@ public class Command : MarisaPluginBase
             canReset.Reset();
         }
 
-        m.Reply("Done.");
+        m.Reply("已完成。");
         return MarisaPluginTaskState.CompletedTask;
     }
 

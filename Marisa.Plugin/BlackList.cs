@@ -40,7 +40,7 @@ public class BlackList : MarisaPluginBase
 
         if (!commanders.Contains(message.Sender.Id))
         {
-            message.Reply("你没有资格。");
+            message.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -53,7 +53,7 @@ public class BlackList : MarisaPluginBase
 
         Cache.Add(qq);
         realm.Write(() => realm.AddWithAutoId(new BlackListEntity(qq)));
-        message.Reply("好了");
+        message.Reply("已完成。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -65,7 +65,7 @@ public class BlackList : MarisaPluginBase
 
         if (!commanders.Contains(message.Sender.Id))
         {
-            message.Reply("你没有资格。");
+            message.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -82,11 +82,11 @@ public class BlackList : MarisaPluginBase
         {
             Cache.Remove(qq);
             realm.Write(() => realm.Remove(item));
-            message.Reply("好了");
+            message.Reply("已完成。");
         }
         else
         {
-            message.Reply("这个人不在黑名单里");
+            message.Reply("该用户不在黑名单中。");
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -111,7 +111,7 @@ public class BlackList : MarisaPluginBase
         }
         else
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
             return false;
         }
 

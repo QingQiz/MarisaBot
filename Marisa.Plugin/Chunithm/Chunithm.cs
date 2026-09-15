@@ -64,16 +64,16 @@ public partial class Chunithm :
         switch (CommonExceptionHandler.UnwrapCommonException(exception))
         {
             case FlurlHttpException { StatusCode: 400 }:
-                message.Reply("“查无此人”");
+                message.Reply("查不到这个账号。");
                 break;
             case FlurlHttpException { StatusCode: 403 }:
-                message.Reply("“403 forbidden”");
+                message.Reply("查分器拒绝了请求（403）。");
                 break;
             case FlurlHttpException { StatusCode: 404 }:
-                message.Reply("404 Not Found");
+                message.Reply("查分器返回 404，暂时找不到相关数据。");
                 break;
             case FlurlHttpTimeoutException:
-                message.Reply("Timeout");
+                message.Reply("请求超时，请稍后再试。");
                 break;
             case FlurlHttpException e:
                 message.Reply(e.Message);

@@ -58,17 +58,17 @@ public partial class Game
             case "":
             case { Length: > 20 }:
             case not null when dbName.Any(c => Path.GetInvalidFileNameChars().Contains(c)):
-                message.Reply("曲库名字不合法");
+                message.Reply("曲库名称无效。");
                 return MarisaPluginTaskState.CompletedTask;
         }
 
         if (File.Exists(Path.Join(GuessDbPath, dbName)))
         {
-            message.Reply("已经存在的曲库");
+            message.Reply("该曲库已存在。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply("请给出要猜的单词，每行一个，可以分多次回复\n发送“结束”结束\n发送“取消”取消\n所有歌名都必须匹配如下正则表达式：\n" + SongTitleMatcher());
+        message.Reply("请发送要猜的单词，每行一个；可以分多次发送。\n发送“结束”完成，发送“取消”退出。\n歌名必须匹配以下正则表达式：\n" + SongTitleMatcher());
 
         var res = new HashSet<ReadOnlyMemory<char>>([], new MemoryExt.ReadOnlyMemoryCharComparer(StringComparison.OrdinalIgnoreCase));
 
@@ -77,14 +77,14 @@ public partial class Game
             switch (mNext.Command.Span)
             {
                 case "结束" when res.Count < 20:
-                    mNext.Reply("太少了，最少20个，请继续", false);
+                    mNext.Reply("至少需要 20 个词，请继续发送。", false);
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 case "结束":
                     File.WriteAllLines(Path.Join(GuessDbPath, dbName), res.Select(x => x.ToString()), Encoding.UTF8);
-                    mNext.Reply("完成", false);
+                    mNext.Reply("已完成。", false);
                     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                 case "取消":
-                    mNext.Reply("行吧", false);
+                    mNext.Reply("已取消。", false);
                     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -98,13 +98,13 @@ public partial class Game
             var illegalTitles = titles.Where(t => !SongTitleMatcher().IsMatch(t.ToString())).ToArray();
             if (illegalTitles.Length != 0)
             {
-                mNext.Reply($"不合法的标题，此次所有的都无效，请重试：{illegalTitles.First()}");
+                mNext.Reply($"标题格式不正确，本次发送的内容未加入，请重试：{illegalTitles.First()}");
                 return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
             }
 
             foreach (var title in titles)
                 res.Add(title);
-            mNext.Reply("继续", false);
+            mNext.Reply("已记录，请继续发送。", false);
 
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }, this);
@@ -148,13 +148,13 @@ public partial class Game
             {
                 if (!SongTitleMatcher().IsMatch(mNext.Command[1..].ToString()))
                 {
-                    mNext.Reply("无效字符");
+                    mNext.Reply("提示字符无效，请换一个。");
                     return Task.FromResult(MarisaPluginTaskState.NoResponse);
                 }
 
                 if (DateTime.Now - cooldownGlobal < TimeSpan.FromMinutes(1))
                 {
-                    mNext.Reply("冷却中...");
+                    mNext.Reply("冷却中，请稍后再试。");
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 }
 
@@ -162,14 +162,14 @@ public partial class Game
                 {
                     if (DateTime.Now - t < TimeSpan.FromMinutes(3))
                     {
-                        mNext.Reply("冷却中...");
+                        mNext.Reply("冷却中，请稍后再试。");
                         return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                     }
                 }
 
                 if (tips.Contains(mNext.Command.Span[1]))
                 {
-                    mNext.Reply("？");
+                    mNext.Reply("这个提示已经用过了。");
                     return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
                 }
 
@@ -193,7 +193,7 @@ public partial class Game
 
                 if (name.Length != songName[num - 1].Length)
                 {
-                    mNext.Reply("不对不对！");
+                    mNext.Reply("不对，再试试！");
                 }
                 else
                 {
@@ -203,11 +203,11 @@ public partial class Game
 
                     if (right.Count == songName.Count)
                     {
-                        mNext.Reply("全部猜出来了耶！", false);
+                        mNext.Reply("全部猜对了！", false);
                         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                     }
 
-                    mNext.Reply("对对对");
+                    mNext.Reply("猜对了！");
                 }
             }
 
@@ -216,11 +216,11 @@ public partial class Game
 
         if (res)
         {
-            message.Reply($"猜歌游戏开始！\n{Reply()}发送“开`任意字符`”开\n发送“`序号`:`歌名`”猜", false);
+            message.Reply($"猜歌游戏开始！\n{Reply()}发送“开任意字符”获取提示\n发送“序号:歌名”进行猜测。", false);
         }
         else
         {
-            message.Reply("？");
+            message.Reply("当前已有猜歌游戏进行中。");
         }
 
         return MarisaPluginTaskState.CompletedTask;
@@ -364,7 +364,7 @@ public partial class Game
 
         if (dbNames.Length == 0 || dbNames.Any(x => x != "maimai" && x != "chunithm"))
         {
-            message.Reply("friberg 仅支持 maimai / chunithm 数据库");
+            message.Reply("friberg 只支持 maimai 和 chunithm 曲库。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -382,7 +382,7 @@ public partial class Game
         songs = songs.Where(s => FribergInfo(s).Constant > 0).ToList();
         if (songs.Count == 0)
         {
-            message.Reply("曲库为空");
+            message.Reply("曲库为空，无法开始游戏。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -421,7 +421,7 @@ public partial class Game
 
                 if (choice == "结束游戏")
                 {
-                    mNext.Reply("游戏结束", false);
+                    mNext.Reply("游戏已结束。", false);
                     return MarisaPluginTaskState.CompletedTask;
                 }
 
@@ -430,7 +430,7 @@ public partial class Game
                     var filtered = FilterByDifficulty(songs, lv, game);
                     if (filtered.Count == 0)
                     {
-                        mNext.Reply("该难度下没有歌曲，游戏结束", false);
+                        mNext.Reply("该难度没有歌曲，游戏已结束。", false);
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
@@ -443,7 +443,7 @@ public partial class Game
                     return MarisaPluginTaskState.ToBeContinued;
                 }
 
-                mNext.Reply("不存在的选项，游戏结束", false);
+                mNext.Reply("选项无效，游戏已结束。", false);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
@@ -480,14 +480,14 @@ public partial class Game
             var input = mNext.Command.Trim();
             if (input.IsWhiteSpace())
             {
-                mNext.Reply("@魔理沙发送歌名进行猜测");
+                mNext.Reply("请 @魔理沙并发送歌名进行猜测。");
                 return MarisaPluginTaskState.ToBeContinued;
             }
 
             var matches = SearchSongs(songs, aliases, input);
             if (matches.Count == 0)
             {
-                mNext.Reply("曲库里没有这首歌");
+                mNext.Reply("曲库中没有这首歌。");
                 return MarisaPluginTaskState.ToBeContinued;
             }
 
@@ -510,7 +510,7 @@ public partial class Game
                 // 冷却期：任意玩家猜测后 5 秒内全群不能再次猜测，防止撞车
                 if (DateTime.Now - cooldown < TimeSpan.FromSeconds(5))
                 {
-                    mNext.Reply("猜太快啦，慢点慢点");
+                    mNext.Reply("猜得太快了，请稍等几秒。");
                     return MarisaPluginTaskState.ToBeContinued;
                 }
                 cooldown = DateTime.Now;
@@ -518,7 +518,7 @@ public partial class Game
                 // 重复猜测：不计数
                 if (!guessedIds.Add(guess.Id))
                 {
-                    mNext.Reply("猜过啦");
+                    mNext.Reply("这首歌已经猜过了。");
                     return MarisaPluginTaskState.ToBeContinued;
                 }
 
@@ -564,7 +564,7 @@ public partial class Game
         }
         else
         {
-            message.Reply("？");
+            message.Reply("当前已有猜歌游戏进行中。");
         }
 
         return MarisaPluginTaskState.CompletedTask;

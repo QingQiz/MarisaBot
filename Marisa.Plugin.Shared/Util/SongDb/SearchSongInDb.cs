@@ -14,7 +14,7 @@ public static class SearchSongInDb
     {
         if (songs.Count == 0)
         {
-            message.Reply("EMPTY");
+            message.Reply("没有找到符合条件的歌曲。");
             return;
         }
 
@@ -39,7 +39,7 @@ public static class SearchSongInDb
         {
             case 0:
                 result.SetResult(null);
-                message.Reply("“查无此歌”");
+                message.Reply("找不到这首歌。");
                 return result.Task;
             case 1:
                 result.SetResult(songs[0]);
@@ -72,7 +72,7 @@ public static class SearchSongInDb
 
                 if (song == null)
                 {
-                    message.Reply("查无此歌");
+                    message.Reply("找不到这首歌。");
                     result.SetResult(null);
                     return Task.FromResult(MarisaPluginTaskState.CompletedTask);
                 }

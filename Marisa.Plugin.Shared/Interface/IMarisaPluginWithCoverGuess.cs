@@ -31,7 +31,7 @@ public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : So
 
         if (res.Count == 0)
         {
-            message.Reply("None");
+            message.Reply("暂无猜歌记录。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -54,7 +54,7 @@ public interface IMarisaPluginWithCoverGuess<TSong, TSongGuess> where TSong : So
         }
         else
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
         }
 
         return MarisaPluginTaskState.CompletedTask;

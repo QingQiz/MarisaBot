@@ -42,13 +42,13 @@ public partial class Osu : MarisaPluginBase, IMarisaPluginWithHelp, IHandleCommo
 
         if (command == null)
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(command.Name))
         {
-            message.Reply("未绑定，请使用 `osu! bind 用户名` 绑定");
+            message.Reply("还没有绑定账号，请使用「osu! bind 用户名」完成绑定。");
             return null;
         }
 

@@ -18,7 +18,7 @@ public class Select : MarisaPluginBase
     private static MarisaPluginTaskState FriendMessageHandler(Message message)
     {
         var cmd = message.Command.Split("还是").ToArray();
-        message.Reply($"建议：{cmd.RandomTake()}");
+        message.Reply($"建议选：{cmd.RandomTake()}");
         return MarisaPluginTaskState.CompletedTask;
     }
 }

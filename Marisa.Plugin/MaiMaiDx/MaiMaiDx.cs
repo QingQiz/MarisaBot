@@ -70,16 +70,16 @@ public partial class MaiMaiDx :
         switch (CommonExceptionHandler.UnwrapCommonException(exception))
         {
             case FlurlHttpException { StatusCode: 400 }:
-                message.Reply("“查无此人”");
+                message.Reply("查不到这个账号。");
                 break;
             case (FlurlHttpException { StatusCode: 403 }):
-                message.Reply("“403 forbidden”");
+                message.Reply("查分器拒绝了请求（403）。");
                 break;
             case (FlurlHttpException { StatusCode: 404 }):
-                message.Reply("404 Not Found（如果你邦的是Wahlap，那有可能是它的网烂了）");
+                message.Reply("查分器返回 404。若绑定的是 Wahlap，可能是服务暂时不可用。");
                 break;
             case FlurlHttpTimeoutException:
-                message.Reply("Timeout");
+                message.Reply("请求超时，请稍后再试。");
                 break;
             case FlurlHttpException e:
                 message.Reply(e.Message);

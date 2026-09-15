@@ -224,7 +224,7 @@ public class SongDb<TSong> : ICanReset where TSong : Song
         {
             >= SongDbConfig.PageSize => MessageChain.FromText($"过多的结果（{songs.Count}个）"),
 
-            0 => MessageChain.FromText("“查无此歌”"),
+            0 => MessageChain.FromText("找不到这首歌。"),
             1 => new MessageChain(
                 new MessageDataText(songs[0].Title),
                 MessageDataImage.FromBase64(songs[0].GetImage())

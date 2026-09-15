@@ -24,7 +24,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         // 未知的歌，不算
         if (guess == null)
         {
-            message.Reply("没找到你说的这首歌");
+            message.Reply("找不到这首歌，请换个答案试试。");
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }
 
@@ -54,7 +54,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
             realm.InsertOrUpdateByUid(u);
         });
 
-        message.Reply("不对不对！");
+        message.Reply("猜错了，再试试！");
         return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
     }
 
@@ -70,7 +70,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
                         new MessageDataText($"猜曲结束，正确答案：{song.Title}"),
                         MessageDataImage.FromBase64(song.GetImage()),
                         new MessageDataText(
-                            $"当前歌在录的别名有：{string.Join(", ", songDb.GetSongAliasesByName(song.Title))}\n若有遗漏，请联系作者")
+                            $"当前收录的别名有：{string.Join("、", songDb.GetSongAliasesByName(song.Title))}\n如有遗漏，请联系作者。")
                     );
                     return MarisaPluginTaskState.CompletedTask;
                 }
@@ -142,7 +142,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
 
         if (!res)
         {
-            message.Reply("？");
+            message.Reply("当前已有猜曲进行中。");
             return false;
         }
 
@@ -176,7 +176,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
 
         if (songs.Count == 0)
         {
-            message.Reply("None");
+            message.Reply("暂无可用歌曲。");
             return;
         }
 
@@ -194,7 +194,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
             message.Reply(
                 new MessageDataText("猜曲模式启动！"),
                 MessageDataImage.FromBase64(cover.ToB64()),
-                new MessageDataText("艾特我+你的答案以参加猜曲\n答案可以是 `歌曲名`、`歌曲id` 或 `id歌曲id`\n\n发送 ”结束猜曲“ 来退出猜曲模式")
+                new MessageDataText("@我并发送答案即可参加猜曲\n答案可以是「歌曲名」「歌曲 ID」或「ID歌曲名」\n\n发送“结束猜曲”即可退出猜曲模式。")
             );
         }
     }

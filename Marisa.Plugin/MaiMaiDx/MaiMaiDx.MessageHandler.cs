@@ -78,7 +78,7 @@ public partial class MaiMaiDx
                 {
                     if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= servers.Length)
                     {
-                        next.Reply("错误的序号，会话已关闭");
+                        next.Reply("序号无效，本次操作已结束。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
@@ -88,7 +88,7 @@ public partial class MaiMaiDx
                         {
                             if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "maimai") != null)
                             {
-                                next.Reply("DivingFish OAuth 绑定成功！（已有有效授权）");
+                                next.Reply("DivingFish OAuth 已绑定（已有有效授权）。");
                                 return DoBind(next, servers[idx]);
                             }
                         }
@@ -104,7 +104,7 @@ public partial class MaiMaiDx
                                 "maimai",
                                 DeviceBindingLabel(next.Sender.Id));
                             next.Reply(MessageChain.FromSensitiveText(
-                                $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}"));
+                                $"请打开下面的水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}"));
 
                             stat = 30;
                             var deviceKey = (message.GroupInfo?.Id, message.Sender.Id);
@@ -121,7 +121,7 @@ public partial class MaiMaiDx
                                 {
                                     var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "maimai");
                                     pendingDeviceBinding = (result.Sub, "maimai", result.Token.Scope);
-                                    message.Reply("绑定已完成，如果是你本人完成了绑定请回复收到");
+                                    message.Reply("授权已完成。如果是你本人操作的，请回复“收到”。");
                                 }
                                 catch (Exception e)
                                 {
@@ -137,7 +137,7 @@ public partial class MaiMaiDx
                         // 已有有效 Token → 跳过 OAuth
                         if (LxnsTokenStore.GetValidToken(next.Sender.Id).GetAwaiter().GetResult() != null)
                         {
-                            message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                            message.Reply("Lxns OAuth 已绑定（已有有效授权）。");
                             return DoBind(next, servers[idx]);
                         }
 
@@ -149,7 +149,7 @@ public partial class MaiMaiDx
                         var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
 
                         message.Reply(MessageChain.FromSensitiveText(
-                            $"请打开以下链接授权：\n{shortUrl}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）"));
+                            $"请打开下面的链接完成授权：\n{shortUrl}\n\n授权成功后，请复制页面显示的验证码并发送（格式如 XXXX-XXXX-XXXX）。"));
 
                         oauthVerifier = verifier;
                         stat = 10;
@@ -163,7 +163,7 @@ public partial class MaiMaiDx
                     }
 
                     // 非 OAuth 绑定：统一经由 DoBind 写入
-                    message.Reply("好了");
+                    message.Reply("已完成绑定。");
                     return DoBind(next, servers[idx]);
                 }
                 case 10:
@@ -171,7 +171,7 @@ public partial class MaiMaiDx
                     var codeInput = next.Command.Trim().ToString();
                     if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
                     {
-                        next.Reply("验证码格式错误，会话已关闭");
+                        next.Reply("验证码格式不正确，本次操作已结束。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
                     try
@@ -180,12 +180,12 @@ public partial class MaiMaiDx
                         LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
                             (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
 
-                        message.Reply("Lxns OAuth 绑定成功！");
+                        message.Reply("Lxns OAuth 已绑定。");
                         return DoBind(next, "lxns");
                     }
                     catch (Exception e)
                     {
-                        next.Reply($"绑定失败: {e.Message}");
+                        next.Reply($"绑定失败：{e.Message}");
                         return MarisaPluginTaskState.CompletedTask;
                     }
                 }
@@ -208,7 +208,7 @@ public partial class MaiMaiDx
                     deviceBindingTimeout?.Cancel();
                     pendingDeviceBinding = null;
                     DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, "", entry.Scope, entry.Game);
-                    next.Reply("ok");
+                    next.Reply("已完成绑定。");
                     return MarisaPluginTaskState.CompletedTask;
                 }
             }
@@ -697,7 +697,7 @@ public partial class MaiMaiDx
 
         if (bind == null)
         {
-            message.Reply("你未绑定Wahlap，无法使用该功能");
+            message.Reply("还没有绑定 Wahlap，暂时无法使用此功能。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -705,11 +705,11 @@ public partial class MaiMaiDx
 
         if (!res)
         {
-            message.Reply("解锁失败。。。");
+            message.Reply("解锁失败，请稍后再试。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply("妥了，玩吧。");
+        message.Reply("已解锁，可以开始游戏了。");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -728,13 +728,13 @@ public partial class MaiMaiDx
 
         if (bind == null)
         {
-            message.Reply("你未绑定Wahlap，无法使用该功能");
+            message.Reply("还没有绑定 Wahlap，暂时无法使用此功能。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
         await AllNetDataFetcher.Fetch(bind.AimeId);
 
-        message.Reply("1");
+        message.Reply("已刷新成绩。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -1195,7 +1195,7 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
 
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
@@ -1238,7 +1238,7 @@ public partial class MaiMaiDx
 
         if (constants.Count is > 2 or < 1 || constants.Any(c => c < 1) || constants.Any(c => c > 15))
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
         }
         else
         {
@@ -1250,7 +1250,7 @@ public partial class MaiMaiDx
             // 太大的话画图会失败，所以给判断一下
             if (constants[1] - constants[0] > 3)
             {
-                message.Reply("过大的跨度");
+                message.Reply("范围跨度过大。");
                 return MarisaPluginTaskState.CompletedTask;
             }
 
@@ -1325,7 +1325,7 @@ public partial class MaiMaiDx
             var version = ResolveSummaryVersion(versionArg, versions);
             if (version == null)
             {
-                message.Reply("错误的版本：" + versionArg);
+                message.Reply("版本无效：" + versionArg);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
@@ -1349,7 +1349,7 @@ public partial class MaiMaiDx
 
             if (!int.TryParse(command.Span, out var index) || index < 0 || index >= versions.Length)
             {
-                next.Reply("错误的序号，会话已关闭");
+                next.Reply("序号无效，本次操作已结束。");
                 return MarisaPluginTaskState.Canceled;
             }
 
@@ -1386,7 +1386,7 @@ public partial class MaiMaiDx
     {
         if (!TryParseLevel(message.Command.Trim().ToString(), out var level))
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -1574,7 +1574,7 @@ public partial class MaiMaiDx
     {
         if (!int.TryParse(message.Command.Span, out var target))
         {
-            message.Reply("参数不是数字");
+        message.Reply("参数必须是数字。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -1628,7 +1628,7 @@ public partial class MaiMaiDx
 
         if (recommend.Items.Count == 0)
         {
-            message.Reply("您无分可恰");
+            message.Reply("当前没有可用成绩。");
         }
         else
         {
@@ -1707,7 +1707,7 @@ public partial class MaiMaiDx
             }
         }
 
-        message.Reply("参数应为“定数”");
+        message.Reply("参数应为定数。");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -1731,7 +1731,7 @@ public partial class MaiMaiDx
 
             if (!PlateData.TryStripDifficultyPrefixLoose(command, out var levelIdx, out var rest))
             {
-                next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、缩写、颜色或全名首字母");
+                next.Reply("难度格式不正确，本次操作已结束。可用格式：难度全名、缩写、颜色或首字母。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -1739,19 +1739,19 @@ public partial class MaiMaiDx
 
             if (!parseSuccess)
             {
-                next.Reply("错误的达成率格式，会话已关闭");
+                next.Reply("达成率格式不正确，本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
             if (achievement is > 101 or < 0)
             {
-                next.Reply("你查**呢");
+                next.Reply("达成率应在 0 至 101 之间。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
             if (levelIdx >= song.Charts.Count)
             {
-                next.Reply("该谱面没有这个难度，会话已关闭");
+                next.Reply("该谱面没有这个难度，本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
             var (x, y) = song.NoteScore(levelIdx);

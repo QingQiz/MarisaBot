@@ -15,7 +15,7 @@ public class Translate : MarisaPluginBase, IHandleCommonException
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            message.Reply("请提供要翻译的文本");
+            message.Reply("请提供需要翻译的文本。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -40,7 +40,7 @@ public class Translate : MarisaPluginBase, IHandleCommonException
         switch (CommonExceptionHandler.UnwrapCommonException(exception))
         {
             case FlurlHttpTimeoutException:
-                message.Reply("超时");
+                message.Reply("请求超时，请稍后再试。");
                 break;
             case FlurlHttpException e:
                 message.Reply(e.Message);

@@ -19,7 +19,7 @@ public partial class Osu
 
         if (name.IsEmpty)
         {
-            message.Reply("请给出 osu! 的用户名");
+            message.Reply("请输入 osu! 用户名。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -41,7 +41,7 @@ public partial class Osu
             bind.OsuUserName = info.Username;
             bind.GameMode    = info.Playmode.ToLower();
         });
-        message.Reply("好了");
+        message.Reply("已完成设置。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -55,7 +55,7 @@ public partial class Osu
 
         if (!OsuApi.ModeList.Contains(mode))
         {
-            message.Reply("可选的模式：" + string.Join(", ", OsuApi.ModeList));
+            message.Reply("可选模式：" + string.Join("、", OsuApi.ModeList));
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
@@ -63,12 +63,12 @@ public partial class Osu
         var bind = realm.All<OsuBind>().FirstOrDefault(o => o.UserId == sender);
         if (bind is null)
         {
-            message.Reply("您未绑定！");
+            message.Reply("还没有绑定账号。");
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
         realm.Write(() => bind.GameMode = mode.ToString());
-        message.Reply("好了");
+        message.Reply("已完成设置。");
 
         return Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
@@ -95,7 +95,7 @@ public partial class Osu
 
             if (uInfo.RankHistory == null)
             {
-                message.Reply("该玩家没有玩过该模式");
+            message.Reply("该玩家没有该模式的游玩记录。");
             }
             else
             {
@@ -121,7 +121,7 @@ public partial class Osu
 
         if (command.Mode is not (0 or 3))
         {
-            message.Reply("目前只支持 osu 和 mania 模式");
+            message.Reply("目前只支持 osu 和 mania 模式。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -192,7 +192,7 @@ public partial class Osu
 
             if (!(best?.Any() ?? false))
             {
-                message.Reply("无");
+                message.Reply("暂无成绩。");
             }
             else
             {
@@ -208,7 +208,7 @@ public partial class Osu
     [MarisaPluginCommand("compare", "cmp")]
     private MarisaPluginTaskState BpCmp(Message message)
     {
-        message.Reply("Disabled");
+        message.Reply("该功能暂未启用。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -218,7 +218,7 @@ public partial class Osu
     [MarisaPluginCommand("distribution", "dist")]
     private MarisaPluginTaskState BpDistribution(Message message)
     {
-        message.Reply("Disabled");
+        message.Reply("该功能暂未启用。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -253,7 +253,7 @@ public partial class Osu
     [MarisaPluginCommand("bns")]
     private static MarisaPluginTaskState BonusPp(Message message)
     {
-        message.Reply("Disabled");
+        message.Reply("该功能暂未启用。");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -283,7 +283,7 @@ public partial class Osu
             }
         }
 
-        message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
         return MarisaPluginTaskState.CompletedTask;
 
         result:
@@ -291,7 +291,7 @@ public partial class Osu
         var info = await OsuApi.GetBeatmapInfoById(beatmapId);
         if (info.ModeInt != 3)
         {
-            message.Reply("只支持 osu!mania");
+            message.Reply("只支持 osu!mania。");
             return MarisaPluginTaskState.CompletedTask;
         }
 

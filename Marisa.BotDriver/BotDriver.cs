@@ -99,7 +99,7 @@ public abstract class BotDriver(
 
             if (res.FinalException is TimeoutRejectedException)
             {
-                message.Reply("Cancelled due to timeout (10min)");
+                message.Reply("操作超时（10 分钟）。");
                 Logger.Error("Handler timed out. Caused by message: {0}", message);
             }
             else

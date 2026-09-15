@@ -54,7 +54,7 @@ public partial class Ongeki
                 goto RightLabel;
             }
 
-            next.Reply("错误的难度格式，会话已关闭。可用难度格式：难度全名、难度全名的首字母或难度颜色");
+            next.Reply("难度格式不正确，本次操作已结束。可用格式：难度全名、首字母或难度颜色。");
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
             RightLabel:
@@ -65,7 +65,7 @@ public partial class Ongeki
                 song.Charts[levelIdx]!.NoteCount == 0 ||
                 song.Charts[levelIdx]!.BellCount == 0)
             {
-                next.Reply("暂无该难度的数据");
+                next.Reply("暂无该难度的数据。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -73,13 +73,13 @@ public partial class Ongeki
 
             if (!parseSuccess)
             {
-                next.Reply("错误的达成率格式，会话已关闭");
+                next.Reply("达成率格式不正确，本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
             if (achievement is > 101_0000 or < 0)
             {
-                next.Reply("你查**呢");
+                next.Reply("达成率应在 0 至 1010000 之间。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 

@@ -369,11 +369,11 @@ public class Chi : MarisaPluginBase
 
         if (place.Any(char.IsPunctuation))
         {
-            message.Reply("sb");
+            message.Reply("地点名称不能包含标点符号。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply("吃什么？");
+        message.Reply("想添加什么菜？");
 
         DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), next =>
         {
@@ -407,7 +407,7 @@ public class Chi : MarisaPluginBase
 
         if (!commanders.Contains(message.Sender.Id))
         {
-            message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            message.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -417,7 +417,7 @@ public class Chi : MarisaPluginBase
         {
             if (!_data.ContainsKey(place))
             {
-                message.Reply("无");
+                message.Reply("找不到这个地点。");
                 return MarisaPluginTaskState.CompletedTask;
             }
         }
@@ -458,7 +458,7 @@ public class Chi : MarisaPluginBase
 
         if (!commanders.Contains(message.Sender.Id))
         {
-            message.Reply("你没资格啊，你没资格。正因如此，你没资格。");
+            message.Reply("你没有权限执行此命令。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -468,7 +468,7 @@ public class Chi : MarisaPluginBase
         {
             if (!_data.ContainsKey(place))
             {
-                message.Reply("无");
+                message.Reply("找不到这个地点。");
                 return MarisaPluginTaskState.CompletedTask;
             }
             _data[place] = [];
@@ -479,7 +479,7 @@ public class Chi : MarisaPluginBase
             using var realm = BotDbContext.OpenRealm();
             realm.Write(() => realm.RemoveRange(realm.All<Meal>().Where(x => x.Place == place)));
         });
-        message.Reply("删完了");
+        message.Reply("已删除这个地点。");
         return MarisaPluginTaskState.CompletedTask;
     }
 

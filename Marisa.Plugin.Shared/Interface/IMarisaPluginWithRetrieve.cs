@@ -31,7 +31,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     [MarisaPluginCommand("alias")]
     MarisaPluginTaskState SongAlias(Message message)
     {
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -48,7 +48,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         if (songName.IsEmpty)
         {
-            message.Reply("？");
+            message.Reply("请输入歌曲名或歌曲 ID。");
         }
 
         var songList = SongDb.SearchSong(songName);
@@ -74,7 +74,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         if (names.Length != 2)
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -83,10 +83,10 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
 
         message.Reply(
             alias.Span.IndexOfAny('\t', '\n', '\r') >= 0
-                ? "别名不能包含制表符或换行"
+                ? "别名不能包含制表符或换行。"
                 : SongDb.SetSongAlias(name, alias)
-                    ? "Success"
-                    : $"不存在的歌曲：{name}");
+                    ? "已完成。"
+                    : $"找不到歌曲：{name}");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -102,7 +102,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     [MarisaPluginCommand("list", "ls")]
     async Task<MarisaPluginTaskState> ListSong(Message message)
     {
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -163,7 +163,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
     [MarisaPluginCommand("random", "rand", "随机")]
     async Task<MarisaPluginTaskState> RandomSong(Message message)
     {
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -283,7 +283,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                         diffConstraint.Add((song, levelIdx) => GetComparer<double>(op)(song.Constants[levelIdx], result));
                         break;
                     }
-                    message.Reply("Constant 只能为数字");
+                    message.Reply("Constant 必须是数字。");
                     throw new ArgumentOutOfRangeException();
                 case 2: // Bpm
                     if (double.TryParse(val, out var bpm))
@@ -303,7 +303,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                         }
                         break;
                     }
-                    message.Reply("Bpm 只能为数字");
+                    message.Reply("BPM 必须是数字。");
                     throw new ArgumentOutOfRangeException();
                 case 3: // Artist
                     CheckEqOp(op);
@@ -324,7 +324,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                         songConstraint.Add(song => GetComparer<long>(op)(song.Id, result));
                         break;
                     }
-                    message.Reply("Id 只能为数字");
+                    message.Reply("ID 必须是数字。");
                     throw new ArgumentOutOfRangeException();
                 case 7: // Index
                     if (int.TryParse(val, out var index))
@@ -333,7 +333,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
                         diffConstraint.Add((_, levelIdx) => GetComparer<int>(op)(levelIdx, result));
                         break;
                     }
-                    message.Reply("LevelIndex 只能为数字");
+                    message.Reply("LevelIndex 必须是数字。");
                     throw new ArgumentOutOfRangeException();
                 case 8: // DiffName
                     CheckEqOp(op);
@@ -405,7 +405,7 @@ public interface IMarisaPluginWithRetrieve<TSong> where TSong : Song
         {
             if (op is "=" or "!=") return;
 
-            message.Reply("该约束可用操作符 =、!=");
+            message.Reply("该约束支持的操作符为 = 和 !=。");
             throw new ArgumentOutOfRangeException();
         }
 

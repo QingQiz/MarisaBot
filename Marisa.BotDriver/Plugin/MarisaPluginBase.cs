@@ -33,7 +33,7 @@ public class MarisaPluginBase
             return Task.CompletedTask;
         }
 
-        message.Send(new MessageDataText("出现异常，已上报开发者"));
+        message.Send(new MessageDataText("处理失败，已通知开发者。"));
 
         return Task.CompletedTask;
 

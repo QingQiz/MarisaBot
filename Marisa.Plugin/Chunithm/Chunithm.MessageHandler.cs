@@ -72,7 +72,7 @@ public partial class Chunithm
                 {
                     if (!int.TryParse(next.Command.Span, out var idx) || idx < 0 || idx >= fetchers.Length)
                     {
-                        next.Reply("错误的序号，会话已关闭");
+                        next.Reply("序号无效，本次操作已结束。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
@@ -81,7 +81,7 @@ public partial class Chunithm
                         // 已有有效 Token → 跳过 OAuth
                         if (LxnsTokenStore.GetValidToken(next.Sender.Id).GetAwaiter().GetResult() != null)
                         {
-                            message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                            message.Reply("Lxns OAuth 已绑定（已有有效授权）。");
                             return DoBind(next, fetchers[idx]);
                         }
 
@@ -93,7 +93,7 @@ public partial class Chunithm
                         var shortUrl = ShortUrlStore.GetShortUrl(shortCode);
 
                         message.Reply(MessageChain.FromSensitiveText(
-                            $"请打开以下链接授权：\n{shortUrl}\n\n授权成功后复制并发送显示的验证码（形如XXXX-XXXX-XXXX）"));
+                            $"请打开下面的链接完成授权：\n{shortUrl}\n\n授权成功后，请复制页面显示的验证码并发送（格式如 XXXX-XXXX-XXXX）。"));
 
                         oauthVerifier = verifier;
                         stat = 10;
@@ -112,7 +112,7 @@ public partial class Chunithm
                         {
                             if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm") != null)
                             {
-                                next.Reply("DivingFish OAuth 绑定成功！（已有有效授权）");
+                                next.Reply("DivingFish OAuth 已绑定（已有有效授权）。");
                                 return DoBind(next, fetchers[idx]);
                             }
                         }
@@ -145,7 +145,7 @@ public partial class Chunithm
                                 {
                                     var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, "chunithm");
                                     pendingDeviceBinding = (result.Sub, "chunithm", result.Token.Scope);
-                                    message.Reply("绑定已完成，如果是你本人完成了绑定请回复收到");
+                                    message.Reply("授权已完成。如果是你本人操作的，请回复“收到”。");
                                 }
                                 catch (Exception e)
                                 {
@@ -158,19 +158,19 @@ public partial class Chunithm
 
                     if (idx is 0 or 1)
                     {
-                        message.Reply("好了");
+                        message.Reply("已完成绑定。");
                         return DoBind(next, fetchers[idx]);
                     }
 
                     if (idx == fetchers.Length - 1)
                     {
-                        message.Reply("给出服务器的地址，即你填写在segatools.ini的[dns]中default的值");
+                        message.Reply("请输入服务器地址，即 segatools.ini 中 [dns] 的 default 值。");
                         stat = 1;
                     }
                     else
                     {
                         server = fetchers[idx];
-                        message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
+                        message.Reply("请输入 Aime 卡的 Access Code，即卡背面的值或 aime.txt 中填写的值。");
                         stat = 2;
                     }
 
@@ -185,14 +185,14 @@ public partial class Chunithm
                         if (Dns.GetHostAddresses(hostStr).Length != 0)
                         {
                             server = hostStr;
-                            message.Reply("给出你Aime卡的Access Code，即Aime卡背面的值或你填写在aime.txt中的值");
+                            message.Reply("请输入 Aime 卡的 Access Code，即卡背面的值或 aime.txt 中填写的值。");
                             stat = 2;
                             return MarisaPluginTaskState.ToBeContinued;
                         }
                     }
                     catch (ArgumentException) {}
 
-                    next.Reply($"无效的服务器地址{host}，会话已关闭");
+                    next.Reply($"服务器地址「{host}」无效，本次操作已结束。");
                     return MarisaPluginTaskState.CompletedTask;
                 }
                 case 2:
@@ -201,7 +201,7 @@ public partial class Chunithm
 
                     if (accessCode.Length != 20)
                     {
-                        next.Reply($"无效的Access Code: {accessCode}，长度应为20");
+                        next.Reply($"Access Code「{accessCode}」无效，长度应为 20。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
@@ -214,7 +214,7 @@ public partial class Chunithm
 
                     if (!(fetcher as AllNetBasedNetDataFetcher)!.Test(accessCode))
                     {
-                        next.Reply($"该Access Code尚未在{server}中绑定");
+                        next.Reply($"该 Access Code 尚未在「{server}」中绑定。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
 
@@ -225,7 +225,7 @@ public partial class Chunithm
                         realm.InsertOrUpdateByUid(bind);
                     });
 
-                    message.Reply("好了");
+                    message.Reply("已完成绑定。");
 
                     return MarisaPluginTaskState.CompletedTask;
                 }
@@ -234,7 +234,7 @@ public partial class Chunithm
                     var codeInput = next.Command.Trim().ToString();
                     if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
                     {
-                        next.Reply("验证码格式错误，会话已关闭");
+                        next.Reply("验证码格式不正确，本次操作已结束。");
                         return MarisaPluginTaskState.CompletedTask;
                     }
                     try
@@ -243,12 +243,12 @@ public partial class Chunithm
                         LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
                             (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
 
-                        message.Reply("Lxns OAuth 绑定成功！");
+                        message.Reply("Lxns OAuth 已绑定。");
                         return DoBind(next, "lxns");
                     }
                     catch (Exception e)
                     {
-                        next.Reply($"绑定失败: {e.Message}");
+                        next.Reply($"绑定失败：{e.Message}");
                         return MarisaPluginTaskState.CompletedTask;
                     }
                 }
@@ -271,7 +271,7 @@ public partial class Chunithm
                     deviceBindingTimeout?.Cancel();
                     pendingDeviceBinding = null;
                     DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, "", entry.Scope, entry.Game);
-                    next.Reply("ok");
+                    next.Reply("已完成绑定。");
                     return MarisaPluginTaskState.CompletedTask;
                 }
             }
@@ -314,13 +314,13 @@ public partial class Chunithm
 
             if (!int.TryParse(command.Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
-                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                next.Reply("选择无效，请输入上面列出的编号。本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
 
             if (string.IsNullOrEmpty(song.ChartName[levelIdx]))
             {
-                next.Reply("暂无该难度的数据");
+                next.Reply("暂无该难度的数据。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
@@ -361,7 +361,7 @@ public partial class Chunithm
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
 
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
@@ -382,7 +382,7 @@ public partial class Chunithm
 
         if (constants.Count is > 2 or < 1 || constants.Any(c => c < 1) || constants.Any(c => c > 16))
         {
-            message.Reply("错误的命令格式");
+            message.Reply("命令格式不正确。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -394,7 +394,7 @@ public partial class Chunithm
         // 太大的话画图会失败，所以给判断一下
         if (constants[1] - constants[0] > 2)
         {
-            message.Reply("过大的跨度，最多是2");
+            message.Reply("范围跨度不能超过 2。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -469,7 +469,7 @@ public partial class Chunithm
 
         if (versions.Length == 0)
         {
-            message.Reply("暂无可用版本数据");
+            message.Reply("暂无可用的版本数据。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -483,7 +483,7 @@ public partial class Chunithm
 
             if (!int.TryParse(command.Span, out var index) || index < 0 || index >= versions.Length)
             {
-                next.Reply("错误的序号，会话已关闭");
+                next.Reply("序号无效，本次操作已结束。");
                 return MarisaPluginTaskState.Canceled;
             }
 
@@ -563,7 +563,7 @@ public partial class Chunithm
 
         // 集中处理错误
         _error:
-        message.Reply("错误的命令格式");
+        message.Reply("命令格式不正确。");
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -605,7 +605,7 @@ public partial class Chunithm
     [MarisaPluginCommand("op")]
     private static async Task<MarisaPluginTaskState> ChuOp(Message message)
     {
-        message.Reply("子命令: base / genre / level / version / border");
+        message.Reply("可用子命令：base / genre / level / version / border");
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
@@ -672,7 +672,7 @@ public partial class Chunithm
             var parts = cmd.Split('-');
             if (parts.Length != 2 || !double.TryParse(parts[0].Trim(), out a) || !double.TryParse(parts[1].Trim(), out b))
             {
-                message.Reply("格式错误，请使用 定数1-定数2，如 12.5-13.2");
+                message.Reply("定数范围格式不正确，请使用 12.5-13.2 这样的格式。");
                 return MarisaPluginTaskState.CompletedTask;
             }
         }
@@ -682,7 +682,7 @@ public partial class Chunithm
         }
         else
         {
-            message.Reply("格式错误，请使用 定数1-定数2 或单个定数");
+            message.Reply("定数格式不正确，请使用范围（如 12.5-13.2）或单个定数。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -744,13 +744,13 @@ public partial class Chunithm
         var parts = cmd.Split('-');
         if (parts.Length != 2)
         {
-            message.Reply("格式错误，请使用 难度1-难度2，如 13-14+");
+            message.Reply("难度范围格式不正确，请使用 13-14+ 这样的格式。");
             return MarisaPluginTaskState.CompletedTask;
         }
 
         double a, b;
         try { a = LevelToNumber(parts[0].Trim()); b = LevelToNumber(parts[1].Trim()); }
-        catch { message.Reply("格式错误，请使用 难度1-难度2，如 13-14+"); return MarisaPluginTaskState.CompletedTask; }
+        catch { message.Reply("难度范围格式不正确，请使用 13-14+ 这样的格式。"); return MarisaPluginTaskState.CompletedTask; }
 
         if (a > b) (a, b) = (b, a);
 
@@ -928,24 +928,24 @@ public partial class Chunithm
             // 第一位是idx，后面是预期达成率
             if (command.Length == 0 || !int.TryParse(command[..1].Span, out var levelIdx) || levelIdx < 0 || levelIdx >= song.Levels.Count)
             {
-                next.Reply("错误的选择，请选择前面的编号。会话已关闭");
+                next.Reply("选择无效，请输入上面列出的编号。本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
             if (song.MaxCombo[levelIdx] == 0)
             {
-                next.Reply("暂无该难度的数据");
+                next.Reply("暂无该难度的数据。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
             var parseSuccess = int.TryParse(command[1..].Trim().Span, out var achievement);
             if (!parseSuccess)
             {
-                next.Reply("错误的达成率格式，会话已关闭");
+                next.Reply("达成率格式不正确，本次操作已结束。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
             if (achievement is > 101_0000 or < 0)
             {
-                next.Reply("你查**呢");
+                next.Reply("达成率应在 0 至 1010000 之间。");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
 
