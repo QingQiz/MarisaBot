@@ -75,9 +75,9 @@ function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 <style scoped lang="postcss">
 .section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: .1em; border-radius: 9999px; padding: 4px 20px; background: #c64fe4; color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.8); white-space: nowrap; }
-.difficulty-line { display:flex; align-items:baseline; gap:16px; margin-bottom:12px; }
+.difficulty-line { display:flex; align-items:center; gap:16px; margin-bottom:12px; min-height:32px; }
 .difficulty { font-family:'SEGA NewRodin',sans-serif; font-size:25px; font-weight:900; letter-spacing:.03em; }
-.level { font:700 21px 'Torus',sans-serif; color:rgba(255,255,255,.72); }
+.level { font:700 21px 'Torus',sans-serif; line-height:1; color:rgba(255,255,255,.72); }
 .players { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .player { min-height:228px; padding:18px 22px 16px; border:1px solid rgba(255,255,255,.15); border-radius:16px; background:linear-gradient(105deg,rgba(8,8,16,.58),rgba(8,8,16,.25)); position:relative; overflow:hidden; }
 .player::before { content:''; position:absolute; inset:0 auto 0 0; width:5px; background:rgba(255,255,255,.2); }
