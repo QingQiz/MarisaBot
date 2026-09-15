@@ -100,11 +100,6 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        if (OAuthEnabled && _publicOtherQueries.TryGetValue(message, out _))
-        {
-            throw new NotSupportedException("OAuth 不能用 Bearer token 补充用户名或 @ 他人的完整成绩");
-        }
-
         var scores = await FetchScores(message, true);
 
         return scores.Records
@@ -121,12 +116,11 @@ public class DivingFishDataFetcher : DataFetcher
 
         if (OAuthEnabled)
         {
-            if (!isSelf)
-            {
+            var tokenOwner = isSelf ? message.Sender.Id : qq;
+            if (!isSelf && await DivingFishTokenStore.GetValidToken(tokenOwner, "maimai") == null)
                 throw OAuthSelfOnly();
-            }
 
-            response = await SendBearerWithOneRetry(message, "maimai", token =>
+            response = await SendBearerWithOneRetry(tokenOwner, "maimai", token =>
                 "https://www.diving-fish.com/api/maimaidxprober/player/record"
                     .WithHeader("Authorization", $"Bearer {token}")
                     .AllowHttpStatus("400,401,403,429,503")
@@ -225,12 +219,10 @@ public class DivingFishDataFetcher : DataFetcher
         if (OAuthEnabled)
         {
             var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
-            if (!isSelf)
-            {
-                throw OAuthSelfOnly();
-            }
+            var tokenOwner = username.IsWhiteSpace() ? qq : -1;
+            if (tokenOwner < 0) throw OAuthSelfOnly();
 
-            var response = await SendBearerWithOneRetry(message, "maimai", token =>
+            var response = await SendBearerWithOneRetry(tokenOwner, "maimai", token =>
                 "https://www.diving-fish.com/api/maimaidxprober/player/records"
                     .WithHeader("Authorization", $"Bearer {token}")
                     .AllowHttpStatus("400,401,403,429,503")
@@ -265,26 +257,26 @@ public class DivingFishDataFetcher : DataFetcher
         return await devResponse.GetJsonAsync<DivingFishDxRatingResponse>();
     }
 
-    private static async Task<string> GetRequiredToken(Message message, string game)
+    private static async Task<string> GetRequiredToken(long qq, string game)
     {
-        var token = (await DivingFishTokenStore.GetValidToken(message.Sender.Id, game))?.AccessToken;
+        var token = (await DivingFishTokenStore.GetValidToken(qq, game))?.AccessToken;
         if (token != null) return token;
         throw new HttpRequestException("未绑定水鱼查分器，请先使用 bind 命令完成绑定后再查询");
     }
 
     private static async Task<IFlurlResponse> SendBearerWithOneRetry(
-        Message message,
+        long qq,
         string game,
         Func<string, Task<IFlurlResponse>> send)
     {
         for (var attempt = 0; attempt < 2; attempt++)
         {
-            var token = await GetRequiredToken(message, game);
+            var token = await GetRequiredToken(qq, game);
 
             var response = await send(token);
             if (response.StatusCode != (int)HttpStatusCode.Unauthorized) return response;
 
-            DivingFishTokenStore.RemoveToken(message.Sender.Id, game);
+            DivingFishTokenStore.RemoveToken(qq, game);
             if (attempt == 1) return response;
         }
 

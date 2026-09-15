@@ -892,6 +892,15 @@ public partial class MaiMaiDx
         var opponentData = await FetchBattleData(opponentMessage, opponentName != null, false);
         if (selfData.Error is not null || opponentData.Error is not null)
         {
+            if (opponentQq is not null && opponentData.Error?.Contains("OAuth", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                new MessageBuilder(message)
+                    .Text("水鱼 OAuth 对手尚未绑定，请先让对手发送 mai 绑定完成授权")
+                    .At(opponentQq.Value)
+                    .Reply();
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
             message.Reply(selfData.Error ?? opponentData.Error!);
             return MarisaPluginTaskState.CompletedTask;
         }
