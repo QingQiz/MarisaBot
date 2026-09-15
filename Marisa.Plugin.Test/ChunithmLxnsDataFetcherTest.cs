@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -28,8 +29,9 @@ public class ChunithmLxnsDataFetcherTest
             [(3, 0)] = CreateScore(3, "new-two", 1000000)
         };
         var method = typeof(LxnsDataFetcher).GetMethod("BuildRating", BindingFlags.NonPublic | BindingFlags.Instance);
+        var newest = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CHUNITHM X-VERSE", "CHUNITHM X-VERSE-X" };
 
-        var rating = (ChunithmRating)method!.Invoke(fetcher, [scores, "tester"])!;
+        var rating = (ChunithmRating)method!.Invoke(fetcher, [scores, "tester", newest])!;
 
         Assert.Multiple(() =>
         {

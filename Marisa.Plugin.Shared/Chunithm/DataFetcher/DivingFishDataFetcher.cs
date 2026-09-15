@@ -5,7 +5,6 @@ using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -70,14 +69,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
         var songList = GetSongList();
         var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
-        var latestVersionResponse = await "https://www.diving-fish.com/api/chunithmprober/latest_version"
-            .GetJsonAsync<LatestVersionResponse>();
-        var newest = latestVersionResponse.Versions
-            .Where(version => !string.IsNullOrWhiteSpace(version))
-            .Select(version => version.Trim())
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        if (newest.Count == 0) throw new InvalidDataException("水鱼 latest_version 返回了空版本列表");
+        var newest = await FetchLatestVersions();
 
         var div = allScores
             .GroupBy(x => newest.Contains(versionMap.GetValueOrDefault(x.Id, "")))
@@ -253,11 +245,5 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     public void Reset()
     {
         _songTitleIndexer = null;
-    }
-
-    private sealed class LatestVersionResponse
-    {
-        [JsonProperty("version", Required = Required.Always)]
-        public string[] Versions { get; set; } = [];
     }
 }
