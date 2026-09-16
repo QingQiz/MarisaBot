@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Runtime.CompilerServices;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
@@ -13,8 +12,6 @@ public class DivingFishDataFetcher : DataFetcher
 {
     public const int OldScoreLimit = 35;
     public const int NewScoreLimit = 15;
-
-    private readonly ConditionalWeakTable<Message, object> _publicOtherQueries = new();
 
     protected virtual bool OAuthEnabled => DivingFishOAuth.IsConfigured;
 
@@ -34,11 +31,6 @@ public class DivingFishDataFetcher : DataFetcher
                 var rating = username.IsWhiteSpace()
                     ? ToDxRating(await FetchScoresByQq(qq))
                     : ToDxRating(await FetchScoresByUsername(username));
-
-                if (!isSelf)
-                {
-                    _publicOtherQueries.GetValue(message, static _ => new object());
-                }
 
                 return rating;
             }
@@ -100,7 +92,12 @@ public class DivingFishDataFetcher : DataFetcher
 
     public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
     {
-        var scores = await FetchScores(message, true);
+        var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
+        var scores = username.IsWhiteSpace()
+            ? await FetchScores(message, true)
+            : OAuthEnabled
+                ? await FetchScoresByUsername(username)
+                : await FetchScores(message, false);
 
         return scores.Records
             .ToDictionary(x => (x.Id, x.LevelIdx), x => x);

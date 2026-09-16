@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -131,6 +132,42 @@ public class MaiMaiDxDivingFishDataFetcherTest
     }
 
     [Test]
+    public async Task GetScores_Should_Pass_Username_Query_To_DivingFish()
+    {
+        var expected = CreateSongScore(42, 13.0, 100.5);
+        var fetcher = new TestDivingFishDataFetcher(CreateSongDb(), [expected]);
+        var message = new Message(null!, [])
+        {
+            Sender = new SenderInfo(1, "sender"),
+            Command = "target".AsMemory()
+        };
+
+        var scores = await fetcher.GetScores(message);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(fetcher.LastQqOnly, Is.False);
+            Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
+        });
+    }
+
+    [Test]
+    public async Task GetScores_OAuth_Username_Should_Use_Public_Target_Records()
+    {
+        var expected = CreateSongScore(43, 13.0, 100.5);
+        var fetcher = new PublicDivingFishDataFetcher(CreateSongDb(), [expected], []);
+        var message = new Message(null!, [])
+        {
+            Sender = new SenderInfo(1, "sender"),
+            Command = "target".AsMemory()
+        };
+
+        var scores = await fetcher.GetScores(message);
+
+        Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
+    }
+
+    [Test]
     public async Task GetRating_PublicResponse_PreservesServerAuthoritativeSplit()
     {
         var songDb = CreateSongDb();
@@ -210,8 +247,11 @@ public class MaiMaiDxDivingFishDataFetcherTest
     {
         protected override bool OAuthEnabled => false;
 
+        public bool? LastQqOnly { get; private set; }
+
         protected override Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
         {
+            LastQqOnly = qqOnly;
             return Task.FromResult(new DivingFishDxRatingResponse("tester", records));
         }
     }
@@ -227,6 +267,15 @@ public class MaiMaiDxDivingFishDataFetcherTest
         {
             return Task.FromResult(new DivingFishDxRatingResponse(
                 "public",
+                oldScores.Concat(newScores).ToList(),
+                oldScores,
+                newScores));
+        }
+
+        protected override Task<DivingFishDxRatingResponse> FetchScoresByUsername(ReadOnlyMemory<char> username)
+        {
+            return Task.FromResult(new DivingFishDxRatingResponse(
+                username.ToString(),
                 oldScores.Concat(newScores).ToList(),
                 oldScores,
                 newScores));

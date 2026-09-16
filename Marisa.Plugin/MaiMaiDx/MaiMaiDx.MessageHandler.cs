@@ -892,7 +892,9 @@ public partial class MaiMaiDx
         var opponentData = await FetchBattleData(opponentMessage, opponentName != null, false);
         if (selfData.Error is not null || opponentData.Error is not null)
         {
-            if (opponentQq is not null && opponentData.Error?.Contains("OAuth", StringComparison.OrdinalIgnoreCase) == true)
+            if (opponentQq is not null &&
+                (opponentData.Error?.Contains("OAuth", StringComparison.OrdinalIgnoreCase) == true ||
+                 opponentData.Error?.Contains("未绑定水鱼", StringComparison.OrdinalIgnoreCase) == true))
             {
                 new MessageBuilder(message)
                     .Text("水鱼 OAuth 对手尚未绑定，请先让对手发送 mai 绑定完成授权")
@@ -953,6 +955,12 @@ public partial class MaiMaiDx
                     .Text("水鱼 OAuth 暂时无法查询该曲的完整成绩，请先让对手发送 mai 绑定完成授权")
                     .At(opponentQq.Value)
                     .Reply();
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            if (opponentName is not null && opponentData.Partial)
+            {
+                message.Reply("水鱼账号名只能查询公开 B50；要查询完整成绩，请使用 @QQ 并完成水鱼 OAuth 绑定");
                 return MarisaPluginTaskState.CompletedTask;
             }
 
@@ -1017,7 +1025,7 @@ public partial class MaiMaiDx
                 var fetcher = GetDataFetcher(target, allowUsername);
                 var rating = await fetcher.GetRating(target);
                 Dictionary<(long Id, int LevelIdx), SongScore> scores;
-                var partial = false;
+                var partial = allowUsername;
                 try
                 {
                     scores = await fetcher.GetScores(target);
