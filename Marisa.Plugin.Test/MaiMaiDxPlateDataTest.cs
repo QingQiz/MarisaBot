@@ -119,6 +119,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("镜将完成表",   new[] { "maimai でらっくす PRiSM" })] // 简体镜
     [TestCase("鏡将完成表",   new[] { "maimai でらっくす PRiSM" })]
     [TestCase("彩将完成表",   new[] { "maimai でらっくす PRiSM PLUS" })]
+    [TestCase("廻将完成表",   new[] { "maimai でらっくす MAGiCAL" })]
     [TestCase("辉将完成表",   new[] { "maimai FiNALE" })]    // 简体辉
     [TestCase("輝将完成表",   new[] { "maimai FiNALE" })]
     [TestCase("真将完成表",   new[] { "maimai", "maimai PLUS" })] // 真双 from
@@ -1568,6 +1569,10 @@ public class MaiMaiDxPlateDataTest
     [TestCase("镜将完成表", "UI_Plate_559102.png")]
     [TestCase("彩将完成表", "UI_Plate_609102.png")]
     [TestCase("彩舞舞完成表", "UI_Plate_609104.png")]
+    [TestCase("廻极完成表", "UI_Plate_709101.png")]
+    [TestCase("廻将完成表", "UI_Plate_709102.png")]
+    [TestCase("廻神完成表", "UI_Plate_709103.png")]
+    [TestCase("廻舞舞完成表", "UI_Plate_709104.png")]
     public void NamePlateImageResolves(string raw, string expected)
     {
         Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.EqualTo(expected));

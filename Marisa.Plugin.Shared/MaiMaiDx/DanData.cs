@@ -4,7 +4,7 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>
 ///     段位認定（mai dan/段位表）的命令解析：版本档 + 段位名 → 前端 dan_courses.json 的查询键。
-///     数据由 extract_dan_courses.py 从游戏包导出，覆盖 1.17-1.65 共 11 个版本档的固定段位
+///     数据由 extract_dan_courses.py 从游戏包导出，覆盖 1.17-1.70 共 12 个版本档的固定段位
 ///     （段位認定 初段-十段 / 真段位認定 真初段-真十段+真皆伝+裏皆伝；随机段位不做）。
 /// </summary>
 public static class DanData
@@ -23,7 +23,7 @@ public static class DanData
 
     /// <summary>版本档全集（与 dan_courses.json 的 version 字段一致）。</summary>
     private static readonly string[] Versions =
-        ["1.17", "1.20", "1.25", "1.30", "1.35", "1.40", "1.45", "1.50", "1.55", "1.60", "1.65"];
+        ["1.17", "1.20", "1.25", "1.30", "1.35", "1.40", "1.45", "1.50", "1.55", "1.60", "1.65", "1.70"];
 
     /// <summary>版本别名 → 档号。档号本身（1.55 这类）天然可输；别名大小写不敏感。</summary>
     private static readonly Dictionary<string, string> VersionAliasMap = new(StringComparer.OrdinalIgnoreCase)
@@ -39,6 +39,7 @@ public static class DanData
         ["prism plus"]    = "1.55", ["prism+"]    = "1.55", ["prismplus"]    = "1.55", ["彩"] = "1.55", ["pri+"] = "1.55",
         ["circle"]        = "1.60", ["丸"]        = "1.60", ["cir"]          = "1.60",
         ["circle plus"]   = "1.65", ["circle+"]   = "1.65", ["circleplus"]   = "1.65", ["cir+"] = "1.65",
+        ["magical"]       = "1.70", ["廻"]        = "1.70",
     };
 
     /// <summary>版本 token 全集（档号 + 别名），长度倒序保证 longest-first（universe plus 优先于 universe）。</summary>
@@ -107,7 +108,7 @@ public static class DanData
             var lastSpace = rest.LastIndexOf(' ');
             if (lastSpace > 0 && TryCanonicalizeDani(rest[(lastSpace + 1)..], out _))
             {
-                error = $"无法识别版本：{rest[..lastSpace].Trim()}（可用档号 1.17-1.65 或版本名，如 prism、彩）";
+                error = $"无法识别版本：{rest[..lastSpace].Trim()}（可用档号 1.17-1.70 或版本名，如 prism、彩、magical、廻）";
                 return false;
             }
             error = $"无法识别段位名：{rest}（可用：初段-十段、真初段-真十段、真皆伝、裏皆伝）";

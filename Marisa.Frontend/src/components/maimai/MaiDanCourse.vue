@@ -91,9 +91,10 @@ const VER_META: Record<string, { name: string; code: number; trim: number }> = {
     '1.55': {name: 'PRiSM PLUS',    code: 255, trim: 1},
     '1.60': {name: 'CiRCLE',        code: 260, trim: 17},
     '1.65': {name: 'CiRCLE PLUS',   code: 265, trim: 20},
+    '1.70': {name: 'MAGiCAL',       code: 270, trim: 40},
 }
 const LOGO_FALLBACK = '/assets/maimai/version/maimaidx.png'
-const FUTURE_VERSIONS = ['1.60', '1.65']
+const FUTURE_VERSIONS = ['1.60', '1.65', '1.70']
 const FUTURE_LABEL = '未来版本'
 
 const route = useRoute()
