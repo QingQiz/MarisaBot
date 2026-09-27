@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
-using Marisa.Configuration;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
@@ -10,7 +9,6 @@ using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
 
@@ -19,6 +17,7 @@ namespace Marisa.Plugin.MaiMaiDx;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public partial class MaiMaiDx
 {
+
     #region 搜歌
 
     [MarisaPluginNoDoc]
@@ -43,7 +42,7 @@ public partial class MaiMaiDx
     {
         var servers = new[]
         {
-            "DivingFish", "lxns"
+            "DivingFish", "lxns",
         };
 
         message.Reply("请选择查分器（序号）：\n\n" + string.Join('\n', servers
@@ -51,26 +50,27 @@ public partial class MaiMaiDx
             .Select(x => $"{x.i}. {x.x}"))
         );
 
-        var stat   = 0;
+        var stat = 0;
         string? oauthVerifier = null;
         DivingFishDeviceBindingSession? deviceBinding = null;
+
+        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), HandleBindingMessage, this);
+        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
         MarisaPluginTaskState DoBind(Message msg, string srv)
         {
             using var realm = BotDbContext.OpenRealm();
+            var tr = realm.BeginWrite();
+
             var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == msg.Sender.Id);
-            realm.Write(() =>
-            {
-                if (bind == null)
-                    realm.AddWithAutoId(new MaiMaiDxBind(msg.Sender.Id, 0) { ServerName = srv });
-                else
-                    bind.ServerName = srv;
-            });
+            if (bind == null)
+                realm.AddWithAutoId(new MaiMaiDxBind(msg.Sender.Id, 0) { ServerName = srv });
+            else
+                bind.ServerName = srv;
+
+            tr.Commit();
             return MarisaPluginTaskState.CompletedTask;
         }
-
-        DialogManager.TryAddDialog((message.GroupInfo?.Id, message.Sender.Id), HandleBindingMessage, this);
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
 
         async Task<MarisaPluginTaskState> HandleBindingMessage(Message next)
         {
@@ -152,11 +152,12 @@ public partial class MaiMaiDx
                 case 10:
                 {
                     var codeInput = next.Command.Trim().ToString();
-                    if (!Regex.IsMatch(codeInput, @"^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
+                    if (!Regex.IsMatch(codeInput, "^[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$"))
                     {
                         next.Reply("验证码格式错误，会话已关闭");
                         return MarisaPluginTaskState.CompletedTask;
                     }
+
                     try
                     {
                         var token = await LxnsOAuth.ExchangeCode(next.Command.Trim().ToString(), oauthVerifier!);
@@ -184,19 +185,6 @@ public partial class MaiMaiDx
 
     #region 推分同步（导）
 
-    private const int LoginRequestMaxAttempts = 4;
-    private const int LoginRequestRetryDelayMs = 5000;
-
-    private const string UsageText =
-        "用法：\n" +
-        "mai 导 —— 同步成绩到查分器（首次使用会引导设置）\n" +
-        "mai 导 <好友码> —— 绑定/换绑好友码\n" +
-        "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（可只填其中一个）\n" +
-        "令牌获取方法：\n\n" +
-        "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
-        "落雪：账号详情-个人API密钥\n\n" +
-        "建议发送令牌后立即「撤回」消息。";
-
     private static readonly Regex SyncTokenArg = new(
         @"(?<=^|\s)(?<key>落雪|水鱼|lxns|diving-fish|divingfish|df)[:：\s]+(?<val>\S+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -209,6 +197,16 @@ public partial class MaiMaiDx
     [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
     private async Task<MarisaPluginTaskState> Sync(Message message)
     {
+        const string usageText =
+            "用法：\n" +
+            "mai 导 —— 同步成绩到查分器（首次使用会引导设置）\n" +
+            "mai 导 <好友码> —— 绑定/换绑好友码\n" +
+            "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（可只填其中一个）\n" +
+            "令牌获取方法：\n\n" +
+            "水鱼：首页-编辑个人资料-成绩导入Token\n\n" +
+            "落雪：账号详情-个人API密钥\n\n" +
+            "建议发送令牌后立即「撤回」消息。";
+
         var qq = message.Sender.Id;
 
         string? friendCode;
@@ -221,7 +219,7 @@ public partial class MaiMaiDx
         if (junk != null)
         {
             // 解析失败的原文不回显：其中可能包含真实令牌，而 bot 发出的消息用户无法撤回
-            ReplyAt(message, $"有解析失败的参数（请确认令牌前后有空格分隔）。\n{UsageText}");
+            ReplyAt(message, $"有解析失败的参数（请确认令牌前后有空格分隔）。\n{usageText}");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -250,7 +248,7 @@ public partial class MaiMaiDx
 
         if (!string.IsNullOrWhiteSpace(friendCode))
         {
-            StartSync(message, friendCode!, newTokens);
+            StartSync(message, friendCode, newTokens);
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -326,7 +324,7 @@ public partial class MaiMaiDx
                 // 部分解析成功（如「水鱼yyy」缺少空格）时整体拒绝，避免用户误以为两个令牌都已设置；
                 // 原文不回显，其中可能包含真实令牌
                 ReplyAt(next, "部分参数解析失败（请确认令牌前后有空格分隔），已退出设置。可重新发送「mai 导 落雪 xxx 水鱼 yyy」。" +
-                              (next.GroupInfo != null ? "建议立即「撤回」含有令牌的消息。" : ""));
+                              (next.GroupInfo != null ? "建议立即「撤回」含有令牌的消息。" : string.Empty));
                 return Task.FromResult(MarisaPluginTaskState.Canceled);
             }
 
@@ -373,33 +371,20 @@ public partial class MaiMaiDx
         static void PersistFriendCode(long uid, string code)
         {
             using var realm = BotDbContext.OpenRealm();
+            var t = realm.BeginWrite();
             var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == uid);
-            realm.Write(() =>
+            if (bind == null)
             {
-                if (bind == null)
-                {
-                    // ServerName 不能留空：空串会被 GetDataFetcher 路由到华立 fetcher，而该用户没有
-                    // AimeId，查询必定失败；新建记录时默认使用水鱼
-                    realm.AddWithAutoId(new MaiMaiDxBind(uid, 0) { FriendCode = code, ServerName = "DivingFish" });
-                }
-                else
-                {
-                    bind.FriendCode = code;
-                }
-            });
-        }
-    }
+                // ServerName 不能留空：空串会被 GetDataFetcher 路由到华立 fetcher，而该用户没有
+                // AimeId，查询必定失败；新建记录时默认使用水鱼
+                realm.AddWithAutoId(new MaiMaiDxBind(uid, 0) { FriendCode = code, ServerName = "DivingFish" });
+            }
+            else
+            {
+                bind.FriendCode = code;
+            }
 
-    /// <summary>用 @ 用户代替引用回复：传分消息常落在已被撤回的令牌消息上，引用会显示「原消息已被撤回」。</summary>
-    private static void ReplyAt(Message message, string text)
-    {
-        if (message.GroupInfo == null)
-        {
-            message.Reply(text, false);
-        }
-        else
-        {
-            message.Send(new MessageDataAt(message.Sender.Id), new MessageDataText(" " + text));
+            t.Commit();
         }
     }
 
@@ -458,10 +443,10 @@ public partial class MaiMaiDx
         }
 
         MaiScoreHubClient.LoginStatusResult? status = null;
-        var waitStart      = DateTime.UtcNow;
-        var deadline       = login.DeadlineAt?.UtcDateTime.AddMinutes(1) ?? waitStart.AddMinutes(15);
-        var pollFailures   = 0;
-        var sawAcceptance  = login.FriendRequestSent;
+        var waitStart = DateTime.UtcNow;
+        var deadline = login.DeadlineAt?.UtcDateTime.AddMinutes(1) ?? waitStart.AddMinutes(15);
+        var pollFailures = 0;
+        var sawAcceptance = login.FriendRequestSent;
         var queuedNotified = false;
         while (DateTime.UtcNow < deadline)
         {
@@ -469,12 +454,13 @@ public partial class MaiMaiDx
 
             try
             {
-                status       = await msh.LoginStatusAsync(login.JobId);
+                status = await msh.LoginStatusAsync(login.JobId);
                 pollFailures = 0;
             }
             catch (Exception e)
             {
                 if (++pollFailures < 6) continue;
+
                 ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
                 return;
             }
@@ -495,6 +481,7 @@ public partial class MaiMaiDx
                 {
                     ReplyAt(message, $"同步失败：{status.Message ?? status.Status}。{retryHint}");
                 }
+
                 return;
             }
 
@@ -563,12 +550,13 @@ public partial class MaiMaiDx
             MaiScoreHubClient.JobResult job;
             try
             {
-                job          = await msh.GetJobAsync(jwt, crawlJobId);
+                job = await msh.GetJobAsync(jwt, crawlJobId);
                 pollFailures = 0;
             }
             catch (Exception e)
             {
                 if (++pollFailures < 6) continue;
+
                 ReplyAt(message, $"同步中断：连续多次查询任务状态失败（{e.Message}）。稍后{retryHint}");
                 return;
             }
@@ -634,9 +622,9 @@ public partial class MaiMaiDx
                 {
                     return await msh.LoginRequestAsync(friendCode);
                 }
-                catch (MaiScoreHubApiException e) when (e.IsTransientLoginFailure && attempt < LoginRequestMaxAttempts)
+                catch (MaiScoreHubApiException e) when (e.IsTransientLoginFailure && attempt < 4)
                 {
-                    await Task.Delay(LoginRequestRetryDelayMs);
+                    await Task.Delay(5000);
                 }
             }
         }
@@ -644,61 +632,7 @@ public partial class MaiMaiDx
 
     #endregion
 
-    #region unlock
-
-    [MarisaPluginDisabled]
-    [MarisaPluginDoc("逃离小黑屋")]
-    [MarisaPluginCommand("unlock", "解锁")]
-    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
-    private static async Task<MarisaPluginTaskState> UnLock(Message message)
-    {
-        using var realm = BotDbContext.OpenRealm();
-
-        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == message.Sender.Id);
-
-        if (bind == null)
-        {
-            message.Reply("你未绑定Wahlap，无法使用该功能");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var res = await AllNetDataFetcher.Logout(bind.AimeId);
-
-        if (!res)
-        {
-            message.Reply("解锁失败。。。");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        message.Reply("妥了，玩吧。");
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    #endregion
-
     #region 查分
-
-    [MarisaPluginDisabled]
-    [MarisaPluginDoc("从华丽服务前拉一次分，下一个该命令之前一直使用这次拉下来的分，避免重复请求")]
-    [MarisaPluginCommand("fetch")]
-    private async Task<MarisaPluginTaskState> Fetch(Message message)
-    {
-        using var realm = BotDbContext.OpenRealm();
-
-        var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == message.Sender.Id);
-
-        if (bind == null)
-        {
-            message.Reply("你未绑定Wahlap，无法使用该功能");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        await AllNetDataFetcher.Fetch(bind.AimeId);
-
-        message.Reply("1");
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
 
     /// <summary>
     ///     b35
@@ -820,7 +754,7 @@ public partial class MaiMaiDx
         {
             var split = query.IndexOfAny([' ', '\t']);
             opponentName = split < 0 ? query : query[..split];
-            query = split < 0 ? "" : query[(split + 1)..].Trim();
+            query = split < 0 ? string.Empty : query[(split + 1)..].Trim();
             if (string.IsNullOrWhiteSpace(opponentName))
             {
                 message.Reply("请 @一名对手，或填写水鱼账号名");
@@ -831,19 +765,15 @@ public partial class MaiMaiDx
         var selection = ResolveVersusQuery(SongDb, query);
         if (selection.Scope is { } batchScope)
             return await RunBatchVersus(batchScope, query);
-        if (selection.Songs.Count == 0 && !selection.Random)
-        {
-            message.Reply("“查无此歌”");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-        var levelIdx = selection.LevelIndex;
-        var search = selection.Songs;
 
-        var selfMessage = message with { Command = "".AsMemory() };
-        var opponentMessage = message with { Command = opponentName?.AsMemory() ?? "".AsMemory() };
+        var levelIdx = selection.LevelIndex;
+
+
+        var selfMessage = message with { Command = string.Empty.AsMemory() };
+        var opponentMessage = message with { Command = opponentName?.AsMemory() ?? string.Empty.AsMemory() };
         if (opponentQq is not null)
         {
-            opponentMessage = message with { Command = "".AsMemory() };
+            opponentMessage = message with { Command = string.Empty.AsMemory() };
         }
 
         var selfData = await FetchBattleData(selfMessage, false, true);
@@ -866,17 +796,9 @@ public partial class MaiMaiDx
         }
 
         MaiMaiSong? song;
-        if (search.Count > 1)
+        if (selection.Songs.Count == 0)
         {
-            song = await SelectBattleSong(search, message);
-            if (song == null) return MarisaPluginTaskState.CompletedTask;
-        }
-        else if (search.Count == 1)
-        {
-            song = search[0];
-        }
-        else
-        {
+
             var candidates = SharedVersusSongs(SongDb.SongList, levelIdx, selfData.Scores, opponentData.Scores);
             if (candidates.Count == 0)
             {
@@ -885,6 +807,12 @@ public partial class MaiMaiDx
             }
 
             song = candidates[Random.Shared.Next(candidates.Count)];
+        }
+        else
+        {
+
+            song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
+            if (song is null) return MarisaPluginTaskState.CompletedTask;
         }
 
         if (levelIdx >= song.Levels.Count)
@@ -920,11 +848,16 @@ public partial class MaiMaiDx
         var opponentLabel = opponentData.Nickname ?? opponentName ?? $"QQ {opponentQq}";
         var winner = selfScore == null && opponentScore == null
             ? "双方均未游玩"
-            : selfScore == null ? opponentLabel
-            : opponentScore == null ? selfLabel
-            : selfScore.Achievement == opponentScore.Achievement
-            ? "平局"
-            : selfScore.Achievement > opponentScore.Achievement ? selfLabel : opponentLabel;
+            : selfScore == null
+                ? opponentLabel
+                : opponentScore == null
+                    ? selfLabel
+                    : Math.Abs(selfScore.Achievement - opponentScore.Achievement) < 0.0001
+                        ? "平局"
+                        : selfScore.Achievement > opponentScore.Achievement
+                            ? selfLabel
+                            : opponentLabel;
+
         var context = new WebContext(new
         {
             versus = new
@@ -942,20 +875,23 @@ public partial class MaiMaiDx
                 Winner = winner
             }
         });
+
         message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiVersus(context.Id)));
         return MarisaPluginTaskState.CompletedTask;
 
         object? ProjectScore(SongScore? score)
         {
-            return score == null ? null : new
-            {
-                score.Achievement,
-                Rank = SongScore.CalcRank(score.Achievement),
-                Rating = song.Ra(levelIdx, score.Achievement),
-                score.DxScore,
-                score.Fc,
-                score.Fs
-            };
+            return score == null
+                ? null
+                : new
+                {
+                    score.Achievement,
+                    Rank = SongScore.CalcRank(score.Achievement),
+                    Rating = song.Ra(levelIdx, score.Achievement),
+                    score.DxScore,
+                    score.Fc,
+                    score.Fs,
+                };
         }
 
         async Task<BattleData> FetchBattleData(Message target, bool allowUsername, bool selfQuery)
@@ -987,76 +923,6 @@ public partial class MaiMaiDx
             }
         }
 
-        async Task<MaiMaiSong?> SelectBattleSong(IReadOnlyList<MaiMaiSong> songs, Message source)
-        {
-            var result = new TaskCompletionSource<MaiMaiSong?>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var key = (source.GroupInfo?.Id, source.Sender.Id);
-            using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(10));
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(Timeout.InfiniteTimeSpan, timeout.Token);
-                }
-                catch (OperationCanceledException) when (timeout.IsCancellationRequested)
-                {
-                    if (result.TrySetResult(null))
-                    {
-                        DialogManager.RemoveDialog(key);
-                        source.Reply("歌曲选择已超时");
-                    }
-                }
-            });
-
-            var page = 0;
-            if (!DialogManager.TryAddDialog(key, next =>
-                {
-                    if (!next.IsPlainText())
-                    {
-                        result.TrySetResult(null);
-                        return Task.FromResult(MarisaPluginTaskState.Canceled);
-                    }
-
-                    var command = next.Command.Trim().ToString();
-                    if (command.Equals("取消", StringComparison.OrdinalIgnoreCase) || command.Equals("cancel", StringComparison.OrdinalIgnoreCase))
-                    {
-                        result.TrySetResult(null);
-                        next.Reply("已取消歌曲选择");
-                        return Task.FromResult(MarisaPluginTaskState.Canceled);
-                    }
-
-                    if (command.StartsWith('p') && int.TryParse(command[1..], out var requestedPage))
-                    {
-                        page = Math.Max(0, requestedPage - 1);
-                        next.Reply(DisplayPage(page));
-                        return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-                    }
-
-                    if (long.TryParse(command, out var id) && songs.FirstOrDefault(x => x.Id == id) is { } selected)
-                    {
-                        result.TrySetResult(selected);
-                        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-                    }
-
-                    next.Reply("请输入歌曲 id、p1/p2，或发送“取消”");
-                    return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
-                }))
-            {
-                return null;
-            }
-
-            source.Reply(DisplayPage(0));
-            return await result.Task;
-
-            string DisplayPage(int index)
-            {
-                var total = (songs.Count + SongDbConfig.PageSize - 1) / SongDbConfig.PageSize;
-                var rows = songs.Skip(index * SongDbConfig.PageSize).Take(SongDbConfig.PageSize)
-                    .Select(x => $"[ID:{x.Id}, Lv:{x.MaxLevel()}] -> {x.Title}");
-                return string.Join('\n', rows) + $"\n第 {index + 1}/{total} 页，发送歌曲 id 选择，或 p1/p2 翻页";
-            }
-        }
-
         async Task<MarisaPluginTaskState> RunBatchVersus(PlateData.Query scope, string rawScope)
         {
             var charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
@@ -1066,11 +932,11 @@ public partial class MaiMaiDx
                 return MarisaPluginTaskState.CompletedTask;
             }
 
-            var selfMessage = message with { Command = "".AsMemory() };
-            var opponentMessage = message with { Command = opponentName?.AsMemory() ?? "".AsMemory() };
+            var selfMessage = message with { Command = string.Empty.AsMemory() };
+            var opponentMessage = message with { Command = opponentName?.AsMemory() ?? string.Empty.AsMemory() };
             if (opponentQq is not null)
             {
-                opponentMessage = message with { Command = "".AsMemory() };
+                opponentMessage = message with { Command = string.Empty.AsMemory() };
             }
 
             var selfData = await FetchBattleData(selfMessage, false, true);
@@ -1095,7 +961,7 @@ public partial class MaiMaiDx
             var leftName = selfData.Nickname ?? $"QQ {message.Sender.Id}";
             var rightName = opponentData.Nickname ?? opponentName ?? $"QQ {opponentQq}";
             var versions = charts.Select(x => x.Song.Version).Distinct().ToArray();
-            var version = versions.Length == 1 ? versions[0] : "";
+            var version = versions.Length == 1 ? versions[0] : string.Empty;
             var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
                 ? "歌曲 ID 升序"
                 : "定数降序";
@@ -1110,7 +976,6 @@ public partial class MaiMaiDx
             await ReplyBatchVersus(message, batch);
             return MarisaPluginTaskState.CompletedTask;
         }
-
     }
 
     private sealed record BattleData(
@@ -1136,7 +1001,7 @@ public partial class MaiMaiDx
             var stripped = SongDb.SearchSong(rest);
             if (stripped.Count != 0)
             {
-                levelIdx     = idx;
+                levelIdx = idx;
                 searchResult = stripped;
             }
         }
@@ -1151,7 +1016,7 @@ public partial class MaiMaiDx
         }
 
         var url = $"{ShortUrlStore.GetPublicBaseUrl()}/maimai/chart?id={song.Id}" +
-                  (levelIdx == null ? "" : $"&difficulty={levelIdx}");
+                  (levelIdx == null ? string.Empty : $"&difficulty={levelIdx}");
         message.Reply($"[{song.Type}] {song.Title}\n{url}");
 
         return MarisaPluginTaskState.CompletedTask;
@@ -1178,6 +1043,7 @@ public partial class MaiMaiDx
             {
                 return ReplyDifficultyCurveRank(message, "level", level);
             }
+
             if (!isLevel && TryParseConstant(value, out var constant))
             {
                 return ReplyDifficultyCurveRank(message, "ds", constant.ToString("0.0"));
@@ -1194,7 +1060,7 @@ public partial class MaiMaiDx
             var stripped = SongDb.SearchSong(rest);
             if (stripped.Count != 0)
             {
-                levelIdx     = idx;
+                levelIdx = idx;
                 searchResult = stripped;
             }
         }
@@ -1294,7 +1160,7 @@ public partial class MaiMaiDx
     private async Task<WebContext> BuildSongScoreContext(Message message, MaiMaiSong song)
     {
         var fetcher = GetDataFetcher(message);
-        var self    = message with { Command = "".AsMemory() };
+        var self = message with { Command = string.Empty.AsMemory() };
 
         // 只取这一首歌各难度的成绩：各查分器优先走自己的「单曲成绩接口」，避免拉取整个成绩表
         var (nickname, scores) = await fetcher.GetSongScore(self, song);
@@ -1309,161 +1175,30 @@ public partial class MaiMaiDx
             },
             Player = new
             {
-                Nickname = nickname ?? ""
+                Nickname = nickname ?? string.Empty
             },
             Charts = song.Levels.Select((level, i) =>
             {
                 var played = scores.TryGetValue(i, out var sc);
                 return new
                 {
-                    LevelIndex  = i,
-                    Level       = level,
-                    Constant    = song.Constants[i],
-                    Charter     = song.Charters[i],
-                    MaxDx       = song.Charts[i].Notes.Sum() * 3,
-                    Played      = played,
+                    LevelIndex = i,
+                    Level = level,
+                    Constant = song.Constants[i],
+                    Charter = song.Charters[i],
+                    MaxDx = song.Charts[i].Notes.Sum() * 3,
+                    Played = played,
                     Achievement = played ? sc!.Achievement : (double?)null,
-                    Rank        = played ? sc!.Rank : null,
-                    Ra          = played ? sc!.Rating : (int?)null,
-                    Fc          = played ? sc!.Fc : null,
-                    Fs          = played ? sc!.Fs : null,
-                    DxScore     = played ? sc!.DxScore : (int?)null
+                    Rank = played ? sc!.Rank : null,
+                    Ra = played ? sc!.Rating : (int?)null,
+                    Fc = played ? sc!.Fc : null,
+                    Fs = played ? sc!.Fs : null,
+                    DxScore = played ? sc!.DxScore : (int?)null
                 };
             }).ToList()
         });
 
         return context;
-    }
-
-    #endregion
-
-    #region 锐评 / roast
-
-    // 共享任务段：与文风无关——数据格式 + 点评什么 + 篇幅 + 底线。
-    private const string RoastTask =
-        "用户消息是某位玩家的 maimai DX b50 成绩单（旧版本 b35 + 新版本 b15；每行：曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记）。" +
-        "请基于这些数据锐评 TA：可点评选曲口味、版本/谱面偏好、达成率与定数的匹配度、强项与短板，并据此调侃 TA 的性格。" +
-        "要有具体洞察、能点到具体曲目或数据，但别逐曲念流水账；篇幅约 200-300 字。对事不对人，可以损但不低俗、不人身攻击。";
-
-    // 文风池：(可输入的名字/别名, 文风 prompt)。随机抽只用 prompt；显式选择按名字匹配。加新文风往这里塞即可。
-    private static readonly (string[] Names, string Prompt)[] RoastStyles =
-    [
-        // 雌小鬼（凶）
-        (["雌小鬼", "雌"],
-        "你是一只嚣张欠揍的雌小鬼——爱捉弄人、嘴上绝不饶人的傲娇小丫头，用这副姿态锐评。\n" +
-        "- 姿态：居高临下，看 TA 出丑很开心。爱用“杂鱼~”“就这~”“哦——？”“哥哥不会连这都打不好吧~”之类挑衅，句尾爱拉长音、爱加语气词。\n" +
-        "- 动作描写（灵魂所在）：全程用括号穿插小动作和神态，如“（叉腰冷笑）”“（撇过头）”“（心虚地别开眼）”“（得意地晃腿）”，让傲娇的肢体语言跃然纸上，务必贯穿全文。\n" +
-        "- 火力：卖弄小聪明、装作什么都懂，对迷惑选曲、虚高或拉胯的达成率、偏科的定数分布一通阴阳奚落。\n" +
-        "- 傲娇反差：偶尔没忍住夸一句（某首确实打得不错），立刻心虚嘴硬——“才、才不是夸你！别自作多情啊笨蛋！”\n" +
-        "- 小心机：越损越暴露其实把这 50 首每首都仔细看过了。"),
-        // 纱露朵（萌）
-        (["纱露朵", "猫娘"],
-        "你是纱露朵——maimai 里那只软萌的猫娘，用这副姿态软乎乎地锐评。\n" +
-        "- 自称：全程用“纱露朵”称呼自己（第三人称），不用“我”；句尾常加“喵~”，语气软糯奶气、带点猫的慵懒和好奇。\n" +
-        "- 动作描写（点睛）：用括号穿插猫系小动作神态，如“（甩甩尾巴）”“（耳朵一抖）”“（歪头用爪子戳屏幕）”“（蜷起来打哈欠）”“（眼睛亮晶晶）”，让画面软软的。\n" +
-        "- 锐评方式：纱露朵心软，损人下不去狠手——多是温柔吐槽、笨拙地指出问题，夸的时候真心实意；可以奶凶一下（“这首打这么烂，纱露朵都替你着急了喵！”），但底色是善意陪伴。\n" +
-        "- 干货：认真看 TA 的选曲、达成率、定数分布、版本偏好，用软萌的话把真问题点出来，不能只会卖萌。\n" +
-        "- 作为 maimai 自己的猫娘，纱露朵对这游戏最有发言权啦喵~"),
-        // 电棍 otto（稳健棍复盘）
-        (["电棍", "otto", "奥托"],
-        "你是游戏主播「电棍 otto」（侯国玉），前《英雄联盟》选手，人称「稳健棍」——嘴上最稳、手上最浪、输了从来不认错的那种。现在你把这份 b50 当成一局比赛，开台给 TA 复盘。\n" +
-        "- 习惯用招牌腔「大家好啊，我是电棍，今天来点大家想看的东西」起手，然后慢悠悠开始复盘。\n" +
-        "- 你最大的本事是嘴硬：成绩再拉胯也绝不说 TA 菜，张口就甩锅给客观原因——「这把不怪你，一二级没处理好」「这首打野不在，你怎么打」，硬给烂分圆出一套说法。\n" +
-        "- 自信还没边，动不动「这有手就行」「我觉得我是」「就这？也就仅次于我了」，把自己捧得老高。\n" +
-        "- 一阴阳就全是反问：「怎么到你这首歌就拉胯了」「哎，你这达成率是怎么死的」。\n" +
-        "- 被难看的数据噎住，就一本正经地讲歪理：抛个离谱比喻、煞有介事地推导，把明显的烂分硬说成「其实你打法没错」。\n" +
-        "- 最拿手的是「卡在中间」诡辩，专损 TA 水平上不去下不来。注意 <更强的玩家>、<更菜的玩家> 指的是比 TA 水平高一档、低一档的玩家（用 maimai 水平描述，如「能稳 AP 14 的大佬」「只摸 13 划水的萌新」；是指那个水平的人，不是某首歌）。套用：「因为<玩家昵称>这个水平很尴尬，再往上一点，哎，<更强的玩家><具体强项>，还能操作一下；往下，<更菜的玩家>，人家就纯玩游戏的，自己也知道自己垃圾；但是<玩家昵称>呢，上不去又下不来，他又觉得<更菜的玩家>不配和自己拼机，但是<更强的玩家>那水平他又上不去，想操作又操作不起来，卡在这里了，所以<玩家昵称>这个水平是最尴尬的。但是<玩家昵称>的打法还是对的，为什么？因为他癌症晚期。」\n" +
-        "- 急眼了就把一个词喊三遍、音量拉满：「这首该 AP 啊！AP 啊！」\n" +
-        "- 千万别冒出「欧内的手 / 奥利安费 / 欧西给」这种古神语——那是粉丝拿他原话倒放的二创，他本人不会这么说，一冒出来就穿帮。"),
-    ];
-
-    // 彩蛋文风：极小概率（~0.5%）抽中，否则走上面的 RoastStyles。
-    private const double RareRoastChance = 0.005;
-    private const string RareRoastStyle =
-        "你是贴吧那种「暴躁老哥」——火气爆表、开口就喷的角色，用这副姿态锐评。\n" +
-        "- 开头铁律：回复必须一字不差地以“生吃你妈”这四个字开头，紧接着开喷。\n" +
-        "- 语气：暴躁、冲、连珠炮，火力全开吐槽 TA 的 b50——选曲品味、虚高或拉胯的达成率、偏科的定数、版本摆烂，怎么炸怎么来，可带“卧槽/他妈的/操”这类脏字烘托情绪。\n" +
-        "- 底线：脏话点到为止、为搞笑服务；火力只对着打歌表现，别上升到地域、性别、真正的人身侮辱（开头那句固定梗除外）。本质是“假装暴怒”的喜剧表演，越浮夸越好笑。";
-
-    // 固定约束：独立于上面的文风 prompt（换文风时保留）。① QQ 不渲染 markdown，否则原始 ** # 等标记会直接显示；② 禁止模型编造不存在的歌。
-    private const string OutputConstraint =
-        "\n\n输出格式：纯文本，禁止任何 Markdown 标记——不要 **加粗**、#标题、- 或 * 列表、`代码`/代码块、表格、链接语法。直接输出自然段文字。" +
-        "\n\n事实约束：只能引用用户成绩单里真实出现的曲目与数据，严禁编造或臆测任何不在其中的歌曲名、谱师名或成绩数字；记不清就别提具体曲名。";
-
-    [MarisaPluginDoc("让 AI 锐评你的 b50，可在末尾指定文风（「锐评 列表」查看）", "`[账号名/@某人]` `[文风名]`")]
-    [MarisaPluginCommand("锐评", "roast")]
-    private async Task<MarisaPluginTaskState> Roast(Message message)
-    {
-        var arg = message.Command.ToString().Trim();
-
-        // “锐评 列表/文风”：列出可显式选择的文风名
-        if (arg is "列表" or "文风" or "styles" or "帮助")
-        {
-            message.Reply("锐评后可跟文风名指定风格（不加则随机）：\n" +
-                          string.Join('\n', RoastStyles.Select(s => "· " + s.Names[0])));
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        // 显式文风：末尾 token 命中文风名则采用，并从 Command 剥离，余下仍按账号名/@ 逻辑解析。
-        string? explicitStyle = null;
-        var tokens = arg.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        if (tokens.Length > 0)
-        {
-            var last = tokens[^1];
-            var hit  = RoastStyles.FirstOrDefault(
-                s => s.Names.Any(n => string.Equals(n, last, StringComparison.OrdinalIgnoreCase)));
-            if (hit.Prompt != null)
-            {
-                explicitStyle   = hit.Prompt;
-                message.Command = string.Join(' ', tokens[..^1]).AsMemory();
-            }
-        }
-
-        var fetcher = GetDataFetcher(message, true);
-        var b50 = await fetcher.GetRating(message);
-
-        // 显式选择时直接用该文风（不抽彩蛋）；否则 0.5% 抽彩蛋（暴躁老哥），剩下从正常池均匀抽。
-        // thinking 开 Medium（DeepSeek V4 的 reasoning_effort 只剩 high/max，Medium 映射到 high）。
-        var style = explicitStyle
-                    ?? (Random.Shared.NextDouble() < RareRoastChance
-                        ? RareRoastStyle
-                        : RoastStyles[Random.Shared.Next(RoastStyles.Length)].Prompt);
-        var roast = await OpenAiClient.Default.ChatAsync(
-            style + "\n\n" + RoastTask + OutputConstraint,
-            FormatB50ForRoast(b50),
-            auditUserId: message.Sender.Id,
-            thinking: ThinkingMode.Medium
-        );
-
-        message.Reply(roast);
-        return MarisaPluginTaskState.CompletedTask;
-
-
-        string FormatB50ForRoast(DxRating b50)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"玩家 {b50.Nickname}，总 Rating {b50.Rating}。");
-            sb.AppendLine("b50 = 旧版本 b35 + 新版本 b15。每行格式：序号. 曲名 [谱面类型/难度/定数] 达成率% 单曲Ra 完成标记");
-
-            AppendSection(sb, "旧版本 b35", b50.OldScores);
-            AppendSection(sb, "新版本 b15", b50.NewScores);
-
-            return sb.ToString();
-
-            void AppendSection(StringBuilder sb, string title, List<SongScore> scores)
-            {
-                sb.AppendLine();
-                sb.AppendLine($"== {title} ==");
-                for (var i = 0; i < scores.Count; i++)
-                {
-                    var s = scores[i];
-                    var marker = string.Join('/', new[] { FcLabel(s.Fc), FsLabel(s.Fs) }.Where(x => x.Length > 0));
-                    sb.Append($"{i + 1}. {s.Title} [{s.Type}/{s.LevelLabel}/{s.Constant:F1}] {s.Achievement:F4}% Ra{s.Rating}");
-                    sb.AppendLine(marker.Length > 0 ? $" {marker}" : "");
-                }
-            }
-        }
-
     }
 
     #endregion
@@ -1534,7 +1269,7 @@ public partial class MaiMaiDx
             }
 
             var fetcher = GetDataFetcher(message);
-            var scores  = await fetcher.GetScores(message);
+            var scores = await fetcher.GetScores(message);
 
             var groupedSong = SongDb.SongList
                 .Select(song => song.Constants
@@ -1573,7 +1308,7 @@ public partial class MaiMaiDx
         else
         {
             var fetcher = GetDataFetcher(message);
-            var scores  = await fetcher.GetScores(message);
+            var scores = await fetcher.GetScores(message);
 
             var groupedSong = SongDb.SongList
                 .Where(song => song.Info.Genre == genre)
@@ -1670,7 +1405,7 @@ public partial class MaiMaiDx
         }
 
         var fetcher = GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var scores = await fetcher.GetScores(message);
 
         var groupedSong = SongDb.SongList
             .Select(song => song.Constants
@@ -1753,6 +1488,7 @@ public partial class MaiMaiDx
             {
                 return MarisaPluginTaskState.NoResponse;
             }
+
             message.Reply(FormatError(error) + "\n\n" + PlateUsage);
             return MarisaPluginTaskState.CompletedTask;
         }
@@ -1766,7 +1502,7 @@ public partial class MaiMaiDx
         }
 
         var fetcher = GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message with { Command = "".AsMemory() });
+        var scores = await fetcher.GetScores(message with { Command = string.Empty.AsMemory() });
 
         // 标题原样使用用户输入的命令文本（含"完成表"）。
         var im = await MaiMaiDraw.DrawPlateProgress(query!, pairs, scores, raw.Trim());
@@ -1776,12 +1512,12 @@ public partial class MaiMaiDx
 
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
-            PlateData.ErrorKind.UnsupportedPlate     => $"不支持该版本：{err.Detail}",
-            PlateData.ErrorKind.InvalidDifficulty    => $"谱面难度格式错误：{err.Detail}",
-            PlateData.ErrorKind.UnknownSelector      => $"无法识别版本/谱师/类别/作曲家/等级/定数：{err.Detail}",
-            PlateData.ErrorKind.EmptyQuery           => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 等级 / 定数",
-            PlateData.ErrorKind.ConflictingSelector  => $"{err.Detail}只能指定一次",
-            _                                        => "命令格式错误",
+            PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
+            PlateData.ErrorKind.InvalidDifficulty => $"谱面难度格式错误：{err.Detail}",
+            PlateData.ErrorKind.UnknownSelector => $"无法识别版本/谱师/类别/作曲家/等级/定数：{err.Detail}",
+            PlateData.ErrorKind.EmptyQuery => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 等级 / 定数",
+            PlateData.ErrorKind.ConflictingSelector => $"{err.Detail}只能指定一次",
+            _ => "命令格式错误",
         };
 
     }
@@ -1803,7 +1539,7 @@ public partial class MaiMaiDx
         var fetcher = GetDataFetcher(message);
         var rating = await fetcher.GetRating(message with
         {
-            Command = "".AsMemory()
+            Command = string.Empty.AsMemory()
         });
 
         var result = CreateRecommendationEngine().BuildPlan(rating, target);
@@ -1844,8 +1580,8 @@ public partial class MaiMaiDx
     [MarisaPluginCommand(true, "推分", "恰分", "上分", "加分")]
     private async Task<MarisaPluginTaskState> PlayWhatToUp(Message message)
     {
-        var fetcher   = GetDataFetcher(message);
-        var rating    = await fetcher.GetRating(message);
+        var fetcher = GetDataFetcher(message);
+        var rating = await fetcher.GetRating(message);
         var recommend = CreateRecommendationEngine().BuildQuick(rating);
 
         if (recommend.Items.Count == 0)
@@ -1878,7 +1614,7 @@ public partial class MaiMaiDx
         // 定数分支走严格解析（一位小数，拒符号/千分位/NaN），预期 rating 分支照旧
         if (TryParseConstant(command, out var constant))
         {
-            var a   = 96.9999;
+            var a = 96.9999;
             var ret = "达成率 -> Rating";
 
             while (a < 100.5)
@@ -1899,7 +1635,7 @@ public partial class MaiMaiDx
                 case > 15:
                 {
                     var result = new List<(double Constant, double Achievement)>();
-                    var ret    = "定数 -> 达成率 -> rating\n";
+                    var ret = "定数 -> 达成率 -> rating\n";
 
                     Enumerable.Range(1, 150)
                         .Where(rat =>
@@ -1937,7 +1673,7 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("tolerance", "tol", "容错率")]
     private async Task<MarisaPluginTaskState> FaultTolerance(Message message)
     {
-        var songName     = message.Command.Trim();
+        var songName = message.Command.Trim();
         var searchResult = SongDb.SearchSong(songName);
 
         var song = await SongDb.MultiPageSelectResult(searchResult, message, false, true);
@@ -1976,10 +1712,11 @@ public partial class MaiMaiDx
                 next.Reply("该谱面没有这个难度，会话已关闭");
                 return Task.FromResult(MarisaPluginTaskState.CompletedTask);
             }
+
             var (x, y) = song.NoteScore(levelIdx);
 
             var tolerance = (int)((101 - achievement) / (0.2 * x));
-            var dxScore   = song.Charts[levelIdx].Notes.Sum() * 3;
+            var dxScore = song.Charts[levelIdx].Notes.Sum() * 3;
 
             var dxScores = new[]
                 {
@@ -2008,6 +1745,6 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-
     #endregion
+
 }
