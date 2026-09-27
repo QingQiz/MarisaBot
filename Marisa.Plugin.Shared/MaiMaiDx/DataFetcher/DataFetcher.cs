@@ -49,4 +49,9 @@ public abstract class DataFetcher(SongDb<MaiMaiSong> songDb)
             .ToDictionary(kv => kv.Key.LevelIdx, kv => kv.Value);
         return (rating.Nickname, scores);
     }
+
+    /// <summary>
+    ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。
+    /// </summary>
+    public virtual Task<bool> TestOAuthToken(long qq) => Task.FromResult(false);
 }

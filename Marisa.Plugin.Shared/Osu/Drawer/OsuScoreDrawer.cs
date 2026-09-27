@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using Marisa.Plugin.Shared.Osu.Entity.Score;
-using Marisa.Plugin.Shared.Util;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;

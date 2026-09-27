@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Marisa.Plugin.Shared.Osu.Entity.User;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;

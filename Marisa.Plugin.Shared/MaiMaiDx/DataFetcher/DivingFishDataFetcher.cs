@@ -2,22 +2,17 @@
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 
-public class DivingFishDataFetcher : DataFetcher
+public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     public const int OldScoreLimit = 35;
     public const int NewScoreLimit = 15;
 
     protected virtual bool OAuthEnabled => DivingFishOAuth.IsConfigured;
-
-    public DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : base(songDb)
-    {
-    }
 
     public override async Task<DxRating> GetRating(Message message)
     {
@@ -47,7 +42,7 @@ public class DivingFishDataFetcher : DataFetcher
 
     private DxRating ToDxRating(DivingFishDxRatingResponse raw)
     {
-        if (raw.PublicOldScores != null && raw.PublicNewScores != null)
+        if (raw is { PublicOldScores: not null, PublicNewScores: not null })
         {
             return new DxRating
             {
@@ -233,7 +228,6 @@ public class DivingFishDataFetcher : DataFetcher
 
         if (OAuthEnabled)
         {
-            var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
             var tokenOwner = username.IsWhiteSpace() ? qq : -1;
             if (tokenOwner < 0) throw OAuthSelfOnly();
 
@@ -296,6 +290,36 @@ public class DivingFishDataFetcher : DataFetcher
         }
 
         throw new InvalidOperationException("DivingFish OAuth retry loop exited unexpectedly");
+    }
+
+    /// <summary>
+    ///     bind 时实测票据是否可读：本地存有票据不代表服务端仍接受它（可能已被撤销），
+    ///     只有成绩接口返回 2xx 才算授权有效；401 时丢票重拉一次。
+    /// </summary>
+    public override async Task<bool> TestOAuthToken(long qq)
+    {
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var token = (await DivingFishTokenStore.GetValidToken(qq, "maimai"))?.AccessToken;
+            if (token == null) return false;
+
+            var response = await "https://www.diving-fish.com/api/maimaidxprober/player/record"
+                .WithHeader("Authorization", $"Bearer {token}")
+                .AllowHttpStatus("400,401,403,429,503")
+                .PostJsonAsync(new Dictionary<string, object> { ["music_id"] = new[] { SongDb.SongList[0].Id } });
+
+            if (response.StatusCode == (int)HttpStatusCode.Unauthorized)
+            {
+                DivingFishTokenStore.RemoveToken(qq, "maimai");
+                continue;
+            }
+
+            if (response.StatusCode is 400 or 403) return false;
+            if (response.StatusCode is 429 or 503) throw new HttpRequestException("水鱼服务器繁忙，请稍后再试");
+            return true;
+        }
+
+        return false;
     }
 
     private static bool IsOAuthError(int statusCode) =>

@@ -1,5 +1,4 @@
-﻿using Marisa.Plugin.Shared.Util;
-using Marisa.Plugin.Shared.Util.Cacheable;
+﻿using Marisa.Plugin.Shared.Util.Cacheable;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;

@@ -3,7 +3,6 @@ using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.Lxns;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
@@ -198,6 +197,38 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         {
             throw new HttpRequestException("[Lxns] OAuth 授权已失效，请重新使用 bind → 选择 lxns 完成授权");
         }
+    }
+
+    /// <summary>
+    ///     bind 时实测令牌是否可读：本地存有票据不代表服务端仍接受它（可能已被撤销），
+    ///     只有玩家接口返回 401/403 之外的状态才算授权有效；401/403 时丢票重拉一次。
+    /// </summary>
+    public override async Task<bool> TestOAuthToken(long qq)
+    {
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var token = await LxnsTokenStore.GetValidToken(qq);
+            if (token == null) return false;
+
+            var response = await "https://maimai.lxns.net/api/v0/user/maimai/player"
+                .WithOAuthBearerToken(token.AccessToken)
+                .AllowHttpStatus("400,401,403,404,429,503")
+                .GetAsync();
+
+            if (response.StatusCode is 401 or 403)
+            {
+                LxnsTokenStore.RemoveToken(qq);
+                continue;
+            }
+
+            if (response.StatusCode is 429 or 503) throw new HttpRequestException("落雪服务器繁忙，请稍后再试");
+            if (response.StatusCode is 400) throw new HttpRequestException("落雪授权验证失败（HTTP 400）");
+
+            // 2xx；404 表示授权有效，只是尚未在落雪绑定该游戏账号
+            return true;
+        }
+
+        return false;
     }
 
     private async Task<string> GetNicknameViaOAuth(LxnsToken token, long qq)

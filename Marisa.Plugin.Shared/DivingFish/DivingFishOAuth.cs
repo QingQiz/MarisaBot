@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using Flurl.Http;
 using Marisa.Configuration;
@@ -28,7 +25,6 @@ public static class DivingFishOAuth
     public sealed record DeviceAuthorization(
         string DeviceCode,
         string UserCode,
-        string VerificationUri,
         string VerificationUriComplete,
         int ExpiresIn,
         int Interval);
@@ -173,39 +169,15 @@ public static class DivingFishOAuth
         return ParseTokenResponse(body, ScopeOf(game), "换票");
     }
 
-    public static string SubjectForQq(long qq)
-    {
-        if (qq <= 0) throw new ArgumentOutOfRangeException(nameof(qq), qq, "QQ 必须为正整数");
-        return "ref:" + SubjectRef(qq.ToString(CultureInfo.InvariantCulture));
-    }
-
     public static string SubjectForSub(string sub)
     {
         if (!IsValidSub(sub)) throw new ArgumentException("水鱼 sub 格式无效", nameof(sub));
         return "sub:" + sub;
     }
 
-    public static string SubjectRef(string externalId)
-    {
-        EnsureClientCredentials();
-        if (string.IsNullOrWhiteSpace(externalId))
-        {
-            throw new ArgumentException("外部用户标识不能为空", nameof(externalId));
-        }
-
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{ClientId}:{externalId}"));
-        return Convert.ToHexString(hash).ToLowerInvariant();
-    }
-
     public static bool IsAllowedSubject(string? subject)
     {
         if (string.IsNullOrEmpty(subject)) return false;
-
-        if (subject.StartsWith("ref:", StringComparison.Ordinal))
-        {
-            var digest = subject.AsSpan(4);
-            return digest.Length == 64 && digest.ToString().All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
-        }
 
         return subject.StartsWith("sub:", StringComparison.Ordinal) && IsValidSub(subject[4..]);
     }
@@ -367,7 +339,6 @@ public static class DivingFishOAuth
             return new DeviceAuthorization(
                 deviceCode,
                 userCode,
-                verificationUri,
                 verificationUriComplete,
                 expiresIn.Value,
                 interval.Value);
@@ -478,7 +449,7 @@ public static class DivingFishOAuth
     {
         if (!IsAllowedSubject(subject))
         {
-            throw new ArgumentException("OBO subject 仅允许已确认的 sub: 或 ref: 标识", nameof(subject));
+            throw new ArgumentException("OBO subject 仅允许已确认的 sub: 标识", nameof(subject));
         }
     }
 

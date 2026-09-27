@@ -28,7 +28,12 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
 
     public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message);
 
-    public static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly = false)
+    /// <summary>
+    ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。
+    /// </summary>
+    public virtual Task<bool> TestOAuthToken(long qq) => Task.FromResult(false);
+
+    public static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly)
     {
         var username = "".AsMemory();
         var qq       = message.Sender.Id;

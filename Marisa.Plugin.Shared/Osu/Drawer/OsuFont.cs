@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Marisa.Plugin.Shared.Util;
 using SharpFNT;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

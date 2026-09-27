@@ -1,5 +1,4 @@
-﻿using Marisa.Plugin.Shared.Util;
-using Marisa.Plugin.Shared.Util.Cacheable;
+﻿using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

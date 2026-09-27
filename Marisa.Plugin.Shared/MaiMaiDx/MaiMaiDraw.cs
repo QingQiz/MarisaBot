@@ -1,8 +1,5 @@
-﻿using Marisa.Plugin.Shared.Util;
-using SixLabors.Fonts;
+﻿using SixLabors.Fonts;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 

@@ -1,5 +1,4 @@
-﻿using Marisa.Plugin.Shared.Util;
-using SixLabors.Fonts;
+﻿using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 

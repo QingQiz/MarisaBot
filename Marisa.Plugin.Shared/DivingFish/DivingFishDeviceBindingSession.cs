@@ -12,40 +12,40 @@ public sealed class DivingFishDeviceBindingSession(
     private readonly CancellationTokenSource _lifetime = new();
     private readonly (long?, long?) _key = (message.GroupInfo?.Id, message.Sender.Id);
     private readonly DateTimeOffset _deadline = timeProvider.GetUtcNow().AddMinutes(10);
-    private (string Sub, string Scope)? _pending;
+    private (string Sub, DivingFishToken Token)? _pending;
     private bool _finished;
 
     public async Task RunAsync(DivingFishOAuth.DeviceAuthorization device)
     {
         try
         {
-            await Task.WhenAll(ExpireAsync(), PollAsync());
+            await Task.WhenAll(ExpireAsync(_lifetime.Token), PollAsync(_lifetime.Token));
         }
         finally
         {
             lock (_gate) _lifetime.Dispose();
         }
 
-        async Task ExpireAsync()
+        async Task ExpireAsync(CancellationToken token)
         {
             try
             {
-                await Task.Delay(TimeSpan.FromMinutes(10), timeProvider, _lifetime.Token);
+                await Task.Delay(TimeSpan.FromMinutes(10), timeProvider, token);
                 lock (_gate)
                 {
                     Finish();
                 }
             }
-            catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
         }
 
-        async Task PollAsync()
+        async Task PollAsync(CancellationToken token)
         {
             try
             {
-                var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, game, _lifetime.Token, timeProvider);
+                var result = await DivingFishOAuth.WaitForDeviceAuthorization(device, game, token, timeProvider);
                 lock (_gate)
                 {
                     if (_finished) return;
@@ -61,11 +61,11 @@ public sealed class DivingFishDeviceBindingSession(
                         return;
                     }
 
-                    _pending = (result.Sub, result.Token.Scope);
+                    _pending = (result.Sub, result.Token);
                     message.Reply("授权已完成，如果是你本人操作的请回复收到");
                 }
             }
-            catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
             catch (Exception e)
@@ -91,7 +91,7 @@ public sealed class DivingFishDeviceBindingSession(
                 return MarisaPluginTaskState.Canceled;
             }
 
-            DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, "", entry.Scope, game);
+            DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, entry.Token, game);
             next.Reply("ok");
             return MarisaPluginTaskState.CompletedTask;
         }

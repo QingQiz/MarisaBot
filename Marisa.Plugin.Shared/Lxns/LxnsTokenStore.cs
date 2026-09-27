@@ -1,72 +1,37 @@
 using System.Collections.Concurrent;
 using System.Net;
-using System.Text.Json;
-using Marisa.Configuration;
+using Marisa.Database;
+using Marisa.Database.Entity.Plugin.Lxns;
+using Realms;
 
 namespace Marisa.Plugin.Shared.Lxns;
 
+/// <summary>
+///     落雪 OAuth 授权与票据存取：持久化在 <see cref="LxnsAuthToken" /> 表中，
+///     以 QQ 直接定位（令牌是账号级的，与游戏无关），不依赖游戏绑定状态。
+/// </summary>
 public static class LxnsTokenStore
 {
-    private static readonly object LockObj = new();
-    private static Dictionary<long, LxnsTokenRecord>? _cache;
-
-    // 可被测试重定向；生产环境保持默认（chunithm temp 目录）
-    private static string? _storePath;
-
-    private static string StorePath => _storePath ??= Path.Combine(
-        ConfigurationManager.Configuration.Chunithm.TempPath, "lxns_oauth_tokens.json");
-
     // 每个 qq 一把刷新锁：防止并发刷新用同一 refresh token（lxns 刷新会轮换 token，旧 token 立即失效）
     private static readonly ConcurrentDictionary<long, SemaphoreSlim> RefreshLocks = new();
 
-    private static Dictionary<long, LxnsTokenRecord> Load()
-    {
-        if (_cache != null) return _cache;
-        if (File.Exists(StorePath))
-        {
-            var json = File.ReadAllText(StorePath);
-            _cache = JsonSerializer.Deserialize<Dictionary<long, LxnsTokenRecord>>(json) ?? new();
-        }
-        else
-        {
-            _cache = new();
-        }
-        return _cache;
-    }
-
-    private static void Save()
-    {
-        var dir = Path.GetDirectoryName(StorePath)!;
-        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-        var json = JsonSerializer.Serialize(_cache);
-        File.WriteAllText(StorePath, json);
-    }
-
     public static void SaveToken(long qq, string accessToken, string refreshToken, int expiresIn)
     {
-        lock (LockObj)
-        {
-            var store = Load();
-            store[qq] = new LxnsTokenRecord
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn)
-            };
-            Save();
-        }
+        var expiresAt = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
+        using var realm = BotDbContext.OpenRealm();
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq) ?? realm.AddWithAutoId(new LxnsAuthToken { Qq = qq });
+        row.AccessToken = accessToken;
+        row.RefreshToken = refreshToken;
+        row.ExpiresAt = expiresAt;
+        row.UpdatedAt = DateTimeOffset.UtcNow;
+        tr.Commit();
     }
 
     public static LxnsToken? GetToken(long qq)
     {
-        var store = Load();
-        if (!store.TryGetValue(qq, out var record)) return null;
-        return new LxnsToken
-        {
-            AccessToken = record.AccessToken,
-            RefreshToken = record.RefreshToken,
-            ExpiresAt = record.ExpiresAt
-        };
+        var row = ReadRow(qq);
+        return row == null ? null : ToToken(row);
     }
 
     public static async Task<LxnsToken?> GetValidToken(long qq)
@@ -75,10 +40,7 @@ public static class LxnsTokenStore
         if (token == null) return null;
 
         // access token 未过期（留 60 秒余量）直接复用，避免频繁刷新
-        if (DateTime.UtcNow < token.ExpiresAt.AddSeconds(-60))
-        {
-            return token;
-        }
+        if (IsFresh(token)) return token;
 
         // 同一 qq 的刷新串行化：并发查询时只有一个能 refresh，其余等待后复用新 token
         var refreshLock = RefreshLocks.GetOrAdd(qq, _ => new SemaphoreSlim(1, 1));
@@ -88,10 +50,7 @@ public static class LxnsTokenStore
             // 等待期间可能已被其他请求刷新，先复查
             token = GetToken(qq);
             if (token == null) return null;
-            if (DateTime.UtcNow < token.ExpiresAt.AddSeconds(-60))
-            {
-                return token;
-            }
+            if (IsFresh(token)) return token;
 
             try
             {
@@ -102,10 +61,10 @@ public static class LxnsTokenStore
             }
             catch (Exception e)
             {
-                // 仅当明确是 token 失效（400/401）时才删除；网络/服务器错误保留 token，避免误删
+                // 仅当明确是 token 失效（400/401）时才删除授权；网络/服务器错误保留，避免误删
                 if (e is HttpRequestException { StatusCode: HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized })
                 {
-                    RemoveToken(qq);
+                    RemoveAuthorization(qq);
                 }
                 throw;
             }
@@ -116,25 +75,57 @@ public static class LxnsTokenStore
         }
     }
 
+    /// <summary>访问令牌被服务端拒绝（401/403）时调用：只丢票据、保留刷新令牌，下次查询自动刷新。</summary>
     public static void RemoveToken(long qq)
     {
-        lock (LockObj)
+        using var realm = BotDbContext.OpenRealm();
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq);
+        if (row != null)
         {
-            var store = Load();
-            store.Remove(qq);
-            Save();
+            row.AccessToken = "";
+            row.ExpiresAt = default;
         }
+        tr.Commit();
     }
 
-    public static void Invalidate()
+    /// <summary>刷新令牌也失效时调用：整行删除，用户需要重新授权。</summary>
+    private static void RemoveAuthorization(long qq)
     {
-        _cache = null;
+        using var realm = BotDbContext.OpenRealm();
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq);
+        if (row != null) realm.Remove(row);
+        tr.Commit();
     }
 
-    private class LxnsTokenRecord
+    private static RowSnapshot? ReadRow(long qq)
     {
-        public string AccessToken { get; set; } = "";
-        public string RefreshToken { get; set; } = "";
-        public DateTime ExpiresAt { get; set; }
+        using var realm = BotDbContext.OpenRealm();
+        var row = Find(realm, qq);
+        return row == null ? null : new RowSnapshot(row.AccessToken, row.RefreshToken, row.ExpiresAt);
     }
+
+    private static LxnsAuthToken? Find(Realm realm, long qq)
+    {
+        return realm.All<LxnsAuthToken>().FirstOrDefault(x => x.Qq == qq);
+    }
+
+    private static bool IsFresh(LxnsToken token)
+    {
+        return !string.IsNullOrWhiteSpace(token.AccessToken) &&
+               DateTime.UtcNow < token.ExpiresAt.AddSeconds(-60);
+    }
+
+    private static LxnsToken ToToken(RowSnapshot row)
+    {
+        return new LxnsToken
+        {
+            AccessToken = row.AccessToken,
+            RefreshToken = row.RefreshToken,
+            ExpiresAt = row.ExpiresAt.UtcDateTime
+        };
+    }
+
+    private sealed record RowSnapshot(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt);
 }

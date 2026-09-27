@@ -1,132 +1,33 @@
 using System.Collections.Concurrent;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.DivingFish;
+using Realms;
 
 namespace Marisa.Plugin.Shared.DivingFish;
 
+/// <summary>
+///     水鱼 OAuth 票据存取：授权与票据都持久化在 <see cref="DivingFishAuthToken" /> 表中，
+///     以 (qq, game) 直接定位，不依赖游戏绑定状态，也不做任何按 QQ 推算的 subject 探测。
+/// </summary>
 public static class DivingFishTokenStore
 {
-    private static readonly ConcurrentDictionary<(string Subject, string Game), DivingFishToken> Cache = new();
+    /// <summary>同一 (qq, game) 的并发拉票去重。</summary>
     private static readonly ConcurrentDictionary<
-        (string Subject, string Game),
+        (long Qq, string Game),
         Lazy<Task<DivingFishToken?>>> InFlightFetches = new();
-    private static readonly ConcurrentDictionary<long, ConcurrentDictionary<string, byte>> KnownSubjectsByQq = new();
 
     public static async Task<DivingFishToken?> GetValidToken(long qq, string game)
     {
         game = NormalizeGame(game);
-        var scope = DivingFishOAuth.ScopeOf(game);
 
-        for (var attempt = 0; attempt < 3; attempt++)
-        {
-            var binding = ReadVerifiedBinding(qq);
-            if (binding != null)
-            {
-                RememberSubject(qq, binding.Subject);
-                var token = await GetOrFetch(binding.Subject, game);
-                if (!IsCurrentVerifiedSubject(qq, binding.Subject))
-                {
-                    Cache.TryRemove((binding.Subject, game), out _);
-                    continue;
-                }
+        var row = ReadRow(qq, game);
+        if (row == null) return null;
+        if (IsFresh(row)) return ToToken(row);
 
-                if (token != null) RecordGrantedScope(qq, binding.Subject, scope);
-                return token;
-            }
-
-            var refSubject = DivingFishOAuth.SubjectForQq(qq);
-            RememberSubject(qq, refSubject);
-            var migratedToken = await GetOrFetch(refSubject, game);
-            if (migratedToken == null)
-            {
-                if (ReadVerifiedBinding(qq) != null) continue;
-                return null;
-            }
-
-            string effectiveSubject;
-            try
-            {
-                effectiveSubject = PersistMigratedBinding(qq, refSubject, scope);
-            }
-            catch
-            {
-                Cache.TryRemove((refSubject, game), out _);
-                throw;
-            }
-
-            if (!effectiveSubject.Equals(refSubject, StringComparison.Ordinal) ||
-                !IsCurrentVerifiedSubject(qq, refSubject))
-            {
-                Cache.TryRemove((refSubject, game), out _);
-                if (DivingFishOAuth.IsAllowedSubject(effectiveSubject)) RememberSubject(qq, effectiveSubject);
-                continue;
-            }
-
-            return migratedToken;
-        }
-
-        throw new InvalidOperationException("水鱼绑定在取票期间反复变化，请稍后重试");
-    }
-
-    public static void Invalidate(long qq)
-    {
-        var subjects = new HashSet<string>(StringComparer.Ordinal);
-        if (KnownSubjectsByQq.TryRemove(qq, out var knownSubjects))
-        {
-            subjects.UnionWith(knownSubjects.Keys);
-        }
-
-        using (var realm = BotDbContext.OpenRealm())
-        {
-            foreach (var bind in realm.All<DivingFishOAuthBind>().Where(x => x.Qq == qq).ToList())
-            {
-                var subject = ResolveStoredSubject(bind, false);
-                if (subject != null) subjects.Add(subject);
-            }
-        }
-
-        if (DivingFishOAuth.IsConfigured) subjects.Add(DivingFishOAuth.SubjectForQq(qq));
-        foreach (var subject in subjects) InvalidateSubject(subject);
-    }
-
-    public static void RemoveToken(long qq, string game)
-    {
-        game = NormalizeGame(game);
-        var binding = ReadVerifiedBinding(qq);
-        if (binding != null) Cache.TryRemove((binding.Subject, game), out _);
-
-        if (DivingFishOAuth.IsConfigured)
-        {
-            Cache.TryRemove((DivingFishOAuth.SubjectForQq(qq), game), out _);
-        }
-    }
-
-    public static void RemoveBinding(long qq)
-    {
-        Invalidate(qq);
-        using var realm = BotDbContext.OpenRealm();
-        realm.Write(() =>
-        {
-            foreach (var bind in realm.All<DivingFishOAuthBind>().Where(x => x.Qq == qq).ToList())
-            {
-                realm.Remove(bind);
-            }
-        });
-    }
-
-    private static async Task<DivingFishToken?> GetOrFetch(string subject, string game)
-    {
-        if (!DivingFishOAuth.IsAllowedSubject(subject))
-        {
-            throw new InvalidOperationException("本地水鱼绑定 subject 无效，请重新绑定");
-        }
-
-        var key = (subject, game);
-        if (TryGetCached(key, out var cached)) return cached;
-
+        var key = (qq, game);
         var fetch = InFlightFetches.GetOrAdd(key, _ =>
             new Lazy<Task<DivingFishToken?>>(
-                () => FetchAndCache(key),
+                () => MintAndStore(qq, game),
                 LazyThreadSafetyMode.ExecutionAndPublication));
         try
         {
@@ -138,197 +39,123 @@ public static class DivingFishTokenStore
         }
     }
 
-    private static async Task<DivingFishToken?> FetchAndCache((string Subject, string Game) key)
+    /// <summary>设备码授权完成后写入（或覆盖）该 QQ 在指定游戏上的授权与票据。</summary>
+    public static void SaveAuthorization(long qq, string game, string sub, DivingFishToken token)
     {
-        if (TryGetCached(key, out var cached)) return cached;
+        game = NormalizeGame(game);
+        DivingFishOAuth.SubjectForSub(sub); // 校验 sub 格式，非法直接拒绝
 
+        using var realm = BotDbContext.OpenRealm();
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq, game) ?? realm.AddWithAutoId(new DivingFishAuthToken { Qq = qq, Game = game });
+        row.Sub = sub;
+        row.Scope = token.Scope;
+        row.AccessToken = token.AccessToken;
+        row.ExpiresAt = token.ExpiresAt;
+        row.UpdatedAt = DateTimeOffset.UtcNow;
+        tr.Commit();
+    }
+
+    /// <summary>服务端拒绝当前票据（401）时调用：丢弃票据、保留授权，下次查询重新拉票。</summary>
+    public static void RemoveToken(long qq, string game)
+    {
+        game = NormalizeGame(game);
+        using var realm = BotDbContext.OpenRealm();
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq, game);
+        if (row != null)
+        {
+            row.AccessToken = "";
+            row.ExpiresAt = default;
+        }
+        tr.Commit();
+    }
+
+    private static async Task<DivingFishToken?> MintAndStore(long qq, string game)
+    {
+        var row = ReadRow(qq, game);
+        if (row == null) return null;
+        if (IsFresh(row)) return ToToken(row); // 等待期间已被其它请求刷新
+
+        string subject;
         try
         {
-            var token = await DivingFishOAuth.FetchToken(key.Subject, key.Game);
-            Cache[key] = token;
-            _ = EvictCachedToken(key, token);
-            return token;
+            subject = DivingFishOAuth.SubjectForSub(row.Sub);
+        }
+        catch (ArgumentException)
+        {
+            // 本地授权数据损坏：清掉，让用户重新绑定
+            RemoveRow(qq, game);
+            return null;
+        }
+
+        DivingFishToken token;
+        try
+        {
+            token = await DivingFishOAuth.FetchToken(subject, game);
         }
         catch (DivingFishNotBoundException)
         {
-            Cache.TryRemove(key, out _);
+            // 服务端已无该授权（被撤销）：删除本地授权，走重新绑定流程
+            RemoveRow(qq, game);
             return null;
         }
+
+        StoreTicket(qq, game, row.Sub, token);
+        return token;
     }
 
-    private static async Task EvictCachedToken(
-        (string Subject, string Game) key,
-        DivingFishToken token)
-    {
-        var evictionAt = token.ExpiresAt < DateTime.UtcNow.AddMinutes(10)
-            ? token.ExpiresAt
-            : DateTime.UtcNow.AddMinutes(10);
-        var delay = evictionAt - DateTime.UtcNow;
-        if (delay > TimeSpan.Zero) await Task.Delay(delay);
-        RemoveExact(Cache, key, token);
-    }
-
-    private static bool TryGetCached((string Subject, string Game) key, out DivingFishToken? token)
-    {
-        if (Cache.TryGetValue(key, out var cached) && DateTime.UtcNow < cached.ExpiresAt.AddSeconds(-30))
-        {
-            token = cached;
-            return true;
-        }
-
-        Cache.TryRemove(key, out _);
-        token = null;
-        return false;
-    }
-
-    private static BindingSnapshot? ReadVerifiedBinding(long qq)
+    private static void StoreTicket(long qq, string game, string sub, DivingFishToken token)
     {
         using var realm = BotDbContext.OpenRealm();
-        var bind = realm.All<DivingFishOAuthBind>()
-            .Where(x => x.Qq == qq && x.Status == DivingFishOAuthBind.VerifiedStatus)
-            .ToList()
-            .OrderByDescending(x => x.VerifiedAt)
-            .FirstOrDefault();
-        if (bind == null) return null;
-
-        var subject = ResolveStoredSubject(bind, true);
-        if (subject == null) return null;
-
-        if (string.IsNullOrWhiteSpace(bind.Subject))
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq, game);
+        // 拉票期间用户可能已换绑：sub 变了就不要把旧票写回去
+        if (row != null && row.Sub.Equals(sub, StringComparison.Ordinal))
         {
-            realm.Write(() => bind.Subject = subject);
+            row.Scope = token.Scope;
+            row.AccessToken = token.AccessToken;
+            row.ExpiresAt = token.ExpiresAt;
+            row.UpdatedAt = DateTimeOffset.UtcNow;
         }
-
-        return new BindingSnapshot(subject);
+        tr.Commit();
     }
 
-    private static bool IsCurrentVerifiedSubject(long qq, string expectedSubject)
-    {
-        var current = ReadVerifiedBinding(qq);
-        return current != null && current.Subject.Equals(expectedSubject, StringComparison.Ordinal);
-    }
-
-    private static string PersistMigratedBinding(long qq, string refSubject, string scope)
-    {
-        lock (DivingFishBindingService.WriteGate)
-        {
-            return PersistMigratedBindingCore(qq, refSubject, scope);
-        }
-    }
-
-    private static string PersistMigratedBindingCore(long qq, string refSubject, string scope)
-    {
-        var effectiveSubject = refSubject;
-        using var realm = BotDbContext.OpenRealm();
-        realm.Write(() =>
-        {
-            var sameQq = realm.All<DivingFishOAuthBind>().Where(x => x.Qq == qq).ToList();
-            var verified = sameQq
-                .Where(x => x.Status == DivingFishOAuthBind.VerifiedStatus)
-                .OrderByDescending(x => x.VerifiedAt)
-                .FirstOrDefault();
-
-            if (verified != null)
-            {
-                var currentSubject = ResolveStoredSubject(verified, true);
-                if (currentSubject != null)
-                {
-                    effectiveSubject = currentSubject;
-                    if (currentSubject.Equals(refSubject, StringComparison.Ordinal))
-                    {
-                        verified.Subject = refSubject;
-                        verified.Scopes = MergeScopes(verified.Scopes, scope);
-                    }
-                    else if (string.IsNullOrWhiteSpace(verified.Subject))
-                    {
-                        verified.Subject = currentSubject;
-                    }
-                    return;
-                }
-            }
-
-            var target = sameQq.OrderByDescending(x => x.VerifiedAt).FirstOrDefault();
-            if (target == null)
-            {
-                target = realm.AddWithAutoId(new DivingFishOAuthBind { Qq = qq });
-            }
-
-            target.Subject = refSubject;
-            target.Sub = "";
-            target.Username = "";
-            target.Scopes = MergeScopes(target.Scopes, scope);
-            target.Status = DivingFishOAuthBind.VerifiedStatus;
-            target.VerifiedAt = DateTimeOffset.UtcNow;
-
-            foreach (var duplicate in sameQq.Where(x => x.Id != target.Id))
-            {
-                realm.Remove(duplicate);
-            }
-        });
-        return effectiveSubject;
-    }
-
-    private static void RecordGrantedScope(long qq, string subject, string scope)
+    private static void RemoveRow(long qq, string game)
     {
         using var realm = BotDbContext.OpenRealm();
-        realm.Write(() =>
-        {
-            var bind = realm.All<DivingFishOAuthBind>()
-                .FirstOrDefault(x =>
-                    x.Qq == qq &&
-                    x.Status == DivingFishOAuthBind.VerifiedStatus &&
-                    x.Subject == subject);
-            if (bind != null) bind.Scopes = MergeScopes(bind.Scopes, scope);
-        });
+        var tr = realm.BeginWrite();
+        var row = Find(realm, qq, game);
+        if (row != null) realm.Remove(row);
+        tr.Commit();
     }
 
-    private static string? ResolveStoredSubject(DivingFishOAuthBind bind, bool throwOnInvalid)
+    private static RowSnapshot? ReadRow(long qq, string game)
     {
-        if (!string.IsNullOrWhiteSpace(bind.Subject))
-        {
-            if (!DivingFishOAuth.IsAllowedSubject(bind.Subject))
-            {
-                if (throwOnInvalid) throw new InvalidOperationException("本地水鱼绑定 subject 无效，请重新绑定");
-                return null;
-            }
-
-            if (bind.Subject.StartsWith("sub:", StringComparison.Ordinal) &&
-                !string.IsNullOrWhiteSpace(bind.Sub) &&
-                !bind.Subject[4..].Equals(bind.Sub, StringComparison.Ordinal))
-            {
-                if (throwOnInvalid) throw new InvalidOperationException("本地水鱼绑定 sub 与 subject 不一致，请重新绑定");
-                return null;
-            }
-            return bind.Subject;
-        }
-
-        if (string.IsNullOrWhiteSpace(bind.Sub)) return null;
-        try
-        {
-            return DivingFishOAuth.SubjectForSub(bind.Sub);
-        }
-        catch (ArgumentException) when (!throwOnInvalid)
-        {
-            return null;
-        }
+        using var realm = BotDbContext.OpenRealm();
+        var row = Find(realm, qq, game);
+        return row == null ? null : new RowSnapshot(row.Sub, row.Scope, row.AccessToken, row.ExpiresAt);
     }
 
-    private static void InvalidateSubject(string subject)
+    private static DivingFishAuthToken? Find(Realm realm, long qq, string game)
     {
-        foreach (var key in Cache.Keys.Where(x => x.Subject.Equals(subject, StringComparison.Ordinal)))
-        {
-            Cache.TryRemove(key, out _);
-        }
+        return realm.All<DivingFishAuthToken>().FirstOrDefault(x => x.Qq == qq && x.Game == game);
     }
 
-    private static void RememberSubject(long qq, string subject)
+    private static bool IsFresh(RowSnapshot row)
     {
-        while (true)
+        return !string.IsNullOrWhiteSpace(row.AccessToken) &&
+               DateTime.UtcNow < row.ExpiresAt.AddSeconds(-30).UtcDateTime;
+    }
+
+    private static DivingFishToken ToToken(RowSnapshot row)
+    {
+        return new DivingFishToken
         {
-            var subjects = KnownSubjectsByQq.GetOrAdd(qq, _ => new ConcurrentDictionary<string, byte>());
-            subjects[subject] = 0;
-            if (KnownSubjectsByQq.TryGetValue(qq, out var current) && ReferenceEquals(subjects, current)) return;
-        }
+            AccessToken = row.AccessToken,
+            Scope = row.Scope,
+            ExpiresAt = row.ExpiresAt.UtcDateTime
+        };
     }
 
     private static void RemoveExact<TKey, TValue>(
@@ -346,18 +173,5 @@ public static class DivingFishTokenStore
         throw new ArgumentOutOfRangeException(nameof(game), game, "仅支持 maimai 或 chunithm");
     }
 
-    private static string NormalizeScopes(string scopes)
-    {
-        return string.Join(' ', scopes
-            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Distinct(StringComparer.Ordinal)
-            .OrderBy(x => x, StringComparer.Ordinal));
-    }
-
-    private static string MergeScopes(string current, string added)
-    {
-        return NormalizeScopes($"{current} {added}");
-    }
-
-    private sealed record BindingSnapshot(string Subject);
+    private sealed record RowSnapshot(string Sub, string Scope, string AccessToken, DateTimeOffset ExpiresAt);
 }

@@ -1,7 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Plugin;
-
-namespace Marisa.Plugin.Shared.Dialog;
+﻿namespace Marisa.Plugin.Shared.Dialog;
 
 public static class Dialog
 {

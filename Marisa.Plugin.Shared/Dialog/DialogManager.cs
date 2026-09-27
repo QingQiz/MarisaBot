@@ -1,6 +1,4 @@
-﻿using Marisa.BotDriver.Plugin;
-
-namespace Marisa.Plugin.Shared.Dialog;
+﻿namespace Marisa.Plugin.Shared.Dialog;
 
 using TKey = (long? GroupId, long? SenderId);
 

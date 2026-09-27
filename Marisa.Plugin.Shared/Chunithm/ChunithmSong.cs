@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Microsoft.CSharp.RuntimeBinder;

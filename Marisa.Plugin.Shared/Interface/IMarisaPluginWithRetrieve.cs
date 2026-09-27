@@ -1,5 +1,4 @@
 ﻿using Marisa.Plugin.Shared.Chunithm;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Interface;

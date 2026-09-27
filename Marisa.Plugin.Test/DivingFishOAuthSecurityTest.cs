@@ -77,38 +77,26 @@ public class DivingFishOAuthSecurityTest
     }
 
     [Test]
-    public void SubjectRef_SameClientAndExternalId_IsStableLowercaseSha256()
-    {
-        const string expected = "7be34ed48f3de4511cfb3987c08091ea28d59cc5ba0695bce6a60c40dff1fa75";
-
-        var first = DivingFishOAuth.SubjectRef("123456789");
-        var second = DivingFishOAuth.SubjectRef("123456789");
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(first, Is.EqualTo(expected));
-            Assert.That(second, Is.EqualTo(expected));
-            Assert.That(first, Does.Match("^[0-9a-f]{64}$"));
-            Assert.That(DivingFishOAuth.SubjectRef("123456788"), Is.Not.EqualTo(first));
-        });
-    }
-
-    [Test]
     public void BindingService_Allows_Same_Subject_For_Different_Qq()
     {
         var firstQq = Interlocked.Increment(ref _identitySeed);
         var secondQq = Interlocked.Increment(ref _identitySeed);
         var sub = $"shared-sub-{firstQq}";
-        var scope = DivingFishOAuth.ScopeOf("maimai");
+        var token = new DivingFishToken
+        {
+            AccessToken = "token",
+            Scope = DivingFishOAuth.ScopeOf("maimai"),
+            ExpiresAt = DateTime.UtcNow.AddHours(1)
+        };
 
-        DivingFishBindingService.Commit(firstQq, sub, "tester", scope, "maimai");
-        DivingFishBindingService.Commit(secondQq, sub, "tester", scope, "maimai");
+        DivingFishBindingService.Commit(firstQq, sub, token, "maimai");
+        DivingFishBindingService.Commit(secondQq, sub, token, "maimai");
 
         using var realm = BotDbContext.OpenRealm();
-        var bindings = realm.All<DivingFishOAuthBind>()
+        var rows = realm.All<DivingFishAuthToken>()
             .Where(x => x.Sub == sub)
             .ToList();
-        Assert.That(bindings.Select(x => x.Qq), Is.EquivalentTo(new[] { firstQq, secondQq }));
+        Assert.That(rows.Select(x => x.Qq), Is.EquivalentTo(new[] { firstQq, secondQq }));
     }
 
     private static async Task<T[]> RunConcurrently<T>(Func<T> action)

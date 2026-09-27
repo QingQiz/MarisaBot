@@ -3,7 +3,6 @@ using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Interface;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
@@ -217,6 +216,36 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         }
 
         throw new InvalidOperationException("DivingFish OAuth retry loop exited unexpectedly");
+    }
+
+    /// <summary>
+    ///     bind 时实测票据是否可读：本地存有票据不代表服务端仍接受它（可能已被撤销），
+    ///     只有成绩接口返回 2xx 才算授权有效；401 时丢票重拉一次。
+    /// </summary>
+    public override async Task<bool> TestOAuthToken(long qq)
+    {
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var token = (await DivingFishTokenStore.GetValidToken(qq, "chunithm"))?.AccessToken;
+            if (token == null) return false;
+
+            var response = await "https://www.diving-fish.com/api/chunithmprober/player/records"
+                .WithHeader("Authorization", $"Bearer {token}")
+                .AllowHttpStatus("400,401,403,429,503")
+                .GetAsync();
+
+            if (response.StatusCode == (int)HttpStatusCode.Unauthorized)
+            {
+                DivingFishTokenStore.RemoveToken(qq, "chunithm");
+                continue;
+            }
+
+            if (response.StatusCode is 400 or 403) return false;
+            if (response.StatusCode is 429 or 503) throw new HttpRequestException("水鱼服务器繁忙，请稍后再试");
+            return true;
+        }
+
+        return false;
     }
 
     private static bool IsOAuthError(int statusCode) =>

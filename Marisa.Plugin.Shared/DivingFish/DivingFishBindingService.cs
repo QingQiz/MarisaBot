@@ -1,110 +1,62 @@
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.Chunithm;
-using Marisa.Database.Entity.Plugin.DivingFish;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 
 namespace Marisa.Plugin.Shared.DivingFish;
 
 public static class DivingFishBindingService
 {
-    internal static readonly object WriteGate = new();
-
-    public static void Commit(
-        long qq,
-        string sub,
-        string username,
-        string scopes,
-        string game)
-    {
-        lock (WriteGate)
-        {
-            CommitCore(qq, sub, username, scopes, game);
-        }
-    }
-
-    private static void CommitCore(
-        long qq,
-        string sub,
-        string username,
-        string scopes,
-        string game)
+    /// <summary>
+    ///     设备码授权确认后落库：写入水鱼授权与票据，并把该游戏的路由指向 DivingFish。
+    /// </summary>
+    public static void Commit(long qq, string sub, DivingFishToken token, string game)
     {
         if (string.IsNullOrWhiteSpace(sub)) throw new ArgumentException("sub is required", nameof(sub));
+
         var requiredScope = DivingFishOAuth.ScopeOf(game);
-        var grantedScopes = scopes.Split(
+        var grantedScopes = token.Scope.Split(
             ' ',
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (!grantedScopes.Contains(requiredScope, StringComparer.Ordinal))
         {
-            throw new ArgumentException("confirmation does not contain the required game scope", nameof(scopes));
+            throw new ArgumentException("confirmation does not contain the required game scope", nameof(token));
         }
 
-        var subject = DivingFishOAuth.SubjectForSub(sub);
+        DivingFishTokenStore.SaveAuthorization(qq, game, sub, token);
+
         using var realm = BotDbContext.OpenRealm();
-
-        var sameQq = realm.All<DivingFishOAuthBind>()
-            .Where(x => x.Qq == qq)
-            .ToList()
-            .OrderByDescending(x => x.VerifiedAt)
-            .ToList();
-        var oauthBinding = sameQq.FirstOrDefault();
-        var duplicateBindings = sameQq.Skip(1).ToList();
-
-        var maiBinding = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
-        var chunithmBinding = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
-        var mergedScopes = MergeScopes(oauthBinding?.Scopes, scopes);
-
-        realm.Write(() =>
+        var tr = realm.BeginWrite();
+        switch (game)
         {
-            foreach (var duplicate in duplicateBindings) realm.Remove(duplicate);
-
-            if (oauthBinding == null)
+            case "maimai":
             {
-                oauthBinding = realm.AddWithAutoId(new DivingFishOAuthBind { Qq = qq });
+                var binding = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
+                if (binding == null)
+                {
+                    realm.AddWithAutoId(new MaiMaiDxBind(qq, 0) { ServerName = "DivingFish" });
+                }
+                else
+                {
+                    binding.ServerName = "DivingFish";
+                }
+                break;
             }
 
-            oauthBinding.Subject = subject;
-            oauthBinding.Sub = sub;
-            oauthBinding.Username = username;
-            oauthBinding.Scopes = mergedScopes;
-            oauthBinding.Status = DivingFishOAuthBind.VerifiedStatus;
-            oauthBinding.VerifiedAt = DateTimeOffset.UtcNow;
-
-            switch (game)
+            case "chunithm":
             {
-                case "maimai":
-                    if (maiBinding == null)
-                    {
-                        realm.AddWithAutoId(new MaiMaiDxBind(qq, 0) { ServerName = "DivingFish" });
-                    }
-                    else
-                    {
-                        maiBinding.ServerName = "DivingFish";
-                    }
-                    break;
-
-                case "chunithm":
-                    if (chunithmBinding == null)
-                    {
-                        realm.AddWithAutoId(new ChunithmBind(qq, "DivingFish"));
-                    }
-                    else
-                    {
-                        chunithmBinding.ServerName = "DivingFish";
-                        chunithmBinding.AccessCode = "";
-                    }
-                    break;
+                var binding = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
+                if (binding == null)
+                {
+                    realm.AddWithAutoId(new ChunithmBind(qq, "DivingFish"));
+                }
+                else
+                {
+                    binding.ServerName = "DivingFish";
+                    binding.AccessCode = "";
+                }
+                break;
             }
-        });
-
-        DivingFishTokenStore.Invalidate(qq);
-    }
-
-    private static string MergeScopes(string? current, string granted)
-    {
-        return string.Join(' ', $"{current} {granted}"
-            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Distinct(StringComparer.Ordinal)
-            .OrderBy(x => x, StringComparer.Ordinal));
+        }
+        tr.Commit();
     }
 }

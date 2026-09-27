@@ -2,9 +2,7 @@
 using Marisa.Plugin.Shared.Chunithm.DataFetcher.Entities;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.Interface;
-using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -43,7 +41,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
 
     public override async Task<ChunithmRating> GetRating(Message message)
     {
-        var (username, qq) = AtOrSelf(message);
+        var (username, qq) = AtOrSelf(message, false);
         var scores = await ReqScores(username.IsWhiteSpace()
             ? new { qq, constant = "0-16" }
             : new { username, constant = "0-16" });

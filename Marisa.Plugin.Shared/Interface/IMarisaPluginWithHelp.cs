@@ -1,6 +1,4 @@
-﻿using Marisa.Plugin.Shared.Util;
-
-namespace Marisa.Plugin.Shared.Interface;
+﻿namespace Marisa.Plugin.Shared.Interface;
 
 public interface IMarisaPluginWithHelp
 {

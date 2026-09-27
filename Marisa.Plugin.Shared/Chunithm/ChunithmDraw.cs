@@ -1,6 +1,4 @@
-﻿using Marisa.Plugin.Shared.Util;
-
-namespace Marisa.Plugin.Shared.Chunithm;
+﻿namespace Marisa.Plugin.Shared.Chunithm;
 
 public static class ChunithmDraw
 {

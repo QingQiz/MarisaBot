@@ -81,10 +81,18 @@ public partial class Chunithm
                     if (idx == 2 && !string.IsNullOrWhiteSpace(ConfigurationManager.Configuration.Lxns.Oauth.ClientId))
                     {
                         // 已有有效 Token → 跳过 OAuth
-                        if (LxnsTokenStore.GetValidToken(next.Sender.Id).GetAwaiter().GetResult() != null)
+                        try
                         {
-                            message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
-                            return DoBind(next, fetchers[idx]);
+                            if (await GetDataFetcher("lxns", null).TestOAuthToken(next.Sender.Id))
+                            {
+                                message.Reply("Lxns OAuth 绑定成功！(已授权，跳过认证)");
+                                return DoBind(next, fetchers[idx]);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            message.Reply($"Lxns OAuth 暂不可用：{e.Message}");
+                            return MarisaPluginTaskState.CompletedTask;
                         }
 
                         // lxns OAuth 流程：只做 token 获取，绑定写入通过状态机 fall through
@@ -112,7 +120,7 @@ public partial class Chunithm
                     {
                         try
                         {
-                            if (await DivingFishTokenStore.GetValidToken(next.Sender.Id, "chunithm") != null)
+                            if (await GetDataFetcher("DivingFish", null).TestOAuthToken(next.Sender.Id))
                             {
                                 next.Reply("DivingFish OAuth 绑定成功！（已有有效授权）");
                                 return DoBind(next, fetchers[idx]);
