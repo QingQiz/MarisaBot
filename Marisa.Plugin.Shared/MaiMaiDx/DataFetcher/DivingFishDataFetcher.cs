@@ -14,8 +14,9 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
 
     protected virtual bool OAuthEnabled => DivingFishOAuth.IsConfigured;
 
-    public override async Task<DxRating> GetRating(Message message)
+    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
         var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
 
@@ -85,8 +86,9 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
         var scores = username.IsWhiteSpace()
             ? await FetchScores(message, true)

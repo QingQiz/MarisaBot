@@ -32,7 +32,7 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
             );
     }
 
-    public override async Task<DxRating> GetRating(Message message)
+    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
     {
         var id = GetAimeId(message);
 
@@ -68,7 +68,7 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
     {
         var id = GetAimeId(message);
 

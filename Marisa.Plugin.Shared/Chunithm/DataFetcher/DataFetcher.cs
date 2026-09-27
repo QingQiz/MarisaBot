@@ -24,9 +24,14 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
         return SongDb.SongList;
     }
 
-    public abstract Task<ChunithmRating> GetRating(Message message);
+    /// <summary>
+    ///     allowUsername 决定命令文本能否被当作查分器账号名查询。命令自带的参数（如汇总的等级、定数）
+    ///     不能当用户名，必须保持默认的 false；只有"参数就是账号名"的命令才传 true。
+    /// </summary>
+    public abstract Task<ChunithmRating> GetRating(Message message, bool allowUsername = false);
 
-    public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message);
+    /// <inheritdoc cref="GetRating"/>
+    public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false);
 
     /// <summary>
     ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。

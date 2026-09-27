@@ -113,6 +113,7 @@ public class DivingFishDeviceBindingDialogTest(string game, string command, bool
     public async Task Confirmation_ThroughDispatcher_BindsOnce_AndStopsTimeout()
     {
         MockAuthorization();
+        MockSuccessfulProbe();
         await StartBinding();
         AssertBindingCount(0);
 
@@ -234,9 +235,10 @@ public class DivingFishDeviceBindingDialogTest(string game, string command, bool
         };
 
         DivingFishDeviceBindingSession session = null!;
-        DialogHandler handler = m => Task.FromResult(session.Confirm(m));
+        DialogHandler handler = m => session.Confirm(m);
         Assert.That(DialogManager.TryAddDialog(Key, handler), Is.True);
-        session = new DivingFishDeviceBindingSession(CreateMessage("bind", _user, Group), game, handler, _clock);
+        session = new DivingFishDeviceBindingSession(CreateMessage("bind", _user, Group), game, handler, _clock,
+            _ => Task.FromResult(true));
         var background = session.RunAsync(new DivingFishOAuth.DeviceAuthorization("test-device", "TEST-CODE", "", 600, 1));
         _clock.Advance(TimeSpan.FromSeconds(1));
         try
@@ -286,6 +288,48 @@ public class DivingFishDeviceBindingDialogTest(string game, string command, bool
             Assert.That(await NextReply(), Is.EqualTo("replacement completed"));
             Assert.That(DialogManager.ContainsDialog(Key), Is.False);
         }
+    }
+
+    [Test]
+    public async Task SummaryLevel_DoesNotQueryByArgumentAsUsername()
+    {
+        if (game != "maimai")
+        {
+            Assert.Ignore("仅 maimai 有 sum lv 命令");
+        }
+
+        SeedAuthorization();
+        MockMusicData();
+        _http.ForCallsTo("https://www.diving-fish.com/api/maimaidxprober/player/records")
+            .RespondWithJson(new { nickname = "tester", records = Array.Empty<object>() });
+        // 公开查询若被误触发会返回 NotBound，正是用户看到的报错
+        _http.ForCallsTo("https://www.diving-fish.com/api/maimaidxprober/query/player")
+            .RespondWithJson(new { message = "尚未登录" }, 400);
+
+        await Dispatch("maisumlv14+");
+
+        Assert.That(_http.CallLog.Any(c => c.Request.Url.ToString().Contains("/query/player")), Is.False,
+            "等级参数不应被当作用户名做公开查询");
+    }
+
+    [Test]
+    public async Task DeviceFlow_TokenRejected_ReportsValidationFailure()
+    {
+        MockAuthorization();
+        if (game == "maimai") MockMusicData();
+        _http.ForCallsTo(ProberUrl).RespondWithJson(new { error = "invalid_token" }, 401);
+        _http.ForCallsTo(TokenUrl).WithRequestBody("*on-behalf-of*")
+            .RespondWithJson(new { error = "consent_required" }, 400);
+
+        await StartBinding();
+        _clock.Advance(TimeSpan.FromSeconds(1));
+        Assert.That(await NextReply(), Does.Contain("回复收到"));
+
+        await Dispatch("收到");
+
+        // 授权完成但实测被拒：不得回复 ok，而是明确告知验证未通过
+        Assert.That(await NextReply(), Does.Contain("令牌验证未通过"));
+        Assert.That(DialogManager.ContainsDialog(Key), Is.False);
     }
 
     [Test]
@@ -355,6 +399,13 @@ public class DivingFishDeviceBindingDialogTest(string game, string command, bool
             access_token = "test-access-token", token_type = "Bearer", expires_in = 3600,
             scope = DivingFishOAuth.ScopeOf(game), sub = "test-sub"
         });
+    }
+
+    /// <summary>设备码授权完成、确认绑定后还会实测一次成绩接口。</summary>
+    private void MockSuccessfulProbe()
+    {
+        if (game == "maimai") MockMusicData();
+        _http.ForCallsTo(ProberUrl).RespondWithJson(new { });
     }
 
     private string ProberUrl => game == "maimai"

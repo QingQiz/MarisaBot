@@ -146,11 +146,31 @@ public class MaiMaiDxDivingFishDataFetcherTest
             Command = "target".AsMemory()
         };
 
-        var scores = await fetcher.GetScores(message);
+        var scores = await fetcher.GetScores(message, true);
 
         Assert.Multiple(() =>
         {
             Assert.That(fetcher.LastQqOnly, Is.False);
+            Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
+        });
+    }
+
+    [Test]
+    public async Task GetScores_Should_Ignore_Command_When_Username_Not_Allowed()
+    {
+        var expected = CreateSongScore(45, 13.0, 100.5);
+        var fetcher = new TestDivingFishDataFetcher(CreateSongDb(), [expected]);
+        var message = new Message(null!, [])
+        {
+            Sender = new SenderInfo(1, "sender"),
+            Command = "14+".AsMemory()
+        };
+
+        var scores = await fetcher.GetScores(message);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(fetcher.LastQqOnly, Is.True, "命令参数不应被当作用户名");
             Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
         });
     }
@@ -186,7 +206,7 @@ public class MaiMaiDxDivingFishDataFetcherTest
             Command = "target".AsMemory()
         };
 
-        var scores = await fetcher.GetScores(message);
+        var scores = await fetcher.GetScores(message, true);
 
         Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
     }
@@ -382,7 +402,7 @@ public class MaiMaiDxDivingFishDataFetcherTest
     {
         public long RequestedQq { get; private set; }
 
-        public override Task<DxRating> GetRating(Message message) =>
+        public override Task<DxRating> GetRating(Message message, bool allowUsername = false) =>
             throw new AssertionException("authorized records must not depend on public B50 visibility");
 
         protected override Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
@@ -451,7 +471,7 @@ public class MaiMaiDxDivingFishDataFetcherTest
                 newScores));
         }
 
-        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
         {
             throw new AssertionException("username versus query must not request full records");
         }
@@ -476,13 +496,13 @@ public class MaiMaiDxDivingFishDataFetcherTest
         public Message? RatingMessage { get; private set; }
         public Message? ScoresMessage { get; private set; }
 
-        public override Task<DxRating> GetRating(Message message)
+        public override Task<DxRating> GetRating(Message message, bool allowUsername = false)
         {
             RatingMessage = message;
             return Task.FromResult(new DxRating { Nickname = "target", OldScores = bestScores, NewScores = [] });
         }
 
-        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
         {
             ScoresMessage = message;
             if (fullScoresError != null) throw fullScoresError;

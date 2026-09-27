@@ -141,7 +141,8 @@ public partial class Chunithm
                                     $"请打开水鱼授权链接完成绑定（{device.ExpiresIn / 60} 分钟内有效）：\n{device.VerificationUriComplete}\n\n用户码：{device.UserCode}"));
 
                             stat = 30;
-                            deviceBinding = new DivingFishDeviceBindingSession(message, "chunithm", HandleBindingMessage, timeProvider);
+                            deviceBinding = new DivingFishDeviceBindingSession(message, "chunithm", HandleBindingMessage, timeProvider,
+                                qq => GetDataFetcher("DivingFish", null).TestOAuthToken(qq));
                             _ = deviceBinding.RunAsync(device);
                             return MarisaPluginTaskState.ToBeContinued;
                         }
@@ -234,6 +235,13 @@ public partial class Chunithm
                         LxnsTokenStore.SaveToken(next.Sender.Id, token.AccessToken, token.RefreshToken,
                             (int)(token.ExpiresAt - DateTime.UtcNow).TotalSeconds);
 
+                        // 授权刚完成也要实测一次：令牌能被玩家接口接受才算绑定成功
+                        if (!await GetDataFetcher("lxns", null).TestOAuthToken(next.Sender.Id))
+                        {
+                            next.Reply("Lxns OAuth 授权已完成，但令牌验证未通过，请重新授权");
+                            return MarisaPluginTaskState.CompletedTask;
+                        }
+
                         message.Reply("Lxns OAuth 绑定成功！");
                         return DoBind(next, "lxns");
                     }
@@ -244,7 +252,7 @@ public partial class Chunithm
                     }
                 }
                 case 30:
-                    return deviceBinding!.Confirm(next);
+                    return await deviceBinding!.Confirm(next);
             }
 
             return MarisaPluginTaskState.CompletedTask;

@@ -71,7 +71,7 @@ public partial class Chunithm
     {
         var fetcher = await GetDataFetcher(message, true);
 
-        var rating = await fetcher.GetRating(message);
+        var rating = await fetcher.GetRating(message, true);
 
         if (b50)
         {

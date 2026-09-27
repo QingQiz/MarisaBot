@@ -16,7 +16,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
     private string KeyChipId { get; } = keyChipId;
     private string ServerUri => _serverUri ??= GetServerUri(KeyChipId).Result;
 
-    public override async Task<ChunithmRating> GetRating(Message message)
+    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
     {
         var aimeId = GetAimeId();
         var scores = await GetScores(aimeId);
@@ -52,7 +52,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
     {
         var aimeId = GetAimeId();
         return await GetScores(aimeId);

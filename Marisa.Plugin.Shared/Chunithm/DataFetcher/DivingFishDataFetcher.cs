@@ -22,8 +22,9 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         return LxnsDataFetcher.GetSharedSongList();
     }
 
-    public override async Task<ChunithmRating> GetRating(Message message)
+    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var (username, qq) = AtOrSelf(message, false);
 
         var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
@@ -88,8 +89,9 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var scores = await GetScoresCore(message, true);
 
         return scores.Records.Best

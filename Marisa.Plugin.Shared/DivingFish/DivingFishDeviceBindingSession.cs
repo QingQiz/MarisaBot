@@ -6,7 +6,8 @@ public sealed class DivingFishDeviceBindingSession(
     Message message,
     string game,
     Dialog.Dialog.MessageHandler handler,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    Func<long, Task<bool>> verifyToken)
 {
     private readonly object _gate = new();
     private readonly CancellationTokenSource _lifetime = new();
@@ -78,23 +79,42 @@ public sealed class DivingFishDeviceBindingSession(
         }
     }
 
-    public MarisaPluginTaskState Confirm(Message next)
+    public async Task<MarisaPluginTaskState> Confirm(Message next)
     {
+        (string Sub, DivingFishToken Token) entry;
         lock (_gate)
         {
             var result = _pending;
             if (!Finish()) return MarisaPluginTaskState.Canceled;
 
             if (!string.Equals(next.Command.Trim().ToString(), "收到", StringComparison.Ordinal) ||
-                result is not { } entry || timeProvider.GetUtcNow() >= _deadline)
+                result is not { } pending || timeProvider.GetUtcNow() >= _deadline)
             {
                 return MarisaPluginTaskState.Canceled;
             }
 
-            DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, entry.Token, game);
-            next.Reply("ok");
-            return MarisaPluginTaskState.CompletedTask;
+            entry = pending;
         }
+
+        DivingFishBindingService.Commit(next.Sender.Id, entry.Sub, entry.Token, game);
+
+        // 授权刚完成也要实测一次：票据能被成绩接口接受才算绑定成功
+        try
+        {
+            if (await verifyToken(next.Sender.Id))
+            {
+                next.Reply("ok");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            next.Reply("DivingFish OAuth 授权已完成，但令牌验证未通过，请重新绑定");
+        }
+        catch (Exception e)
+        {
+            next.Reply($"DivingFish OAuth 授权已完成，但令牌验证失败：{e.Message}");
+        }
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     private bool Finish()

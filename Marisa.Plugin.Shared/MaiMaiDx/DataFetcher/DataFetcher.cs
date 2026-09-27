@@ -11,15 +11,21 @@ public abstract class DataFetcher(SongDb<MaiMaiSong> songDb)
         return SongDb.SongList;
     }
 
-    public abstract Task<DxRating> GetRating(Message message);
+    /// <summary>
+    ///     allowUsername 决定命令文本能否被当作查分器账号名查询。命令自带的参数（如汇总的等级、定数）
+    ///     不能当用户名，必须保持默认的 false；只有"参数就是账号名"的命令才传 true。
+    /// </summary>
+    public abstract Task<DxRating> GetRating(Message message, bool allowUsername = false);
 
-    public abstract Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message);
+    /// <inheritdoc cref="GetRating"/>
+    public abstract Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false);
 
     /// <summary>Partial 数据中缺失的谱面不可判为未游玩。</summary>
     public virtual async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, bool Partial)>
         GetVersusData(Message message, bool publicOnly)
     {
-        var rating = await GetRating(message);
+        // vs 的对手支持"用户名"查询，这里显式放行
+        var rating = await GetRating(message, true);
         if (publicOnly)
         {
             return (rating.Nickname, rating.OldScores.Concat(rating.NewScores)
@@ -28,7 +34,7 @@ public abstract class DataFetcher(SongDb<MaiMaiSong> songDb)
 
         try
         {
-            return (rating.Nickname, await GetScores(message), false);
+            return (rating.Nickname, await GetScores(message, true), false);
         }
         catch (NotSupportedException)
         {

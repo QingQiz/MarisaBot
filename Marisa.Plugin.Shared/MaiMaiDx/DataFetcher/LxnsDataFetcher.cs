@@ -11,8 +11,9 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/maimai";
 
-    public override async Task<DxRating> GetRating(Message message)
+    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
         if (username.IsWhiteSpace() && qq == message.Sender.Id)
         {
@@ -25,7 +26,7 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         return await FetchScores(message);
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
     {
         var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
 

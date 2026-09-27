@@ -39,8 +39,9 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         }
     }
 
-    public override async Task<ChunithmRating> GetRating(Message message)
+    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
     {
+        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
         var (username, qq) = AtOrSelf(message, false);
         var scores = await ReqScores(username.IsWhiteSpace()
             ? new { qq, constant = "0-16" }
@@ -67,7 +68,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
     {
         var (username, qq) = AtOrSelf(message, true);
 
