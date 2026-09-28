@@ -17,7 +17,7 @@
 
         <section class="match-summary">
             <div class="player-summary player-a"><span>{{ data.Players[0].Name }}</span><div><b>{{ data.Summary.LeftWins }}</b><small>胜</small></div></div>
-            <div class="summary-center"><b>VS</b><span>全范围战绩</span><div>{{ data.Summary.Draws }} 平 <i>·</i> {{ data.Summary.Unknown }} 不可见</div><div class="summary-unplayed">{{ data.Summary.Unplayed }} 双方未游玩</div></div>
+            <div class="summary-center"><b>VS</b><span>全范围战绩</span><div>{{ data.Summary.Draws }} 平</div><div class="summary-unplayed">{{ data.Summary.Unplayed }} 双方未游玩</div></div>
             <div class="player-summary player-b"><span>{{ data.Players[1].Name }}</span><div><b>{{ data.Summary.RightWins }}</b><small>胜</small></div></div>
         </section>
         <div class="match-bar">
@@ -50,7 +50,7 @@
                             </span>
                         </div>
                     </template>
-                    <span v-else class="missing" :class="{unknown: scoreOf(row, side).State === 'unknown'}">{{ scoreOf(row, side).State === 'unknown' ? '不可见' : '未游玩' }}</span>
+                    <span v-else class="missing">未游玩</span>
                 </div>
                 <div class="outcome-cell" :class="row.Outcome">
                     <b>{{ outcomeMark(row.Outcome) }}</b>
@@ -77,10 +77,10 @@ import {DIFF_COLORS, DIFF_NAMES, bgKeyOf, versionLogoSrc} from '@/components/mai
 import {dxScoreStar} from '@/components/maimai/utils/ordinal'
 
 type Side = 'left' | 'right'
-type Outcome = Side | 'draw' | 'unplayed' | 'unknown'
-interface Score { State: 'played' | 'unplayed' | 'unknown'; Achievement: number | null; Rank: string | null; Fc: string; Fs: string; DxScore: number | null }
+type Outcome = Side | 'draw' | 'unplayed'
+interface Score { State: 'played' | 'unplayed'; Achievement: number | null; Rank: string | null; Fc: string; Fs: string; DxScore: number | null }
 interface Row { Id: number; Title: string; Type: string; LevelIndex: number; Level: string; Constant: number; MaxDx: number; Left: Score; Right: Score; Outcome: Outcome }
-interface BatchData { Scope: string; Version: string; SortLabel: string; Players: {Name: string}[]; Page: number; PageSize: number; TotalCharts: number; Summary: {LeftWins: number; RightWins: number; Draws: number; Unplayed: number; Unknown: number}; Rows: Row[] }
+interface BatchData { Scope: string; Version: string; SortLabel: string; Players: {Name: string}[]; Page: number; PageSize: number; TotalCharts: number; Summary: {LeftWins: number; RightWins: number; Draws: number; Unplayed: number}; Rows: Row[] }
 const route = useRoute()
 const data = ref<BatchData | null>(null)
 const sides: Side[] = ['left', 'right']
@@ -90,7 +90,6 @@ const summarySegments = computed(() => {
     return [
         {count: summary?.LeftWins ?? 0, color: '#68dcf2'},
         {count: summary?.Draws ?? 0, color: '#d8c7f4'},
-        {count: summary?.Unknown ?? 0, color: '#5d526d'},
         {count: summary?.Unplayed ?? 0, color: '#342d41'},
         {count: summary?.RightWins ?? 0, color: '#eea0db'},
     ]
@@ -104,8 +103,8 @@ function rankIcon(rank: string | null) { return '/assets/maimai/pic/rank_' + (ra
 function icon(name: string) { return '/assets/maimai/pic/icon_' + name + '.png' }
 function starN(row: Row, side: Side) { return dxScoreStar(scoreOf(row, side).DxScore ?? 0, row.MaxDx) }
 function starIcon(row: Row, side: Side) { return '/assets/maimai/pic/music_icon_dxstar_' + starN(row, side) + '.png' }
-function outcomeMark(outcome: Outcome) { return ({left: '←', right: '→', draw: '=', unplayed: '—', unknown: '—'})[outcome] }
-function outcomeLabel(outcome: Outcome) { return ({left: 'WIN', right: 'WIN', draw: '平局', unplayed: '未游玩', unknown: '不计胜负'})[outcome] }
+function outcomeMark(outcome: Outcome) { return ({left: '←', right: '→', draw: '=', unplayed: '—'})[outcome] }
+function outcomeLabel(outcome: Outcome) { return ({left: 'WIN', right: 'WIN', draw: '平局', unplayed: '未游玩'})[outcome] }
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
@@ -165,13 +164,11 @@ h1 { font:900 36px 'Microsoft YaHei',sans-serif; margin:5px 0 0; letter-spacing:
 .completion { display:flex; align-items:center; gap:4px; }
 .completion img { height:20px; width:auto; display:block; }
 .missing { color:#a291b0; font:700 15px 'Microsoft YaHei',sans-serif; }
-.missing.unknown { color:#c6b193; }
 .outcome-cell { grid-column:3; grid-row:1; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#ad99bb; gap:1px; }
 .outcome-cell b { font:700 23px/1 'Torus','Microsoft YaHei',sans-serif; }
 .outcome-cell small { font:700 9px 'Microsoft YaHei',sans-serif; white-space:nowrap; }
 .outcome-cell.left { color:#95eafa; }
 .outcome-cell.right { color:#f3b1e2; }
-.outcome-cell.unknown { color:#a391ae; }
 .batch-footer { display:flex; justify-content:space-between; align-items:end; margin-top:20px; }
 .batch-footer>div { display:flex; flex-direction:column; gap:8px; }
 .range-label { color:#b29bc2; font:700 11px 'Microsoft YaHei',sans-serif; }

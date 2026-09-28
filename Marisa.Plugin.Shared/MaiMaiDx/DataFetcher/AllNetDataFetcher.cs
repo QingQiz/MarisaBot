@@ -32,9 +32,9 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
             );
     }
 
-    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
+    public override async Task<DxRating> GetRating(ResolvedPlayer player)
     {
-        var id = GetAimeId(message);
+        var id = GetAimeId(player.Qq);
 
         var scores = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
 
@@ -68,11 +68,15 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
+    public override async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores)>
+        GetScores(ResolvedPlayer player)
     {
-        var id = GetAimeId(message);
+        var id = GetAimeId(player.Qq);
 
-        return await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
+        var scores = await GetPolicy("GetScores").ExecuteAsync(async () => await GetScores(id));
+
+        // 昵称不在本地缓存里，要额外请求一次 GM 接口
+        return ((await GetUserPreview(id)).Username, scores);
     }
 
     public static async Task<bool> Logout(int userId)
@@ -132,16 +136,8 @@ public class AllNetDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         return ret;
     }
 
-    private static int GetAimeId(Message message)
+    private static int GetAimeId(long qq)
     {
-        var qq = message.Sender.Id;
-
-        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
-        {
-            qq = (at as MessageDataAt)?.Target ?? qq;
-        }
-
         using var realm = BotDbContext.OpenRealm();
 
         var user = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().First(x => x.UId == qq);

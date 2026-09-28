@@ -2,9 +2,10 @@ using System.Security.Cryptography;
 using Marisa.Configuration;
 using Marisa.Database;
 using Marisa.Plugin.Shared.Dialog;
+using Marisa.Plugin.Shared.DivingFish;
+using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
-using Marisa.Plugin.Shared.Util;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -211,8 +212,8 @@ public partial class MaiMaiDx
         MaiValueAnalysisMode mode,
         MaiValueAnalysisFilter filter)
     {
-        var fetcher = GetDataFetcher(message);
-        var rating  = await fetcher.GetRating(message);
+        var player  = ResolvePlayer(message);
+        var rating  = await player.Fetcher.GetRating(player);
         var engine  = new MaiValueAnalysisEngine(SongDb.SongList);
         IReadOnlyList<SongScore> scores;
         string scope;
@@ -223,7 +224,7 @@ public partial class MaiMaiDx
         }
         else
         {
-            scores = engine.FilterScores((await fetcher.GetScores(message)).Values, filter);
+            scores = engine.FilterScores((await player.Fetcher.GetScores(player)).Scores.Values, filter);
             scope  = MaiValueAnalysisFilters.Scope(filter);
         }
 
@@ -268,38 +269,88 @@ public partial class MaiMaiDx
 
     #region data fetcher
 
-    private DataFetcher GetDataFetcher(Message message, bool allowUsername = false)
+    /// <summary>
+    ///     解析查询目标：@ 优先，其次命令文本（仅当调用方允许把它当账号名时），否则发送者自己；
+    ///     并按该 QQ 的本地绑定选定查分器。只查本地库，不发网络请求，fetcher 不再自己从消息里反推目标。
+    /// </summary>
+    private ResolvedPlayer ResolvePlayer(Message message, bool allowUsername = false)
     {
-        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查
-        if (allowUsername && !message.Command.IsWhiteSpace())
-        {
-            return GetDataFetcher(DataFetcherType.DivingFish);
-        }
-
-        var qq = message.Sender.Id;
-
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
+
+        // 账号名查询只有水鱼有公开接口；账号名不代表本人，一律拿不到 OAuth 票据
+        if (at is null && allowUsername && !message.Command.IsWhiteSpace())
         {
-            qq = (at as MessageDataAt)?.Target ?? qq;
+            return new ResolvedPlayer(message.Sender.Id, message.Command.Trim().ToString(), false,
+                GetDataFetcher(DataFetcherType.DivingFish));
         }
 
+        var qq = (at as MessageDataAt)?.Target ?? message.Sender.Id;
+
+        return new ResolvedPlayer(qq, null, qq == message.Sender.Id, GetDataFetcher(qq));
+    }
+
+    /// <summary>
+    ///     vs 的一方：对手必然来自 @。要求能读到对方的完整成绩——华立不支持 vs，
+    ///     水鱼/落雪都要求本地存有该 QQ 的 OAuth 授权。只查绑定表与票据表，不发网络请求。
+    /// </summary>
+    private (ResolvedPlayer? Player, string? Error) ResolveVersusPlayer(Message message, long qq)
+    {
+        var server = ServerOf(qq);
+
+        switch (server)
+        {
+            // 落雪只有 OAuth 一条取数路径
+            case "lxns" when LxnsTokenStore.GetToken(qq) is null:
+                return (null, LxnsDataFetcher.NotBoundHint);
+            case "lxns":
+                return (new ResolvedPlayer(qq, null, qq == message.Sender.Id, GetDataFetcher(server)), null);
+
+            // 水鱼：配置了 OAuth 就必须有授权；未配置时走 bot 的 dev token，不依赖用户票据
+            case "DivingFish" or null when DivingFishOAuth.IsConfigured && DivingFishTokenStore.GetToken(qq, "maimai") is null:
+                return (null, DivingFishDataFetcher.NotBoundHint);
+            case "DivingFish" or null:
+                return (new ResolvedPlayer(qq, null, qq == message.Sender.Id, GetDataFetcher(DataFetcherType.DivingFish)), null);
+
+            // 华立等旧绑定不支持 vs（bind 早已不提供华立）
+            default:
+                return (null, "该查分器不支持 vs，请先 bind 改绑水鱼或落雪");
+        }
+    }
+
+    /// <summary>该 QQ 绑定的查分器名；没绑定记录时为空。</summary>
+    private static string? ServerOf(long qq)
+    {
         using var realm = BotDbContext.OpenRealm();
 
-        var bind = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq);
+        return realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxBind>()
+            .FirstOrDefault(x => x.UId == qq)?.ServerName;
+    }
 
-        if (bind == null)
-        {
-            return GetDataFetcher(DataFetcherType.DivingFish);
-        }
+    /// <summary>按绑定选查分器：未绑定时按水鱼处理，认不出的绑定名按华立处理（历史数据的兜底）。</summary>
+    private DataFetcher GetDataFetcher(long qq)
+    {
+        var server = ServerOf(qq);
 
-        return bind.ServerName switch
-        {
-            "lxns" => GetDataFetcher(DataFetcherType.Lxns),
-            "DivingFish" => GetDataFetcher(DataFetcherType.DivingFish),
-            "Wahlap" => GetDataFetcher(DataFetcherType.Wahlap),
-            _ => GetDataFetcher(DataFetcherType.Wahlap)
-        };
+        return server is null ? GetDataFetcher(DataFetcherType.DivingFish) : GetDataFetcher(server);
+    }
+
+    private DataFetcher GetDataFetcher(string server) => server switch
+    {
+        "lxns" => GetDataFetcher(DataFetcherType.Lxns),
+        "DivingFish" => GetDataFetcher(DataFetcherType.DivingFish),
+        _ => GetDataFetcher(DataFetcherType.Wahlap),
+    };
+
+    /// <summary>授权类错误（对手没绑定，或票据已失效）：要 @ 对手本人，原文里已写明怎么重新绑定。</summary>
+    private static bool IsOpponentBindingError(string error) =>
+        error.Contains("OAuth", StringComparison.OrdinalIgnoreCase) ||
+        error.Contains("未绑定水鱼", StringComparison.OrdinalIgnoreCase);
+
+    private static MarisaPluginTaskState ReplyOpponentNotBound(Message message, long opponentQq, string error)
+    {
+        new MessageBuilder(message).Text(error).At(opponentQq).Reply();
+
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     private readonly Dictionary<DataFetcherType, DataFetcher> _dataFetchers = new();

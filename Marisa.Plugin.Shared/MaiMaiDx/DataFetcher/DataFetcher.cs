@@ -12,48 +12,29 @@ public abstract class DataFetcher(SongDb<MaiMaiSong> songDb)
     }
 
     /// <summary>
-    ///     allowUsername 决定命令文本能否被当作查分器账号名查询。命令自带的参数（如汇总的等级、定数）
-    ///     不能当用户名，必须保持默认的 false；只有"参数就是账号名"的命令才传 true。
+    ///     顶峰成绩（旧 35 + 新 15）。各查分器自己的 B50 接口，支持按账号名查询和 @ 他人；
+    ///     关注的是「服务器认定的最好成绩」，与完整成绩是两套数据，不要合并。
     /// </summary>
-    public abstract Task<DxRating> GetRating(Message message, bool allowUsername = false);
+    public abstract Task<DxRating> GetRating(ResolvedPlayer player);
 
-    /// <inheritdoc cref="GetRating"/>
-    public abstract Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false);
-
-    /// <summary>Partial 数据中缺失的谱面不可判为未游玩。</summary>
-    public virtual async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, bool Partial)>
-        GetVersusData(Message message, bool publicOnly)
-    {
-        // vs 的对手支持"用户名"查询，这里显式放行
-        var rating = await GetRating(message, true);
-        if (publicOnly)
-        {
-            return (rating.Nickname, rating.OldScores.Concat(rating.NewScores)
-                .ToDictionary(x => (x.Id, x.LevelIdx), x => x), true);
-        }
-
-        try
-        {
-            return (rating.Nickname, await GetScores(message, true), false);
-        }
-        catch (NotSupportedException)
-        {
-            return (rating.Nickname, rating.OldScores.Concat(rating.NewScores)
-                .ToDictionary(x => (x.Id, x.LevelIdx), x => x), true);
-        }
-    }
+    /// <summary>
+    ///     完整成绩：昵称 + 按 (歌曲 id, 难度序号) 索引的全量成绩。本人/@ 他人用对方自己的凭据读取；
+    ///     按账号名查询时只有水鱼可用（公开 B50）。昵称拿不到时为 null。
+    /// </summary>
+    public abstract Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores)>
+        GetScores(ResolvedPlayer player);
 
     /// <summary>
     ///     获取某一首歌各难度的个人成绩（单曲成绩卡用）。返回 (昵称, 按难度索引的成绩)；昵称拿不到时为 null。
     ///     默认实现回退为「拉取整个成绩表再筛选」；具体查分器可覆写为各自的「单曲成绩接口」以避免全量拉取。
     /// </summary>
-    public virtual async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
+    public virtual async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(ResolvedPlayer player, MaiMaiSong song)
     {
-        var rating = await GetRating(message);
-        var scores = (await GetScores(message))
+        var (nickname, scores) = await GetScores(player);
+
+        return (nickname, scores
             .Where(kv => kv.Key.Id == song.Id)
-            .ToDictionary(kv => kv.Key.LevelIdx, kv => kv.Value);
-        return (rating.Nickname, scores);
+            .ToDictionary(kv => kv.Key.LevelIdx, kv => kv.Value));
     }
 
     /// <summary>

@@ -39,6 +39,17 @@ public static class DivingFishTokenStore
         }
     }
 
+    /// <summary>
+    ///     是否存有该 QQ 的授权：只查本地库，不发网络请求（票据新鲜与否由 <see cref="GetValidToken" /> 负责）。
+    /// </summary>
+    public static DivingFishToken? GetToken(long qq, string game)
+    {
+        game = NormalizeGame(game);
+
+        var row = ReadRow(qq, game);
+        return row == null ? null : ToToken(row);
+    }
+
     /// <summary>设备码授权完成后写入（或覆盖）该 QQ 在指定游戏上的授权与票据。</summary>
     public static void SaveAuthorization(long qq, string game, string sub, DivingFishToken token)
     {

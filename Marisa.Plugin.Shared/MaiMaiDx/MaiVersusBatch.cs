@@ -29,8 +29,7 @@ public sealed class MaiVersusBatch
             _rows.Count(x => x.Outcome == Outcome.Left),
             _rows.Count(x => x.Outcome == Outcome.Right),
             _rows.Count(x => x.Outcome == Outcome.Draw),
-            _rows.Count(x => x.Outcome == Outcome.Unplayed),
-            _rows.Count(x => x.Outcome == Outcome.Unknown));
+            _rows.Count(x => x.Outcome == Outcome.Unplayed));
     }
 
     public string Scope { get; }
@@ -89,7 +88,7 @@ public sealed class MaiVersusBatch
     {
         if (!player.Scores.TryGetValue(key, out var score))
         {
-            return new ScoreView(player.Partial ? State.Unknown : State.Unplayed);
+            return new ScoreView(State.Unplayed);
         }
 
         return new ScoreView(
@@ -104,7 +103,6 @@ public sealed class MaiVersusBatch
 
     private static string Compare(ScoreView left, ScoreView right)
     {
-        if (left.State == State.Unknown || right.State == State.Unknown) return Outcome.Unknown;
         if (left.State == State.Unplayed && right.State == State.Unplayed) return Outcome.Unplayed;
         if (left.State == State.Unplayed) return Outcome.Right;
         if (right.State == State.Unplayed) return Outcome.Left;
@@ -114,10 +112,9 @@ public sealed class MaiVersusBatch
 
     public sealed record Player(
         string Name,
-        IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> Scores,
-        bool Partial);
+        IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> Scores);
 
-    public sealed record BatchSummary(int LeftWins, int RightWins, int Draws, int Unplayed, int Unknown);
+    public sealed record BatchSummary(int LeftWins, int RightWins, int Draws, int Unplayed);
 
     public sealed record PlayerView(string Name);
 
@@ -157,7 +154,6 @@ public sealed class MaiVersusBatch
     {
         public const string Played = "played";
         public const string Unplayed = "unplayed";
-        public const string Unknown = "unknown";
     }
 
     private static class Outcome
@@ -166,6 +162,5 @@ public sealed class MaiVersusBatch
         public const string Right = "right";
         public const string Draw = "draw";
         public const string Unplayed = "unplayed";
-        public const string Unknown = "unknown";
     }
 }

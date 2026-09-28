@@ -77,7 +77,7 @@ public class MaiMaiVersusDialogTest
         {
             var charts = Enumerable.Range(1, count)
                 .Select(id => (14.0, 3, MaiMaiVersusCommandTest.Song(id, $"song-{id}"))).ToArray();
-            var player = new MaiVersusBatch.Player("player", new Dictionary<(long, int), SongScore>(), false);
+            var player = new MaiVersusBatch.Player("player", new Dictionary<(long, int), SongScore>());
             _batch = new MaiVersusBatch("彩代", "", "定数降序", charts, player, player);
         }
 

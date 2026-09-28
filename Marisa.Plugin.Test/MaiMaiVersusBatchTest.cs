@@ -9,36 +9,30 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiVersusBatchTest
 {
-    [TestCase("played", "played", "draw")]
-    [TestCase("played", "unplayed", "left")]
-    [TestCase("unplayed", "played", "right")]
-    [TestCase("unplayed", "unplayed", "unplayed")]
-    [TestCase("played", "unknown", "unknown")]
-    [TestCase("unknown", "played", "unknown")]
-    [TestCase("unplayed", "unknown", "unknown")]
-    [TestCase("unknown", "unplayed", "unknown")]
-    [TestCase("unknown", "unknown", "unknown")]
-    public void MissingRecordsRespectDataCoverage(string leftState, string rightState, string outcome)
+    [TestCase(true, true, "draw")]
+    [TestCase(true, false, "left")]
+    [TestCase(false, true, "right")]
+    [TestCase(false, false, "unplayed")]
+    public void MissingRecordsCountAsUnplayed(bool leftPlayed, bool rightPlayed, string outcome)
     {
         var song = CreateSong(1);
         var batch = CreateBatch(
             [(14.0, 3, song)],
-            PlayerWithState(leftState, 1),
-            PlayerWithState(rightState, 1));
+            PlayerWithState(leftPlayed, 1),
+            PlayerWithState(rightPlayed, 1));
         var row = batch.GetPage(1).Rows.Single();
 
         Assert.Multiple(() =>
         {
-            Assert.That(row.Left.State, Is.EqualTo(leftState));
-            Assert.That(row.Right.State, Is.EqualTo(rightState));
+            Assert.That(row.Left.State, Is.EqualTo(leftPlayed ? "played" : "unplayed"));
+            Assert.That(row.Right.State, Is.EqualTo(rightPlayed ? "played" : "unplayed"));
             Assert.That(row.Outcome, Is.EqualTo(outcome));
             Assert.That(batch.Summary.LeftWins, Is.EqualTo(outcome == "left" ? 1 : 0));
             Assert.That(batch.Summary.RightWins, Is.EqualTo(outcome == "right" ? 1 : 0));
             Assert.That(batch.Summary.Draws, Is.EqualTo(outcome == "draw" ? 1 : 0));
             Assert.That(batch.Summary.Unplayed, Is.EqualTo(outcome == "unplayed" ? 1 : 0));
-            Assert.That(batch.Summary.Unknown, Is.EqualTo(outcome == "unknown" ? 1 : 0));
-            if (leftState != "played") Assert.That(row.Left.Achievement, Is.Null);
-            if (rightState != "played") Assert.That(row.Right.Achievement, Is.Null);
+            if (!leftPlayed) Assert.That(row.Left.Achievement, Is.Null);
+            if (!rightPlayed) Assert.That(row.Right.Achievement, Is.Null);
         });
     }
 
@@ -70,28 +64,6 @@ public class MaiMaiVersusBatchTest
             Assert.That(row.Left.State, Is.EqualTo("played"));
             Assert.That(row.Left.Achievement, Is.Zero);
             Assert.That(row.Outcome, Is.EqualTo("left"));
-        });
-    }
-
-    [Test]
-    public void PublicB50RecordIsPlayedButMissingDifficultyIsUnknown()
-    {
-        var song = CreateSong(1);
-        var left = new MaiVersusBatch.Player("public user", new Dictionary<(long, int), SongScore>
-        {
-            [(1, 2)] = CreateScore(1, 2, 100.5)
-        }, true);
-        var batch = CreateBatch([(12.0, 2, song), (14.0, 3, song)], left, Player());
-        var rows = batch.GetPage(1).Rows;
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(rows[0].Left.State, Is.EqualTo("played"));
-            Assert.That(rows[0].Outcome, Is.EqualTo("left"));
-            Assert.That(rows[1].Left.State, Is.EqualTo("unknown"));
-            Assert.That(rows[1].Outcome, Is.EqualTo("unknown"));
-            Assert.That(rows[1].Left.Rating, Is.Null);
-            Assert.That(rows[1].Left.DxScore, Is.Null);
         });
     }
 
@@ -189,15 +161,15 @@ public class MaiMaiVersusBatchTest
         return new MaiVersusBatch("彩代 紫", "maimai でらっくす BUDDiES", "定数降序", charts, left, right);
     }
 
-    private static MaiVersusBatch.Player PlayerWithState(string state, long id)
+    private static MaiVersusBatch.Player PlayerWithState(bool played, long id)
     {
-        var scores = state == "played" ? new[] { CreateScore(id, 3, 100) } : Array.Empty<SongScore>();
-        return new MaiVersusBatch.Player("player", scores.ToDictionary(score => (score.Id, score.LevelIdx)), state == "unknown");
+        SongScore[] scores = played ? [CreateScore(id, 3, 100)] : [];
+        return new MaiVersusBatch.Player("player", scores.ToDictionary(score => (score.Id, score.LevelIdx)));
     }
 
     private static MaiVersusBatch.Player Player(params SongScore[] scores)
     {
-        return new MaiVersusBatch.Player("player", scores.ToDictionary(score => (score.Id, score.LevelIdx)), false);
+        return new MaiVersusBatch.Player("player", scores.ToDictionary(score => (score.Id, score.LevelIdx)));
     }
 
     private static SongScore CreateScore(long id, int levelIdx, double achievement)

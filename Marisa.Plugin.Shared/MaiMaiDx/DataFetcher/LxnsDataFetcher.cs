@@ -11,35 +11,37 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
 {
     private const string BaseUrl = "https://maimai.lxns.net/api/v0/maimai";
 
-    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
+    /// <summary>没有可用 OAuth 授权时的提示。vs 的本地预检也用这句，保证预检与取数失败时口径一致。</summary>
+    public const string NotBoundHint = "[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试";
+
+    /// <summary>
+    ///     B50：本人用本人 OAuth 票据，他人用 bot 的 dev token 查公开数据（落雪没有按账号名的接口）。
+    /// </summary>
+    public override async Task<DxRating> GetRating(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
-        if (username.IsWhiteSpace() && qq == message.Sender.Id)
+        if (player.IsSelf)
         {
-            var token = await GetRequiredOAuthToken(qq);
-            var scores = await GetScoresViaOAuth(token, qq);
-            var nickname = await GetNicknameViaOAuth(token, qq);
+            var token    = await GetRequiredOAuthToken(player.Qq);
+            var scores   = await GetScoresViaOAuth(token, player.Qq);
+            var nickname = await GetNicknameViaOAuth(token, player.Qq);
             return BuildRating(scores, nickname);
         }
 
-        return await FetchScores(message);
+        return await FetchScores(player.Qq);
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
+    /// <summary>
+    ///     完整成绩：用该 QQ 自己的落雪 OAuth 票据读，不走 bot 的 dev token 公共查询——
+    ///     后者要求对方公开成绩、QQ 已关联落雪，会让同一对玩家两个方向的可用性不一致。
+    /// </summary>
+    public override async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores)>
+        GetScores(ResolvedPlayer player)
     {
-        var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
+        var token    = await GetRequiredOAuthToken(player.Qq);
+        var scores   = await GetScoresViaOAuth(token, player.Qq);
+        var nickname = await GetNicknameViaOAuth(token, player.Qq);
 
-        // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
-        var oauthToken = await GetRequiredOAuthToken(qq);
-        return await GetScoresViaOAuth(oauthToken, qq);
-
-        // === 以下 dev token 两阶段抓取已废弃 ===
-        /*
-        // 回落 dev token 两阶段抓取
-        var token = ConfigurationManager.Configuration.Lxns.DevToken;
-        ...
-        */
+        return (nickname, scores);
     }
 
     private async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)
@@ -105,86 +107,19 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         return result;
     }
 
-    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
+    /// <summary>
+    ///     本人和他人一样：用对方自己的 OAuth 票据读完整成绩再筛这一首。昵称也一并拿到，
+    ///     不走 dev token 的公共单曲接口——那条路要求对方公开成绩、QQ 已关联落雪。
+    /// </summary>
+    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(ResolvedPlayer player, MaiMaiSong song)
     {
-        var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
-        var empty   = new Dictionary<int, SongScore>();
+        var token       = await GetRequiredOAuthToken(player.Qq);
+        var oauthScores = await GetScoresViaOAuth(token, player.Qq);
+        var nickname    = await GetNicknameViaOAuth(token, player.Qq);
 
-        if (username.IsWhiteSpace() && qq == message.Sender.Id)
-        {
-            var token = await GetRequiredOAuthToken(qq);
-            var oauthScores = await GetScoresViaOAuth(token, qq);
-            var nickname = await GetNicknameViaOAuth(token, qq);
-            return (nickname, oauthScores
-                .Where(x => x.Key.Id == song.Id)
-                .ToDictionary(x => x.Key.LevelIdx, x => x.Value));
-        }
-
-        // 玩家信息：拿昵称 + friend_code（单曲成绩接口按 friend_code 查，dev token 即可，无需 OAuth）
-        var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
-            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
-            .AllowHttpStatus("400,401,403,404")
-            .GetAsync();
-
-        if (playerResponse.StatusCode is 400 or 401 or 403 or 404)
-        {
-            var body = await playerResponse.GetStringAsync();
-            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.Lxns(playerResponse.StatusCode, body));
-        }
-
-        var playerJson = await playerResponse.GetStringAsync();
-        using var playerDoc = JsonDocument.Parse(playerJson);
-        var data       = playerDoc.RootElement.GetProperty("data");
-        var friendCode = data.GetProperty("friend_code").GetInt64().ToString();
-        var playerName = data.GetProperty("name").GetString() ?? "";
-
-        // 宴会场（id > 100000）落雪单曲接口无对应，直接返回空成绩（卡片显示未游玩）
-        if (song.Id > 100000) return (playerName, empty);
-
-        var isDx     = song.Id >= 10000;                       // DX 谱 id 形如 1xxxx
-        var rawId    = isDx ? (int)(song.Id - 10000) : (int)song.Id;
-        var songType = isDx ? "dx" : "standard";
-
-        var response = await $"{BaseUrl}/player/{friendCode}/bests?song_id={rawId}&song_type={songType}"
-            .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
-            .AllowHttpStatus("400,401,403,404")
-            .GetAsync();
-
-        if (response.StatusCode is 404) return (playerName, empty);   // 该曲无成绩
-        if (response.StatusCode is 400 or 401 or 403)
-        {
-            var body = await response.GetStringAsync();
-            throw new HttpRequestException(HttpRequestError.Unknown, ProberError.Lxns(response.StatusCode, body));
-        }
-
-        var jsonString = await response.GetStringAsync();
-        using var doc  = JsonDocument.Parse(jsonString);
-        var root       = doc.RootElement.TryGetProperty("data", out var d) ? d : doc.RootElement;
-
-        var scores = new Dictionary<int, SongScore>();
-        if (root.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var s in root.EnumerateArray())
-            {
-                var lvlIdx = s.TryGetProperty("level_index", out var li) ? li.GetInt32() : -1;
-                if (lvlIdx < 0) continue;
-
-                scores[lvlIdx] = new SongScore
-                {
-                    Id          = song.Id,
-                    LevelIdx    = lvlIdx,
-                    Level       = s.TryGetProperty("level", out var lv) ? lv.GetString() ?? "" : "",
-                    Achievement = s.TryGetProperty("achievements", out var ach) ? ach.GetDouble() : 0,
-                    DxScore     = s.TryGetProperty("dx_score", out var dx) ? dx.GetInt32() : 0,
-                    Fc          = s.TryGetProperty("fc", out var fc) ? fc.GetString() ?? "" : "",
-                    Fs          = s.TryGetProperty("fs", out var fs) ? fs.GetString() ?? "" : "",
-                    Type        = isDx ? "DX" : "SD",
-                    Constant    = lvlIdx < song.Constants.Count ? song.Constants[lvlIdx] : 0
-                };
-            }
-        }
-
-        return (playerName, scores);
+        return (nickname, oauthScores
+            .Where(x => x.Key.Id == song.Id)
+            .ToDictionary(x => x.Key.LevelIdx, x => x.Value));
     }
 
     private async Task<LxnsToken> GetRequiredOAuthToken(long qq)
@@ -192,7 +127,7 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         try
         {
             return await LxnsTokenStore.GetValidToken(qq)
-                   ?? throw new HttpRequestException("[Lxns] 请先使用 bind → 选择 lxns 完成 OAuth 授权后再试");
+                   ?? throw new HttpRequestException(NotBoundHint);
         }
         catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized)
         {
@@ -293,10 +228,8 @@ public class LxnsDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(songDb)
         }
     }
 
-    private async Task<DxRating> FetchScores(Message message)
+    private async Task<DxRating> FetchScores(long qq)
     {
-        var (_, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
-
         var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
             .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
             .AllowHttpStatus("400,401,403,404")

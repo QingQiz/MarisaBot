@@ -105,6 +105,10 @@ public class MaiMaiDxDivingFishDataFetcherTest
         }));
     }
 
+    /// <summary>构造取数目标；测试里被测的 fetcher 就是目标自己的 fetcher。</summary>
+    private static ResolvedPlayer Target(DataFetcher fetcher, long qq = 1, string? username = null, bool isSelf = true) =>
+        new(qq, username, isSelf, fetcher);
+
     [Test]
     public async Task GetRating_Should_Keep_Top_35_Old_And_Top_15_New_By_IsNew()
     {
@@ -115,13 +119,9 @@ public class MaiMaiDxDivingFishDataFetcherTest
         var newRecords = Enumerable.Range(1001, 20)
             .Select(i => CreateSongScore(i, 11.0 + i / 1000.0, 200 + i))
             .ToList();
-        var fetcher = new TestDivingFishDataFetcher(songDb, oldRecords.Concat(newRecords).ToList());
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "test")
-        };
+        var fetcher = new RecordingDivingFishDataFetcher(songDb, oldRecords.Concat(newRecords).ToList());
 
-        var rating = await fetcher.GetRating(message);
+        var rating = await fetcher.GetRating(Target(fetcher));
 
         Assert.Multiple(() =>
         {
@@ -136,61 +136,34 @@ public class MaiMaiDxDivingFishDataFetcherTest
     }
 
     [Test]
-    public async Task GetScores_Should_Pass_Username_Query_To_DivingFish()
+    public async Task GetScores_Should_Query_Target_By_Username()
     {
         var expected = CreateSongScore(42, 13.0, 100.5);
-        var fetcher = new TestDivingFishDataFetcher(CreateSongDb(), [expected]);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "sender"),
-            Command = "target".AsMemory()
-        };
+        var fetcher  = new RecordingDivingFishDataFetcher(CreateSongDb(), [expected]);
 
-        var scores = await fetcher.GetScores(message, true);
+        var (_, scores) = await fetcher.GetScores(Target(fetcher, username: "target"));
 
         Assert.Multiple(() =>
         {
-            Assert.That(fetcher.LastQqOnly, Is.False);
+            Assert.That(fetcher.LastUsername, Is.EqualTo("target"));
+            Assert.That(fetcher.LastQq, Is.Null);
             Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
         });
     }
 
     [Test]
-    public async Task GetScores_Should_Ignore_Command_When_Username_Not_Allowed()
-    {
-        var expected = CreateSongScore(45, 13.0, 100.5);
-        var fetcher = new TestDivingFishDataFetcher(CreateSongDb(), [expected]);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "sender"),
-            Command = "14+".AsMemory()
-        };
-
-        var scores = await fetcher.GetScores(message);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(fetcher.LastQqOnly, Is.True, "命令参数不应被当作用户名");
-            Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
-        });
-    }
-
-    [Test]
-    public async Task GetScores_Should_Use_Qq_Query_When_Command_Is_Empty()
+    public async Task GetScores_Should_Query_Target_By_Qq()
     {
         var expected = CreateSongScore(43, 13.0, 100.5);
-        var fetcher = new TestDivingFishDataFetcher(CreateSongDb(), [expected]);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "sender"),
-            Command = "".AsMemory()
-        };
+        var fetcher  = new RecordingDivingFishDataFetcher(CreateSongDb(), [expected]);
 
-        var scores = await fetcher.GetScores(message);
+        var (nickname, scores) = await fetcher.GetScores(Target(fetcher, qq: 7));
 
         Assert.Multiple(() =>
         {
-            Assert.That(fetcher.LastQqOnly, Is.True);
+            Assert.That(fetcher.LastQq, Is.EqualTo(7), "命令参数不会被当作用户名：目标由 ResolvePlayer 解析，见 MaiMaiResolvePlayerTest");
+            Assert.That(fetcher.LastUsername, Is.Null);
+            Assert.That(nickname, Is.EqualTo("tester"));
             Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
         });
     }
@@ -199,125 +172,51 @@ public class MaiMaiDxDivingFishDataFetcherTest
     public async Task GetScores_OAuth_Username_Should_Use_Public_Target_Records()
     {
         var expected = CreateSongScore(43, 13.0, 100.5);
-        var fetcher = new PublicDivingFishDataFetcher(CreateSongDb(), [expected], []);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "sender"),
-            Command = "target".AsMemory()
-        };
+        var fetcher  = new PublicDivingFishDataFetcher(CreateSongDb(), [expected], []);
 
-        var scores = await fetcher.GetScores(message, true);
+        var (_, scores) = await fetcher.GetScores(Target(fetcher, username: "target"));
 
         Assert.That(scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
     }
 
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task GetVersusData_Username_Should_Not_Request_Full_Records(bool oauthEnabled)
-    {
-        var expected = CreateSongScore(44, 13.0, 100.5);
-        var fetcher = new PublicVersusDivingFishDataFetcher(CreateSongDb(), [expected], [], oauthEnabled);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "sender"),
-            Command = "target".AsMemory()
-        };
-
-        var data = await fetcher.GetVersusData(message, true);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(data.Partial, Is.True);
-            Assert.That(data.Nickname, Is.EqualTo("target"));
-            Assert.That(data.Scores[(expected.Id, expected.LevelIdx)], Is.SameAs(expected));
-        });
-    }
-
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task GetVersusData_Qq_DoesNotRequirePublicB50(bool mention)
-    {
-        var expected = CreateSongScore(44, 13, 95);
-        var fetcher = new PrivateVersusDivingFishDataFetcher(CreateSongDb(), [expected]);
-        var message = new Message(null!, mention ? [new MessageDataAt(2)] : [])
-        {
-            Sender = new SenderInfo(1, "sender"), Command = "".AsMemory()
-        };
-        var result = await fetcher.GetVersusData(message, false);
-        Assert.That(result.Partial, Is.False);
-        Assert.That(result.Nickname, Is.EqualTo("authorized"));
-        Assert.That(result.Scores[(44, 0)], Is.SameAs(expected));
-        Assert.That(fetcher.RequestedQq, Is.EqualTo(mention ? 2 : 1));
-    }
-
     [Test]
-    public void GetVersusData_EmptyUsernameDoesNotFallBackToSender()
+    public async Task GetScores_UsesGivenQqAndKeepsRecordsOutsideB50()
     {
-        var fetcher = new PublicVersusDivingFishDataFetcher(CreateSongDb(), [], [], true);
-        var message = new Message(null!, []) { Sender = new SenderInfo(1, "sender") };
-        Assert.ThrowsAsync<ArgumentException>(() => fetcher.GetVersusData(message, true));
-    }
-
-    [Test]
-    public async Task GetVersusData_Qq_Should_Preserve_Complete_Records_Outside_B50()
-    {
-        var best = CreateSongScore(1, 13.0, 100.5);
+        var best       = CreateSongScore(1, 13.0, 100.5);
         var outsideB50 = CreateSongScore(2, 13.0, 90);
-        var fetcher = new VersusDataFetcher(CreateSongDb(), [best], [best, outsideB50]);
-        var message = new Message(null!, []) { Sender = new SenderInfo(1, "sender") };
+        var fetcher    = new PrivateVersusDivingFishDataFetcher(CreateSongDb(), [best, outsideB50]);
 
-        var data = await fetcher.GetVersusData(message, false);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(data.Partial, Is.False);
-            Assert.That(data.Scores.Keys, Is.EquivalentTo(new[] { (1L, 0), (2L, 0) }));
-            Assert.That(data.Scores[(2, 0)], Is.SameAs(outsideB50));
-            Assert.That(fetcher.RatingMessage, Is.SameAs(message));
-            Assert.That(fetcher.ScoresMessage, Is.SameAs(message));
-        });
-    }
-
-    [Test]
-    public async Task GetVersusData_Qq_Should_Mark_Unsupported_Full_Records_As_Partial()
-    {
-        var best = CreateSongScore(1, 13.0, 100.5);
-        var fetcher = new VersusDataFetcher(CreateSongDb(), [best], [], new NotSupportedException());
-        var message = new Message(null!, []) { Sender = new SenderInfo(1, "sender") };
-
-        var data = await fetcher.GetVersusData(message, false);
+        var (nickname, scores) = await fetcher.GetScores(Target(fetcher, qq: 2, isSelf: false));
 
         Assert.Multiple(() =>
         {
-            Assert.That(data.Partial, Is.True);
-            Assert.That(data.Scores.Keys, Is.EqualTo(new[] { (1L, 0) }));
-            Assert.That(data.Scores[(1, 0)], Is.SameAs(best));
-            Assert.That(data.Nickname, Is.EqualTo("target"));
+            Assert.That(fetcher.RequestedQq, Is.EqualTo(2), "用目标的 QQ 取数，不查公开 B50");
+            Assert.That(nickname, Is.EqualTo("authorized"));
+            Assert.That(scores.Keys, Is.EquivalentTo(new[] { (1L, 0), (2L, 0) }));
+            Assert.That(scores[(2, 0)], Is.SameAs(outsideB50));
         });
     }
 
     [TestCase(HttpStatusCode.BadRequest)]
     [TestCase(HttpStatusCode.Unauthorized)]
     [TestCase(HttpStatusCode.Forbidden)]
-    public void GetVersusData_Qq_Should_Not_Fallback_On_Http_Error(HttpStatusCode status)
+    public void GetScores_Should_Not_Fallback_On_Http_Error(HttpStatusCode status)
     {
-        var error = new HttpRequestException("target inaccessible", null, status);
-        var fetcher = new VersusDataFetcher(CreateSongDb(), [CreateSongScore(1, 13, 100)], [], error);
-        var message = new Message(null!, []) { Sender = new SenderInfo(1, "sender") };
+        var error   = new HttpRequestException("target inaccessible", null, status);
+        var fetcher = new ThrowingDivingFishDataFetcher(CreateSongDb(), error);
 
-        var actual = Assert.ThrowsAsync<HttpRequestException>(() => fetcher.GetVersusData(message, false));
+        var actual = Assert.ThrowsAsync<HttpRequestException>(() => fetcher.GetScores(Target(fetcher)));
 
         Assert.That(actual, Is.SameAs(error));
     }
 
     [Test]
-    public void GetVersusData_Should_Propagate_Missing_Configuration()
+    public void GetScores_Should_Propagate_Missing_Configuration()
     {
-        var error = new MissingConfigurationException("divingFish.devToken");
-        var fetcher = new VersusDataFetcher(CreateSongDb(), [CreateSongScore(1, 13, 100)], [], error);
-        var message = new Message(null!, []) { Sender = new SenderInfo(1, "sender") };
+        var error   = new MissingConfigurationException("divingFish.devToken");
+        var fetcher = new ThrowingDivingFishDataFetcher(CreateSongDb(), error);
 
-        var actual = Assert.ThrowsAsync<MissingConfigurationException>(() => fetcher.GetVersusData(message, false));
+        var actual = Assert.ThrowsAsync<MissingConfigurationException>(() => fetcher.GetScores(Target(fetcher)));
 
         Assert.That(actual, Is.SameAs(error));
     }
@@ -329,12 +228,8 @@ public class MaiMaiDxDivingFishDataFetcherTest
         var publicOld = new List<SongScore> { CreateSongScore(9001, 13.0, 100.5) };
         var publicNew = new List<SongScore> { CreateSongScore(9002, 13.0, 100.5) };
         var fetcher = new PublicDivingFishDataFetcher(songDb, publicOld, publicNew);
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "test")
-        };
 
-        var rating = await fetcher.GetRating(message);
+        var rating = await fetcher.GetRating(Target(fetcher));
 
         Assert.Multiple(() =>
         {
@@ -402,28 +297,40 @@ public class MaiMaiDxDivingFishDataFetcherTest
     {
         public long RequestedQq { get; private set; }
 
-        public override Task<DxRating> GetRating(Message message, bool allowUsername = false) =>
-            throw new AssertionException("authorized records must not depend on public B50 visibility");
+        public override Task<DxRating> GetRating(ResolvedPlayer player) =>
+            throw new AssertionException("完整成绩不走公开 B50");
 
-        protected override Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
+        protected override Task<DivingFishDxRatingResponse> FetchScores(long qq)
         {
-            Assert.That(qqOnly, Is.True);
-            var (username, qq) = Shared.Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
-            Assert.That(username.IsEmpty, Is.True);
             RequestedQq = qq;
             return Task.FromResult(new DivingFishDxRatingResponse("authorized", records));
         }
+
+        protected override Task<DivingFishDxRatingResponse> FetchScores(ReadOnlyMemory<char> username) =>
+            throw new AssertionException("这条路径不应按账号名查询");
     }
 
-    private sealed class TestDivingFishDataFetcher(SongDb<MaiMaiSong> songDb, List<SongScore> records) : DivingFishDataFetcher(songDb)
+    private sealed class ThrowingDivingFishDataFetcher(SongDb<MaiMaiSong> songDb, Exception error) : DivingFishDataFetcher(songDb)
+    {
+        protected override Task<DivingFishDxRatingResponse> FetchScores(long qq) => throw error;
+    }
+
+    private sealed class RecordingDivingFishDataFetcher(SongDb<MaiMaiSong> songDb, List<SongScore> records) : DivingFishDataFetcher(songDb)
     {
         protected override bool OAuthEnabled => false;
 
-        public bool? LastQqOnly { get; private set; }
+        public long? LastQq { get; private set; }
+        public string? LastUsername { get; private set; }
 
-        protected override Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
+        protected override Task<DivingFishDxRatingResponse> FetchScores(long qq)
         {
-            LastQqOnly = qqOnly;
+            LastQq = qq;
+            return Task.FromResult(new DivingFishDxRatingResponse("tester", records));
+        }
+
+        protected override Task<DivingFishDxRatingResponse> FetchScores(ReadOnlyMemory<char> username)
+        {
+            LastUsername = username.ToString();
             return Task.FromResult(new DivingFishDxRatingResponse("tester", records));
         }
     }
@@ -454,59 +361,4 @@ public class MaiMaiDxDivingFishDataFetcherTest
         }
     }
 
-    private sealed class PublicVersusDivingFishDataFetcher(
-        SongDb<MaiMaiSong> songDb,
-        List<SongScore> oldScores,
-        List<SongScore> newScores,
-        bool oauthEnabled) : DivingFishDataFetcher(songDb)
-    {
-        protected override bool OAuthEnabled => oauthEnabled;
-
-        protected override Task<DivingFishDxRatingResponse> FetchScoresByUsername(ReadOnlyMemory<char> username)
-        {
-            return Task.FromResult(new DivingFishDxRatingResponse(
-                username.ToString(),
-                oldScores.Concat(newScores).ToList(),
-                oldScores,
-                newScores));
-        }
-
-        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
-        {
-            throw new AssertionException("username versus query must not request full records");
-        }
-
-        protected override Task<DivingFishDxRatingResponse> FetchScoresByQq(long qq)
-        {
-            throw new AssertionException("username versus query must not fall back to sender QQ");
-        }
-
-        protected override Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
-        {
-            throw new AssertionException("username versus query must only use the public username endpoint");
-        }
-    }
-
-    private sealed class VersusDataFetcher(
-        SongDb<MaiMaiSong> songDb,
-        List<SongScore> bestScores,
-        List<SongScore> allScores,
-        Exception? fullScoresError = null) : DataFetcher(songDb)
-    {
-        public Message? RatingMessage { get; private set; }
-        public Message? ScoresMessage { get; private set; }
-
-        public override Task<DxRating> GetRating(Message message, bool allowUsername = false)
-        {
-            RatingMessage = message;
-            return Task.FromResult(new DxRating { Nickname = "target", OldScores = bestScores, NewScores = [] });
-        }
-
-        public override Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
-        {
-            ScoresMessage = message;
-            if (fullScoresError != null) throw fullScoresError;
-            return Task.FromResult(allScores.ToDictionary(score => (score.Id, score.LevelIdx)));
-        }
-    }
 }

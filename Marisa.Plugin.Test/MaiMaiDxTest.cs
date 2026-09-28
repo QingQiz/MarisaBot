@@ -49,12 +49,7 @@ public class MaiMaiDxTest
     [TestCase(920759985)] // Laplaze
     public async Task Score_Should_Be_Fetched(long qq)
     {
-        var m = new Message(null!, [])
-        {
-            Sender = new SenderInfo(qq, "test")
-        };
-
-        var res = await _allNet.GetRating(m);
+        var res = await _allNet.GetRating(new ResolvedPlayer(qq, null, true, _allNet));
 
         Assert.That(res.Rating > 0);
     }
@@ -71,13 +66,7 @@ public class MaiMaiDxTest
             Assert.Ignore("divingFish.devToken is not configured.");
         }
 
-        var m = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "test"),
-            Command = "laplaze".AsMemory()
-        };
-
-        var res = await _divingFish.GetRating(m);
+        var res = await _divingFish.GetRating(new ResolvedPlayer(1, "laplaze", false, _divingFish));
 
         Assert.Multiple(() =>
         {

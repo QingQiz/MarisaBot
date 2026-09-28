@@ -12,33 +12,31 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
     public const int OldScoreLimit = 35;
     public const int NewScoreLimit = 15;
 
+    /// <summary>没有可用 OAuth 授权时的提示。vs 的本地预检也用这句，保证预检与取数失败时口径一致。</summary>
+    public const string NotBoundHint = "未绑定水鱼查分器，请先使用 bind 命令完成绑定后再查询";
+
     protected virtual bool OAuthEnabled => DivingFishOAuth.IsConfigured;
 
-    public override async Task<DxRating> GetRating(Message message, bool allowUsername = false)
+    public override async Task<DxRating> GetRating(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
-        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
-
         if (OAuthEnabled)
         {
             try
             {
-                var rating = username.IsWhiteSpace()
-                    ? ToDxRating(await FetchScoresByQq(qq))
-                    : ToDxRating(await FetchScoresByUsername(username));
-
-                return rating;
+                return player.Username is { } username
+                    ? ToDxRating(await FetchScoresByUsername(username.AsMemory()))
+                    : ToDxRating(await FetchScoresByQq(player.Qq));
             }
             catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Forbidden)
             {
-                if (!isSelf) throw;
+                // 公开 B50 拿不到本人（未公开等）时，改用完整成绩在本地算 35+15
+                if (!player.IsSelf) throw;
 
-                return ToDxRating(await FetchScores(message, false));
+                return ToDxRating(await FetchRecords(player));
             }
         }
 
-        return ToDxRating(await FetchScores(message, false));
+        return ToDxRating(await FetchRecords(player));
     }
 
     private DxRating ToDxRating(DivingFishDxRatingResponse raw)
@@ -86,53 +84,32 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), SongScore>> GetScores(Message message, bool allowUsername = false)
+    public override async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores)>
+        GetScores(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
-        var scores = username.IsWhiteSpace()
-            ? await FetchScores(message, true)
-            : OAuthEnabled
-                ? await FetchScoresByUsername(username)
-                : await FetchScores(message, false);
+        // 按账号名查询：OAuth 模式只有公开 B50 可用，dev token 模式由水鱼按账号名返回完整记录
+        var response = player.Username is { } username && OAuthEnabled
+            ? await FetchScoresByUsername(username.AsMemory())
+            : await FetchRecords(player);
 
-        return scores.Records
-            .ToDictionary(x => (x.Id, x.LevelIdx), x => x);
+        return (response.Nickname, response.Records.ToDictionary(x => (x.Id, x.LevelIdx), x => x));
     }
 
-    public override async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, bool Partial)>
-        GetVersusData(Message message, bool publicOnly)
+    /// <summary>完整成绩记录：OAuth 票据按 QQ 读（不看 B50 是否公开）；未配置 OAuth 时用 dev token。</summary>
+    private async Task<DivingFishDxRatingResponse> FetchRecords(ResolvedPlayer player) =>
+        player.Username is { } username ? await FetchScores(username.AsMemory()) : await FetchScores(player.Qq);
+
+    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(ResolvedPlayer player, MaiMaiSong song)
     {
-        if (!publicOnly)
-        {
-            var records = await FetchScores(message, true);
-            return (records.Nickname, records.Records.ToDictionary(x => (x.Id, x.LevelIdx), x => x), false);
-        }
-
-        var (username, _) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, false);
-        if (username.IsWhiteSpace()) throw new ArgumentException("请填写水鱼账号名");
-
-        // 账号名始终走公开 B50，不随 OAuth/developer token 配置升级为完整成绩查询。
-        var rating = ToDxRating(await FetchScoresByUsername(username));
-        return (rating.Nickname, rating.OldScores.Concat(rating.NewScores)
-            .ToDictionary(x => (x.Id, x.LevelIdx), x => x), true);
-    }
-
-    public override async Task<(string? Nickname, Dictionary<int, SongScore> Scores)> GetSongScore(Message message, MaiMaiSong song)
-    {
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, true);
-        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
-
         var body = new Dictionary<string, object> { ["music_id"] = new[] { song.Id } };
         IFlurlResponse response;
 
         if (OAuthEnabled)
         {
-            var tokenOwner = isSelf ? message.Sender.Id : qq;
-            if (!isSelf && await DivingFishTokenStore.GetValidToken(tokenOwner, "maimai") == null)
+            if (!player.IsSelf && await DivingFishTokenStore.GetValidToken(player.Qq, "maimai") == null)
                 throw OAuthSelfOnly();
 
-            response = await SendBearerWithOneRetry(tokenOwner, "maimai", token =>
+            response = await SendBearerWithOneRetry(player.Qq, "maimai", token =>
                 "https://www.diving-fish.com/api/maimaidxprober/player/record"
                     .WithHeader("Authorization", $"Bearer {token}")
                     .AllowHttpStatus("400,401,403,429,503")
@@ -147,8 +124,8 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
         }
         else
         {
-            if (username.IsWhiteSpace()) body["qq"] = qq;
-            else body["username"] = username.ToString();
+            if (player.Username is { } username) body["username"] = username;
+            else body["qq"] = player.Qq;
 
             response = await "https://www.diving-fish.com/api/maimaidxprober/dev/player/record"
                 .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
@@ -224,55 +201,57 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
             response.Charts.Dx);
     }
 
-    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(Message message, bool qqOnly)
+    /// <summary>按 QQ 取完整成绩：OAuth 票据优先；未配置 OAuth 时退回 dev token（要求该 QQ 已注册水鱼且公开）。</summary>
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(long qq)
     {
-        var (username, qq) = Chunithm.DataFetcher.DataFetcher.AtOrSelf(message, qqOnly);
+        if (!OAuthEnabled) return await FetchScoresWithDevToken($"qq={qq}");
 
-        if (OAuthEnabled)
+        var response = await SendBearerWithOneRetry(qq, "maimai", token =>
+            "https://www.diving-fish.com/api/maimaidxprober/player/records"
+                .WithHeader("Authorization", $"Bearer {token}")
+                .AllowHttpStatus("400,401,403,429,503")
+                .GetAsync());
+
+        if (IsOAuthError(response.StatusCode))
         {
-            var tokenOwner = username.IsWhiteSpace() ? qq : -1;
-            if (tokenOwner < 0) throw OAuthSelfOnly();
-
-            var response = await SendBearerWithOneRetry(tokenOwner, "maimai", token =>
-                "https://www.diving-fish.com/api/maimaidxprober/player/records"
-                    .WithHeader("Authorization", $"Bearer {token}")
-                    .AllowHttpStatus("400,401,403,429,503")
-                    .GetAsync());
-
-            if (IsOAuthError(response.StatusCode))
-            {
-                var body = await response.GetStringAsync();
-                throw new HttpRequestException(ProberError.DivingFishOAuth(response.StatusCode, body),
-                    null, (HttpStatusCode)response.StatusCode);
-            }
-
-            return await response.GetJsonAsync<DivingFishDxRatingResponse>();
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(ProberError.DivingFishOAuth(response.StatusCode, body),
+                null, (HttpStatusCode)response.StatusCode);
         }
 
-        var uri = username.IsWhiteSpace()
-            ? $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?qq={qq}"
-            : $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?username={username}";
+        return await response.GetJsonAsync<DivingFishDxRatingResponse>();
+    }
 
-        var devResponse = await uri
+    /// <summary>按水鱼账号名取完整成绩：OAuth 票据只能读本人，所以只可能是 dev token 模式。</summary>
+    protected virtual async Task<DivingFishDxRatingResponse> FetchScores(ReadOnlyMemory<char> username)
+    {
+        if (OAuthEnabled) throw OAuthSelfOnly();
+
+        return await FetchScoresWithDevToken($"username={username}");
+    }
+
+    private static async Task<DivingFishDxRatingResponse> FetchScoresWithDevToken(string query)
+    {
+        var response = await $"https://www.diving-fish.com/api/maimaidxprober/dev/player/records?{query}"
             .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
             .AllowHttpStatus("400,401,403,410")
             .GetAsync();
 
-        if (devResponse.StatusCode is 400 or 401 or 403 or 410)
+        if (response.StatusCode is 400 or 401 or 403 or 410)
         {
-            var body = await devResponse.GetStringAsync();
-            throw new HttpRequestException(ProberError.DivingFish(devResponse.StatusCode, body),
-                null, (HttpStatusCode)devResponse.StatusCode);
+            var body = await response.GetStringAsync();
+            throw new HttpRequestException(ProberError.DivingFish(response.StatusCode, body),
+                null, (HttpStatusCode)response.StatusCode);
         }
 
-        return await devResponse.GetJsonAsync<DivingFishDxRatingResponse>();
+        return await response.GetJsonAsync<DivingFishDxRatingResponse>();
     }
 
     private static async Task<string> GetRequiredToken(long qq, string game)
     {
         var token = (await DivingFishTokenStore.GetValidToken(qq, game))?.AccessToken;
         if (token != null) return token;
-        throw new HttpRequestException("未绑定水鱼查分器，请先使用 bind 命令完成绑定后再查询");
+        throw new HttpRequestException(NotBoundHint);
     }
 
     private static async Task<IFlurlResponse> SendBearerWithOneRetry(
@@ -328,7 +307,7 @@ public class DivingFishDataFetcher(SongDb<MaiMaiSong> songDb) : DataFetcher(song
         statusCode is 400 or 401 or 403 or 429 or 503;
 
     private static HttpRequestException OAuthSelfOnly() =>
-        new("水鱼 OAuth 只能读取发送者本人的完整成绩；查询用户名或 @ 他人仅支持公开成绩");
+        new("水鱼 OAuth 只能读取本人授权的成绩；@ 他人需要对方先完成绑定，按账号名查询只能读公开 B50");
 
     protected sealed record DivingFishDxRatingResponse(
         string Nickname,
