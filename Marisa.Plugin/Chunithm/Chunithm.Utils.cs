@@ -41,37 +41,41 @@ public partial class Chunithm
         }
     }
 
-    private Task<DataFetcher> GetDataFetcher(Message message, bool allowUsername = false)
+    /// <summary>
+    ///     解析查询目标：@ 优先，其次命令文本（仅当调用方允许把它当账号名时），否则发送者自己；
+    ///     并按该 QQ 的本地绑定选定查分器。只查本地库，不发网络请求，fetcher 不再自己从消息里反推目标。
+    /// </summary>
+    private ResolvedPlayer ResolvePlayer(Message message, bool allowUsername = false)
     {
-        // Command不为空的话，就是用用户名查。只有DivingFish能使用用户名查。
-        // NOTE Louis也能用用户名查，但现在还是默认水鱼吧
-        if (allowUsername && !message.Command.IsWhiteSpace())
-        {
-            return Task.FromResult(GetDataFetcher("DivingFish", null));
-        }
-
-        var qq = message.Sender.Id;
-
         var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
+
+        // 账号名查询只有水鱼有公开接口（Louis 也支持按账号名查，但没启用）；账号名不代表本人，拿不到本人票据
+        if (at is null && allowUsername && !message.Command.IsWhiteSpace())
         {
-            qq = (at as MessageDataAt)?.Target ?? qq;
+            return new ResolvedPlayer(message.Sender.Id, message.Command.Trim().ToString(), false,
+                GetDataFetcher("DivingFish", null));
         }
 
+        var qq = (at as MessageDataAt)?.Target ?? message.Sender.Id;
+
+        return new ResolvedPlayer(qq, null, qq == message.Sender.Id, GetDataFetcher(qq));
+    }
+
+    /// <summary>按绑定选查分器：没绑定记录时按水鱼处理。</summary>
+    private DataFetcher GetDataFetcher(long qq)
+    {
         using var realm = BotDbContext.OpenRealm();
 
         var bind = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq);
 
-        return Task.FromResult(bind == null
-            ? GetDataFetcher("DivingFish", null)
-            : GetDataFetcher(bind.ServerName, bind.AccessCode));
+        return bind == null ? GetDataFetcher("DivingFish", null) : GetDataFetcher(bind.ServerName, bind.AccessCode);
     }
 
     private async Task<ChunithmRating> GetRating(Message message, bool b50 = false)
     {
-        var fetcher = await GetDataFetcher(message, true);
+        var player = ResolvePlayer(message, allowUsername: true);
 
-        var rating = await fetcher.GetRating(message, true);
+        var rating = await player.Fetcher.GetRating(player);
 
         if (b50)
         {

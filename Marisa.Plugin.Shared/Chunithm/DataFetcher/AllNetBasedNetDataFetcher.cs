@@ -16,7 +16,8 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
     private string KeyChipId { get; } = keyChipId;
     private string ServerUri => _serverUri ??= GetServerUri(KeyChipId).Result;
 
-    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
+    // 目标身份由构造时的 accessCode 决定（插件按查询目标的绑定建 fetcher），这里不再看 ResolvedPlayer
+    public override async Task<ChunithmRating> GetRating(ResolvedPlayer player)
     {
         var aimeId = GetAimeId();
         var scores = await GetScores(aimeId);
@@ -52,7 +53,7 @@ public class AllNetBasedNetDataFetcher(SongDb<ChunithmSong> songDb, string short
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player)
     {
         var aimeId = GetAimeId();
         return await GetScores(aimeId);

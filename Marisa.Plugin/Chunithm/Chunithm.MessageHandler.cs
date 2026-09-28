@@ -375,9 +375,10 @@ public partial class Chunithm
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var fetcher = await GetDataFetcher(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
 
-        var scores = await fetcher.GetScores(message);
+        var scores = await fetcher.GetScores(player);
 
         var groupedSong = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -402,7 +403,8 @@ public partial class Chunithm
         var cmd = message.Command.Trim().ToString();
         var sort = ParseSortFlag(ref cmd);
 
-        var fetcher = await GetDataFetcher(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
         var genres = fetcher.GetSongList().Select(song => song.Genre).Distinct().ToArray();
         var genre = genres.FirstOrDefault(p =>
             cmd.Equals(p, StringComparison.OrdinalIgnoreCase));
@@ -413,7 +415,7 @@ public partial class Chunithm
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var scores = await fetcher.GetScores(message);
+        var scores = await fetcher.GetScores(player);
 
         var groupedSong = fetcher.GetSongList()
             .Where(song => song.Genre == genre)
@@ -439,7 +441,8 @@ public partial class Chunithm
         var cmd = message.Command.Trim().ToString();
         var sort = ParseSortFlag(ref cmd);
 
-        var fetcher = await GetDataFetcher(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
         var songList = fetcher.GetSongList();
 
         var versions = VersionOrderHelper.BuildVersionList(songList, song => song.Version, song => song.Id);
@@ -473,7 +476,7 @@ public partial class Chunithm
 
         async Task ReplyVersionSummary(Message replyMessage, string version)
         {
-            var scores = await fetcher.GetScores(message);
+            var scores = await fetcher.GetScores(player);
 
             var groupedSong = songList
                 .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
@@ -521,8 +524,9 @@ public partial class Chunithm
             goto _error;
         }
 
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var groupedSong = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -550,8 +554,9 @@ public partial class Chunithm
     [MarisaPluginCommand("overpower", "op")]
     private async Task<MarisaPluginTaskState> SummaryOverPower(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -665,8 +670,9 @@ public partial class Chunithm
 
         if (a > b) (a, b) = (b, a);
 
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -689,8 +695,9 @@ public partial class Chunithm
     [MarisaPluginCommand("genre", "type", "g")]
     private async Task<MarisaPluginTaskState> ChuOpGenre(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -731,8 +738,9 @@ public partial class Chunithm
 
         if (a > b) (a, b) = (b, a);
 
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
@@ -759,8 +767,9 @@ public partial class Chunithm
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> ChuOpVersion(Message message)
     {
-        var fetcher = await GetDataFetcher(message);
-        var scores  = await fetcher.GetScores(message);
+        var player  = ResolvePlayer(message);
+        var fetcher = player.Fetcher;
+        var scores  = await fetcher.GetScores(player);
 
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants

@@ -6,8 +6,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Flurl.Http.Testing;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -163,13 +161,8 @@ public class ChunithmDivingFishDataFetcherTest
                 ]
             }
         });
-        var message = new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "test")
-        };
-
-        var rating = await fetcher.GetRating(message);
-        var scores = await fetcher.GetScores(message);
+        var rating = await fetcher.GetRating(Target(fetcher));
+        var scores = await fetcher.GetScores(Target(fetcher));
 
         Assert.Multiple(() =>
         {
@@ -200,7 +193,7 @@ public class ChunithmDivingFishDataFetcherTest
             }
         });
 
-        var rating = await fetcher.GetRating(CreateMessage());
+        var rating = await fetcher.GetRating(Target(fetcher));
 
         Assert.Multiple(() =>
         {
@@ -223,8 +216,8 @@ public class ChunithmDivingFishDataFetcherTest
             }
         });
 
-        await fetcher.GetRating(CreateMessage());
-        await fetcher.GetRating(CreateMessage());
+        await fetcher.GetRating(Target(fetcher));
+        await fetcher.GetRating(Target(fetcher));
 
         Assert.That(httpTest.CallLog.Count(call =>
             call.Request.Url.ToString().EndsWith("/api/chunithmprober/latest_version", StringComparison.Ordinal)),
@@ -244,7 +237,7 @@ public class ChunithmDivingFishDataFetcherTest
             }
         });
 
-        var error = Assert.ThrowsAsync<FlurlHttpException>(() => fetcher.GetRating(CreateMessage()));
+        var error = Assert.ThrowsAsync<FlurlHttpException>(() => fetcher.GetRating(Target(fetcher)));
 
         Assert.That(error!.StatusCode, Is.EqualTo(503));
     }
@@ -259,13 +252,9 @@ public class ChunithmDivingFishDataFetcherTest
         return new SongDb<ChunithmSong>("", "", () => songs.ToList());
     }
 
-    private static Message CreateMessage()
-    {
-        return new Message(null!, [])
-        {
-            Sender = new SenderInfo(1, "test")
-        };
-    }
+    /// <summary>构造取数目标；测试里被测的 fetcher 就是目标自己的 fetcher。</summary>
+    private static ResolvedPlayer Target(DataFetcher fetcher, long qq = 1, string? username = null, bool isSelf = true) =>
+        new(qq, username, isSelf, fetcher);
 
     private static ChunithmSong CreateSong(long id, string title, string version = "CHUNITHM LUMINOUS")
     {
@@ -315,7 +304,7 @@ public class ChunithmDivingFishDataFetcherTest
             return SongDb.SongList;
         }
 
-        protected override Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
+        protected override Task<ChunithmRating> FetchScores(ResolvedPlayer player)
         {
             return Task.FromResult(new ChunithmRating
             {

@@ -22,45 +22,45 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         return LxnsDataFetcher.GetSharedSongList();
     }
 
-    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
+    public override async Task<ChunithmRating> GetRating(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, qq) = AtOrSelf(message, false);
-
-        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
-
         if (OAuthEnabled)
         {
             try
             {
-                var raw = username.IsWhiteSpace()
-                    ? await FetchScoresByQq(qq)
-                    : await FetchScoresByUsername(username);
+                // 公开 B30/N20：按账号名或 QQ 查，水鱼只返回已公开的成绩
+                var raw = player.Username is { } username
+                    ? await FetchScoresByUsername(username.AsMemory())
+                    : await FetchScoresByQq(player.Qq);
 
                 raw.DataSource = "DivingFish";
-                raw.Records.Best = NormalizeRecords(raw.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+                raw.Records.Best = KnownSongs(raw.Records.Best).ToArray();
                 var newBest = raw.Records.N20.Length > 0 ? raw.Records.N20 : raw.Records.Recent;
-                raw.Records.Recent = NormalizeRecords(newBest).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
+                raw.Records.Recent = KnownSongs(newBest).ToArray();
                 return raw;
             }
             catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Forbidden)
             {
-                if (!isSelf) throw;
+                // 公开成绩拿不到本人（未公开等）时，改用票据读完整记录再本地分组
+                if (!player.IsSelf) throw;
 
-                var json = await FetchScores(message, false);
-                json.DataSource = "DivingFish";
-                json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-                json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
-                return await GroupBestAndRecent(json);
+                return await GroupBestAndRecent(await LoadRecords(player));
             }
         }
 
-        var devJson = await FetchScores(message, false);
-        devJson.DataSource = "DivingFish";
-        devJson.Records.Best = NormalizeRecords(devJson.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-        devJson.Records.Recent = NormalizeRecords(devJson.Records.Recent).ToArray();
+        return await GroupBestAndRecent(await LoadRecords(player));
+    }
 
-        return await GroupBestAndRecent(devJson);
+    /// <summary>票据/dev token 读到的完整记录：去掉已删曲目并标记来源（Recent 交给 GroupBestAndRecent 重新分组）。</summary>
+    private async Task<ChunithmRating> LoadRecords(ResolvedPlayer player)
+    {
+        var json = await FetchScores(player);
+
+        json.DataSource = "DivingFish";
+        json.Records.Best = KnownSongs(json.Records.Best).ToArray();
+        json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
+
+        return json;
     }
 
     private async Task<ChunithmRating> GroupBestAndRecent(ChunithmRating raw)
@@ -89,24 +89,12 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var scores = await GetScoresCore(message, true);
+        var scores = await FetchScores(player);
 
-        return scores.Records.Best
-            .Where(x => !DeletedSongs.Contains(x.Id))
+        return KnownSongs(scores.Records.Best)
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
-    }
-
-    private async Task<ChunithmRating> GetScoresCore(Message message, bool qqOnly)
-    {
-        var json = await FetchScores(message, qqOnly);
-        json.DataSource = "DivingFish";
-        json.Records.Best = NormalizeRecords(json.Records.Best).Where(x => !DeletedSongs.Contains(x.Id)).ToArray();
-        json.Records.Recent = NormalizeRecords(json.Records.Recent).ToArray();
-
-        return json;
     }
 
     protected virtual async Task<ChunithmRating> FetchScoresByUsername(ReadOnlyMemory<char> username)
@@ -147,19 +135,17 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         return await response.GetJsonAsync<ChunithmRating>();
     }
 
-    protected virtual async Task<ChunithmRating> FetchScores(Message message, bool qqOnly)
+    /// <summary>完整记录：配置了 OAuth 时用本人票据读（只有本人能读），否则用 dev token 按账号名或 QQ 查。</summary>
+    protected virtual async Task<ChunithmRating> FetchScores(ResolvedPlayer player)
     {
-        var (username, qq) = AtOrSelf(message, qqOnly);
-        var isSelf = username.IsWhiteSpace() && qq == message.Sender.Id;
-
         if (OAuthEnabled)
         {
-            if (!isSelf)
+            if (!player.IsSelf)
             {
                 throw OAuthSelfOnly();
             }
 
-            var response = await SendBearerWithOneRetry(message, "chunithm", token =>
+            var response = await SendBearerWithOneRetry(player.Qq, "chunithm", token =>
                 "https://www.diving-fish.com/api/chunithmprober/player/records"
                     .WithHeader("Authorization", $"Bearer {token}")
                     .AllowHttpStatus("400,401,403,429,503")
@@ -175,9 +161,9 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             return await response.GetJsonAsync<ChunithmRating>();
         }
 
-        var uri = username.IsWhiteSpace()
-            ? $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?qq={qq}"
-            : $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?username={username}";
+        var uri = player.Username is { } username
+            ? $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?username={username}"
+            : $"https://www.diving-fish.com/api/chunithmprober/dev/player/records?qq={player.Qq}";
 
         var devResponse = await uri
             .WithHeader("Developer-Token", ConfigurationManager.Configuration.DivingFish.DevToken)
@@ -194,26 +180,26 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         return await devResponse.GetJsonAsync<ChunithmRating>();
     }
 
-    private static async Task<string> GetRequiredToken(Message message, string game)
+    private static async Task<string> GetRequiredToken(long qq, string game)
     {
-        var token = (await DivingFishTokenStore.GetValidToken(message.Sender.Id, game))?.AccessToken;
+        var token = (await DivingFishTokenStore.GetValidToken(qq, game))?.AccessToken;
         if (token != null) return token;
         throw new HttpRequestException("未绑定水鱼查分器，请先使用 bind 命令完成绑定后再查询");
     }
 
     private static async Task<IFlurlResponse> SendBearerWithOneRetry(
-        Message message,
+        long qq,
         string game,
         Func<string, Task<IFlurlResponse>> send)
     {
         for (var attempt = 0; attempt < 2; attempt++)
         {
-            var token = await GetRequiredToken(message, game);
+            var token = await GetRequiredToken(qq, game);
 
             var response = await send(token);
             if (response.StatusCode != (int)HttpStatusCode.Unauthorized) return response;
 
-            DivingFishTokenStore.RemoveToken(message.Sender.Id, game);
+            DivingFishTokenStore.RemoveToken(qq, game);
             if (attempt == 1) return response;
         }
 
@@ -255,6 +241,10 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
     private static HttpRequestException OAuthSelfOnly() =>
         new("水鱼 OAuth 只能读取发送者本人的完整成绩；查询用户名或 @ 他人仅支持公开成绩");
+
+    /// <summary>已删除的歌在查分器侧可能还留着记录，统计与展示前先剔掉。</summary>
+    private IEnumerable<ChunithmScore> KnownSongs(IEnumerable<ChunithmScore> records) =>
+        NormalizeRecords(records).Where(x => !DeletedSongs.Contains(x.Id));
 
     private IEnumerable<ChunithmScore> NormalizeRecords(IEnumerable<ChunithmScore> records)
     {

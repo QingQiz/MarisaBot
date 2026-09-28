@@ -25,35 +25,18 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     }
 
     /// <summary>
-    ///     allowUsername 决定命令文本能否被当作查分器账号名查询。命令自带的参数（如汇总的等级、定数）
-    ///     不能当用户名，必须保持默认的 false；只有"参数就是账号名"的命令才传 true。
+    ///     b30/b50 查分：目标（查谁、账号名、是否本人）由插件层解析成 <see cref="ResolvedPlayer" />，
+    ///     fetcher 不再自己从消息里反推。
     /// </summary>
-    public abstract Task<ChunithmRating> GetRating(Message message, bool allowUsername = false);
+    public abstract Task<ChunithmRating> GetRating(ResolvedPlayer player);
 
-    /// <inheritdoc cref="GetRating"/>
-    public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false);
+    /// <summary>完整成绩（汇总 / OP 用），目标同样来自 <see cref="ResolvedPlayer" />。</summary>
+    public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player);
 
     /// <summary>
     ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。
     /// </summary>
     public virtual Task<bool> TestOAuthToken(long qq) => Task.FromResult(false);
-
-    public static (ReadOnlyMemory<char>, long) AtOrSelf(Message message, bool qqOnly)
-    {
-        var username = "".AsMemory();
-        var qq       = message.Sender.Id;
-
-        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At);
-        if (at != null)
-        {
-            qq = (at as MessageDataAt)?.Target ?? qq;
-            return (username, qq);
-        }
-
-        if (!qqOnly) username = message.Command;
-
-        return (username, qq);
-    }
 
     private static HashSet<string>? _latestVersions;
 

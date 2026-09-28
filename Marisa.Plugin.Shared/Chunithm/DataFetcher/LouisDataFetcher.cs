@@ -39,13 +39,9 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         }
     }
 
-    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
+    public override async Task<ChunithmRating> GetRating(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, qq) = AtOrSelf(message, false);
-        var scores = await ReqScores(username.IsWhiteSpace()
-            ? new { qq, constant = "0-16" }
-            : new { username, constant = "0-16" });
+        var scores = await ReqScores(Query(player));
 
         var songList = GetSongList();
         var versionMap = songList.ToDictionary(s => s.Id, s => s.Version);
@@ -59,7 +55,7 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         return new ChunithmRating
         {
             DataSource = "Louis",
-            Username = username.IsWhiteSpace() ? "" : username.ToString(),
+            Username = player.Username ?? "",
             Records = new Records
             {
                 Best = div.FirstOrDefault(x => !x.Key)?.OrderByDescending(x => x.Rating).Take(30).ToArray() ?? [],
@@ -68,14 +64,14 @@ public class LouisDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb)
         };
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player)
     {
-        var (username, qq) = AtOrSelf(message, true);
-
-        return await ReqScores(username.IsWhiteSpace()
-            ? new { qq, constant       = "0-16" }
-            : new { username, constant = "0-16" });
+        return await ReqScores(Query(player));
     }
+
+    private static object Query(ResolvedPlayer player) => player.Username is { } username
+        ? new { username, constant = "0-16" }
+        : new { qq = player.Qq, constant = "0-16" };
 
     public async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> ReqScores(object req)
     {

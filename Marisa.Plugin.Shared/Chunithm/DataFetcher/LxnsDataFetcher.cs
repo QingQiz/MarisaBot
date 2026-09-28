@@ -87,35 +87,27 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         return GetSharedSongList();
     }
 
-    public override async Task<ChunithmRating> GetRating(Message message, bool allowUsername = false)
+    /// <summary>
+    ///     B30/N20：本人用本人 OAuth 票据，他人用 bot 的 dev token 查公开数据（落雪没有按账号名的接口）。
+    /// </summary>
+    public override async Task<ChunithmRating> GetRating(ResolvedPlayer player)
     {
-        if (!allowUsername) message = message with { Command = string.Empty.AsMemory() };
-        var (username, qq) = AtOrSelf(message, false);
-        if (username.IsWhiteSpace() && qq == message.Sender.Id)
+        if (player.IsSelf)
         {
-            var token = await GetRequiredOAuthToken(qq);
-            var scores = await GetScoresViaOAuth(token, qq);
-            var nickname = await GetNicknameViaOAuth(token, qq);
+            var token    = await GetRequiredOAuthToken(player.Qq);
+            var scores   = await GetScoresViaOAuth(token, player.Qq);
+            var nickname = await GetNicknameViaOAuth(token, player.Qq);
             return BuildRating(scores, nickname, await FetchLatestVersions());
         }
 
-        return await FetchScores(message);
+        return await FetchScores(player.Qq);
     }
 
-    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(Message message, bool allowUsername = false)
+    /// <summary>完整成绩：用该 QQ 自己的落雪 OAuth 票据读，dev token 的公共查询读不到全量。</summary>
+    public override async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player)
     {
-        var (_, qq) = AtOrSelf(message, true);
-
-        // 优先 OAuth 个人 API (1 次请求拿全量带达成率)
-        var oauthToken = await GetRequiredOAuthToken(qq);
-        return await GetScoresViaOAuth(oauthToken, qq);
-
-        // === 以下 dev token 两阶段抓取已废弃 ===
-        /*
-        // 回落 dev token 两阶段抓取
-        var token = ConfigurationManager.Configuration.Lxns.DevToken;
-        ...
-        */
+        var oauthToken = await GetRequiredOAuthToken(player.Qq);
+        return await GetScoresViaOAuth(oauthToken, player.Qq);
     }
 
     private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)
@@ -287,10 +279,9 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         }
     }
 
-    private async Task<ChunithmRating> FetchScores(Message message)
+    /// <summary>他人的公开 B30/N20：dev token 按 QQ 查，要求对方已注册落雪且公开成绩。</summary>
+    private async Task<ChunithmRating> FetchScores(long qq)
     {
-        var (_, qq) = AtOrSelf(message, true);
-
         var playerResponse = await $"{BaseUrl}/player/qq/{qq}"
             .WithHeader("Authorization", ConfigurationManager.Configuration.Lxns.DevToken)
             .AllowHttpStatus("400,401,403,404")
