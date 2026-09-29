@@ -20,6 +20,26 @@
     max-width: none;
 }
 
+/* 圆角卡片内嵌色轨：上下留白、两端圆头；紧凑行可调整留白与宽度。 */
+.mai-accent-rail {
+    position: relative;
+}
+
+.mai-accent-rail::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 6px;
+    top: var(--rail-top, 15px);
+    bottom: var(--rail-bottom, 15px);
+    width: var(--rail-width, 5px);
+    border-radius: 9999px;
+    background: var(--rail-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--rail-color) 33%, transparent);
+    opacity: var(--rail-opacity, 1);
+    pointer-events: none;
+}
+
 .font-torus {
     font-family: 'Torus', 'LXGW WenKai', sans-serif;
     font-variant-numeric: tabular-nums;

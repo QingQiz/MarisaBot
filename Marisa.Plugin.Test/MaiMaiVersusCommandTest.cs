@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Entity.MessageData;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
@@ -116,10 +118,77 @@ public class MaiMaiVersusCommandTest
         Assert.That((List<MaiMaiSong>)method.Invoke(null, [songs, 3, left, new Dictionary<(long, int), SongScore>()])!, Is.Empty);
     }
 
+    [TestCase("maivs5", 5)]
+    [TestCase("mai vs20", 20)]
+    [TestCase("舞萌VS1", 1)]
+    public void CompactRandomVersusCountIsRecognized(string command, int expected)
+    {
+        var (recognized, count, error) = ParseCompactCount(command);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(recognized, Is.True);
+            Assert.That(count, Is.EqualTo(expected));
+            Assert.That(error, Is.Null);
+        });
+    }
+
+    [TestCase("mai vs 123")]
+    [TestCase("maivs song")]
+    public void SpacedOrNonNumericVsQueryKeepsLegacyParsing(string command)
+    {
+        var (recognized, count, error) = ParseCompactCount(command);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(recognized, Is.False);
+            Assert.That(count, Is.Null);
+            Assert.That(error, Is.Null);
+        });
+    }
+
+    [TestCase("maivs0")]
+    [TestCase("maivs21")]
+    public void CompactRandomVersusCountRejectsValuesOutsideLimit(string command)
+    {
+        var (recognized, count, error) = ParseCompactCount(command);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(recognized, Is.True);
+            Assert.That(count, Is.Null);
+            Assert.That(error, Does.Contain("1～20"));
+        });
+    }
+
+    [Test]
+    public void RandomSelectionReturnsDistinctSongsWithinRequestedCount()
+    {
+        var songs = Enumerable.Range(1, 5).Select(id => Song(id, $"song-{id}")).ToArray();
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("PickRandomVersusSongs", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var selected = (MaiMaiSong[])method.Invoke(null, [songs, 3])!;
+
+        Assert.That(selected, Has.Length.EqualTo(3));
+        Assert.That(selected.Select(song => song.Id).Distinct(), Has.Count.EqualTo(3));
+        Assert.That(selected.All(song => songs.Any(candidate => candidate.Id == song.Id)), Is.True);
+    }
+
     private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random, PlateData.Query? Scope)
         Resolve(SongDb<MaiMaiSong> db, string input) =>
         ((List<MaiMaiSong>, int, bool, PlateData.Query?))typeof(MaiMaiDx.MaiMaiDx)
             .GetMethod("ResolveVersusQuery", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [db, input])!;
+
+    private static (bool Recognized, int? Count, string? Error) ParseCompactCount(string command)
+    {
+        var message = new Message(
+            new MessageChain(new MessageDataText(command.AsMemory())),
+            null!);
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod(
+            "TryParseCompactVersusCount", BindingFlags.NonPublic | BindingFlags.Static)!;
+        object?[] args = [message, null, null];
+        var recognized = (bool)method.Invoke(null, args)!;
+        return (recognized, (int?)args[1], (string?)args[2]);
+    }
 
     private static SongDb<MaiMaiSong> Songs(params (string Alias, string Title)[] extra)
     {

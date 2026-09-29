@@ -105,7 +105,8 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        // Include the layout revision so existing images are redrawn with inset accent rails.
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.capsule-v1.b64");
         return new CacheableText(path, () =>
         {
             var ctx = new WebContext();

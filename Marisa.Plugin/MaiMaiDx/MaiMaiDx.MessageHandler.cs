@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using Flurl.Http;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
@@ -736,7 +737,7 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("比较双方成绩；不填歌曲时随机选择共同已玩谱面", "`@某人`，可选歌曲、难度或完成表范围")]
+    [MarisaPluginDoc("比较双方成绩；不填歌曲时随机选择共同已玩谱面，也可用 `maivsn` 随机抽取 N 首（N≤20）", "`@某人`，可选歌曲、难度或完成表范围")]
     [MarisaPluginCommand("vs", "对战")]
     private async Task<MarisaPluginTaskState> SongVersus(Message message)
     {
@@ -750,6 +751,15 @@ public partial class MaiMaiDx
 
         var opponentQq = opponents[0];
 
+        // 紧凑写法 maivsn（例如 maivs5）用于随机抽取多首共同谱面。
+        // 带空格的「mai vs 123」仍按原有单曲 ID 查询处理。
+        var hasRandomCount = TryParseCompactVersusCount(message, out var randomCount, out var randomCountError);
+        if (hasRandomCount && randomCountError is not null)
+        {
+            message.Reply(randomCountError);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         // 2. 双方都要能读到完整成绩：只查本地库，缺谁就直接回复，一次网络请求都不发
         var (self, selfError)         = ResolveVersusPlayer(message, message.Sender.Id);
         var (opponent, opponentError) = ResolveVersusPlayer(message, opponentQq);
@@ -761,13 +771,19 @@ public partial class MaiMaiDx
         }
 
         // 3. 范围：单曲、随机，或完成表；完成表先在本地确认有谱面，免得为无效范围白取一次数
-        var query       = message.Command.Trim().ToString();
+        var query       = hasRandomCount ? string.Empty : message.Command.Trim().ToString();
         var selection   = ResolveVersusQuery(SongDb, query);
         var batchScope  = selection.Scope;
         var batchCharts = batchScope is null ? null : PlateData.SelectScopeCharts(batchScope, SongDb.SongList);
         if (batchCharts is { Count: 0 })
         {
             message.Reply($"没有找到 {query} 对应的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (selection.Songs.Count == 0 && !selection.Random && batchScope is null)
+        {
+            message.Reply($"没有找到 {query} 对应的歌曲或范围");
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -810,6 +826,31 @@ public partial class MaiMaiDx
         if (batchScope is not null && batchCharts is not null)
             return await ReplyVersusBatch(batchScope, batchCharts, query);
 
+        // maivsn：从双方共同游玩的谱面中不重复地随机抽 n 首，复用批量对战页面渲染。
+        if (randomCount is int count)
+        {
+            var candidates = SharedVersusSongs(SongDb.SongList, levelIdx, selfData.Scores, opponentData.Scores);
+            if (candidates.Count < count)
+            {
+                message.Reply($"双方共同游玩且当前可查询的谱面只有 {candidates.Count} 首，无法随机选择 {count} 首");
+                return MarisaPluginTaskState.CompletedTask;
+            }
+
+            var charts = PickRandomVersusSongs(candidates, count)
+                .Select(song => (song.Constants[levelIdx], levelIdx, song))
+                .ToArray();
+            var randomBatch = new MaiVersusBatch(
+                $"随机 {count} 首共同谱面",
+                string.Empty,
+                "随机",
+                charts,
+                new MaiVersusBatch.Player(selfLabel, selfData.Scores),
+                new MaiVersusBatch.Player(opponentLabel, opponentData.Scores));
+
+            await ReplyBatchVersus(message, randomBatch);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
         // 随机模式才需要成绩：从双方都已游玩的谱面里挑
         if (song is null)
         {
@@ -826,17 +867,24 @@ public partial class MaiMaiDx
         var selfScore     = selfData.Scores.GetValueOrDefault((song.Id, levelIdx));
         var opponentScore = opponentData.Scores.GetValueOrDefault((song.Id, levelIdx));
 
-        var winner = selfScore == null && opponentScore == null
-            ? "双方均未游玩"
+        // VS 只比较完成率；DX Score 只作为卡片信息展示，不参与胜负。
+        var winnerIndex = selfScore == null && opponentScore == null
+            ? -1
             : selfScore == null
-                ? opponentLabel
+                ? 1
                 : opponentScore == null
-                    ? selfLabel
-                    : Math.Abs(selfScore.Achievement - opponentScore.Achievement) < 0.0001
-                        ? "平局"
+                    ? 0
+                    : selfScore.Achievement == opponentScore.Achievement
+                        ? -1
                         : selfScore.Achievement > opponentScore.Achievement
-                            ? selfLabel
-                            : opponentLabel;
+                            ? 0
+                            : 1;
+        var winner = winnerIndex switch
+        {
+            0 => selfLabel,
+            1 => opponentLabel,
+            _ => selfScore == null && opponentScore == null ? "双方均未游玩" : "平局"
+        };
 
         var context = new WebContext(new
         {
@@ -852,7 +900,8 @@ public partial class MaiMaiDx
                     new { Nickname = selfLabel, Played = selfScore != null, Score = ProjectScore(selfScore) },
                     new { Nickname = opponentLabel, Played = opponentScore != null, Score = ProjectScore(opponentScore) }
                 },
-                Winner = winner
+                Winner = winner,
+                WinnerIndex = winnerIndex
             }
         });
 
@@ -897,7 +946,7 @@ public partial class MaiMaiDx
         }
     }
 
-    /// <summary>取一方的 vs 数据；授权/网络错误转成 Error 文本交给调用方回复，其余异常照旧抛出。</summary>
+    /// <summary>取一方的 vs 数据；授权、网络和外部数据格式错误转成 Error 文本交给调用方回复。</summary>
     private static async Task<BattleData> FetchBattleData(ResolvedPlayer player)
     {
         try
@@ -906,6 +955,14 @@ public partial class MaiMaiDx
             return new BattleData(nickname, scores, null);
         }
         catch (HttpRequestException e)
+        {
+            return new BattleData(null, [], e.Message);
+        }
+        catch (Exception e) when (e is FlurlHttpException
+                                  or System.Text.Json.JsonException
+                                  or Newtonsoft.Json.JsonException
+                                  or ArgumentException
+                                  or InvalidOperationException)
         {
             return new BattleData(null, [], e.Message);
         }
