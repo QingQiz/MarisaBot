@@ -14,20 +14,7 @@ public partial class EventHandler
 
         if (m.Target != qq) return;
 
-        const string word = "别戳啦！";
-
-        if (message.GroupInfo != null)
-        {
-            message.Reply(
-                new MessageDataAt(m.FromId),
-                new MessageDataText(" "),
-                new MessageDataText(word)
-            );
-        }
-        else
-        {
-            message.Reply(word);
-        }
+        message.Reply("别戳啦！", false);
     }
 
     /// <summary>

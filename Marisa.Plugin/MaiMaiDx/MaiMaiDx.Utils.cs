@@ -400,17 +400,4 @@ public partial class MaiMaiDx
     };
 
     #endregion
-
-    /// <summary>用 @ 用户代替引用回复：传分消息常落在已被撤回的令牌消息上，引用会显示「原消息已被撤回」。</summary>
-    private static void ReplyAt(Message message, string text)
-    {
-        if (message.GroupInfo == null)
-        {
-            message.Reply(text, false);
-        }
-        else
-        {
-            message.Send(new MessageDataAt(message.Sender.Id), new MessageDataText(" " + text));
-        }
-    }
 }
