@@ -11,69 +11,6 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
-    /// <summary>
-    ///     maivsn 的随机谱面数上限。批量对战页面每页最多显示 20 行，保持这个上限可以让
-    ///     一次命令的结果保持在单页内，也避免一次请求生成过大的图片。
-    /// </summary>
-    internal const int MaxRandomVersusSongs = MaiVersusBatch.DefaultPageSize;
-
-    /// <summary>
-    ///     识别紧凑的 maivsn 写法（例如 <c>maivs5 @某人</c>）。
-    ///     只有 vs 后立即跟数字才是新命令；vs 后有空格时仍保留原来的歌曲查询语法。
-    /// </summary>
-    private static bool TryParseCompactVersusCount(
-        Message message,
-        out int? count,
-        out string? error)
-    {
-        count = null;
-        error = null;
-
-        var raw = message.MessageChain?.Text.Trim() ?? string.Empty;
-        ReadOnlySpan<char> rest = raw.AsSpan();
-        string[] roots = ["maimai", "mai", "舞萌"];
-
-        foreach (var root in roots)
-        {
-            if (!rest.StartsWith(root.AsSpan(), StringComparison.OrdinalIgnoreCase)) continue;
-
-            rest = rest[root.Length..].TrimStart();
-            if (!rest.StartsWith("vs".AsSpan(), StringComparison.OrdinalIgnoreCase)) return false;
-
-            rest = rest[2..];
-            // A space after vs means the old song-query syntax ("vs 123").
-            if (rest.Length == 0 || char.IsWhiteSpace(rest[0])) return false;
-
-            var digits = 0;
-            while (digits < rest.Length && char.IsAsciiDigit(rest[digits])) digits++;
-            if (digits == 0 || !rest[digits..].IsWhiteSpace()) return false;
-
-            if (!int.TryParse(rest[..digits], out var parsed) ||
-                parsed is < 1 or > MaxRandomVersusSongs)
-            {
-                error = $"随机对战谱面数必须是 1～{MaxRandomVersusSongs} 的整数，用法：maivsN @对手";
-                return true;
-            }
-
-            count = parsed;
-            return true;
-        }
-
-        return false;
-    }
-
-    private static MaiMaiSong[] PickRandomVersusSongs(IReadOnlyList<MaiMaiSong> candidates, int count)
-    {
-        var shuffled = candidates.ToArray();
-        for (var i = 0; i < count; i++)
-        {
-            var j = Random.Shared.Next(i, shuffled.Length);
-            (shuffled[i], shuffled[j]) = (shuffled[j], shuffled[i]);
-        }
-
-        return shuffled[..count];
-    }
-
     private static List<MaiMaiSong> SharedVersusSongs(
         IEnumerable<MaiMaiSong> songs, int level,
         IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> left,

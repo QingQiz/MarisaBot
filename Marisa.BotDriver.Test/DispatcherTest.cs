@@ -1,4 +1,4 @@
-﻿using Marisa.Backend.OneBot;
+using Marisa.Backend.OneBot;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -110,6 +110,11 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver白");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver白");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs n 20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("mai vs random subcommand");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b 彩代")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs batch subcommand");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Bad Apple")), typeof(MaiMaiDx), "SongVersus").SetName("mai vs single song");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Neverland")), typeof(MaiMaiDx), "SongVersus").SetName("mai vs song beginning with subcommand letter");
         }
     }
 

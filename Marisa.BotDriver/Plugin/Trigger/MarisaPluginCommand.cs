@@ -1,4 +1,4 @@
-﻿using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Entity.Message;
 
 namespace Marisa.BotDriver.Plugin.Trigger;
 
@@ -14,6 +14,9 @@ public class MarisaPluginCommand(MessageType target, StringComparison comparison
     }
 
     public ReadOnlyMemory<char>[] Commands { get; } = prefixes.Select(p => p.AsMemory()).ToArray();
+
+    /// <summary>Require a token boundary after a short command prefix.</summary>
+    public bool RequireTokenBoundary { get; set; }
 
     public MarisaPluginCommand(params string[] prefixes) : this(DefaultTarget, StringComparison.OrdinalIgnoreCase, false, prefixes)
     {
@@ -51,6 +54,13 @@ public class MarisaPluginCommand(MessageType target, StringComparison comparison
         foreach (var prefix in Commands)
         {
             if (!Comparer(afterMatch, prefix)) continue;
+
+            if (RequireTokenBoundary &&
+                afterMatch.Length > prefix.Length &&
+                !char.IsWhiteSpace(afterMatch.Span[prefix.Length]))
+            {
+                continue;
+            }
 
             afterMatch = afterMatch[prefix.Length..].TrimStart();
             return true;
