@@ -105,7 +105,8 @@ public class MaiMaiSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        // 版式改动时更换后缀，让旧图片缓存失效
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.capsule-v1.b64");
         return new CacheableText(path, () =>
         {
             var ctx = new WebContext();

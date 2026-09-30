@@ -11,45 +11,104 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
+
+    /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
+    private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
+    {
+        var opponents = message.At().Distinct().ToArray();
+        if (opponents.Length != 1)
+        {
+            message.Reply(opponents.Length == 0 ? "请 @一名对手" : "请只指定一名对手");
+            return null;
+        }
+
+        var (self, selfError)         = ResolveVersusPlayer(message, message.Sender.Id);
+        var (opponent, opponentError) = ResolveVersusPlayer(message, opponents[0]);
+        if (opponent is null)
+        {
+            ReplyOpponentNotBound(message, opponents[0], opponentError!);
+            return null;
+        }
+
+        if (self is null)
+        {
+            message.Reply(selfError!);
+            return null;
+        }
+
+        return (self, opponent);
+    }
+
+    /// <summary>并行取双方成绩；失败时已回复原因并返回空。</summary>
+    private static async Task<(MaiVersusBatch.Player Self, MaiVersusBatch.Player Opponent)?> FetchVersusScores(
+        Message message, (ResolvedPlayer Self, ResolvedPlayer Opponent) players)
+    {
+        var selfFetch     = FetchBattleData(players.Self);
+        var opponentFetch = FetchBattleData(players.Opponent);
+        var selfData      = await selfFetch;
+        var opponentData  = await opponentFetch;
+
+        if (opponentData.Error is not null && IsOpponentBindingError(opponentData.Error))
+        {
+            ReplyOpponentNotBound(message, players.Opponent.Qq, opponentData.Error);
+            return null;
+        }
+
+        if ((selfData.Error ?? opponentData.Error) is { } error)
+        {
+            message.Reply(error);
+            return null;
+        }
+
+        return (new MaiVersusBatch.Player(selfData.Nickname ?? $"QQ {players.Self.Qq}", selfData.Scores),
+            new MaiVersusBatch.Player(opponentData.Nickname ?? $"QQ {players.Opponent.Qq}", opponentData.Scores));
+
+        // 授权/网络错误转成 Error 文本交给调用方回复，其余异常照旧抛出
+        static async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, string? Error)>
+            FetchBattleData(ResolvedPlayer player)
+        {
+            try
+            {
+                var (nickname, scores) = await player.Fetcher.GetScores(player);
+                return (nickname, scores, null);
+            }
+            catch (HttpRequestException e)
+            {
+                return (null, [], e.Message);
+            }
+        }
+    }
+
     private static List<MaiMaiSong> SharedVersusSongs(
         IEnumerable<MaiMaiSong> songs, int level,
         IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> left,
         IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> right) =>
-        songs.Where(song => song.Levels.Count > level && left.ContainsKey((song.Id, level)) &&
+        songs.Where(song => song.Levels.Count > level && song.Constants.Count > level &&
+                            song.Charts.Count > level && left.ContainsKey((song.Id, level)) &&
                             right.ContainsKey((song.Id, level))).ToList();
 
-    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random, PlateData.Query? Scope)
+    /// <summary>解析单曲 vs 的歌曲与难度；空输入或只有难度时随机选曲。</summary>
+    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)
         ResolveVersusQuery(Shared.Util.SongDb.SongDb<MaiMaiSong> songs, string input)
     {
         var query = input.Trim();
-        if (query.Length == 0) return ([], 3, true, null);
+        if (query.Length == 0) return ([], 3, true);
 
         var exact = songs.SearchSongExact(query.AsMemory());
-        if (exact.Count > 0) return (exact, 3, false, null);
-        if (PlateData.DifficultyAliasMap.TryGetValue(query, out var difficulty))
-            return ([], difficulty, true, null);
+        if (exact.Count > 0) return (exact, 3, false);
+        if (PlateData.DifficultyAliasMap.TryGetValue(query, out var difficulty)) return ([], difficulty, true);
 
         var hasAffix = PlateData.TryStripDifficultyAffix(query.AsMemory(), out var level, out var rest);
-        var explicitAffix = PlateData.DifficultyAliasMap.Keys.Any(token =>
-            query.StartsWith(token, StringComparison.OrdinalIgnoreCase) ||
-            query.EndsWith(token, StringComparison.OrdinalIgnoreCase));
-        if (hasAffix && explicitAffix)
-        {
-            exact = songs.SearchSongExact(rest);
-            if (exact.Count > 0) return (exact, level, false, null);
-        }
-
-        // 单字白/紫优先作为版本代字；白谱/紫谱可用于指定单曲难度。
-        if (PlateData.TryParseScope(query, out var scope, out _)) return ([], 3, false, scope);
         if (hasAffix)
         {
             exact = songs.SearchSongExact(rest);
-            if (exact.Count > 0) return (exact, level, false, null);
+            if (exact.Count > 0) return (exact, level, false);
         }
 
         var fuzzy = songs.SearchSong(query.AsMemory());
-        if (fuzzy.Count > 0) return (fuzzy, 3, false, null);
-        return (hasAffix ? songs.SearchSong(rest) : [], hasAffix ? level : 3, false, null);
+        if (fuzzy.Count > 0) return (fuzzy, 3, false);
+        return hasAffix ? (songs.SearchSong(rest), level, false) : ([], 3, false);
     }
 
     private async Task ReplyBatchVersus(

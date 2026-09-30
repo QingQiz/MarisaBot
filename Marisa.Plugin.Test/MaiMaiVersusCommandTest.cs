@@ -23,23 +23,8 @@ public class MaiMaiVersusCommandTest
         {
             Assert.That(query.Random, Is.True);
             Assert.That(query.Songs, Is.Empty);
-            Assert.That(query.Scope, Is.Null);
             Assert.That(query.LevelIndex, Is.EqualTo(3));
         });
-    }
-
-    [TestCase("彩")]
-    [TestCase("真")]
-    [TestCase("14+")]
-    public void ValidScopeTakesPrecedenceOverFuzzyAliases(string input)
-    {
-        var db = Songs();
-        Assert.That(db.SearchSong(input.AsMemory()), Is.Not.Empty);
-        Assert.That(db.SearchSongExact(input.AsMemory()), Is.Empty);
-        var query = Resolve(db, input);
-        Assert.That(query.Scope, Is.Not.Null);
-        Assert.That(query.Songs, Is.Empty);
-        Assert.That(query.Random, Is.False);
     }
 
     [TestCase("22", 22, 3)]
@@ -54,18 +39,16 @@ public class MaiMaiVersusCommandTest
     public void ExactSongAliasesIdsAndDifficultyAffixesStaySingleSong(string text, long id, int level)
     {
         var query = Resolve(Songs(), text);
-        Assert.That(query.Scope, Is.Null);
         Assert.That(query.Random, Is.False);
         Assert.That(query.LevelIndex, Is.EqualTo(level));
         Assert.That(query.Songs.Select(song => song.Id), Is.EqualTo(new[] { id }));
     }
 
-    [Test]
-    public void ExactAliasCanWinOverScopeWithoutStealingLongerSongNames()
+    [TestCase("彩虹", 25)]
+    [TestCase("Chao", 22)]
+    public void FuzzySearchStillFindsSongs(string text, long id)
     {
-        var db = Songs(("彩", "In Chaos"));
-        Assert.That(Resolve(db, "彩").Songs.Single().Id, Is.EqualTo(22));
-        Assert.That(Resolve(db, "彩虹").Songs.Single().Id, Is.EqualTo(25));
+        Assert.That(Resolve(Songs(), text).Songs.Select(song => song.Id), Is.EqualTo(new[] { id }));
     }
 
     [Test]
@@ -84,17 +67,7 @@ public class MaiMaiVersusCommandTest
     {
         var query = Resolve(Songs(), text);
         Assert.That(query.Random, Is.True);
-        Assert.That(query.Scope, Is.Null);
         Assert.That(query.LevelIndex, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void InvalidScopeDoesNotBecomeRandomAndFuzzySongsStillWork()
-    {
-        Assert.That(Resolve(Songs(), "彩代14.8-14.0").Random, Is.False);
-        Assert.That(Resolve(Songs(), "不存在的歌曲").Songs, Is.Empty);
-        Assert.That(Resolve(Songs(), "Chao").Songs.Single().Id, Is.EqualTo(22));
-        Assert.That(Resolve(Songs(), "彩代紫谱").Scope!.LevelIdxes, Is.EqualTo(new[] { 3 }));
     }
 
     [Test]
@@ -116,9 +89,9 @@ public class MaiMaiVersusCommandTest
         Assert.That((List<MaiMaiSong>)method.Invoke(null, [songs, 3, left, new Dictionary<(long, int), SongScore>()])!, Is.Empty);
     }
 
-    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random, PlateData.Query? Scope)
+    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)
         Resolve(SongDb<MaiMaiSong> db, string input) =>
-        ((List<MaiMaiSong>, int, bool, PlateData.Query?))typeof(MaiMaiDx.MaiMaiDx)
+        ((List<MaiMaiSong>, int, bool))typeof(MaiMaiDx.MaiMaiDx)
             .GetMethod("ResolveVersusQuery", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [db, input])!;
 
     private static SongDb<MaiMaiSong> Songs(params (string Alias, string Title)[] extra)

@@ -42,7 +42,7 @@
                              class="block w-[440px] h-[440px] object-cover rounded-[24px]">
                     </div>
                     <div v-if="starInfos.length" class="flex flex-col gap-3 w-full">
-                        <div v-for="info in starInfos" :key="info.name" class="star-block" :style="starBlockStyle(info.idx)">
+                        <div v-for="info in starInfos" :key="info.name" class="star-block mai-accent-rail" :style="starBlockStyle(info.idx)">
                             <!-- 头部定宽：MASTER / Re:MASTER 两栏的星星列对齐 -->
                             <div class="shrink-0 w-[118px]">
                                 <div class="star-head-title">DX SCORE</div>
@@ -73,7 +73,7 @@
 
                 <div class="flex flex-col gap-[10px]">
                     <div v-for="(chart, i) in song.Charts" :key="i"
-                         class="chart-row relative h-[144px] rounded-[10px] overflow-hidden"
+                         class="chart-row mai-accent-rail h-[144px] rounded-[10px] overflow-hidden"
                          :style="rowStyle(i)">
                         <!-- 行头双层 chip：难度名（难度色）+ 等级（向白混色提亮层；定数已移到徽章） -->
                         <div class="flex items-stretch">
@@ -373,7 +373,7 @@ function starBlockStyle(i: number) {
     return {
         background: `linear-gradient(90deg, ${c}26 0%, rgba(0,0,0,0.42) 30%, rgba(0,0,0,0.42) 100%)`,
         border: '1px solid rgba(255,255,255,0.09)',
-        boxShadow: `inset 4px 0 0 ${c}`,
+        '--rail-color': c,
     }
 }
 
@@ -386,7 +386,7 @@ function rowStyle(i: number) {
     const c = rowColor(i)
     return {
         border: '1px solid rgba(255,255,255,0.09)',
-        boxShadow: `inset 4px 0 0 ${c}`,
+        '--rail-color': c,
         background: `linear-gradient(90deg, ${c}26 0%, rgba(0,0,0,0.42) 34%, rgba(0,0,0,0.42) 100%)`,
     }
 }
@@ -722,13 +722,22 @@ function break50Loss(chart: Chart): string {
 }
 
 /* ── 左列 DX 分星线（两栏 w-full 自动等宽，总宽贴住封面 452px） ── */
+.chart-row {
+    --rail-width: 4px;
+    --rail-top: 48px; /* 避开顶部 38px 高的难度标题色块。 */
+    --rail-bottom: 10px;
+}
+
 .star-block {
+    --rail-width: 4px;
+    --rail-top: 10px;
+    --rail-bottom: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     width: 100%;
-    padding: 10px 14px 9px;
+    padding: 10px 14px 9px 18px;
     border-radius: 10px;
 }
 

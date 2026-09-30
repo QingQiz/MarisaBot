@@ -110,6 +110,11 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver白");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver白");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs n 20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("mai vs n 20");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maivsn20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("maivsn20");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b 彩代")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b 彩代");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b彩代14+")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b彩代14+");
         }
     }
 

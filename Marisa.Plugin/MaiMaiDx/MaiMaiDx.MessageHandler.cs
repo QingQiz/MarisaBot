@@ -736,46 +736,18 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("比较双方成绩；不填歌曲时随机选择共同已玩谱面", "`@某人`，可选歌曲、难度或完成表范围")]
+    [MarisaPluginDoc("比较双方单曲成绩；不填歌曲时随机", "`@某人`，可选歌曲名、别名、ID 或难度")]
     [MarisaPluginCommand("vs", "对战")]
     private async Task<MarisaPluginTaskState> SongVersus(Message message)
     {
-        // 1. 对手：必须且只能 @ 一个
-        var opponents = message.At().Distinct().ToArray();
-        if (opponents.Length != 1)
-        {
-            message.Reply(opponents.Length == 0 ? "请 @一名对手" : "请只指定一名对手");
-            return MarisaPluginTaskState.CompletedTask;
-        }
+        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
 
-        var opponentQq = opponents[0];
-
-        // 2. 双方都要能读到完整成绩：只查本地库，缺谁就直接回复，一次网络请求都不发
-        var (self, selfError)         = ResolveVersusPlayer(message, message.Sender.Id);
-        var (opponent, opponentError) = ResolveVersusPlayer(message, opponentQq);
-        if (opponent is null) return ReplyOpponentNotBound(message, opponentQq, opponentError!);
-        if (self is null)
-        {
-            message.Reply(selfError!);
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        // 3. 范围：单曲、随机，或完成表；完成表先在本地确认有谱面，免得为无效范围白取一次数
-        var query       = message.Command.Trim().ToString();
-        var selection   = ResolveVersusQuery(SongDb, query);
-        var batchScope  = selection.Scope;
-        var batchCharts = batchScope is null ? null : PlateData.SelectScopeCharts(batchScope, SongDb.SongList);
-        if (batchCharts is { Count: 0 })
-        {
-            message.Reply($"没有找到 {query} 对应的谱面");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
+        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
         var levelIdx = selection.LevelIndex;
 
-        // 单曲：先把歌选出来（多匹配时要走多页选择、等用户回复），选完再取数
+        // 指定歌曲时先完成选歌（可能要等用户选择），再取成绩
         MaiMaiSong? song = null;
-        if (selection.Songs.Count > 0)
+        if (!selection.Random)
         {
             song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
             if (song is null) return MarisaPluginTaskState.CompletedTask;
@@ -787,33 +759,13 @@ public partial class MaiMaiDx
             }
         }
 
-        // 4. 取数：双方并行
-        var selfFetch     = FetchBattleData(self);
-        var opponentFetch = FetchBattleData(opponent);
-        await Task.WhenAll(selfFetch, opponentFetch);
-        var selfData     = await selfFetch;
-        var opponentData = await opponentFetch;
+        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
 
-        if (selfData.Error is not null || opponentData.Error is not null)
-        {
-            if (opponentData.Error is not null && IsOpponentBindingError(opponentData.Error))
-                return ReplyOpponentNotBound(message, opponentQq, opponentData.Error);
+        var (self, opponent) = sides;
 
-            message.Reply(selfData.Error ?? opponentData.Error!);
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var selfLabel     = selfData.Nickname ?? $"QQ {message.Sender.Id}";
-        var opponentLabel = opponentData.Nickname ?? $"QQ {opponentQq}";
-
-        // 5. 渲染：完成表出一整套表，否则出单曲对比图
-        if (batchScope is not null && batchCharts is not null)
-            return await ReplyVersusBatch(batchScope, batchCharts, query);
-
-        // 随机模式才需要成绩：从双方都已游玩的谱面里挑
         if (song is null)
         {
-            var candidates = SharedVersusSongs(SongDb.SongList, levelIdx, selfData.Scores, opponentData.Scores);
+            var candidates = SharedVersusSongs(SongDb.SongList, levelIdx, self.Scores, opponent.Scores);
             if (candidates.Count == 0)
             {
                 message.Reply("没有找到双方都已游玩且当前可查询的谱面");
@@ -823,20 +775,15 @@ public partial class MaiMaiDx
             song = candidates[Random.Shared.Next(candidates.Count)];
         }
 
-        var selfScore     = selfData.Scores.GetValueOrDefault((song.Id, levelIdx));
-        var opponentScore = opponentData.Scores.GetValueOrDefault((song.Id, levelIdx));
+        var selfScore     = self.Scores.GetValueOrDefault((song.Id, levelIdx));
+        var opponentScore = opponent.Scores.GetValueOrDefault((song.Id, levelIdx));
 
-        var winner = selfScore == null && opponentScore == null
-            ? "双方均未游玩"
-            : selfScore == null
-                ? opponentLabel
-                : opponentScore == null
-                    ? selfLabel
-                    : Math.Abs(selfScore.Achievement - opponentScore.Achievement) < 0.0001
-                        ? "平局"
-                        : selfScore.Achievement > opponentScore.Achievement
-                            ? selfLabel
-                            : opponentLabel;
+        // 只按达成率判定胜负：0 = 自己，1 = 对手，-1 = 平局或双方均未游玩
+        var winnerIndex = selfScore == null && opponentScore == null ? -1
+            : selfScore == null ? 1
+            : opponentScore == null ? 0
+            : selfScore.Achievement == opponentScore.Achievement ? -1
+            : selfScore.Achievement > opponentScore.Achievement ? 0 : 1;
 
         var context = new WebContext(new
         {
@@ -849,10 +796,10 @@ public partial class MaiMaiDx
                 MaxDx = song.Charts[levelIdx].Notes.Sum() * 3,
                 Players = new[]
                 {
-                    new { Nickname = selfLabel, Played = selfScore != null, Score = ProjectScore(selfScore) },
-                    new { Nickname = opponentLabel, Played = opponentScore != null, Score = ProjectScore(opponentScore) }
+                    new { Nickname = self.Name, Played = selfScore != null, Score = ProjectScore(selfScore) },
+                    new { Nickname = opponent.Name, Played = opponentScore != null, Score = ProjectScore(opponentScore) }
                 },
-                Winner = winner
+                WinnerIndex = winnerIndex
             }
         });
 
@@ -873,48 +820,96 @@ public partial class MaiMaiDx
                     score.Fs,
                 };
         }
+    }
 
-        async Task<MarisaPluginTaskState> ReplyVersusBatch(
-            PlateData.Query scope,
-            IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> charts,
-            string rawScope)
+    [MarisaPluginDoc("随机比较 N 个成绩", "`N`（最大 20），可选难度或完成表范围")]
+    [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginCommand("n")]
+    private async Task<MarisaPluginTaskState> SongVersusRandom(Message message)
+    {
+        var command = message.Command.Trim().ToString();
+        var digits  = command.TakeWhile(char.IsAsciiDigit).Count();
+        if (!int.TryParse(command[..digits], out var count) || count is < 1 or > MaxVersusRandomCount)
         {
-            var versions = charts.Select(x => x.Song.Version).Distinct().ToArray();
-            var version  = versions.Length == 1 ? versions[0] : string.Empty;
-            var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
-                ? "歌曲 ID 升序"
-                : "定数降序";
-            var batch = new MaiVersusBatch(
-                rawScope.Trim(),
-                version,
-                sortLabel,
-                charts,
-                new MaiVersusBatch.Player(selfLabel, selfData.Scores),
-                new MaiVersusBatch.Player(opponentLabel, opponentData.Scores));
-
-            await ReplyBatchVersus(message, batch);
+            message.Reply($"N 须为 1～{MaxVersusRandomCount} 的整数，用法：mai vs n 5 [难度/范围] @对手");
             return MarisaPluginTaskState.CompletedTask;
         }
+
+        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
+
+        var query    = command[digits..].Trim();
+        var levelIdx = 3;
+        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> charts;
+        if (query.Length == 0 || PlateData.DifficultyAliasMap.TryGetValue(query, out levelIdx))
+        {
+            charts = SongDb.SongList
+                .Where(song => song.Levels.Count > levelIdx && song.Constants.Count > levelIdx && song.Charts.Count > levelIdx)
+                .Select(song => (song.Constants[levelIdx], levelIdx, song))
+                .ToList();
+        }
+        else if (PlateData.TryParseScope(query, out var scope, out _))
+        {
+            charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
+        }
+        else
+        {
+            message.Reply($"无法解析难度或完成表范围：{query}");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
+
+        var (self, opponent) = sides;
+
+        var shared = charts
+            .Where(x => self.Scores.ContainsKey((x.Song.Id, x.LevelIdx)) && opponent.Scores.ContainsKey((x.Song.Id, x.LevelIdx)))
+            .ToList();
+
+        if (shared.Count == 0)
+        {
+            message.Reply("没有找到双方都已游玩且当前可查询的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var picked = shared.OrderBy(_ => Random.Shared.Next()).Take(count).ToArray();
+        await ReplyBatchVersus(message, new MaiVersusBatch($"随机 {picked.Length} 首共同谱面", string.Empty, "随机", picked, self, opponent));
+        return MarisaPluginTaskState.CompletedTask;
     }
 
-    /// <summary>取一方的 vs 数据；授权/网络错误转成 Error 文本交给调用方回复，其余异常照旧抛出。</summary>
-    private static async Task<BattleData> FetchBattleData(ResolvedPlayer player)
+    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围`，如`彩代14+`")]
+    [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginCommand("b")]
+    private async Task<MarisaPluginTaskState> SongVersusBatch(Message message)
     {
-        try
+        var query = message.Command.Trim().ToString();
+        if (!PlateData.TryParseScope(query, out var scope, out _))
         {
-            var (nickname, scores) = await player.Fetcher.GetScores(player);
-            return new BattleData(nickname, scores, null);
+            message.Reply($"无法解析完成表范围：{query}");
+            return MarisaPluginTaskState.CompletedTask;
         }
-        catch (HttpRequestException e)
-        {
-            return new BattleData(null, [], e.Message);
-        }
-    }
 
-    private sealed record BattleData(
-        string? Nickname,
-        Dictionary<(long Id, int LevelIdx), SongScore> Scores,
-        string? Error);
+        // 先在本地确认范围内有谱面，免得为无效范围白取一次成绩
+        var charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
+        if (charts.Count == 0)
+        {
+            message.Reply($"没有找到 {query} 对应的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
+        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
+
+        var (self, opponent) = sides;
+
+        var versions  = charts.Select(x => x.Song.Version).Distinct().ToArray();
+        var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
+            ? "歌曲 ID 升序"
+            : "定数降序";
+
+        await ReplyBatchVersus(message,
+            new MaiVersusBatch(query, versions.Length == 1 ? versions[0] : string.Empty, sortLabel, charts, self, opponent));
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
     /// <summary>
     ///     谱面预览

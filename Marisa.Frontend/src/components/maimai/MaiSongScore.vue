@@ -32,7 +32,7 @@
                         <div class="vc-h vc-h-c">FC / FS</div>
                     </div>
                 </div>
-                <div v-for="c in charts" :key="c.LevelIndex" class="vc-row" :style="rowStyle(c.LevelIndex)">
+                <div v-for="c in charts" :key="c.LevelIndex" class="vc-row mai-accent-rail" :style="rowStyle(c.LevelIndex)">
                     <div class="vc-chip" :style="{ color: diffColor(c.LevelIndex), borderColor: diffColor(c.LevelIndex) }">
                         <span class="vc-chip-name" :style="isUtage ? { fontFamily: `'Microsoft YaHei', sans-serif` } : undefined">{{ diffName(c.LevelIndex) }}</span>
                         <span class="vc-chip-ds tabular-nums">{{ isUtage ? c.Level : c.Constant.toFixed(1) }}</span>
@@ -122,7 +122,7 @@ function rowStyle(i: number) {
     const c = diffColor(i)
     return {
         border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: `inset 5px 0 0 ${c}`,
+        '--rail-color': c,
         background: `linear-gradient(90deg, ${c}24 0%, rgba(0,0,0,0.34) 26%, rgba(0,0,0,0.34) 100%)`,
     }
 }
@@ -144,9 +144,9 @@ function rowStyle(i: number) {
 .vc-head .vc-h-diff { width: 116px; flex-shrink: 0; }
 .vc-h { font-family: 'Torus','Microsoft YaHei',sans-serif; font-weight: bold; font-size: 13px; letter-spacing: 0.04em; color: rgba(255,255,255,0.5); }
 .vc-h-c { text-align: center; }
-.vc-row { display: flex; align-items: stretch; height: 54px; border-radius: 10px; overflow: hidden; }
-.vc-chip { width: 116px; flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: rgba(8,8,16,0.34); }
-.vc-chip::after { content: ''; position: absolute; right: -1.5px; top: 11px; bottom: 11px; width: 4px; border-radius: 2px; background: currentColor; }
+.vc-row { --rail-width: 4px; --rail-top: 10px; --rail-bottom: 10px; display: flex; align-items: stretch; height: 54px; border-radius: 10px; overflow: hidden; }
+.vc-chip { width: 116px; flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding-left: 8px; background: rgba(8,8,16,0.34); }
+.vc-chip::after { content: ''; position: absolute; right: 0; top: 10px; bottom: 10px; width: 1px; background: currentColor; opacity: .48; }
 .vc-chip-name { font-family: 'SEGA NewRodin',sans-serif; font-weight: 900; font-size: 13px; }
 .vc-chip-ds { font-family: 'Torus',sans-serif; font-weight: bold; font-size: 25px; line-height: 1; margin-top: -5px; }
 .vc-cells { flex: 1; min-width: 0; display: grid; grid-template-columns: 110px 94px 32px 88px 54px 44px 76px; justify-content: space-between; align-items: center; padding-left: 16px; padding-right: 18px; }
