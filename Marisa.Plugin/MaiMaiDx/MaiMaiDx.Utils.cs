@@ -11,6 +11,75 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
+
+    private static bool VersusRandomTrigger(Message message, IServiceProvider _) => IsVersusSubcommand(message.Command, 'n');
+
+    private static bool VersusBatchTrigger(Message message, IServiceProvider _) => IsVersusSubcommand(message.Command, 'b');
+
+    /// <summary>子命令字母后须是空白、数字或非 ASCII 字符，避免把 Bad Apple、Neverland 等歌名当作子命令。</summary>
+    private static bool IsVersusSubcommand(ReadOnlyMemory<char> command, char name)
+    {
+        var span = command.Span.TrimStart();
+        if (span.Length == 0 || char.ToLowerInvariant(span[0]) != name) return false;
+        if (span.Length == 1) return true;
+
+        var next = span[1];
+        return char.IsWhiteSpace(next) || char.IsAsciiDigit(next) || !char.IsAscii(next);
+    }
+
+    /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
+    private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
+    {
+        var opponents = message.At().Distinct().ToArray();
+        if (opponents.Length != 1)
+        {
+            message.Reply(opponents.Length == 0 ? "请 @一名对手" : "请只指定一名对手");
+            return null;
+        }
+
+        var (self, selfError)         = ResolveVersusPlayer(message, message.Sender.Id);
+        var (opponent, opponentError) = ResolveVersusPlayer(message, opponents[0]);
+        if (opponent is null)
+        {
+            ReplyOpponentNotBound(message, opponents[0], opponentError!);
+            return null;
+        }
+
+        if (self is null)
+        {
+            message.Reply(selfError!);
+            return null;
+        }
+
+        return (self, opponent);
+    }
+
+    /// <summary>并行取双方成绩；失败时已回复原因并返回空。</summary>
+    private static async Task<(MaiVersusBatch.Player Self, MaiVersusBatch.Player Opponent)?> FetchVersusScores(
+        Message message, (ResolvedPlayer Self, ResolvedPlayer Opponent) players)
+    {
+        var selfFetch     = FetchBattleData(players.Self);
+        var opponentFetch = FetchBattleData(players.Opponent);
+        var selfData      = await selfFetch;
+        var opponentData  = await opponentFetch;
+
+        if (opponentData.Error is not null && IsOpponentBindingError(opponentData.Error))
+        {
+            ReplyOpponentNotBound(message, players.Opponent.Qq, opponentData.Error);
+            return null;
+        }
+
+        if ((selfData.Error ?? opponentData.Error) is { } error)
+        {
+            message.Reply(error);
+            return null;
+        }
+
+        return (new MaiVersusBatch.Player(selfData.Nickname ?? $"QQ {players.Self.Qq}", selfData.Scores),
+            new MaiVersusBatch.Player(opponentData.Nickname ?? $"QQ {players.Opponent.Qq}", opponentData.Scores));
+    }
+
     private static List<MaiMaiSong> SharedVersusSongs(
         IEnumerable<MaiMaiSong> songs, int level,
         IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> left,

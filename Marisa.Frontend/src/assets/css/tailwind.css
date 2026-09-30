@@ -43,10 +43,11 @@
     src: url('@/assets/fonts/SEGAMaruGothicDB.woff2') format('woff2');
 }
 
+/* 仅含“菜”一个字形（wght 800），供 vs 卡片的印章使用 */
 @font-face {
     font-family: 'Noto Serif JP';
-    font-weight: 100 900;
-    src: url('/assets/font/NotoSerifJP-VF.ttf') format('truetype');
+    font-weight: 800;
+    src: url('@/assets/fonts/NotoSerifJP-ExtraBold-Stamp.woff2') format('woff2');
 }
 
 /* SEGA NewRodin EB — the font maimai actually uses for song titles in-game

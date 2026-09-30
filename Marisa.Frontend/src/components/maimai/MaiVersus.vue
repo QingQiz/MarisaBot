@@ -16,12 +16,12 @@
             <span class="difficulty" :style="{color: diffColor}">{{ diffName }} {{ data.Level }}</span>
         </div>
         <div class="players">
-            <div v-for="(player, index) in data.Players" :key="index" class="player mai-accent-rail" :class="{winner: isWinner(index), loser: isRateLoser(index)}">
+            <div v-for="(player, index) in data.Players" :key="index" class="player mai-accent-rail" :class="{winner: isWinner(index)}">
                 <div class="player-head">
                     <span class="player-name">{{ player.Nickname }}</span>
-                    <span class="player-status" aria-label="对战结果">
+                    <span class="player-status">
                         <b v-if="isWinner(index)" class="win-badge">WIN</b>
-                        <span v-if="isRateLoser(index)" class="loser-stamp" aria-label="完成率落后">菜</span>
+                        <span v-if="isLoser(index)" class="loser-stamp">菜</span>
                     </span>
                 </div>
                 <template v-if="player.Played && player.Score">
@@ -61,7 +61,7 @@ import MaiCover from '@/components/maimai/MaiCover.vue'
 
 interface Score { Achievement: number; Rank: string; Rating: number; DxScore: number; Fc: string; Fs: string }
 interface Player { Nickname: string; Played: boolean; Score: Score | null }
-interface VersusData { Song: {Id: number; Title: string; Type: string; Artist: string; Genre: string; Bpm: number; From: string; IsNew: boolean}; LevelIndex: number; Level: string; Constant: number; MaxDx: number; Players: Player[]; Winner: string; WinnerIndex: number }
+interface VersusData { Song: {Id: number; Title: string; Type: string; Artist: string; Genre: string; Bpm: number; From: string; IsNew: boolean}; LevelIndex: number; Level: string; Constant: number; MaxDx: number; Players: Player[]; WinnerIndex: number }
 const route = useRoute()
 const data = ref<VersusData | null>(null)
 axios.get(context_get, {params: {id: route.query.id, name: 'versus'}}).then(res => { data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data })
@@ -77,18 +77,8 @@ function starN(score: Score) { return dxScoreStar(score.DxScore, data.value?.Max
 function starIcon(score: Score) { return `${PIC}/music_icon_dxstar_${starN(score)}.png` }
 function dxRate(score: Score) { return data.value?.MaxDx ? (score.DxScore / data.value.MaxDx * 100).toFixed(1) : '0.0' }
 function isWinner(index: number) { return data.value?.WinnerIndex === index }
-/**
- * The loser stamp is deliberately derived from Achievement only.  In
- * particular, DX score never participates in deciding whether the stamp is
- * shown.  A missing score is not treated as a zero completion rate: the stamp
- * is reserved for a real rate-vs-rate comparison.
- */
-function isRateLoser(index: number) {
-    const current = data.value?.Players[index]
-    const other = data.value?.Players[1 - index]
-    if (!current?.Played || !current.Score || !other?.Played || !other.Score) return false
-    return current.Score.Achievement < other.Score.Achievement
-}
+// 未游玩的一方只算输，不盖“菜”章
+function isLoser(index: number) { return data.value?.WinnerIndex === 1 - index && data.value.Players[index].Played }
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
@@ -158,7 +148,7 @@ function isRateLoser(index: number) {
 .loser-stamp::before { content:''; position:absolute; inset:3px; border:0.75px solid #fff4ed; border-radius:2px; opacity:.95; }
 .loser-stamp::after { content:''; position:absolute; inset:0; border:1px solid #f3aaa2; border-radius:5px; opacity:.7; }
 .player.winner { --rail-opacity:1; border-color:rgba(255,255,255,.78); box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 0 22px var(--winner-glow); }
-/* Center the achievement on the fixed rank slot and keep the metrics below it. */
+/* 达成率与右侧评级图垂直居中 */
 .score-main { margin-top:calc(var(--rank-top) + var(--rank-height) / 2 - 19.5px - 18px - var(--status-height)); display:flex; align-items:center; min-height:39px; padding-right:76px; }
 .achievement { font:900 39px 'Torus',sans-serif; letter-spacing:.02em; line-height:1; }
 .achievement small { margin-left:3px; font-size:17px; opacity:.65; }
@@ -175,4 +165,3 @@ function isRateLoser(index: number) {
 .unplayed { height:142px; display:flex; align-items:center; justify-content:center; gap:10px; font:700 21px 'SEGA NewRodin',sans-serif; letter-spacing:.14em; color:rgba(255,255,255,.34); }
 .unplayed-mark { font:400 35px 'Torus',sans-serif; color:rgba(255,255,255,.22); }
 </style>
-

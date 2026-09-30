@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using Marisa.BotDriver.Entity.Message;
-using Marisa.BotDriver.Entity.MessageData;
-using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
@@ -14,27 +11,6 @@ namespace Marisa.Plugin.Test;
 
 public class MaiMaiVersusCommandTest
 {
-    [Test]
-    public void VersusSubcommandsRequireTokenBoundaries()
-    {
-        var parent = typeof(MaiMaiDx.MaiMaiDx).GetMethod("SongVersus", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetCustomAttribute<MarisaPluginCommand>()!;
-        var random = typeof(MaiMaiDx.MaiMaiDx).GetMethod("SongVersusRandom", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetCustomAttribute<MarisaPluginCommand>()!;
-        var batch = typeof(MaiMaiDx.MaiMaiDx).GetMethod("SongVersusBatch", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetCustomAttribute<MarisaPluginCommand>()!;
-
-        Assert.That(parent.TryMatch(TextMessage("vs n 20"), out var parentRest), Is.True);
-        Assert.That(parentRest.ToString(), Is.EqualTo("n 20"));
-        Assert.That(random.TryMatch(TextMessage("n 20"), out var randomRest), Is.True);
-        Assert.That(randomRest.ToString(), Is.EqualTo("20"));
-        Assert.That(batch.TryMatch(TextMessage("b 彩代"), out var batchRest), Is.True);
-        Assert.That(batchRest.ToString(), Is.EqualTo("彩代"));
-        Assert.That(random.TryMatch(TextMessage("nonsense"), out _), Is.False);
-        Assert.That(batch.TryMatch(TextMessage("bad"), out _), Is.False);
-        Assert.That(parent.TryMatch(TextMessage("vscode"), out _), Is.False);
-    }
-
     [TestCase("")]
     [TestCase("   ")]
     [TestCase("\t　")]
@@ -140,6 +116,21 @@ public class MaiMaiVersusCommandTest
         Assert.That((List<MaiMaiSong>)method.Invoke(null, [songs, 3, left, new Dictionary<(long, int), SongScore>()])!, Is.Empty);
     }
 
+    [TestCase("n", 'n', true)]
+    [TestCase("n 20", 'n', true)]
+    [TestCase("N20 彩代", 'n', true)]
+    [TestCase("b 彩代14+", 'b', true)]
+    [TestCase("b彩代14+", 'b', true)]
+    [TestCase("Neverland", 'n', false)]
+    [TestCase("Bad Apple", 'b', false)]
+    [TestCase("B.B.K.K.B.K.K.", 'b', false)]
+    [TestCase("", 'n', false)]
+    public void SubcommandLetterNeedsABoundary(string command, char name, bool expected)
+    {
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("IsVersusSubcommand", BindingFlags.NonPublic | BindingFlags.Static)!;
+        Assert.That((bool)method.Invoke(null, [command.AsMemory(), name])!, Is.EqualTo(expected));
+    }
+
     private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random, PlateData.Query? Scope)
         Resolve(SongDb<MaiMaiSong> db, string input) =>
         ((List<MaiMaiSong>, int, bool, PlateData.Query?))typeof(MaiMaiDx.MaiMaiDx)
@@ -158,9 +149,6 @@ public class MaiMaiVersusCommandTest
         typeof(SongDb<MaiMaiSong>).GetField("_songAlias", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(db, aliases);
         return db;
     }
-
-    private static Message TextMessage(string command) => new(
-        new MessageChain(new MessageDataText(command.AsMemory())), null!);
 
     internal static MaiMaiSong Song(long id, string title)
     {
