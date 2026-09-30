@@ -63,6 +63,21 @@ public partial class MaiMaiDx
 
         return (new MaiVersusBatch.Player(selfData.Nickname ?? $"QQ {players.Self.Qq}", selfData.Scores),
             new MaiVersusBatch.Player(opponentData.Nickname ?? $"QQ {players.Opponent.Qq}", opponentData.Scores));
+
+        // 授权/网络错误转成 Error 文本交给调用方回复，其余异常照旧抛出
+        static async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, string? Error)>
+            FetchBattleData(ResolvedPlayer player)
+        {
+            try
+            {
+                var (nickname, scores) = await player.Fetcher.GetScores(player);
+                return (nickname, scores, null);
+            }
+            catch (HttpRequestException e)
+            {
+                return (null, [], e.Message);
+            }
+        }
     }
 
     private static List<MaiMaiSong> SharedVersusSongs(
