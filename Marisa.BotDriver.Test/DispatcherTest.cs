@@ -111,8 +111,6 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver白");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver白");
 
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Bad Apple")), typeof(MaiMaiDx), "SongVersus").SetName("mai vs Bad Apple");
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Neverland")), typeof(MaiMaiDx), "SongVersus").SetName("mai vs Neverland");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs n 20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("mai vs n 20");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maivsn20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("maivsn20");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b 彩代")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b 彩代");
@@ -147,12 +145,6 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai S S含金量分析")), typeof(MaiMaiDx), "FilteredValueAnalysis").SetName("mai rejects ranks separated by whitespace");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai 含金量分析 extra")), typeof(MaiMaiDx), "GoldValueAnalysis").SetName("mai gold analysis is exact");
-
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Bad Apple")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b needs a boundary");
-
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs Neverland")), typeof(MaiMaiDx), "SongVersusRandom").SetName("mai vs n needs a boundary");
-
-            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs B.B.K.K.B.K.K.")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b rejects punctuation");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai best")) with
             {

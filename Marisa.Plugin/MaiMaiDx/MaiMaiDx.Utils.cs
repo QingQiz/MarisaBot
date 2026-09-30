@@ -13,21 +13,6 @@ public partial class MaiMaiDx
 {
     private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
 
-    private static bool VersusRandomTrigger(Message message, IServiceProvider _) => IsVersusSubcommand(message.Command, 'n');
-
-    private static bool VersusBatchTrigger(Message message, IServiceProvider _) => IsVersusSubcommand(message.Command, 'b');
-
-    /// <summary>子命令字母后须是空白、数字或非 ASCII 字符，避免把 Bad Apple、Neverland 等歌名当作子命令。</summary>
-    private static bool IsVersusSubcommand(ReadOnlyMemory<char> command, char name)
-    {
-        var span = command.Span.TrimStart();
-        if (span.Length == 0 || char.ToLowerInvariant(span[0]) != name) return false;
-        if (span.Length == 1) return true;
-
-        var next = span[1];
-        return char.IsWhiteSpace(next) || char.IsAsciiDigit(next) || !char.IsAscii(next);
-    }
-
     /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
     private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
     {
@@ -88,38 +73,27 @@ public partial class MaiMaiDx
                             song.Charts.Count > level && left.ContainsKey((song.Id, level)) &&
                             right.ContainsKey((song.Id, level))).ToList();
 
-    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random, PlateData.Query? Scope)
+    /// <summary>解析单曲 vs 的歌曲与难度；空输入或只有难度时随机选曲。</summary>
+    private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)
         ResolveVersusQuery(Shared.Util.SongDb.SongDb<MaiMaiSong> songs, string input)
     {
         var query = input.Trim();
-        if (query.Length == 0) return ([], 3, true, null);
+        if (query.Length == 0) return ([], 3, true);
 
         var exact = songs.SearchSongExact(query.AsMemory());
-        if (exact.Count > 0) return (exact, 3, false, null);
-        if (PlateData.DifficultyAliasMap.TryGetValue(query, out var difficulty))
-            return ([], difficulty, true, null);
+        if (exact.Count > 0) return (exact, 3, false);
+        if (PlateData.DifficultyAliasMap.TryGetValue(query, out var difficulty)) return ([], difficulty, true);
 
         var hasAffix = PlateData.TryStripDifficultyAffix(query.AsMemory(), out var level, out var rest);
-        var explicitAffix = PlateData.DifficultyAliasMap.Keys.Any(token =>
-            query.StartsWith(token, StringComparison.OrdinalIgnoreCase) ||
-            query.EndsWith(token, StringComparison.OrdinalIgnoreCase));
-        if (hasAffix && explicitAffix)
-        {
-            exact = songs.SearchSongExact(rest);
-            if (exact.Count > 0) return (exact, level, false, null);
-        }
-
-        // 单字白/紫优先作为版本代字；白谱/紫谱可用于指定单曲难度。
-        if (PlateData.TryParseScope(query, out var scope, out _)) return ([], 3, false, scope);
         if (hasAffix)
         {
             exact = songs.SearchSongExact(rest);
-            if (exact.Count > 0) return (exact, level, false, null);
+            if (exact.Count > 0) return (exact, level, false);
         }
 
         var fuzzy = songs.SearchSong(query.AsMemory());
-        if (fuzzy.Count > 0) return (fuzzy, 3, false, null);
-        return (hasAffix ? songs.SearchSong(rest) : [], hasAffix ? level : 3, false, null);
+        if (fuzzy.Count > 0) return (fuzzy, 3, false);
+        return hasAffix ? (songs.SearchSong(rest), level, false) : ([], 3, false);
     }
 
     private async Task ReplyBatchVersus(
