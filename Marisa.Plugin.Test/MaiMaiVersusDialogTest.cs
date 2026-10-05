@@ -83,14 +83,14 @@ public class MaiMaiVersusDialogTest
 
         public Task Start()
         {
-            Func<MaiVersusBatch, int, Task<string>> render = (_, page) =>
+            Func<int, Task<string>> render = page =>
             {
                 if (FailPage == page) throw new InvalidOperationException("render failed");
                 Rendered.Add(page);
                 return Task.FromResult("");
             };
-            return (Task)typeof(MaiMaiDx.MaiMaiDx).GetMethod("ReplyBatchVersus", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .Invoke(_plugin, [Message(""), _batch, render])!;
+            return (Task)typeof(MaiMaiDx.MaiMaiDx).GetMethod("ReplyPages", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .Invoke(_plugin, [Message(""), _batch.PageCount, render])!;
         }
 
         public async Task<MarisaPluginTaskState> Send(string text)

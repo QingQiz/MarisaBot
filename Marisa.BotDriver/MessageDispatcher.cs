@@ -136,7 +136,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     /// <returns>
     ///     元组
     ///     <list type="MethodInfo">
-    ///         <item>1. 哪个方法会被触发，为<paramref name="handler" />或其子命令</item>
+    ///         <item>1. 哪个方法会被触发，为<paramref name="handler" />或其（多层）子命令</item>
     ///         <item>2. 触发后的message（可能只有Command不同）</item>
     ///     </list>
     /// </returns>
@@ -155,7 +155,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         foreach (var sub in currentSub)
         {
             if (ShouldTrigger(sub, message, out var after))
-                return (sub, message with { Command = after });
+                return WhichMethodShouldBeTriggeredByWhat(plugin, sub, message with { Command = after });
         }
 
         // 不能就执行当前

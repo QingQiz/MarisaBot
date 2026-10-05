@@ -125,28 +125,6 @@ function isLoser(index: number) { return data.value?.WinnerIndex === 1 - index &
     letter-spacing:.12em;
     color:#ffe45c;
 }
-.loser-stamp {
-    position:relative;
-    z-index:2;
-    width:100%;
-    height:100%;
-    display:grid;
-    place-items:center;
-    color:#fff4ed;
-    background:#d55759;
-    border:0;
-    border-radius:5px;
-    font-family:'Noto Serif JP',serif;
-    font-size:30px;
-    font-weight:800;
-    line-height:1;
-    letter-spacing:0;
-    transform:rotate(var(--stamp-rotate));
-    pointer-events:none;
-    user-select:none;
-}
-.loser-stamp::before { content:''; position:absolute; inset:3px; border:0.75px solid #fff4ed; border-radius:2px; opacity:.95; }
-.loser-stamp::after { content:''; position:absolute; inset:0; border:1px solid #f3aaa2; border-radius:5px; opacity:.7; }
 .player.winner { --rail-opacity:1; border-color:rgba(255,255,255,.78); box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 0 22px var(--winner-glow); }
 /* 达成率与右侧评级图垂直居中 */
 .score-main { margin-top:calc(var(--rank-top) + var(--rank-height) / 2 - 19.5px - 18px - var(--status-height)); display:flex; align-items:center; min-height:39px; padding-right:76px; }

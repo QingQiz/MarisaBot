@@ -825,41 +825,13 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("n")]
     private async Task<MarisaPluginTaskState> SongVersusRandom(Message message)
     {
-        var command = message.Command.Trim().ToString();
-        var digits  = command.TakeWhile(char.IsAsciiDigit).Count();
-        if (!int.TryParse(command[..digits], out var count) || count is < 1 or > MaxVersusRandomCount)
-        {
-            message.Reply($"N 须为 1～{MaxVersusRandomCount} 的整数，用法：mai vs n 5 [难度/范围] @对手");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
+        if (ParseVersusRandom(message, "mai vs n 5 [难度/范围] @对手") is not { } parsed) return MarisaPluginTaskState.CompletedTask;
         if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
-
-        var query    = command[digits..].Trim();
-        var levelIdx = 3;
-        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> charts;
-        if (query.Length == 0 || PlateData.DifficultyAliasMap.TryGetValue(query, out levelIdx))
-        {
-            charts = SongDb.SongList
-                .Where(song => song.Levels.Count > levelIdx && song.Constants.Count > levelIdx && song.Charts.Count > levelIdx)
-                .Select(song => (song.Constants[levelIdx], levelIdx, song))
-                .ToList();
-        }
-        else if (PlateData.TryParseScope(query, out var scope, out _))
-        {
-            charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
-        }
-        else
-        {
-            message.Reply($"无法解析难度或完成表范围：{query}");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
         if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
 
         var (self, opponent) = sides;
 
-        var shared = charts
+        var shared = parsed.Charts
             .Where(x => self.Scores.ContainsKey((x.Song.Id, x.LevelIdx)) && opponent.Scores.ContainsKey((x.Song.Id, x.LevelIdx)))
             .ToList();
 
@@ -869,8 +841,9 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var picked = shared.OrderBy(_ => Random.Shared.Next()).Take(count).ToArray();
-        await ReplyBatchVersus(message, new MaiVersusBatch($"随机 {picked.Length} 首共同谱面", string.Empty, "随机", picked, self, opponent));
+        var picked = shared.OrderBy(_ => Random.Shared.Next()).Take(parsed.Count).ToArray();
+        var batch  = new MaiVersusBatch($"随机 {picked.Length} 首共同谱面", string.Empty, "随机", picked, self, opponent);
+        await ReplyPages(message, batch.PageCount, page => MaiMaiDraw.DrawVersusBatch(batch, page));
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -879,33 +852,72 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("b")]
     private async Task<MarisaPluginTaskState> SongVersusBatch(Message message)
     {
-        var query = message.Command.Trim().ToString();
-        if (!PlateData.TryParseScope(query, out var scope, out _))
-        {
-            message.Reply($"无法解析完成表范围：{query}");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
         // 先在本地确认范围内有谱面，免得为无效范围白取一次成绩
-        var charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
-        if (charts.Count == 0)
-        {
-            message.Reply($"没有找到 {query} 对应的谱面");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
+        if (ParseVersusScope(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
         if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
         if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
 
         var (self, opponent) = sides;
 
-        var versions  = charts.Select(x => x.Song.Version).Distinct().ToArray();
-        var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
-            ? "歌曲 ID 升序"
-            : "定数降序";
+        var batch = new MaiVersusBatch(parsed.Query, VersusVersion(parsed.Charts), parsed.SortLabel, parsed.Charts, self, opponent);
+        await ReplyPages(message, batch.PageCount, page => MaiMaiDraw.DrawVersusBatch(batch, page));
+        return MarisaPluginTaskState.CompletedTask;
+    }
 
-        await ReplyBatchVersus(message,
-            new MaiVersusBatch(query, versions.Length == 1 ? versions[0] : string.Empty, sortLabel, charts, self, opponent));
+    [MarisaPluginDoc("多人对战；不填歌曲时每轮随机", "可选歌曲或难度，可 @ 多人")]
+    [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginCommand("开房")]
+    private async Task<MarisaPluginTaskState> SongVersusRoom(Message message, long qq)
+    {
+        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
+
+        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
+        var levelIdx  = selection.LevelIndex;
+        var levelName = MaiMaiSong.LevelNameZh[levelIdx];
+
+        if (selection.Random)
+        {
+            OpenVersusRoom(message, members, new VersusRoomPlan(
+                levelIdx == 3 ? "随机单曲" : $"随机单曲（{levelName}谱）", string.Empty, VersusLevelCharts(levelIdx), 1, true));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
+        if (song is null) return MarisaPluginTaskState.CompletedTask;
+
+        if (levelIdx >= song.Levels.Count)
+        {
+            message.Reply($"该歌曲没有{levelName}谱");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        OpenVersusRoom(message, members, new VersusRoomPlan(
+            $"{song.Title}（{levelName}谱）", song.Version, [(song.Constants[levelIdx], levelIdx, song)], null, true));
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("每轮随机比较 N 个成绩", "`N`（最大 20），可选难度或完成表范围")]
+    [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginCommand("n")]
+    private MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq)
+    {
+        if (ParseVersusRandom(message, "mai vs 开房 n 5 [难度/范围]") is not { } parsed) return MarisaPluginTaskState.CompletedTask;
+        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
+
+        var title = parsed.Query.Length == 0 ? $"随机 {parsed.Count} 首" : $"{parsed.Query} 随机 {parsed.Count} 首";
+        OpenVersusRoom(message, members, new VersusRoomPlan(title, VersusVersion(parsed.Charts), parsed.Charts, parsed.Count, false));
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围`，如`彩代14+`")]
+    [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginCommand("b")]
+    private MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq)
+    {
+        if (ParseVersusScope(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
+        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
+
+        OpenVersusRoom(message, members, new VersusRoomPlan(parsed.Query, VersusVersion(parsed.Charts), parsed.Charts, null, false));
         return MarisaPluginTaskState.CompletedTask;
     }
 

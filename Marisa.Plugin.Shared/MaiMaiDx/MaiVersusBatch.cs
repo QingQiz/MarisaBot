@@ -62,9 +62,8 @@ public sealed class MaiVersusBatch
         Player left,
         Player right)
     {
-        var key = (chart.Song.Id, chart.LevelIdx);
-        var leftScore = CreateScore(left, key, chart.Song, chart.LevelIdx);
-        var rightScore = CreateScore(right, key, chart.Song, chart.LevelIdx);
+        var leftScore = CreateScore(left.Scores, chart.Song, chart.LevelIdx);
+        var rightScore = CreateScore(right.Scores, chart.Song, chart.LevelIdx);
         var outcome = Compare(leftScore, rightScore);
 
         return new Row(
@@ -80,13 +79,12 @@ public sealed class MaiVersusBatch
             outcome);
     }
 
-    private static ScoreView CreateScore(
-        Player player,
-        (long Id, int LevelIdx) key,
+    internal static ScoreView CreateScore(
+        IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> scores,
         MaiMaiSong song,
         int levelIdx)
     {
-        if (!player.Scores.TryGetValue(key, out var score))
+        if (!scores.TryGetValue((song.Id, levelIdx), out var score))
         {
             return new ScoreView(State.Unplayed);
         }
