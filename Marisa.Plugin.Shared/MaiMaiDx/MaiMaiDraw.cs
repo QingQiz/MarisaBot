@@ -11,6 +11,19 @@ public static class MaiMaiDraw
         return WebApi.MaiMaiVersusBatch(context.Id);
     }
 
+    public static Task<string> DrawVersusMulti(MaiVersusMulti result, int round, IReadOnlyList<MaiVersusMulti.Standing> standings)
+    {
+        var context = new WebContext(new { versusMulti = result.GetSingle(round, standings) });
+        return WebApi.MaiMaiVersusMulti(context.Id);
+    }
+
+    public static Task<string> DrawVersusMultiBatch(
+        MaiVersusMulti result, int page, int round, IReadOnlyList<MaiVersusMulti.Standing> standings)
+    {
+        var context = new WebContext(new { versusMultiBatch = result.GetPage(page, round, standings) });
+        return WebApi.MaiMaiVersusMultiBatch(context.Id);
+    }
+
     /// <summary>
     ///     画汇总表（前端渲染）。把 grouped songs + scores 投到 WebContext，让
     ///     Marisa.Frontend 的 /maimai/summary 页面用 Puppeteer 截图。

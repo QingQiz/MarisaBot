@@ -115,6 +115,11 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("maivsn20")), typeof(MaiMaiDx), "SongVersusRandom").SetName("maivsn20");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b 彩代")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b 彩代");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs b彩代14+")), typeof(MaiMaiDx), "SongVersusBatch").SetName("mai vs b彩代14+");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房")), typeof(MaiMaiDx), "SongVersusRoom").SetName("mai vs 开房");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 白谱")), typeof(MaiMaiDx), "SongVersusRoom").SetName("mai vs 开房 白谱");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 n 5 彩代")), typeof(MaiMaiDx), "SongVersusRoomRandom").SetName("mai vs 开房 n 5 彩代");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("maivs开房n5")), typeof(MaiMaiDx), "SongVersusRoomRandom").SetName("maivs开房n5");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 b 彩代14+")), typeof(MaiMaiDx), "SongVersusRoomBatch").SetName("mai vs 开房 b 彩代14+");
         }
     }
 
@@ -129,6 +134,10 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("chu sum b 15")), typeof(Chunithm), "SummarySongBpm").SetName("chu sum b");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum bpm 15")), typeof(MaiMaiDx), "SummarySongBase").SetName("chu sum bpm");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 n 5")), typeof(MaiMaiDx), "SongVersusRoom").SetName("mai vs 开房 n stops at nested subcommand");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 n 5")), typeof(MaiMaiDx), "SongVersusRandom").SetName("mai vs 开房 n is not two-player random");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai 双星含金量分析")), typeof(MaiMaiDx), "FilteredValueAnalysis").SetName("mai rejects invented double star rank");
 
