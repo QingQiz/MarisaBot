@@ -123,6 +123,97 @@ public class DispatcherTest
         }
     }
 
+    [TestCase("brued")]
+    [TestCase("BRUED：")]
+    [TestCase("BLACKBOX")]
+    [TestCase("blackbox")]
+    [TestCase("B.M.S.")]
+    [TestCase("B 中文关键词")]
+    [TestCase("B14")]
+    [TestCase("NULCTRL")]
+    [TestCase("niconico")]
+    [TestCase("N 5")]
+    [TestCase("BASIC")]
+    [TestCase("x")]
+    public void VersusSongAfterMentionPreservesWholeQuery(string query)
+    {
+        AssertVersusDispatch("maivs", query, "SongVersus", query);
+        AssertVersusDispatch("maivs开房", query, "SongVersusRoom", query);
+    }
+
+    [TestCase("brued")]
+    [TestCase("BRUED：")]
+    [TestCase("BLACKBOX")]
+    [TestCase("B.M.S.")]
+    [TestCase("NULCTRL")]
+    [TestCase("niconico")]
+    [TestCase("BASIC")]
+    [TestCase("x")]
+    public void VersusSongBeforeMentionPreservesWholeQuery(string query)
+    {
+        AssertVersusDispatch($"mai vs {query}", "", "SongVersus", query);
+        AssertVersusDispatch($"mai vs 开房 {query}", "", "SongVersusRoom", query);
+    }
+
+    [TestCase("maivsb", "彩代14+", "SongVersusBatch", "彩代14+")]
+    [TestCase("mai vs b 彩代14+", "", "SongVersusBatch", "彩代14+")]
+    [TestCase("mai vs b彩代14+", "", "SongVersusBatch", "彩代14+")]
+    [TestCase("mai vs B 14+", "", "SongVersusBatch", "14+")]
+    [TestCase("mai vs b", "invalid", "SongVersusBatch", "invalid")]
+    [TestCase("maivsn20", "", "SongVersusRandom", "20")]
+    [TestCase("mai vs n 5", "紫谱", "SongVersusRandom", "5  紫谱")]
+    [TestCase("mai vs N5", "", "SongVersusRandom", "5")]
+    [TestCase("mai vs n", "invalid", "SongVersusRandom", "invalid")]
+    [TestCase("mai 对战 b彩代", "", "SongVersusBatch", "彩代")]
+    [TestCase("舞萌 对战 n 5", "", "SongVersusRandom", "5")]
+    [TestCase("mai vs 开房 b彩代14+", "", "SongVersusRoomBatch", "彩代14+")]
+    [TestCase("mai vs 开房 b", "彩代14+", "SongVersusRoomBatch", "彩代14+")]
+    [TestCase("maivs开房n20", "", "SongVersusRoomRandom", "20")]
+    [TestCase("mai vs 开房 n 5", "紫谱", "SongVersusRoomRandom", "5  紫谱")]
+    public void ExplicitVersusSubcommandsStillDispatch(string beforeMention, string afterMention, string method, string command)
+    {
+        AssertVersusDispatch(beforeMention, afterMention, method, command);
+    }
+
+    [TestCase("mai vs", "SongVersus")]
+    [TestCase("mai vs 开房", "SongVersusRoom")]
+    [TestCase("maivsb", "SongVersusBatch")]
+    [TestCase("maivsn", "SongVersusRandom")]
+    [TestCase("maivs开房b", "SongVersusRoomBatch")]
+    [TestCase("maivs开房n", "SongVersusRoomRandom")]
+    public void VersusEmptyQueryStillDispatchesWithoutThrowing(string command, string method)
+    {
+        AssertVersusDispatch(command, "", method, "");
+    }
+
+    [TestCase(MessageType.GroupMessage, true)]
+    [TestCase(MessageType.FriendMessage, false)]
+    [TestCase(MessageType.TempMessage, false)]
+    [TestCase(MessageType.StrangerMessage, false)]
+    public void VersusCommandsOnlyDispatchInGroups(MessageType type, bool expected)
+    {
+        foreach (var command in new[] { "mai vs BLACKBOX", "mai vs n 5", "mai vs b 14+",
+                     "mai vs 开房 BLACKBOX", "mai vs 开房 n 5", "mai vs 开房 b 14+" })
+        {
+            var message = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = type };
+            Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(MaiMaiDx) &&
+                x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
+        }
+    }
+
+    private void AssertVersusDispatch(string beforeMention, string afterMention, string method, string command)
+    {
+        var message = CreateMessage(new MessageDataText(beforeMention), new MessageDataAt(123456),
+            new MessageDataText(afterMention.Length == 0 ? "" : $" {afterMention}")) with { Type = MessageType.GroupMessage };
+        var dispatched = _dispatcher.Dispatch(message).Single(x => x.Plugin.GetType() == typeof(MaiMaiDx));
+        Assert.Multiple(() =>
+        {
+            Assert.That(dispatched.Method.Name, Is.EqualTo(method));
+            Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(command));
+            Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }));
+        });
+    }
+
     public static IEnumerable<TestCaseData> TestCaseData2
     {
         get

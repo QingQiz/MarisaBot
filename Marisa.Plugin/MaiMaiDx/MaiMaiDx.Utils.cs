@@ -13,6 +13,32 @@ public partial class MaiMaiDx
 {
     private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
 
+    private static bool VersusBatchTrigger(Message message, IServiceProvider _serviceProvider)
+    {
+        var command = message.Command.Trim().ToString();
+        return command.Length > 0 &&
+               (command.Length == 1 || char.IsWhiteSpace(command[1]) ||
+                PlateData.TryParseScope(command[1..], out _, out _)) &&
+               VersusSubCommandBeforeMention(message);
+    }
+
+    private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider)
+    {
+        var command = message.Command.Trim().Span;
+        return command.Length > 0 &&
+               (command.Length == 1 || char.IsWhiteSpace(command[1]) || char.IsAsciiDigit(command[1])) &&
+               VersusSubCommandBeforeMention(message);
+    }
+
+    private static bool VersusSubCommandBeforeMention(Message message)
+    {
+        var chain = message.MessageChain!;
+        var beforeMention = new MessageChain(chain.Messages.TakeWhile(x => x.Type != MessageDataType.At)).Text.Trim();
+        // Command 已去掉 mai/vs；用已消费的文本长度判断子命令是否在 @ 之前。
+        var consumed = chain.Text.Trim().Length - message.Command.TrimStart().Length;
+        return beforeMention.Length > consumed;
+    }
+
     /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
     private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
     {
