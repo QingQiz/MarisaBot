@@ -134,6 +134,7 @@ public class DispatcherTest
     [TestCase("niconico")]
     [TestCase("N 5")]
     [TestCase("BASIC")]
+    [TestCase("x")]
     public void VersusSongAfterMentionPreservesWholeQuery(string query)
     {
         AssertVersusDispatch("maivs", query, "SongVersus", query);
@@ -147,6 +148,7 @@ public class DispatcherTest
     [TestCase("NULCTRL")]
     [TestCase("niconico")]
     [TestCase("BASIC")]
+    [TestCase("x")]
     public void VersusSongBeforeMentionPreservesWholeQuery(string query)
     {
         AssertVersusDispatch($"mai vs {query}", "", "SongVersus", query);
@@ -173,10 +175,36 @@ public class DispatcherTest
         AssertVersusDispatch(beforeMention, afterMention, method, command);
     }
 
+    [TestCase("mai vs", "SongVersus")]
+    [TestCase("mai vs 开房", "SongVersusRoom")]
+    [TestCase("maivsb", "SongVersusBatch")]
+    [TestCase("maivsn", "SongVersusRandom")]
+    [TestCase("maivs开房b", "SongVersusRoomBatch")]
+    [TestCase("maivs开房n", "SongVersusRoomRandom")]
+    public void VersusEmptyQueryStillDispatchesWithoutThrowing(string command, string method)
+    {
+        AssertVersusDispatch(command, "", method, "");
+    }
+
+    [TestCase(MessageType.GroupMessage, true)]
+    [TestCase(MessageType.FriendMessage, false)]
+    [TestCase(MessageType.TempMessage, false)]
+    [TestCase(MessageType.StrangerMessage, false)]
+    public void VersusCommandsOnlyDispatchInGroups(MessageType type, bool expected)
+    {
+        foreach (var command in new[] { "mai vs BLACKBOX", "mai vs n 5", "mai vs b 14+",
+                     "mai vs 开房 BLACKBOX", "mai vs 开房 n 5", "mai vs 开房 b 14+" })
+        {
+            var message = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = type };
+            Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(MaiMaiDx) &&
+                x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
+        }
+    }
+
     private void AssertVersusDispatch(string beforeMention, string afterMention, string method, string command)
     {
         var message = CreateMessage(new MessageDataText(beforeMention), new MessageDataAt(123456),
-            new MessageDataText(afterMention.Length == 0 ? "" : $" {afterMention}"));
+            new MessageDataText(afterMention.Length == 0 ? "" : $" {afterMention}")) with { Type = MessageType.GroupMessage };
         var dispatched = _dispatcher.Dispatch(message).Single(x => x.Plugin.GetType() == typeof(MaiMaiDx));
         Assert.Multiple(() =>
         {

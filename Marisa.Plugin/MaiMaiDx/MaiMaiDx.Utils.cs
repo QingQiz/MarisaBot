@@ -16,7 +16,7 @@ public partial class MaiMaiDx
     private static bool VersusBatchTrigger(Message message, IServiceProvider _serviceProvider)
     {
         var command = message.Command.Trim().ToString();
-        return command.StartsWith("b", StringComparison.OrdinalIgnoreCase) &&
+        return command.Length > 0 &&
                (command.Length == 1 || char.IsWhiteSpace(command[1]) ||
                 PlateData.TryParseScope(command[1..], out _, out _)) &&
                VersusSubCommandBeforeMention(message);
@@ -25,7 +25,7 @@ public partial class MaiMaiDx
     private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider)
     {
         var command = message.Command.Trim().Span;
-        return command.StartsWith("n", StringComparison.OrdinalIgnoreCase) &&
+        return command.Length > 0 &&
                (command.Length == 1 || char.IsWhiteSpace(command[1]) || char.IsAsciiDigit(command[1])) &&
                VersusSubCommandBeforeMention(message);
     }
