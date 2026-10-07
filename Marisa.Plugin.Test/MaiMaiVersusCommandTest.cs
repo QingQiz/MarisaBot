@@ -51,6 +51,24 @@ public class MaiMaiVersusCommandTest
         Assert.That(Resolve(Songs(), text).Songs.Select(song => song.Id), Is.EqualTo(new[] { id }));
     }
 
+    [TestCase("brued", "IMBRUED:FLUX")]
+    [TestCase("BRUED:", "IMBRUED:FLUX")]
+    [TestCase("IMBRUED:FLUX", "IMBRUED:FLUX")]
+    [TestCase("BLACKBOX", "World's end BLACKBOX")]
+    [TestCase("blackbox", "World's end BLACKBOX")]
+    [TestCase("World's end BLACKBOX", "World's end BLACKBOX")]
+    public void ReportedVersusKeywordsFindTheirSongs(string query, string title)
+    {
+        var db = Songs((title, title));
+        db.SongList.Add(Song(1002, title));
+        var selection = Resolve(db, query);
+        Assert.Multiple(() =>
+        {
+            Assert.That(selection.Random, Is.False);
+            Assert.That(selection.Songs.Select(song => song.Title), Is.EqualTo(new[] { title }));
+        });
+    }
+
     [Test]
     public void NumericTitleAndAliasStaySongsWhenNoSuchIdExists()
     {

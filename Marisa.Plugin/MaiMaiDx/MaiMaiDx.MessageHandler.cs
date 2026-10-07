@@ -820,8 +820,10 @@ public partial class MaiMaiDx
         }
     }
 
-    [MarisaPluginDoc("随机比较 N 个成绩", "`N`（最大 20），可选难度或完成表范围")]
+    [MarisaPluginDoc("随机比较 N 个成绩", "`N [难度/完成表范围] @某人`（最大 20）")]
     [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusRandomTrigger),
+        MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)]
     [MarisaPluginCommand("n")]
     private async Task<MarisaPluginTaskState> SongVersusRandom(Message message)
     {
@@ -847,8 +849,10 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围`，如`彩代14+`")]
+    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围 @某人`，如`彩代14+ @某人`")]
     [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusBatchTrigger),
+        MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)]
     [MarisaPluginCommand("b")]
     private async Task<MarisaPluginTaskState> SongVersusBatch(Message message)
     {
@@ -898,6 +902,8 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("每轮随机比较 N 个成绩", "`N`（最大 20），可选难度或完成表范围")]
     [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusRandomTrigger),
+        MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)]
     [MarisaPluginCommand("n")]
     private MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq)
     {
@@ -911,6 +917,8 @@ public partial class MaiMaiDx
 
     [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围`，如`彩代14+`")]
     [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusBatchTrigger),
+        MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)]
     [MarisaPluginCommand("b")]
     private MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq)
     {
