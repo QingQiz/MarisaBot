@@ -44,7 +44,7 @@ public partial class MaiMaiDx :
             }
         );
 
-        SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb);
+        SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, song => song.Id <= 100000);
     }
 
     public void Reset()
