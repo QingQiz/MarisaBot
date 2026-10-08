@@ -65,12 +65,12 @@ const groups = computed(() => {
     <div v-if="data_fetched" class="container">
         <div class="op-container">
             <div>ALL</div>
-            <OverPower :scores="allScores" :group="filteredSongs" :detail="true"/>
+            <OverPower :scores="allScores" :group="filteredSongs" :detail="true" :show-difficulty="true"/>
         </div>
         <template v-for="g in groups" :key="g.label">
             <div class="op-container">
                 <div>{{ g.label }}</div>
-                <OverPower :scores="g.scores" :group="g.group" :detail="true"/>
+                <OverPower :scores="g.scores" :group="g.group" :detail="true" :show-difficulty="true"/>
             </div>
         </template>
     </div>

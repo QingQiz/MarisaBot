@@ -26,8 +26,8 @@ let props = defineProps({
         type   : Boolean,
         default: false
     },
-    // g/v 每首曲子只取 op 最高的那一张谱面，难度是不固定的，用一条 2px 难度条显示出来。
-    // lv/b 本来就按谱面分组（lv 更是整组同一个难度），所以默认不开。
+    // 每首曲子只取 op 最高的那一张谱面（g/v/ALL），或按谱面分组（lv/b），
+    // 同一档里都可能混着不同难度，用一条 2px 难度条显示出来。chuop 系列的页面都开着。
     showDifficulty: {
         type   : Boolean,
         default: false
@@ -87,13 +87,14 @@ let rk = computed(() => GetRankStatistic());
 
 // ---------- 难度条 ----------
 
-// 与 ChunithmSong.vue 的 level_idx_color_map 同色
+// 难度色沿用 ChunithmSong.vue 的 level_idx_color_map，只有 ULTIMA 不一样：
+// 那边用的纯黑贴在最下面那条时会和外框糊在一起，这里用官方配色的 #97343A。
 const DIFFICULTY_COLORS: { [levelIndex: number]: string } = {
     0: '#52E72B',   // BASIC
     1: '#FFA801',   // ADVANCED
     2: '#FF5A66',   // EXPERT
     3: '#C64FE4',   // MASTER
-    4: '#000000',   // ULTIMA
+    4: '#97343A',   // ULTIMA（官方配色）
     5: '#DBAAFF',   // WORLD'S END
 }
 

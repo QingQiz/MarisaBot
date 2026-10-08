@@ -94,7 +94,7 @@ function GetConstRange(): [number, number, string][] {
         <template v-for="f in [filterBestOP(songs)]">
             <div class="op-container">
                 <div>ALL</div>
-                <OverPower :scores="f.scores" :group="f.group" :detail="true"/>
+                <OverPower :scores="f.scores" :group="f.group" :detail="true" :show-difficulty="true"/>
             </div>
         </template>
         <template v-for="range in GetConstRange()">
@@ -102,7 +102,7 @@ function GetConstRange(): [number, number, string][] {
                 <template v-for="f in [filterBestOP(s)]">
                     <div v-if="f.group.length != 0" class="op-container">
                         <div>{{ range[2] }}</div>
-                        <OverPower :scores="f.scores" :group="f.group" :detail="true"/>
+                        <OverPower :scores="f.scores" :group="f.group" :detail="true" :show-difficulty="true"/>
                     </div>
                 </template>
             </template>
