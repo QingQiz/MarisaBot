@@ -71,54 +71,59 @@ function GetBorder(rank: string) {
     return `/assets/chunithm/pic/border_${fallback()}.png`
 }
 
-function GetFontColor(fc: string, fallback = '#FFFFFF') {
-    switch (fc) {
+// fc / 成绩 -> 档位，数值越大越好。
+// 1010000 是独立的最顶档，对应 OverPower.vue 里的 ajc：只看 fc 的话它和普通 AJ 分不开。
+function GetTier(score?: Score) {
+    if (!score) return 0
+    if (score.score >= 101_0000) return 5
+
+    switch (score.fc) {
         case 'fullcombo':
-            return '#76BA1B'
+            return 1
         case 'fullchain':
-            return '#ACDF87'
+            return 2
         case 'fullchain2':
-            return '#A4DE02'
+            return 3
         case 'alljustice':
+            return 4
+        default:
+            return 0
+    }
+}
+
+// 档位 -> 颜色。最顶档用淡金色，与 OverPower.vue 的 ajc(amber-200) 同色。
+function GetTierColor(tier: number, fallback = '#FFFFFF') {
+    switch (tier) {
+        case 5:
+            return '#FDE68A'
+        case 4:
             return '#FFDF00'
+        case 3:
+            return '#A4DE02'
+        case 2:
+            return '#ACDF87'
+        case 1:
+            return '#76BA1B'
         default:
             return fallback
     }
 }
 
-function GetGroupMinFc(group: any[]) {
-    let min = 5
-    let fc  = '';
-
-    function FcRank(fc: string) {
-        switch (fc) {
-            case 'fullcombo':
-                return 1
-            case 'fullchain':
-                return 2
-            case 'fullchain2':
-                return 3
-            case 'alljustice':
-                return 4
-            default:
-                return 0
-        }
-    }
+// 组标题取组内最差的档位，所以整组都 1010000 才会变淡金色；
+// 只要有任意一首没打就返回 -1，由调用方的 fallback 决定颜色。
+function GetGroupMinTier(group: any[]) {
+    let min = 6
 
     for (let i = 0; i < group.length; i++) {
         const song  = group[i]
         const score = GetScore(song.Item3.Id, song.Item2)
 
-        if (score) {
-            if (FcRank(score.fc) < min) {
-                min = FcRank(score.fc)
-                fc  = score.fc
-            }
-        } else {
-            return ''
-        }
+        if (!score) return -1
+
+        min = Math.min(min, GetTier(score))
     }
-    return fc;
+
+    return min
 }
 
 function GetGroupMinRank(group: any[]) {
@@ -164,7 +169,7 @@ function GetGroupMinRank(group: any[]) {
                     class="justify-self-end"/>
             </div>
             <div v-for="{Key: key, x: group} in grouped">
-                <div class="group-title" :style="`color: ${GetFontColor(GetGroupMinFc(group), '#000000')}`">
+                <div class="group-title" :style="`color: ${GetTierColor(GetGroupMinTier(group), '#000000')}`">
                     {{ key }}
                     <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
                          onerror="this.style.opacity=0">
@@ -178,7 +183,7 @@ function GetGroupMinRank(group: any[]) {
                             <div class="cover"
                                  :style="`background-image: url('/assets/chunithm/cover/${song.Item3.Id}.png')`">
                             </div>
-                            <div class="achievement" :style="`color: ${GetFontColor(score.fc)}`" v-if="score">
+                            <div class="achievement" :style="`color: ${GetTierColor(GetTier(score))}`" v-if="score">
                                 {{ score.score.toString().padStart(7, '0') }}
                             </div>
                             <div class="level-mark" :style="`background-color: ${GetLevelColor(song.Item2)}`"></div>
