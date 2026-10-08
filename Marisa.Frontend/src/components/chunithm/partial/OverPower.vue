@@ -98,8 +98,9 @@ const DIFFICULTY_COLORS: { [levelIndex: number]: string } = {
     5: '#DBAAFF',   // WORLD'S END
 }
 
-// 固定顺序，保证同一个条里色块排列一致
-const DIFFICULTY_ORDER = [0, 1, 2, 3, 4, 5]
+// 固定顺序，保证同一个条里色块排列一致。
+// 难度从高到低排：ULTIMA 在最左，BASIC 在最右。
+const DIFFICULTY_ORDER = [5, 4, 3, 2, 1, 0]
 
 type Segment = {
     key: string
