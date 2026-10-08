@@ -196,11 +196,11 @@ const OpSegments = computed(() => {
                 <div class="relative w-full h-[100px] flex flex-col bg-gray-500 border-4 border-black">
                     <div class="relative w-full h-full flex">
                         <div v-for="s in RankSegments" :key="s.key" class="seg" :style="`width: ${s.width}`">
-                            <div class="seg-body" :class="s.cls"></div>
                             <div v-if="showDifficulty" class="seg-diff">
                                 <div v-for="d in s.diffs" :key="d.level"
                                      :style="`width: ${d.width}; background-color: ${d.color}`"></div>
                             </div>
+                            <div class="seg-body" :class="s.cls"></div>
                         </div>
                     </div>
                     <div class="relative w-full h-full flex">
@@ -258,8 +258,9 @@ const OpSegments = computed(() => {
 }
 
 .seg-diff {
-    flex: 0 0 2px;
-    height: 2px;
+    /* 与容器的 border-4 同宽 */
+    flex: 0 0 4px;
+    height: 4px;
     min-width: 0;
     display: flex;
 }
