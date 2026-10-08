@@ -8,7 +8,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Marisa.Plugin.Shared.Util.SongGuessMaker;
 
-public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
+public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb, Func<TSong, bool>? defaultFilter = null)
     where TSong : Song
     where TSongGuess : class, IHaveId, ISongGuess, IRealmObject, new()
 {
@@ -172,7 +172,7 @@ public class SongGuessMaker<TSong, TSongGuess>(SongDb<TSong> songDb)
         Message message, long qq, int widthDiv,
         Func<TSong, bool>? filter)
     {
-        var songs = songDb.SongList.Where(s => filter?.Invoke(s) ?? true).ToList();
+        var songs = songDb.SongList.Where(s => (defaultFilter?.Invoke(s) ?? true) && (filter?.Invoke(s) ?? true)).ToList();
 
         if (songs.Count == 0)
         {
