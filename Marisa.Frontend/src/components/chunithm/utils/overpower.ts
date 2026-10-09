@@ -1,4 +1,8 @@
 import { Score } from "./summary_t";
+import {ACHIEVEMENT_MAX, isAllJustice, isFullCombo, isMaxScore} from "./score";
+
+/** 满分(AJC)的达成状况加成，op_r 的上限。 */
+export const OP_R_MAX = 250;
 
 export const SCORE_SEGMENTS: {
     threshold: number;
@@ -36,9 +40,14 @@ export function calcOverPower(score: Score): number {
     const op_s = getOpS(score.ds, score.score);
 
     let op_r = 0;
-    if (score.fc == 'fullcombo' || score.fc == 'fullchain' || score.fc == 'fullchain2') op_r = 100;
-    if (score.fc == 'alljustice') op_r = 200;
-    if (score.score == 101_0000) op_r = 250;
+    if (isFullCombo(score)) op_r = 100;
+    if (isAllJustice(score)) op_r = 200;
+    if (isMaxScore(score)) op_r = OP_R_MAX;
 
     return (op_s + op_r) / 200;
+}
+
+/** 某个定数下可能达到的最高 op（满分 + AJC 加成）。 */
+export function calcMaxOverPower(constant: number): number {
+    return (getOpS(constant, ACHIEVEMENT_MAX) + OP_R_MAX) / 200;
 }

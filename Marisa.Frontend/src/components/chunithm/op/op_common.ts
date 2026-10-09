@@ -5,6 +5,15 @@ import axios from "axios";
 import {context_get} from "@/GlobalVars";
 import {useRoute} from "vue-router";
 
+/**
+ * op 页面只统计 MASTER(3) / ULTIMA(4) 且定数 >= 10 的谱面。
+ * 原来 OpBase 与 OpLevel 各写了一份，合并到这里。
+ */
+export function shouldSkip(s: GroupSongInfo): boolean {
+    if (s.Item2 !== 3 && s.Item2 !== 4) return true;
+    return s.Item3.Constants[s.Item2] < 10;
+}
+
 export function useOpData() {
     const route = useRoute()
     const id    = ref(route.query.id)

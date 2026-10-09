@@ -42,13 +42,13 @@ function displayLabel(raw: string): string {
         <template v-for="f in [filterBestOP(songs)]">
             <div class="op-container">
                 <div>ALL</div>
-                <OverPower :scores="f.scores" :group="f.group" :detail="true"/>
+                <OverPower :scores="f.scores" :group="f.group" :detail="true" :show-difficulty="true"/>
             </div>
         </template>
         <template v-for="g in groups" :key="g.label">
             <div class="op-container">
                 <div class="label-text">{{ displayLabel(g.label) }}</div>
-                <OverPower :scores="g.scores" :group="g.group" :detail="true"/>
+                <OverPower :scores="g.scores" :group="g.group" :detail="true" :show-difficulty="true"/>
             </div>
         </template>
     </div>

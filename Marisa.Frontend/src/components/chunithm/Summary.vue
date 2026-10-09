@@ -5,6 +5,7 @@ import axios from 'axios';
 import {context_get} from "@/GlobalVars";
 import OverPower from "@/components/chunithm/partial/OverPower.vue";
 import {GroupSongInfo, Score} from "@/components/chunithm/utils/summary_t";
+import {getRank, isMaxScore} from "@/components/chunithm/utils/score";
 
 const route = useRoute()
 const id    = ref(route.query.id)
@@ -75,7 +76,7 @@ function GetBorder(rank: string) {
 // 1010000 是独立的最顶档，对应 OverPower.vue 里的 ajc：只看 fc 的话它和普通 AJ 分不开。
 function GetTier(score?: Score) {
     if (!score) return 0
-    if (score.score >= 101_0000) return 5
+    if (isMaxScore(score)) return 5
 
     switch (score.fc) {
         case 'fullcombo':
@@ -142,14 +143,8 @@ function GetGroupMinRank(group: any[]) {
         }
     }
 
-    let score_key_points = [100_9000, 100_7500, 100_5000, 100_0000, 99_0000, 97_5000, 95_0000, 92_5000, 90_0000, 80_0000, 70_0000, 60_0000, 50_0000, 0]
-    let rank_key_points  = ['sssp', 'sss', 'ssp', 'ss', 'sp', 's', 'aaa', 'aa', 'a', 'bbb', 'bb', 'b', 'c', 'd']
-
-    for (let i = 0; i < score_key_points.length; i++) {
-        if (min >= score_key_points[i]) {
-            return rank_key_points[i]
-        }
-    }
+    // 评级阈值表统一放在 utils/score.ts，别在这里再抄一份
+    return getRank(min)
 }
 </script>
 
