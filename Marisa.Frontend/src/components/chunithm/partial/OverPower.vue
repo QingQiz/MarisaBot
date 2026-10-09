@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {Score, GroupSongInfo} from "../utils/summary_t";
 import {computed} from "vue";
-import {getOpS, calcOverPower} from "../utils/overpower";
+import {calcMaxOverPower, calcOverPower} from "../utils/overpower";
+import {getRank, isAllJustice, isFullCombo, isMaxScore} from "../utils/score";
 
 
 type OpStatisticKey = 'pl' | 'fc' | 'aj' | 'ajc' | 'np' | 'opMax' | 'opSum' | 'songCnt'
@@ -38,20 +39,26 @@ let props = defineProps({
 // 所以难度条要上下各画一条。
 function OpKey(score: Score): OpStatisticKey {
     if (!score) return 'np'
-    if (score.score == 101_0000) return 'ajc';
-    if (score.fc === 'alljustice') return 'aj';
-    if (score.fc.startsWith('full')) return 'fc';
+    if (isMaxScore(score)) return 'ajc';
+    if (isAllJustice(score)) return 'aj';
+    if (isFullCombo(score)) return 'fc';
     return 'pl';
 }
 
 function RankKey(score: Score): RkStatisticKey {
     if (!score) return 'np';
-    if (score.score == 101_0000) return 'ajc';
-    if (score.score >= 100_9000) return 'sssp';
-    if (score.score >= 100_7500) return 'sss';
-    if (score.score >= 100_5000) return 'ssp';
-    if (score.score >= 100_0000) return 'ss';
-    return 'oth';
+    if (isMaxScore(score)) return 'ajc';
+
+    const rank = getRank(score.score);
+    switch (rank) {
+        case 'sssp':
+        case 'sss':
+        case 'ssp':
+        case 'ss':
+            return rank;
+        default:
+            return 'oth';
+    }
 }
 
 function GetOverPowerStatistic() {
@@ -65,7 +72,7 @@ function GetOverPowerStatistic() {
         opStat['opSum'] += calcOverPower(score);
         opStat[OpKey(score)] += 1
         opStat['songCnt'] += 1
-        opStat['opMax'] += (getOpS(constant, 101_0000) + 250) / 200;
+        opStat['opMax'] += calcMaxOverPower(constant);
     }
 
     return opStat
