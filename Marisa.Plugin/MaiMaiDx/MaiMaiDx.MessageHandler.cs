@@ -1086,6 +1086,7 @@ public partial class MaiMaiDx
     [MarisaPluginCommand("称号", "title")]
     private async Task<MarisaPluginTaskState> SongTitles(Message message)
     {
+        await RefreshSongTitlesCatalog();
         var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
         if (song == null) return MarisaPluginTaskState.CompletedTask;
 

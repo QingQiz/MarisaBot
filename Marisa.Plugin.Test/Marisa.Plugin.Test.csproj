@@ -24,6 +24,9 @@
         <None Update="Resources\Testing\Beatmaps\**\*.osu">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\Testing\MaiMai\public_catalog_fixture.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

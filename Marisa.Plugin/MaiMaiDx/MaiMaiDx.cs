@@ -1,11 +1,9 @@
-﻿using System.Dynamic;
-using Flurl.Http;
+﻿using Flurl.Http;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Plugin.Shared.Util.SongGuessMaker;
-using Newtonsoft.Json;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -21,27 +19,15 @@ public partial class MaiMaiDx :
     IMarisaPluginWithCoverGuess<MaiMaiSong, MaiMaiDxGuess>
 
 {
+    private readonly MaiMaiSongCatalog _songCatalog;
+
     public MaiMaiDx()
     {
+        _songCatalog = new MaiMaiSongCatalog(Path.Join(ResourceManager.ResourcePath, "SongInfo.json"));
         SongDb = new SongDb<MaiMaiSong>(
             ResourceManager.ResourcePath + "/aliases.tsv",
             ResourceManager.TempPath + "/MaiMaiSongAliasTemp.txt",
-            () =>
-            {
-                try
-                {
-                    var data = "https://www.diving-fish.com/api/maimaidxprober/music_data".GetJsonListAsync().Result;
-
-                    return data.Select(d => new MaiMaiSong(d)).ToList();
-                }
-                catch
-                {
-                    var data = JsonConvert.DeserializeObject<ExpandoObject[]>(
-                        File.ReadAllText(ResourceManager.ResourcePath + "/SongInfo.json")
-                    ) as dynamic[];
-                    return data!.Select(d => new MaiMaiSong(d)).ToList();
-                }
-            }
+            () => _songCatalog.GetAsync().GetAwaiter().GetResult()
         );
 
         SongGuessMaker = new SongGuessMaker<MaiMaiSong, MaiMaiDxGuess>(SongDb, song => song.Id <= 100000);
@@ -50,6 +36,7 @@ public partial class MaiMaiDx :
     public void Reset()
     {
         ResetCaches();
+        _songCatalog.Invalidate();
         SongDb.Reset();
         _dataFetchers.Clear();
     }
