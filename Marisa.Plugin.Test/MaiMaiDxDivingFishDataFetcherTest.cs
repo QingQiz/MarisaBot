@@ -23,12 +23,12 @@ public class MaiMaiDxDivingFishDataFetcherTest
     [TestCase("雪", "MiLK PLUS")]
     [TestCase("maimai MiLK", "maimai MiLK")]
     [TestCase("不存在的版本", null)]
-    public void ResolveSummaryVersion_Should_Resolve_Alias_And_Exact_Version(string input, string? expected)
+    public void ResolveSummaryVersions_Should_Resolve_Alias_And_Exact_Version(string input, string? expected)
     {
-        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("ResolveSummaryVersion", BindingFlags.NonPublic | BindingFlags.Static);
-        var actual = (string?)method!.Invoke(null, [input, new[] { "maimai MiLK", "MiLK PLUS" }]);
+        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("ResolveSummaryVersions", BindingFlags.NonPublic | BindingFlags.Static);
+        var actual = (string[]?)method!.Invoke(null, [input, new[] { "maimai MiLK", "MiLK PLUS" }]);
 
-        Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(actual, Is.EqualTo(expected == null ? null : new[] { expected }));
     }
 
     [Test]

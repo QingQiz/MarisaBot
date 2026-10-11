@@ -1275,14 +1275,14 @@ public partial class MaiMaiDx
         var versionArg = message.Command.Trim().ToString();
         if (versionArg.Length > 0)
         {
-            var version = ResolveSummaryVersion(versionArg, versions);
-            if (version == null)
+            var selectedVersions = ResolveSummaryVersions(versionArg, versions);
+            if (selectedVersions == null)
             {
                 message.Reply("错误的版本：" + versionArg);
                 return MarisaPluginTaskState.CompletedTask;
             }
 
-            await ReplyVersionSummary(message, version);
+            await ReplyVersionSummary(message, selectedVersions, selectedVersions.Length == 1 ? selectedVersions[0] : versionArg);
             return MarisaPluginTaskState.CompletedTask;
         }
 
@@ -1306,28 +1306,22 @@ public partial class MaiMaiDx
                 return MarisaPluginTaskState.Canceled;
             }
 
-            await ReplyVersionSummary(next, versions[index]);
+            await ReplyVersionSummary(next, [versions[index]], versions[index]);
 
             return MarisaPluginTaskState.CompletedTask;
         }, this);
 
         return MarisaPluginTaskState.CompletedTask;
 
-        async Task ReplyVersionSummary(Message replyMessage, string version)
+        async Task ReplyVersionSummary(Message replyMessage, IReadOnlyCollection<string> selectedVersions, string title)
         {
             var player = ResolvePlayer(message);
             var (_, scores) = await player.Fetcher.GetScores(player);
 
-            var groupedSong = SongDb.SongList
-                .Where(song => song.Version.Equals(version, StringComparison.OrdinalIgnoreCase))
-                .Select(song => song.Constants
-                    .Select((constant, i) => (constant, i, song)))
-                .SelectMany(s => s)
-                .Where(data => data.i == 3)
-                .OrderByDescending(x => x.constant)
-                .GroupBy(x => x.song.Levels[x.i]);
+            var groupedSong = SelectVersionSummaryCharts(SongDb.SongList, selectedVersions)
+                .GroupBy(chart => chart.Song.Levels[chart.LevelIdx]);
 
-            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, version);
+            var im = await MaiMaiDraw.DrawGroupedSong(groupedSong, scores, title);
             replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
     }

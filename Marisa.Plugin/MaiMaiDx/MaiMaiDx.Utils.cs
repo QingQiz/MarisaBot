@@ -470,18 +470,34 @@ public partial class MaiMaiDx
         return VersionOrderHelper.BuildVersionList(songs, song => song.Version, song => song.Id);
     }
 
-    private static string? ResolveSummaryVersion(string input, IReadOnlyList<string> versions)
+    private static string[]? ResolveSummaryVersions(string input, IReadOnlyList<string> versions)
     {
         var key = input.Trim();
         var direct = versions.FirstOrDefault(v => v.Equals(key, StringComparison.OrdinalIgnoreCase));
-        if (direct != null) return direct;
+        if (direct != null) return [direct];
 
-        if (!PlateData.PlateVersionMap.TryGetValue(key, out var mapped) || mapped.Length != 1)
+        if (!PlateData.PlateVersionMap.TryGetValue(key, out var mapped))
         {
             return null;
         }
 
-        return versions.FirstOrDefault(v => v.Equals(mapped[0], StringComparison.OrdinalIgnoreCase));
+        var selected = mapped
+            .Select(version => versions.FirstOrDefault(v => v.Equals(version, StringComparison.OrdinalIgnoreCase)))
+            .OfType<string>()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        return selected.Length == 0 ? null : selected;
+    }
+
+    private static IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectVersionSummaryCharts(
+        IReadOnlyList<MaiMaiSong> songs, IReadOnlyCollection<string> versions)
+    {
+        return songs
+            .Where(song => versions.Contains(song.Version, StringComparer.OrdinalIgnoreCase))
+            .SelectMany(song => song.Constants.Select((constant, i) => (Constant: constant, LevelIdx: i, Song: song)))
+            .Where(chart => chart.LevelIdx == 3)
+            .OrderByDescending(chart => chart.Constant)
+            .ToArray();
     }
 
     #region 等级/定数解析
