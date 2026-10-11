@@ -465,6 +465,14 @@ public partial class MaiMaiDx
         _versions = null;
     }
 
+    private async Task RefreshSongTitlesCatalog()
+    {
+        var songs = await _songCatalog.GetAsync();
+        if (ReferenceEquals(songs, SongDb.SongList)) return;
+        SongDb.ReplaceSongList(songs);
+        ResetCaches();
+    }
+
     private static string[] BuildVersionList(IReadOnlyList<MaiMaiSong> songs)
     {
         return VersionOrderHelper.BuildVersionList(songs, song => song.Version, song => song.Id);

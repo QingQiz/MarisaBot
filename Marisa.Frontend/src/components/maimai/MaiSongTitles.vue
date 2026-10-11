@@ -38,7 +38,8 @@ import {computed, ref} from 'vue'
 import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
-import {achievementOrdinal, dxScoreStar, fcOrdinal, fsOrdinal} from '@/components/maimai/utils/ordinal'
+import {isTitleAchieved, titlesForSong} from '@/components/maimai/utils/song_titles'
+import type {SongTitle, SongTitlesDatabase} from '@/components/maimai/utils/song_titles'
 import {themeMainOf, bgKeyOf, isUtageId} from '@/components/maimai/utils/song_card'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiSongMetaBar from '@/components/maimai/MaiSongMetaBar.vue'
@@ -67,42 +68,24 @@ axios.get(context_get, {params: {id: route.query.id, name: 'SongScore'}}).then(r
     data.value = typeof res.data === 'string' ? JSON.parse(res.data) : res.data
 })
 
-// ── 称号静态表（按歌 id 查，削除曲 key 不存在=天然排除） ──
-interface SongTitle {
-    id: number; name: string; rare: string; text: string; norm: string
-    diffIdx: number
-    check: { dim: string; lv: number; scope: string } | null
-}
-
-const titlesDb = ref<Record<string, SongTitle[]> | null>(null)
+// ── 当前曲库与预存称号：曲库可选到完整歌曲 ID 时即可查询 ──
+const titlesDb = ref<SongTitlesDatabase | null>(null)
+const pendingTitlesDb = ref<SongTitlesDatabase | null>(null)
 axios.get('/assets/maimai/song_titles.json')
     .then(r => { titlesDb.value = r.data })
     .catch(() => { titlesDb.value = {} })
+axios.get('/assets/maimai/song_titles_pending.json')
+    .then(r => { pendingTitlesDb.value = r.data })
+    .catch(() => { pendingTitlesDb.value = {} })
 
-const RARE_ORDER: Record<string, number> = {Rainbow: 0, Gold: 1, Silver: 2, Bronze: 3, Normal: 4}
 const songTitles = computed<SongTitle[]>(() => {
-    if (!song.value || !titlesDb.value) return []
-    const list = titlesDb.value[String(song.value.Id)] ?? []
-    return [...list].sort((a, b) => (RARE_ORDER[a.rare] ?? 9) - (RARE_ORDER[b.rare] ?? 9) || a.id - b.id)
+    if (!song.value) return []
+    return titlesForSong(song.value.Id, titlesDb.value, pendingTitlesDb.value)
 })
 const achievedCount = computed(() => songTitles.value.filter(t => titleAchieved(t) === true).length)
 
-function titleOrd(c: ChartScore, dim: string): number {
-    switch (dim) {
-        case 'rank': return achievementOrdinal(c.Achievement ?? 0)
-        case 'fc':   return fcOrdinal(c.Fc ?? '')
-        case 'fs':   return fsOrdinal(c.Fs ?? '')
-        case 'dx':   return dxScoreStar(c.DxScore ?? 0, c.MaxDx)
-        default:     return c.Played ? 1 : 0
-    }
-}
-
 function titleAchieved(t: SongTitle): boolean | null {
-    if (!t.check) return null
-    const pool = t.diffIdx >= 0 ? charts.value.filter(c => c.LevelIndex === t.diffIdx) : charts.value
-    if (!pool.length) return false
-    const hit = (c: ChartScore) => c.Played && titleOrd(c, t.check!.dim) >= t.check!.lv
-    return t.check.scope === 'all' ? pool.every(hit) : pool.some(hit)
+    return isTitleAchieved(t, charts.value)
 }
 
 const PIC = '/assets/maimai/pic'
