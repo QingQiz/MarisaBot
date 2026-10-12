@@ -26,7 +26,7 @@ public class MaiMaiDxPlateDataTest
     private static readonly IReadOnlyCollection<string> Artists =
     [
         "DECO*27", "sasakure.UK x DECO*27", "HIMEHINA", "rintaro soma", "Various Artists",
-        "A-One", "SAMBA MASTER 佐藤",
+        "A-One", "SAMBA MASTER 佐藤", "Sta",
     ];
 
     private static PlateData.Query MustParse(string raw)
@@ -1333,6 +1333,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("企鹅完成表",     "企鹅",   "ペンギン")]
     [TestCase("柠檬神完成表",   "柠檬",   "じゃこレモン")]
     [TestCase("二大爷完成表",   "二大爷", "ニャイン")]
+    [TestCase("maistar神完成表", "maistar", "mai-Star")]
     public void ParsesCharterAlias(string raw, string input, string expectedName)
     {
         var q = MustParse(raw);

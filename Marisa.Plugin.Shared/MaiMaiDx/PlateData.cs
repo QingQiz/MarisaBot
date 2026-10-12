@@ -1317,6 +1317,7 @@ public static class PlateData
                 })
                 .Where(x => x.Start >= 0 &&
                             !IsReservedStandaloneToken(x.Name) &&
+                            !IsInsideCharterAlias(x.Start, x.Name.Length) &&
                             (x.Start + x.Name.Length >= input.Length ||
                              input[x.Start + x.Name.Length] != OptionalDaiSuffix[0]))
                 .OrderByDescending(x => x.Name.Length)
@@ -1333,6 +1334,15 @@ public static class PlateData
                     ? new Selector.Charter(input.Substring(start, length))
                     : new Selector.Artist(input.Substring(start, length));
             return true;
+
+            bool IsInsideCharterAlias(int nameStart, int nameLength) =>
+                CharterAliasMap.Keys.Any(alias =>
+                {
+                    if (alias.Length <= nameLength) return false;
+                    var aliasStart = input.IndexOf(alias, Math.Max(0, nameStart + nameLength - alias.Length),
+                        StringComparison.OrdinalIgnoreCase);
+                    return aliasStart >= 0 && aliasStart <= nameStart;
+                });
 
             bool TryCreateKnownNameSelector(string name, out Selector? knownNameSelector)
             {
@@ -1354,7 +1364,7 @@ public static class PlateData
         {
             if (ThresholdEntries.Any(x => x.Token.Equals(candidate, StringComparison.OrdinalIgnoreCase)) ||
                 DifficultyAliasMap.ContainsKey(candidate) ||
-                CharterAliasMap.ContainsKey(candidate) ||
+                CharterAliasMap.Keys.Contains(candidate, StringComparer.OrdinalIgnoreCase) ||
                 candidate.Equals(RevivalGenreToken, StringComparison.Ordinal) ||
                 GenreAliasMap.ContainsKey(candidate) ||
                 GenreAliasMap.Values.Contains(candidate, StringComparer.Ordinal) ||
