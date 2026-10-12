@@ -1,0 +1,59 @@
+.section-tag { font-family: 'Microsoft YaHei',sans-serif; font-weight: bold; font-size: 21px; letter-spacing: .1em; border-radius: 9999px; padding: 4px 20px; background: var(--accent); color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.8); white-space: nowrap; }
+.difficulty-line { display:flex; align-items:center; margin-bottom:12px; min-height:32px; }
+.difficulty { font-family:'SEGA NewRodin',sans-serif; font-size:25px; font-weight:900; letter-spacing:.03em; }
+.players { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.mai-versus {
+    --status-left:280.33px;
+    --status-top:15.33px;
+    --status-width:71.33px;
+    --status-height:46px;
+    --stamp-rotate:10deg;
+    --rank-left:275px;
+    --rank-top:99.67px;
+    --rank-width:76px;
+    --rank-height:34px;
+}
+.player { --rail-color:var(--accent); --rail-opacity:.5; min-width:0; min-height:228px; padding:18px 22px 16px; border:1px solid rgba(255,255,255,.15); border-radius:16px; background:linear-gradient(105deg,rgba(8,8,16,.58),rgba(8,8,16,.25)); overflow:hidden; }
+.player-head {
+    display:flex;
+    align-items:center;
+    min-height:var(--status-height);
+    padding-right:76px;
+    font:700 21px 'Microsoft YaHei',sans-serif;
+}
+.player-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.player-status,
+.rank-slot {
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.player-status { left:var(--status-left); top:var(--status-top); width:var(--status-width); height:var(--status-height); }
+.win-badge {
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font:700 14px 'Torus',sans-serif;
+    letter-spacing:.12em;
+    color:#ffe45c;
+}
+.player.winner { --rail-opacity:1; border-color:rgba(255,255,255,.78); box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 0 22px var(--winner-glow); }
+/* 达成率与右侧评级图垂直居中 */
+.score-main { margin-top:calc(var(--rank-top) + var(--rank-height) / 2 - 19.5px - 18px - var(--status-height)); display:flex; align-items:center; min-height:39px; padding-right:76px; }
+.achievement { font:900 39px 'Torus',sans-serif; letter-spacing:.02em; line-height:1; }
+.achievement small { margin-left:3px; font-size:17px; opacity:.65; }
+.rank-slot { left:var(--rank-left); top:var(--rank-top); width:var(--rank-width); height:var(--rank-height); }
+.rank { width:100%; height:100%; object-fit:contain; display:block; }
+.metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; margin-top:15px; padding:9px 0 8px; border-top:1px solid rgba(255,255,255,.14); border-bottom:1px solid rgba(255,255,255,.14); }
+.metrics div + div { border-left:1px solid rgba(255,255,255,.12); }
+.metrics div { min-width:0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; padding:0 6px; }
+.metrics span { font:700 11px 'Torus',sans-serif; letter-spacing:.04em; color:rgba(255,255,255,.5); white-space:nowrap; }
+.metrics b { font:800 18px 'Torus',sans-serif; white-space:nowrap; }
+.metrics small { margin-left:4px; font-size:11px; color:rgba(255,255,255,.55); }
+.marks { margin-top:9px; height:32px; display:flex; align-items:center; justify-content:center; gap:8px; }
+.marks img { display:block; max-height:32px; max-width:76px; }
+.unplayed { height:142px; display:flex; align-items:center; justify-content:center; gap:10px; font:700 21px 'SEGA NewRodin',sans-serif; letter-spacing:.14em; color:rgba(255,255,255,.34); }
+.unplayed-mark { font:400 35px 'Torus',sans-serif; color:rgba(255,255,255,.22); }

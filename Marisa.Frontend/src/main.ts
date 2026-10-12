@@ -1,3 +1,7 @@
+import ChuVersusMultiBatch from "@/components/chunithm/ChuVersusMultiBatch.vue";
+import ChuVersusMulti from "@/components/chunithm/ChuVersusMulti.vue";
+import ChuVersusBatch from "@/components/chunithm/ChuVersusBatch.vue";
+import ChuVersus from "@/components/chunithm/ChuVersus.vue";
 import {createApp} from 'vue'
 import {createRouter, createWebHistory} from 'vue-router'
 
@@ -56,6 +60,10 @@ const routes = [
     {path: '/maimai/curve-rank', component: MaiCurveRank},
     {path: '/maimai/dan-course', component: MaiDanCourse},
     {path: '/maimai/value-analysis', component: MaiValueAnalysis},
+    {path: '/chunithm/versus', component: ChuVersus},
+    {path: '/chunithm/versus-batch', component: ChuVersusBatch},
+    {path: '/chunithm/versus-multi', component: ChuVersusMulti},
+    {path: '/chunithm/versus-multi-batch', component: ChuVersusMultiBatch},
     {path: '/chunithm/best', component: ChuBestScores},
     {path: '/chunithm/summary', component: ChunithmSummary},
     {path: '/chunithm/overpower', component: OverPowerAll},

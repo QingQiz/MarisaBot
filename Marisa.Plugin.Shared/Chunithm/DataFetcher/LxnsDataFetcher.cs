@@ -110,7 +110,24 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         return await GetScoresViaOAuth(oauthToken, player.Qq);
     }
 
+    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player)
+    {
+        var token = await GetRequiredOAuthToken(player.Qq);
+        var scores = await GetScoreRecordsViaOAuth(token, player.Qq, forBattle: true);
+        var nickname = await GetNicknameViaOAuth(token, player.Qq);
+        return new ChunithmBattleData(nickname,
+            ChunithmVersusCatalog.NormalizeScores(scores, SongDb.SongList));
+    }
+
     private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)
+    {
+        var records = await GetScoreRecordsViaOAuth(oauthToken, qq);
+        var result = new Dictionary<(long Id, int LevelIdx), ChunithmScore>();
+        foreach (var score in records) result[(score.Id, (int)score.LevelIndex)] = score;
+        return result;
+    }
+
+    private async Task<IReadOnlyList<ChunithmScore>> GetScoreRecordsViaOAuth(LxnsToken oauthToken, long qq, bool forBattle = false)
     {
         var response = await "https://maimai.lxns.net/api/v0/user/chunithm/player/scores"
             .WithOAuthBearerToken(oauthToken.AccessToken)
@@ -138,15 +155,18 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("scores", out var scArr))
             root = scArr;
 
-        var lxnsSongs = GetSongList();
+        var lxnsSongs = forBattle ? new List<ChunithmSong>() : GetSongList();
         var lxnsSongById = lxnsSongs.ToDictionary(s => s.Id, s => s);
         var lxnsSongByTitle = lxnsSongs.DistinctBy(s => s.Title).ToDictionary(s => s.Title, s => s);
 
-        var result = new Dictionary<(long Id, int LevelIdx), ChunithmScore>();
+        var result = new List<ChunithmScore>();
         foreach (var s in root.EnumerateArray())
         {
             var lvlIdx = s.TryGetProperty("level_index", out var li) ? li.GetInt32() : -1;
+            if (forBattle && lvlIdx < 0) throw new InvalidDataException("落雪完整成绩响应缺少有效难度，无法进行对战");
             if (lvlIdx < 0) continue;
+            if (forBattle && (!s.TryGetProperty("score", out var battleScore) || !battleScore.TryGetInt32(out _)))
+                throw new InvalidDataException("落雪完整成绩响应缺少整数 score，无法进行对战");
 
             var score = new ChunithmScore
             {
@@ -156,10 +176,15 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
                 Level = s.TryGetProperty("level", out var lv) ? lv.GetString() ?? "" : "",
                 Achievement = s.TryGetProperty("score", out var ach) ? ach.GetInt32() : 0,
                 Fc = s.TryGetProperty("full_combo", out var fc) ? fc.GetString() ?? "" : "",
+                FullChain = s.TryGetProperty("full_chain", out var chain) ? chain.GetString() ?? "" : "",
                 Constant = 0
             };
+            if (forBattle && s.TryGetProperty("level_label", out var label))
+                score.LevelLabel = label.GetString() ?? "";
+            if (forBattle && s.TryGetProperty("clear", out var clear) && clear.ValueKind == JsonValueKind.String)
+                score.Clear = clear.GetString();
 
-            var song = FindMatchingSong(score, SongDb, lxnsSongById, lxnsSongByTitle);
+            var song = forBattle ? null : FindMatchingSong(score, SongDb, lxnsSongById, lxnsSongByTitle);
             if (song != null)
             {
                 score.Id = song.Id;
@@ -167,7 +192,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
                     score.Constant = (decimal)song.Constants[lvlIdx];
             }
 
-            result[(score.Id, lvlIdx)] = score;
+            result.Add(forBattle ? ChunithmBattleCompletion.FromLxns(score) : score);
         }
 
         return result;

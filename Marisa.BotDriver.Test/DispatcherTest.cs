@@ -1,4 +1,4 @@
-﻿using Marisa.Backend.OneBot;
+using Marisa.Backend.OneBot;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
@@ -197,6 +197,48 @@ public class DispatcherTest
         {
             var message = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = type };
             Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(MaiMaiDx) &&
+                x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
+        }
+    }
+
+    [TestCase("chu vs", "", "SongVersus", "")]
+    [TestCase("chuvsn20", "", "SongVersusRandom", "20")]
+    [TestCase("chu vs n 5 ULTIMA", "", "SongVersusRandom", "5 ULTIMA")]
+    [TestCase("chu vs b 14+", "", "SongVersusBatch", "14+")]
+    [TestCase("chuvsbVERSE14+", "", "SongVersusBatch", "VERSE14+")]
+    [TestCase("chu vs 开房", "", "SongVersusRoom", "")]
+    [TestCase("chuvs开房n5", "", "SongVersusRoomRandom", "5")]
+    [TestCase("chu vs 开房 b VERSE 14+", "", "SongVersusRoomBatch", "VERSE 14+")]
+    [TestCase("chu vs", "BLACKBOX", "SongVersus", "BLACKBOX")]
+    [TestCase("chu vs BLACKBOX", "", "SongVersus", "BLACKBOX")]
+    [TestCase("chu vs", "NULCTRL", "SongVersus", "NULCTRL")]
+    [TestCase("chu vs BASIC", "", "SongVersus", "BASIC")]
+    [TestCase("chu vs 开房", "BASIC", "SongVersusRoom", "BASIC")]
+    [TestCase("chu vs", "n 5", "SongVersus", "n 5")]
+    public void ChunithmVersusRoutesWithoutTruncatingSongs(string beforeMention, string afterMention, string method, string command)
+    {
+        var message = CreateMessage(new MessageDataText(beforeMention), new MessageDataAt(123456),
+            new MessageDataText(afterMention.Length == 0 ? "" : $" {afterMention}")) with { Type = MessageType.GroupMessage };
+        var dispatched = _dispatcher.Dispatch(message).Single(x => x.Plugin.GetType() == typeof(Chunithm));
+        Assert.Multiple(() =>
+        {
+            Assert.That(dispatched.Method.Name, Is.EqualTo(method));
+            Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(command));
+            Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }));
+        });
+    }
+
+    [TestCase(MessageType.GroupMessage, true)]
+    [TestCase(MessageType.FriendMessage, false)]
+    [TestCase(MessageType.TempMessage, false)]
+    [TestCase(MessageType.StrangerMessage, false)]
+    public void ChunithmVersusOnlyDispatchesInGroups(MessageType type, bool expected)
+    {
+        foreach (var command in new[] { "chu vs BASIC", "chuvsn5", "chu vs b 14+",
+                     "chu vs 开房", "chuvs开房n5", "chu vs 开房 b 14+" })
+        {
+            var message = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = type };
+            Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(Chunithm) &&
                 x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
         }
     }

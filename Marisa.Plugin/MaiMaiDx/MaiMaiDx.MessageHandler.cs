@@ -777,11 +777,12 @@ public partial class MaiMaiDx
         var opponentScore = opponent.Scores.GetValueOrDefault((song.Id, levelIdx));
 
         // 只按达成率判定胜负：0 = 自己，1 = 对手，-1 = 平局或双方均未游玩
-        var winnerIndex = selfScore == null && opponentScore == null ? -1
-            : selfScore == null ? 1
-            : opponentScore == null ? 0
-            : selfScore.Achievement == opponentScore.Achievement ? -1
-            : selfScore.Achievement > opponentScore.Achievement ? 0 : 1;
+        var winnerIndex = Marisa.Plugin.Shared.Versus.VersusRules.Compare(selfScore?.Achievement, opponentScore?.Achievement) switch
+        {
+            "left" => 0,
+            "right" => 1,
+            _ => -1
+        };
 
         var context = new WebContext(new
         {

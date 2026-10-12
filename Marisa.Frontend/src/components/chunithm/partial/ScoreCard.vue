@@ -5,6 +5,7 @@ import {computed, ref} from "vue";
 import {chunithm_levelColors} from "@/GlobalVars";
 import {GetContrastingTextColor, MakeRgba} from "@/utils/color";
 import {ToFixedNoRound} from "@/utils/str";
+import {rankIcon} from "@/components/chunithm/utils/score";
 
 let props = defineProps<{ score: ChuScore }>();
 
@@ -59,7 +60,7 @@ function UpdateColor() {
                                    :prefix="'/assets/chunithm/pic/'"
                                    class="h-[30px]"
                     />
-                    <img :src="`/assets/chunithm/pic/rank_${score.Rank.toLowerCase()}.png`" alt="" class="h-[30px]">
+                    <img :src="rankIcon(score.Rank)" alt="" class="h-[30px]">
                 </div>
             </div>
 

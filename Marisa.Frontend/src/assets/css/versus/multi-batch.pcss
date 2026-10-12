@@ -1,0 +1,60 @@
+.batch-header { display:flex; align-items:center; justify-content:space-between; }
+.batch-heading { display:flex; align-items:center; gap:20px; }
+.version-logo { width:112px; height:74px; object-fit:contain; }
+.eyebrow { font:700 11px 'Torus',sans-serif; letter-spacing:.3em; color:#c4b9d3; }
+h1 { font:900 36px 'Microsoft YaHei',sans-serif; margin:5px 0 0; letter-spacing:.08em; }
+.badges { display:flex; gap:10px; }
+.badge { display:flex; align-items:baseline; gap:6px; padding:10px 17px; border:1px solid #ffffff2a; border-radius:14px; background:#ffffff08; font-family:'Torus',sans-serif; }
+.badge strong { font-size:32px; }
+.badge span { font-size:13px; letter-spacing:.18em; color:#b5a6c9; }
+.scope-line { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:20px 0 18px; font:700 14px 'Microsoft YaHei',sans-serif; color:#d4cadd; }
+.scope-chip { max-width:100%; overflow-wrap:anywhere; border:1px solid #d690ed77; border-radius:99px; padding:6px 16px; background:#ba42d932; color:#f1d2ff; }
+.separator { color:#9986ad; }
+
+.grid-row { display:grid; grid-template-columns:minmax(0,1fr) repeat(var(--players), 128px); column-gap:8px; }
+.table-head { align-items:end; margin-bottom:10px; }
+.song-label { padding:0 0 8px 14px; font:700 12px 'Microsoft YaHei',sans-serif; color:#baa8cd; letter-spacing:.04em; }
+.player-head {
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:10px 8px 9px;
+    border:1px solid rgba(255,255,255,.14);
+    border-top:3px solid var(--place-color);
+    border-radius:12px;
+    background:rgba(10,8,26,.5);
+}
+.player-head.champion { border-color:rgba(255,227,140,.65); border-top-color:var(--place-color); background:linear-gradient(180deg,rgba(255,215,94,.2),rgba(10,8,26,.5)); box-shadow:0 0 18px rgba(255,215,94,.2); }
+.player-place { font:700 11px 'Torus',sans-serif; letter-spacing:.06em; color:var(--place-color); }
+.player-place b { font-size:22px; font-weight:900; margin-right:1px; }
+.player-name { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:700 15px 'Microsoft YaHei',sans-serif; }
+.player-points { font:700 12px 'Torus',sans-serif; color:rgba(255,255,255,.55); font-variant-numeric:tabular-nums; }
+.player-points b { font-size:17px; color:#fff; }
+.player-points i { margin:0 2px; font-style:normal; color:rgba(255,255,255,.3); }
+
+.battle-list { display:flex; flex-direction:column; gap:6px; }
+.battle-row { align-items:stretch; min-height:76px; border:1px solid #ffffff12; border-radius:12px; background:#09051458; overflow:hidden; }
+.battle-row:nth-child(even) { background:#ffffff05; }
+.song-cell { display:flex; align-items:center; gap:11px; padding:10px 8px 10px 12px; min-width:0; }
+.row-number { font:700 12px 'Torus',sans-serif; color:#b09abc; width:19px; flex-shrink:0; text-align:center; }
+.song-copy { min-width:0; }
+.song-title { font:900 15px/1.32 'SEGA NewRodin',sans-serif; overflow-wrap:anywhere; color:#f8f3fb; }
+.song-title.has-han { font-family:'Microsoft YaHei',sans-serif; }
+.chart-meta { display:flex; align-items:center; gap:8px; margin-top:4px; white-space:nowrap; }
+.chart-meta>b { font:900 10px 'SEGA NewRodin',sans-serif; }
+.constant { color:#ddcce9; font:700 12px 'Torus',sans-serif; }
+.score-cell { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; }
+.score-cell.best { background:linear-gradient(180deg,rgba(255,215,94,.06),rgba(255,215,94,.16)); box-shadow:inset 0 -2px 0 rgba(255,215,94,.75); }
+.achievement { font:900 19px/1 'Torus',sans-serif; font-variant-numeric:tabular-nums; color:#e7dfed; }
+.best .achievement { color:#ffe27a; }
+.achievement small { font-size:11px; margin-left:1px; color:#ab99b9; }
+.score-badges { display:flex; align-items:center; justify-content:center; gap:4px; height:18px; }
+.rank { height:16px; width:auto; display:block; }
+.mark { height:18px; width:auto; display:block; }
+.missing { color:rgba(255,255,255,.25); font:400 22px 'Torus',sans-serif; }
+.batch-footer { display:flex; justify-content:space-between; align-items:end; margin-top:20px; }
+.batch-footer>div { display:flex; flex-direction:column; gap:8px; }
+.range-label { color:#b29bc2; font:700 11px 'Microsoft YaHei',sans-serif; }
+.hint { color:#bba7c9; font:700 12px 'Microsoft YaHei',sans-serif; }

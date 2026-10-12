@@ -5,7 +5,7 @@ import axios from 'axios';
 import {context_get} from "@/GlobalVars";
 import OverPower from "@/components/chunithm/partial/OverPower.vue";
 import {GroupSongInfo, Score} from "@/components/chunithm/utils/summary_t";
-import {getRank, isMaxScore} from "@/components/chunithm/utils/score";
+import {getRank, isMaxScore, rankIcon} from "@/components/chunithm/utils/score";
 
 const route = useRoute()
 const id    = ref(route.query.id)
@@ -166,7 +166,7 @@ function GetGroupMinRank(group: any[]) {
             <div v-for="{Key: key, x: group} in grouped">
                 <div class="group-title" :style="`color: ${GetTierColor(GetGroupMinTier(group), '#000000')}`">
                     {{ key }}
-                    <img :src="`/assets/chunithm/pic/rank_${GetGroupMinRank(group)}.png`" alt="" class="group-min-rank"
+                    <img :src="rankIcon(GetGroupMinRank(group))" alt="" class="group-min-rank"
                          onerror="this.style.opacity=0">
                     <OverPower :group="group" :scores="group.map((s: typeof s.x) => GetScore(s.Item3.Id, s.Item2))"
                                class="justify-self-end"/>

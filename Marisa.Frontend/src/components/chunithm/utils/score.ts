@@ -10,6 +10,11 @@ export type ChunithmRank =
     'sssp' | 'sss' | 'ssp' | 'ss' | 'sp' | 's' |
     'aaa' | 'aa' | 'a' | 'bbb' | 'bb' | 'b' | 'c' | 'd';
 
+/** 原生字片共用同一画布，避免附加 + 改变主体字的显示大小。 */
+export function rankIcon(rank: string | null) {
+    return `/assets/chunithm/pic/rank_${(rank ?? 'd').toLowerCase()}.svg`;
+}
+
 /** 评级阈值，从高到低。与后端 ChunithmScore.GetRank 同源，不要在页面里各写一份。 */
 export const RANK_STEPS: [threshold: number, rank: ChunithmRank][] = [
     [1_009_000, 'sssp'],

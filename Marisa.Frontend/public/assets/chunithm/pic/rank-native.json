@@ -1,0 +1,183 @@
+{
+  "sourceVersion": "SDHD 2.45.00 / CHUNITHM X-VERSE-X",
+  "sourceDds": {
+    "archiveEntry": "data/surfboard/texture/CHU_UI_Result_Rank_00.dds",
+    "sha256": "254ac54bc955a90b2b50ba9fb8bf7acd450e8e3f7058d9f2eda8385e6d98f5bc"
+  },
+  "canvas": [
+    544,
+    226
+  ],
+  "letterAdvance": {
+    "a": 128,
+    "b": 108,
+    "c": 179,
+    "d": 186,
+    "s": 130
+  },
+  "layout": "Same canvas and unscaled native letter images for every rank; center the visible whole label including +. Never trim each label independently.",
+  "glyphs": {
+    "a": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 2,
+      "cropLTRB": [
+        0,
+        767,
+        206,
+        959
+      ],
+      "nativeSize": [
+        206,
+        192
+      ],
+      "pngSha256": "b17992e10e81c66de5021e7399fbce931536b0b702722612df5fea6f1e90da48",
+      "alphaBounds": [
+        4,
+        4,
+        202,
+        188
+      ],
+      "bodyAlpha128Bounds": [
+        12,
+        13,
+        193,
+        183
+      ]
+    },
+    "b": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 37,
+      "cropLTRB": [
+        817,
+        221,
+        997,
+        409
+      ],
+      "nativeSize": [
+        180,
+        188
+      ],
+      "pngSha256": "88398cabb6db3ddb4c40d0a7c6c1d5188ca33915abe7410b920b0a7af5ba4c81",
+      "alphaBounds": [
+        4,
+        4,
+        176,
+        184
+      ],
+      "bodyAlpha128Bounds": [
+        13,
+        13,
+        168,
+        179
+      ]
+    },
+    "c": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 7,
+      "cropLTRB": [
+        207,
+        767,
+        386,
+        961
+      ],
+      "nativeSize": [
+        179,
+        194
+      ],
+      "pngSha256": "a49d63fd2da06dbbf3b1662bd7b31044e474249faf8d3f6ca0fe5274dfc1dde0",
+      "alphaBounds": [
+        4,
+        4,
+        176,
+        190
+      ],
+      "bodyAlpha128Bounds": [
+        12,
+        13,
+        168,
+        185
+      ]
+    },
+    "d": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 26,
+      "cropLTRB": [
+        630,
+        221,
+        816,
+        409
+      ],
+      "nativeSize": [
+        186,
+        188
+      ],
+      "pngSha256": "ad341d642e69c13cdf440837401a208139c28501ba54c1b8406c2d5f8ca4c362",
+      "alphaBounds": [
+        4,
+        4,
+        182,
+        184
+      ],
+      "bodyAlpha128Bounds": [
+        12,
+        13,
+        173,
+        179
+      ]
+    },
+    "s": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 15,
+      "cropLTRB": [
+        461,
+        221,
+        629,
+        415
+      ],
+      "nativeSize": [
+        168,
+        194
+      ],
+      "pngSha256": "9571d6e290910a13fd707e732ca631103047524f269dd6742b24eb7f68808f8a",
+      "alphaBounds": [
+        4,
+        4,
+        165,
+        190
+      ],
+      "bodyAlpha128Bounds": [
+        12,
+        13,
+        157,
+        185
+      ]
+    },
+    "plus": {
+      "atlas": "CHU_UI_Result_Rank_00",
+      "spriteIndex": 32,
+      "cropLTRB": [
+        749,
+        757,
+        845,
+        859
+      ],
+      "nativeSize": [
+        96,
+        102
+      ],
+      "pngSha256": "42126e4d8c2d912c694c4a63514d8fe54e016a106945690b1334ddc232ba2a44",
+      "alphaBounds": [
+        4,
+        4,
+        93,
+        98
+      ],
+      "bodyAlpha128Bounds": [
+        12,
+        13,
+        85,
+        93
+      ]
+    }
+  }
+}

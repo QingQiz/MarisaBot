@@ -6,6 +6,7 @@ using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
+using Marisa.Plugin.Shared.Versus;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -13,31 +14,11 @@ public partial class MaiMaiDx
 {
     private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
 
-    private static bool VersusBatchTrigger(Message message, IServiceProvider _serviceProvider)
-    {
-        var command = message.Command.Trim().ToString();
-        return command.Length > 0 &&
-               (command.Length == 1 || char.IsWhiteSpace(command[1]) ||
-                PlateData.TryParseScope(command[1..], out _, out _)) &&
-               VersusSubCommandBeforeMention(message);
-    }
+    private static bool VersusBatchTrigger(Message message, IServiceProvider _serviceProvider) =>
+        VersusCommands.BatchTrigger(message, query => PlateData.TryParseScope(query, out _, out _));
 
-    private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider)
-    {
-        var command = message.Command.Trim().Span;
-        return command.Length > 0 &&
-               (command.Length == 1 || char.IsWhiteSpace(command[1]) || char.IsAsciiDigit(command[1])) &&
-               VersusSubCommandBeforeMention(message);
-    }
-
-    private static bool VersusSubCommandBeforeMention(Message message)
-    {
-        var chain = message.MessageChain!;
-        var beforeMention = new MessageChain(chain.Messages.TakeWhile(x => x.Type != MessageDataType.At)).Text.Trim();
-        // Command 已去掉 mai/vs；用已消费的文本长度判断子命令是否在 @ 之前。
-        var consumed = chain.Text.Trim().Length - message.Command.TrimStart().Length;
-        return beforeMention.Length > consumed;
-    }
+    private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider) =>
+        VersusCommands.RandomTrigger(message);
 
     /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
     private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
@@ -137,31 +118,8 @@ public partial class MaiMaiDx
         return hasAffix ? (songs.SearchSong(rest), level, false) : ([], 3, false);
     }
 
-    private async Task ReplyPages(Message message, int pageCount, Func<int, Task<string>> render)
-    {
-        var firstPage = await render(1);
-        message.Reply(MessageDataImage.FromBase64(firstPage));
-        if (pageCount == 1) return;
-
-        var key = (message.GroupInfo?.Id, message.Sender.Id);
-        if (!DialogManager.TryAddDialog(key, HandlePage, this)) return;
-
-        async Task<MarisaPluginTaskState> HandlePage(Message next)
-        {
-            if (!next.IsPlainText()) return MarisaPluginTaskState.Canceled;
-
-            var command = next.Command.Trim().ToString();
-            if (command.Length < 2 || command[0] is not ('p' or 'P') ||
-                !int.TryParse(command[1..], out var page) || page < 1 || page > pageCount)
-            {
-                return MarisaPluginTaskState.Canceled;
-            }
-
-            var image = page == 1 ? firstPage : await render(page);
-            next.Reply(MessageDataImage.FromBase64(image));
-            return MarisaPluginTaskState.ToBeContinued;
-        }
-    }
+    private Task ReplyPages(Message message, int pageCount, Func<int, Task<string>> render) =>
+        VersusPaging.ReplyPages(this, message, pageCount, render);
 
     /// <summary>解析 `N [难度/范围]`；失败时已回复原因。</summary>
     private (int Count, string Query, IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> Charts)?
@@ -248,9 +206,9 @@ public partial class MaiMaiDx
         var invitees = message.At().Distinct().Where(x => x != message.Sender.Id && x != botQq).ToArray();
         var unbound  = invitees.Where(x => ResolveVersusPlayer(message, x).Player is null).ToArray();
         var joined   = invitees.Except(unbound).ToArray();
-        if (joined.Length >= MaiVersusRoom.MaxPlayers)
+        if (joined.Length >= VersusRoom<SongScore>.MaxPlayers)
         {
-            message.Reply($"一个房间最多 {MaiVersusRoom.MaxPlayers} 人");
+            message.Reply($"一个房间最多 {VersusRoom<SongScore>.MaxPlayers} 人");
             return null;
         }
 
@@ -263,179 +221,40 @@ public partial class MaiMaiDx
     /// </summary>
     private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members, VersusRoomPlan plan)
     {
-        var room = new MaiVersusRoom(message.Sender.Id, members.Joined);
-        if (!DialogManager.TryAddDialog((message.GroupInfo!.Id, null), HandleRoom, this))
-        {
-            message.Reply("群里已经有进行中的房间或游戏");
-            return;
-        }
-
-        var announce = new MessageBuilder(message).Text($"多人对战：{plan.Title}（{room.Count}/{MaiVersusRoom.MaxPlayers}）\n");
-        if (members.Joined.Length > 0)
-        {
-            foreach (var qq in members.Joined) announce.At(qq).Text(" ");
-            announce.Text("已加入，不参加可以发送「退出」\n");
-        }
-
-        if (members.Unbound.Length > 0)
-        {
-            foreach (var qq in members.Unbound) announce.At(qq).Text(" ");
-            announce.Text("需要先绑定查分器才能加入\n");
-        }
-
-        announce.Text("发送「加入」参加，房主发送「开始」开打").Reply();
+        VersusRoomSession.Open<SongScore, (double Constant, int LevelIdx, MaiMaiSong Song), MaiVersusMulti>(
+            this, message, members, new(plan.Title, plan.Charts, plan.PickCount),
+            chart => (chart.Song.Id, chart.LevelIdx), chart => chart.Constant,
+            (next, qq) => ResolveVersusPlayer(next, qq).Error,
+            FetchRoomPlayer,
+            (charts, players) => new MaiVersusMulti(plan.Title, plan.Version, charts,
+                players.Select(p => new MaiVersusMulti.Player(p.Qq, p.Name, p.Scores)).ToArray()),
+            result => result.Players.Select((p, i) =>
+                new VersusRoundPlayer(p.Qq, p.Name, result.Totals[i].Points, result.Totals[i].Matchups)).ToArray(),
+            ReplyRound);
         return;
 
-        async Task<MarisaPluginTaskState> HandleRoom(Message next)
+        async Task<VersusFetchResult<SongScore>> FetchRoomPlayer(Message next, long qq)
         {
-            if (room.IsExpired) return MarisaPluginTaskState.Canceled;
-
-            return next.Command.Trim().ToString() switch
-            {
-                "加入" => JoinRoom(next),
-                "退出" => LeaveRoom(next),
-                "开始" => await StartRound(next),
-                "取消" when next.Sender.Id == room.Host => CancelRoom(next),
-                _ => MarisaPluginTaskState.NoResponse
-            };
-        }
-
-        MarisaPluginTaskState JoinRoom(Message next)
-        {
-            var (player, error) = ResolveVersusPlayer(next, next.Sender.Id);
-            if (player is null)
-            {
-                next.Reply(error!);
-                return MarisaPluginTaskState.ToBeContinued;
-            }
-
-            switch (room.Join(next.Sender.Id))
-            {
-                case MaiVersusRoom.JoinResult.Joined:
-                    next.Reply($"已加入（{room.Count}/{MaiVersusRoom.MaxPlayers}）");
-                    break;
-                case MaiVersusRoom.JoinResult.Full:
-                    next.Reply("房间已满");
-                    break;
-                case MaiVersusRoom.JoinResult.Closed:
-                    return MarisaPluginTaskState.NoResponse;
-            }
-
-            return MarisaPluginTaskState.ToBeContinued;
-        }
-
-        MarisaPluginTaskState LeaveRoom(Message next)
-        {
-            switch (room.Leave(next.Sender.Id))
-            {
-                case MaiVersusRoom.LeaveResult.NotIn:
-                    return MarisaPluginTaskState.NoResponse;
-                case MaiVersusRoom.LeaveResult.Dissolved:
-                    next.Reply("房间已解散");
-                    return MarisaPluginTaskState.CompletedTask;
-                case MaiVersusRoom.LeaveResult.HostChanged:
-                    new MessageBuilder(next).Text("已退出，房主转给 ").At(room.Host).Reply();
-                    return MarisaPluginTaskState.ToBeContinued;
-                default:
-                    next.Reply("已退出");
-                    return MarisaPluginTaskState.ToBeContinued;
-            }
-        }
-
-        MarisaPluginTaskState CancelRoom(Message next)
-        {
-            room.Close();
-            next.Reply("房间已解散");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        async Task<MarisaPluginTaskState> StartRound(Message next)
-        {
-            switch (room.TryStart(next.Sender.Id, out var roster))
-            {
-                case MaiVersusRoom.StartResult.NotMember:
-                    return MarisaPluginTaskState.NoResponse;
-                case MaiVersusRoom.StartResult.TooFew:
-                    next.Reply("至少需要 2 人才能开始");
-                    return MarisaPluginTaskState.ToBeContinued;
-                case not MaiVersusRoom.StartResult.Started:
-                    return MarisaPluginTaskState.ToBeContinued;
-            }
-
-            if (!plan.Continuous) room.Close();
-
-            MaiVersusMulti? result = null;
-            try
-            {
-                result = await PlayRound(next, roster);
-            }
-            finally
-            {
-                room.EndRound(result);
-            }
-
-            if (result is not null) await ReplyRound(next, result);
-            return plan.Continuous ? MarisaPluginTaskState.ToBeContinued : MarisaPluginTaskState.CompletedTask;
-        }
-
-        async Task<MaiVersusMulti?> PlayRound(Message next, IReadOnlyList<long> roster)
-        {
-            var fetched = await Task.WhenAll(roster.Select(qq => FetchRoomPlayer(next, qq)));
-            var players = fetched.Where(x => x.Player is not null).Select(x => x.Player!).ToArray();
-            var failed  = fetched.Where(x => x.Error is not null).ToArray();
-
-            var notice = new MessageBuilder(next);
-            for (var i = 0; i < failed.Length; i++)
-            {
-                notice.At(failed[i].Qq).Text($" 本轮跳过：{failed[i].Error}{(i + 1 < failed.Length ? "\n" : "")}");
-            }
-
-            if (players.Length < 2)
-            {
-                notice.Text(failed.Length > 0 ? "\n取到成绩的玩家不足 2 人" : "取到成绩的玩家不足 2 人").Reply();
-                return null;
-            }
-
-            if (failed.Length > 0) notice.Reply();
-
-            var charts = plan.PickCount is { } count
-                ? room.PickCharts(plan.Charts, players, count, Random.Shared)
-                : plan.Charts;
-            if (charts.Count == 0)
-            {
-                next.Reply("没有找到至少两人玩过的谱面");
-                return null;
-            }
-
-            return new MaiVersusMulti(plan.Title, plan.Version, charts, players);
-        }
-
-        async Task<(long Qq, MaiVersusMulti.Player? Player, string? Error)> FetchRoomPlayer(Message next, long qq)
-        {
-            if (room.TryGetScores(qq, out var cached)) return (qq, cached, null);
-
             var (resolved, error) = ResolveVersusPlayer(next, qq);
-            if (resolved is null) return (qq, null, error);
+            if (resolved is null) return new(null, error);
 
             var (nickname, scores, fetchError) = await FetchBattleData(resolved);
-            if (fetchError is not null) return (qq, null, fetchError);
-
-            var player = new MaiVersusMulti.Player(qq, nickname ?? $"QQ {qq}", scores);
-            room.CacheScores(player);
-            return (qq, player, null);
+            return fetchError is not null
+                ? new(null, fetchError)
+                : new(new VersusPlayer<SongScore>(qq, nickname ?? $"QQ {qq}", scores), null);
         }
 
-        async Task ReplyRound(Message next, MaiVersusMulti result)
+        async Task ReplyRound(Message next, MaiVersusMulti result, int round, IReadOnlyList<VersusStanding> standings)
         {
-            var round     = plan.Continuous ? room.Round : 0;
-            var standings = round >= 2 ? room.Standings() : [];
+            var projected = standings.Select(s =>
+                new MaiVersusMulti.Standing(s.Name, s.Wins, s.Matchups, s.Rounds, s.Left)).ToArray();
             if (plan.SingleSong)
             {
-                next.Reply(MessageDataImage.FromBase64(await MaiMaiDraw.DrawVersusMulti(result, round, standings)));
+                next.Reply(MessageDataImage.FromBase64(await MaiMaiDraw.DrawVersusMulti(result, round, projected)));
                 return;
             }
 
-            await ReplyPages(next, result.PageCount, page => MaiMaiDraw.DrawVersusMultiBatch(result, page, round, standings));
+            await ReplyPages(next, result.PageCount, page => MaiMaiDraw.DrawVersusMultiBatch(result, page, round, projected));
         }
     }
 

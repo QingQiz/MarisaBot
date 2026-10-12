@@ -1,9 +1,11 @@
-﻿using System.Net;
+using System.Net;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Marisa.Plugin.Shared.Chunithm.DataFetcher;
 
@@ -97,6 +99,23 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
 
+    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player)
+    {
+        if (player.Username is not null) throw new InvalidOperationException("对战必须按绑定 QQ 读取完整成绩");
+        var response = await FetchBattleRecords(player);
+        if (response.Records.Best.Any(score => score is null || !score.HasScore))
+            throw new InvalidDataException("水鱼完整成绩响应缺少整数 score，无法进行对战");
+        // 水鱼 WE-only 的 cids 可能返回 Basic/index 0，须按该源的 >=8000 曲目 ID 排除。
+        var scores = ChunithmVersusCatalog.NormalizeScores(response.Records.Best
+            .Where(score => score.Id < 8000).Select(ChunithmBattleCompletion.FromDivingFish), SongDb.SongList);
+        // 官方规定标准谱 1,010,000 为 AJC；只转换已验证的标准成绩，chain 已独立保存。
+        foreach (var score in scores.Values.Where(score => score.Achievement == 1_010_000))
+            score.Fc = "alljusticecritical";
+        return new ChunithmBattleData(response.Username, scores);
+    }
+
+    protected virtual Task<ChunithmRating> FetchBattleRecords(ResolvedPlayer player) => FetchCompleteRecords(player, true);
+
     protected virtual async Task<ChunithmRating> FetchScoresByUsername(ReadOnlyMemory<char> username)
     {
         var response = await "https://www.diving-fish.com/api/chunithmprober/query/player"
@@ -136,11 +155,13 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     }
 
     /// <summary>完整记录：配置了 OAuth 时用本人票据读（只有本人能读），否则用 dev token 按账号名或 QQ 查。</summary>
-    protected virtual async Task<ChunithmRating> FetchScores(ResolvedPlayer player)
+    protected virtual Task<ChunithmRating> FetchScores(ResolvedPlayer player) => FetchCompleteRecords(player, false);
+
+    private async Task<ChunithmRating> FetchCompleteRecords(ResolvedPlayer player, bool allowAuthorizedOpponent)
     {
         if (OAuthEnabled)
         {
-            if (!player.IsSelf)
+            if ((!allowAuthorizedOpponent && !player.IsSelf) || player.Username is not null)
             {
                 throw OAuthSelfOnly();
             }
@@ -158,7 +179,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
                     null, (HttpStatusCode)response.StatusCode);
             }
 
-            return await response.GetJsonAsync<ChunithmRating>();
+            return allowAuthorizedOpponent ? await ReadBattleRecords(response) : await response.GetJsonAsync<ChunithmRating>();
         }
 
         var uri = player.Username is { } username
@@ -177,7 +198,45 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
                 null, (HttpStatusCode)devResponse.StatusCode);
         }
 
-        return await devResponse.GetJsonAsync<ChunithmRating>();
+        return allowAuthorizedOpponent ? await ReadBattleRecords(devResponse) : await devResponse.GetJsonAsync<ChunithmRating>();
+    }
+
+    private static async Task<ChunithmRating> ReadBattleRecords(IFlurlResponse response)
+    {
+        var json = await response.GetStringAsync();
+        try
+        {
+            var raw = JsonConvert.DeserializeObject<BattleResponse>(json)
+                ?? throw new InvalidDataException("水鱼完整成绩响应为空，无法进行对战");
+            var scores = raw.Records.Best.Select(token =>
+            {
+                if (token is not JObject score || score["score"]?.Type != JTokenType.Integer)
+                    throw new InvalidDataException("水鱼完整成绩响应缺少整数 score，无法进行对战");
+                if (score.TryGetValue("level_index", out var index) && index.Type != JTokenType.Integer)
+                    throw new InvalidDataException("水鱼完整成绩响应包含非整数难度索引，无法进行对战");
+                return score.ToObject<ChunithmScore>()!;
+            }).ToArray();
+            return new ChunithmRating { Username = raw.Nickname!, Records = new Records { Best = scores, Recent = [] } };
+        }
+        catch (JsonException error)
+        {
+            throw new InvalidDataException("水鱼完整成绩响应缺少有效 records.best 数组，无法进行对战", error);
+        }
+    }
+
+    private sealed class BattleResponse
+    {
+        [JsonProperty("nickname")]
+        public string? Nickname { get; set; }
+
+        [JsonProperty("records", Required = Required.Always)]
+        public BattleRecords Records { get; set; } = new();
+    }
+
+    private sealed class BattleRecords
+    {
+        [JsonProperty("best", Required = Required.Always)]
+        public JArray Best { get; set; } = new();
     }
 
     private static async Task<string> GetRequiredToken(long qq, string game)

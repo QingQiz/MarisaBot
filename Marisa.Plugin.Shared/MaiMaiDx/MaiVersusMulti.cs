@@ -1,3 +1,5 @@
+using Marisa.Plugin.Shared.Versus;
+
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>
@@ -41,27 +43,8 @@ public sealed class MaiVersusMulti
         IEnumerable<(double Constant, int LevelIdx, MaiMaiSong Song)> charts,
         IReadOnlyList<IReadOnlyDictionary<(long Id, int LevelIdx), SongScore>> scores,
         int count,
-        Random random)
-    {
-        var candidates = charts
-            .Select(chart => (Chart: chart, Played: scores.Count(s => s.ContainsKey((chart.Song.Id, chart.LevelIdx)))))
-            .Where(x => x.Played >= 2)
-            .ToList();
-
-        var poolSize  = Math.Max(10, count * 2);
-        var threshold = Enumerable.Range(2, Math.Max(0, scores.Count - 1)).Reverse()
-            .FirstOrDefault(t => candidates.Count(x => x.Played >= t) >= poolSize, 2);
-
-        return candidates
-            .Where(x => x.Played >= threshold)
-            .Select(x => (x.Chart, Key: Math.Log(1 - random.NextDouble()) / Math.Pow(2, x.Played - threshold)))
-            .OrderByDescending(x => x.Key)
-            .Take(count)
-            .Select(x => x.Chart)
-            .OrderByDescending(x => x.Constant)
-            .ThenBy(x => x.Song.Id)
-            .ToList();
-    }
+        Random random) =>
+        VersusSampler.Pick(charts, scores, x => (x.Song.Id, x.LevelIdx), x => x.Constant, count, random);
 
     /// <summary>单曲排行：“菜”章只盖给玩过的人里达成率最低的，未游玩不盖。</summary>
     public SingleData GetSingle(int round, IReadOnlyList<Standing> standings)
@@ -109,8 +92,7 @@ public sealed class MaiVersusMulti
     private static Row CreateRow((double Constant, int LevelIdx, MaiMaiSong Song) chart, IReadOnlyList<Player> players)
     {
         var scores       = players.Select(p => MaiVersusBatch.CreateScore(p.Scores, chart.Song, chart.LevelIdx)).ToArray();
-        var achievements = scores.Select(s => s.Achievement).ToArray();
-        var played       = achievements.Count(a => a is not null);
+        var cells = VersusRules.ScoreChart(scores.Select(s => s.Achievement).ToArray());
 
         return new Row(
             new SongView(chart.Song),
@@ -118,17 +100,7 @@ public sealed class MaiVersusMulti
             chart.Song.Levels[chart.LevelIdx],
             chart.Constant,
             chart.Song.Charts[chart.LevelIdx].Notes.Sum() * 3,
-            scores.Select((score, i) => CreateCell(score, i)).ToArray());
-
-        Cell CreateCell(MaiVersusBatch.ScoreView score, int index)
-        {
-            if (achievements[index] is not { } achievement) return new Cell(score, null, 0, played);
-
-            var others = achievements.Where((_, j) => j != index).ToArray();
-            var points = others.Sum(other => other is not { } a || a < achievement ? 1 : a == achievement ? 0.5 : 0);
-
-            return new Cell(score, 1 + others.Count(a => a > achievement), points, others.Length);
-        }
+            scores.Select((score, i) => new Cell(score, cells[i].Place, cells[i].Points, cells[i].Matchups)).ToArray());
     }
 
     public sealed record Player(
