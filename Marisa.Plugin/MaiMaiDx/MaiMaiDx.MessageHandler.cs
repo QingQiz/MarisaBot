@@ -1445,7 +1445,6 @@ public partial class MaiMaiDx
 
         static string FormatError(PlateData.ParseError err) => err.Kind switch
         {
-            PlateData.ErrorKind.UnsupportedPlate => $"不支持该版本：{err.Detail}",
             PlateData.ErrorKind.InvalidDifficulty => $"谱面难度格式错误：{err.Detail}",
             PlateData.ErrorKind.UnknownSelector => $"无法识别版本/谱师/类别/作曲家/等级/定数：{err.Detail}",
             PlateData.ErrorKind.EmptyQuery => "'完成表' 前面要写一个版本代字 / 谱师名 / 类别 / 作曲家名 / 等级 / 定数",

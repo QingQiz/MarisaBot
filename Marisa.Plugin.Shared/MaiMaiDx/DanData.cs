@@ -38,8 +38,8 @@ public static class DanData
         ["prism"]         = "1.50", ["镜"]        = "1.50", ["鏡"]           = "1.50", ["pri"] = "1.50",
         ["prism plus"]    = "1.55", ["prism+"]    = "1.55", ["prismplus"]    = "1.55", ["彩"] = "1.55", ["pri+"] = "1.55",
         ["circle"]        = "1.60", ["丸"]        = "1.60", ["cir"]          = "1.60",
-        ["circle plus"]   = "1.65", ["circle+"]   = "1.65", ["circleplus"]   = "1.65", ["cir+"] = "1.65",
-        ["magical"]       = "1.70", ["廻"]        = "1.70",
+        ["circle plus"]   = "1.65", ["circle+"]   = "1.65", ["circleplus"]   = "1.65", ["廻"] = "1.65", ["cir+"] = "1.65",
+        ["magical"]       = "1.70",
     };
 
     /// <summary>版本 token 全集（档号 + 别名），长度倒序保证 longest-first（universe plus 优先于 universe）。</summary>

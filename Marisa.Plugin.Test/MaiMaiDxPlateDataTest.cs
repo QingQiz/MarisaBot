@@ -119,7 +119,8 @@ public class MaiMaiDxPlateDataTest
     [TestCase("镜将完成表",   new[] { "maimai でらっくす PRiSM" })] // 简体镜
     [TestCase("鏡将完成表",   new[] { "maimai でらっくす PRiSM" })]
     [TestCase("彩将完成表",   new[] { "maimai でらっくす PRiSM PLUS" })]
-    [TestCase("廻将完成表",   new[] { "maimai でらっくす MAGiCAL" })]
+    [TestCase("丸将完成表",   new[] { "maimai でらっくす CiRCLE" })]
+    [TestCase("廻将完成表",   new[] { "maimai でらっくす CiRCLE PLUS" })]
     [TestCase("辉将完成表",   new[] { "maimai FiNALE" })]    // 简体辉
     [TestCase("輝将完成表",   new[] { "maimai FiNALE" })]
     [TestCase("真将完成表",   new[] { "maimai", "maimai PLUS" })] // 真双 from
@@ -233,9 +234,15 @@ public class MaiMaiDxPlateDataTest
         void Check(string raw, string expectedName, string threshold, IReadOnlyList<int> levelIdxes)
         {
             var ok = PlateData.TryParse(raw, charters, artists, out var query, out var error);
+            var charterHit = charters.Concat(PlateData.CharterIdentityMap.Keys)
+                .Any(name => name.Contains(expectedName, StringComparison.OrdinalIgnoreCase));
+            var artistHit = artists.Any(name => name.Contains(expectedName, StringComparison.OrdinalIgnoreCase));
+            var expectedType = charterHit && artistHit ? typeof(PlateData.Selector.CharterOrArtist)
+                : charterHit ? typeof(PlateData.Selector.Charter) : typeof(PlateData.Selector.Artist);
             var nameSelectors = query?.Selectors.Where(x => x is
                 PlateData.Selector.Charter or PlateData.Selector.Artist or PlateData.Selector.CharterOrArtist).ToList();
             if (!ok || nameSelectors is not { Count: 1 } || nameSelectors[0].Display != expectedName ||
+                nameSelectors[0].GetType() != expectedType ||
                 query!.Selectors.Count != 1 || query.Threshold.DisplayName != threshold ||
                 !query.LevelIdxes.SequenceEqual(levelIdxes))
             {
@@ -267,11 +274,28 @@ public class MaiMaiDxPlateDataTest
 
     [TestCase("丸将完成表",   "丸")]
     [TestCase("丸代神完成表", "丸")]
-    public void RejectsBlockedPlates(string raw, string kanji)
+    public void ParsesCirclePlateWithOptionalDaiSuffix(string raw, string kanji)
     {
-        var error = MustFail(raw);
-        Assert.That(error.Kind, Is.EqualTo(PlateData.ErrorKind.UnsupportedPlate));
-        Assert.That(error.Detail, Is.EqualTo(kanji));
+        var plate = MustParse(raw).Selectors.OfType<PlateData.Selector.Plate>().Single();
+        Assert.That(plate.Kanji, Is.EqualTo(kanji));
+        Assert.That(plate.Versions, Is.EqualTo(new[] { "maimai でらっくす CiRCLE" }));
+    }
+
+    [TestCase("丸", 90001L)]
+    [TestCase("廻", 90002L)]
+    public void CirclePlateAliasesDoNotSelectMagicalSongs(string kanji, long expectedId)
+    {
+        var songs = new[]
+        {
+            CreateSong(90001, "maimai でらっくす CiRCLE"),
+            CreateSong(90002, "maimai でらっくす CiRCLE PLUS"),
+            CreateSong(90003, "maimai でらっくす MAGiCAL")
+        };
+        var query = MustParse($"{kanji}神完成表");
+        Assert.That(PlateData.SelectCharts(query, songs).Select(x => (x.Song.Id, x.LevelIdx)),
+            Is.EqualTo(new[] { (expectedId, 3) }));
+        Assert.That(PlateData.PlateVersionMap.Values.SelectMany(x => x),
+            Does.Not.Contain("maimai でらっくす MAGiCAL"));
     }
 
     [Test]
@@ -1584,6 +1608,7 @@ public class MaiMaiDxPlateDataTest
     [TestCase("霸者神完成表")]    // 覆盖固有阈值后不再是「霸者」姓名框
     [TestCase("镜代V家将完成表")] // 多 selector 不出牌
     [TestCase("翠楼屋将完成表")]  // 非版本代字查询
+    [TestCase("丸将完成表")]      // 当前资源未收录 CiRCLE 姓名框。
     public void NamePlateImageAbsent(string raw)
     {
         Assert.That(PlateData.NamePlateImage(MustParse(raw)), Is.Null);
