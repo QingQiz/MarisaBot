@@ -4,9 +4,13 @@ using Marisa.Database;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Lxns;
+using Marisa.Plugin.Shared.Interface;
+using MaiBattleChart = (double Constant, int LevelIdx, Marisa.Plugin.Shared.MaiMaiDx.MaiMaiSong Song);
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Versus;
+using Marisa.Plugin.Shared.Util.Cacheable;
+using Marisa.Plugin.Shared.Util.SongDb;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -20,80 +24,117 @@ public partial class MaiMaiDx
     private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider) =>
         VersusCommands.RandomTrigger(message);
 
-    /// <summary>双方都能读取完整成绩时返回；否则已回复原因。</summary>
-    private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
+    private VersusBattle? _battle;
+
+    VersusBattle ICanBattleWithOthers.Battle => _battle ??= new VersusBattle<SongScore, MaiBattleChart>
     {
-        var opponents = message.At().Distinct().ToArray();
-        if (opponents.Length != 1)
-        {
-            message.Reply(opponents.Length == 0 ? "请 @一名对手" : "请只指定一名对手");
-            return null;
-        }
+        CommandPrefix = "mai",
+        ResolvePlayer = ResolveBattlePlayer,
+        IsOpponentBindingError = IsOpponentBindingError,
+        SelectSingle = SelectVersusSingle,
+        ParseRandom = (message, usage) => ParseVersusRandom(message, usage) is { } parsed
+            ? new VersusRandomSelection<MaiBattleChart>(parsed.Count, parsed.Query, parsed.Charts) : null,
+        ParseBatch = message => ParseVersusScope(message) is { } parsed
+            ? new VersusBatchSelection<MaiBattleChart>(parsed.Query, parsed.SortLabel, parsed.Charts) : null,
+        ChartKey = chart => (chart.Song.Id, chart.LevelIdx),
+        VersionOf = charts => VersusVersion(charts),
+        ReplySingle = ReplyVersusSingle,
+        ReplyBatch = ReplyVersusBatch,
+        OpenRoom = (message, members, plan, version, singleSong) => OpenVersusRoom(message, members,
+            new VersusRoomPlan(plan.Title, version, plan.Charts, plan.PickCount, singleSong))
+    };
 
-        var (self, selfError)         = ResolveVersusPlayer(message, message.Sender.Id);
-        var (opponent, opponentError) = ResolveVersusPlayer(message, opponents[0]);
-        if (opponent is null)
-        {
-            ReplyOpponentNotBound(message, opponents[0], opponentError!);
-            return null;
-        }
-
-        if (self is null)
-        {
-            message.Reply(selfError!);
-            return null;
-        }
-
-        return (self, opponent);
+    private (VersusPlayerBinding<SongScore>? Player, string? Error) ResolveBattlePlayer(Message message, long qq)
+    {
+        var (player, error) = ResolveVersusPlayer(message, qq);
+        return player is null ? (null, error) : (new(qq, () => FetchBattleData(player)), null);
     }
 
-    /// <summary>并行取双方成绩；失败时已回复原因并返回空。</summary>
-    private static async Task<(MaiVersusBatch.Player Self, MaiVersusBatch.Player Opponent)?> FetchVersusScores(
-        Message message, (ResolvedPlayer Self, ResolvedPlayer Opponent) players)
-    {
-        var selfFetch     = FetchBattleData(players.Self);
-        var opponentFetch = FetchBattleData(players.Opponent);
-        var selfData      = await selfFetch;
-        var opponentData  = await opponentFetch;
-
-        if (opponentData.Error is not null && IsOpponentBindingError(opponentData.Error))
-        {
-            ReplyOpponentNotBound(message, players.Opponent.Qq, opponentData.Error);
-            return null;
-        }
-
-        if ((selfData.Error ?? opponentData.Error) is { } error)
-        {
-            message.Reply(error);
-            return null;
-        }
-
-        return (new MaiVersusBatch.Player(selfData.Nickname ?? $"QQ {players.Self.Qq}", selfData.Scores),
-            new MaiVersusBatch.Player(opponentData.Nickname ?? $"QQ {players.Opponent.Qq}", opponentData.Scores));
-    }
-
-    /// <summary>授权/网络错误转成 Error 文本交给调用方回复，其余异常照旧抛出。</summary>
-    private static async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, string? Error)>
-        FetchBattleData(ResolvedPlayer player)
+    private static async Task<VersusFetchResult<SongScore>> FetchBattleData(ResolvedPlayer player)
     {
         try
         {
             var (nickname, scores) = await player.Fetcher.GetScores(player);
-            return (nickname, scores, null);
+            return new(new VersusPlayer<SongScore>(player.Qq, nickname ?? $"QQ {player.Qq}", scores), null);
         }
         catch (HttpRequestException e)
         {
-            return (null, [], e.Message);
+            return new(null, e.Message);
         }
     }
 
-    private static List<MaiMaiSong> SharedVersusSongs(
-        IEnumerable<MaiMaiSong> songs, int level,
-        IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> left,
-        IReadOnlyDictionary<(long Id, int LevelIdx), SongScore> right) =>
-        songs.Where(song => song.Levels.Count > level && song.Constants.Count > level &&
-                            song.Charts.Count > level && left.ContainsKey((song.Id, level)) &&
-                            right.ContainsKey((song.Id, level))).ToList();
+    private async Task<VersusSingleSelection<MaiBattleChart>?> SelectVersusSingle(Message message)
+    {
+        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
+        var level = selection.LevelIndex;
+        var levelName = MaiMaiSong.LevelNameZh[level];
+        if (selection.Random)
+        {
+            return new(VersusLevelCharts(level), true,
+                level == 3 ? "随机单曲" : $"随机单曲（{levelName}谱）", string.Empty);
+        }
+
+        var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
+        if (song is null) return null;
+        if (level >= song.Levels.Count)
+        {
+            message.Reply($"该歌曲没有{levelName}谱");
+            return null;
+        }
+        return new([(song.Constants[level], level, song)], false, $"{song.Title}（{levelName}谱）", song.Version);
+    }
+
+    private async Task ReplyVersusSingle(Message message, MaiBattleChart chart,
+        VersusPlayer<SongScore> self, VersusPlayer<SongScore> opponent)
+    {
+        var song = chart.Song;
+        var levelIdx = chart.LevelIdx;
+        var selfScore = self.Scores.GetValueOrDefault((song.Id, levelIdx));
+        var opponentScore = opponent.Scores.GetValueOrDefault((song.Id, levelIdx));
+        var winnerIndex = VersusRules.Compare(selfScore?.Achievement, opponentScore?.Achievement) switch
+        {
+            "left" => 0,
+            "right" => 1,
+            _ => -1
+        };
+        var context = new WebContext(new
+        {
+            versus = new
+            {
+                Song = new { song.Id, song.Title, song.Type, song.Info.Artist, song.Info.Genre, song.Info.Bpm, song.Info.From, song.Info.IsNew },
+                LevelIndex = levelIdx,
+                Level = song.Levels[levelIdx],
+                Constant = song.Constants[levelIdx],
+                MaxDx = song.Charts[levelIdx].Notes.Sum() * 3,
+                Players = new[]
+                {
+                    new { Nickname = self.Name, Played = selfScore != null, Score = ProjectScore(selfScore) },
+                    new { Nickname = opponent.Name, Played = opponentScore != null, Score = ProjectScore(opponentScore) }
+                },
+                WinnerIndex = winnerIndex
+            }
+        });
+        message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiVersus(context.Id)));
+        return;
+
+        object? ProjectScore(SongScore? score) => score == null ? null : new
+        {
+            score.Achievement,
+            Rank = SongScore.CalcRank(score.Achievement),
+            Rating = song.Ra(levelIdx, score.Achievement),
+            score.DxScore,
+            score.Fc,
+            score.Fs
+        };
+    }
+
+    private async Task ReplyVersusBatch(Message message, string title, string version, string sort,
+        IReadOnlyList<MaiBattleChart> charts, VersusPlayer<SongScore> self, VersusPlayer<SongScore> opponent)
+    {
+        var batch = new MaiVersusBatch(title, version, sort, charts,
+            new MaiVersusBatch.Player(self.Name, self.Scores), new MaiVersusBatch.Player(opponent.Name, opponent.Scores));
+        await ReplyPages(message, batch.PageCount, page => MaiMaiDraw.DrawVersusBatch(batch, page));
+    }
 
     /// <summary>解析单曲 vs 的歌曲与难度；空输入或只有难度时随机选曲。</summary>
     private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)
@@ -187,34 +228,6 @@ public partial class MaiMaiDx
         return versions.Length == 1 ? versions[0] : string.Empty;
     }
 
-    /// <summary>开房前检查房主能 vs；返回能直接加入的被邀请人和还没绑定的被邀请人。失败时已回复原因。</summary>
-    private (long[] Joined, long[] Unbound)? ResolveVersusRoomMembers(Message message, long botQq)
-    {
-        if (message.GroupInfo is null)
-        {
-            message.Reply("请在群里开房");
-            return null;
-        }
-
-        var (self, error) = ResolveVersusPlayer(message, message.Sender.Id);
-        if (self is null)
-        {
-            message.Reply(error!);
-            return null;
-        }
-
-        var invitees = message.At().Distinct().Where(x => x != message.Sender.Id && x != botQq).ToArray();
-        var unbound  = invitees.Where(x => ResolveVersusPlayer(message, x).Player is null).ToArray();
-        var joined   = invitees.Except(unbound).ToArray();
-        if (joined.Length >= VersusRoom<SongScore>.MaxPlayers)
-        {
-            message.Reply($"一个房间最多 {VersusRoom<SongScore>.MaxPlayers} 人");
-            return null;
-        }
-
-        return (joined, unbound);
-    }
-
     /// <summary>
     ///     房间挂在群级 dialog 上，用不带前缀的「加入」「退出」「开始」「取消」操作，其它消息原样放行；
     ///     闲置超时后由下一条消息静默结束。
@@ -238,10 +251,7 @@ public partial class MaiMaiDx
             var (resolved, error) = ResolveVersusPlayer(next, qq);
             if (resolved is null) return new(null, error);
 
-            var (nickname, scores, fetchError) = await FetchBattleData(resolved);
-            return fetchError is not null
-                ? new(null, fetchError)
-                : new(new VersusPlayer<SongScore>(qq, nickname ?? $"QQ {qq}", scores), null);
+            return await FetchBattleData(resolved);
         }
 
         async Task ReplyRound(Message next, MaiVersusMulti result, int round, IReadOnlyList<VersusStanding> standings)
@@ -548,13 +558,6 @@ public partial class MaiMaiDx
     private static bool IsOpponentBindingError(string error) =>
         error.Contains("OAuth", StringComparison.OrdinalIgnoreCase) ||
         error.Contains("未绑定水鱼", StringComparison.OrdinalIgnoreCase);
-
-    private static MarisaPluginTaskState ReplyOpponentNotBound(Message message, long opponentQq, string error)
-    {
-        new MessageBuilder(message).Text(error).At(opponentQq).Reply();
-
-        return MarisaPluginTaskState.CompletedTask;
-    }
 
     private readonly Dictionary<DataFetcherType, DataFetcher> _dataFetchers = new();
 

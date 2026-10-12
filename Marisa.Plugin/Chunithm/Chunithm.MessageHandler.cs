@@ -7,11 +7,11 @@ using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.DivingFish;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
-using Marisa.Plugin.Shared.Versus;
 
 namespace Marisa.Plugin.Chunithm;
 
@@ -328,143 +328,33 @@ public partial class Chunithm
 
     #region 对战
 
-    [MarisaPluginDoc("比较双方单曲成绩；不填歌曲时随机", "`@某人`，可选歌曲名、别名、ID 或难度")]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "vs", "对战")]
-    private async Task<MarisaPluginTaskState> SongVersus(Message message)
-    {
-        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
-
-        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
-        ChunithmVersusChart? chart = null;
-        if (!selection.Random)
-        {
-            var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
-            if (song is null) return MarisaPluginTaskState.CompletedTask;
-            chart = ChunithmVersusCatalog.FindChart(song, selection.LevelIndex);
-            if (chart is null)
-            {
-                message.Reply($"该歌曲没有 {ChunithmSong.LevelLabel[selection.LevelIndex]} 谱面");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-        }
-
-        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
-        var (self, opponent) = sides;
-        if (chart is null)
-        {
-            var shared = VersusLevelCharts(selection.LevelIndex)
-                .Where(x => self.Scores.ContainsKey((x.Id, x.LevelIndex)) && opponent.Scores.ContainsKey((x.Id, x.LevelIndex)))
-                .ToArray();
-            if (shared.Length == 0)
-            {
-                message.Reply("没有找到双方都已游玩且当前可查询的谱面");
-                return MarisaPluginTaskState.CompletedTask;
-            }
-            chart = shared[Random.Shared.Next(shared.Length)];
-        }
-
-        message.Reply(MessageDataImage.FromBase64(await ChunithmDraw.DrawVersus(ChunithmVersusBatch.GetSingle(chart, self, opponent))));
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
     [MarisaPluginDoc("随机比较 N 个成绩", "`N [难度/范围] @某人`（最大 20）")]
-    [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersus))]
     [MarisaPluginTrigger(typeof(Chunithm), nameof(VersusRandomTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "n")]
-    private async Task<MarisaPluginTaskState> SongVersusRandom(Message message)
-    {
-        if (ParseVersusRandom(message, "chu vs n 5 [难度/范围] @对手") is not { } parsed) return MarisaPluginTaskState.CompletedTask;
-        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
-        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
-
-        var (self, opponent) = sides;
-        var shared = parsed.Charts
-            .Where(x => self.Scores.ContainsKey((x.Id, x.LevelIndex)) && opponent.Scores.ContainsKey((x.Id, x.LevelIndex)))
-            .ToArray();
-        if (shared.Length == 0)
-        {
-            message.Reply("没有找到双方都已游玩且当前可查询的谱面");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var picked = shared.OrderBy(_ => Random.Shared.Next()).Take(parsed.Count).ToArray();
-        var batch = new ChunithmVersusBatch($"随机 {picked.Length} 首共同谱面", string.Empty, "随机", picked, self, opponent);
-        await VersusPaging.ReplyPages(this, message, batch.PageCount, page => ChunithmDraw.DrawVersusBatch(batch, page));
-        return MarisaPluginTaskState.CompletedTask;
-    }
+    private Task<MarisaPluginTaskState> SongVersusRandom(Message message) =>
+        ((ICanBattleWithOthers)this).Battle.Random(message);
 
     [MarisaPluginDoc("比较范围内的全部谱面", "`范围 @某人`，如`VERSE 14+ @某人`")]
-    [MarisaPluginSubCommand(nameof(SongVersus))]
+    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersus))]
     [MarisaPluginTrigger(typeof(Chunithm), nameof(VersusBatchTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "b")]
-    private async Task<MarisaPluginTaskState> SongVersusBatch(Message message)
-    {
-        if (ParseVersusScope(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
-        if (ResolveVersusPlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
-        if (await FetchVersusScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
-
-        var batch = new ChunithmVersusBatch(parsed.Query, VersusVersion(parsed.Charts), parsed.SortLabel,
-            parsed.Charts, sides.Self, sides.Opponent);
-        await VersusPaging.ReplyPages(this, message, batch.PageCount, page => ChunithmDraw.DrawVersusBatch(batch, page));
-        return MarisaPluginTaskState.CompletedTask;
-    }
-
-    [MarisaPluginDoc("多人对战；不填歌曲时每轮随机", "可选歌曲或难度，可 @ 多人")]
-    [MarisaPluginSubCommand(nameof(SongVersus))]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "开房")]
-    private async Task<MarisaPluginTaskState> SongVersusRoom(Message message, long qq)
-    {
-        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
-
-        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
-        var levelName = ChunithmSong.LevelLabel[selection.LevelIndex];
-        if (selection.Random)
-        {
-            OpenVersusRoom(message, members, new VersusRoomPlan<ChunithmVersusChart>(
-                selection.LevelIndex == 3 ? "随机单曲" : $"随机单曲（{levelName}）", VersusLevelCharts(selection.LevelIndex), 1), true);
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
-        if (song is null) return MarisaPluginTaskState.CompletedTask;
-        var chart = ChunithmVersusCatalog.FindChart(song, selection.LevelIndex);
-        if (chart is null)
-        {
-            message.Reply($"该歌曲没有 {levelName} 谱面");
-            return MarisaPluginTaskState.CompletedTask;
-        }
-
-        OpenVersusRoom(message, members, new VersusRoomPlan<ChunithmVersusChart>(
-            $"{song.Title}（{levelName}）", [chart], null), true);
-        return MarisaPluginTaskState.CompletedTask;
-    }
+    private Task<MarisaPluginTaskState> SongVersusBatch(Message message) =>
+        ((ICanBattleWithOthers)this).Battle.Batch(message);
 
     [MarisaPluginDoc("每轮随机比较 N 个成绩", "`N [难度/范围]`（最大 20）")]
-    [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersusRoom))]
     [MarisaPluginTrigger(typeof(Chunithm), nameof(VersusRandomTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "n")]
-    private MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq)
-    {
-        if (ParseVersusRandom(message, "chu vs 开房 n 5 [难度/范围]") is not { } parsed) return MarisaPluginTaskState.CompletedTask;
-        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
-
-        var title = parsed.Query.Length == 0 ? $"随机 {parsed.Count} 首" : $"{parsed.Query} 随机 {parsed.Count} 首";
-        OpenVersusRoom(message, members, new VersusRoomPlan<ChunithmVersusChart>(title, parsed.Charts, parsed.Count), false);
-        return MarisaPluginTaskState.CompletedTask;
-    }
+    private MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq) =>
+        ((ICanBattleWithOthers)this).Battle.RandomRoom(message, qq);
 
     [MarisaPluginDoc("比较范围内的全部谱面", "`范围`，如`VERSE 14+`")]
-    [MarisaPluginSubCommand(nameof(SongVersusRoom))]
+    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersusRoom))]
     [MarisaPluginTrigger(typeof(Chunithm), nameof(VersusBatchTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "b")]
-    private MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq)
-    {
-        if (ParseVersusScope(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
-        if (ResolveVersusRoomMembers(message, qq) is not { } members) return MarisaPluginTaskState.CompletedTask;
-
-        OpenVersusRoom(message, members, new VersusRoomPlan<ChunithmVersusChart>(parsed.Query, parsed.Charts, null), false);
-        return MarisaPluginTaskState.CompletedTask;
-    }
+    private MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq) =>
+        ((ICanBattleWithOthers)this).Battle.BatchRoom(message, qq);
 
     #endregion
 

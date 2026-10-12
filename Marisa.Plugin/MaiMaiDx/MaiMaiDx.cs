@@ -16,6 +16,7 @@ public partial class MaiMaiDx :
     MarisaPluginBase,
     IHandleCommonException,
     ICanReset,
+    ICanBattleWithOthers,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<MaiMaiSong>,
     IMarisaPluginWithCoverGuess<MaiMaiSong, MaiMaiDxGuess>

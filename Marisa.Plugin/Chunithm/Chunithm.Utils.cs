@@ -5,6 +5,7 @@ using Marisa.Database.Entity.Plugin.Chunithm;
 using Marisa.Plugin.Shared.Chunithm;
 using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.DivingFish;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Lxns;
 using Marisa.Plugin.Shared.Util;
 using Marisa.Plugin.Shared.Util.SongDb;
@@ -15,6 +16,33 @@ namespace Marisa.Plugin.Chunithm;
 
 public partial class Chunithm
 {
+    private VersusBattle? _battle;
+
+    VersusBattle ICanBattleWithOthers.Battle => _battle ??= new VersusBattle<ChunithmScore, ChunithmVersusChart>
+    {
+        CommandPrefix = "chu",
+        ResolvePlayer = (message, qq) =>
+        {
+            var (player, error) = ResolveVersusPlayer(message, qq);
+            return (player is null ? null : new VersusPlayerBinding<ChunithmScore>(qq, () => FetchBattleData(player)), error);
+        },
+        IsOpponentBindingError = error => error.Contains("OAuth", StringComparison.OrdinalIgnoreCase) ||
+                                          error.Contains("绑定", StringComparison.Ordinal),
+        SelectSingle = SelectVersusSingle,
+        ParseRandom = ParseVersusRandom,
+        ParseBatch = ParseVersusScope,
+        ChartKey = chart => (chart.Id, chart.LevelIndex),
+        VersionOf = VersusVersion,
+        ReplySingle = async (message, chart, self, opponent) =>
+            message.Reply(MessageDataImage.FromBase64(await ChunithmDraw.DrawVersus(ChunithmVersusBatch.GetSingle(chart, self, opponent)))),
+        ReplyBatch = async (message, title, version, sortLabel, charts, self, opponent) =>
+        {
+            var batch = new ChunithmVersusBatch(title, version, sortLabel, charts, self, opponent);
+            await VersusPaging.ReplyPages(this, message, batch.PageCount, page => ChunithmDraw.DrawVersusBatch(batch, page));
+        },
+        OpenRoom = OpenVersusRoom
+    };
+
     private static bool VersusRandomTrigger(Message message, IServiceProvider _) => VersusCommands.RandomTrigger(message);
 
     private static bool VersusBatchTrigger(Message message, IServiceProvider provider) =>
@@ -43,30 +71,6 @@ public partial class Chunithm
         }
     }
 
-    private (ResolvedPlayer Self, ResolvedPlayer Opponent)? ResolveVersusPlayers(Message message)
-    {
-        var opponents = message.At().Distinct().ToArray();
-        if (opponents.Length != 1)
-        {
-            message.Reply(opponents.Length == 0 ? "请 @一名对手" : "请只指定一名对手");
-            return null;
-        }
-
-        var (self, selfError) = ResolveVersusPlayer(message, message.Sender.Id);
-        var (opponent, opponentError) = ResolveVersusPlayer(message, opponents[0]);
-        if (opponent is null)
-        {
-            new MessageBuilder(message).Text(opponentError!).At(opponents[0]).Reply();
-            return null;
-        }
-        if (self is null)
-        {
-            message.Reply(selfError!);
-            return null;
-        }
-        return (self, opponent);
-    }
-
     private static async Task<VersusFetchResult<ChunithmScore>> FetchBattleData(ResolvedPlayer player)
     {
         try
@@ -79,24 +83,6 @@ public partial class Chunithm
         {
             return new VersusFetchResult<ChunithmScore>(null, e.Message);
         }
-    }
-
-    private static async Task<(VersusPlayer<ChunithmScore> Self, VersusPlayer<ChunithmScore> Opponent)?> FetchVersusScores(
-        Message message, (ResolvedPlayer Self, ResolvedPlayer Opponent) players)
-    {
-        var fetched = await Task.WhenAll(FetchBattleData(players.Self), FetchBattleData(players.Opponent));
-        if (fetched[1].Error is { } opponentError &&
-            (opponentError.Contains("OAuth", StringComparison.OrdinalIgnoreCase) || opponentError.Contains("绑定", StringComparison.Ordinal)))
-        {
-            new MessageBuilder(message).Text(opponentError).At(players.Opponent.Qq).Reply();
-            return null;
-        }
-        if ((fetched[0].Error ?? fetched[1].Error) is { } error)
-        {
-            message.Reply(error);
-            return null;
-        }
-        return (fetched[0].Player!, fetched[1].Player!);
     }
 
     private static (List<ChunithmSong> Songs, int LevelIndex, bool Random) ResolveVersusQuery(SongDb<ChunithmSong> songs, string input)
@@ -120,7 +106,31 @@ public partial class Chunithm
     private IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) =>
         ChunithmVersusCatalog.StandardCharts(SongDb.SongList).Where(x => x.LevelIndex == level).ToArray();
 
-    private (int Count, string Query, IReadOnlyList<ChunithmVersusChart> Charts)? ParseVersusRandom(Message message, string usage)
+    private async Task<VersusSingleSelection<ChunithmVersusChart>?> SelectVersusSingle(Message message)
+    {
+        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
+        var levelName = ChunithmSong.LevelLabel[selection.LevelIndex];
+        if (selection.Random)
+        {
+            var randomCharts = VersusLevelCharts(selection.LevelIndex);
+            var title = selection.LevelIndex == 3 ? "随机单曲" : $"随机单曲（{levelName}）";
+            return new VersusSingleSelection<ChunithmVersusChart>(randomCharts, true, title, VersusVersion(randomCharts));
+        }
+
+        var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
+        if (song is null) return null;
+        var chart = ChunithmVersusCatalog.FindChart(song, selection.LevelIndex);
+        if (chart is null)
+        {
+            message.Reply($"该歌曲没有 {levelName} 谱面");
+            return null;
+        }
+
+        IReadOnlyList<ChunithmVersusChart> charts = [chart];
+        return new VersusSingleSelection<ChunithmVersusChart>(charts, false, $"{song.Title}（{levelName}）", VersusVersion(charts));
+    }
+
+    private VersusRandomSelection<ChunithmVersusChart>? ParseVersusRandom(Message message, string usage)
     {
         var command = message.Command.Trim().ToString();
         var digits = command.TakeWhile(char.IsAsciiDigit).Count();
@@ -130,15 +140,16 @@ public partial class Chunithm
             return null;
         }
         var query = command[digits..].Trim();
-        if (query.Length == 0) return (count, query, VersusLevelCharts(3));
-        if (ChunithmVersusScope.TryParseDifficulty(query, out var level)) return (count, query, VersusLevelCharts(level));
+        if (query.Length == 0) return new VersusRandomSelection<ChunithmVersusChart>(count, query, VersusLevelCharts(3));
+        if (ChunithmVersusScope.TryParseDifficulty(query, out var level))
+            return new VersusRandomSelection<ChunithmVersusChart>(count, query, VersusLevelCharts(level));
         if (ChunithmVersusScope.TryParse(query, SongDb.SongList, out var scope, out _) && scope is not null)
-            return (count, query, ChunithmVersusScope.SelectCharts(scope, SongDb.SongList));
+            return new VersusRandomSelection<ChunithmVersusChart>(count, query, ChunithmVersusScope.SelectCharts(scope, SongDb.SongList));
         message.Reply($"无法解析难度或范围：{query}；支持 BASIC～ULTIMA");
         return null;
     }
 
-    private (string Query, string SortLabel, IReadOnlyList<ChunithmVersusChart> Charts)? ParseVersusScope(Message message)
+    private VersusBatchSelection<ChunithmVersusChart>? ParseVersusScope(Message message)
     {
         var query = message.Command.Trim().ToString();
         if (!ChunithmVersusScope.TryParse(query, SongDb.SongList, out var scope, out var error) || scope is null)
@@ -152,7 +163,7 @@ public partial class Chunithm
             message.Reply($"没有找到 {query} 对应的谱面");
             return null;
         }
-        return (query, scope.SortLabel, charts);
+        return new VersusBatchSelection<ChunithmVersusChart>(query, scope.SortLabel, charts);
     }
 
     private static string VersusVersion(IEnumerable<ChunithmVersusChart> charts)
@@ -161,34 +172,9 @@ public partial class Chunithm
         return versions.Length == 1 ? versions[0] : string.Empty;
     }
 
-    private (long[] Joined, long[] Unbound)? ResolveVersusRoomMembers(Message message, long botQq)
-    {
-        if (message.GroupInfo is null)
-        {
-            message.Reply("请在群里开房");
-            return null;
-        }
-        var (self, error) = ResolveVersusPlayer(message, message.Sender.Id);
-        if (self is null)
-        {
-            message.Reply(error!);
-            return null;
-        }
-        var invitees = message.At().Distinct().Where(x => x != message.Sender.Id && x != botQq).ToArray();
-        var unbound = invitees.Where(x => ResolveVersusPlayer(message, x).Player is null).ToArray();
-        var joined = invitees.Except(unbound).ToArray();
-        if (joined.Length >= VersusRoom<ChunithmScore>.MaxPlayers)
-        {
-            message.Reply($"一个房间最多 {VersusRoom<ChunithmScore>.MaxPlayers} 人");
-            return null;
-        }
-        return (joined, unbound);
-    }
-
     private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members,
-        VersusRoomPlan<ChunithmVersusChart> plan, bool singleSong)
+        VersusRoomPlan<ChunithmVersusChart> plan, string version, bool singleSong)
     {
-        var version = VersusVersion(plan.Charts);
         VersusRoomSession.Open<ChunithmScore, ChunithmVersusChart, ChunithmVersusMulti>(this, message, members, plan,
             chart => (chart.Id, chart.LevelIndex), chart => chart.Constant,
             (next, qq) => ResolveVersusPlayer(next, qq).Error,

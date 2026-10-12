@@ -215,6 +215,23 @@ public class DispatcherTest
     [TestCase("chu vs BASIC", "", "SongVersus", "BASIC")]
     [TestCase("chu vs 开房", "BASIC", "SongVersusRoom", "BASIC")]
     [TestCase("chu vs", "n 5", "SongVersus", "n 5")]
+    [TestCase("chu vs", "B 14+", "SongVersus", "B 14+")]
+    [TestCase("chu vs", "N 5", "SongVersus", "N 5")]
+    [TestCase("chu vs", "B.M.S.", "SongVersus", "B.M.S.")]
+    [TestCase("chu vs", "niconico", "SongVersus", "niconico")]
+    [TestCase("chu vs NULCTRL", "", "SongVersus", "NULCTRL")]
+    [TestCase("chu vs B.M.S.", "", "SongVersus", "B.M.S.")]
+    [TestCase("chu vs niconico", "", "SongVersus", "niconico")]
+    [TestCase("chu vs 开房", "B 14+", "SongVersusRoom", "B 14+")]
+    [TestCase("chu vs 开房", "N 5", "SongVersusRoom", "N 5")]
+    [TestCase("chu vs 开房", "BLACKBOX", "SongVersusRoom", "BLACKBOX")]
+    [TestCase("chu vs 开房", "NULCTRL", "SongVersusRoom", "NULCTRL")]
+    [TestCase("chu vs 开房 BLACKBOX", "", "SongVersusRoom", "BLACKBOX")]
+    [TestCase("chu vs 开房 NULCTRL", "", "SongVersusRoom", "NULCTRL")]
+    [TestCase("chuvsn", "", "SongVersusRandom", "")]
+    [TestCase("chuvsb", "", "SongVersusBatch", "")]
+    [TestCase("chuvs开房n", "", "SongVersusRoomRandom", "")]
+    [TestCase("chuvs开房b", "", "SongVersusRoomBatch", "")]
     public void ChunithmVersusRoutesWithoutTruncatingSongs(string beforeMention, string afterMention, string method, string command)
     {
         var message = CreateMessage(new MessageDataText(beforeMention), new MessageDataAt(123456),
