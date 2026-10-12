@@ -1,5 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.Util.SongDb;
 using NUnit.Framework;
@@ -50,6 +54,114 @@ public class SongDbResetTest
         Assert.That(index2, Is.Not.SameAs(index1), "Reset 后 SongIndexer 必须重建");
         Assert.That(index2.ContainsKey(2), Is.True,  "新索引应反映重新生成的歌单");
         Assert.That(index2.ContainsKey(1), Is.False, "旧歌单的 id 不应残留在新索引里");
+    }
+
+    [Test]
+    public void CatalogChange_CannotBeOverwrittenByAnInFlightOldIndexer()
+    {
+        using var generating = new ManualResetEventSlim();
+        using var releaseGeneration = new ManualResetEventSlim();
+        using var changing = new ManualResetEventSlim();
+        var generations = 0;
+        var db = new SongDb<StubSong>("unused.tsv", "unused.tmp", () =>
+        {
+            var generation = Interlocked.Increment(ref generations);
+            if (generation == 1)
+            {
+                generating.Set();
+                if (!releaseGeneration.Wait(TimeSpan.FromSeconds(10)))
+                    throw new TimeoutException("Test did not release the initial catalog generation");
+            }
+            return [new StubSong { Id = generation, Title = $"song{generation}" }];
+        });
+        var oldIndexer = Task.Factory.StartNew(() => db.SongIndexer,
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task? change = null;
+        try
+        {
+            Assert.That(generating.Wait(TimeSpan.FromSeconds(10)), Is.True);
+            change = Task.Factory.StartNew(() =>
+            {
+                changing.Set();
+                db.Reset();
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Assert.That(changing.Wait(TimeSpan.FromSeconds(10)), Is.True);
+            // A change must wait for the previous construction, then invalidate it atomically.
+            Assert.That(change.Wait(TimeSpan.FromMilliseconds(100)), Is.False);
+            releaseGeneration.Set();
+            Assert.That(Task.WaitAll([oldIndexer, change], TimeSpan.FromSeconds(10)), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(oldIndexer.Result.ContainsKey(1), Is.True);
+                Assert.That(db.SongList.Single().Id, Is.EqualTo(2));
+                Assert.That(db.SongIndexer.Keys, Is.EquivalentTo(new long[] { 2 }));
+                Assert.That(generations, Is.EqualTo(2));
+            });
+        }
+        finally
+        {
+            releaseGeneration.Set();
+            Task.WaitAll(change == null ? [oldIndexer] : [oldIndexer, change], TimeSpan.FromSeconds(10));
+            db.Reset();
+        }
+    }
+
+    [Test]
+    public void AliasCallbacks_FromDisposedWatchersCannotOverwriteOrReviveCurrentCache()
+    {
+        var path = Path.Join(TestContext.CurrentContext.WorkDirectory, $"song-db-alias-{Guid.NewGuid():N}");
+        var aliases = path + ".tsv";
+        var userAliases = path + ".tmp";
+        File.WriteAllText(aliases, "song2\tstable\n");
+        const string userText = "song2\tpersonal\n";
+        File.WriteAllText(userAliases, userText);
+        var songs = new[] { new StubSong { Id = 1, Title = "song1" } };
+        var db = new SongDb<StubSong>(aliases, userAliases, () => songs.ToList());
+        var watcherField = typeof(SongDb<StubSong>).GetField("_songAliasChangedWatcher", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var aliasField = typeof(SongDb<StubSong>).GetField("_songAlias", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var refresh = typeof(SongDb<StubSong>).GetMethod("RefreshSongAliases", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        try
+        {
+            _ = db.GetSongAliasesByName("song1");
+            var oldWatcher = (FileSystemWatcher)watcherField.GetValue(db)!;
+            oldWatcher.EnableRaisingEvents = false;
+
+            songs = [new StubSong { Id = 2, Title = "song2" }];
+            db.Reset();
+            Assert.That(db.SearchSongExact("stable".AsMemory()).Single().Id, Is.EqualTo(2));
+            var currentWatcher = (FileSystemWatcher)watcherField.GetValue(db)!;
+            currentWatcher.EnableRaisingEvents = false;
+            const string updatedText = "song2\tupdated\n";
+            File.WriteAllText(aliases, updatedText);
+
+            // Deliver the delayed reload directly, without timing an OS notification or debounce sleep.
+            refresh.Invoke(db, [oldWatcher]);
+            Assert.Multiple(() =>
+            {
+                Assert.That(db.SearchSongExact("stable".AsMemory()).Single().Id, Is.EqualTo(2));
+                Assert.That(db.SearchSongExact("updated".AsMemory()), Is.Empty);
+            });
+
+            refresh.Invoke(db, [currentWatcher]);
+            Assert.Multiple(() =>
+            {
+                Assert.That(db.SearchSongExact("stable".AsMemory()), Is.Empty);
+                Assert.That(db.SearchSongExact("updated".AsMemory()).Single().Id, Is.EqualTo(2));
+                Assert.That(db.SearchSongExact("personal".AsMemory()).Single().Id, Is.EqualTo(2));
+                Assert.That(File.ReadAllText(aliases), Is.EqualTo(updatedText));
+                Assert.That(File.ReadAllText(userAliases), Is.EqualTo(userText));
+            });
+
+            db.Reset();
+            refresh.Invoke(db, [currentWatcher]);
+            Assert.That(aliasField.GetValue(db), Is.Null, "A queued callback must not revive a reset cache");
+        }
+        finally
+        {
+            db.Reset();
+            File.Delete(aliases);
+            File.Delete(userAliases);
+        }
     }
 
     [Test]
