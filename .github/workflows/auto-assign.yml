@@ -1,0 +1,19 @@
+name: Auto assign issues
+
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign to QingQiz
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ITEM_NUMBER: ${{ github.event.issue.number }}
+        run: gh api --method POST "repos/$GH_REPO/issues/$ITEM_NUMBER/assignees" -f 'assignees[]=QingQiz'
