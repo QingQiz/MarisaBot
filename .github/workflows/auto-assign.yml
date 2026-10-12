@@ -1,14 +1,11 @@
-name: Auto assign issues and pull requests
+name: Auto assign issues
 
 on:
   issues:
     types: [opened, reopened]
-  pull_request_target:
-    types: [opened, reopened]
 
 permissions:
   issues: write
-  pull-requests: write
 
 jobs:
   assign:
@@ -18,5 +15,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          ITEM_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          ITEM_NUMBER: ${{ github.event.issue.number }}
         run: gh api --method POST "repos/$GH_REPO/issues/$ITEM_NUMBER/assignees" -f 'assignees[]=QingQiz'
