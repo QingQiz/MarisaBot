@@ -27,7 +27,7 @@ public static class PlateData
     public sealed record Threshold(Dimension Dim, int Level, string DisplayName);
 
     /// <summary>
-    ///     选择条件：版本（plate）/ 谱师 / 类别 / 作曲家 四选一。
+    ///     查询范围条件；多个条件取交集。
     /// </summary>
     public abstract record Selector(string Display)
     {
@@ -90,7 +90,7 @@ public static class PlateData
     /// <summary>默认阈值（"将"=SSS）。用户未指定阈值时自动应用。</summary>
     public static readonly Threshold DefaultThreshold = new(Dimension.Achievement, 12, "SSS");
 
-    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnsupportedPlate, UnknownSelector, ConflictingSelector, InvalidDifficulty }
+    public enum ErrorKind { NotPlateCommand, EmptyQuery, UnknownSelector, ConflictingSelector, InvalidDifficulty }
 
     public sealed record ParseError(ErrorKind Kind, string? Detail = null);
 
@@ -347,7 +347,8 @@ public static class PlateData
         ["鏡"] = ["maimai でらっくす PRiSM"],
         ["镜"] = ["maimai でらっくす PRiSM"],
         ["彩"] = ["maimai でらっくす PRiSM PLUS"],
-        ["廻"] = ["maimai でらっくす MAGiCAL"],
+        ["丸"] = ["maimai でらっくす CiRCLE"],
+        ["廻"] = ["maimai でらっくす CiRCLE PLUS"],
     };
 
     /// <summary>
@@ -435,9 +436,6 @@ public static class PlateData
 
     public static bool IsFinaleAndEarlierChart(long songId, int levelIdx) =>
         levelIdx != 4 || FinaleAndEarlierRemasterSongIds.Contains(songId);
-
-    /// <summary>diving-fish 暂未提供数据的代字（CiRCLE 的丸）。报错而非"未识别"。</summary>
-    public static readonly HashSet<string> BlockedPlateKanji = ["丸"];
 
     /// <summary>类别别名 → diving-fish basic_info.genre 实际值。</summary>
     public static readonly Dictionary<string, string> GenreAliasMap = new()
@@ -855,15 +853,9 @@ public static class PlateData
             return false;
         }
 
-        // 已知谱师/作曲家名先作为整体抽出，避免名称内部的 S、舞舞、MASTER、数字等被后续字段解析吞掉；
-        // 名称外部的字段仍留在 parsePart 中按原顺序解析，恰好等于保留 token 的输入仍保持原语义。
         var selectors = new List<Selector>();
-        var parsePart = inner;
-        if (!scopeOnly && TryExtractKnownName(inner, out var nameStart, out var nameLength, out var nameSelector))
-        {
-            selectors.Add(nameSelector!);
-            parsePart = (inner[..nameStart] + inner[(nameStart + nameLength)..]).Trim();
-        }
+        var removed = new bool[inner.Length];
+        var parsePart = scopeOnly ? inner : ExtractNames(inner);
 
         // 1. 阈值 token —— 字段位置可任意（"真代EXPERT将"=阈值在末尾、"将真EXPERT"=阈值在开头都接受）。
         //    longest-first 顺序遍历表，找 rightmost 满足"边界合法"的出现位置，strip 掉得到剩余字符串。
@@ -886,7 +878,7 @@ public static class PlateData
 
         // 默认阈值延后到 selector 解析后再定（完整牌名如「霸者」可能自带阈值档）。
         var afterThreshold = thresholdAt >= 0
-            ? (parsePart[..thresholdAt] + parsePart[(thresholdAt + thresholdLen)..]).Trim()
+            ? MaskToken(parsePart, thresholdAt, thresholdLen)
             : parsePart;
 
         // 2. 难度集合：在原字符串上从左到右扫描一次，避免删除旧 token 后拼出新 token。
@@ -900,7 +892,7 @@ public static class PlateData
         var difficultyExplicit = explicitLevelIdxes.Count > 0;
         IReadOnlyList<int> levelIdxes = difficultyExplicit ? explicitLevelIdxes : DefaultLevelIdxes;
 
-        if (selectorPart.Length == 0 && selectors.Count == 0)
+        if (string.IsNullOrWhiteSpace(selectorPart) && selectors.Count == 0)
         {
             error = new(ErrorKind.UnknownSelector, inner);
             return false;
@@ -923,15 +915,10 @@ public static class PlateData
             int matchStart = -1, matchLen = 0;
             Selector? matched = null;
 
-            if (TryFindRightmostPlateInString(workingPart, out var pStart, out var pLen, out var pSel, out var pErr))
+            if (TryFindRightmostPlateInString(workingPart, out var pStart, out var pLen, out var pSel))
             {
                 if (pLen > matchLen || (pLen == matchLen && pStart > matchStart))
                 { matchStart = pStart; matchLen = pLen; matched = pSel; }
-            }
-            else if (pErr != null)
-            {
-                error = pErr;       // 丸 这种已知不支持，立刻返回
-                return false;
             }
 
             if (TryFindRightmostGenreInString(workingPart, out var gStart, out var gLen, out var gSel))
@@ -1017,38 +1004,22 @@ public static class PlateData
             }
 
             selectors.Add(matched!);
-            workingPart = (workingPart[..matchStart] + workingPart[(matchStart + matchLen)..]).Trim();
+            workingPart = MaskToken(workingPart, matchStart, matchLen);
         }
 
-        // 剩余连续片段当 Charter / Artist
-        if (workingPart.Length > 0)
+        // 残串仅作未知谱师回显，不重新识别拼接出来的 token。
+        if (!string.IsNullOrWhiteSpace(workingPart))
         {
+            var remainder = new System.Text.StringBuilder(inner.Length);
+            for (var i = 0; i < inner.Length; i++)
+                if (!removed[i]) remainder.Append(inner[i]);
+            var unknownName = remainder.ToString().Trim();
             if (scopeOnly)
             {
-                error = new(ErrorKind.UnknownSelector, workingPart);
+                error = new(ErrorKind.UnknownSelector, unknownName);
                 return false;
             }
-
-            var charterHit = TryResolveCharterPrecise(workingPart, knownCharters, out var charterPreciseSel);
-            var artistHit  = TryResolveArtist(workingPart, knownArtists, out var artistSel);
-
-            if (charterHit && artistHit)
-            {
-                selectors.Add(new Selector.CharterOrArtist(workingPart));
-            }
-            else if (charterHit)
-            {
-                selectors.Add(charterPreciseSel!);
-            }
-            else if (artistHit)
-            {
-                selectors.Add(artistSel!);
-            }
-            else
-            {
-                // catch-all：把剩余部分当 charter 接收，由 handler 在筛选时报 0 首。
-                selectors.Add(new Selector.Charter(workingPart));
-            }
+            selectors.Add(new Selector.Charter(unknownName));
         }
 
         if (selectors.Count == 0)
@@ -1090,6 +1061,14 @@ public static class PlateData
 
         query = new Query(selectors, threshold, levelIdxes);
         return true;
+
+        string MaskToken(string source, int start, int length)
+        {
+            var chars = source.ToCharArray();
+            Array.Fill(chars, ' ', start, length);
+            Array.Fill(removed, true, start, length);
+            return new string(chars);
+        }
 
         bool TryExtractDifficulties(
             string source,
@@ -1187,17 +1166,21 @@ public static class PlateData
             var builder = new System.Text.StringBuilder(source.Length);
             for (var i = 0; i < source.Length; i++)
             {
-                if (!remove[i]) builder.Append(source[i]);
+                builder.Append(remove[i] ? ' ' : source[i]);
             }
 
             explicitLevels = levels.ToArray();
-            remaining = builder.ToString().Trim();
+            remaining = builder.ToString();
             parseError = null;
             return true;
 
             void MarkRemoved(int start, int length)
             {
-                for (var i = start; i < start + length; i++) remove[i] = true;
+                for (var i = start; i < start + length; i++)
+                {
+                    remove[i] = true;
+                    removed[i] = true;
+                }
             }
         }
 
@@ -1289,60 +1272,169 @@ public static class PlateData
         ParseError InvalidConnectorError() =>
             new(ErrorKind.InvalidDifficulty, "连接符两侧必须是谱面难度");
 
-        bool TryExtractKnownName(string input, out int start, out int length, out Selector? selector)
+        string ExtractNames(string input)
         {
-            start = -1;
-            length = 0;
-            selector = null;
-
-            if (!IsReservedStandaloneToken(input) && TryCreateKnownNameSelector(input, out selector))
+            var explicitConstants = System.Text.RegularExpressions.Regex.Matches(input, @"定数((?:1[0-5]|[1-9])\.\d)")
+                .Where(match => IsCompleteNumberToken(input, match.Groups[1].Index, match.Groups[1].Length))
+                .Select(match => (Start: match.Index, Length: match.Length)).ToArray();
+            if (explicitConstants.Length == 0 && !IsReservedStandaloneToken(input) && TryCreateKnownNameSelector(input, out var wholeName))
             {
-                start = 0;
-                length = input.Length;
+                selectors.Add(wholeName!);
+                return MaskToken(input, 0, input.Length);
+            }
+
+            var names = knownCharters.Concat(CharterIdentityMap.Keys).Concat(knownArtists)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            var starts = new bool[input.Length + 1];
+            var ends = new bool[input.Length + 1];
+            starts[0] = ends[input.Length] = true;
+            for (var i = 0; i < input.Length; i++)
+                if (char.IsWhiteSpace(input[i]))
+                {
+                    ends[i] = true;
+                    starts[i + 1] = true;
+                }
+
+            var candidates = new HashSet<(int Start, int Length, string? Alias)>();
+            var completeNames = new HashSet<(int Start, int Length)>();
+            var fields = new List<(int Start, int Length)>();
+            var difficulties = new List<(int Start, int Length)>();
+            foreach (var name in names)
+                if (!IsReservedStandaloneToken(name)) AddOccurrences(name, null);
+            foreach (var alias in CharterAliasMap.Keys) AddOccurrences(alias, alias);
+
+            foreach (var entry in ThresholdEntries) AddFieldOccurrences(entry.Token, true);
+            foreach (var token in DifficultyAliasMap.Keys) AddFieldOccurrences(token, true, true);
+            for (var i = 0; i < input.Length; i++)
+                if (TryMatchDifficultyRange(input, i, out var rangeLength, out _, out _))
+                    AddFieldBoundary(i, rangeLength);
+            var previousEnd = -1;
+            foreach (var difficulty in difficulties.OrderBy(d => d.Start).ThenByDescending(d => d.Length))
+            {
+                if (previousEnd >= 0 && difficulty.Start > previousEnd)
+                {
+                    var gap = input.Substring(previousEnd, difficulty.Start - previousEnd).Trim();
+                    if (gap.All(c => char.IsWhiteSpace(c) || c is '/' or '／' or '、' or '或' or '-' or '－' or ',' or '，' or '+'))
+                        AddFieldBoundary(previousEnd, difficulty.Start - previousEnd);
+                }
+                previousEnd = Math.Max(previousEnd, difficulty.Start + difficulty.Length);
+            }
+            foreach (var token in PlateVersionMap.Keys)
+            {
+                AddFieldOccurrences(token, false);
+                AddFieldOccurrences(token + OptionalDaiSuffix, false);
+            }
+            foreach (var token in GenreAliasMap.Keys.Concat(GenreAliasMap.Values).Append(RevivalGenreToken))
+                AddFieldOccurrences(token, false);
+            foreach (var match in System.Text.RegularExpressions.Regex.Matches(input, @"(?:定数)?((?:1[0-5]|[1-9])\.\d)|(1[0-5]|[1-9])\+?").Cast<System.Text.RegularExpressions.Match>())
+            {
+                var number = match.Groups[1].Success ? match.Groups[1] : match.Groups[2];
+                if (IsCompleteNumberToken(input, number.Index, number.Length)) AddFieldBoundary(match.Index, match.Length);
+            }
+
+            var foldedInput = input.ToUpperInvariant();
+            var firstChars = Enumerable.Range(0, input.Length).Where(i => starts[i])
+                .Select(i => foldedInput[i]).ToHashSet();
+            var longest = new int[input.Length];
+            var lengths = new int[input.Length + 1];
+            foreach (var name in names)
+            {
+                var foldedName = name.ToUpperInvariant();
+                if (!foldedName.Any(firstChars.Contains)) continue;
+                Array.Clear(lengths);
+                for (var j = foldedName.Length - 1; j >= 0; j--)
+                    for (var i = 0; i < input.Length; i++)
+                    {
+                        lengths[i] = foldedInput[i] == foldedName[j] ? lengths[i + 1] + 1 : 0;
+                        if (starts[i] && lengths[i] > longest[i]) longest[i] = lengths[i];
+                    }
+            }
+
+            for (var start = 0; start < input.Length; start++)
+                if (starts[start])
+                {
+                    for (var length = longest[start]; length > 0; length--)
+                        if (ends[start + length] && AddCandidate(start, length, null)) break;
+                }
+
+            var occupied = new bool[input.Length];
+            var result = input;
+            foreach (var candidate in candidates.OrderByDescending(c => c.Length).ThenByDescending(c => c.Start)
+                         .ThenByDescending(c => c.Alias is not null))
+            {
+                if (Enumerable.Range(candidate.Start, candidate.Length).Any(i => occupied[i])) continue;
+                if (candidate.Alias is null && fields.Any(f => f.Start <= candidate.Start &&
+                    f.Start + f.Length >= candidate.Start + candidate.Length)) continue;
+                if (candidate.Alias is null && candidate.Length < 3 &&
+                    !completeNames.Contains((candidate.Start, candidate.Length)) && !HasOnlyFieldsOutside(candidate.Start, candidate.Length)) continue;
+                var name = input.Substring(candidate.Start, candidate.Length);
+                Selector? selector;
+                if (candidate.Alias is { } alias)
+                    selector = new Selector.CharterAlias(CharterAliasMap[alias], CharterAliasExclude.GetValueOrDefault(alias, []), name);
+                else if (!TryCreateKnownNameSelector(name, out selector)) continue;
+                selectors.Add(selector!);
+                Array.Fill(occupied, true, candidate.Start, candidate.Length);
+                result = MaskToken(result, candidate.Start, candidate.Length);
+            }
+            return result;
+
+            void AddFieldBoundary(int start, int length)
+            {
+                ends[start] = true;
+                starts[start + length] = true;
+                fields.Add((start, length));
+            }
+
+            void AddOccurrences(string token, string? alias)
+            {
+                for (var at = input.IndexOf(token, StringComparison.OrdinalIgnoreCase); at >= 0;
+                     at = input.IndexOf(token, at + 1, StringComparison.OrdinalIgnoreCase))
+                    if (AddCandidate(at, token.Length, alias))
+                    {
+                        starts[at] = true;
+                        ends[at + token.Length] = true;
+                        if (alias is null) completeNames.Add((at, token.Length));
+                    }
+            }
+
+            bool AddCandidate(int start, int length, string? alias)
+            {
+                while (length > 0 && char.IsWhiteSpace(input[start])) { start++; length--; }
+                while (length > 0 && char.IsWhiteSpace(input[start + length - 1])) length--;
+                if (length == 0 || explicitConstants.Any(c => c.Start < start + length && c.Start + c.Length > start)) return false;
+                if (alias is null && (IsReservedStandaloneToken(input.Substring(start, length)) ||
+                    (length == 1 && input[start] is '/' or '／' or '、' or '或' or '-' or '－' or ',' or '，' or '+') ||
+                    (start + length < input.Length && input[start + length] == OptionalDaiSuffix[0]))) return false;
+                candidates.Add((start, length, alias));
                 return true;
             }
 
-            var candidate = knownCharters.Select(name => (Name: name, IsCharter: true, IsArtist: false))
-                .Concat(CharterIdentityMap.Keys.Select(name => (Name: name, IsCharter: true, IsArtist: false)))
-                .Concat(knownArtists.Select(name => (Name: name, IsCharter: false, IsArtist: true)))
-                .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(group =>
+            bool HasOnlyFieldsOutside(int start, int length)
+            {
+                for (var i = 0; i < input.Length; i++)
                 {
-                    var name = group.Key;
-                    return (
-                        Name: name,
-                        Start: input.LastIndexOf(name, StringComparison.OrdinalIgnoreCase),
-                        IsCharter: group.Any(x => x.IsCharter),
-                        IsArtist: group.Any(x => x.IsArtist));
-                })
-                .Where(x => x.Start >= 0 &&
-                            !IsReservedStandaloneToken(x.Name) &&
-                            !IsInsideCharterAlias(x.Start, x.Name.Length) &&
-                            (x.Start + x.Name.Length >= input.Length ||
-                             input[x.Start + x.Name.Length] != OptionalDaiSuffix[0]))
-                .OrderByDescending(x => x.Name.Length)
-                .ThenByDescending(x => x.Start)
-                .FirstOrDefault();
+                    if (occupied[i] || char.IsWhiteSpace(input[i]) || (i >= start && i < start + length)) continue;
+                    if (fields.Any(f => i >= f.Start && i < f.Start + f.Length)) continue;
+                    if (candidates.Any(c => (c.Alias is not null || completeNames.Contains((c.Start, c.Length))) &&
+                        i >= c.Start && i < c.Start + c.Length)) continue;
+                    return false;
+                }
+                return true;
+            }
 
-            if (candidate.Name is null) return false;
-
-            start = candidate.Start;
-            length = candidate.Name.Length;
-            selector = candidate.IsCharter && candidate.IsArtist
-                ? new Selector.CharterOrArtist(input.Substring(start, length))
-                : candidate.IsCharter
-                    ? new Selector.Charter(input.Substring(start, length))
-                    : new Selector.Artist(input.Substring(start, length));
-            return true;
-
-            bool IsInsideCharterAlias(int nameStart, int nameLength) =>
-                CharterAliasMap.Keys.Any(alias =>
+            void AddFieldOccurrences(string token, bool bounded, bool difficulty = false)
+            {
+                for (var at = input.IndexOf(token, StringComparison.OrdinalIgnoreCase); at >= 0;
+                     at = input.IndexOf(token, at + 1, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (alias.Length <= nameLength) return false;
-                    var aliasStart = input.IndexOf(alias, Math.Max(0, nameStart + nameLength - alias.Length),
-                        StringComparison.OrdinalIgnoreCase);
-                    return aliasStart >= 0 && aliasStart <= nameStart;
-                });
+                    if (bounded && token.Any(IsAsciiLetter) &&
+                        ((at > 0 && IsAsciiLetter(input[at - 1])) ||
+                         (at + token.Length < input.Length && IsAsciiLetter(input[at + token.Length])))) continue;
+                    AddFieldBoundary(at, token.Length);
+                    if (difficulty) difficulties.Add((at, token.Length));
+                }
+            }
 
             bool TryCreateKnownNameSelector(string name, out Selector? knownNameSelector)
             {
@@ -1374,19 +1466,17 @@ public static class PlateData
                 return true;
             }
 
-            return TryResolvePlate(candidate, out _, out var plateError) || plateError is not null;
+            return TryResolvePlate(candidate, out _);
         }
     }
 
     /// <summary>
     ///     尝试把 selectorPart 解析为代字。允许末尾可选"代"后缀（仅对版本代字生效）。
-    ///     返回值：true = 命中代字；false + plateErr != null = 命中已知"不支持"代字；
-    ///     false + plateErr == null = 不是代字，让下一阶段尝试。
+    ///     返回 true 表示命中代字，否则由下一阶段解析。
     /// </summary>
-    private static bool TryResolvePlate(string selectorPart, out Selector? selector, out ParseError? plateErr)
+    private static bool TryResolvePlate(string selectorPart, out Selector? selector)
     {
         selector = null;
-        plateErr = null;
 
         // 首先尝试不剥"代"
         var raw = selectorPart;
@@ -1394,11 +1484,6 @@ public static class PlateData
         {
             selector = CreatePlateSelector(raw, versions);
             return true;
-        }
-        if (BlockedPlateKanji.Contains(raw))
-        {
-            plateErr = new(ErrorKind.UnsupportedPlate, raw);
-            return false;
         }
 
         // 然后尝试剥末尾"代"
@@ -1409,11 +1494,6 @@ public static class PlateData
             {
                 selector = CreatePlateSelector(stripped, versions2);
                 return true;
-            }
-            if (BlockedPlateKanji.Contains(stripped))
-            {
-                plateErr = new(ErrorKind.UnsupportedPlate, stripped);
-                return false;
             }
         }
 
@@ -1550,12 +1630,11 @@ public static class PlateData
     /// <summary>
     ///     找 workingPart 内"最佳"Plate kanji 匹配。优先级 (length DESC, rightmost) —
     ///     即更长的匹配（带"代"后缀的双字版本）优先；同长度时取靠右的位置。
-    ///     BlockedPlateKanji 命中且比有效 kanji 更靠右时报错。
     /// </summary>
     private static bool TryFindRightmostPlateInString(
-        string s, out int start, out int length, out Selector? selector, out ParseError? plateErr)
+        string s, out int start, out int length, out Selector? selector)
     {
-        start = -1; length = 0; selector = null; plateErr = null;
+        start = -1; length = 0; selector = null;
 
         int bestStart = -1, bestLen = 0;
         string? bestKanji = null;
@@ -1572,21 +1651,6 @@ public static class PlateData
             {
                 bestStart = idx; bestLen = len; bestKanji = kanji; bestVersions = versions;
             }
-        }
-
-        int blockedStart = -1;
-        string? blockedKanji = null;
-        foreach (var bk in BlockedPlateKanji)
-        {
-            var idx = s.LastIndexOf(bk, StringComparison.Ordinal);
-            if (idx > blockedStart) { blockedStart = idx; blockedKanji = bk; }
-        }
-
-        // 若被屏蔽 kanji 出现得比任何有效 kanji 更右 → 立即报错（避免悄悄走 catch-all）
-        if (blockedStart > bestStart)
-        {
-            plateErr = new(ErrorKind.UnsupportedPlate, blockedKanji!);
-            return false;
         }
 
         if (bestStart < 0) return false;

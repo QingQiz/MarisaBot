@@ -48,13 +48,13 @@ public class MaiMaiDxCharterAliasRegressionTest
     [TestCase("Sta神完成表", "Sta", new[] { 3, 4 }, null)]
     [TestCase("sta14MST神完成表", "sta", new[] { 3 }, "14")]
     [TestCase("MSTSta14神完成表", "Sta", new[] { 3 }, "14")]
-    public void StandaloneStaStillParsesAndSelectsItsOwnSongs(
+    public void StandaloneStaUsesBothSubstringDimensionsWithExternalFields(
         string raw, string artist, int[] levelIdxes, string? levelLabel)
     {
         var query = MustParse(raw, Charters, Artists);
         Assert.Multiple(() =>
         {
-            Assert.That(query.Selectors.OfType<PlateData.Selector.Artist>().Select(x => x.Name), Is.EqualTo(new[] { artist }));
+            Assert.That(query.Selectors.OfType<PlateData.Selector.CharterOrArtist>().Select(x => x.Name), Is.EqualTo(new[] { artist }));
             Assert.That(query.Selectors, Has.None.InstanceOf<PlateData.Selector.CharterAlias>());
             Assert.That(query.Threshold.DisplayName, Is.EqualTo("AP"));
             Assert.That(query.LevelIdxes, Is.EqualTo(levelIdxes));
@@ -63,7 +63,7 @@ public class MaiMaiDxCharterAliasRegressionTest
             Assert.That(query.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo(levelLabel));
 
         var songs = new[] { CreateSong(1, "mai-Star", "Other artist"), CreateSong(2, "Jack", "Sta") };
-        Assert.That(PlateData.SelectCharts(query, songs).Select(x => x.Song.Id).Distinct(), Is.EqualTo(new[] { 2L }));
+        Assert.That(PlateData.SelectCharts(query, songs).Select(x => x.Song.Id).Distinct(), Is.EquivalentTo(new[] { 1L, 2L }));
     }
 
     [TestCase("Revo", "Revo")]
