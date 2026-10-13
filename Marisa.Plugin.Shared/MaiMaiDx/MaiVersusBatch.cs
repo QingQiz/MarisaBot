@@ -1,3 +1,5 @@
+using Marisa.Plugin.Shared.Versus;
+
 namespace Marisa.Plugin.Shared.MaiMaiDx;
 
 /// <summary>批量对战的内存模型和前端分页投影。</summary>
@@ -64,7 +66,7 @@ public sealed class MaiVersusBatch
     {
         var leftScore = CreateScore(left.Scores, chart.Song, chart.LevelIdx);
         var rightScore = CreateScore(right.Scores, chart.Song, chart.LevelIdx);
-        var outcome = Compare(leftScore, rightScore);
+        var outcome = VersusRules.Compare(leftScore.Achievement, rightScore.Achievement);
 
         return new Row(
             chart.Song.Id,
@@ -97,15 +99,6 @@ public sealed class MaiVersusBatch
             score.DxScore,
             score.Fc ?? string.Empty,
             score.Fs ?? string.Empty);
-    }
-
-    private static string Compare(ScoreView left, ScoreView right)
-    {
-        if (left.State == State.Unplayed && right.State == State.Unplayed) return Outcome.Unplayed;
-        if (left.State == State.Unplayed) return Outcome.Right;
-        if (right.State == State.Unplayed) return Outcome.Left;
-        if (left.Achievement == right.Achievement) return Outcome.Draw;
-        return left.Achievement > right.Achievement ? Outcome.Left : Outcome.Right;
     }
 
     public sealed record Player(

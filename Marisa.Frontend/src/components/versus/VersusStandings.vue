@@ -7,7 +7,7 @@
             <span class="col-label">参与</span>
         </header>
         <div v-for="(row, index) in standings" :key="index" class="standing" :class="{left: row.Left}">
-            <span class="standing-place" :style="{color: row.Left ? undefined : placeColor(placeOf(row))}">{{ placeOf(row) }}</span>
+            <span class="standing-place" :style="{color: row.Left ? undefined : placeColor(placeOf(row))}">{{ placeOf(row) ?? '—' }}</span>
             <span class="standing-name"><span>{{ row.Name }}</span><small v-if="row.Left">已退出</small></span>
             <div class="rate-track"><div class="rate-fill" :style="{width: percent(row) + '%'}"></div></div>
             <b class="rate">{{ row.Rate == null ? '—' : percent(row) }}<small v-if="row.Rate != null">%</small></b>
@@ -18,12 +18,15 @@
 </template>
 
 <script setup lang="ts">
-import {formatPoints, placeColor, type VersusStanding} from '@/components/maimai/utils/versus'
+import {formatPoints, placeColor, type VersusStanding} from '@/components/versus/utils'
 
-const props = defineProps<{standings: VersusStanding[]; rounds: number; accent: string}>()
+const props = defineProps<{standings: VersusStanding[]; rounds: number; accent: string; unrankedEmpty?: boolean}>()
 
 function percent(row: VersusStanding) { return Math.round((row.Rate ?? 0) * 100) }
-function placeOf(row: VersusStanding) { return 1 + props.standings.filter(x => (x.Rate ?? -1) > (row.Rate ?? -1)).length }
+function placeOf(row: VersusStanding) {
+    if (props.unrankedEmpty && row.Matchups === 0) return null
+    return 1 + props.standings.filter(x => (x.Rate ?? -1) > (row.Rate ?? -1)).length
+}
 </script>
 
 <style scoped lang="postcss">

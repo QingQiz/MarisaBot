@@ -1,4 +1,4 @@
-﻿using System.Runtime.Loader;
+using System.Runtime.Loader;
 using Marisa.Configuration;
 using NLog;
 using PuppeteerSharp;
@@ -248,6 +248,14 @@ public static class WebApi
     {
         return await RenderUrl("/chunithm/song?id=" + id);
     }
+
+    public static Task<string> ChunithmVersus(Guid id) => RenderUrl("/chunithm/versus?id=" + id);
+
+    public static Task<string> ChunithmVersusBatch(Guid id) => RenderUrl("/chunithm/versus-batch?id=" + id);
+
+    public static Task<string> ChunithmVersusMulti(Guid id) => RenderUrl("/chunithm/versus-multi?id=" + id);
+
+    public static Task<string> ChunithmVersusMultiBatch(Guid id) => RenderUrl("/chunithm/versus-multi-batch?id=" + id);
 
     public static async Task<string> ChunithmSummary(Guid contextId, string sort = "")
     {

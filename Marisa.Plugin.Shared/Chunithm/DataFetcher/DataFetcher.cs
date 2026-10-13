@@ -1,4 +1,4 @@
-﻿using Flurl.Http;
+using Flurl.Http;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Newtonsoft.Json;
 
@@ -17,6 +17,8 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
         2027, 2039, 2075, 2076, 2095, 2141, 2211, 2212, 2213, 921
     ];
 
+    internal static bool IsDeletedSong(long id) => DeletedSongs.Contains(id);
+
     protected SongDb<ChunithmSong> SongDb { get; } = songDb;
 
     public virtual List<ChunithmSong> GetSongList()
@@ -32,6 +34,10 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
 
     /// <summary>完整成绩（汇总 / OP 用），目标同样来自 <see cref="ResolvedPlayer" />。</summary>
     public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player);
+
+    /// <summary>对战只使用目标自己授权的完整成绩；公开 B30/N20 不能代表未游玩状态。</summary>
+    public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player) =>
+        throw new NotSupportedException("该查分器不支持 chu vs，请先 bind 改绑水鱼或落雪");
 
     /// <summary>
     ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。

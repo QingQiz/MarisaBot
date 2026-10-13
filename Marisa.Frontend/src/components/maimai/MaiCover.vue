@@ -1,18 +1,19 @@
 <template>
     <div class="cover-frame shrink-0" :style="{ borderRadius: frameRadius + 'px' }">
-        <img :src="src" @error="src = COVER_FALLBACK" alt="" class="block object-cover"
+        <img :src="src" @error="src = fallback" alt="" class="block object-cover"
              :style="{ width: size + 'px', height: size + 'px', borderRadius: imgRadius + 'px' }">
     </div>
 </template>
 
 <script setup lang="ts">
-import {ref, watchEffect} from 'vue'
+import {computed, ref, watchEffect} from 'vue'
 import {coverSrcOf, COVER_FALLBACK} from '@/components/maimai/utils/song_card'
 
-const props = defineProps<{songId: number; size: number; frameRadius: number; imgRadius: number}>()
+const props = withDefaults(defineProps<{songId: number; size: number; frameRadius: number; imgRadius: number; game?: 'maimai' | 'chunithm'}>(), {game: 'maimai'})
 
 const src = ref('')
-watchEffect(() => { src.value = coverSrcOf(props.songId) })
+const fallback = computed(() => props.game === 'maimai' ? COVER_FALLBACK : '/assets/chunithm/cover/0.png')
+watchEffect(() => { src.value = props.game === 'maimai' ? coverSrcOf(props.songId) : `/assets/chunithm/cover/${props.songId}.png` })
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>

@@ -12,6 +12,10 @@ public class MarisaPluginTrigger : Attribute
 
     public readonly PluginTrigger Trigger;
 
+    private readonly MethodInfo? _instanceTrigger;
+    private readonly Type? _instanceTriggerType;
+    private readonly MessageType _target;
+
 
     /// <summary>
     /// !!!只有使用预定义的触发器时才会使用这个构造函数!!!
@@ -31,6 +35,7 @@ public class MarisaPluginTrigger : Attribute
     /// <param name="target">触发器面对的消息类型</param>
     public MarisaPluginTrigger(Type triggerType, string triggerName, MessageType target = (MessageType)0b11)
     {
+        _target = target;
         PluginTrigger t;
         const BindingFlags bindingFlags = BindingFlags.Default | BindingFlags.NonPublic | BindingFlags.Instance |
                                           BindingFlags.Static | BindingFlags.Public;
@@ -53,6 +58,14 @@ public class MarisaPluginTrigger : Attribute
         {
             var del = triggerType.GetMethod(triggerName, bindingFlags)!;
 
+            if (!del.IsStatic)
+            {
+                _instanceTrigger = del;
+                _instanceTriggerType = triggerType;
+                Trigger = (_, _) => throw new InvalidOperationException("Instance triggers require the current plugin; use Matches.");
+                return;
+            }
+
             t = (a, b) => (bool)del.Invoke(triggerType, new object[] { a, b })!;
         }
         else
@@ -61,6 +74,16 @@ public class MarisaPluginTrigger : Attribute
         }
 
         Trigger = (message, provider) => ((message.Type & target) != 0 || message.Type == 0) && t(message, provider);
+    }
+
+    /// <summary>评估触发器；实例方法在当前插件上调用，静态触发器沿用原委托。</summary>
+    public bool Matches(MarisaPluginBase plugin, Message message, IServiceProvider provider)
+    {
+        if (_instanceTrigger == null) return Trigger(message, provider);
+        if ((message.Type & _target) == 0 && message.Type != 0) return false;
+        if (!_instanceTriggerType!.IsInstanceOfType(plugin)) return false;
+
+        return (bool)_instanceTrigger.Invoke(plugin, new object[] { message, provider })!;
     }
 
     // 这里提供一些常用的 trigger

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Shared.Chunithm;
 
@@ -13,6 +13,29 @@ public class ChunithmScore
     [JsonProperty("fc")]
     public string Fc { get; set; }
 
+    // 水鱼旧字段可能只有 chain；保留它，但不能因此虚构一个 FC/AJ。
+    private string? _fullChain;
+
+    [JsonProperty("full_chain")]
+    public string FullChain
+    {
+        get => _fullChain ?? (Fc?.StartsWith("fullchain", StringComparison.OrdinalIgnoreCase) == true ? Fc : "");
+        set => _fullChain = value ?? "";
+    }
+
+    [JsonIgnore]
+    public string FullCombo => Fc?.ToLowerInvariant() switch
+    {
+        "fc" or "fullcombo" => "fullcombo",
+        "aj" or "alljustice" => "alljustice",
+        "ajc" or "alljusticecritical" => "alljusticecritical",
+        "fullchain" or "fullchain2" => "",
+        _ => Fc ?? ""
+    };
+
+    [JsonProperty("clear")]
+    public string? Clear { get; set; }
+
     /**
      * 13+,14,...
      */
@@ -20,7 +43,14 @@ public class ChunithmScore
     public string Level { get; set; }
 
     [JsonProperty("level_index")]
-    public long LevelIndex { get; set; }
+    public long LevelIndex
+    {
+        get => _levelIndex;
+        set { _levelIndex = value; HasLevelIndex = true; }
+    }
+
+    private long _levelIndex;
+    internal bool HasLevelIndex { get; private set; }
 
     /**
      * Basic,Advanced,Expert,Master,...
@@ -40,7 +70,14 @@ public class ChunithmScore
     }
 
     [JsonProperty("score")]
-    public int Achievement { get; set; }
+    public int Achievement
+    {
+        get => _achievement;
+        set { _achievement = value; HasScore = true; }
+    }
+
+    private int _achievement;
+    internal bool HasScore { get; private set; }
 
     [JsonProperty("title")]
     public string Title { get; set; }

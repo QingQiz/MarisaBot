@@ -1,12 +1,14 @@
-﻿using Marisa.Backend.OneBot;
+using Marisa.Backend.OneBot;
 using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
+using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.Database;
 using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -128,11 +130,8 @@ public class DispatcherTest
     [TestCase("BLACKBOX")]
     [TestCase("blackbox")]
     [TestCase("B.M.S.")]
-    [TestCase("B 中文关键词")]
-    [TestCase("B14")]
     [TestCase("NULCTRL")]
     [TestCase("niconico")]
-    [TestCase("N 5")]
     [TestCase("BASIC")]
     [TestCase("x")]
     public void VersusSongAfterMentionPreservesWholeQuery(string query)
@@ -199,6 +198,189 @@ public class DispatcherTest
             Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(MaiMaiDx) &&
                 x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
         }
+    }
+
+    [TestCase("chu vs", "", "SongVersus", "")]
+    [TestCase("chuvsn20", "", "SongVersusRandom", "20")]
+    [TestCase("chu vs n 5 ULTIMA", "", "SongVersusRandom", "5 ULTIMA")]
+    [TestCase("chu vs b 14+", "", "SongVersusBatch", "14+")]
+    [TestCase("chuvsbVERSE14+", "", "SongVersusBatch", "VERSE14+")]
+    [TestCase("chu vs 开房", "", "SongVersusRoom", "")]
+    [TestCase("chuvs开房n5", "", "SongVersusRoomRandom", "5")]
+    [TestCase("chu vs 开房 b VERSE 14+", "", "SongVersusRoomBatch", "VERSE 14+")]
+    [TestCase("chu vs", "BLACKBOX", "SongVersus", "BLACKBOX")]
+    [TestCase("chu vs BLACKBOX", "", "SongVersus", "BLACKBOX")]
+    [TestCase("chu vs", "NULCTRL", "SongVersus", "NULCTRL")]
+    [TestCase("chu vs BASIC", "", "SongVersus", "BASIC")]
+    [TestCase("chu vs 开房", "BASIC", "SongVersusRoom", "BASIC")]
+    [TestCase("chu vs", "n 5", "SongVersusRandom", "5")]
+    [TestCase("chu vs", "B 14+", "SongVersusBatch", "14+")]
+    [TestCase("chu vs", "N 5", "SongVersusRandom", "5")]
+    [TestCase("chu vs", "B.M.S.", "SongVersus", "B.M.S.")]
+    [TestCase("chu vs", "niconico", "SongVersus", "niconico")]
+    [TestCase("chu vs NULCTRL", "", "SongVersus", "NULCTRL")]
+    [TestCase("chu vs B.M.S.", "", "SongVersus", "B.M.S.")]
+    [TestCase("chu vs niconico", "", "SongVersus", "niconico")]
+    [TestCase("chu vs 开房", "B 14+", "SongVersusRoomBatch", "14+")]
+    [TestCase("chu vs 开房", "N 5", "SongVersusRoomRandom", "5")]
+    [TestCase("chu vs 开房", "BLACKBOX", "SongVersusRoom", "BLACKBOX")]
+    [TestCase("chu vs 开房", "NULCTRL", "SongVersusRoom", "NULCTRL")]
+    [TestCase("chu vs 开房 BLACKBOX", "", "SongVersusRoom", "BLACKBOX")]
+    [TestCase("chu vs 开房 NULCTRL", "", "SongVersusRoom", "NULCTRL")]
+    [TestCase("chuvsn", "", "SongVersusRandom", "")]
+    [TestCase("chuvsb", "", "SongVersusBatch", "")]
+    [TestCase("chuvs开房n", "", "SongVersusRoomRandom", "")]
+    [TestCase("chuvs开房b", "", "SongVersusRoomBatch", "")]
+    public void ChunithmVersusRoutesWithoutTruncatingSongs(string beforeMention, string afterMention, string method, string command)
+    {
+        var message = CreateMessage(new MessageDataText(beforeMention), new MessageDataAt(123456),
+            new MessageDataText(afterMention.Length == 0 ? "" : $" {afterMention}")) with { Type = MessageType.GroupMessage };
+        var dispatched = _dispatcher.Dispatch(message).Single(x => x.Plugin.GetType() == typeof(Chunithm));
+        Assert.Multiple(() =>
+        {
+            Assert.That(dispatched.Method.Name, Is.EqualTo(method));
+            Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(command));
+            Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }));
+        });
+    }
+
+    [TestCase("n5", "Random", "5")]
+    [TestCase("N 5", "Random", "5")]
+    [TestCase("n5 14+", "Random", "5 14+")]
+    [TestCase("n invalid", "Random", "invalid")]
+    [TestCase("n", "Random", "")]
+    [TestCase("b14", "Batch", "14")]
+    [TestCase("B 14+", "Batch", "14+")]
+    [TestCase("b invalid", "Batch", "invalid")]
+    [TestCase("B 中文关键词", "Batch", "中文关键词")]
+    [TestCase("b", "Batch", "")]
+    public void VersusSubcommandsWorkOnEitherSideOfThePlayers(string query, string suffix, string arguments)
+    {
+        foreach (var (prefix, plugin) in new[] { ("mai", typeof(MaiMaiDx)), ("chu", typeof(Chunithm)) })
+        foreach (var room in new[] { false, true })
+        foreach (var mentionPosition in new[] { 0, 1, 2 })
+        {
+            var command = $"{prefix}vs{(room ? "开房" : "")}";
+            var message = mentionPosition switch
+            {
+                0 => CreateMessage(new MessageDataText(command), new MessageDataAt(123456), new MessageDataAt(654321), new MessageDataText(query)),
+                1 => CreateMessage(new MessageDataText($"{command}{query[0]}"), new MessageDataAt(123456), new MessageDataAt(654321), new MessageDataText(query[1..].TrimStart())),
+                _ => CreateMessage(new MessageDataText($"{command}{query}"), new MessageDataAt(123456), new MessageDataAt(654321))
+            };
+            message = message with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(message).Single(result => result.Plugin.GetType() == plugin);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo($"SongVersus{(room ? "Room" : "")}{suffix}"), message.MessageChain!.ToString());
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(arguments));
+                Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L, 654321L }));
+            });
+        }
+    }
+
+    [TestCase("niconico")]
+    [TestCase("NULCTRL")]
+    [TestCase("BLACKBOX")]
+    [TestCase("brued")]
+    [TestCase("B.M.S.")]
+    [TestCase("bUnknownSong")]
+    [TestCase("nUnknownSong")]
+    public void VersusSongNamesAfterPlayersKeepTheirInitialNOrB(string query)
+    {
+        foreach (var (prefix, plugin) in new[] { ("mai", typeof(MaiMaiDx)), ("chu", typeof(Chunithm)) })
+        foreach (var room in new[] { false, true })
+        {
+            var message = CreateMessage(new MessageDataText($"{prefix}vs{(room ? "开房" : "")}"),
+                new MessageDataAt(123456), new MessageDataText(query)) with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(message).Single(result => result.Plugin.GetType() == plugin);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo(room ? "SongVersusRoom" : "SongVersus"));
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(query));
+            });
+        }
+    }
+
+    [TestCase(MessageType.GroupMessage, true)]
+    [TestCase(MessageType.FriendMessage, false)]
+    [TestCase(MessageType.TempMessage, false)]
+    [TestCase(MessageType.StrangerMessage, false)]
+    public void ChunithmVersusOnlyDispatchesInGroups(MessageType type, bool expected)
+    {
+        foreach (var command in new[] { "chu vs BASIC", "chuvsn5", "chu vs b 14+",
+                     "chu vs 开房", "chuvs开房n5", "chu vs 开房 b 14+" })
+        {
+            var message = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = type };
+            Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(Chunithm) &&
+                x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
+        }
+    }
+
+    [TestCase("彩代14+", true, false)]
+    [TestCase("VERSE14+", false, true)]
+    [TestCase("ULTIMA14+", false, true)]
+    public void SharedBatchTriggerUsesTheCurrentGameScope(string scope, bool maiMatches, bool chuMatches)
+    {
+        var trigger = new MarisaPluginTrigger(typeof(ICanBattleWithOthers), nameof(ICanBattleWithOthers.VersusBatchTrigger), MessageType.GroupMessage);
+        var plugins = _provider.GetServices<MarisaPluginBase>().ToArray();
+        var mai = plugins.Single(plugin => plugin.GetType() == typeof(MaiMaiDx));
+        var chu = plugins.Single(plugin => plugin.GetType() == typeof(Chunithm));
+        var message = CreateMessage(new MessageDataText($"mai vs b{scope}")) with
+        {
+            Type = MessageType.GroupMessage,
+            Command = $"b{scope}".AsMemory()
+        };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(trigger.Matches(mai, message, _provider), Is.EqualTo(maiMatches));
+            Assert.That(trigger.Matches(chu, message, _provider), Is.EqualTo(chuMatches));
+        });
+
+        foreach (var (prefix, pluginType, matches) in new[]
+                 {
+                     ("mai", typeof(MaiMaiDx), maiMatches),
+                     ("chu", typeof(Chunithm), chuMatches)
+                 })
+        foreach (var room in new[] { false, true })
+        {
+            var command = $"{prefix} vs {(room ? "开房" : "")}b{scope}";
+            var request = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(request).Single(result => result.Plugin.GetType() == pluginType);
+            var expectedMethod = room
+                ? matches ? nameof(ICanBattleWithOthers.SongVersusRoomBatch) : nameof(ICanBattleWithOthers.SongVersusRoom)
+                : matches ? nameof(ICanBattleWithOthers.SongVersusBatch) : nameof(ICanBattleWithOthers.SongVersus);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo(expectedMethod), command);
+                Assert.That(dispatched.Method.DeclaringType, Is.EqualTo(typeof(ICanBattleWithOthers)), command);
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(matches ? scope : $"b{scope}"), command);
+                Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }), command);
+            });
+        }
+    }
+
+    [Test]
+    public void StaticTriggersInOtherPluginsKeepTheirDispatchBoundaries()
+    {
+        var plainBind = CreateMessage(new MessageDataText("mai bind")) with { Type = MessageType.GroupMessage };
+        var mentionedBind = CreateMessage(new MessageDataText("mai bind"), new MessageDataAt(123456)) with { Type = MessageType.GroupMessage };
+        var validFilter = CreateMessage(new MessageDataText("mai 14+含金量分析")) with { Type = MessageType.GroupMessage };
+        var invalidFilter = CreateMessage(new MessageDataText("mai 15+含金量分析")) with { Type = MessageType.GroupMessage };
+        var online = CreateMessage(new MessageDataBotOnline()) with { Type = MessageType.GroupMessage };
+        var unknown = CreateMessage(new MessageDataUnknown()) with { Type = MessageType.GroupMessage };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_dispatcher.Dispatch(plainBind).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "Bind"), Is.True);
+            Assert.That(_dispatcher.Dispatch(mentionedBind).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "Bind"), Is.False);
+            Assert.That(_dispatcher.Dispatch(validFilter).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "FilteredValueAnalysis"), Is.True);
+            Assert.That(_dispatcher.Dispatch(invalidFilter).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "FilteredValueAnalysis"), Is.False);
+            Assert.That(_dispatcher.Dispatch(online).Any(result => result.Plugin.GetType() == typeof(EventHandler) && result.Method.Name == "Handler"), Is.True);
+            Assert.That(_dispatcher.Dispatch(unknown).Any(result => result.Plugin.GetType() == typeof(EventHandler)), Is.False);
+        });
     }
 
     private void AssertVersusDispatch(string beforeMention, string afterMention, string method, string command)

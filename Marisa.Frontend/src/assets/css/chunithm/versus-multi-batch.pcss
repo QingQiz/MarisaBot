@@ -1,0 +1,164 @@
+/* Give the primary score a full-width line above rank and the award rail. */
+.chu-multi-batch {
+    --chu-mark-width:92px;
+    --matrix-inset:14px;
+}
+.chu-multi-batch .grid-row {
+    grid-template-columns:minmax(340px,1fr) repeat(var(--players),var(--player-column));
+    column-gap:0;
+}
+.chu-multi-batch .scope-line { margin:16px 0 14px; }
+.chu-multi-batch .table-head {
+    align-items:stretch;
+    box-sizing:border-box;
+    padding-inline:1px;
+    margin-bottom:8px;
+}
+.chu-multi-batch .song-label {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:7px;
+    padding:12px 16px 12px 12px;
+    font-size:16px;
+    color:#e7deee;
+}
+.chu-multi-batch .song-label small { font-size:13px; font-weight:400; color:#b8a9c5; }
+.chu-multi-batch .player-head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:32px 34px;
+    align-items:center;
+    justify-items:start;
+    gap:8px 12px;
+    margin:0;
+    padding:12px var(--matrix-inset);
+    border:0;
+    border-top:2px solid var(--place-color);
+    border-bottom:1px solid rgba(255,255,255,.12);
+    border-radius:0;
+    background:rgba(10,8,26,.4);
+}
+.chu-multi-batch .player-head.champion {
+    background:linear-gradient(180deg,rgba(255,215,94,.17),rgba(255,215,94,.06));
+    box-shadow:none;
+}
+.chu-multi-batch .player-name {
+    grid-column:1 / -1;
+    grid-row:1;
+    min-width:0;
+    width:100%;
+    font-size:24px;
+    line-height:32px;
+}
+.chu-multi-batch .player-place { grid-column:1; grid-row:2; font-size:16px; line-height:34px; }
+.chu-multi-batch .player-place b { font-size:30px; }
+.chu-multi-batch .player-points { grid-column:2; grid-row:2; justify-self:end; font-size:14px; }
+.chu-multi-batch .player-points b { font-size:20px; }
+.chu-multi-batch .battle-list { gap:0; }
+.chu-multi-batch .battle-row {
+    min-height:154px;
+    border-top:0;
+    border-radius:0;
+    border-color:rgba(255,255,255,.11);
+}
+.chu-multi-batch .battle-row:first-child { border-top:1px solid rgba(255,255,255,.11); border-radius:8px 8px 0 0; }
+.chu-multi-batch .battle-row:last-child { border-radius:0 0 8px 8px; }
+.chu-multi-batch .battle-row:only-child { border-radius:8px; }
+.chu-multi-batch .song-cell {
+    gap:10px;
+    padding:12px 16px 12px 12px;
+    box-shadow:inset -1px 0 rgba(255,255,255,.09);
+}
+.chu-multi-batch .song-title {
+    font-size:24px;
+    line-height:1.32;
+    display:block;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+.chu-multi-batch .row-number { font-size:14px; }
+.chu-multi-batch .chart-meta { margin-top:7px; }
+.chu-multi-batch .chart-meta>b { font-size:13px; }
+.chu-multi-batch .constant { font-size:14px; }
+.chu-multi-batch .score-cell {
+    position:relative;
+    box-sizing:border-box;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 104px;
+    grid-template-rows:50px 70px;
+    align-content:center;
+    align-items:center;
+    justify-content:stretch;
+    justify-items:start;
+    column-gap:12px;
+    row-gap:10px;
+    margin:0;
+    padding:12px var(--matrix-inset);
+    border:0;
+    border-radius:0;
+}
+.chu-multi-batch .achievement {
+    grid-column:1 / -1;
+    grid-row:1;
+    min-width:0;
+    font-size:38px;
+    line-height:50px;
+    letter-spacing:0;
+    white-space:nowrap;
+}
+.chu-multi-batch .score-badges {
+    grid-column:1;
+    grid-row:2;
+    align-self:stretch;
+    width:100%;
+    height:70px;
+    align-items:center;
+    justify-content:center;
+}
+.chu-multi-batch .rank { display:block; height:30px; max-width:84px; object-fit:contain; }
+.chu-multi-batch .completion-marks {
+    grid-column:2;
+    grid-row:2;
+    box-sizing:border-box;
+    display:flex;
+    width:104px;
+    height:70px;
+    min-height:70px;
+    padding-left:12px;
+    align-items:flex-start;
+}
+/* Missing awards leave their semantic row empty rather than shifting other awards. */
+.chu-multi-batch .completion-marks :deep(.chu-marks) {
+    display:grid;
+    grid-template-columns:var(--chu-mark-width);
+    grid-template-rows:repeat(3,calc(var(--chu-mark-width) * 26 / 134));
+    align-content:start;
+    align-items:start;
+    justify-content:start;
+    justify-items:start;
+    gap:8px;
+    width:var(--chu-mark-width);
+}
+.chu-multi-batch .completion-marks :deep(.mark-slot) { grid-column:1; }
+.chu-multi-batch .completion-marks :deep([data-mark-slot="combo"]) { grid-row:1; }
+.chu-multi-batch .completion-marks :deep([data-mark-slot="chain"]) { grid-row:2; }
+.chu-multi-batch .completion-marks :deep([data-mark-slot="clear"]) { grid-row:3; }
+.chu-multi-batch .missing { grid-column:1 / -1; grid-row:1 / -1; align-self:center; justify-self:center; font-size:30px; }
+.chu-multi-batch .score-cell.best {
+    background:linear-gradient(180deg,rgba(255,215,94,.06),rgba(255,215,94,.16));
+    box-shadow:none;
+}
+/* Adjacent tied leaders share a continuous background and bottom rule. */
+.chu-multi-batch .score-cell.best::after {
+    content:'';
+    position:absolute;
+    inset:auto 0 0;
+    height:2px;
+    background:rgba(255,215,94,.75);
+    pointer-events:none;
+}
+.chu-multi-batch :deep(.standing) { min-height:46px; }
+.chu-multi-batch :deep(.standing-name) { font-size:20px; }
+.chu-multi-batch :deep(.standing-place) { font-size:25px; }

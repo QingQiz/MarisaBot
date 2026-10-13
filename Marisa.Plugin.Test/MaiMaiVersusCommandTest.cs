@@ -3,9 +3,18 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Marisa.BotDriver.DI.Message;
+using Marisa.BotDriver.Entity.Message;
+using Marisa.BotDriver.Entity.MessageData;
+using Marisa.BotDriver.Entity.MessageSender;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.Util.SongDb;
+using Marisa.Plugin.Shared.Versus;
 using NUnit.Framework;
+using MaiBattleChart = (double Constant, int LevelIdx, Marisa.Plugin.Shared.MaiMaiDx.MaiMaiSong Song);
 
 namespace Marisa.Plugin.Test;
 
@@ -89,22 +98,75 @@ public class MaiMaiVersusCommandTest
     }
 
     [Test]
-    public void RandomCandidatesRequireBothPlayersSameDifficultyAndAnExistingChart()
+    public async Task RandomCandidatesRequireBothPlayersSameDifficultyAndAnExistingChart()
     {
-        var songs = Songs().SongList;
+        var db = Songs();
+        var missingLevel = Song(26, "missing level");
+        missingLevel.Levels.RemoveAt(3);
+        var missingConstant = Song(27, "missing constant");
+        missingConstant.Constants.RemoveAt(3);
+        var missingChart = Song(28, "missing chart");
+        missingChart.Charts.RemoveAt(3);
+        db.SongList.AddRange([missingLevel, missingConstant, missingChart]);
+        var plugin = (MaiMaiDx.MaiMaiDx)RuntimeHelpers.GetUninitializedObject(typeof(MaiMaiDx.MaiMaiDx));
+        typeof(MaiMaiDx.MaiMaiDx).GetField("<SongDb>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .SetValue(plugin, db);
+        var adapter = (VersusBattle<SongScore, MaiBattleChart>)((ICanBattleWithOthers)plugin).Battle;
         var left = new Dictionary<(long, int), SongScore>
         {
-            [(22, 3)] = new(), [(23, 3)] = new(), [(24, 2)] = new(), [(25, 4)] = new()
+            [(22, 3)] = new(), [(23, 3)] = new(), [(24, 2)] = new(), [(25, 4)] = new(),
+            [(26, 3)] = new(), [(27, 3)] = new(), [(28, 3)] = new()
         };
         var right = new Dictionary<(long, int), SongScore>
         {
-            [(22, 3)] = new(), [(24, 3)] = new(), [(25, 4)] = new()
+            [(22, 3)] = new(), [(24, 3)] = new(), [(25, 4)] = new(),
+            [(26, 3)] = new(), [(27, 3)] = new(), [(28, 3)] = new()
         };
-        var method = typeof(MaiMaiDx.MaiMaiDx).GetMethod("SharedVersusSongs", BindingFlags.NonPublic | BindingFlags.Static)!;
-        var candidates = (List<MaiMaiSong>)method.Invoke(null, [songs, 3, left, right])!;
-        Assert.That(candidates.Select(song => song.Id), Is.EqualTo(new[] { 22L }));
-        Assert.That((List<MaiMaiSong>)method.Invoke(null, [songs, 4, left, right])!, Is.Empty);
-        Assert.That((List<MaiMaiSong>)method.Invoke(null, [songs, 3, left, new Dictionary<(long, int), SongScore>()])!, Is.Empty);
+        var candidates = await Compare("MASTER", right);
+        var missingDifficulty = await Compare("白谱", right);
+        var unplayedOpponent = await Compare("MASTER", new Dictionary<(long, int), SongScore>());
+        Assert.Multiple(() =>
+        {
+            Assert.That(candidates, Is.EqualTo(new[] { 22L }));
+            Assert.That(missingDifficulty, Is.Empty);
+            Assert.That(unplayedOpponent, Is.Empty);
+        });
+        return;
+
+        async Task<long[]> Compare(string difficulty, IReadOnlyDictionary<(long, int), SongScore> opponent)
+        {
+            var rendered = new List<long>();
+            var battle = new VersusBattle<SongScore, MaiBattleChart>
+            {
+                CommandPrefix = adapter.CommandPrefix,
+                MatchScope = adapter.CanParseScope,
+                ResolvePlayer = (_, qq) => (new VersusPlayerBinding<SongScore>(qq, () => Task.FromResult(
+                    new VersusFetchResult<SongScore>(new(qq, $"p{qq}", qq == 1 ? left : opponent), null))), null),
+                IsOpponentBindingError = adapter.IsOpponentBindingError,
+                SelectSingle = adapter.SelectSingle,
+                ParseRandom = adapter.ParseRandom,
+                ParseBatch = adapter.ParseBatch,
+                ChartKey = adapter.ChartKey,
+                VersionOf = adapter.VersionOf,
+                ReplySingle = (_, chart, _, _) =>
+                {
+                    rendered.Add(chart.Song.Id);
+                    return Task.CompletedTask;
+                },
+                ReplyBatch = (_, _, _, _, _, _, _) => throw new NotSupportedException(),
+                OpenRoom = (_, _, _, _) => throw new NotSupportedException()
+            };
+            var queue = new MessageQueueProvider();
+            var message = new Message(new MessageSenderProvider(queue), new MessageDataId(1, 1),
+                new MessageDataText(difficulty), new MessageDataAt(2))
+            {
+                Sender = new SenderInfo(1, "self"),
+                GroupInfo = new GroupInfo(1, "group", null),
+                Type = MessageType.GroupMessage
+            };
+            await battle.Single(message);
+            return rendered.ToArray();
+        }
     }
 
     private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)

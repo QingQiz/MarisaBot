@@ -19,6 +19,7 @@ public partial class Chunithm :
     MarisaPluginBase,
     IHandleCommonException,
     ICanReset,
+    ICanBattleWithOthers,
     IMarisaPluginWithHelp,
     IMarisaPluginWithRetrieve<ChunithmSong>,
     IMarisaPluginWithCoverGuess<ChunithmSong, ChunithmGuess>
