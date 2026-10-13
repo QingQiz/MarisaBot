@@ -135,14 +135,13 @@ public partial class Chunithm
     }
 
     private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members,
-        VersusRoomPlan<ChunithmVersusChart> plan, string version, bool singleSong)
+        VersusRoomPlan<ChunithmVersusChart> plan, VersusRoomPresentation presentation)
     {
         VersusRoomSession.OpenRendered<ChunithmScore, ChunithmVersusChart, ChunithmVersusMulti>(this, message, members, plan,
             chart => (chart.Id, chart.LevelIndex), chart => chart.Constant, ResolveBattlePlayer,
-            (charts, players) => new ChunithmVersusMulti(plan.Title, version, charts, players),
-            result => result.Players.Select((player, i) =>
-                new VersusRoundPlayer(player.Qq, player.Name, result.Totals[i].Points, result.Totals[i].Matchups)).ToArray(),
-            ChunithmDraw.DrawVersusMulti, ChunithmDraw.DrawVersusMultiBatch, result => result.PageCount, singleSong);
+            (charts, players) => new ChunithmVersusMulti(plan.Title, presentation.Version, charts, players),
+            result => result.ForRoom(),
+            ChunithmDraw.DrawVersusMulti, ChunithmDraw.DrawVersusMultiBatch, result => result.PageCount, presentation.View);
     }
 
     private static string DeviceBindingLabel(long qq)

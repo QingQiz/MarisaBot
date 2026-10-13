@@ -462,10 +462,10 @@ public class MaiMaiVersusRoomTest
         public bool Open()
         {
             var hadRoom  = DialogManager.ContainsDialog(Key);
-            var planType = typeof(MaiMaiDx.MaiMaiDx).GetNestedType("VersusRoomPlan", BindingFlags.NonPublic)!;
-            var plan     = Activator.CreateInstance(planType, "测试", "", Array.Empty<(double, int, MaiMaiSong)>(), 1, true);
+            var plan = new VersusRoomPlan<(double Constant, int LevelIdx, MaiMaiSong Song)>("测试", [], 1);
+            var presentation = new VersusRoomPresentation("", VersusRoomView.SingleSong);
             typeof(MaiMaiDx.MaiMaiDx).GetMethod("OpenVersusRoom", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .Invoke(_plugin, [Message(host, "mai vs 开房"), (joined, unbound ?? []), plan]);
+                .Invoke(_plugin, [Message(host, "mai vs 开房"), (joined, unbound ?? []), plan, presentation]);
             return !hadRoom && DialogManager.ContainsDialog(Key);
         }
 

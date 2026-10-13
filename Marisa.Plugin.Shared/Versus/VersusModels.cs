@@ -18,6 +18,14 @@ public sealed record VersusRoomSnapshot(int Round, IReadOnlyList<VersusStanding>
 
 public sealed record VersusFetchResult<TScore>(VersusPlayer<TScore>? Player, string? Error);
 
+public enum VersusRoomView
+{
+    SingleSong,
+    Batch
+}
+
+public sealed record VersusRoomPresentation(string Version, VersusRoomView View);
+
 /// <param name="PickCount">为空时比较全部谱面并关房；否则每轮随机抽取。</param>
 public sealed record VersusRoomPlan<TChart>(string Title, IReadOnlyList<TChart> Charts, int? PickCount)
 {

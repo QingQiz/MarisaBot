@@ -154,7 +154,7 @@ public class MaiMaiVersusCommandTest
                     return Task.CompletedTask;
                 },
                 ReplyBatch = (_, _, _, _, _, _, _) => throw new NotSupportedException(),
-                OpenRoom = (_, _, _, _, _) => throw new NotSupportedException()
+                OpenRoom = (_, _, _, _) => throw new NotSupportedException()
             };
             var queue = new MessageQueueProvider();
             var message = new Message(new MessageSenderProvider(queue), new MessageDataId(1, 1),

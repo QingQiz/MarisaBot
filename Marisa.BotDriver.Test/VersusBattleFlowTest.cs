@@ -34,6 +34,47 @@ public class VersusBattleFlowTest
         Assert.That(session.Rendered, Is.EqualTo(new[] { new Chart(1, 3) }));
     }
 
+    [TestCase(1)]
+    [TestCase(2)]
+    public void FaultedFetchWaitsForTheOtherPlayersFaultBeforePropagating(int firstFailure)
+    {
+        var session = new Session();
+        var sibling = new TaskCompletionSource<VersusFetchResult<int>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        session.FetchOverrides[firstFailure] = () => Task.FromException<VersusFetchResult<int>>(new InvalidDataException("first failure"));
+        session.FetchOverrides[3 - firstFailure] = () => sibling.Task;
+
+        var operation = session.Battle.Single(session.Message(2));
+        var completedBeforeSibling = operation.IsCompleted;
+        var eventsBeforeSibling = session.Events.ToArray();
+        sibling.SetException(new InvalidDataException("sibling failure"));
+        Assert.ThrowsAsync<InvalidDataException>(async () => await operation);
+        Assert.Multiple(() =>
+        {
+            Assert.That(eventsBeforeSibling, Is.EqualTo(new[] { "bind:1", "bind:2", "select", "fetch:1", "fetch:2" }));
+            Assert.That(completedBeforeSibling, Is.False);
+            Assert.That(session.Rendered, Is.Empty);
+            Assert.That(session.Replies(), Is.Empty);
+        });
+    }
+
+    [Test]
+    public void SingleComparisonPropagatesInvalidScoreDataWithoutConvertingItToAFetchError()
+    {
+        var session = new Session();
+        var error = new InvalidDataException("invalid achievement");
+        session.FetchOverrides[1] = () => Task.FromException<VersusFetchResult<int>>(error);
+
+        var thrown = Assert.ThrowsAsync<InvalidDataException>(async () => await session.Battle.Single(session.Message(2)));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(thrown, Is.SameAs(error));
+            Assert.That(session.Events, Does.Contain("fetch:2"));
+            Assert.That(session.Rendered, Is.Empty);
+            Assert.That(session.Replies(), Is.Empty);
+        });
+    }
+
     [Test]
     public async Task FailedBindingAndCanceledSelectionDoNotFetchScores()
     {
@@ -140,6 +181,39 @@ public class VersusBattleFlowTest
         });
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task SpecifiedSingleAndBatchRoomsKeepDistinctViewsWithTheSamePickCount(bool batch)
+    {
+        var session = new Session { Selection = new([], false, "song", "single version") };
+        session.BatchSelection = new("range", "sort", session.Charts);
+
+        if (batch) session.Battle.BatchRoom(session.Message(2), 99);
+        else await session.Battle.SingleRoom(session.Message(2), 99);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(session.OpenedPlan!.PickCount, Is.Null);
+            Assert.That(session.OpenedPlan.Title, Is.EqualTo(batch ? "range" : "song"));
+            Assert.That(session.OpenedPresentation, Is.EqualTo(new VersusRoomPresentation(
+                batch ? "version" : "single version", batch ? VersusRoomView.Batch : VersusRoomView.SingleSong)));
+        });
+    }
+
+    [Test]
+    public void RandomRoomUsesTheBatchViewAndPreservesTheRequestedCount()
+    {
+        var session = new Session();
+
+        session.Battle.RandomRoom(session.Message(2), 99);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(session.OpenedPlan!.PickCount, Is.EqualTo(20));
+            Assert.That(session.OpenedPresentation, Is.EqualTo(new VersusRoomPresentation("version", VersusRoomView.Batch)));
+        });
+    }
+
     [TestCase(7, true)]
     [TestCase(8, false)]
     public async Task RoomLimitIncludesTheHost(int inviteeCount, bool opened)
@@ -166,6 +240,7 @@ public class VersusBattleFlowTest
         public List<Chart> Rendered { get; } = [];
         public Dictionary<long, string> BindingErrors { get; } = [];
         public Dictionary<long, string> FetchErrors { get; } = [];
+        public Dictionary<long, Func<Task<VersusFetchResult<int>>>> FetchOverrides { get; } = [];
         public Dictionary<long, IReadOnlyDictionary<(long, int), int>> Scores { get; } = new()
         {
             [1] = new Dictionary<(long, int), int> { [(1, 3)] = 100 },
@@ -173,10 +248,12 @@ public class VersusBattleFlowTest
         };
         public IReadOnlyList<Chart> Charts { get; set; } = [new(1, 3)];
         public VersusSingleSelection<Chart>? Selection { get; set; } = new([new(1, 3)], true, "随机单曲", "");
+        public VersusBatchSelection<Chart>? BatchSelection { get; set; }
         public TaskCompletionSource<VersusSingleSelection<Chart>?>? SelectionGate { get; init; }
         public TaskCompletionSource<bool>? FetchGate { get; init; }
         public (long[] Joined, long[] Unbound)? OpenedMembers { get; private set; }
         public VersusRoomPlan<Chart>? OpenedPlan { get; private set; }
+        public VersusRoomPresentation? OpenedPresentation { get; private set; }
         public bool OpenedAsSingleSong { get; private set; }
         public VersusBattle<int, Chart> Battle { get; }
 
@@ -201,7 +278,7 @@ public class VersusBattleFlowTest
                     return Selection is null ? null : Selection with { Charts = Charts };
                 },
                 ParseRandom = (_, _) => new(20, "", Charts),
-                ParseBatch = _ => null,
+                ParseBatch = _ => BatchSelection,
                 ChartKey = chart => (chart.Id, chart.Level),
                 VersionOf = _ => "version",
                 ReplySingle = (_, chart, _, _) =>
@@ -216,12 +293,13 @@ public class VersusBattleFlowTest
                     Rendered.AddRange(charts);
                     return Task.CompletedTask;
                 },
-                OpenRoom = (_, members, plan, _, singleSong) =>
+                OpenRoom = (_, members, plan, presentation) =>
                 {
                     Events.Add("room");
                     OpenedMembers = members;
                     OpenedPlan = plan;
-                    OpenedAsSingleSong = singleSong;
+                    OpenedPresentation = presentation;
+                    OpenedAsSingleSong = presentation.View == VersusRoomView.SingleSong;
                 }
             };
         }
@@ -245,6 +323,7 @@ public class VersusBattleFlowTest
         private async Task<VersusFetchResult<int>> Fetch(long qq)
         {
             Events.Add($"fetch:{qq}");
+            if (FetchOverrides.TryGetValue(qq, out var fetch)) return await fetch();
             if (FetchGate is not null) await FetchGate.Task;
             return FetchErrors.TryGetValue(qq, out var error)
                 ? new VersusFetchResult<int>(null, error)

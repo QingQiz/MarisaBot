@@ -75,8 +75,7 @@ public static class ChunithmVersusScope
 
         string? version = null;
         var versionAliases = catalog.Select(song => song.Version).Distinct(StringComparer.OrdinalIgnoreCase)
-            .SelectMany(full => new[] { full, Regex.Replace(full, @"^CHUNITHM\s*", "", RegexOptions.IgnoreCase) }
-                .SelectMany(alias => new[] { (Alias: alias, Version: full), (Alias: alias.Replace("-", ""), Version: full) }))
+            .SelectMany(full => VersionAliases(full).Select(alias => (Alias: alias, Version: full)))
             .Where(pair => pair.Alias.Length > 0).Distinct().OrderByDescending(pair => pair.Alias.Length);
         foreach (var pair in versionAliases)
         {
@@ -160,8 +159,11 @@ public static class ChunithmVersusScope
     private static bool IsAscii(char value) => value is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
     private static Match VersionMatch(string text, string token)
     {
-        var compact = token.Replace("-", "");
-        var pattern = Regex.Replace(Regex.Escape(compact), @"(?<=[A-Za-z])(?=[A-Za-z])", "-?");
+        var compact = token.Replace("-", "").Trim();
+        var pattern = string.Join(@"\s+", Regex.Split(compact, @"\s+")
+            .Select(part => Regex.Replace(Regex.Escape(part), @"(?<=[A-Za-z])(?=[A-Za-z])", "-?")));
+        pattern = Regex.Replace(pattern, @"[!！]+$", @"[!！]+");
+        pattern = Regex.Replace(pattern, @"\\\+|＋", @"\s*[+＋]");
         return Regex.Match(text, (IsAscii(compact[0]) ? @"(?<![A-Za-z])" : "") + pattern +
             (IsAscii(compact[^1]) ? @"(?![A-Za-z])" : ""), RegexOptions.IgnoreCase);
     }
@@ -170,6 +172,20 @@ public static class ChunithmVersusScope
     private static string Remove(string text, Match match) => (text[..match.Index] + " " + text[(match.Index + match.Length)..]).Trim();
     private static string NormalizeVersion(string version) => Regex.Replace(version, @"[-\s]", "").ToUpperInvariant();
     private static double LevelNumber(string level) => double.TryParse(level.TrimEnd('+'), CultureInfo.InvariantCulture, out var number) ? number + (level.EndsWith('+') ? 0.5 : 0) : -1;
+
+    private static IEnumerable<string> VersionAliases(string version)
+    {
+        var full = Regex.Replace(version.Trim(), @"\s+", " ");
+        var shortName = Regex.Replace(full, @"^CHUNITHM\s*", "", RegexOptions.IgnoreCase);
+        foreach (var name in new[] { full, shortName })
+        {
+            yield return name;
+            var plain = name.TrimEnd('!', '！');
+            var plus = Regex.Replace(plain, @"\s*[+＋]$", " PLUS");
+            yield return plus;
+            yield return Regex.Replace(plus, @"\s+PLUS$", "+", RegexOptions.IgnoreCase);
+        }
+    }
 
     private static IEnumerable<string> GenreAliases(string genre)
     {

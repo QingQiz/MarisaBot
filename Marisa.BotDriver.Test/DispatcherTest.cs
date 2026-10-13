@@ -130,11 +130,8 @@ public class DispatcherTest
     [TestCase("BLACKBOX")]
     [TestCase("blackbox")]
     [TestCase("B.M.S.")]
-    [TestCase("B 中文关键词")]
-    [TestCase("B14")]
     [TestCase("NULCTRL")]
     [TestCase("niconico")]
-    [TestCase("N 5")]
     [TestCase("BASIC")]
     [TestCase("x")]
     public void VersusSongAfterMentionPreservesWholeQuery(string query)
@@ -216,16 +213,16 @@ public class DispatcherTest
     [TestCase("chu vs", "NULCTRL", "SongVersus", "NULCTRL")]
     [TestCase("chu vs BASIC", "", "SongVersus", "BASIC")]
     [TestCase("chu vs 开房", "BASIC", "SongVersusRoom", "BASIC")]
-    [TestCase("chu vs", "n 5", "SongVersus", "n 5")]
-    [TestCase("chu vs", "B 14+", "SongVersus", "B 14+")]
-    [TestCase("chu vs", "N 5", "SongVersus", "N 5")]
+    [TestCase("chu vs", "n 5", "SongVersusRandom", "5")]
+    [TestCase("chu vs", "B 14+", "SongVersusBatch", "14+")]
+    [TestCase("chu vs", "N 5", "SongVersusRandom", "5")]
     [TestCase("chu vs", "B.M.S.", "SongVersus", "B.M.S.")]
     [TestCase("chu vs", "niconico", "SongVersus", "niconico")]
     [TestCase("chu vs NULCTRL", "", "SongVersus", "NULCTRL")]
     [TestCase("chu vs B.M.S.", "", "SongVersus", "B.M.S.")]
     [TestCase("chu vs niconico", "", "SongVersus", "niconico")]
-    [TestCase("chu vs 开房", "B 14+", "SongVersusRoom", "B 14+")]
-    [TestCase("chu vs 开房", "N 5", "SongVersusRoom", "N 5")]
+    [TestCase("chu vs 开房", "B 14+", "SongVersusRoomBatch", "14+")]
+    [TestCase("chu vs 开房", "N 5", "SongVersusRoomRandom", "5")]
     [TestCase("chu vs 开房", "BLACKBOX", "SongVersusRoom", "BLACKBOX")]
     [TestCase("chu vs 开房", "NULCTRL", "SongVersusRoom", "NULCTRL")]
     [TestCase("chu vs 开房 BLACKBOX", "", "SongVersusRoom", "BLACKBOX")]
@@ -245,6 +242,64 @@ public class DispatcherTest
             Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(command));
             Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }));
         });
+    }
+
+    [TestCase("n5", "Random", "5")]
+    [TestCase("N 5", "Random", "5")]
+    [TestCase("n5 14+", "Random", "5 14+")]
+    [TestCase("n invalid", "Random", "invalid")]
+    [TestCase("n", "Random", "")]
+    [TestCase("b14", "Batch", "14")]
+    [TestCase("B 14+", "Batch", "14+")]
+    [TestCase("b invalid", "Batch", "invalid")]
+    [TestCase("B 中文关键词", "Batch", "中文关键词")]
+    [TestCase("b", "Batch", "")]
+    public void VersusSubcommandsWorkOnEitherSideOfThePlayers(string query, string suffix, string arguments)
+    {
+        foreach (var (prefix, plugin) in new[] { ("mai", typeof(MaiMaiDx)), ("chu", typeof(Chunithm)) })
+        foreach (var room in new[] { false, true })
+        foreach (var mentionPosition in new[] { 0, 1, 2 })
+        {
+            var command = $"{prefix}vs{(room ? "开房" : "")}";
+            var message = mentionPosition switch
+            {
+                0 => CreateMessage(new MessageDataText(command), new MessageDataAt(123456), new MessageDataAt(654321), new MessageDataText(query)),
+                1 => CreateMessage(new MessageDataText($"{command}{query[0]}"), new MessageDataAt(123456), new MessageDataAt(654321), new MessageDataText(query[1..].TrimStart())),
+                _ => CreateMessage(new MessageDataText($"{command}{query}"), new MessageDataAt(123456), new MessageDataAt(654321))
+            };
+            message = message with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(message).Single(result => result.Plugin.GetType() == plugin);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo($"SongVersus{(room ? "Room" : "")}{suffix}"), message.MessageChain!.ToString());
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(arguments));
+                Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L, 654321L }));
+            });
+        }
+    }
+
+    [TestCase("niconico")]
+    [TestCase("NULCTRL")]
+    [TestCase("BLACKBOX")]
+    [TestCase("brued")]
+    [TestCase("B.M.S.")]
+    [TestCase("bUnknownSong")]
+    [TestCase("nUnknownSong")]
+    public void VersusSongNamesAfterPlayersKeepTheirInitialNOrB(string query)
+    {
+        foreach (var (prefix, plugin) in new[] { ("mai", typeof(MaiMaiDx)), ("chu", typeof(Chunithm)) })
+        foreach (var room in new[] { false, true })
+        {
+            var message = CreateMessage(new MessageDataText($"{prefix}vs{(room ? "开房" : "")}"),
+                new MessageDataAt(123456), new MessageDataText(query)) with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(message).Single(result => result.Plugin.GetType() == plugin);
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo(room ? "SongVersusRoom" : "SongVersus"));
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(query));
+            });
+        }
     }
 
     [TestCase(MessageType.GroupMessage, true)]

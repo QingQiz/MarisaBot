@@ -84,6 +84,9 @@ public sealed class MaiVersusMulti
             standings);
     }
 
+    public IReadOnlyList<VersusRoundPlayer> ForRoom() => Players.Select((player, index) =>
+        new VersusRoundPlayer(player.Qq, player.Name, Totals[index].Points, Totals[index].Matchups)).ToArray();
+
     private int PlaceOf(int index) => 1 + Totals.Count(t => t.Points > Totals[index].Points);
 
     private int[] Order(Func<int, int> place) =>

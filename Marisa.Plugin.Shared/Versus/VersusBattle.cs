@@ -35,7 +35,7 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
     public required Func<IReadOnlyList<TChart>, string> VersionOf { get; init; }
     public required Func<Message, TChart, VersusPlayer<TScore>, VersusPlayer<TScore>, Task> ReplySingle { get; init; }
     public required Func<Message, string, string, string, IReadOnlyList<TChart>, VersusPlayer<TScore>, VersusPlayer<TScore>, Task> ReplyBatch { get; init; }
-    public required Action<Message, (long[] Joined, long[] Unbound), VersusRoomPlan<TChart>, string, bool> OpenRoom { get; init; }
+    public required Action<Message, (long[] Joined, long[] Unbound), VersusRoomPlan<TChart>, VersusRoomPresentation> OpenRoom { get; init; }
 
     public override bool CanParseScope(string query) => MatchScope(query);
 
@@ -92,7 +92,7 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         if (await SelectSingle(message) is not { } selection) return MarisaPluginTaskState.CompletedTask;
 
         OpenRoom(message, members, new VersusRoomPlan<TChart>(selection.Title, selection.Charts, selection.Random ? 1 : null),
-            selection.Version, true);
+            new VersusRoomPresentation(selection.Version, VersusRoomView.SingleSong));
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -103,7 +103,8 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         if (ResolveRoomMembers(message, botQq) is not { } members) return MarisaPluginTaskState.CompletedTask;
 
         var title = parsed.Query.Length == 0 ? $"随机 {parsed.Count} 首" : $"{parsed.Query} 随机 {parsed.Count} 首";
-        OpenRoom(message, members, new VersusRoomPlan<TChart>(title, parsed.Charts, parsed.Count), VersionOf(parsed.Charts), false);
+        OpenRoom(message, members, new VersusRoomPlan<TChart>(title, parsed.Charts, parsed.Count),
+            new VersusRoomPresentation(VersionOf(parsed.Charts), VersusRoomView.Batch));
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -112,7 +113,8 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         if (ParseBatch(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
         if (ResolveRoomMembers(message, botQq) is not { } members) return MarisaPluginTaskState.CompletedTask;
 
-        OpenRoom(message, members, new VersusRoomPlan<TChart>(parsed.Query, parsed.Charts, null), VersionOf(parsed.Charts), false);
+        OpenRoom(message, members, new VersusRoomPlan<TChart>(parsed.Query, parsed.Charts, null),
+            new VersusRoomPresentation(VersionOf(parsed.Charts), VersusRoomView.Batch));
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -145,8 +147,9 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
     {
         var selfFetch = players.Self.Fetch();
         var opponentFetch = players.Opponent.Fetch();
-        var selfData = await selfFetch;
-        var opponentData = await opponentFetch;
+        var fetched = await Task.WhenAll(selfFetch, opponentFetch);
+        var selfData = fetched[0];
+        var opponentData = fetched[1];
 
         if (opponentData.Error is { } opponentError && IsOpponentBindingError(opponentError))
         {

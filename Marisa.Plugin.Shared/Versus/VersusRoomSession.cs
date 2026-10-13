@@ -14,7 +14,7 @@ public static class VersusRoomSession
         Func<TResult, IReadOnlyList<VersusRoundPlayer>> totals,
         Func<TResult, int, IReadOnlyList<VersusStanding>, Task<string>> renderSingle,
         Func<TResult, int, int, IReadOnlyList<VersusStanding>, Task<string>> renderBatch,
-        Func<TResult, int> pageCount, bool singleSong) where TResult : class
+        Func<TResult, int> pageCount, VersusRoomView view) where TResult : class
     {
         Open(source, message, members, plan, keySelector, constantSelector,
             (next, qq) => resolvePlayer(next, qq).Error,
@@ -27,7 +27,7 @@ public static class VersusRoomSession
 
         async Task Reply(Message next, TResult result, int round, IReadOnlyList<VersusStanding> standings)
         {
-            if (singleSong)
+            if (view == VersusRoomView.SingleSong)
             {
                 next.Reply(MessageDataImage.FromBase64(await renderSingle(result, round, standings)));
                 return;
@@ -205,7 +205,16 @@ public static class VersusRoomSession
         async Task<VersusFetchResult<TScore>> Fetch(Message next, long qq)
         {
             if (room.TryGetScores(qq, out var cached)) return new VersusFetchResult<TScore>(cached, null);
-            var result = await fetch(next, qq);
+            VersusFetchResult<TScore> result;
+            try
+            {
+                result = await fetch(next, qq);
+            }
+            catch (Exception error) when (error is InvalidDataException or HttpRequestException)
+            {
+                return new VersusFetchResult<TScore>(null, error.Message);
+            }
+
             if (result.Player is { } player) room.CacheScores(player);
             return result;
         }

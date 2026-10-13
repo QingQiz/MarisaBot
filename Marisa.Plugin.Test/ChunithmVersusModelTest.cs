@@ -177,6 +177,29 @@ public class ChunithmVersusModelTest
         });
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public void RoomProjectionPreservesPlayerOrderIdentityAndMatchupTotals(bool allUnplayed)
+    {
+        var charts = Enumerable.Range(1, 3).Select(id => ChunithmVersusCatalog.FindChart(Song(id), 3)!).ToArray();
+        var players = allUnplayed
+            ? new[] { Player(30), Player(10), Player(20) }
+            : new[]
+            {
+                Player(30, Score(1, 3, 1_000_000)),
+                Player(10, Score(1, 3, 1_009_000), Score(2, 3, 1_009_000)),
+                Player(20, Score(1, 3, 1_009_000))
+            };
+        players[0] = players[0] with { Name = "same" };
+        players[1] = players[1] with { Name = "other" };
+        players[2] = players[2] with { Name = "same" };
+        var multi = new ChunithmVersusMulti("title", "", charts, players);
+
+        Assert.That(multi.ForRoom(), Is.EqualTo(allUnplayed
+            ? new VersusRoundPlayer[] { new(30, "same", 0, 0), new(10, "other", 0, 0), new(20, "same", 0, 0) }
+            : new VersusRoundPlayer[] { new(30, "same", 0, 3), new(10, "other", 3.5, 4), new(20, "same", 1.5, 3) }));
+    }
+
     internal static ChunithmSong Song(long id, string? title = null, string version = "CHUNITHM VERSE", string genre = "ORIGINAL", string[]? names = null)
     {
         dynamic song = new ExpandoObject();

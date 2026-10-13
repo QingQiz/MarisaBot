@@ -35,8 +35,7 @@ public partial class MaiMaiDx
         VersionOf = charts => VersusVersion(charts),
         ReplySingle = ReplyVersusSingle,
         ReplyBatch = ReplyVersusBatch,
-        OpenRoom = (message, members, plan, version, singleSong) => OpenVersusRoom(message, members,
-            new VersusRoomPlan(plan.Title, version, plan.Charts, plan.PickCount, singleSong))
+        OpenRoom = OpenVersusRoom
     };
 
     private (VersusPlayerBinding<SongScore>? Player, string? Error) ResolveBattlePlayer(Message message, long qq)
@@ -167,33 +166,22 @@ public partial class MaiMaiDx
         return versions.Length == 1 ? versions[0] : string.Empty;
     }
 
-    private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members, VersusRoomPlan plan)
+    private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members,
+        VersusRoomPlan<MaiBattleChart> plan, VersusRoomPresentation presentation)
     {
         VersusRoomSession.OpenRendered<SongScore, MaiBattleChart, MaiVersusMulti>(
-            this, message, members, new(plan.Title, plan.Charts, plan.PickCount),
+            this, message, members, plan,
             chart => (chart.Song.Id, chart.LevelIdx), chart => chart.Constant, ResolveBattlePlayer,
-            (charts, players) => new MaiVersusMulti(plan.Title, plan.Version, charts,
+            (charts, players) => new MaiVersusMulti(plan.Title, presentation.Version, charts,
                 players.Select(p => new MaiVersusMulti.Player(p.Qq, p.Name, p.Scores)).ToArray()),
-            result => result.Players.Select((p, i) =>
-                new VersusRoundPlayer(p.Qq, p.Name, result.Totals[i].Points, result.Totals[i].Matchups)).ToArray(),
+            result => result.ForRoom(),
             (result, round, standings) => MaiMaiDraw.DrawVersusMulti(result, round, ProjectStandings(standings)),
             (result, page, round, standings) => MaiMaiDraw.DrawVersusMultiBatch(result, page, round, ProjectStandings(standings)),
-            result => result.PageCount, plan.SingleSong);
+            result => result.PageCount, presentation.View);
         return;
 
         static IReadOnlyList<MaiVersusMulti.Standing> ProjectStandings(IReadOnlyList<VersusStanding> standings) =>
             standings.Select(s => new MaiVersusMulti.Standing(s.Name, s.Wins, s.Matchups, s.Rounds, s.Left)).ToArray();
-    }
-
-    /// <param name="PickCount">每轮随机抽取的谱面数；为空时比较全部谱面，比完即关房。</param>
-    private sealed record VersusRoomPlan(
-        string Title,
-        string Version,
-        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> Charts,
-        int? PickCount,
-        bool SingleSong)
-    {
-        public bool Continuous => PickCount is not null;
     }
 
     private static string DeviceBindingLabel(long qq)

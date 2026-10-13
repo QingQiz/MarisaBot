@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Marisa.Plugin.Shared.MaiMaiDx;
+using Marisa.Plugin.Shared.Versus;
 using NUnit.Framework;
 
 namespace Marisa.Plugin.Test;
@@ -147,6 +148,29 @@ public class MaiMaiVersusMultiTest
         var picked = MaiVersusMulti.PickCharts(charts, scores, 20, new Random(3));
 
         Assert.That(picked.Select(x => x.Song.Id), Is.EqualTo(new long[] { 2, 1, 3 }));
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void RoomProjectionPreservesPlayerOrderIdentityAndMatchupTotals(bool allUnplayed)
+    {
+        var charts = Enumerable.Range(1, 3).Select(id => Chart(id)).ToArray();
+        var players = allUnplayed
+            ? new[] { Player(30), Player(10), Player(20) }
+            : new[]
+            {
+                Player(30, (1, 99.0)),
+                Player(10, (1, 100.0), (2, 100.0)),
+                Player(20, (1, 100.0))
+            };
+        players[0] = players[0] with { Name = "same" };
+        players[1] = players[1] with { Name = "other" };
+        players[2] = players[2] with { Name = "same" };
+        var multi = Round(charts, players);
+
+        Assert.That(multi.ForRoom(), Is.EqualTo(allUnplayed
+            ? new VersusRoundPlayer[] { new(30, "same", 0, 0), new(10, "other", 0, 0), new(20, "same", 0, 0) }
+            : new VersusRoundPlayer[] { new(30, "same", 0, 3), new(10, "other", 3.5, 4), new(20, "same", 1.5, 3) }));
     }
 
     internal static (double Constant, int LevelIdx, MaiMaiSong Song) Chart(long id, double constant = 14.0) =>
