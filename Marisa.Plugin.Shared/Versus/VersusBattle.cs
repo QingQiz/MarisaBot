@@ -12,6 +12,7 @@ public sealed record VersusBatchSelection<TChart>(string Query, string SortLabel
 /// <summary>非泛型命令入口，使默认接口方法与游戏的强类型适配器共用一个契约。</summary>
 public abstract class VersusBattle
 {
+    public abstract bool CanParseScope(string query);
     public abstract Task<MarisaPluginTaskState> Single(Message message);
     public abstract Task<MarisaPluginTaskState> Random(Message message);
     public abstract Task<MarisaPluginTaskState> Batch(Message message);
@@ -23,6 +24,7 @@ public abstract class VersusBattle
 /// <summary>共享玩家解析、成绩获取、共同谱面抽取及六种对战流程。</summary>
 public sealed class VersusBattle<TScore, TChart> : VersusBattle
 {
+    public required Func<string, bool> MatchScope { get; init; }
     public required string CommandPrefix { get; init; }
     public required Func<Message, long, (VersusPlayerBinding<TScore>? Player, string? Error)> ResolvePlayer { get; init; }
     public required Func<string, bool> IsOpponentBindingError { get; init; }
@@ -34,6 +36,8 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
     public required Func<Message, TChart, VersusPlayer<TScore>, VersusPlayer<TScore>, Task> ReplySingle { get; init; }
     public required Func<Message, string, string, string, IReadOnlyList<TChart>, VersusPlayer<TScore>, VersusPlayer<TScore>, Task> ReplyBatch { get; init; }
     public required Action<Message, (long[] Joined, long[] Unbound), VersusRoomPlan<TChart>, string, bool> OpenRoom { get; init; }
+
+    public override bool CanParseScope(string query) => MatchScope(query);
 
     public override async Task<MarisaPluginTaskState> Single(Message message)
     {

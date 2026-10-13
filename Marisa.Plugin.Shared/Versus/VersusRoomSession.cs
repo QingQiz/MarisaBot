@@ -5,6 +5,38 @@ namespace Marisa.Plugin.Shared.Versus;
 /// <summary>两游戏共用的群房间对话；授权、谱面和绘图保留在游戏适配器。</summary>
 public static class VersusRoomSession
 {
+    public static void OpenRendered<TScore, TChart, TResult>(
+        MarisaPluginBase source, Message message, (long[] Joined, long[] Unbound) members,
+        VersusRoomPlan<TChart> plan, Func<TChart, (long Id, int LevelIdx)> keySelector,
+        Func<TChart, double> constantSelector,
+        Func<Message, long, (VersusPlayerBinding<TScore>? Player, string? Error)> resolvePlayer,
+        Func<IReadOnlyList<TChart>, IReadOnlyList<VersusPlayer<TScore>>, TResult> createResult,
+        Func<TResult, IReadOnlyList<VersusRoundPlayer>> totals,
+        Func<TResult, int, IReadOnlyList<VersusStanding>, Task<string>> renderSingle,
+        Func<TResult, int, int, IReadOnlyList<VersusStanding>, Task<string>> renderBatch,
+        Func<TResult, int> pageCount, bool singleSong) where TResult : class
+    {
+        Open(source, message, members, plan, keySelector, constantSelector,
+            (next, qq) => resolvePlayer(next, qq).Error,
+            async (next, qq) =>
+            {
+                var (player, error) = resolvePlayer(next, qq);
+                return player is null ? new VersusFetchResult<TScore>(null, error) : await player.Fetch();
+            }, createResult, totals, Reply);
+        return;
+
+        async Task Reply(Message next, TResult result, int round, IReadOnlyList<VersusStanding> standings)
+        {
+            if (singleSong)
+            {
+                next.Reply(MessageDataImage.FromBase64(await renderSingle(result, round, standings)));
+                return;
+            }
+            await VersusPaging.ReplyPages(source, next, pageCount(result),
+                page => renderBatch(result, page, round, standings));
+        }
+    }
+
     public static void Open<TScore, TChart, TResult>(
         MarisaPluginBase source,
         Message message,

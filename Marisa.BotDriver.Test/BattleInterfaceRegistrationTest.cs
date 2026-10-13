@@ -19,13 +19,13 @@ public class BattleInterfaceRegistrationTest
 {
     private static readonly string[] BattleMethods =
     [
-        nameof(ICanBattleWithOthers.SongVersus), "SongVersusRandom", "SongVersusBatch",
-        nameof(ICanBattleWithOthers.SongVersusRoom), "SongVersusRoomRandom", "SongVersusRoomBatch"
+        nameof(ICanBattleWithOthers.SongVersus), nameof(ICanBattleWithOthers.SongVersusRandom), nameof(ICanBattleWithOthers.SongVersusBatch),
+        nameof(ICanBattleWithOthers.SongVersusRoom), nameof(ICanBattleWithOthers.SongVersusRoomRandom), nameof(ICanBattleWithOthers.SongVersusRoomBatch)
     ];
 
     [TestCase(typeof(MaiPlugin))]
     [TestCase(typeof(ChuPlugin))]
-    public void BattleCommandsAreDiscoveredOnceFromTheInterfaceAndGame(Type plugin)
+    public void BattleCommandsAreDiscoveredOnceFromTheInterface(Type plugin)
     {
         var commands = plugin.GetAllMethods()
             .Where(method => BattleMethods.Contains(method.Name) &&
@@ -35,12 +35,8 @@ public class BattleInterfaceRegistrationTest
         Assert.Multiple(() =>
         {
             Assert.That(commands.Select(method => method.Name), Is.EquivalentTo(BattleMethods));
-            Assert.That(commands.Where(method => method.Name is nameof(ICanBattleWithOthers.SongVersus)
-                    or nameof(ICanBattleWithOthers.SongVersusRoom)).Select(method => method.DeclaringType),
-                Is.EqualTo(new[] { typeof(ICanBattleWithOthers), typeof(ICanBattleWithOthers) }));
-            Assert.That(commands.Where(method => method.Name is not nameof(ICanBattleWithOthers.SongVersus)
-                    and not nameof(ICanBattleWithOthers.SongVersusRoom)).Select(method => method.DeclaringType),
-                Is.EqualTo(Enumerable.Repeat(plugin, 4)));
+            Assert.That(commands.Select(method => method.DeclaringType),
+                Is.EqualTo(Enumerable.Repeat(typeof(ICanBattleWithOthers), 6)));
         });
     }
 
@@ -70,7 +66,11 @@ public class BattleInterfaceRegistrationTest
     }
 
     [TestCase(nameof(ICanBattleWithOthers.SongVersus), MarisaPluginTaskState.ToBeContinued)]
+    [TestCase(nameof(ICanBattleWithOthers.SongVersusRandom), MarisaPluginTaskState.ToBeContinued)]
+    [TestCase(nameof(ICanBattleWithOthers.SongVersusBatch), MarisaPluginTaskState.ToBeContinued)]
     [TestCase(nameof(ICanBattleWithOthers.SongVersusRoom), MarisaPluginTaskState.CompletedTask)]
+    [TestCase(nameof(ICanBattleWithOthers.SongVersusRoomRandom), MarisaPluginTaskState.CompletedTask)]
+    [TestCase(nameof(ICanBattleWithOthers.SongVersusRoomBatch), MarisaPluginTaskState.CompletedTask)]
     public async Task DispatcherInvokesDefaultInterfaceCommandsWithTheirArguments(string command, MarisaPluginTaskState expected)
     {
         const long botQq = 987654;
@@ -88,7 +88,8 @@ public class BattleInterfaceRegistrationTest
             Assert.That(method.DeclaringType, Is.EqualTo(typeof(ICanBattleWithOthers)));
             Assert.That(result, Is.EqualTo(expected));
             Assert.That(battle.Message, Is.SameAs(message));
-            Assert.That(battle.BotQq, Is.EqualTo(command == nameof(ICanBattleWithOthers.SongVersusRoom) ? botQq : (long?)null));
+            Assert.That(battle.Method, Is.EqualTo(command));
+            Assert.That(battle.BotQq, Is.EqualTo(command.StartsWith(nameof(ICanBattleWithOthers.SongVersusRoom), StringComparison.Ordinal) ? botQq : (long?)null));
         });
     }
 
@@ -103,10 +104,14 @@ public class BattleInterfaceRegistrationTest
     {
         public Message? Message { get; private set; }
         public long? BotQq { get; private set; }
+        public string? Method { get; private set; }
+
+        public override bool CanParseScope(string scope) => false;
 
         public override Task<MarisaPluginTaskState> Single(Message message)
         {
             Message = message;
+            Method = nameof(ICanBattleWithOthers.SongVersus);
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }
 
@@ -114,12 +119,38 @@ public class BattleInterfaceRegistrationTest
         {
             Message = message;
             BotQq = botQq;
+            Method = nameof(ICanBattleWithOthers.SongVersusRoom);
             return Task.FromResult(MarisaPluginTaskState.CompletedTask);
         }
 
-        public override Task<MarisaPluginTaskState> Random(Message message) => throw new NotSupportedException();
-        public override Task<MarisaPluginTaskState> Batch(Message message) => throw new NotSupportedException();
-        public override MarisaPluginTaskState RandomRoom(Message message, long botQq) => throw new NotSupportedException();
-        public override MarisaPluginTaskState BatchRoom(Message message, long botQq) => throw new NotSupportedException();
+        public override Task<MarisaPluginTaskState> Random(Message message)
+        {
+            Message = message;
+            Method = nameof(ICanBattleWithOthers.SongVersusRandom);
+            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+        }
+
+        public override Task<MarisaPluginTaskState> Batch(Message message)
+        {
+            Message = message;
+            Method = nameof(ICanBattleWithOthers.SongVersusBatch);
+            return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
+        }
+
+        public override MarisaPluginTaskState RandomRoom(Message message, long botQq)
+        {
+            Message = message;
+            BotQq = botQq;
+            Method = nameof(ICanBattleWithOthers.SongVersusRoomRandom);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        public override MarisaPluginTaskState BatchRoom(Message message, long botQq)
+        {
+            Message = message;
+            BotQq = botQq;
+            Method = nameof(ICanBattleWithOthers.SongVersusRoomBatch);
+            return MarisaPluginTaskState.CompletedTask;
+        }
     }
 }

@@ -139,6 +139,7 @@ public class MaiMaiVersusCommandTest
             var battle = new VersusBattle<SongScore, MaiBattleChart>
             {
                 CommandPrefix = adapter.CommandPrefix,
+                MatchScope = adapter.CanParseScope,
                 ResolvePlayer = (_, qq) => (new VersusPlayerBinding<SongScore>(qq, () => Task.FromResult(
                     new VersusFetchResult<SongScore>(new(qq, $"p{qq}", qq == 1 ? left : opponent), null))), null),
                 IsOpponentBindingError = adapter.IsOpponentBindingError,

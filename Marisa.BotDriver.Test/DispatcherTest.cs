@@ -3,10 +3,12 @@ using Marisa.BotDriver.DI;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Plugin;
+using Marisa.BotDriver.Plugin.Trigger;
 using Marisa.Database;
 using Marisa.Plugin;
 using Marisa.Plugin.Chunithm;
 using Marisa.Plugin.MaiMaiDx;
+using Marisa.Plugin.Shared.Interface;
 using Marisa.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -258,6 +260,72 @@ public class DispatcherTest
             Assert.That(_dispatcher.Dispatch(message).Any(x => x.Plugin.GetType() == typeof(Chunithm) &&
                 x.Method.Name.StartsWith("SongVersus", StringComparison.Ordinal)), Is.EqualTo(expected), command);
         }
+    }
+
+    [TestCase("彩代14+", true, false)]
+    [TestCase("VERSE14+", false, true)]
+    [TestCase("ULTIMA14+", false, true)]
+    public void SharedBatchTriggerUsesTheCurrentGameScope(string scope, bool maiMatches, bool chuMatches)
+    {
+        var trigger = new MarisaPluginTrigger(typeof(ICanBattleWithOthers), nameof(ICanBattleWithOthers.VersusBatchTrigger), MessageType.GroupMessage);
+        var plugins = _provider.GetServices<MarisaPluginBase>().ToArray();
+        var mai = plugins.Single(plugin => plugin.GetType() == typeof(MaiMaiDx));
+        var chu = plugins.Single(plugin => plugin.GetType() == typeof(Chunithm));
+        var message = CreateMessage(new MessageDataText($"mai vs b{scope}")) with
+        {
+            Type = MessageType.GroupMessage,
+            Command = $"b{scope}".AsMemory()
+        };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(trigger.Matches(mai, message, _provider), Is.EqualTo(maiMatches));
+            Assert.That(trigger.Matches(chu, message, _provider), Is.EqualTo(chuMatches));
+        });
+
+        foreach (var (prefix, pluginType, matches) in new[]
+                 {
+                     ("mai", typeof(MaiMaiDx), maiMatches),
+                     ("chu", typeof(Chunithm), chuMatches)
+                 })
+        foreach (var room in new[] { false, true })
+        {
+            var command = $"{prefix} vs {(room ? "开房" : "")}b{scope}";
+            var request = CreateMessage(new MessageDataText(command), new MessageDataAt(123456)) with { Type = MessageType.GroupMessage };
+            var dispatched = _dispatcher.Dispatch(request).Single(result => result.Plugin.GetType() == pluginType);
+            var expectedMethod = room
+                ? matches ? nameof(ICanBattleWithOthers.SongVersusRoomBatch) : nameof(ICanBattleWithOthers.SongVersusRoom)
+                : matches ? nameof(ICanBattleWithOthers.SongVersusBatch) : nameof(ICanBattleWithOthers.SongVersus);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(dispatched.Method.Name, Is.EqualTo(expectedMethod), command);
+                Assert.That(dispatched.Method.DeclaringType, Is.EqualTo(typeof(ICanBattleWithOthers)), command);
+                Assert.That(dispatched.Message.Command.ToString(), Is.EqualTo(matches ? scope : $"b{scope}"), command);
+                Assert.That(dispatched.Message.At(), Is.EqualTo(new[] { 123456L }), command);
+            });
+        }
+    }
+
+    [Test]
+    public void StaticTriggersInOtherPluginsKeepTheirDispatchBoundaries()
+    {
+        var plainBind = CreateMessage(new MessageDataText("mai bind")) with { Type = MessageType.GroupMessage };
+        var mentionedBind = CreateMessage(new MessageDataText("mai bind"), new MessageDataAt(123456)) with { Type = MessageType.GroupMessage };
+        var validFilter = CreateMessage(new MessageDataText("mai 14+含金量分析")) with { Type = MessageType.GroupMessage };
+        var invalidFilter = CreateMessage(new MessageDataText("mai 15+含金量分析")) with { Type = MessageType.GroupMessage };
+        var online = CreateMessage(new MessageDataBotOnline()) with { Type = MessageType.GroupMessage };
+        var unknown = CreateMessage(new MessageDataUnknown()) with { Type = MessageType.GroupMessage };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_dispatcher.Dispatch(plainBind).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "Bind"), Is.True);
+            Assert.That(_dispatcher.Dispatch(mentionedBind).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "Bind"), Is.False);
+            Assert.That(_dispatcher.Dispatch(validFilter).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "FilteredValueAnalysis"), Is.True);
+            Assert.That(_dispatcher.Dispatch(invalidFilter).Any(result => result.Plugin.GetType() == typeof(MaiMaiDx) && result.Method.Name == "FilteredValueAnalysis"), Is.False);
+            Assert.That(_dispatcher.Dispatch(online).Any(result => result.Plugin.GetType() == typeof(EventHandler) && result.Method.Name == "Handler"), Is.True);
+            Assert.That(_dispatcher.Dispatch(unknown).Any(result => result.Plugin.GetType() == typeof(EventHandler)), Is.False);
+        });
     }
 
     private void AssertVersusDispatch(string beforeMention, string afterMention, string method, string command)

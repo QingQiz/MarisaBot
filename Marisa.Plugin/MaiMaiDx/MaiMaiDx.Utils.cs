@@ -18,24 +18,19 @@ public partial class MaiMaiDx
 {
     private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
 
-    private static bool VersusBatchTrigger(Message message, IServiceProvider _serviceProvider) =>
-        VersusCommands.BatchTrigger(message, query => PlateData.TryParseScope(query, out _, out _));
-
-    private static bool VersusRandomTrigger(Message message, IServiceProvider _serviceProvider) =>
-        VersusCommands.RandomTrigger(message);
-
     private VersusBattle? _battle;
 
     VersusBattle ICanBattleWithOthers.Battle => _battle ??= new VersusBattle<SongScore, MaiBattleChart>
     {
         CommandPrefix = "mai",
+        MatchScope = query => ParseVersusScopeQuery(query).Scope is not null,
         ResolvePlayer = ResolveBattlePlayer,
         IsOpponentBindingError = IsOpponentBindingError,
         SelectSingle = SelectVersusSingle,
-        ParseRandom = (message, usage) => ParseVersusRandom(message, usage) is { } parsed
-            ? new VersusRandomSelection<MaiBattleChart>(parsed.Count, parsed.Query, parsed.Charts) : null,
-        ParseBatch = message => ParseVersusScope(message) is { } parsed
-            ? new VersusBatchSelection<MaiBattleChart>(parsed.Query, parsed.SortLabel, parsed.Charts) : null,
+        ParseRandom = (message, usage) => VersusQueries.ParseRandom(message, usage, MaxVersusRandomCount,
+            DifficultyOf, VersusLevelCharts, ParseVersusScopeQuery,
+            query => $"无法解析难度或完成表范围：{query}"),
+        ParseBatch = message => VersusQueries.ParseBatch(message, ParseVersusScopeQuery),
         ChartKey = chart => (chart.Song.Id, chart.LevelIdx),
         VersionOf = charts => VersusVersion(charts),
         ReplySingle = ReplyVersusSingle,
@@ -136,84 +131,28 @@ public partial class MaiMaiDx
         await ReplyPages(message, batch.PageCount, page => MaiMaiDraw.DrawVersusBatch(batch, page));
     }
 
-    /// <summary>解析单曲 vs 的歌曲与难度；空输入或只有难度时随机选曲。</summary>
     private static (List<MaiMaiSong> Songs, int LevelIndex, bool Random)
-        ResolveVersusQuery(Shared.Util.SongDb.SongDb<MaiMaiSong> songs, string input)
+        ResolveVersusQuery(SongDb<MaiMaiSong> songs, string input) =>
+        VersusQueries.ResolveSongQuery(songs, input, DifficultyOf, StripBattleDifficulty);
+
+    private static int? DifficultyOf(string query) =>
+        PlateData.DifficultyAliasMap.TryGetValue(query, out var level) ? level : null;
+
+    private static (int Level, ReadOnlyMemory<char> Remaining)? StripBattleDifficulty(ReadOnlyMemory<char> input) =>
+        PlateData.TryStripDifficultyAffix(input, out var level, out var rest) ? (level, rest) : null;
+
+    private (VersusScopeSelection<MaiBattleChart>? Scope, string? Error) ParseVersusScopeQuery(string query)
     {
-        var query = input.Trim();
-        if (query.Length == 0) return ([], 3, true);
-
-        var exact = songs.SearchSongExact(query.AsMemory());
-        if (exact.Count > 0) return (exact, 3, false);
-        if (PlateData.DifficultyAliasMap.TryGetValue(query, out var difficulty)) return ([], difficulty, true);
-
-        var hasAffix = PlateData.TryStripDifficultyAffix(query.AsMemory(), out var level, out var rest);
-        if (hasAffix)
-        {
-            exact = songs.SearchSongExact(rest);
-            if (exact.Count > 0) return (exact, level, false);
-        }
-
-        var fuzzy = songs.SearchSong(query.AsMemory());
-        if (fuzzy.Count > 0) return (fuzzy, 3, false);
-        return hasAffix ? (songs.SearchSong(rest), level, false) : ([], 3, false);
+        if (!PlateData.TryParseScope(query, out var scope, out _))
+            return (null, $"无法解析完成表范围：{query}");
+        var charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
+        var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
+            ? "歌曲 ID 升序" : "定数降序";
+        return (new(charts, sortLabel), null);
     }
 
     private Task ReplyPages(Message message, int pageCount, Func<int, Task<string>> render) =>
         VersusPaging.ReplyPages(this, message, pageCount, render);
-
-    /// <summary>解析 `N [难度/范围]`；失败时已回复原因。</summary>
-    private (int Count, string Query, IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> Charts)?
-        ParseVersusRandom(Message message, string usage)
-    {
-        var command = message.Command.Trim().ToString();
-        var digits  = command.TakeWhile(char.IsAsciiDigit).Count();
-        if (!int.TryParse(command[..digits], out var count) || count is < 1 or > MaxVersusRandomCount)
-        {
-            message.Reply($"N 须为 1～{MaxVersusRandomCount} 的整数，用法：{usage}");
-            return null;
-        }
-
-        var query    = command[digits..].Trim();
-        var levelIdx = 3;
-        if (query.Length == 0 || PlateData.DifficultyAliasMap.TryGetValue(query, out levelIdx))
-        {
-            return (count, query, VersusLevelCharts(levelIdx));
-        }
-
-        if (PlateData.TryParseScope(query, out var scope, out _))
-        {
-            return (count, query, PlateData.SelectScopeCharts(scope, SongDb.SongList));
-        }
-
-        message.Reply($"无法解析难度或完成表范围：{query}");
-        return null;
-    }
-
-    /// <summary>解析完成表范围并确认范围内有谱面；失败时已回复原因。</summary>
-    private (string Query, string SortLabel, IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> Charts)?
-        ParseVersusScope(Message message)
-    {
-        var query = message.Command.Trim().ToString();
-        if (!PlateData.TryParseScope(query, out var scope, out _))
-        {
-            message.Reply($"无法解析完成表范围：{query}");
-            return null;
-        }
-
-        var charts = PlateData.SelectScopeCharts(scope, SongDb.SongList);
-        if (charts.Count == 0)
-        {
-            message.Reply($"没有找到 {query} 对应的谱面");
-            return null;
-        }
-
-        var sortLabel = scope.Selectors.Any(x => x is PlateData.Selector.Constant or PlateData.Selector.ConstantRange)
-            ? "歌曲 ID 升序"
-            : "定数降序";
-
-        return (query, sortLabel, charts);
-    }
 
     private List<(double Constant, int LevelIdx, MaiMaiSong Song)> VersusLevelCharts(int levelIdx) =>
         SongDb.SongList
@@ -228,44 +167,22 @@ public partial class MaiMaiDx
         return versions.Length == 1 ? versions[0] : string.Empty;
     }
 
-    /// <summary>
-    ///     房间挂在群级 dialog 上，用不带前缀的「加入」「退出」「开始」「取消」操作，其它消息原样放行；
-    ///     闲置超时后由下一条消息静默结束。
-    /// </summary>
     private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members, VersusRoomPlan plan)
     {
-        VersusRoomSession.Open<SongScore, (double Constant, int LevelIdx, MaiMaiSong Song), MaiVersusMulti>(
+        VersusRoomSession.OpenRendered<SongScore, MaiBattleChart, MaiVersusMulti>(
             this, message, members, new(plan.Title, plan.Charts, plan.PickCount),
-            chart => (chart.Song.Id, chart.LevelIdx), chart => chart.Constant,
-            (next, qq) => ResolveVersusPlayer(next, qq).Error,
-            FetchRoomPlayer,
+            chart => (chart.Song.Id, chart.LevelIdx), chart => chart.Constant, ResolveBattlePlayer,
             (charts, players) => new MaiVersusMulti(plan.Title, plan.Version, charts,
                 players.Select(p => new MaiVersusMulti.Player(p.Qq, p.Name, p.Scores)).ToArray()),
             result => result.Players.Select((p, i) =>
                 new VersusRoundPlayer(p.Qq, p.Name, result.Totals[i].Points, result.Totals[i].Matchups)).ToArray(),
-            ReplyRound);
+            (result, round, standings) => MaiMaiDraw.DrawVersusMulti(result, round, ProjectStandings(standings)),
+            (result, page, round, standings) => MaiMaiDraw.DrawVersusMultiBatch(result, page, round, ProjectStandings(standings)),
+            result => result.PageCount, plan.SingleSong);
         return;
 
-        async Task<VersusFetchResult<SongScore>> FetchRoomPlayer(Message next, long qq)
-        {
-            var (resolved, error) = ResolveVersusPlayer(next, qq);
-            if (resolved is null) return new(null, error);
-
-            return await FetchBattleData(resolved);
-        }
-
-        async Task ReplyRound(Message next, MaiVersusMulti result, int round, IReadOnlyList<VersusStanding> standings)
-        {
-            var projected = standings.Select(s =>
-                new MaiVersusMulti.Standing(s.Name, s.Wins, s.Matchups, s.Rounds, s.Left)).ToArray();
-            if (plan.SingleSong)
-            {
-                next.Reply(MessageDataImage.FromBase64(await MaiMaiDraw.DrawVersusMulti(result, round, projected)));
-                return;
-            }
-
-            await ReplyPages(next, result.PageCount, page => MaiMaiDraw.DrawVersusMultiBatch(result, page, round, projected));
-        }
+        static IReadOnlyList<MaiVersusMulti.Standing> ProjectStandings(IReadOnlyList<VersusStanding> standings) =>
+            standings.Select(s => new MaiVersusMulti.Standing(s.Name, s.Wins, s.Matchups, s.Rounds, s.Left)).ToArray();
     }
 
     /// <param name="PickCount">每轮随机抽取的谱面数；为空时比较全部谱面，比完即关房。</param>

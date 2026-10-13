@@ -7,7 +7,6 @@ using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.DivingFish;
 using Marisa.Plugin.Shared.Lxns;
-using Marisa.Plugin.Shared.Interface;
 using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util.Cacheable;
@@ -733,42 +732,6 @@ public partial class MaiMaiDx
         message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiSongScore(context.Id)));
 
         return MarisaPluginTaskState.CompletedTask;
-    }
-
-    [MarisaPluginDoc("随机比较 N 个成绩", "`N [难度/完成表范围] @某人`（最大 20）")]
-    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersus))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusRandomTrigger), MessageType.GroupMessage)]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "n")]
-    private Task<MarisaPluginTaskState> SongVersusRandom(Message message)
-    {
-        return ((ICanBattleWithOthers)this).Battle.Random(message);
-    }
-
-    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围 @某人`，如`彩代14+ @某人`")]
-    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersus))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusBatchTrigger), MessageType.GroupMessage)]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "b")]
-    private Task<MarisaPluginTaskState> SongVersusBatch(Message message)
-    {
-        return ((ICanBattleWithOthers)this).Battle.Batch(message);
-    }
-
-    [MarisaPluginDoc("每轮随机比较 N 个成绩", "`N`（最大 20），可选难度或完成表范围")]
-    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersusRoom))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusRandomTrigger), MessageType.GroupMessage)]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "n")]
-    private MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq)
-    {
-        return ((ICanBattleWithOthers)this).Battle.RandomRoom(message, qq);
-    }
-
-    [MarisaPluginDoc("比较完成表范围内的全部谱面", "`完成表范围`，如`彩代14+`")]
-    [MarisaPluginSubCommand(nameof(ICanBattleWithOthers.SongVersusRoom))]
-    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(VersusBatchTrigger), MessageType.GroupMessage)]
-    [MarisaPluginCommand(MessageType.GroupMessage, false, "b")]
-    private MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq)
-    {
-        return ((ICanBattleWithOthers)this).Battle.BatchRoom(message, qq);
     }
 
     /// <summary>

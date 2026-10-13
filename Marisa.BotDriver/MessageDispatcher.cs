@@ -70,13 +70,13 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
 
         foreach (var plugin in Plugins)
         {
-            if (!ShouldTrigger(plugin.GetType(), m1, out var t1)) continue;
+            if (!ShouldTrigger(plugin, plugin.GetType(), m1, out var t1)) continue;
 
             var m2 = m1 with { Command = t1 };
 
             foreach (var method in Commands[plugin])
             {
-                if (!ShouldTrigger(method, m2, out var t2)) continue;
+                if (!ShouldTrigger(plugin, method, m2, out var t2)) continue;
 
                 var (which, what) = WhichMethodShouldBeTriggeredByWhat(plugin, method, message with { Command = t2 });
 
@@ -96,11 +96,12 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
     /// <summary>
     ///     <paramref name="message" />是否应该被<paramref name="member" />触发
     /// </summary>
+    /// <param name="plugin">当前插件实例</param>
     /// <param name="member"></param>
     /// <param name="message"></param>
     /// <param name="afterTrigger">触发后的消息剩余什么</param>
     /// <returns>是否被触发</returns>
-    private bool ShouldTrigger(MemberInfo member, Message message, out ReadOnlyMemory<char> afterTrigger)
+    private bool ShouldTrigger(MarisaPluginBase plugin, MemberInfo member, Message message, out ReadOnlyMemory<char> afterTrigger)
     {
         afterTrigger = message.Command;
 
@@ -111,7 +112,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
 
         if (t != null)
         {
-            var triggerResult = t.Trigger(message, serviceProvider);
+            var triggerResult = t.Matches(plugin, message, serviceProvider);
             if (!triggerResult) return false;
         }
 
@@ -154,7 +155,7 @@ public class MessageDispatcher(IEnumerable<MarisaPluginBase> pluginsAll, IServic
         // 检查子命令能否执行
         foreach (var sub in currentSub)
         {
-            if (ShouldTrigger(sub, message, out var after))
+            if (ShouldTrigger(plugin, sub, message, out var after))
                 return WhichMethodShouldBeTriggeredByWhat(plugin, sub, message with { Command = after });
         }
 

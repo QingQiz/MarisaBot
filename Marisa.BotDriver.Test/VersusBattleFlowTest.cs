@@ -185,6 +185,7 @@ public class VersusBattleFlowTest
             Battle = new VersusBattle<int, Chart>
             {
                 CommandPrefix = "test",
+                MatchScope = _ => false,
                 ResolvePlayer = (_, qq) =>
                 {
                     Events.Add($"bind:{qq}");
