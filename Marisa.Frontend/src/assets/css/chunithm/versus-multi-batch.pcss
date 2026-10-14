@@ -5,7 +5,6 @@
 }
 .chu-multi-batch .grid-row {
     grid-template-columns:minmax(340px,1fr) repeat(var(--players),var(--player-column));
-    column-gap:0;
 }
 .chu-multi-batch .scope-line { margin:16px 0 14px; }
 .chu-multi-batch .table-head {
@@ -83,7 +82,6 @@
 .chu-multi-batch .chart-meta>b { font-size:13px; }
 .chu-multi-batch .constant { font-size:14px; }
 .chu-multi-batch .score-cell {
-    position:relative;
     box-sizing:border-box;
     display:grid;
     grid-template-columns:minmax(0,1fr) 104px;
@@ -146,19 +144,6 @@
 .chu-multi-batch .completion-marks :deep([data-mark-slot="chain"]) { grid-row:2; }
 .chu-multi-batch .completion-marks :deep([data-mark-slot="clear"]) { grid-row:3; }
 .chu-multi-batch .missing { grid-column:1 / -1; grid-row:1 / -1; align-self:center; justify-self:center; font-size:30px; }
-.chu-multi-batch .score-cell.best {
-    background:linear-gradient(180deg,rgba(255,215,94,.06),rgba(255,215,94,.16));
-    box-shadow:none;
-}
-/* Adjacent tied leaders share a continuous background and bottom rule. */
-.chu-multi-batch .score-cell.best::after {
-    content:'';
-    position:absolute;
-    inset:auto 0 0;
-    height:2px;
-    background:rgba(255,215,94,.75);
-    pointer-events:none;
-}
 .chu-multi-batch :deep(.standing) { min-height:46px; }
 .chu-multi-batch :deep(.standing-name) { font-size:20px; }
 .chu-multi-batch :deep(.standing-place) { font-size:25px; }
