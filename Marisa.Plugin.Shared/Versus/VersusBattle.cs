@@ -17,8 +17,8 @@ public abstract class VersusBattle
     public abstract Task<MarisaPluginTaskState> Random(Message message);
     public abstract Task<MarisaPluginTaskState> Batch(Message message);
     public abstract Task<MarisaPluginTaskState> SingleRoom(Message message, long botQq);
-    public abstract Task<MarisaPluginTaskState> RandomRoom(Message message, long botQq);
-    public abstract Task<MarisaPluginTaskState> BatchRoom(Message message, long botQq);
+    public abstract MarisaPluginTaskState RandomRoom(Message message, long botQq);
+    public abstract MarisaPluginTaskState BatchRoom(Message message, long botQq);
 }
 
 /// <summary>共享玩家解析、成绩获取、共同谱面抽取及六种对战流程。</summary>
@@ -96,26 +96,26 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    public override Task<MarisaPluginTaskState> RandomRoom(Message message, long botQq)
+    public override MarisaPluginTaskState RandomRoom(Message message, long botQq)
     {
         if (ParseRandom(message, $"{CommandPrefix} vs 开房 n 5 [难度/范围]") is not { } parsed)
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        if (ResolveRoomMembers(message, botQq) is not { } members) return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            return MarisaPluginTaskState.CompletedTask;
+        if (ResolveRoomMembers(message, botQq) is not { } members) return MarisaPluginTaskState.CompletedTask;
 
         var title = parsed.Query.Length == 0 ? $"随机 {parsed.Count} 首" : $"{parsed.Query} 随机 {parsed.Count} 首";
         OpenRoom(message, members, new VersusRoomPlan<TChart>(title, parsed.Charts, parsed.Count),
             new VersusRoomPresentation(VersionOf(parsed.Charts), VersusRoomView.Batch));
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
-    public override Task<MarisaPluginTaskState> BatchRoom(Message message, long botQq)
+    public override MarisaPluginTaskState BatchRoom(Message message, long botQq)
     {
-        if (ParseBatch(message) is not { } parsed) return Task.FromResult(MarisaPluginTaskState.CompletedTask);
-        if (ResolveRoomMembers(message, botQq) is not { } members) return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        if (ParseBatch(message) is not { } parsed) return MarisaPluginTaskState.CompletedTask;
+        if (ResolveRoomMembers(message, botQq) is not { } members) return MarisaPluginTaskState.CompletedTask;
 
         OpenRoom(message, members, new VersusRoomPlan<TChart>(parsed.Query, parsed.Charts, null),
             new VersusRoomPresentation(VersionOf(parsed.Charts), VersusRoomView.Batch));
-        return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+        return MarisaPluginTaskState.CompletedTask;
     }
 
     private (VersusPlayerBinding<TScore> Self, VersusPlayerBinding<TScore> Opponent)? ResolvePlayers(Message message)

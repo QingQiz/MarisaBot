@@ -59,7 +59,7 @@ public class ChunithmVersusCommandTest
 
     private static (List<ChunithmSong> Songs, int LevelIndex, bool Random) Resolve(SongDb<ChunithmSong> db, string input) =>
         ((List<ChunithmSong>, int, bool))typeof(Chunithm.Chunithm)
-            .GetMethod("ResolveVersusQuery", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [db, input, null])!;
+            .GetMethod("ResolveVersusQuery", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [db, input])!;
 
     private static SongDb<ChunithmSong> Songs()
     {

@@ -137,20 +137,20 @@ public class BattleInterfaceRegistrationTest
             return Task.FromResult(MarisaPluginTaskState.ToBeContinued);
         }
 
-        public override Task<MarisaPluginTaskState> RandomRoom(Message message, long botQq)
+        public override MarisaPluginTaskState RandomRoom(Message message, long botQq)
         {
             Message = message;
             BotQq = botQq;
             Method = nameof(ICanBattleWithOthers.SongVersusRoomRandom);
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            return MarisaPluginTaskState.CompletedTask;
         }
 
-        public override Task<MarisaPluginTaskState> BatchRoom(Message message, long botQq)
+        public override MarisaPluginTaskState BatchRoom(Message message, long botQq)
         {
             Message = message;
             BotQq = botQq;
             Method = nameof(ICanBattleWithOthers.SongVersusRoomBatch);
-            return Task.FromResult(MarisaPluginTaskState.CompletedTask);
+            return MarisaPluginTaskState.CompletedTask;
         }
     }
 }

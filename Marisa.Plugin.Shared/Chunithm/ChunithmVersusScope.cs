@@ -5,8 +5,6 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public static class ChunithmVersusScope
 {
-    private static readonly string[] CountryGenres = ["niconico", "东方Project", "其他游戏", "原创", "彩绿", "流行 & 动漫", "音击舞萌"];
-
     public static readonly IReadOnlyDictionary<string, int> DifficultyAliases = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
     {
         ["BASIC"] = 0, ["BAS"] = 0, ["BSC"] = 0, ["绿谱"] = 0,
@@ -57,7 +55,7 @@ public static class ChunithmVersusScope
         return false;
     }
 
-    public static bool TryParse(string input, IReadOnlyList<ChunithmSong> catalog, out Query? query, out string? error, bool syntaxOnly = false)
+    public static bool TryParse(string input, IReadOnlyList<ChunithmSong> catalog, out Query? query, out string? error)
     {
         query = null;
         error = null;
@@ -89,19 +87,15 @@ public static class ChunithmVersusScope
         }
 
         var genres = new List<string>();
-        // 触发阶段识别合法分类语法，不请求远端；实际筛选始终使用传入目录的原始分类值。
-        var knownGenres = catalog.Select(song => song.Genre);
-        if (syntaxOnly) knownGenres = knownGenres.Concat(CountryGenres);
-        var genreAliases = knownGenres.Distinct(StringComparer.OrdinalIgnoreCase)
+        var genreAliases = catalog.Select(song => song.Genre).Distinct(StringComparer.OrdinalIgnoreCase)
             .SelectMany(genre => GenreAliases(genre).Select(alias => (Alias: alias, Genre: genre)))
             .Where(pair => pair.Alias.Length > 0)
-            .GroupBy(pair => pair.Alias, StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(group => group.Key.Length).ToArray();
+            .OrderByDescending(pair => pair.Alias.Length).ToArray();
         foreach (var pair in genreAliases)
         {
-            var match = TokenMatch(remaining, pair.Key);
+            var match = TokenMatch(remaining, pair.Alias);
             if (!match.Success) continue;
-            genres.AddRange(pair.Select(entry => entry.Genre));
+            genres.Add(pair.Genre);
             remaining = Remove(remaining, match);
         }
 

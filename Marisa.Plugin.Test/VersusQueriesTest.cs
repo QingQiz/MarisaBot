@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Marisa.BotDriver.DI.Message;
 using Marisa.BotDriver.Entity.Message;
 using Marisa.BotDriver.Entity.MessageData;
 using Marisa.BotDriver.Entity.MessageSender;
 using Marisa.Plugin.Shared.MaiMaiDx;
-using Marisa.Plugin.Shared.Dialog;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Marisa.Plugin.Shared.Versus;
 using NUnit.Framework;
@@ -110,131 +108,6 @@ public class VersusQueriesTest
             Assert.That(missing.LevelIndex, Is.EqualTo(3));
             Assert.That(missing.Random, Is.False);
         });
-    }
-
-    [TestCase("CN Night", 3)]
-    [TestCase("999", 3)]
-    [TestCase("ID 999", 3)]
-    [TestCase("EXPERT CN Night", 2)]
-    [TestCase("白CN Night", 4)]
-    [TestCase("cn n", 3)]
-    [TestCase("白cn n", 4)]
-    public void AdditionalCatalogueSongsCanBeSelectedByTitleIdAffixAndFuzzyQuery(string input, int level)
-    {
-        var songs = Songs("Local Song");
-        var additional = new QuerySong { Id = 999, Title = "CN Night" };
-
-        var result = Resolve(songs, input, [additional]);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.Songs, Has.Count.EqualTo(1));
-            Assert.That(result.Songs[0], Is.SameAs(additional));
-            Assert.That(result.LevelIndex, Is.EqualTo(level));
-            Assert.That(result.Random, Is.False);
-        });
-    }
-
-    [Test]
-    public void AdditionalExactTitleWinsBeforeDifficultySyntax()
-    {
-        var additional = new QuerySong { Id = 999, Title = "BASIC" };
-        var result = VersusQueries.ResolveSongQuery(Songs("Local Song"), "BASIC",
-            _ => throw new AssertionException("新增完整歌名应优先于难度语法"),
-            _ => throw new AssertionException("新增完整歌名不应剥离难度"), [additional]);
-
-        Assert.That(result.Songs.Single(), Is.SameAs(additional));
-        Assert.That(result.Random, Is.False);
-    }
-
-    [Test]
-    public void AdditionalAffixExactMatchWinsBeforeLocalWholeQueryFuzzyMatch()
-    {
-        var additional = new QuerySong { Id = 999, Title = "CN Night" };
-        var result = Resolve(Songs("EXPERT CN Night Remix"), "EXPERT CN Night", [additional]);
-
-        Assert.That(result.Songs.Single(), Is.SameAs(additional));
-        Assert.That(result.LevelIndex, Is.EqualTo(2));
-    }
-
-    [Test]
-    public void ExistingExactAliasWinsBeforeAdditionalAffixAndFuzzyMatches()
-    {
-        var songs = Songs("Local Song");
-        var aliases = (Dictionary<ReadOnlyMemory<char>, List<ReadOnlyMemory<char>>>)typeof(SongDb<QuerySong>)
-            .GetField("_songAlias", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(songs)!;
-        aliases.Add("白CN Night".AsMemory(), ["Local Song".AsMemory()]);
-        var additional = new QuerySong { Id = 999, Title = "CN Night" };
-
-        var result = Resolve(songs, "白CN Night", [additional]);
-
-        Assert.That(result.Songs.Single(), Is.SameAs(songs.SongList[0]));
-        Assert.That(result.LevelIndex, Is.EqualTo(3));
-    }
-
-    [Test]
-    public void AdditionalSearchMergesInOrderAndDeduplicatesById()
-    {
-        var songs = Songs("Night Local");
-        var sameId = new QuerySong { Id = 1, Title = "Night Local" };
-        var newSong = new QuerySong { Id = 999, Title = "Night CN" };
-
-        var result = Resolve(songs, "Night", [sameId, newSong, newSong]);
-
-        Assert.That(result.Songs, Is.EqualTo(new[] { songs.SongList[0], newSong }));
-    }
-
-    [TestCase("", true)]
-    [TestCase("missing", false)]
-    public void AdditionalCatalogueKeepsBlankAndMissingQueriesDistinct(string input, bool random)
-    {
-        var additional = new QuerySong { Id = 999, Title = "CN Night" };
-        var result = Resolve(Songs("Local Song"), input, [additional]);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.Songs, Is.Empty);
-            Assert.That(result.LevelIndex, Is.EqualTo(3));
-            Assert.That(result.Random, Is.EqualTo(random));
-        });
-    }
-
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task SongSelectionUsesTheCustomLookupForAdditionalIdsAndKeepsTheDefaultLookup(bool customLookup)
-    {
-        var songs = Songs("Local One", "Local Two");
-        var additional = new QuerySong { Id = 999, Title = "CN New Song" };
-        var (message, queue) = Message("Local");
-        var key = (message.GroupInfo?.Id, (long?)message.Sender.Id);
-        Assert.That(DialogManager.ContainsDialog(key), Is.False);
-        var lookupIds = new List<long>();
-        var candidates = songs.SongList.Append(additional).ToArray();
-
-        var selection = songs.MultiPageSelectResult(candidates, message, reply: false, waitRes: true,
-            findSong: customLookup ? FindAdditional : null);
-        try
-        {
-            Assert.That(selection.IsCompleted, Is.False);
-            Assert.That(DialogManager.TryGetDialog(key, out var handler), Is.True);
-            var (choice, _) = Message(customLookup ? "999" : "2");
-            await handler!(choice);
-
-            Assert.That(await selection, Is.SameAs(customLookup ? additional : songs.SongList[1]));
-            Assert.That(lookupIds, Is.EqualTo(customLookup ? new[] { 999L } : Array.Empty<long>()));
-            Assert.That(Replies(queue).Single(), Does.Contain("CN New Song"));
-        }
-        finally
-        {
-            DialogManager.RemoveDialog(key);
-        }
-        return;
-
-        QuerySong? FindAdditional(long id)
-        {
-            lookupIds.Add(id);
-            return id == additional.Id ? additional : null;
-        }
     }
 
     [TestCase("")]
@@ -373,9 +246,8 @@ public class VersusQueriesTest
             (null, $"范围解析的详细错误：{query}");
     }
 
-    private static (List<QuerySong> Songs, int LevelIndex, bool Random) Resolve(
-        SongDb<QuerySong> songs, string input, IReadOnlyList<QuerySong>? additionalSongs = null) =>
-        VersusQueries.ResolveSongQuery(songs, input, Difficulty, StripAffix, additionalSongs);
+    private static (List<QuerySong> Songs, int LevelIndex, bool Random) Resolve(SongDb<QuerySong> songs, string input) =>
+        VersusQueries.ResolveSongQuery(songs, input, Difficulty, StripAffix);
 
     private static int? Difficulty(string query) =>
         PlateData.DifficultyAliasMap.TryGetValue(query, out var level) ? level : null;
@@ -415,7 +287,7 @@ public class VersusQueriesTest
 
     private sealed class QuerySong : Song
     {
-        public override string MaxLevel() => "14";
+        public override string MaxLevel() => throw new NotSupportedException();
         public override string GetImage() => throw new NotSupportedException();
         public override Image GetCover() => throw new NotSupportedException();
     }

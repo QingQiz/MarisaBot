@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Versus;
 using NUnit.Framework;
 
@@ -52,15 +54,14 @@ public class ChunithmVersusModelTest
     }
 
     [Test]
-    public void CatalogueMembershipDefinesCurrentScopeInsteadOfHistoricDeletionIds()
+    public void DeletedSongIsExcludedFromBothCandidateScopeAndNormalizedScores()
     {
         var catalog = new[] { Song(1), Song(156) };
         var normalized = ChunithmVersusCatalog.NormalizeScores([Score(1, 3, 1_000_000), Score(156, 3, 1_009_000)], catalog);
         Assert.Multiple(() =>
         {
-            Assert.That(ChunithmVersusCatalog.StandardCharts(catalog).Select(chart => chart.Id).Distinct(), Is.EqualTo(new[] { 1L, 156L }));
-            Assert.That(normalized.Keys, Is.EqualTo(new[] { (1L, 3), (156L, 3) }));
-            Assert.That(ChunithmVersusCatalog.NormalizeScores([Score(156, 3, 1_009_000)], [Song(1)]), Is.Empty);
+            Assert.That(ChunithmVersusCatalog.StandardCharts(catalog).Select(chart => chart.Id).Distinct(), Is.EqualTo(new[] { 1L }));
+            Assert.That(normalized.Keys, Is.EqualTo(new[] { (1L, 3) }));
         });
     }
 
@@ -224,6 +225,18 @@ public class ChunithmVersusModelTest
 
     internal static VersusPlayer<ChunithmScore> Player(long qq, params ChunithmScore[] scores) =>
         new(qq, $"player-{qq}", scores.ToDictionary(score => (score.Id, (int)score.LevelIndex)));
+
+    internal static IDisposable UseNationalSongs(List<ChunithmSong> songs)
+    {
+        var field = typeof(LxnsDataFetcher).GetField("_songList", BindingFlags.NonPublic | BindingFlags.Static)!;
+        field.SetValue(null, songs);
+        return new Restore(() => field.SetValue(null, null));
+    }
+
+    private sealed class Restore(Action restore) : IDisposable
+    {
+        public void Dispose() => restore();
+    }
 
     private static ChunithmVersusBatch Batch(IReadOnlyList<ChunithmVersusChart> charts,
         VersusPlayer<ChunithmScore> a, VersusPlayer<ChunithmScore> b) => new("scope", "", "定数降序", charts, a, b);

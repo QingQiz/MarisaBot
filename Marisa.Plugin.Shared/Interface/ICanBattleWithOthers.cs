@@ -32,13 +32,13 @@ public interface ICanBattleWithOthers
     [MarisaPluginSubCommand(nameof(SongVersusRoom))]
     [MarisaPluginTrigger(typeof(ICanBattleWithOthers), nameof(VersusRandomTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "n")]
-    Task<MarisaPluginTaskState> SongVersusRoomRandom(Message message, long qq) => Battle.RandomRoom(message, qq);
+    MarisaPluginTaskState SongVersusRoomRandom(Message message, long qq) => Battle.RandomRoom(message, qq);
 
     [MarisaPluginDoc("比较范围内的全部谱面", "`范围`，可选难度、版本、等级或定数，可在参数前后 @多人")]
     [MarisaPluginSubCommand(nameof(SongVersusRoom))]
     [MarisaPluginTrigger(typeof(ICanBattleWithOthers), nameof(VersusBatchTrigger), MessageType.GroupMessage)]
     [MarisaPluginCommand(MessageType.GroupMessage, false, "b")]
-    Task<MarisaPluginTaskState> SongVersusRoomBatch(Message message, long qq) => Battle.BatchRoom(message, qq);
+    MarisaPluginTaskState SongVersusRoomBatch(Message message, long qq) => Battle.BatchRoom(message, qq);
 
     bool VersusRandomTrigger(Message message, IServiceProvider provider) => VersusCommands.RandomTrigger(message);
 

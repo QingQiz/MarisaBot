@@ -17,20 +17,16 @@ public partial class Chunithm
 {
     private VersusBattle? _battle;
 
-    VersusBattle ICanBattleWithOthers.Battle => _battle ??= new PreparingVersusBattle(
-        query => ChunithmVersusScope.TryParse(query, SongDb.SongList, out _, out _, syntaxOnly: true),
-        async () => CreateVersusBattle(await ChunithmCnCatalog.Shared.GetAsync()));
-
-    private VersusBattle<ChunithmScore, ChunithmVersusChart> CreateVersusBattle(IReadOnlyList<ChunithmSong> catalog) => new()
+    VersusBattle ICanBattleWithOthers.Battle => _battle ??= new VersusBattle<ChunithmScore, ChunithmVersusChart>
     {
         CommandPrefix = "chu",
-        ResolvePlayer = (message, qq) => ResolveBattlePlayer(message, qq, catalog),
+        ResolvePlayer = ResolveBattlePlayer,
         IsOpponentBindingError = error => error.Contains("OAuth", StringComparison.OrdinalIgnoreCase) ||
                                           error.Contains("绑定", StringComparison.Ordinal),
-        SelectSingle = message => SelectVersusSingle(message, catalog),
-        ParseRandom = (message, usage) => ParseVersusRandom(message, usage, catalog),
-        ParseBatch = message => ParseVersusScope(message, catalog),
-        MatchScope = query => ChunithmVersusScope.TryParse(query, catalog, out _, out _),
+        SelectSingle = SelectVersusSingle,
+        ParseRandom = ParseVersusRandom,
+        ParseBatch = ParseVersusScope,
+        MatchScope = query => ChunithmVersusScope.TryParse(query, SongDb.SongList, out _, out _),
         ChartKey = chart => (chart.Id, chart.LevelIndex),
         VersionOf = VersusVersion,
         ReplySingle = async (message, chart, self, opponent) =>
@@ -40,14 +36,13 @@ public partial class Chunithm
             var batch = new ChunithmVersusBatch(title, version, sortLabel, charts, self, opponent);
             await VersusPaging.ReplyPages(this, message, batch.PageCount, page => ChunithmDraw.DrawVersusBatch(batch, page));
         },
-        OpenRoom = (message, members, plan, presentation) => OpenVersusRoom(message, members, plan, presentation, catalog)
+        OpenRoom = OpenVersusRoom
     };
 
-    private (VersusPlayerBinding<ChunithmScore>? Player, string? Error) ResolveBattlePlayer(
-        Message message, long qq, IReadOnlyList<ChunithmSong> catalog)
+    private (VersusPlayerBinding<ChunithmScore>? Player, string? Error) ResolveBattlePlayer(Message message, long qq)
     {
         var (player, error) = ResolveVersusPlayer(message, qq);
-        return (player is null ? null : new VersusPlayerBinding<ChunithmScore>(qq, () => FetchBattleData(player, catalog)), error);
+        return (player is null ? null : new VersusPlayerBinding<ChunithmScore>(qq, () => FetchBattleData(player)), error);
     }
 
     private (ResolvedPlayer? Player, string? Error) ResolveVersusPlayer(Message message, long qq)
@@ -69,11 +64,11 @@ public partial class Chunithm
         }
     }
 
-    private static async Task<VersusFetchResult<ChunithmScore>> FetchBattleData(ResolvedPlayer player, IReadOnlyList<ChunithmSong> catalog)
+    private static async Task<VersusFetchResult<ChunithmScore>> FetchBattleData(ResolvedPlayer player)
     {
         try
         {
-            var data = await player.Fetcher.GetBattleData(player, catalog);
+            var data = await player.Fetcher.GetBattleData(player);
             return new VersusFetchResult<ChunithmScore>(new VersusPlayer<ChunithmScore>(player.Qq,
                 string.IsNullOrWhiteSpace(data.Nickname) ? $"QQ {player.Qq}" : data.Nickname, data.Scores), null);
         }
@@ -83,37 +78,32 @@ public partial class Chunithm
         }
     }
 
-    private static (List<ChunithmSong> Songs, int LevelIndex, bool Random) ResolveVersusQuery(
-        SongDb<ChunithmSong> songs, string input, IReadOnlyList<ChunithmSong>? catalog = null)
+    private static (List<ChunithmSong> Songs, int LevelIndex, bool Random) ResolveVersusQuery(SongDb<ChunithmSong> songs, string input)
         => VersusQueries.ResolveSongQuery(songs, input,
             query => ChunithmVersusScope.TryParseDifficulty(query, out var difficulty) ? difficulty : null,
-            query => ChunithmVersusScope.TryStripDifficultyAffix(query, out var level, out var rest) ? (level, rest) : null,
-            additionalSongs: catalog);
+            query => ChunithmVersusScope.TryStripDifficultyAffix(query, out var level, out var rest) ? (level, rest) : null);
 
-    private static IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level, IReadOnlyList<ChunithmSong> catalog) =>
-        ChunithmVersusCatalog.StandardCharts(catalog).Where(x => x.LevelIndex == level).ToArray();
+    private static IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) =>
+        ChunithmVersusCatalog.StandardCharts(LxnsDataFetcher.GetSharedSongList()).Where(x => x.LevelIndex == level).ToArray();
 
-    private async Task<VersusSingleSelection<ChunithmVersusChart>?> SelectVersusSingle(Message message, IReadOnlyList<ChunithmSong> catalog)
+    private async Task<VersusSingleSelection<ChunithmVersusChart>?> SelectVersusSingle(Message message)
     {
-        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString(), catalog);
+        var selection = ResolveVersusQuery(SongDb, message.Command.Trim().ToString());
         var levelName = ChunithmSong.LevelLabel[selection.LevelIndex];
         if (selection.Random)
         {
-            var randomCharts = VersusLevelCharts(selection.LevelIndex, catalog);
+            var randomCharts = VersusLevelCharts(selection.LevelIndex);
             var title = selection.LevelIndex == 3 ? "随机单曲" : $"随机单曲（{levelName}）";
             return new VersusSingleSelection<ChunithmVersusChart>(randomCharts, true, title, VersusVersion(randomCharts));
         }
 
-        var nationalById = catalog.ToDictionary(song => song.Id);
-        var candidates = selection.Songs.Select(song => nationalById.GetValueOrDefault(song.Id) ?? song).ToArray();
-        var song = await SongDb.MultiPageSelectResult(candidates, message, false, true,
-            findSong: id => nationalById.GetValueOrDefault(id) ?? SongDb.GetSongById(id));
+        var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
         if (song is null) return null;
-        var nationalSong = nationalById.GetValueOrDefault(song.Id);
-        var chart = nationalSong is null ? null : ChunithmVersusCatalog.FindChart(nationalSong, selection.LevelIndex);
+        var cnSong = LxnsDataFetcher.GetSharedSongList().FirstOrDefault(x => x.Id == song.Id);
+        var chart = cnSong is null ? null : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex);
         if (chart is null)
         {
-            message.Reply($"国服当前曲库未收录「{song.Title}」的 {levelName} 谱面，暂不能进行对战");
+            message.Reply($"国服暂未收录「{song.Title}」的 {levelName} 谱面");
             return null;
         }
 
@@ -121,22 +111,23 @@ public partial class Chunithm
         return new VersusSingleSelection<ChunithmVersusChart>(charts, false, $"{song.Title}（{levelName}）", VersusVersion(charts));
     }
 
-    private VersusRandomSelection<ChunithmVersusChart>? ParseVersusRandom(Message message, string usage, IReadOnlyList<ChunithmSong> catalog)
+    private VersusRandomSelection<ChunithmVersusChart>? ParseVersusRandom(Message message, string usage)
         => VersusQueries.ParseRandom(message, usage, 20,
             query => ChunithmVersusScope.TryParseDifficulty(query, out var difficulty) ? difficulty : null,
-            level => VersusLevelCharts(level, catalog), query => ParseVersusScopeQuery(query, catalog),
+            VersusLevelCharts, ParseVersusScopeQuery,
             query => $"无法解析难度或范围：{query}；支持 BASIC～ULTIMA");
 
-    private VersusBatchSelection<ChunithmVersusChart>? ParseVersusScope(Message message, IReadOnlyList<ChunithmSong> catalog)
-        => VersusQueries.ParseBatch(message, query => ParseVersusScopeQuery(query, catalog));
+    private VersusBatchSelection<ChunithmVersusChart>? ParseVersusScope(Message message)
+        => VersusQueries.ParseBatch(message, ParseVersusScopeQuery);
 
-    private static (VersusScopeSelection<ChunithmVersusChart>? Scope, string? Error) ParseVersusScopeQuery(string query, IReadOnlyList<ChunithmSong> catalog)
+    private static (VersusScopeSelection<ChunithmVersusChart>? Scope, string? Error) ParseVersusScopeQuery(string query)
     {
-        if (!ChunithmVersusScope.TryParse(query, catalog, out var scope, out var error) || scope is null)
+        var songs = LxnsDataFetcher.GetSharedSongList();
+        if (!ChunithmVersusScope.TryParse(query, songs, out var scope, out var error) || scope is null)
             return (null, error ?? $"无法解析范围：{query}");
 
         return (new VersusScopeSelection<ChunithmVersusChart>(
-            ChunithmVersusScope.SelectCharts(scope, catalog), scope.SortLabel), null);
+            ChunithmVersusScope.SelectCharts(scope, songs), scope.SortLabel), null);
     }
 
     private static string VersusVersion(IEnumerable<ChunithmVersusChart> charts)
@@ -146,10 +137,10 @@ public partial class Chunithm
     }
 
     private void OpenVersusRoom(Message message, (long[] Joined, long[] Unbound) members,
-        VersusRoomPlan<ChunithmVersusChart> plan, VersusRoomPresentation presentation, IReadOnlyList<ChunithmSong> catalog)
+        VersusRoomPlan<ChunithmVersusChart> plan, VersusRoomPresentation presentation)
     {
         VersusRoomSession.OpenRendered<ChunithmScore, ChunithmVersusChart, ChunithmVersusMulti>(this, message, members, plan,
-            chart => (chart.Id, chart.LevelIndex), chart => chart.Constant, (next, qq) => ResolveBattlePlayer(next, qq, catalog),
+            chart => (chart.Id, chart.LevelIndex), chart => chart.Constant, ResolveBattlePlayer,
             (charts, players) => new ChunithmVersusMulti(plan.Title, presentation.Version, charts, players),
             result => result.ForRoom(),
             ChunithmDraw.DrawVersusMulti, ChunithmDraw.DrawVersusMultiBatch, result => result.PageCount, presentation.View);

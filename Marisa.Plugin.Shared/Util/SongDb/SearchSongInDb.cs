@@ -29,11 +29,9 @@ public static class SearchSongInDb
     /// <param name="message"></param>
     /// <param name="reply">是否回复歌曲详细信息（图片）</param>
     /// <param name="waitRes">是否等待查询结果</param>
-    /// <param name="findSong">可选的 ID 查询器，供额外歌曲资料参与选择</param>
     /// <typeparam name="T">TSong</typeparam>
     /// <returns></returns>
-    public static Task<T?> MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message,
-        bool reply = true, bool waitRes = false, Func<long, T?>? findSong = null) where T : Song
+    public static Task<T?> MultiPageSelectResult<T>(this SongDb<T> db, IReadOnlyList<T> songs, Message message, bool reply = true, bool waitRes = false) where T : Song
     {
         var result = new TaskCompletionSource<T?>();
 
@@ -70,7 +68,7 @@ public static class SearchSongInDb
 
             if (long.TryParse(next.Command.Span, out var id))
             {
-                var song = findSong is null ? db.GetSongById(id) : findSong(id);
+                var song = db.GetSongById(id);
 
                 if (song == null)
                 {

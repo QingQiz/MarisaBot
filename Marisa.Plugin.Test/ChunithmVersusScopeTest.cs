@@ -135,11 +135,10 @@ public class ChunithmVersusScopeTest
     public void RandomAndBatchAdaptersUseNaturalVersionAliases(string input, string version)
     {
         var songs = new SongDb<ChunithmSong>("unused.tsv", "unused.tsv", () => VersionCatalog.ToList());
-        var plugin = (Chunithm.Chunithm)RuntimeHelpers.GetUninitializedObject(typeof(Chunithm.Chunithm));
+        using var national = ChunithmVersusModelTest.UseNationalSongs(VersionCatalog.ToList());        var plugin = (Chunithm.Chunithm)RuntimeHelpers.GetUninitializedObject(typeof(Chunithm.Chunithm));
         typeof(Chunithm.Chunithm).GetField("<SongDb>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)!
             .SetValue(plugin, songs);
-        var adapter = (VersusBattle<ChunithmScore, ChunithmVersusChart>)typeof(Chunithm.Chunithm)
-            .GetMethod("CreateVersusBattle", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(plugin, [VersionCatalog])!;
+        var adapter = (VersusBattle<ChunithmScore, ChunithmVersusChart>)((ICanBattleWithOthers)plugin).Battle;
         var queue = new MessageQueueProvider();
         var random = adapter.ParseRandom(ScopeMessage("2 " + input), "usage");
         var batch = adapter.ParseBatch(ScopeMessage(input));
@@ -266,18 +265,16 @@ public class ChunithmVersusScopeTest
     [TestCase("東方Project", "东方Project")]
     [TestCase("VOCALOID", "niconico")]
     [TestCase("V家", "niconico")]
-    public void CountryGenreAliasesSelectActualCountryMetadata(string alias, string expectedGenre)
+    public void NationalGenresAcceptLocalAliases(string alias, string expectedGenre)
     {
-        string[] countryGenres = ["niconico", "东方Project", "其他游戏", "原创", "彩绿", "流行 & 动漫", "音击舞萌"];
-        var catalog = countryGenres.Select((genre, index) => ChunithmVersusModelTest.Song(20_000 + index, genre: genre)).ToArray();
+        string[] genres = ["niconico", "东方Project", "其他游戏", "原创", "彩绿", "流行 & 动漫", "音击舞萌"];
+        var catalog = genres.Select((genre, index) => ChunithmVersusModelTest.Song(20_000 + index, genre: genre)).ToArray();
         Assert.That(ChunithmVersusScope.TryParse(alias + "14", catalog, out var query, out var error), Is.True, error);
         var charts = ChunithmVersusScope.SelectCharts(query!, catalog);
         Assert.Multiple(() =>
         {
             Assert.That(query!.Genres, Is.EqualTo(new[] { expectedGenre }));
-            Assert.That(charts, Has.Count.EqualTo(1));
-            Assert.That(charts.Single().Song.Genre, Is.EqualTo(expectedGenre));
-            Assert.That(charts.Single().LevelIndex, Is.EqualTo(3));
+            Assert.That(charts.Select(chart => (chart.Song.Genre, chart.LevelIndex)), Is.EqualTo(new[] { (expectedGenre, 3) }));
         });
     }
 
@@ -287,63 +284,11 @@ public class ChunithmVersusScopeTest
     [TestCase("音击舞萌", "ゲキマイ")]
     [TestCase("彩绿", "イロドリミドリ")]
     [TestCase("东方Project", "東方Project")]
-    public void CountryGenreNamesCanStillSelectLocalJapaneseMetadata(string alias, string genre)
+    public void LocalGenresAcceptNationalNames(string alias, string genre)
     {
         var catalog = new[] { ChunithmVersusModelTest.Song(1, genre: genre) };
         Assert.That(ChunithmVersusScope.TryParse(alias, catalog, out var query, out var error), Is.True, error);
         Assert.That(query!.Genres, Is.EqualTo(new[] { genre }));
-        Assert.That(ChunithmVersusScope.SelectCharts(query, catalog).Single().Song, Is.SameAs(catalog[0]));
-    }
-
-    [Test]
-    public void GenreAliasMatchesAllActualNamesInMixedCatalogs()
-    {
-        var catalog = new[]
-        {
-            ChunithmVersusModelTest.Song(1, genre: "ORIGINAL"), ChunithmVersusModelTest.Song(2, genre: "原创")
-        };
-        Assert.That(ChunithmVersusScope.TryParse("原创曲", catalog, out var query, out var error), Is.True, error);
-        Assert.Multiple(() =>
-        {
-            Assert.That(query!.Genres, Is.EquivalentTo(new[] { "ORIGINAL", "原创" }));
-            Assert.That(ChunithmVersusScope.SelectCharts(query, catalog).Select(chart => chart.Id), Is.EqualTo(new long[] { 1, 2 }));
-        });
-    }
-
-    [Test]
-    public void SyntaxOnlyCountryCategoryRecognitionDoesNotGrantAbsentCharts()
-    {
-        var catalog = new[] { ChunithmVersusModelTest.Song(1, genre: "niconico") };
-        Assert.That(ChunithmVersusScope.TryParse("音击舞萌14", catalog, out _, out _), Is.False);
-        Assert.That(ChunithmVersusScope.TryParse("音击舞萌14", catalog, out var query, out var error, syntaxOnly: true), Is.True, error);
-        Assert.That(ChunithmVersusScope.SelectCharts(query!, catalog), Is.Empty);
-
-        var message = new Message(new MessageChain(new MessageDataText("b音击舞萌14")), null!)
-        {
-            Command = "b音击舞萌14".AsMemory()
-        };
-        Assert.That(VersusCommands.BatchTrigger(message,
-            input => ChunithmVersusScope.TryParse(input, catalog, out _, out _, syntaxOnly: true)), Is.True);
-    }
-
-    [TestCase("BLACKBOX")]
-    [TestCase("ORIGINALITY14")]
-    [TestCase("VARIETYLAND14")]
-    [TestCase("niconicobox14")]
-    [TestCase("niconicoBLACKBOX")]
-    [TestCase("原创曲BLACKBOX")]
-    public void SyntaxOnlyGenreAliasesDoNotConsumeSongTitlePrefixes(string input) =>
-        Assert.That(ChunithmVersusScope.TryParse(input, [], out _, out _, syntaxOnly: true), Is.False);
-
-    [TestCase("niconico")]
-    [TestCase("niconico14")]
-    [TestCase("其他14")]
-    [TestCase("动漫14")]
-    [TestCase("音击舞萌14")]
-    public void SyntaxOnlyGenreAliasesRecognizeLegalScopesWithNoLoadedSongs(string input)
-    {
-        Assert.That(ChunithmVersusScope.TryParse(input, [], out var query, out var error, syntaxOnly: true), Is.True, error);
-        Assert.That(ChunithmVersusScope.SelectCharts(query!, []), Is.Empty);
     }
 
     private static ChunithmSong[] ActualCatalog()
