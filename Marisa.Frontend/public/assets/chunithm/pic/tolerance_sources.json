@@ -1,0 +1,105 @@
+{
+  "sourceVersion": "SDHD 2.45.00 / CHUNITHM X-VERSE-X",
+  "archiveEntry": "data/acroarts/CHU_EF_Tap_text_v10.afb",
+  "afbSha256": "dc5de24b0a5698d4fd286225a0232a3a9e9ca8038dbbe5f02eca2479fcc4cf71",
+  "embeddedTextureName": "chu_ef_textset.dds",
+  "embeddedDdsOffset": 18624,
+  "ddsSha256": "c2836b979d3fa751d0210dbcabfe78943c357c32d0e1992fe98c5b25120c78dc",
+  "nativeTextureSize": [
+    512,
+    512
+  ],
+  "labels": [
+    {
+      "file": "tolerance_justice.png",
+      "cropLTRB": [
+        256,
+        0,
+        512,
+        64
+      ],
+      "subcropLTRB": [
+        0,
+        0,
+        249,
+        57
+      ],
+      "pasteXY": [
+        6,
+        4
+      ],
+      "canvas": [
+        256,
+        64
+      ],
+      "bodyAlpha128Bounds": [
+        10,
+        12,
+        247,
+        53
+      ],
+      "pngSha256": "2436bfa4823f92b7c65ae89a3e7c7cbf5875cbbb29bc688be6468c9c4370c5ba"
+    },
+    {
+      "file": "tolerance_attack.png",
+      "cropLTRB": [
+        0,
+        64,
+        256,
+        128
+      ],
+      "subcropLTRB": [
+        5,
+        0,
+        238,
+        50
+      ],
+      "pasteXY": [
+        12,
+        11
+      ],
+      "canvas": [
+        256,
+        64
+      ],
+      "bodyAlpha128Bounds": [
+        20,
+        12,
+        237,
+        53
+      ],
+      "pngSha256": "8f4c6aa2e625bc542d2ed10d892ba45473557c1e34ff943298b9f47192548493"
+    },
+    {
+      "file": "tolerance_miss.png",
+      "cropLTRB": [
+        0,
+        0,
+        256,
+        64
+      ],
+      "subcropLTRB": [
+        46,
+        0,
+        198,
+        58
+      ],
+      "pasteXY": [
+        52,
+        4
+      ],
+      "canvas": [
+        256,
+        64
+      ],
+      "bodyAlpha128Bounds": [
+        60,
+        11,
+        196,
+        54
+      ],
+      "pngSha256": "e798dc19c9e4014b4ca2f26fe4f54908cfa1883e4c356b7ab1c9cd345839d732"
+    }
+  ],
+  "notes": "Native pixels cropped and translated on transparent canvases; no scaling or recoloring."
+}

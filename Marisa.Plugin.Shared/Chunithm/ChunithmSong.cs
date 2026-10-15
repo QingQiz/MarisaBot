@@ -202,7 +202,7 @@ public partial class ChunithmSong : Song
 
     public override string GetImage()
     {
-        var path = Path.Join(ResourceManager.TempPath, $"Detail.{Id}.{Hash()}.b64");
+        var path = Path.Join(ResourceManager.TempPath, $"Detail.song-card-v2.{Id}.{Hash()}.b64");
         return new CacheableText(path, () =>
         {
             var beatmaps = new List<object>();

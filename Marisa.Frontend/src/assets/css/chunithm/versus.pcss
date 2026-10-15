@@ -1,4 +1,3 @@
-.chu-versus,.chu-batch,.chu-multi,.chu-multi-batch { --chu-ultima-ink:#7e183d; }
 .chu-versus .achievement { font-variant-numeric:tabular-nums; font-size:36px; letter-spacing:0; }
 .chu-versus .score-main { padding-right:76px; }
 .chu-versus .metrics { grid-template-columns:1fr; }
@@ -10,15 +9,6 @@
 .chu-batch .score-badges { height:20px; flex:0 0 20px; }
 .chu-batch .scope-chip,.chu-multi-batch .scope-chip { border-color:color-mix(in srgb,var(--accent) 45%,transparent); background:color-mix(in srgb,var(--accent) 15%,transparent); color:#f0edf5; }
 
-/* ULTIMA：参考原生黑底与红色斜翼，保留深色主体和细亮边。 */
-.chu-ultima {
-    --pill-bg:linear-gradient(135deg,#270d18,#101016 64%,#431324);
-    --pill-shadow:0 2px 12px #be14312e;
-    --chip-ink:#f4dce3;
-    --chip-bg:linear-gradient(135deg,#32101d,#0c0a10 68%,#6a152e);
-    --chip-ring:0 0 0 1px #d9335580;
-}
-.chu-ultima :deep(.stripe-layer + .absolute) { opacity:.32; }
 .chu-ultima .mai-accent-rail::before {
     background:var(--chu-ultima-ink);
     box-shadow:0 0 8px color-mix(in srgb,var(--chu-ultima-ink) 20%,transparent);
@@ -26,12 +16,3 @@
 .chu-ultima .player,.chu-ultima .racer { --rail-opacity:.4; }
 .chu-ultima .player.winner,.chu-ultima .racer.leader { --rail-opacity:1; }
 .chu-ultima .racer.unplayed { --rail-opacity:.2; }
-.chu-ultima :deep(.stripe-layer) {
-    background:repeating-linear-gradient(-38deg,rgba(255,255,255,.025) 0 3px,transparent 3px 26px,rgba(255,255,255,.025) 26px 29px,transparent 29px 52px,rgba(255,255,255,.025) 52px 55px,transparent 55px 78px,#e718451c 78px 81px,transparent 81px 104px);
-}
-.chu-ultima .section-tag {
-    background:repeating-linear-gradient(135deg,transparent 0 60px,#e7184566 60px 62px,transparent 62px 70px),linear-gradient(135deg,#3a1020,#100b12 72%,#591328);
-    box-shadow:0 0 0 1px #eb3e6470,inset 0 0 12px #600d2540;
-    color:#fff0f4;
-}
-.chu-ultima .scope-chip { background:linear-gradient(135deg,#44101f80,#09080dc0 72%,#7a102d50); border-color:#d52c5066; color:#f7dfe6; }

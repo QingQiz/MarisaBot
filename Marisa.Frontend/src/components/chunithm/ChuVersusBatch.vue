@@ -1,5 +1,5 @@
 <template>
-    <MaiCardShell v-if="data" class="batch-card chu-batch" :class="{'chu-ultima': themeIndex === 4}" :width="cardWidth" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="difficultyColor(themeIndex)" :style="{'--accent': difficultyColor(themeIndex)}">
+    <MaiCardShell v-if="data" class="batch-card chu-batch chu-theme" :class="{'chu-ultima': themeIndex === 4}" :width="cardWidth" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="difficultyColor(themeIndex)" :style="{'--accent': difficultyColor(themeIndex)}">
         <header class="batch-header">
             <div class="batch-heading">
                 <img :src="versionLogo(data.Version)" class="version-logo" alt="CHUNITHM" @error="fallbackLogo">
@@ -70,7 +70,8 @@ import {context_get} from '@/GlobalVars'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiCover from '@/components/maimai/MaiCover.vue'
 import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
-import {backgroundOf, difficultyColor, difficultyStyle, formatScore, hasClear, rankIcon, versionLogo, fallbackLogo, type ChuScore} from '@/components/chunithm/utils/versus'
+import {backgroundOf, difficultyColor, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
+import {formatScore, hasClear, rankIcon, type ChuScore} from '@/components/chunithm/utils/versus'
 type Side = 'left' | 'right'
 type Outcome = Side | 'draw' | 'unplayed'
 interface Row { Id: number; Title: string; LevelIndex: number; LevelName: string; ChartIndex: number; Level: string; Constant: number; Left: ChuScore; Right: ChuScore; Outcome: Outcome }
@@ -95,3 +96,4 @@ function outcomeLabel(outcome: Outcome) { return ({left: 'WIN', right: 'WIN', dr
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/versus/batch.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/versus.pcss"/>
+<style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>

@@ -1,0 +1,51 @@
+/* 虹色细轨：混合歌曲仅装饰 WE 谱面，整卡仍跟随最高常规难度。 */
+.chu-song.chu-we {
+    --we-pattern: url('/assets/chunithm/pic/song_worldsend_pattern.png');
+    --we-side: url('/assets/chunithm/pic/song_worldsend_side.png');
+    --we-spectrum: linear-gradient(90deg, #df00b5 0%, #13dcea 19%, #0dc35a 37%, #e9ed09 55%, #ff5826 72%, #e30986 86%, #4824c4 100%);
+    --we-surface: linear-gradient(110deg, #242834 0%, #171b24 66%, #1e2230 100%);
+}
+
+.chu-song .chart-row.we-chart::before {
+    background: linear-gradient(180deg, #df00b5, #13dcea 23%, #0dc35a 43%, #e9ed09 63%, #ff5826 80%, #4824c4);
+    box-shadow: 0 0 10px #8f6bff40;
+}
+.chu-song .we-badge {
+    border-color: transparent;
+    background: linear-gradient(135deg, #252937, #12151d 72%) padding-box, var(--we-spectrum) border-box;
+    color: #fff;
+    font: 700 36px/1 'Microsoft YaHei', sans-serif;
+    text-shadow: 0 0 10px #c9b8ff8c;
+    box-shadow: 0 0 18px #8f6bff38, inset 0 0 12px #ffffff12;
+}
+
+.chu-song.chu-we-only {
+    --pill-bg: linear-gradient(135deg, #2c303d, #1b1f29 72%);
+    --pill-shadow: 0 2px 10px #05070d38;
+    --chip-ink: #e5e8f2;
+    --chip-bg: linear-gradient(135deg, #353948, #272b38 76%);
+    --chip-ring: 0 0 0 1px #c5cbdf3b;
+}
+.chu-song.chu-we-only :deep(.stripe-layer + .absolute) { opacity: .36; }
+.chu-song.chu-we-only :deep(.cover-frame) {
+    background-image: var(--we-pattern), var(--we-pattern), var(--we-side), var(--we-side);
+    background-position: left top, left bottom, left top, right top;
+    background-size: 292px 5px, 292px 5px, 5px 100%, 5px 100%;
+    background-repeat: repeat-x, repeat-x, no-repeat, no-repeat;
+    box-shadow: inset 0 0 0 2px #151922, 0 0 0 1px #bfc7d826, 0 8px 20px -12px #0009;
+}
+.chu-song.chu-we-only .section-tag {
+    position: relative;
+    overflow: hidden;
+    background: var(--we-surface);
+    box-shadow: 0 0 0 1px #c5cbdf28;
+}
+.chu-song.chu-we-only .section-tag::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--we-pattern) center / 260px 24px;
+}
