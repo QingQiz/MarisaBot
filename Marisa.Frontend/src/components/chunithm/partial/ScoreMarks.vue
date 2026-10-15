@@ -15,11 +15,11 @@
 
 <script setup lang="ts">
 import {computed} from 'vue'
-import {hasClear} from '@/components/chunithm/utils/versus'
+import {hasChain, hasClear, hasCombo} from '@/components/chunithm/utils/score'
 const props = withDefaults(defineProps<{combo: string; chain: string; clear?: string | null; family?: 'result' | 'common'}>(), {clear: '', family: 'result'})
 const pic = computed(() => `/assets/chunithm/pic/versus_${props.family === 'common' ? 'common_' : ''}`)
-const comboSrc = computed(() => ['fullcombo', 'alljustice', 'alljusticecritical'].includes(props.combo) ? `${pic.value}${props.combo}.png` : '')
-const chainSrc = computed(() => props.chain === 'fullchain' || props.chain === 'fullchain2' ? `${pic.value}${props.chain}.png` : '')
+const comboSrc = computed(() => hasCombo(props.combo) ? `${pic.value}${props.combo}.png` : '')
+const chainSrc = computed(() => hasChain(props.chain) ? `${pic.value}${props.chain}.png` : '')
 const clearSrc = computed(() => ['clear', 'hard', 'brave', 'absolute', 'catastrophy'].includes(props.clear ?? '') || (props.family === 'common' && props.clear === 'failed') ? `${pic.value}${props.clear}.png` : '')
 const comboTitle = computed(() => ({fullcombo: 'FULL COMBO', alljustice: 'ALL JUSTICE', alljusticecritical: 'ALL JUSTICE CRITICAL'} as Record<string, string>)[props.combo])
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <MaiCardShell v-if="data" class="batch-card chu-batch chu-theme" :class="{'chu-ultima': themeIndex === 4}" :width="cardWidth" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="difficultyColor(themeIndex)" :style="{'--accent': difficultyColor(themeIndex)}">
+    <MaiCardShell v-if="data" v-bind="cardTheme(themeIndex)" class="batch-card chu-batch" :width="cardWidth">
         <header class="batch-header">
             <div class="batch-heading">
                 <img :src="versionLogo(data.Version)" class="version-logo" alt="CHUNITHM" @error="fallbackLogo">
@@ -46,7 +46,7 @@
                         </div>
                     </template>
                     <span v-else class="missing">未游玩</span>
-                    <VersusMarks :combo="scoreOf(row, side).FullCombo" :chain="scoreOf(row, side).FullChain" :clear="scoreOf(row, side).Clear"/>
+                    <ScoreMarks :combo="scoreOf(row, side).FullCombo" :chain="scoreOf(row, side).FullChain" :clear="scoreOf(row, side).Clear"/>
                 </div>
                 <div class="outcome-cell" :class="row.Outcome">
                     <b>{{ outcomeMark(row.Outcome) }}</b>
@@ -69,9 +69,9 @@ import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiCover from '@/components/maimai/MaiCover.vue'
-import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
-import {backgroundOf, difficultyColor, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
-import {formatScore, hasClear, rankIcon, type ChuScore} from '@/components/chunithm/utils/versus'
+import ScoreMarks from '@/components/chunithm/partial/ScoreMarks.vue'
+import {cardTheme, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
+import {formatScore, hasClear, rankIcon, type ChuScore} from '@/components/chunithm/utils/score'
 type Side = 'left' | 'right'
 type Outcome = Side | 'draw' | 'unplayed'
 interface Row { Id: number; Title: string; LevelIndex: number; LevelName: string; ChartIndex: number; Level: string; Constant: number; Left: ChuScore; Right: ChuScore; Outcome: Outcome }

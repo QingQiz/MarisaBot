@@ -1,6 +1,6 @@
 <template>
-    <MaiCardShell v-if="data" class="multi-batch chu-multi-batch chu-theme" :class="{'chu-ultima': themeIndex === 4}" :width="width" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="accent"
-                  :style="{'--accent': accent, '--players': data.Players.length, '--player-column': playerColumnWidth + 'px'}">
+    <MaiCardShell v-if="data" v-bind="cardTheme(themeIndex)" class="multi-batch chu-multi-batch" :width="width"
+                  :style="{'--players': data.Players.length, '--player-column': playerColumnWidth + 'px'}">
         <header class="batch-header">
             <div class="batch-heading">
                 <img :src="versionLogo(data.Version)" class="version-logo" alt="CHUNITHM" @error="fallbackLogo">
@@ -46,7 +46,7 @@
                             <img v-if="cell.Score.Rank" :src="rankIcon(cell.Score.Rank)" class="rank" :alt="cell.Score.Rank.toUpperCase()">
                         </div>
                         <div class="completion-marks">
-                            <VersusMarks family="common" :combo="cell.Score.FullCombo" :chain="cell.Score.FullChain" :clear="cell.Score.Clear"/>
+                            <ScoreMarks family="common" :combo="cell.Score.FullCombo" :chain="cell.Score.FullChain" :clear="cell.Score.Clear"/>
                         </div>
                     </template>
                     <span v-else class="missing">—</span>
@@ -71,10 +71,11 @@ import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiCover from '@/components/maimai/MaiCover.vue'
-import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
+import ScoreMarks from '@/components/chunithm/partial/ScoreMarks.vue'
 import VersusStandings from '@/components/versus/VersusStandings.vue'
-import {backgroundOf, difficultyColor, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
-import {formatScore, formatPoints, placeColor, placeSuffix, rankIcon, type ChuChart, type VersusStanding} from '@/components/chunithm/utils/versus'
+import {cardTheme, difficultyColor, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
+import {formatScore, rankIcon} from '@/components/chunithm/utils/score'
+import {formatPoints, placeColor, placeSuffix, type ChuChart, type VersusStanding} from '@/components/chunithm/utils/versus'
 interface PlayerView { Name: string; Place: number; Points: number; Matchups: number }
 interface PageData { Title: string; Version: string; Round: number; Players: PlayerView[]; Page: number; PageSize: number; TotalCharts: number; Rows: ChuChart[]; Standings: VersusStanding[] }
 const route = useRoute()
