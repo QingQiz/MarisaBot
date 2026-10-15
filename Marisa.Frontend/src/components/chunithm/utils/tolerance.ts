@@ -10,7 +10,7 @@ export type ToleranceJudgement = keyof typeof deductions
 export function toleranceCounts(maxCombo: number | null, rank: ToleranceRank) {
     const threshold = RANK_STEPS.find(([, name]) => name === rank)![0]
     const budget = ACHIEVEMENT_MAX - threshold
-    if (maxCombo == null || !Number.isSafeInteger(maxCombo) || maxCombo <= 0 || !Number.isSafeInteger(budget * maxCombo)) return null
+    if (maxCombo == null || maxCombo <= 0) return null
     return {
         justice: Math.floor(budget * maxCombo / deductions.justice),
         attack: Math.floor(budget * maxCombo / deductions.attack),

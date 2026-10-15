@@ -74,7 +74,7 @@ const route = useRoute()
 const song = ref<ChuSongData | null>(null)
 const failed = ref(false)
 axios.get(context_get, {params: {id: route.query.id, name: 'SongData'}}).then(response => {
-    song.value = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
+    song.value = response.data
 }).catch(() => { failed.value = true })
 
 const charts = computed(() => (song.value?.Beatmaps ?? []).filter((chart): chart is ChuSongBeatmap => chart != null))
@@ -104,7 +104,7 @@ watch(song, fitCharters, {flush: 'post'})
 
 async function fitCharters() {
     await nextTick()
-    try { await document.fonts.ready } catch { /* 按回退字体测量。 */ }
+    try { await document.fonts.ready } catch { /* 测量兜底 */ }
     chartList.value?.querySelectorAll<HTMLElement>('.chart-charter').forEach(element => {
         const apply = (size: number, wrap: boolean) => {
             element.classList.toggle('wrapped', wrap)

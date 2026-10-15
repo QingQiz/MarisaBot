@@ -38,13 +38,12 @@ const coverScale = ref(1)
 const chartScale = ref(1)
 let fitVersion = 0
 
-// 沿用 MaiSong 的双列等比缩放：设计宽度 452 / 624，按内容自然高度对齐。
 async function fitColumns() {
     if (!props.largeCover) return
     const version = ++fitVersion
     coverScale.value = chartScale.value = 1
     await nextTick()
-    try { await document.fonts.ready } catch { /* 仍按实际回退字体测量。 */ }
+    try { await document.fonts.ready } catch { /* 测量兜底 */ }
     if (version !== fitVersion) return
     const container = columns.value
     const artwork = artworkColumn.value
@@ -52,14 +51,13 @@ async function fitColumns() {
     const artworkLast = artwork?.lastElementChild
     const last = charts?.lastElementChild
     if (!container || !artwork || !artworkLast || !charts || !last) return
-    // zoom 后的边框会取整；复测补偿，避免多谱面累计出两列底边的偏差。
+    // zoom 后边框会取整，需复测补偿
     for (let pass = 0; pass < 3; pass++) {
         if (version !== fitVersion) return
         const artworkHeight = (artworkLast.getBoundingClientRect().bottom - artwork.getBoundingClientRect().top) / coverScale.value
         const chartHeight = (last.getBoundingClientRect().bottom - charts.getBoundingClientRect().top) / chartScale.value
         const heightRatio = artwork.firstElementChild === artworkLast ? Math.max(1, chartHeight / artworkHeight) : chartHeight / artworkHeight
         const scale = (container.clientWidth - 28) / (452 * heightRatio + 624)
-        // 六谱或长谱师时优先保持读数清晰，不继续挤窄右栏来放大曲绘。
         chartScale.value = Math.min(1.15, Math.max(.8, scale))
         coverScale.value = (container.clientWidth - 28 - 624 * chartScale.value) / 452
         await nextTick()
