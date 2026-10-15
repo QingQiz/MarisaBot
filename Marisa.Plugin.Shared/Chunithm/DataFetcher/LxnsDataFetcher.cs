@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Net;
 using System.Text.Json;
 using Flurl.Http;
@@ -56,17 +57,27 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             var originId = weOriginIds[i];
 
             var parent = songs.FirstOrDefault(s => s.Id == originId);
-            if (parent == null) continue;
+            if (parent == null)
+            {
+                dynamic weOnly = new ExpandoObject();
+                weOnly.Id = (long)originId;
+                weOnly.Title = (string)weSong.title;
+                weOnly.Artist = (string)weSong.artist;
+                weOnly.Genre = (string)weSong.genre;
+                weOnly.Version = weSong.version.ToString();
+                weOnly.Beatmaps = Array.Empty<object>();
+                songs.Add(parent = new ChunithmSong(weOnly));
+            }
 
             var weChart = weSong.difficulties[0];
 
             parent.AddDifficulty(
-                level: (string)weChart.level,
+                level: (string)weChart.kanji,
                 constant: (double)weChart.level_value,
                 charter: (string)weChart.note_designer,
                 diffName: ChunithmSong.LevelLabel[5],
                 maxCombo: weChart.notes?.total ?? 0,
-                chartName: "",
+                chartName: weSong.id.ToString(),
                 bpm: weSong.bpm.ToString()
             );
         }
@@ -110,7 +121,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         return await GetScoresViaOAuth(oauthToken, player.Qq);
     }
 
-    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player)
+    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyCollection<long>? songIds = null)
     {
         var token = await GetRequiredOAuthToken(player.Qq);
         var scores = await GetScoreRecordsViaOAuth(token, player.Qq, forBattle: true);

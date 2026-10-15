@@ -19,7 +19,7 @@
         <SongMetaBar :song="song"/>
         <div class="flex items-end gap-5 mt-7">
             <MaiCover game="chunithm" :song-id="song.Id" :size="132" :frame-radius="22" :img-radius="16"/>
-            <MaiSongHeading :title="song.Title" :artist="song.Artist" :max="84" :min="1" :artist-size="20" :artist-top="12"/>
+            <MaiSongHeading :title="song.Title" :artist="song.Artist" :max="84" :min="1" :artist-size="20" :artist-top="12" :player="player"/>
         </div>
     </template>
 </template>
@@ -30,7 +30,7 @@ import MaiCover from '@/components/maimai/MaiCover.vue'
 import MaiSongHeading from '@/components/maimai/MaiSongHeading.vue'
 import SongMetaBar from '@/components/chunithm/partial/SongMetaBar.vue'
 import type {ChuSongHeaderData} from '@/components/chunithm/utils/song-card'
-const props = withDefaults(defineProps<{song: ChuSongHeaderData; largeCover?: boolean}>(), {largeCover: false})
+const props = withDefaults(defineProps<{song: ChuSongHeaderData; largeCover?: boolean; player?: string}>(), {largeCover: false, player: ''})
 const columns = ref<HTMLElement | null>(null)
 const artworkColumn = ref<HTMLElement | null>(null)
 const chartColumn = ref<HTMLElement | null>(null)

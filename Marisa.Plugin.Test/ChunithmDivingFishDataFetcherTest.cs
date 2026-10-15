@@ -51,8 +51,8 @@ public class ChunithmDivingFishDataFetcherTest
         Assert.That(first.Constants.Count, Is.EqualTo(first.Levels.Count));
         Assert.That(first.Constants.Count, Is.EqualTo(first.DiffNames.Count));
 
-        // 验证难度级别格式（7, 7+, 11, 13+ 等）
-        Assert.That(first.Levels, Has.All.Match(@"^\d+\+?$"));
+        // 验证难度级别格式（7, 7+, 11, 13+ 等，WE 为属性字）
+        Assert.That(first.Levels.Where((_, i) => first.DiffNames[i] != ChunithmSong.LevelLabel[5]), Has.All.Match(@"^\d+\+?$"));
 
         // 验证定数范围（0.0 ~ 15.4），WE 难度定数为 0
         Assert.That(first.Constants, Has.All.InRange(0.0, 15.4));

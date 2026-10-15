@@ -748,6 +748,7 @@ public partial class Chunithm
             .SelectMany(s => s)
             .Where(x =>
             {
+                if (x.song.DiffNames[x.i] == ChunithmSong.LevelLabel[5]) return false;
                 var lv = LevelToNumber(x.song.Levels[x.i]);
                 return lv >= a && lv <= b;
             });
@@ -845,6 +846,33 @@ public partial class Chunithm
         message.Reply($"{rating.Username} ({rating.Rating})\nOld : {rating.B30}\nNew: {rating.R20}\n\n" +
                       $"推分剩余: 0.{50 - (bSum + rSum) % 50:00}\nOld 推分剩余: 0.{30 - bSum % 30:00}\nNew 推分剩余: 0.{20 - rSum % 20:00}");
 
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
+    [MarisaPluginCommand("info", "信息")]
+    private async Task<MarisaPluginTaskState> SongInfo(Message message)
+    {
+        var at = message.MessageChain!.Messages.FirstOrDefault(m => m.Type == MessageDataType.At) as MessageDataAt;
+        var (player, error) = ResolveScorePlayer(message, at?.Target ?? message.Sender.Id, "chu info");
+        if (player is null)
+        {
+            message.Reply(error!);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var song = await SongDb.MultiPageSelectResult(SongDb.SearchSong(message.Command.Trim()), message, false, true);
+        if (song is null) return MarisaPluginTaskState.CompletedTask;
+
+        var cnSong = LxnsDataFetcher.GetSharedSongList().FirstOrDefault(x => x.Id == song.Id);
+        if (cnSong is null)
+        {
+            message.Reply($"国服暂未收录「{song.Title}」");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var data = await player.Fetcher.GetBattleData(player, [cnSong.Id, ..ChunithmVersusCatalog.WorldsEndCharts([cnSong]).Keys]);
+        message.Reply(MessageDataImage.FromBase64(await ChunithmDraw.DrawSongScore(ChunithmSongScore.Build(cnSong, data))));
         return MarisaPluginTaskState.CompletedTask;
     }
 

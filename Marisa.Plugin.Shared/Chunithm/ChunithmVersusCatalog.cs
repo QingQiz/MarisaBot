@@ -34,7 +34,14 @@ public static class ChunithmVersusCatalog
         _ => -1
     };
 
-    /// <summary>只归一化对战标准谱；不改变旧汇总/查分路径。未知、歧义标题和 WE 不参与比较。</summary>
+    /// <summary>以 WE 曲目编号为键。</summary>
+    public static IReadOnlyDictionary<long, ChunithmVersusChart> WorldsEndCharts(IEnumerable<ChunithmSong> songs) =>
+        songs.SelectMany(song => Enumerable.Range(0, song.DiffNames.Count)
+                .Where(i => DifficultyIndex(song.DiffNames[i]) == 5 && long.TryParse(song.ChartName[i], out _))
+                .Select(i => new ChunithmVersusChart(song, i, 5)))
+            .ToDictionary(chart => long.Parse(chart.Song.ChartName[chart.ChartIndex]));
+
+    /// <summary>只归一化曲库中的标准谱与 WE；WE 按曲目编号匹配，因为水鱼单谱 WE 的难度索引可能是 0。</summary>
     public static Dictionary<(long Id, int LevelIdx), ChunithmScore> NormalizeScores(
         IEnumerable<ChunithmScore> records, IReadOnlyList<ChunithmSong> catalog)
     {
@@ -43,10 +50,17 @@ public static class ChunithmVersusCatalog
             .Where(group => group.Count() == 1)
             .ToDictionary(group => group.Key, group => group.Single(), StringComparer.OrdinalIgnoreCase);
         var charts = StandardCharts(catalog).ToDictionary(chart => (chart.Id, chart.LevelIndex));
+        var worldsEnd = WorldsEndCharts(catalog);
         var result = new Dictionary<(long Id, int LevelIdx), ChunithmScore>();
 
         foreach (var record in records)
         {
+            if (worldsEnd.TryGetValue(record.Id, out var we))
+            {
+                Add((record.Id, 5), we, record);
+                continue;
+            }
+
             var difficulty = ScoreDifficulty(record);
             if (difficulty is < 0 or > 4) continue;
 
@@ -58,12 +72,18 @@ public static class ChunithmVersusCatalog
             }
 
             var key = (song.Id, difficulty);
-            if (!charts.TryGetValue(key, out var chart)) continue;
+            if (charts.TryGetValue(key, out var chart)) Add(key, chart, record);
+        }
+
+        return result;
+
+        void Add((long Id, int LevelIdx) key, ChunithmVersusChart chart, ChunithmScore record)
+        {
             var normalized = new ChunithmScore
             {
-                Id = song.Id,
-                Title = song.Title,
-                LevelIndex = difficulty,
+                Id = key.Id,
+                Title = chart.Song.Title,
+                LevelIndex = chart.LevelIndex,
                 LevelLabel = chart.LevelName,
                 Level = chart.Level,
                 Constant = (decimal)chart.Constant,
@@ -77,8 +97,6 @@ public static class ChunithmVersusCatalog
                 ? ChunithmBattleCompletion.Merge(previous, normalized)
                 : normalized;
         }
-
-        return result;
     }
 
     private static int ScoreDifficulty(ChunithmScore record)

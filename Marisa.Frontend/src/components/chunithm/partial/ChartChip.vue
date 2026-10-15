@@ -10,7 +10,7 @@ import {computed} from 'vue'
 import {chartDifficulty, type ChuSongBeatmap} from '@/components/chunithm/utils/song'
 import {difficultyColor} from '@/components/chunithm/utils/song-card'
 
-const props = withDefaults(defineProps<{chart: ChuSongBeatmap; levelChars?: number}>(), {levelChars: 3})
+const props = withDefaults(defineProps<{chart: Pick<ChuSongBeatmap, 'LevelName' | 'LevelStr'>; levelChars?: number}>(), {levelChars: 3})
 const index = computed(() => chartDifficulty(props.chart))
 </script>
 

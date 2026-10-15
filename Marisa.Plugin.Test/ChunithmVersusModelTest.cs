@@ -73,6 +73,46 @@ public class ChunithmVersusModelTest
         Assert.That(ChunithmVersusCatalog.NormalizeScores([Score(8020, 0, 0)], [song]).ContainsKey((8020, 0)), Is.True);
     }
 
+    [Test]
+    public void WorldsEndScoresMatchOnlyCatalogWorldsEndIdsIgnoringSourceDifficulty()
+    {
+        var song = WorldsEndSong();
+        var records = new[] { Score(8020, 0, 1_010_000, title: "[狂]song-1"), Score(8021, 5, 990_000), Score(8030, 5, 1_000_000), Score(1, 5, 1_000_000) };
+        var normalized = ChunithmVersusCatalog.NormalizeScores(records, [song]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(normalized.Keys, Is.EquivalentTo(new[] { (8020L, 5), (8021L, 5) }));
+            Assert.That(normalized[(8020, 5)].Level, Is.EqualTo("狂"));
+            Assert.That(normalized[(8021, 5)].LevelLabel, Is.EqualTo("WORLD'S END"));
+            Assert.That(ChunithmVersusCatalog.StandardCharts([song]).Select(chart => chart.LevelIndex), Is.EqualTo(new[] { 0, 1, 2, 3, 4 }));
+        });
+    }
+
+    [Test]
+    public void SongScoreUsesCountryConstantsAndKeepsWorldsEndWithoutRating()
+    {
+        var master = Score(1, 3, 1_007_500);
+        master.Fc = "fullcombo";
+        var we = Score(8020, 5, 1_009_000);
+        we.Clear = "absolute";
+        var page = ChunithmSongScore.Build(WorldsEndSong(), new ChunithmBattleData("player", new() { [(1, 3)] = master, [(8020, 5)] = we }));
+        Assert.Multiple(() =>
+        {
+            Assert.That(page.Nickname, Is.EqualTo("player"));
+            Assert.That(page.Song.Bpm, Is.EqualTo("200"));
+            Assert.That(page.Charts.Select(chart => (chart.LevelIndex, chart.Level)),
+                Is.EqualTo(new[] { (0, "2"), (1, "5"), (2, "10"), (3, "14"), (4, "14+"), (5, "狂"), (5, "避") }));
+            Assert.That(page.Charts[3].Score.Rating, Is.EqualTo(16m));
+            Assert.That(page.Charts[3].Score.FullCombo, Is.EqualTo("fullcombo"));
+            Assert.That(page.Charts[0].Score.State, Is.EqualTo("unplayed"));
+            Assert.That(page.Charts[5].Constant, Is.Null);
+            Assert.That(page.Charts[5].Score.Rating, Is.Null);
+            Assert.That(page.Charts[5].Score.Rank, Is.EqualTo("sssp"));
+            Assert.That(page.Charts[5].Score.Clear, Is.EqualTo("absolute"));
+            Assert.That(page.Charts[6].Score.State, Is.EqualTo("unplayed"));
+        });
+    }
+
     [TestCase(1_009_001, 1_009_000, "left")]
     [TestCase(1_009_000, 1_009_001, "right")]
     [TestCase(1_010_000, 1_010_000, "draw")]
@@ -218,6 +258,14 @@ public class ChunithmVersusModelTest
         return new ChunithmSong(song);
     }
 
+    internal static ChunithmSong WorldsEndSong()
+    {
+        var song = Song(1);
+        song.AddDifficulty("狂", 0, "", ChunithmSong.LevelLabel[5], 3000, "8020", "200");
+        song.AddDifficulty("避", 0, "", ChunithmSong.LevelLabel[5], 2500, "8021", "200");
+        return song;
+    }
+
     internal static ChunithmScore Score(long id, int level, int score, string? title = null) => new()
     {
         Id = id, LevelIndex = level, Achievement = score, Title = title ?? $"song-{id}", LevelLabel = "", Fc = "", Constant = 1m, Level = "1"
@@ -226,7 +274,7 @@ public class ChunithmVersusModelTest
     internal static VersusPlayer<ChunithmScore> Player(long qq, params ChunithmScore[] scores) =>
         new(qq, $"player-{qq}", scores.ToDictionary(score => (score.Id, (int)score.LevelIndex)));
 
-    internal static IDisposable UseNationalSongs(List<ChunithmSong> songs)
+    internal static IDisposable UseNationalSongs(List<ChunithmSong>? songs)
     {
         var field = typeof(LxnsDataFetcher).GetField("_songList", BindingFlags.NonPublic | BindingFlags.Static)!;
         field.SetValue(null, songs);
