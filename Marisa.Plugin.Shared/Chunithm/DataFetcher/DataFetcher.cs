@@ -17,8 +17,6 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
         2027, 2039, 2075, 2076, 2095, 2141, 2211, 2212, 2213, 921
     ];
 
-    internal static bool IsDeletedSong(long id) => DeletedSongs.Contains(id);
-
     protected SongDb<ChunithmSong> SongDb { get; } = songDb;
 
     public virtual List<ChunithmSong> GetSongList()
@@ -38,6 +36,10 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     /// <summary>对战只使用目标自己授权的完整成绩；公开 B30/N20 不能代表未游玩状态。</summary>
     public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player) =>
         throw new NotSupportedException("该查分器不支持 chu vs，请先 bind 改绑水鱼或落雪");
+
+    /// <summary>使用本次对战固定的国服目录，保证双方成绩与候选谱面的等级、定数一致。</summary>
+    public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyList<ChunithmSong> catalog) =>
+        GetBattleData(player);
 
     /// <summary>
     ///     bind 时实测 OAuth 授权是否可用（本地票据能否被服务端接受）。仅支持 OAuth 的查分器覆写。

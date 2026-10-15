@@ -12,8 +12,7 @@ public sealed record ChunithmVersusChart(ChunithmSong Song, int ChartIndex, int 
 public static class ChunithmVersusCatalog
 {
     public static IReadOnlyList<ChunithmVersusChart> StandardCharts(IEnumerable<ChunithmSong> songs) =>
-        songs.Where(song => !DataFetcher.DataFetcher.IsDeletedSong(song.Id))
-            .SelectMany(song => Enumerable.Range(0, song.DiffNames.Count)
+        songs.SelectMany(song => Enumerable.Range(0, song.DiffNames.Count)
                 .Where(i => i < song.Constants.Count && i < song.Levels.Count)
                 .Select(i => (ChartIndex: i, LevelIndex: DifficultyIndex(song.DiffNames[i])))
                 .Where(x => x.LevelIndex is >= 0 and <= 4)

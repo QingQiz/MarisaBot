@@ -188,7 +188,7 @@ public class VersusBattleFlowTest
         var session = new Session { Selection = new([], false, "song", "single version") };
         session.BatchSelection = new("range", "sort", session.Charts);
 
-        if (batch) session.Battle.BatchRoom(session.Message(2), 99);
+        if (batch) await session.Battle.BatchRoom(session.Message(2), 99);
         else await session.Battle.SingleRoom(session.Message(2), 99);
 
         Assert.Multiple(() =>
@@ -201,11 +201,11 @@ public class VersusBattleFlowTest
     }
 
     [Test]
-    public void RandomRoomUsesTheBatchViewAndPreservesTheRequestedCount()
+    public async Task RandomRoomUsesTheBatchViewAndPreservesTheRequestedCount()
     {
         var session = new Session();
 
-        session.Battle.RandomRoom(session.Message(2), 99);
+        await session.Battle.RandomRoom(session.Message(2), 99);
 
         Assert.Multiple(() =>
         {

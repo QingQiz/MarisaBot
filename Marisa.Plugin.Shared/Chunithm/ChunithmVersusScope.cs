@@ -5,6 +5,8 @@ namespace Marisa.Plugin.Shared.Chunithm;
 
 public static class ChunithmVersusScope
 {
+    private static readonly string[] CountryGenres = ["niconico", "东方Project", "其他游戏", "原创", "彩绿", "流行 & 动漫", "音击舞萌"];
+
     public static readonly IReadOnlyDictionary<string, int> DifficultyAliases = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
     {
         ["BASIC"] = 0, ["BAS"] = 0, ["BSC"] = 0, ["绿谱"] = 0,
@@ -55,7 +57,7 @@ public static class ChunithmVersusScope
         return false;
     }
 
-    public static bool TryParse(string input, IReadOnlyList<ChunithmSong> catalog, out Query? query, out string? error)
+    public static bool TryParse(string input, IReadOnlyList<ChunithmSong> catalog, out Query? query, out string? error, bool syntaxOnly = false)
     {
         query = null;
         error = null;
@@ -87,15 +89,19 @@ public static class ChunithmVersusScope
         }
 
         var genres = new List<string>();
-        var genreAliases = catalog.Select(song => song.Genre).Distinct(StringComparer.OrdinalIgnoreCase)
+        // 触发阶段识别合法分类语法，不请求远端；实际筛选始终使用传入目录的原始分类值。
+        var knownGenres = catalog.Select(song => song.Genre);
+        if (syntaxOnly) knownGenres = knownGenres.Concat(CountryGenres);
+        var genreAliases = knownGenres.Distinct(StringComparer.OrdinalIgnoreCase)
             .SelectMany(genre => GenreAliases(genre).Select(alias => (Alias: alias, Genre: genre)))
             .Where(pair => pair.Alias.Length > 0)
-            .OrderByDescending(pair => pair.Alias.Length).ToArray();
+            .GroupBy(pair => pair.Alias, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(group => group.Key.Length).ToArray();
         foreach (var pair in genreAliases)
         {
-            var match = TokenMatch(remaining, pair.Alias);
+            var match = TokenMatch(remaining, pair.Key);
             if (!match.Success) continue;
-            genres.Add(pair.Genre);
+            genres.AddRange(pair.Select(entry => entry.Genre));
             remaining = Remove(remaining, match);
         }
 
@@ -192,13 +198,32 @@ public static class ChunithmVersusScope
         yield return genre;
         if (genre.Contains("niconico", StringComparison.OrdinalIgnoreCase) || genre.Contains("VOCALOID", StringComparison.OrdinalIgnoreCase))
         {
-            yield return "术力口"; yield return "V家"; yield return "VOCALOID";
+            yield return "niconico"; yield return "术力口"; yield return "V家"; yield return "VOCALOID";
         }
-        if (genre.Contains("東方") || genre.Contains("东方")) yield return "东方";
-        if (genre.Contains("ORIGINAL", StringComparison.OrdinalIgnoreCase)) { yield return "原创"; yield return "原创曲"; }
-        if (genre.Contains("VARIETY", StringComparison.OrdinalIgnoreCase)) { yield return "其他"; yield return "其他游戏"; }
-        if (genre.Contains("POPS", StringComparison.OrdinalIgnoreCase) || genre.Contains("ANIME", StringComparison.OrdinalIgnoreCase)) { yield return "流行"; yield return "动漫"; }
-        if (genre.Contains("イロドリミドリ")) yield return "彩绿";
-        if (genre.Contains("ゲキマイ")) yield return "击中";
+        if (genre.Contains("東方") || genre.Contains("东方"))
+        {
+            yield return "東方Project"; yield return "东方Project"; yield return "东方";
+        }
+        if (genre.Contains("ORIGINAL", StringComparison.OrdinalIgnoreCase) || genre.Contains("原创"))
+        {
+            yield return "ORIGINAL"; yield return "原创"; yield return "原创曲";
+        }
+        if (genre.Contains("VARIETY", StringComparison.OrdinalIgnoreCase) || genre.Contains("其他") || genre.Contains("其它"))
+        {
+            yield return "VARIETY"; yield return "其他"; yield return "其他游戏"; yield return "其它"; yield return "其它游戏";
+        }
+        if (genre.Contains("POPS", StringComparison.OrdinalIgnoreCase) || genre.Contains("ANIME", StringComparison.OrdinalIgnoreCase) || genre.Contains("流行") || genre.Contains("动漫"))
+        {
+            yield return "POPS&ANIME"; yield return "POPS & ANIME";
+            yield return "流行 & 动漫"; yield return "流行&动漫"; yield return "流行"; yield return "动漫";
+        }
+        if (genre.Contains("イロドリミドリ") || genre.Contains("彩绿"))
+        {
+            yield return "イロドリミドリ"; yield return "彩绿";
+        }
+        if (genre.Contains("ゲキマイ") || genre.Contains("音击舞萌"))
+        {
+            yield return "ゲキマイ"; yield return "音击舞萌"; yield return "击中";
+        }
     }
 }

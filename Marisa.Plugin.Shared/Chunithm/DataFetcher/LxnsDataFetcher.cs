@@ -112,11 +112,23 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
 
     public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player)
     {
+        var (nickname, scores) = await FetchBattleRecords(player);
+        return new ChunithmBattleData(nickname,
+            ChunithmVersusCatalog.NormalizeScores(scores, await ChunithmCnCatalog.Shared.GetAsync()));
+    }
+
+    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyList<ChunithmSong> catalog)
+    {
+        var (nickname, scores) = await FetchBattleRecords(player);
+        return new ChunithmBattleData(nickname, ChunithmVersusCatalog.NormalizeScores(scores, catalog));
+    }
+
+    private async Task<(string Nickname, IReadOnlyList<ChunithmScore> Scores)> FetchBattleRecords(ResolvedPlayer player)
+    {
         var token = await GetRequiredOAuthToken(player.Qq);
         var scores = await GetScoreRecordsViaOAuth(token, player.Qq, forBattle: true);
         var nickname = await GetNicknameViaOAuth(token, player.Qq);
-        return new ChunithmBattleData(nickname,
-            ChunithmVersusCatalog.NormalizeScores(scores, SongDb.SongList));
+        return (nickname, scores);
     }
 
     private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)
@@ -434,5 +446,6 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
     {
         _songList = null;
         ResetLatestVersionsCache();
+        ChunithmCnCatalog.Shared.Invalidate();
     }
 }

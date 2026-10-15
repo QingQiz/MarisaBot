@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -31,6 +32,7 @@ public class ChunithmBattleDataFetcherTest
         var path = Path.Combine(_testRoot, "config.yaml");
         File.WriteAllText(path, $"tempPath: '{_testRoot}'\ndatabasePath: battle-test.db\n");
         ConfigurationManager.SetConfigFilePath(path);
+        ChunithmCnCatalog.Shared.Invalidate();
         _http = new HttpTest();
     }
 
@@ -38,6 +40,7 @@ public class ChunithmBattleDataFetcherTest
     public void TearDown()
     {
         _http.Dispose();
+        ChunithmCnCatalog.Shared.Invalidate();
         ConfigurationManager.SetConfigFilePath(_restoreConfig);
         Directory.Delete(_testRoot, true);
     }
@@ -59,7 +62,7 @@ public class ChunithmBattleDataFetcherTest
             }
         });
 
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher, songs);
         Assert.Multiple(() =>
         {
             Assert.That(data.Nickname, Is.EqualTo("opponent"));
@@ -75,7 +78,7 @@ public class ChunithmBattleDataFetcherTest
     {
         AuthorizeFish(Self, "sender-ticket");
         var fetcher = new OAuthFishFetcher(Db());
-        var error = Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        var error = Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() => FetchBattleData(fetcher));
         Assert.That(error!.Message, Does.Contain("未绑定水鱼"));
         Assert.That(_http.CallLog, Is.Empty);
     }
@@ -95,7 +98,7 @@ public class ChunithmBattleDataFetcherTest
         AuthorizeFish(Opponent, "opponent-ticket");
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records").RespondWith("forbidden", (int)HttpStatusCode.Forbidden);
-        Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() => FetchBattleData(fetcher));
         Assert.That(_http.CallLog, Has.Count.EqualTo(1));
     }
 
@@ -109,7 +112,7 @@ public class ChunithmBattleDataFetcherTest
             nickname = "opponent", rating = 0,
             records = new { best = new[] { new { mid = 1, title = "song-1", level_index = 3, fc = "alljustice" } }, r10 = Array.Empty<object>() }
         });
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
     }
 
     [TestCase("{}")]
@@ -124,7 +127,7 @@ public class ChunithmBattleDataFetcherTest
         AuthorizeFish(Opponent, "opponent-ticket");
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records").RespondWith(wire);
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
         Assert.That(_http.CallLog, Has.Count.EqualTo(1));
     }
 
@@ -135,7 +138,7 @@ public class ChunithmBattleDataFetcherTest
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records")
             .RespondWith("{\"nickname\":\"opponent\",\"records\":{\"best\":[]}}");
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores, Is.Empty);
         Assert.That(data.Nickname, Is.EqualTo("opponent"));
     }
@@ -153,7 +156,7 @@ public class ChunithmBattleDataFetcherTest
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records")
             .RespondWith("{\"records\":{\"best\":[" + scoreWire + "]}}");
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
     }
 
     [TestCase("{\"mid\":1,\"title\":\"song-1\",\"score\":0,\"level_index\":0}", 0)]
@@ -165,7 +168,7 @@ public class ChunithmBattleDataFetcherTest
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records")
             .RespondWith("{\"records\":{\"best\":[" + scoreWire + "]}}");
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores[(1, expectedLevel)].Achievement, Is.Zero);
     }
 
@@ -176,7 +179,7 @@ public class ChunithmBattleDataFetcherTest
         var fetcher = new OAuthFishFetcher(Db());
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records")
             .RespondWith("{\"records\":{\"best\":[{\"mid\":1,\"score\":0,\"level_index\":5,\"level_label\":\"WORLD'S END\"}]}}");
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores, Is.Empty);
     }
 
@@ -197,7 +200,7 @@ public class ChunithmBattleDataFetcherTest
                 }
             }
         });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores.Keys, Is.EqualTo(new[] { (1L, 3) }));
         Assert.That(data.Scores[(1, 3)].Achievement, Is.EqualTo(1_009_000));
     }
@@ -215,7 +218,7 @@ public class ChunithmBattleDataFetcherTest
         }.Skip(includeStandard ? 0 : 1).ToArray();
         _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records")
             .RespondWithJson(new { records = new { best = records } });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores.Keys, Is.EqualTo(includeStandard ? new[] { (1L, 3) } : Array.Empty<(long, int)>()));
         Assert.That(data.Scores.ContainsKey((1, 0)), Is.False);
     }
@@ -231,7 +234,7 @@ public class ChunithmBattleDataFetcherTest
             data = new[] { new { id = 999, song_name = "song-1", level_index = 3, score = 1_010_000, full_combo = "alljusticecritical", full_chain = "fullchain2" } }
         });
         _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.Multiple(() =>
         {
             Assert.That(data.Nickname, Is.EqualTo("opponent"));
@@ -251,7 +254,7 @@ public class ChunithmBattleDataFetcherTest
         {
             data = new[] { new { id = 1, song_name = "song-1", level_index = 3, full_combo = "alljustice" } }
         });
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
         Assert.That(_http.CallLog, Has.Count.EqualTo(1));
     }
 
@@ -266,7 +269,7 @@ public class ChunithmBattleDataFetcherTest
             data = new[] { new { id = 1, song_name = "song-1", score = 0, level_index = index, level_label = label } }
         });
         _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
     }
 
     [TestCase("fullchain", "fullchain2")]
@@ -279,7 +282,7 @@ public class ChunithmBattleDataFetcherTest
         {
             records = new { best = new[] { new { mid = 1, title = "song-1", score = 1_009_999, level_index = 3, fc = raw, clear = "catastrophy" } } }
         });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.Multiple(() =>
         {
             Assert.That(data.Scores[(1, 3)].FullCombo, Is.Empty, "链记录不能虚构个人 COMBO");
@@ -298,7 +301,7 @@ public class ChunithmBattleDataFetcherTest
         {
             records = new { best = new[] { new { mid = 1, title = "song-1", score = points, level_index = 3, fc = "fullchain" } } }
         });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.That(data.Scores[(1, 3)].FullCombo, Is.EqualTo(combo));
         Assert.That(data.Scores[(1, 3)].FullChain, Is.EqualTo("fullchain2"));
     }
@@ -313,7 +316,7 @@ public class ChunithmBattleDataFetcherTest
         {
             records = new { best = new[] { new { mid = 1, title = "song-1", score = points, level_index = 3, fc = "alljustice" } } }
         });
-        Assert.ThrowsAsync<InvalidDataException>(() => fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.ThrowsAsync<InvalidDataException>(() => FetchBattleData(fetcher));
     }
 
     [TestCase("fullchain", "fullchain2", "brave")]
@@ -328,7 +331,7 @@ public class ChunithmBattleDataFetcherTest
             data = new[] { new { id = 1, song_name = "song-1", level_index = 3, score = 1_010_000, full_combo = "future-combo", full_chain = rawChain, clear } }
         });
         _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.Multiple(() =>
         {
             Assert.That(data.Scores[(1, 3)].FullCombo, Is.EqualTo("future-combo"), "落雪遵循显式字段，不凭分数升 AJC");
@@ -350,7 +353,7 @@ public class ChunithmBattleDataFetcherTest
         };
         _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player/scores").RespondWithJson(new { data = reverse ? records.Reverse().ToArray() : records });
         _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
-        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var data = await FetchBattleData(fetcher);
         Assert.Multiple(() =>
         {
             Assert.That(data.Scores[(1, 3)].Achievement, Is.EqualTo(1_009_000));
@@ -359,6 +362,126 @@ public class ChunithmBattleDataFetcherTest
             Assert.That(data.Scores[(1, 3)].Clear, Is.EqualTo("catastrophy"));
         });
     }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task BattleScoresUseFixedNationalConstantsAndExcludeUnavailableChartsWithoutChangingLocalData(bool lxns)
+    {
+        var localSong = ChunithmVersusModelTest.Song(1);
+        var localJapanOnly = ChunithmVersusModelTest.Song(2);
+        var nationalSong = ChunithmVersusModelTest.Song(1, names: ["BASIC", "ADVANCED", "EXPERT", "MASTER"]);
+        nationalSong.Levels[3] = "13+";
+        nationalSong.Constants[3] = 13.8;
+        var nationalNewSong = ChunithmVersusModelTest.Song(3);
+        var nationalUnplayedSong = ChunithmVersusModelTest.Song(4);
+        var localDb = new SongDb<ChunithmSong>("", "", () => [localSong, localJapanOnly]);
+        var fetcher = AuthorizeFetcher(lxns, localDb);
+        RespondBattleScores(lxns, [(1, 3, 1_009_000), (1, 4, 1_010_000), (2, 3, 1_009_000), (3, 3, 0)]);
+
+        var data = await FetchBattleData(fetcher, [nationalSong, nationalNewSong, nationalUnplayedSong]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(data.Scores.Keys, Is.EquivalentTo(new[] { (1L, 3), (3L, 3) }));
+            Assert.That(data.Scores[(1, 3)].Level, Is.EqualTo("13+"));
+            Assert.That(data.Scores[(1, 3)].Constant, Is.EqualTo(13.8m));
+            Assert.That(data.Scores[(1, 3)].Rating, Is.EqualTo(15.95m));
+            Assert.That(data.Scores[(3, 3)].Achievement, Is.Zero, "真实的 0 分仍是已游玩");
+            Assert.That(data.Scores.ContainsKey((4, 3)), Is.False, "国服存在但没成绩的谱面不应伪造记录");
+            Assert.That(localSong.Levels[3], Is.EqualTo("14"));
+            Assert.That(localSong.Constants[3], Is.EqualTo(14.0));
+            Assert.That(ChunithmVersusCatalog.FindChart(localSong, 4), Is.Not.Null);
+            Assert.That(_http.CallLog.Any(call => call.Request.Url.Path.EndsWith("song/list")), Is.False,
+                "传入的本次目录不能在玩家取数时再次刷新");
+        });
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task DefaultBattleFetchUsesAnonymousLxnsNationalCatalogInsteadOfLocalJapaneseCatalog(bool lxns)
+    {
+        var localSong = ChunithmVersusModelTest.Song(1);
+        var fetcher = AuthorizeFetcher(lxns, new SongDb<ChunithmSong>("", "", () => [localSong]));
+        RespondBattleScores(lxns, [(1, 3, 1_009_000), (1, 4, 1_010_000)]);
+        _http.ForCallsTo("https://maimai.lxns.net/api/v0/chunithm/song/list*").RespondWithJson(new
+        {
+            versions = new[] { new { version = 21000, title = "CHUNITHM LUMINOUS" } },
+            songs = new[]
+            {
+                new
+                {
+                    id = 1, title = "song-1", artist = "artist", genre = "ORIGINAL", version = 21000, bpm = 200,
+                    difficulties = new[] { new { difficulty = 3, level = "13+", level_value = 13.8, note_designer = "charter" } }
+                }
+            }
+        });
+
+        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        var catalogCall = _http.CallLog.Single(call => call.Request.Url.Path.EndsWith("song/list"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(data.Scores.Keys, Is.EqualTo(new[] { (1L, 3) }));
+            Assert.That(data.Scores[(1, 3)].Constant, Is.EqualTo(13.8m));
+            Assert.That(data.Scores[(1, 3)].Level, Is.EqualTo("13+"));
+            Assert.That(catalogCall.Request.Headers.Any(header => header.Name == "Authorization"), Is.False);
+            Assert.That(localSong.Constants[3], Is.EqualTo(14.0));
+            Assert.That(localSong.DiffNames, Does.Contain("ULTIMA"));
+        });
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void DefaultBattleFetchRejectsMissingAuthorizationBeforeRequestingNationalCatalog(bool lxns)
+    {
+        DataFetcher fetcher = lxns ? new LocalLxnsFetcher(Db()) : new OAuthFishFetcher(Db());
+        Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(() =>
+            fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher)));
+        Assert.That(_http.CallLog, Is.Empty);
+    }
+
+    private DataFetcher AuthorizeFetcher(bool lxns, SongDb<ChunithmSong> db)
+    {
+        if (lxns)
+        {
+            LxnsTokenStore.SaveToken(Opponent, "opponent-ticket", "fake-refresh", 3600);
+            return new LocalLxnsFetcher(db);
+        }
+
+        AuthorizeFish(Opponent, "opponent-ticket");
+        return new OAuthFishFetcher(db);
+    }
+
+    private void RespondBattleScores(bool lxns, (int Id, int Level, int Score)[] records)
+    {
+        if (lxns)
+        {
+            _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player/scores").RespondWithJson(new
+            {
+                data = records.Select(record => new
+                {
+                    id = record.Id, song_name = $"song-{record.Id}", level_index = record.Level,
+                    score = record.Score, full_combo = "alljustice", full_chain = "fullchain2"
+                }).ToArray()
+            });
+            _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player")
+                .RespondWithJson(new { data = new { name = "opponent" } });
+            return;
+        }
+
+        _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records").RespondWithJson(new
+        {
+            records = new
+            {
+                best = records.Select(record => new
+                {
+                    mid = record.Id, title = $"song-{record.Id}", level_index = record.Level,
+                    score = record.Score, fc = "alljustice", full_chain = "fullchain2"
+                }).ToArray()
+            }
+        });
+    }
+
+    private static Task<ChunithmBattleData> FetchBattleData(DataFetcher fetcher, IReadOnlyList<ChunithmSong>? catalog = null) =>
+        fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher), catalog ?? Db().SongList);
 
     private static SongDb<ChunithmSong> Db() => new("", "", () => [ChunithmVersusModelTest.Song(1)]);
     private static void AuthorizeFish(long qq, string token) => DivingFishTokenStore.SaveAuthorization(qq, "chunithm", $"synthetic-{qq}",

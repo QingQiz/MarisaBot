@@ -52,14 +52,15 @@ public class ChunithmVersusModelTest
     }
 
     [Test]
-    public void DeletedSongIsExcludedFromBothCandidateScopeAndNormalizedScores()
+    public void CatalogueMembershipDefinesCurrentScopeInsteadOfHistoricDeletionIds()
     {
         var catalog = new[] { Song(1), Song(156) };
         var normalized = ChunithmVersusCatalog.NormalizeScores([Score(1, 3, 1_000_000), Score(156, 3, 1_009_000)], catalog);
         Assert.Multiple(() =>
         {
-            Assert.That(ChunithmVersusCatalog.StandardCharts(catalog).Select(chart => chart.Id).Distinct(), Is.EqualTo(new[] { 1L }));
-            Assert.That(normalized.Keys, Is.EqualTo(new[] { (1L, 3) }));
+            Assert.That(ChunithmVersusCatalog.StandardCharts(catalog).Select(chart => chart.Id).Distinct(), Is.EqualTo(new[] { 1L, 156L }));
+            Assert.That(normalized.Keys, Is.EqualTo(new[] { (1L, 3), (156L, 3) }));
+            Assert.That(ChunithmVersusCatalog.NormalizeScores([Score(156, 3, 1_009_000)], [Song(1)]), Is.Empty);
         });
     }
 

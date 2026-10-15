@@ -11,28 +11,59 @@ public static class VersusQueries
         SongDb<TSong> songs,
         string input,
         Func<string, int?> difficulty,
-        Func<ReadOnlyMemory<char>, (int Level, ReadOnlyMemory<char> Remaining)?> stripAffix)
+        Func<ReadOnlyMemory<char>, (int Level, ReadOnlyMemory<char> Remaining)?> stripAffix,
+        IReadOnlyList<TSong>? additionalSongs = null)
         where TSong : Song
     {
         var query = input.Trim();
         if (query.Length == 0) return ([], 3, true);
 
-        var exact = songs.SearchSongExact(query.AsMemory());
+        var exact = Search(query.AsMemory(), true);
         if (exact.Count > 0) return (exact, 3, false);
         if (difficulty(query) is { } levelIndex) return ([], levelIndex, true);
 
         var affix = stripAffix(query.AsMemory());
         if (affix is { } parsed)
         {
-            exact = songs.SearchSongExact(parsed.Remaining);
+            exact = Search(parsed.Remaining, true);
             if (exact.Count > 0) return (exact, parsed.Level, false);
         }
 
-        var fuzzy = songs.SearchSong(query.AsMemory());
+        var fuzzy = Search(query.AsMemory(), false);
         if (fuzzy.Count > 0) return (fuzzy, 3, false);
         return affix is { } fallback
-            ? (songs.SearchSong(fallback.Remaining), fallback.Level, false)
+            ? (Search(fallback.Remaining, false), fallback.Level, false)
             : ([], 3, false);
+
+        List<TSong> Search(ReadOnlyMemory<char> input, bool exactMatch)
+        {
+            var local = exactMatch ? songs.SearchSongExact(input) : songs.SearchSong(input);
+            if (additionalSongs is null) return local;
+
+            var value = input.Span.Trim();
+            if (exactMatch && value.IsEmpty) return local;
+            var title = value.ToString();
+            IEnumerable<TSong> additional;
+            if (!exactMatch)
+            {
+                additional = additionalSongs.Where(song => song.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            }
+            else if (value.StartsWith("id", StringComparison.OrdinalIgnoreCase) &&
+                     long.TryParse(value[2..].Trim(), out var explicitId))
+            {
+                additional = additionalSongs.Where(song => song.Id == explicitId);
+            }
+            else if (long.TryParse(value, out var id) && additionalSongs.Any(song => song.Id == id))
+            {
+                additional = additionalSongs.Where(song => song.Id == id);
+            }
+            else
+            {
+                additional = additionalSongs.Where(song => song.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return local.Concat(additional).DistinctBy(song => song.Id).ToList();
+        }
     }
 
     /// <summary>解析 `N [难度/范围]`；数量或查询无效时已回复原因。</summary>
