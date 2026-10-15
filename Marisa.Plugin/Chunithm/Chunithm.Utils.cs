@@ -27,7 +27,7 @@ public partial class Chunithm
         ParseRandom = ParseVersusRandom,
         ParseBatch = ParseVersusScope,
         MatchScope = query => ChunithmVersusScope.TryParse(query, SongDb.SongList, out _, out _),
-        ChartKey = chart => (chart.Id, chart.LevelIndex),
+        ChartKey = chart => chart.ScoreKey,
         VersionOf = VersusVersion,
         ReplySingle = async (message, chart, self, opponent) =>
             message.Reply(MessageDataImage.FromBase64(await ChunithmDraw.DrawVersus(ChunithmVersusBatch.GetSingle(chart, self, opponent)))),
@@ -86,8 +86,9 @@ public partial class Chunithm
             query => ChunithmVersusScope.TryParseDifficulty(query, out var difficulty) ? difficulty : null,
             query => ChunithmVersusScope.TryStripDifficultyAffix(query, out var level, out var rest) ? (level, rest) : null);
 
-    private static IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) =>
-        ChunithmVersusCatalog.StandardCharts(LxnsDataFetcher.GetSharedSongList()).Where(x => x.LevelIndex == level).ToArray();
+    private static IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) => level == 5
+        ? ChunithmVersusCatalog.WorldsEndCharts(LxnsDataFetcher.GetSharedSongList()).Values.ToArray()
+        : ChunithmVersusCatalog.StandardCharts(LxnsDataFetcher.GetSharedSongList()).Where(x => x.LevelIndex == level).ToArray();
 
     private async Task<VersusSingleSelection<ChunithmVersusChart>?> SelectVersusSingle(Message message)
     {
@@ -103,7 +104,14 @@ public partial class Chunithm
         var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
         if (song is null) return null;
         var cnSong = LxnsDataFetcher.GetSharedSongList().FirstOrDefault(x => x.Id == song.Id);
-        var chart = cnSong is null ? null : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex);
+        var worldsEnd = cnSong is null || selection.LevelIndex != 5 ? [] : ChunithmVersusCatalog.WorldsEndCharts([cnSong]).Values.ToArray();
+        if (worldsEnd.Length > 1)
+        {
+            message.Reply($"「{song.Title}」有多张 WORLD'S END 谱面，暂不能指定对战");
+            return null;
+        }
+        var chart = cnSong is null ? null
+            : selection.LevelIndex == 5 ? worldsEnd.SingleOrDefault() : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex);
         if (chart is null)
         {
             message.Reply($"国服暂未收录「{song.Title}」的 {levelName} 谱面");
@@ -143,7 +151,7 @@ public partial class Chunithm
         VersusRoomPlan<ChunithmVersusChart> plan, VersusRoomPresentation presentation)
     {
         VersusRoomSession.OpenRendered<ChunithmScore, ChunithmVersusChart, ChunithmVersusMulti>(this, message, members, plan,
-            chart => (chart.Id, chart.LevelIndex), chart => chart.Constant, ResolveBattlePlayer,
+            chart => chart.ScoreKey, chart => chart.Constant, ResolveBattlePlayer,
             (charts, players) => new ChunithmVersusMulti(plan.Title, presentation.Version, charts, players),
             result => result.ForRoom(),
             ChunithmDraw.DrawVersusMulti, ChunithmDraw.DrawVersusMultiBatch, result => result.PageCount, presentation.View);

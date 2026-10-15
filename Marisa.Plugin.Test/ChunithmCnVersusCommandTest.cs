@@ -89,6 +89,48 @@ public class ChunithmCnVersusCommandTest
     }
 
     [Test]
+    public async Task WorldsEndSingleAndRandomUseNationalWorldsEndCharts()
+    {
+        using var session = new Session();
+        session.National[0].AddDifficulty("狂", 0, "", ChunithmSong.LevelLabel[5], 3000, "8136", "190");
+        var single = await session.Battle.SelectSingle(session.Message("Äventyr we"));
+        var random = session.Battle.ParseRandom(session.Message("3 WE"), "usage")!;
+        var chart = single!.Charts.Single();
+        var view = ChunithmVersusBatch.CreateScore(new Dictionary<(long, int), ChunithmScore>
+            { [(8136, 5)] = ChunithmVersusModelTest.Score(8136, 5, 1_009_000) }, chart);
+        Assert.Multiple(() =>
+        {
+            Assert.That((chart.Id, chart.ScoreKey, chart.Level), Is.EqualTo((136L, (8136L, 5), "狂")));
+            Assert.That(session.Battle.ChartKey(chart), Is.EqualTo((8136L, 5)));
+            Assert.That(random.Charts.Select(x => x.ScoreKey), Is.EqualTo(new[] { (8136L, 5) }));
+            Assert.That(view.Score, Is.EqualTo(1_009_000));
+            Assert.That(view.Rating, Is.Null);
+            Assert.That(session.Replies(), Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task WorldsEndRejectsScopesAndAmbiguousOrMissingCharts()
+    {
+        using var session = new Session();
+        session.National[0].AddDifficulty("狂", 0, "", ChunithmSong.LevelLabel[5], 3000, "8136", "190");
+        session.National[0].AddDifficulty("避", 0, "", ChunithmSong.LevelLabel[5], 2500, "8137", "190");
+        var ambiguous = await session.Battle.SelectSingle(session.Message("Äventyr we"));
+        var ambiguousReply = session.Replies().Single().Text;
+        var missing = await session.Battle.SelectSingle(session.Message("MegiddØ we"));
+        var missingReply = session.Replies().Single().Text;
+        Assert.Multiple(() =>
+        {
+            Assert.That(ambiguous, Is.Null);
+            Assert.That(ambiguousReply, Does.Contain("多张 WORLD'S END"));
+            Assert.That(missing, Is.Null);
+            Assert.That(missingReply, Does.Contain("WORLD'S END 谱面"));
+            Assert.That(ChunithmVersusScope.TryParse("14 WE", session.National, out _, out var error), Is.False);
+            Assert.That(error, Does.Contain("单曲和随机"));
+        });
+    }
+
+    [Test]
     public void TriggerMatchingUsesLocalDataWithoutFetchingNationalCatalog()
     {
         using var session = new Session(national: false);
@@ -108,6 +150,7 @@ public class ChunithmCnVersusCommandTest
         private readonly string _root = Path.Combine(Path.GetTempPath(), nameof(ChunithmCnVersusCommandTest), Guid.NewGuid().ToString("N"));
         private readonly IDisposable? _national;
         public SongDb<ChunithmSong> Local { get; }
+        public List<ChunithmSong> National { get; } = [];
         public VersusBattle<ChunithmScore, ChunithmVersusChart> Battle { get; }
 
         public Session(bool national = true)
@@ -121,11 +164,13 @@ public class ChunithmCnVersusCommandTest
                 ChunithmVersusModelTest.Song(7, "缺 ULTIMA", genre: "ゲキマイ")
             ]);
             if (national)
-                _national = ChunithmVersusModelTest.UseNationalSongs(
-                [
+            {
+                National.AddRange([
                     Chart(136, "Äventyr", 3, "13+", 13.8), Chart(2768, "MegiddØ", 2, "14", 14.4),
                     Chart(2739, "Aether Crest", 2, "14", 14.3), Chart(7, "缺 ULTIMA", 3, "14", 14.2)
                 ]);
+                _national = ChunithmVersusModelTest.UseNationalSongs(National);
+            }
             var plugin = (Chunithm.Chunithm)RuntimeHelpers.GetUninitializedObject(typeof(Chunithm.Chunithm));
             typeof(Chunithm.Chunithm).GetField("<SongDb>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(plugin, Local);
             Battle = (VersusBattle<ChunithmScore, ChunithmVersusChart>)((ICanBattleWithOthers)plugin).Battle;

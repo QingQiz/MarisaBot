@@ -4,6 +4,8 @@ namespace Marisa.Plugin.Shared.Chunithm;
 public sealed record ChunithmVersusChart(ChunithmSong Song, int ChartIndex, int LevelIndex)
 {
     public long Id => Song.Id;
+    /// <summary>成绩按 WE 曲目编号记录；歌曲信息与曲绘仍使用原曲编号。</summary>
+    public (long Id, int LevelIdx) ScoreKey => (LevelIndex == 5 ? long.Parse(Song.ChartName[ChartIndex]) : Song.Id, LevelIndex);
     public double Constant => Song.Constants[ChartIndex];
     public string Level => Song.Levels[ChartIndex];
     public string LevelName => ChunithmSong.LevelLabel[LevelIndex];
@@ -39,7 +41,7 @@ public static class ChunithmVersusCatalog
         songs.SelectMany(song => Enumerable.Range(0, song.DiffNames.Count)
                 .Where(i => DifficultyIndex(song.DiffNames[i]) == 5 && long.TryParse(song.ChartName[i], out _))
                 .Select(i => new ChunithmVersusChart(song, i, 5)))
-            .ToDictionary(chart => long.Parse(chart.Song.ChartName[chart.ChartIndex]));
+            .ToDictionary(chart => chart.ScoreKey.Id);
 
     /// <summary>只归一化曲库中的标准谱与 WE；WE 按曲目编号匹配，因为水鱼单谱 WE 的难度索引可能是 0。</summary>
     public static Dictionary<(long Id, int LevelIdx), ChunithmScore> NormalizeScores(
@@ -57,7 +59,7 @@ public static class ChunithmVersusCatalog
         {
             if (worldsEnd.TryGetValue(record.Id, out var we))
             {
-                Add((record.Id, 5), we, record);
+                Add(we, record);
                 continue;
             }
 
@@ -71,14 +73,14 @@ public static class ChunithmVersusCatalog
                 if (string.IsNullOrWhiteSpace(record.Title) || !byTitle.TryGetValue(record.Title, out song)) continue;
             }
 
-            var key = (song.Id, difficulty);
-            if (charts.TryGetValue(key, out var chart)) Add(key, chart, record);
+            if (charts.TryGetValue((song.Id, difficulty), out var chart)) Add(chart, record);
         }
 
         return result;
 
-        void Add((long Id, int LevelIdx) key, ChunithmVersusChart chart, ChunithmScore record)
+        void Add(ChunithmVersusChart chart, ChunithmScore record)
         {
+            var key = chart.ScoreKey;
             var normalized = new ChunithmScore
             {
                 Id = key.Id,

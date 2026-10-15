@@ -27,7 +27,7 @@ public sealed class ChunithmVersusMulti
 
     public static List<ChunithmVersusChart> PickCharts(IEnumerable<ChunithmVersusChart> charts,
         IReadOnlyList<IReadOnlyDictionary<(long Id, int LevelIdx), ChunithmScore>> scores, int count, Random random) =>
-        VersusSampler.Pick(charts, scores, chart => (chart.Id, chart.LevelIndex), chart => chart.Constant, count, random);
+        VersusSampler.Pick(charts, scores, chart => chart.ScoreKey, chart => chart.Constant, count, random);
 
     public SingleData GetSingle(int round, IReadOnlyList<VersusStanding> standings)
     {
