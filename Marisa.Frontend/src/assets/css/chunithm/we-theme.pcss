@@ -1,5 +1,6 @@
 .chu-song.chu-we {
-    --we-stripes: repeating-linear-gradient(135deg, #a005c6 0 20px, #05bec6 0 40px, #90be35 0 60px, #d47e0a 0 80px, #ad04bd 0 100px, #e7044d 0 120px);
+    --we-band: #c702b3 9.34%, #ff04a6 0 12.07%, #03f0ee 0 21.18%, #0380f8 0 24.15%, #a6e85a 0 33.26%, #0cf469 0 36.22%, #fcf703 0 48.29%,
+        #d504d9 0 60.36%, #02f7f8 0 69.02%, #06abf9 0 72.44%, #bce14f 0 84.51%, #fff202 0 96.58%, #f70c52 0;
     --we-spectrum: linear-gradient(90deg, #df00b5 0%, #13dcea 19%, #0dc35a 37%, #e9ed09 55%, #ff5826 72%, #e30986 86%, #4824c4 100%);
     --we-surface: linear-gradient(110deg, #242834 0%, #171b24 66%, #1e2230 100%);
 }
@@ -26,7 +27,12 @@
 }
 .chu-song.chu-we-only :deep(.stripe-layer + .absolute) { opacity: .36; }
 .chu-song.chu-we-only :deep(.cover-frame) {
-    background: var(--we-stripes);
+    --we-side-l: linear-gradient(94.5deg, #c303b3 14%, #04dfe8 0 28.26%, #43ef5f 0 42.66%, #f2e517 0 56.93%, #6a1e9a 0 71.2%, #1280b1 0 85.6%, #57bf4f 0);
+    --we-side-r: linear-gradient(94.5deg, #fc02a5 13.27%, #06e4e9 0 26.8%, #a9e956 0 40.46%, #ffdb12 0 53.99%, #ee1a7a 0 67.53%, #21869d 0 81.19%, #5fae22 0 94.59%, #ff430e 0);
+    background-image: linear-gradient(163.5deg, var(--we-band)), linear-gradient(163.5deg, var(--we-band)), var(--we-side-l), var(--we-side-r), var(--we-side-l), var(--we-side-r);
+    background-position: left top, left bottom, left top, left top, right 2.08px top, right top;
+    background-size: 292px 5px, 292px 5px, 2.92px 100%, 5px 100%, 2.92px 100%, 5px 100%;
+    background-repeat: repeat-x, repeat-x, no-repeat, no-repeat, no-repeat, no-repeat;
     box-shadow: inset 0 0 0 2px #151922, 0 0 0 1px #bfc7d826, 0 8px 20px -12px #0009;
 }
 .chu-song.chu-we-only .section-tag {
@@ -42,5 +48,5 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: var(--we-stripes);
+    background: linear-gradient(122deg, var(--we-band)) center / 260px 24px;
 }

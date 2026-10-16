@@ -23,5 +23,13 @@ const index = computed(() => chartDifficulty(props.chart))
 .chip-ultima .chip-name { background:linear-gradient(180deg,#221419,#09080b); color:#ff3a5f; box-shadow:inset 0 0 0 1px #e7184559; text-shadow:0 0 8px #e7184566; }
 .chip-ultima .chip-level { background:#7e183d; }
 
-.chip-we .chip-name { width:calc(var(--name-width,8.8em) + var(--level-width) - .93em); background:var(--we-stripes); }
+.chip-we .chip-name { width:calc(var(--name-width,8.8em) + var(--level-width) - .93em); background:none; }
+.chip-we .chip-name::before {
+    content:''; position:absolute; left:0; right:0; top:50%; z-index:-1; aspect-ratio:122/30; transform:translateY(-50%);
+    background:
+        linear-gradient(135deg,#84a448 44.95%,transparent 0) 56.92% 0/20.08% 100% no-repeat,
+        linear-gradient(135deg,#c9ae0a 46.58%,transparent 0) 85.56% 0/23.36% 100% no-repeat,
+        linear-gradient(135deg,#e3054d 59.77%,transparent 0) 100% 0/11.07% 100% no-repeat,
+        linear-gradient(135deg,#9c06c0 16.78%,#04c1ca 0 34.7%,#98c433 0 52.63%,#d48808 0 70.56%,#bc06be 0 88.49%,#09d4bc 0);
+}
 </style>
