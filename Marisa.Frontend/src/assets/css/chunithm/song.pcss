@@ -1,0 +1,31 @@
+.song-section { display:flex; align-items:center; gap:16px; height:44px; margin-bottom:14px; }
+.section-tag { font:700 23px 'Microsoft YaHei',sans-serif; letter-spacing:.12em; border-radius:9999px; padding:4px 22px; background:var(--accent); color:#fff; box-shadow:0 0 0 2px #ffffffcc; white-space:nowrap; }
+.section-subtitle { font:900 20px 'SEGA NewRodin',sans-serif; letter-spacing:.25em; color:#ffffffbf; white-space:nowrap; }
+.section-rule { flex:1; height:2px; background:#ffffff33; border-radius:99px; }
+.chart-count { font:700 18px 'Torus',sans-serif; color:#ffffff8c; letter-spacing:.2em; white-space:nowrap; }
+
+.chart-list { display:flex; flex-direction:column; gap:10px; }
+.chart-row { --rail-width:4px; --rail-top:48px; --rail-bottom:10px; position:relative; height:120px; overflow:hidden; border:1px solid #ffffff17; border-radius:10px; }
+.chart-top { display:flex; align-items:flex-start; height:38px; }
+.chart-charter-box { display:flex; align-items:center; justify-content:flex-end; flex:1; min-width:0; height:38px; padding:0 14px 0 18px; }
+.chart-charter { max-width:100%; overflow:hidden; white-space:nowrap; text-align:right; color:#fff; font:900 22px/1.15 'SEGA NewRodin','Microsoft YaHei',sans-serif; text-shadow:0 1px 3px #0009; }
+.chart-charter.wrapped { white-space:normal; text-wrap:balance; overflow-wrap:anywhere; line-height:1.1; }
+.chart-charter.missing { color:#ffffff59; }
+
+.chart-body { position:absolute; left:12px; right:112px; top:38px; bottom:0; display:flex; align-items:center; padding-left:12px; }
+.chart-stats { display:flex; align-items:stretch; width:100%; }
+.chart-stat { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.chart-stat:first-child { width:150px; flex-shrink:0; }
+.chart-stat:last-child { flex:1; }
+.stat-rule { width:2px; margin:2px 24px 2px 0; border-radius:2px; background:#ffffff26; }
+.stat-label { font:700 12px/1 'Torus',sans-serif; letter-spacing:.14em; color:#ffffffa6; text-shadow:0 1px 3px #0009; }
+.stat-value { display:flex; align-items:baseline; gap:10px; margin-top:6px; color:#fff; font:700 34px/1 'Torus',sans-serif; text-shadow:0 2px 4px #0000008c; white-space:nowrap; }
+.bpm-range { align-self:center; padding:4px 8px; border-radius:6px; background:#ffffff14; font:700 15px/1 'Torus',sans-serif; color:#ffffffb3; }
+
+.chart-badge { position:absolute; right:14px; bottom:10px; display:flex; align-items:center; justify-content:center; width:74px; height:70px; border:2.5px solid var(--badge-color); border-radius:20px; background:#08081059; color:var(--badge-color); font:700 31px/1 'Torus',sans-serif; box-shadow:0 0 18px color-mix(in srgb,var(--badge-color) 40%,transparent),inset 0 0 12px color-mix(in srgb,var(--badge-color) 18%,transparent); text-shadow:0 0 10px color-mix(in srgb,var(--badge-color) 53%,transparent); }
+.chart-badge.unavailable { color:#ffffff59; text-shadow:none; }
+
+.song-footer { display:flex; align-items:center; justify-content:space-between; margin:24px 44px 0; gap:20px; }
+.song-loading { padding:40px; color:#777; font:500 18px 'Microsoft YaHei',sans-serif; }
+.tolerance-list { display:flex; flex-direction:column; gap:12px; width:100%; }
+.tolerance-list .song-section { margin-bottom:2px; }

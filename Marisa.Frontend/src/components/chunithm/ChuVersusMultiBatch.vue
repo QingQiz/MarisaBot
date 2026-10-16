@@ -1,5 +1,5 @@
 <template>
-    <MaiCardShell v-if="data" class="multi-batch chu-multi-batch" :class="{'chu-ultima': themeIndex === 4}" :width="width" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="accent"
+    <MaiCardShell v-if="data" class="multi-batch chu-multi-batch chu-theme" :class="{'chu-ultima': themeIndex === 4}" :width="width" bg-key="DMY" :background="backgroundOf(themeIndex)" :accent="accent"
                   :style="{'--accent': accent, '--players': data.Players.length, '--player-column': playerColumnWidth + 'px'}">
         <header class="batch-header">
             <div class="batch-heading">
@@ -73,7 +73,8 @@ import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import MaiCover from '@/components/maimai/MaiCover.vue'
 import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
 import VersusStandings from '@/components/versus/VersusStandings.vue'
-import {backgroundOf, difficultyColor, difficultyStyle, formatScore, formatPoints, placeColor, placeSuffix, rankIcon, versionLogo, fallbackLogo, type ChuChart, type VersusStanding} from '@/components/chunithm/utils/versus'
+import {backgroundOf, difficultyColor, difficultyStyle, versionLogo, fallbackLogo} from '@/components/chunithm/utils/song-card'
+import {formatScore, formatPoints, placeColor, placeSuffix, rankIcon, type ChuChart, type VersusStanding} from '@/components/chunithm/utils/versus'
 interface PlayerView { Name: string; Place: number; Points: number; Matchups: number }
 interface PageData { Title: string; Version: string; Round: number; Players: PlayerView[]; Page: number; PageSize: number; TotalCharts: number; Rows: ChuChart[]; Standings: VersusStanding[] }
 const route = useRoute()
@@ -91,4 +92,5 @@ function playedCount(row: ChuChart) { return row.Cells.filter(c => c.Score.State
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/versus/multi-batch.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/versus.pcss"/>
+<style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/versus-multi-batch.pcss"/>
