@@ -1,6 +1,5 @@
 .chu-song.chu-we {
-    --we-pattern: url('/assets/chunithm/pic/song_worldsend_pattern.png');
-    --we-side: url('/assets/chunithm/pic/song_worldsend_side.png');
+    --we-stripes: repeating-linear-gradient(135deg, #a005c6 0 20px, #05bec6 0 40px, #90be35 0 60px, #d47e0a 0 80px, #ad04bd 0 100px, #e7044d 0 120px);
     --we-spectrum: linear-gradient(90deg, #df00b5 0%, #13dcea 19%, #0dc35a 37%, #e9ed09 55%, #ff5826 72%, #e30986 86%, #4824c4 100%);
     --we-surface: linear-gradient(110deg, #242834 0%, #171b24 66%, #1e2230 100%);
 }
@@ -27,10 +26,7 @@
 }
 .chu-song.chu-we-only :deep(.stripe-layer + .absolute) { opacity: .36; }
 .chu-song.chu-we-only :deep(.cover-frame) {
-    background-image: var(--we-pattern), var(--we-pattern), var(--we-side), var(--we-side);
-    background-position: left top, left bottom, left top, right top;
-    background-size: 292px 5px, 292px 5px, 5px 100%, 5px 100%;
-    background-repeat: repeat-x, repeat-x, no-repeat, no-repeat;
+    background: var(--we-stripes);
     box-shadow: inset 0 0 0 2px #151922, 0 0 0 1px #bfc7d826, 0 8px 20px -12px #0009;
 }
 .chu-song.chu-we-only .section-tag {
@@ -46,5 +42,5 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: var(--we-pattern) center / 260px 24px;
+    background: var(--we-stripes);
 }

@@ -1,9 +1,6 @@
 <template>
     <div class="chart-chip" :class="{'chip-ultima': index === 4, 'chip-we': index === 5}" :style="{'--chip-color': difficultyColor(index), '--level-chars': levelChars}">
-        <span class="chip-name">
-            <img v-if="index === 5" src="/assets/chunithm/pic/song_worldsend.png" alt="WORLD'S END">
-            <template v-else>{{ chart.LevelName }}</template>
-        </span>
+        <span class="chip-name">{{ chart.LevelName }}</span>
         <span v-if="index !== 5" class="chip-level"><span>{{ chart.LevelStr || '—' }}</span></span>
     </div>
 </template>
@@ -26,7 +23,5 @@ const index = computed(() => chartDifficulty(props.chart))
 .chip-ultima .chip-name { background:linear-gradient(180deg,#221419,#09080b); color:#ff3a5f; box-shadow:inset 0 0 0 1px #e7184559; text-shadow:0 0 8px #e7184566; }
 .chip-ultima .chip-level { background:#7e183d; }
 
-.chip-we .chip-name { width:calc(var(--name-width,8.8em) + var(--level-width) - .93em); background:linear-gradient(135deg,#2a2e3c,#161922 72%); }
-.chip-we .chip-name::after { content:''; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--we-spectrum); }
-.chip-we img { display:block; height:2em; width:auto; }
+.chip-we .chip-name { width:calc(var(--name-width,8.8em) + var(--level-width) - .93em); background:var(--we-stripes); }
 </style>
