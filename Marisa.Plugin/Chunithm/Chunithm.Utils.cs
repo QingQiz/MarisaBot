@@ -26,7 +26,7 @@ public partial class Chunithm
         SelectSingle = SelectVersusSingle,
         ParseRandom = ParseVersusRandom,
         ParseBatch = ParseVersusScope,
-        MatchScope = query => ParseVersusScopeQuery(query).Scope is not null,
+        MatchScope = query => ChunithmVersusScope.TryParse(query, SongDb.SongList, out _, out _),
         ChartKey = chart => (chart.Id, chart.LevelIndex),
         VersionOf = VersusVersion,
         ReplySingle = async (message, chart, self, opponent) =>
@@ -83,8 +83,8 @@ public partial class Chunithm
             query => ChunithmVersusScope.TryParseDifficulty(query, out var difficulty) ? difficulty : null,
             query => ChunithmVersusScope.TryStripDifficultyAffix(query, out var level, out var rest) ? (level, rest) : null);
 
-    private IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) =>
-        ChunithmVersusCatalog.StandardCharts(SongDb.SongList).Where(x => x.LevelIndex == level).ToArray();
+    private static IReadOnlyList<ChunithmVersusChart> VersusLevelCharts(int level) =>
+        ChunithmVersusCatalog.StandardCharts(LxnsDataFetcher.GetSharedSongList()).Where(x => x.LevelIndex == level).ToArray();
 
     private async Task<VersusSingleSelection<ChunithmVersusChart>?> SelectVersusSingle(Message message)
     {
@@ -99,10 +99,11 @@ public partial class Chunithm
 
         var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
         if (song is null) return null;
-        var chart = ChunithmVersusCatalog.FindChart(song, selection.LevelIndex);
+        var cnSong = LxnsDataFetcher.GetSharedSongList().FirstOrDefault(x => x.Id == song.Id);
+        var chart = cnSong is null ? null : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex);
         if (chart is null)
         {
-            message.Reply($"该歌曲没有 {levelName} 谱面");
+            message.Reply($"国服暂未收录「{song.Title}」的 {levelName} 谱面");
             return null;
         }
 
@@ -119,13 +120,14 @@ public partial class Chunithm
     private VersusBatchSelection<ChunithmVersusChart>? ParseVersusScope(Message message)
         => VersusQueries.ParseBatch(message, ParseVersusScopeQuery);
 
-    private (VersusScopeSelection<ChunithmVersusChart>? Scope, string? Error) ParseVersusScopeQuery(string query)
+    private static (VersusScopeSelection<ChunithmVersusChart>? Scope, string? Error) ParseVersusScopeQuery(string query)
     {
-        if (!ChunithmVersusScope.TryParse(query, SongDb.SongList, out var scope, out var error) || scope is null)
+        var songs = LxnsDataFetcher.GetSharedSongList();
+        if (!ChunithmVersusScope.TryParse(query, songs, out var scope, out var error) || scope is null)
             return (null, error ?? $"无法解析范围：{query}");
 
         return (new VersusScopeSelection<ChunithmVersusChart>(
-            ChunithmVersusScope.SelectCharts(scope, SongDb.SongList), scope.SortLabel), null);
+            ChunithmVersusScope.SelectCharts(scope, songs), scope.SortLabel), null);
     }
 
     private static string VersusVersion(IEnumerable<ChunithmVersusChart> charts)

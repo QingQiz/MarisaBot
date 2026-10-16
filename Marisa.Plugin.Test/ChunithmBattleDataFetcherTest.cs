@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -360,15 +361,64 @@ public class ChunithmBattleDataFetcherTest
         });
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task BattleScoresUseNationalLevelsAndConstants(bool lxns)
+    {
+        var national = ChunithmVersusModelTest.Song(1, names: ["BASIC", "ADVANCED", "EXPERT", "MASTER"]);
+        national.Levels[3] = "13+";
+        national.Constants[3] = 13.8;
+        var local = new SongDb<ChunithmSong>("", "", () => [ChunithmVersusModelTest.Song(1), ChunithmVersusModelTest.Song(2)]);
+        DataFetcher fetcher;
+        if (lxns)
+        {
+            LxnsTokenStore.SaveToken(Opponent, "opponent-ticket", "fake-refresh", 3600);
+            fetcher = new LocalLxnsFetcher(local, [national]);
+            _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player/scores").RespondWithJson(new
+            {
+                data = new[] { (1, 3), (1, 4), (2, 3) }.Select(x => new
+                {
+                    id = x.Item1, song_name = $"song-{x.Item1}", level_index = x.Item2, score = 1_009_000, full_combo = "alljustice", full_chain = "fullchain2"
+                }).ToArray()
+            });
+            _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
+        }
+        else
+        {
+            AuthorizeFish(Opponent, "opponent-ticket");
+            fetcher = new OAuthFishFetcher(local, [national]);
+            _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records").RespondWithJson(new
+            {
+                records = new
+                {
+                    best = new[] { (1, 3), (1, 4), (2, 3) }.Select(x => new
+                    {
+                        mid = x.Item1, title = $"song-{x.Item1}", level_index = x.Item2, score = 1_009_000, fc = "alljustice", full_chain = "fullchain2"
+                    }).ToArray()
+                }
+            });
+        }
+
+        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher));
+        Assert.Multiple(() =>
+        {
+            Assert.That(data.Scores.Keys, Is.EqualTo(new[] { (1L, 3) }));
+            Assert.That(data.Scores[(1, 3)].Level, Is.EqualTo("13+"));
+            Assert.That(data.Scores[(1, 3)].Constant, Is.EqualTo(13.8m));
+            Assert.That(data.Scores[(1, 3)].Rating, Is.EqualTo(15.95m));
+        });
+    }
+
     private static SongDb<ChunithmSong> Db() => new("", "", () => [ChunithmVersusModelTest.Song(1)]);
     private static void AuthorizeFish(long qq, string token) => DivingFishTokenStore.SaveAuthorization(qq, "chunithm", $"synthetic-{qq}",
         new DivingFishToken { AccessToken = token, Scope = "chunithm.records.read", ExpiresAt = DateTime.UtcNow.AddHours(1) });
-    private sealed class OAuthFishFetcher(SongDb<ChunithmSong> db) : DivingFishDataFetcher(db)
+    private sealed class OAuthFishFetcher(SongDb<ChunithmSong> db, List<ChunithmSong>? songs = null) : DivingFishDataFetcher(db)
     {
         protected override bool OAuthEnabled => true;
+        public override List<ChunithmSong> GetSongList() => songs ?? SongDb.SongList;
     }
-    private sealed class LocalLxnsFetcher(SongDb<ChunithmSong> db) : LxnsDataFetcher(db)
+    private sealed class LocalLxnsFetcher(SongDb<ChunithmSong> db, List<ChunithmSong>? songs = null) : LxnsDataFetcher(db)
     {
-        public override System.Collections.Generic.List<ChunithmSong> GetSongList() => SongDb.SongList;
+        public override List<ChunithmSong> GetSongList() => songs ?? SongDb.SongList;
     }
 }

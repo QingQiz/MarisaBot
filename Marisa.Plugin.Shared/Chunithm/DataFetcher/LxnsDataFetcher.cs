@@ -45,7 +45,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             }
         }
 
-        _songList = normalData
+        var songs = normalData
             .Select(x => new ChunithmSong(x, ChunithmSong.DataSource.Lxns))
             .Where(x => !DeletedSongs.Contains(x.Id))
             .ToList();
@@ -55,7 +55,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             var weSong = weSongData[i];
             var originId = weOriginIds[i];
 
-            var parent = _songList.FirstOrDefault(s => s.Id == originId);
+            var parent = songs.FirstOrDefault(s => s.Id == originId);
             if (parent == null) continue;
 
             var weChart = weSong.difficulties[0];
@@ -71,7 +71,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             );
         }
 
-        foreach (var song in _songList)
+        foreach (var song in songs)
         {
             if (int.TryParse(song.Version, out var versionId) && versionMap.TryGetValue(versionId, out var versionName))
             {
@@ -79,7 +79,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             }
         }
 
-        return _songList;
+        return _songList = songs;
     }
 
     public override List<ChunithmSong> GetSongList()
@@ -116,7 +116,7 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
         var scores = await GetScoreRecordsViaOAuth(token, player.Qq, forBattle: true);
         var nickname = await GetNicknameViaOAuth(token, player.Qq);
         return new ChunithmBattleData(nickname,
-            ChunithmVersusCatalog.NormalizeScores(scores, SongDb.SongList));
+            ChunithmVersusCatalog.NormalizeScores(scores, GetSongList()));
     }
 
     private async Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScoresViaOAuth(LxnsToken oauthToken, long qq)

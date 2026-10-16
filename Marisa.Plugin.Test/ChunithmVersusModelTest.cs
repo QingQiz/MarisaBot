@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using Marisa.Plugin.Shared.Chunithm;
+using Marisa.Plugin.Shared.Chunithm.DataFetcher;
 using Marisa.Plugin.Shared.Versus;
 using NUnit.Framework;
 
@@ -223,6 +225,18 @@ public class ChunithmVersusModelTest
 
     internal static VersusPlayer<ChunithmScore> Player(long qq, params ChunithmScore[] scores) =>
         new(qq, $"player-{qq}", scores.ToDictionary(score => (score.Id, (int)score.LevelIndex)));
+
+    internal static IDisposable UseNationalSongs(List<ChunithmSong> songs)
+    {
+        var field = typeof(LxnsDataFetcher).GetField("_songList", BindingFlags.NonPublic | BindingFlags.Static)!;
+        field.SetValue(null, songs);
+        return new Restore(() => field.SetValue(null, null));
+    }
+
+    private sealed class Restore(Action restore) : IDisposable
+    {
+        public void Dispose() => restore();
+    }
 
     private static ChunithmVersusBatch Batch(IReadOnlyList<ChunithmVersusChart> charts,
         VersusPlayer<ChunithmScore> a, VersusPlayer<ChunithmScore> b) => new("scope", "", "定数降序", charts, a, b);

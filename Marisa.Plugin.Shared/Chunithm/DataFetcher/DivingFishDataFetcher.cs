@@ -107,7 +107,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             throw new InvalidDataException("水鱼完整成绩响应缺少整数 score，无法进行对战");
         // 水鱼 WE-only 的 cids 可能返回 Basic/index 0，须按该源的 >=8000 曲目 ID 排除。
         var scores = ChunithmVersusCatalog.NormalizeScores(response.Records.Best
-            .Where(score => score.Id < 8000).Select(ChunithmBattleCompletion.FromDivingFish), SongDb.SongList);
+            .Where(score => score.Id < 8000).Select(ChunithmBattleCompletion.FromDivingFish), GetSongList());
         // 官方规定标准谱 1,010,000 为 AJC；只转换已验证的标准成绩，chain 已独立保存。
         foreach (var score in scores.Values.Where(score => score.Achievement == 1_010_000))
             score.Fc = "alljusticecritical";

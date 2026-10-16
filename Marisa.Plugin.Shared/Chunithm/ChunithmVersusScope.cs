@@ -192,13 +192,32 @@ public static class ChunithmVersusScope
         yield return genre;
         if (genre.Contains("niconico", StringComparison.OrdinalIgnoreCase) || genre.Contains("VOCALOID", StringComparison.OrdinalIgnoreCase))
         {
-            yield return "术力口"; yield return "V家"; yield return "VOCALOID";
+            yield return "niconico"; yield return "术力口"; yield return "V家"; yield return "VOCALOID";
         }
-        if (genre.Contains("東方") || genre.Contains("东方")) yield return "东方";
-        if (genre.Contains("ORIGINAL", StringComparison.OrdinalIgnoreCase)) { yield return "原创"; yield return "原创曲"; }
-        if (genre.Contains("VARIETY", StringComparison.OrdinalIgnoreCase)) { yield return "其他"; yield return "其他游戏"; }
-        if (genre.Contains("POPS", StringComparison.OrdinalIgnoreCase) || genre.Contains("ANIME", StringComparison.OrdinalIgnoreCase)) { yield return "流行"; yield return "动漫"; }
-        if (genre.Contains("イロドリミドリ")) yield return "彩绿";
-        if (genre.Contains("ゲキマイ")) yield return "击中";
+        if (genre.Contains("東方") || genre.Contains("东方"))
+        {
+            yield return "東方Project"; yield return "东方Project"; yield return "东方";
+        }
+        if (genre.Contains("ORIGINAL", StringComparison.OrdinalIgnoreCase) || genre.Contains("原创"))
+        {
+            yield return "ORIGINAL"; yield return "原创"; yield return "原创曲";
+        }
+        if (genre.Contains("VARIETY", StringComparison.OrdinalIgnoreCase) || genre.Contains("其他") || genre.Contains("其它"))
+        {
+            yield return "VARIETY"; yield return "其他"; yield return "其他游戏"; yield return "其它"; yield return "其它游戏";
+        }
+        if (genre.Contains("POPS", StringComparison.OrdinalIgnoreCase) || genre.Contains("ANIME", StringComparison.OrdinalIgnoreCase) || genre.Contains("流行") || genre.Contains("动漫"))
+        {
+            yield return "POPS&ANIME"; yield return "POPS & ANIME";
+            yield return "流行 & 动漫"; yield return "流行&动漫"; yield return "流行"; yield return "动漫";
+        }
+        if (genre.Contains("イロドリミドリ") || genre.Contains("彩绿"))
+        {
+            yield return "イロドリミドリ"; yield return "彩绿";
+        }
+        if (genre.Contains("ゲキマイ") || genre.Contains("音击舞萌"))
+        {
+            yield return "ゲキマイ"; yield return "音击舞萌"; yield return "击中";
+        }
     }
 }

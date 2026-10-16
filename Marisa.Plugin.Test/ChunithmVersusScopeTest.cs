@@ -135,7 +135,7 @@ public class ChunithmVersusScopeTest
     public void RandomAndBatchAdaptersUseNaturalVersionAliases(string input, string version)
     {
         var songs = new SongDb<ChunithmSong>("unused.tsv", "unused.tsv", () => VersionCatalog.ToList());
-        var plugin = (Chunithm.Chunithm)RuntimeHelpers.GetUninitializedObject(typeof(Chunithm.Chunithm));
+        using var national = ChunithmVersusModelTest.UseNationalSongs(VersionCatalog.ToList());        var plugin = (Chunithm.Chunithm)RuntimeHelpers.GetUninitializedObject(typeof(Chunithm.Chunithm));
         typeof(Chunithm.Chunithm).GetField("<SongDb>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)!
             .SetValue(plugin, songs);
         var adapter = (VersusBattle<ChunithmScore, ChunithmVersusChart>)((ICanBattleWithOthers)plugin).Battle;
@@ -247,6 +247,48 @@ public class ChunithmVersusScopeTest
             Assert.That(charts.Any(chart => chart.Id == 2999 && chart.LevelIndex == 4 && chart.Level == "16" && chart.Constant == 16), Is.True);
             Assert.That(ChunithmVersusScope.TryParse("16+", catalog, out _, out _), Is.False);
         });
+    }
+
+    [TestCase("原创曲", "原创")]
+    [TestCase("ORIGINAL", "原创")]
+    [TestCase("其他", "其他游戏")]
+    [TestCase("其它游戏", "其他游戏")]
+    [TestCase("VARIETY", "其他游戏")]
+    [TestCase("流行", "流行 & 动漫")]
+    [TestCase("动漫", "流行 & 动漫")]
+    [TestCase("POPS&ANIME", "流行 & 动漫")]
+    [TestCase("POPS & ANIME", "流行 & 动漫")]
+    [TestCase("流行&动漫", "流行 & 动漫")]
+    [TestCase("击中", "音击舞萌")]
+    [TestCase("ゲキマイ", "音击舞萌")]
+    [TestCase("イロドリミドリ", "彩绿")]
+    [TestCase("東方Project", "东方Project")]
+    [TestCase("VOCALOID", "niconico")]
+    [TestCase("V家", "niconico")]
+    public void NationalGenresAcceptLocalAliases(string alias, string expectedGenre)
+    {
+        string[] genres = ["niconico", "东方Project", "其他游戏", "原创", "彩绿", "流行 & 动漫", "音击舞萌"];
+        var catalog = genres.Select((genre, index) => ChunithmVersusModelTest.Song(20_000 + index, genre: genre)).ToArray();
+        Assert.That(ChunithmVersusScope.TryParse(alias + "14", catalog, out var query, out var error), Is.True, error);
+        var charts = ChunithmVersusScope.SelectCharts(query!, catalog);
+        Assert.Multiple(() =>
+        {
+            Assert.That(query!.Genres, Is.EqualTo(new[] { expectedGenre }));
+            Assert.That(charts.Select(chart => (chart.Song.Genre, chart.LevelIndex)), Is.EqualTo(new[] { (expectedGenre, 3) }));
+        });
+    }
+
+    [TestCase("原创", "ORIGINAL")]
+    [TestCase("其他游戏", "VARIETY")]
+    [TestCase("流行 & 动漫", "POPS&ANIME")]
+    [TestCase("音击舞萌", "ゲキマイ")]
+    [TestCase("彩绿", "イロドリミドリ")]
+    [TestCase("东方Project", "東方Project")]
+    public void LocalGenresAcceptNationalNames(string alias, string genre)
+    {
+        var catalog = new[] { ChunithmVersusModelTest.Song(1, genre: genre) };
+        Assert.That(ChunithmVersusScope.TryParse(alias, catalog, out var query, out var error), Is.True, error);
+        Assert.That(query!.Genres, Is.EqualTo(new[] { genre }));
     }
 
     private static ChunithmSong[] ActualCatalog()
