@@ -440,13 +440,19 @@ public static class PlateData
         levelIdx != 4 || FinaleAndEarlierRemasterSongIds.Contains(songId);
 
     /// <summary>类别别名 → diving-fish basic_info.genre 实际值。</summary>
-    public static readonly Dictionary<string, string> GenreAliasMap = new()
+    public static readonly Dictionary<string, string> GenreAliasMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["术力口"]    = "niconico & VOCALOID",
         ["V家"]       = "niconico & VOCALOID",
         ["VOCALOID"]  = "niconico & VOCALOID",
+        ["niconico"]  = "niconico & VOCALOID",
+        ["ボカロ"]    = "niconico & VOCALOID",
         ["东方"]      = "东方Project",
+        ["東方"]      = "东方Project",
+        ["東方Project"] = "东方Project",
         ["击中"]      = "音击&中二节奏",
+        ["音击"]      = "音击&中二节奏",
+        ["中二"]      = "音击&中二节奏",
         ["流行"]      = "流行&动漫",
         ["动漫"]      = "流行&动漫",
         ["流行动漫"]  = "流行&动漫",
@@ -1499,7 +1505,7 @@ public static class PlateData
                 CharterAliasMap.Keys.Contains(candidate, StringComparer.OrdinalIgnoreCase) ||
                 candidate.Equals(RevivalGenreToken, StringComparison.Ordinal) ||
                 GenreAliasMap.ContainsKey(candidate) ||
-                GenreAliasMap.Values.Contains(candidate, StringComparer.Ordinal) ||
+                GenreAliasMap.Values.Contains(candidate, StringComparer.OrdinalIgnoreCase) ||
                 TryResolveLevel(candidate, out _) ||
                 TryResolveConstant(candidate, out _))
             {
@@ -1728,7 +1734,7 @@ public static class PlateData
 
         foreach (var (alias, fullName) in GenreAliasMap)
         {
-            var idx = s.LastIndexOf(alias, StringComparison.Ordinal);
+            var idx = s.LastIndexOf(alias, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) continue;
             if (alias.Length > bestLen || (alias.Length == bestLen && idx > bestStart))
             {
@@ -1738,7 +1744,7 @@ public static class PlateData
         }
         foreach (var fullName in GenreAliasMap.Values.Distinct(StringComparer.Ordinal))
         {
-            var idx = s.LastIndexOf(fullName, StringComparison.Ordinal);
+            var idx = s.LastIndexOf(fullName, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) continue;
             if (fullName.Length > bestLen || (fullName.Length == bestLen && idx > bestStart))
             {

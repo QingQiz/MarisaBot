@@ -1796,6 +1796,27 @@ public class MaiMaiDxPlateDataTest
         Assert.That(MustParseBest(raw).Selectors.Single(), Is.InstanceOf(selector));
     }
 
+    [TestCase("东方50",            "东方Project")]
+    [TestCase("東方50",            "东方Project")]
+    [TestCase("東方Project b50",   "东方Project")]
+    [TestCase("VOCALOID50",        "niconico & VOCALOID")]
+    [TestCase("vocaloid ap50",     "niconico & VOCALOID")]
+    [TestCase("v家50",             "niconico & VOCALOID")]
+    [TestCase("niconico50",        "niconico & VOCALOID")]
+    [TestCase("ボカロ50",          "niconico & VOCALOID")]
+    [TestCase("中二50",            "音击&中二节奏")]
+    public void BestAcceptsGenreAliasesInAnyCase(string raw, string genre)
+    {
+        Assert.That(((PlateData.Selector.Genre)MustParseBest(raw).Selectors.Single()).FullName, Is.EqualTo(genre));
+    }
+
+    [TestCase("東方完成表",   "东方Project")]
+    [TestCase("vocaloid完成表", "niconico & VOCALOID")]
+    public void PlateAcceptsTraditionalAndLowercaseGenreAliases(string raw, string genre)
+    {
+        Assert.That(((PlateData.Selector.Genre)MustParse(raw).Selectors.Single()).FullName, Is.EqualTo(genre));
+    }
+
     [TestCase("Jac ap50")]
     [TestCase("sasakure 50")]
     [TestCase("舞舞50")]
