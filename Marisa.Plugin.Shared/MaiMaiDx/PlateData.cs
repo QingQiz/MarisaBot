@@ -7,6 +7,7 @@ namespace Marisa.Plugin.Shared.MaiMaiDx;
 public static class PlateData
 {
     public const string CommandSuffix = "完成表";
+    public const string BestCommandSuffix = "50";
     private const string OptionalDaiSuffix = "代";
     private const string RevivalGenreToken = "复活曲";
 
@@ -139,7 +140,7 @@ public static class PlateData
     };
 
     /// <summary>
-    ///     DX Score 星档（官方 1★-5★，对应 max DX 的 85/90/93/95/97%）。
+    ///     DX Score 星档（官方 1★-5★，对应 max DX 的 85/90/93/95/97%；6★ 为社区用法，99%）。
     ///     用整数运算避免浮点误差：dxScore * 100 ≥ maxDx * pct 等价于 dxScore / maxDx ≥ pct/100。
     ///     注意：maimai でらっくす BUDDiES 官方 plate marker 也只到 5★，icon asset 只有这 5 档。
     ///     maxDx 接 long 是因为生产代码用 song.Charts[i].Notes.Sum() * 3 自然推 long
@@ -149,6 +150,7 @@ public static class PlateData
     {
         if (maxDx <= 0) return 0;
         var hundred = dxScore * 100L;
+        if (hundred >= maxDx * 99L) return 6;
         if (hundred >= maxDx * 97L) return 5;
         if (hundred >= maxDx * 95L) return 4;
         if (hundred >= maxDx * 93L) return 3;
@@ -438,13 +440,19 @@ public static class PlateData
         levelIdx != 4 || FinaleAndEarlierRemasterSongIds.Contains(songId);
 
     /// <summary>类别别名 → diving-fish basic_info.genre 实际值。</summary>
-    public static readonly Dictionary<string, string> GenreAliasMap = new()
+    public static readonly Dictionary<string, string> GenreAliasMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["术力口"]    = "niconico & VOCALOID",
         ["V家"]       = "niconico & VOCALOID",
         ["VOCALOID"]  = "niconico & VOCALOID",
+        ["niconico"]  = "niconico & VOCALOID",
+        ["ボカロ"]    = "niconico & VOCALOID",
         ["东方"]      = "东方Project",
+        ["東方"]      = "东方Project",
+        ["東方Project"] = "东方Project",
         ["击中"]      = "音击&中二节奏",
+        ["音击"]      = "音击&中二节奏",
+        ["中二"]      = "音击&中二节奏",
         ["流行"]      = "流行&动漫",
         ["动漫"]      = "流行&动漫",
         ["流行动漫"]  = "流行&动漫",
@@ -621,9 +629,15 @@ public static class PlateData
         ("5*",   new(Dimension.DxScore, 5, "5★")),
     ];
 
-    /// <summary>按 token 长度倒序，保证 longest-suffix-match 正确（"大将" 优先于 "将"，"FDX+" 优先于 "FDX"）。</summary>
-    private static readonly (string Token, Threshold Threshold)[] ThresholdEntriesLongestFirst =
-        ThresholdEntries.OrderByDescending(t => t.Token.Length).ToArray();
+    private static readonly (string Token, Threshold Threshold)[] BestThresholdEntries =
+    [
+        .. ThresholdEntries.Where(t => t.Token is not ("将" or "大将" or "极" or "神" or "舞舞")),
+        ("六星", new(Dimension.DxScore, 6, "6★")),
+        ("6星",  new(Dimension.DxScore, 6, "6★")),
+        ("6*",   new(Dimension.DxScore, 6, "6★")),
+    ];
+
+    private static readonly Threshold AnyScoreThreshold = new(Dimension.Achievement, 0, "D");
 
     /// <summary>
     ///     难度别名表。**故意不收单字**（绿/黄/红/紫/白），因为这些字跟代字（紫=MURASAKi、白=MiLK）
@@ -769,11 +783,21 @@ public static class PlateData
         IReadOnlyCollection<string> knownArtists,
         out Query? query,
         out ParseError? error)
-        => TryParseCore(raw, knownCharters, knownArtists, false, out query, out error);
+        => TryParseCore(raw, knownCharters, knownArtists, ParseMode.Plate, out query, out error);
 
     /// <summary>解析批量范围，不接受成绩阈值或谱师/作曲家。</summary>
     public static bool TryParseScope(string raw, out Query? query, out ParseError? error)
-        => TryParseCore(raw, [], [], true, out query, out error);
+        => TryParseCore(raw, [], [], ParseMode.Scope, out query, out error);
+
+    /// <summary>解析「条件 + 50」或「条件 + b50」；未写成绩条件时不限成绩，未写谱面难度时查全难度。</summary>
+    public static bool TryParseBest(
+        string raw,
+        IReadOnlyCollection<string> knownCharters,
+        IReadOnlyCollection<string> knownArtists,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Query? query)
+        => TryParseCore(raw, knownCharters, knownArtists, ParseMode.Best, out query, out _);
+
+    private enum ParseMode { Plate, Scope, Best }
 
     /// <summary>含定数条件时按歌曲 ID 升序，否则按定数降序。</summary>
     public static IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectScopeCharts(
@@ -830,22 +854,38 @@ public static class PlateData
         string raw,
         IReadOnlyCollection<string> knownCharters,
         IReadOnlyCollection<string> knownArtists,
-        bool scopeOnly,
+        ParseMode mode,
         out Query? query,
         out ParseError? error)
     {
         query = null;
         error = null;
 
+        var scopeOnly = mode == ParseMode.Scope;
         var trimmed = raw.Trim();
 
-        if (!scopeOnly && !trimmed.EndsWith(CommandSuffix, StringComparison.Ordinal))
+        if ((mode == ParseMode.Plate && !trimmed.EndsWith(CommandSuffix, StringComparison.Ordinal))
+            || (mode == ParseMode.Best && !trimmed.EndsWith(BestCommandSuffix, StringComparison.Ordinal)))
         {
             error = new(ErrorKind.NotPlateCommand);
             return false;
         }
 
-        var inner = scopeOnly ? trimmed : trimmed[..^CommandSuffix.Length].Trim();
+        // 「b50」优先整体剥离，单独的「b50」不会被当作 B 评级
+        var inner = mode switch
+        {
+            ParseMode.Plate => trimmed[..^CommandSuffix.Length].Trim(),
+            ParseMode.Best => System.Text.RegularExpressions.Regex.Replace(trimmed, @"(?:b\s*)?50$", "",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim(),
+            _ => trimmed
+        };
+
+        var thresholdEntries = mode switch
+        {
+            ParseMode.Plate => ThresholdEntries,
+            ParseMode.Best => BestThresholdEntries,
+            _ => []
+        };
 
         if (inner.Length == 0)
         {
@@ -864,7 +904,7 @@ public static class PlateData
         //    缺省时回落到 DefaultThreshold（"将"=SSS）。
         Threshold? threshold = null;
         int thresholdAt = -1, thresholdLen = 0;
-        foreach (var (token, t) in scopeOnly ? [] : ThresholdEntriesLongestFirst)
+        foreach (var (token, t) in thresholdEntries.OrderByDescending(t => t.Token.Length))
         {
             var pos = FindBoundedRightmost(parsePart, token);
             if (pos >= 0)
@@ -892,7 +932,7 @@ public static class PlateData
         var difficultyExplicit = explicitLevelIdxes.Count > 0;
         IReadOnlyList<int> levelIdxes = difficultyExplicit ? explicitLevelIdxes : DefaultLevelIdxes;
 
-        if (string.IsNullOrWhiteSpace(selectorPart) && selectors.Count == 0)
+        if (mode != ParseMode.Best && string.IsNullOrWhiteSpace(selectorPart) && selectors.Count == 0)
         {
             error = new(ErrorKind.UnknownSelector, inner);
             return false;
@@ -1014,7 +1054,7 @@ public static class PlateData
             for (var i = 0; i < inner.Length; i++)
                 if (!removed[i]) remainder.Append(inner[i]);
             var unknownName = remainder.ToString().Trim();
-            if (scopeOnly)
+            if (mode != ParseMode.Plate)
             {
                 error = new(ErrorKind.UnknownSelector, unknownName);
                 return false;
@@ -1022,7 +1062,7 @@ public static class PlateData
             selectors.Add(new Selector.Charter(unknownName));
         }
 
-        if (selectors.Count == 0)
+        if (mode != ParseMode.Best && selectors.Count == 0)
         {
             // 理论上不会走到（EmptyQuery 在更早被挡），保险兜底
             error = new(ErrorKind.UnknownSelector, inner);
@@ -1031,7 +1071,7 @@ public static class PlateData
 
         if (!difficultyExplicit)
         {
-            if (selectors.Any(s => s is Selector.Level or Selector.Constant or Selector.ConstantRange))
+            if (mode == ParseMode.Best || selectors.Any(s => s is Selector.Level or Selector.Constant or Selector.ConstantRange))
             {
                 // 指定了等级/定数：该等级/定数的谱面可能分布在任意难度（如 6+ 只在 BASIC/ADVANCED，
                 // 13+ 在 EXPERT/MASTER/Re:MASTER），全难度都查——此时版本代字的「仅 MASTER」默认不适用。
@@ -1055,9 +1095,11 @@ public static class PlateData
         }
 
         // 阈值缺省回落：特例牌子（霸者）固定自带的成绩要求优先，否则默认 SSS（将）。
-        threshold ??= selectors.OfType<Selector.Plate>()
-            .Select(p => p.ImpliedThreshold)
-            .FirstOrDefault(t => t is not null) ?? DefaultThreshold;
+        threshold ??= mode == ParseMode.Best
+            ? AnyScoreThreshold
+            : selectors.OfType<Selector.Plate>()
+                .Select(p => p.ImpliedThreshold)
+                .FirstOrDefault(t => t is not null) ?? DefaultThreshold;
 
         query = new Query(selectors, threshold, levelIdxes);
         return true;
@@ -1304,7 +1346,7 @@ public static class PlateData
                 if (!IsReservedStandaloneToken(name)) AddOccurrences(name, null);
             foreach (var alias in CharterAliasMap.Keys) AddOccurrences(alias, alias);
 
-            foreach (var entry in ThresholdEntries) AddFieldOccurrences(entry.Token, true);
+            foreach (var entry in thresholdEntries) AddFieldOccurrences(entry.Token, true);
             foreach (var token in DifficultyAliasMap.Keys) AddFieldOccurrences(token, true, true);
             for (var i = 0; i < input.Length; i++)
                 if (TryMatchDifficultyRange(input, i, out var rangeLength, out _, out _))
@@ -1438,9 +1480,8 @@ public static class PlateData
 
             bool TryCreateKnownNameSelector(string name, out Selector? knownNameSelector)
             {
-                var charterHit = knownCharters.Any(c => c.Contains(name, StringComparison.OrdinalIgnoreCase)) ||
-                                 CharterIdentityMap.Keys.Any(c => c.Contains(name, StringComparison.OrdinalIgnoreCase));
-                var artistHit = knownArtists.Any(a => a.Contains(name, StringComparison.OrdinalIgnoreCase));
+                var charterHit = knownCharters.Concat(CharterIdentityMap.Keys).Any(c => IsKnownName(c, name));
+                var artistHit = knownArtists.Any(a => IsKnownName(a, name));
                 knownNameSelector = charterHit && artistHit
                     ? new Selector.CharterOrArtist(name)
                     : charterHit
@@ -1450,16 +1491,21 @@ public static class PlateData
                             : null;
                 return knownNameSelector is not null;
             }
+
+            // 「50」结尾的消息很常见，这里只认完整名字，避免把其他命令的参数（如 song、line）当成曲师
+            bool IsKnownName(string known, string name) => mode == ParseMode.Best
+                ? known.Equals(name, StringComparison.OrdinalIgnoreCase)
+                : known.Contains(name, StringComparison.OrdinalIgnoreCase);
         }
 
         bool IsReservedStandaloneToken(string candidate)
         {
-            if (ThresholdEntries.Any(x => x.Token.Equals(candidate, StringComparison.OrdinalIgnoreCase)) ||
+            if (thresholdEntries.Any(x => x.Token.Equals(candidate, StringComparison.OrdinalIgnoreCase)) ||
                 DifficultyAliasMap.ContainsKey(candidate) ||
                 CharterAliasMap.Keys.Contains(candidate, StringComparer.OrdinalIgnoreCase) ||
                 candidate.Equals(RevivalGenreToken, StringComparison.Ordinal) ||
                 GenreAliasMap.ContainsKey(candidate) ||
-                GenreAliasMap.Values.Contains(candidate, StringComparer.Ordinal) ||
+                GenreAliasMap.Values.Contains(candidate, StringComparer.OrdinalIgnoreCase) ||
                 TryResolveLevel(candidate, out _) ||
                 TryResolveConstant(candidate, out _))
             {
@@ -1688,7 +1734,7 @@ public static class PlateData
 
         foreach (var (alias, fullName) in GenreAliasMap)
         {
-            var idx = s.LastIndexOf(alias, StringComparison.Ordinal);
+            var idx = s.LastIndexOf(alias, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) continue;
             if (alias.Length > bestLen || (alias.Length == bestLen && idx > bestStart))
             {
@@ -1698,7 +1744,7 @@ public static class PlateData
         }
         foreach (var fullName in GenreAliasMap.Values.Distinct(StringComparer.Ordinal))
         {
-            var idx = s.LastIndexOf(fullName, StringComparison.Ordinal);
+            var idx = s.LastIndexOf(fullName, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) continue;
             if (fullName.Length > bestLen || (fullName.Length == bestLen && idx > bestStart))
             {

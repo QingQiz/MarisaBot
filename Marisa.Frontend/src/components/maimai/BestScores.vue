@@ -25,7 +25,7 @@
                             </template>
                             <span v-else>{{ total_ra }}</span>
                         </div>
-                        <div class="text-3xl font-semibold mt-3 tabular-nums flex items-baseline justify-end gap-3">
+                        <div v-if="!json.merged" class="text-3xl font-semibold mt-3 tabular-nums flex items-baseline justify-end gap-3">
                             <span>{{ ra_old }}</span>
                             <span class="text-white/70">+</span>
                             <span>{{ ra_new }}</span>
@@ -35,8 +35,9 @@
 
                     <!-- Center (absolute, page-centered): subtitle + nickname -->
                     <div class="absolute left-1/2 -translate-x-1/2 bottom-[71px] flex flex-col items-center text-center pointer-events-none">
-                        <div class="text-2xl uppercase tracking-[0.5em] font-bold mb-2 mai-subtitle">
-                            maimai DX · best 50
+                        <div :style="{ fontSize: subtitleFontSize }"
+                             class="text-2xl uppercase tracking-[0.5em] font-bold mb-2 whitespace-nowrap mai-subtitle">
+                            {{ subtitle }}
                         </div>
                         <div :style="{ fontSize: nicknameFontSize }"
                              class="mai-nickname tracking-tight whitespace-nowrap">
@@ -57,18 +58,18 @@
                      charts can include DX charts from previous releases too. -->
                 <section class="px-card-x">
                     <div class="flex items-baseline gap-5 pb-7">
-                        <span class="mai-section-tag bg-[#f93eac]">B35</span>
-                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Old</div>
+                        <span class="mai-section-tag bg-[#f93eac]">{{ json.merged ? 'B50' : 'B35' }}</span>
+                        <div v-if="!json.merged" class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Old</div>
                         <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
                         <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">{{ ra_old }}</div>
                     </div>
-                    <div class="grid grid-cols-5-maimai gap-card pb-12">
+                    <div class="grid grid-cols-5-maimai gap-card" :class="json.merged ? 'pb-[70px]' : 'pb-12'">
                         <score-card v-for="(data, i) in json.charts.sd" v-bind:key="i" :score="data"/>
                     </div>
                 </section>
 
                 <!-- B15 (New) section -->
-                <section class="px-card-x">
+                <section v-if="!json.merged" class="px-card-x">
                     <div class="flex items-baseline gap-5 pb-7">
                         <span class="mai-section-tag bg-[#6dbefe]">B15</span>
                         <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(20,40,120,0.55)]">NEW</div>
@@ -133,6 +134,17 @@ const nicknameChars = computed(() => {
     return out
 })
 const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
+
+const subtitle = computed(() => `maimai DX · ${json.value?.title ?? 'best 50'}`)
+
+// Long filter titles shrink so they stay clear of the logo; fullwidth chars plus tracking count as 1.5.
+const subtitleFontSize = computed(() => {
+    let weight = 0
+    for (const c of subtitle.value) {
+        weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.5 : 1.0
+    }
+    return `${Math.min(1.5, 1.5 * 26 / weight)}rem`
+})
 
 // Auto-shrink nickname so long names don't collide with logo / rating columns.
 // Fullwidth chars count as 1.0, halfwidth ~0.55 — matches their actual rendered width ratio.
@@ -248,6 +260,7 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
 
 /* Subtitle "MAIMAI DX · BEST 50" — dark navy on the light pastel top of the gradient */
 .mai-subtitle {
+    font-family: Torus, 'Microsoft YaHei', sans-serif;
     color: #1e293b;
     text-shadow: 0 1px 2px rgba(255,255,255,0.6);
 }

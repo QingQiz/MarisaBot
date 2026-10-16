@@ -691,6 +691,40 @@ public partial class MaiMaiDx
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("按成绩/版本/谱师/等级等条件筛选 b50，如`ap50`、`14+ 六星b50`")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(FilteredBestTrigger))]
+    private async Task<MarisaPluginTaskState> FilteredBest(Message message)
+    {
+        if (!TryParseFilteredBest(message.Command, out var query))
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
+        var charts = PlateData.SelectCharts(query, SongDb.SongList.Where(song => song.Id <= 100000));
+
+        if (charts.Count == 0)
+        {
+            message.Reply($"没有找到 {string.Join(" + ", query.Selectors.Select(s => s.Display))} 对应的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var player = ResolvePlayer(message);
+        var (nickname, scores) = await player.Fetcher.GetScores(player);
+        var b50 = BuildFilteredBest(query, charts, scores, nickname, message.Command.ToString().Trim());
+
+        if (b50.OldScores.Count + b50.NewScores.Count == 0)
+        {
+            message.Reply("没有符合条件的成绩");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var context = new WebContext(new { b50 });
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("支持按评级、等级、谱面难度和官方定数筛选", "无筛选时分析 B50，如`鸟加 14+ 紫谱 14.8`")]
     [MarisaPluginCommand(true, "含金量分析")]
     private Task<MarisaPluginTaskState> GoldValueAnalysis(Message message)
@@ -1210,18 +1244,7 @@ public partial class MaiMaiDx
     private async Task<MarisaPluginTaskState> Plate(Message message)
     {
         var raw = message.Command.ToString();
-
-        var charters = SongDb.SongList
-            .SelectMany(s => s.Charters)
-            .Where(c => !string.IsNullOrWhiteSpace(c) && c != "-" && c != "N/A")
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        var artists = SongDb.SongList
-            .Select(s => s.Info.Artist)
-            .Where(a => !string.IsNullOrWhiteSpace(a))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var (charters, artists) = ChartersAndArtists();
 
         if (!PlateData.TryParse(raw, charters, artists, out var query, out var error))
         {

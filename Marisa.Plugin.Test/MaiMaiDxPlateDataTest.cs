@@ -1294,7 +1294,7 @@ public class MaiMaiDxPlateDataTest
             Assert.That(q.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo(levelLabel));
     }
 
-    // DxScoreStar helper integer math 验证（边界 85/90/93/95/97%）
+    // DxScoreStar helper integer math 验证（边界 85/90/93/95/97/99%）
     [TestCase(0,    1000, 0)]
     [TestCase(849,  1000, 0)]
     [TestCase(850,  1000, 1)]   // 85.0% 边界
@@ -1306,7 +1306,11 @@ public class MaiMaiDxPlateDataTest
     [TestCase(950,  1000, 4)]   // 95.0%
     [TestCase(969,  1000, 4)]
     [TestCase(970,  1000, 5)]   // 97.0%
-    [TestCase(1000, 1000, 5)]
+    [TestCase(989,  1000, 5)]
+    [TestCase(990,  1000, 6)]   // 99.0%
+    [TestCase(1000, 1000, 6)]
+    [TestCase(2969, 2999, 5)]   // 98.999…%
+    [TestCase(2970, 3000, 6)]
     [TestCase(266,  288,  2)]   // True Love Song BASIC, TamakoZz 实际样本 92.36% → 2★
     [TestCase(100,  0,    0)]   // maxDx=0 兜底
     public void DxScoreStarHelper_Boundaries(int dxScore, int maxDx, int expected)
@@ -1707,5 +1711,150 @@ public class MaiMaiDxPlateDataTest
     public void LooseDifficultyPrefixRejectsNonDifficulty(string input)
     {
         Assert.That(PlateData.TryStripDifficultyPrefixLoose(input.AsMemory(), out _, out _), Is.False);
+    }
+
+    private static PlateData.Query MustParseBest(string raw)
+    {
+        Assert.That(PlateData.TryParseBest(raw, Charters, Artists, out var query), Is.True, raw);
+        return query!;
+    }
+
+    [TestCase("ap50",      PlateData.Dimension.Fc,          3)]
+    [TestCase("AP b50",    PlateData.Dimension.Fc,          3)]
+    [TestCase("apb50",     PlateData.Dimension.Fc,          3)]
+    [TestCase("ap 50",     PlateData.Dimension.Fc,          3)]
+    [TestCase("AP+50",     PlateData.Dimension.Fc,          4)]
+    [TestCase("理论值50",  PlateData.Dimension.Fc,          4)]
+    [TestCase("fc+b50",    PlateData.Dimension.Fc,          2)]
+    [TestCase("sss+50",    PlateData.Dimension.Achievement, 13)]
+    [TestCase("FDX+ B50",  PlateData.Dimension.Fs,          5)]
+    [TestCase("五星50",    PlateData.Dimension.DxScore,     5)]
+    [TestCase("六星50",    PlateData.Dimension.DxScore,     6)]
+    [TestCase("6星b50",    PlateData.Dimension.DxScore,     6)]
+    [TestCase("6*50",      PlateData.Dimension.DxScore,     6)]
+    public void BestParsesThresholdOnlyAsAllCharts(string raw, PlateData.Dimension dim, int level)
+    {
+        var query = MustParseBest(raw);
+        Assert.Multiple(() =>
+        {
+            Assert.That(query.Selectors, Is.Empty);
+            Assert.That(query.Threshold.Dim, Is.EqualTo(dim));
+            Assert.That(query.Threshold.Level, Is.EqualTo(level));
+            Assert.That(query.LevelIdxes, Is.EqualTo(new[] { 0, 1, 2, 3, 4 }));
+        });
+    }
+
+    [TestCase("bb50",     2)]
+    [TestCase("B b50",    2)]
+    [TestCase("bbb50",    3)]
+    [TestCase("BBB b50",  4)]
+    [TestCase("bbbb50",   4)]
+    public void BestStripsB50BeforeReadingBRanks(string raw, int level)
+    {
+        var query = MustParseBest(raw);
+        Assert.That((query.Threshold.Dim, query.Threshold.Level), Is.EqualTo((PlateData.Dimension.Achievement, level)));
+    }
+
+    [TestCase("b50")]
+    [TestCase("B50")]
+    [TestCase("b 50")]
+    [TestCase(" b50 ")]
+    [TestCase("50")]
+    [TestCase("ap")]
+    [TestCase("将50")]
+    [TestCase("大将b50")]
+    [TestCase("真将50")]
+    [TestCase("极50")]
+    [TestCase("神50")]
+    [TestCase("舞将50")]
+    [TestCase("ap 六星50")]
+    [TestCase("info In Chaos50")]
+    [TestCase("line 250")]
+    public void BestRejectsPlainB50PlateOnlyWordsAndUnknownText(string raw)
+    {
+        Assert.That(PlateData.TryParseBest(raw, Charters, Artists, out _), Is.False);
+    }
+
+    [Test]
+    public void BestWithoutThresholdAcceptsAnyScoreAndAllDifficulties()
+    {
+        var query = MustParseBest("真代50");
+        Assert.Multiple(() =>
+        {
+            Assert.That(query.Selectors.Single(), Is.InstanceOf<PlateData.Selector.Plate>());
+            Assert.That(query.Threshold.Level, Is.Zero);
+            Assert.That(query.LevelIdxes, Is.EqualTo(new[] { 0, 1, 2, 3, 4 }));
+        });
+    }
+
+    [TestCase("Jack ap50",    typeof(PlateData.Selector.Charter))]
+    [TestCase("DECO*27 50",   typeof(PlateData.Selector.Artist))]
+    [TestCase("rintaro soma 50", typeof(PlateData.Selector.CharterOrArtist))]
+    [TestCase("沙发太50",     typeof(PlateData.Selector.CharterAlias))]
+    public void BestAcceptsCompleteNamesAndAliases(string raw, Type selector)
+    {
+        Assert.That(MustParseBest(raw).Selectors.Single(), Is.InstanceOf(selector));
+    }
+
+    [TestCase("东方50",            "东方Project")]
+    [TestCase("東方50",            "东方Project")]
+    [TestCase("東方Project b50",   "东方Project")]
+    [TestCase("VOCALOID50",        "niconico & VOCALOID")]
+    [TestCase("vocaloid ap50",     "niconico & VOCALOID")]
+    [TestCase("v家50",             "niconico & VOCALOID")]
+    [TestCase("niconico50",        "niconico & VOCALOID")]
+    [TestCase("ボカロ50",          "niconico & VOCALOID")]
+    [TestCase("中二50",            "音击&中二节奏")]
+    public void BestAcceptsGenreAliasesInAnyCase(string raw, string genre)
+    {
+        Assert.That(((PlateData.Selector.Genre)MustParseBest(raw).Selectors.Single()).FullName, Is.EqualTo(genre));
+    }
+
+    [TestCase("東方完成表",   "东方Project")]
+    [TestCase("vocaloid完成表", "niconico & VOCALOID")]
+    public void PlateAcceptsTraditionalAndLowercaseGenreAliases(string raw, string genre)
+    {
+        Assert.That(((PlateData.Selector.Genre)MustParse(raw).Selectors.Single()).FullName, Is.EqualTo(genre));
+    }
+
+    [TestCase("Jac ap50")]
+    [TestCase("sasakure 50")]
+    [TestCase("舞舞50")]
+    [TestCase("SAMBA 50")]
+    public void BestRejectsPartialNamesThatPlateWouldAccept(string raw)
+    {
+        Assert.That(PlateData.TryParseBest(raw, Charters, Artists, out _), Is.False);
+    }
+
+    [Test]
+    public void BestIgnoresPlateImpliedThreshold()
+    {
+        var query = MustParseBest("霸者50");
+        Assert.That(query.Threshold.Level, Is.Zero);
+    }
+
+    [Test]
+    public void BestCombinesScopesDifficultiesAndThreshold()
+    {
+        var query = MustParseBest("翠楼屋 14+ 紫谱/白谱 六星b50");
+        Assert.Multiple(() =>
+        {
+            Assert.That(query.Selectors.OfType<PlateData.Selector.Charter>().Single().Name, Is.EqualTo("翠楼屋"));
+            Assert.That(query.Selectors.OfType<PlateData.Selector.Level>().Single().Label, Is.EqualTo("14+"));
+            Assert.That(query.LevelIdxes, Is.EqualTo(new[] { 3, 4 }));
+            Assert.That(query.Threshold, Is.EqualTo(new PlateData.Threshold(PlateData.Dimension.DxScore, 6, "6★")));
+        });
+    }
+
+    [Test]
+    public void PlateStillRejectsSixStarsAndKeepsPlateWords()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(MustParse("真将完成表").Threshold.Level, Is.EqualTo(12));
+            Assert.That(MustParse("14+完成表").Threshold, Is.EqualTo(PlateData.DefaultThreshold));
+            Assert.That(MustParse("14+ 5星完成表").Threshold.Level, Is.EqualTo(5));
+            Assert.That(MustParse("14+ 六星完成表").Threshold.Dim, Is.Not.EqualTo(PlateData.Dimension.DxScore));
+        });
     }
 }
