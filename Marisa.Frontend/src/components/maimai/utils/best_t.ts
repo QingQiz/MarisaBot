@@ -7,6 +7,8 @@ export interface MaiMaiRating {
     user_data: null;
     user_id: null;
     username: string;
+    title?: string;
+    merged?: boolean;
 }
 
 export interface Charts {

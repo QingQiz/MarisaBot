@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using Marisa.Configuration;
 using Marisa.Database;
@@ -372,6 +373,73 @@ public partial class MaiMaiDx
         var context = new WebContext(new { analysis = data });
         message.Reply(MessageDataImage.FromBase64(await WebApi.MaiMaiValueAnalysis(context.Id)));
         return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
+    #region 条件 b50
+
+    private (List<string> Charters, List<string> Artists) ChartersAndArtists() =>
+    (
+        SongDb.SongList
+            .SelectMany(s => s.Charters)
+            .Where(c => !string.IsNullOrWhiteSpace(c) && c != "-" && c != "N/A")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList(),
+        SongDb.SongList
+            .Select(s => s.Info.Artist)
+            .Where(a => !string.IsNullOrWhiteSpace(a))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList()
+    );
+
+    private bool TryParseFilteredBest(ReadOnlyMemory<char> command, [NotNullWhen(true)] out PlateData.Query? query)
+    {
+        query = null;
+        if (!command.EndsWith(PlateData.BestCommandSuffix)) return false;
+
+        var (charters, artists) = ChartersAndArtists();
+        return PlateData.TryParseBest(command.ToString(), charters, artists, out query);
+    }
+
+    private bool FilteredBestTrigger(Message message, IServiceProvider _serviceProvider) =>
+        TryParseFilteredBest(message.Command, out _);
+
+    private static DxRating BuildFilteredBest(
+        PlateData.Query query,
+        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> charts,
+        Dictionary<(long Id, int LevelIdx), SongScore> scores,
+        string? nickname,
+        string title)
+    {
+        var reached = charts
+            .Where(chart => scores.TryGetValue((chart.Song.Id, chart.LevelIdx), out var score) && Reached(score, chart.Song, chart.LevelIdx))
+            .Select(chart => (chart.Song.Info.IsNew, Score: scores[(chart.Song.Id, chart.LevelIdx)]))
+            .ToList();
+        var merged = charts.All(chart => chart.Song.Info.IsNew) || charts.All(chart => !chart.Song.Info.IsNew);
+
+        return new DxRating
+        {
+            Nickname  = nickname!,
+            Title     = title,
+            Merged    = merged,
+            OldScores = merged
+                ? Top(reached, DivingFishDataFetcher.OldScoreLimit + DivingFishDataFetcher.NewScoreLimit)
+                : Top(reached.Where(x => !x.IsNew), DivingFishDataFetcher.OldScoreLimit),
+            NewScores = merged ? [] : Top(reached.Where(x => x.IsNew), DivingFishDataFetcher.NewScoreLimit)
+        };
+
+        bool Reached(SongScore score, MaiMaiSong song, int levelIdx) => query.Threshold.Dim == PlateData.Dimension.DxScore
+            ? levelIdx < song.Charts.Count
+              && PlateData.DxScoreStar(score.DxScore, song.Charts[levelIdx].Notes.Sum() * 3) >= query.Threshold.Level
+            : PlateData.LevelOf(query.Threshold.Dim, score) >= query.Threshold.Level;
+
+        static List<SongScore> Top(IEnumerable<(bool IsNew, SongScore Score)> source, int limit) => source
+            .Select(x => x.Score)
+            .OrderByDescending(score => score.Rating)
+            .ThenByDescending(score => score.Id)
+            .Take(limit)
+            .ToList();
     }
 
     #endregion

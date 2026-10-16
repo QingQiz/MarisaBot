@@ -36,6 +36,13 @@ public record DxRating
     [JsonProperty("nickname")]
     public string Nickname { get; set; }
 
+    [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
+    public string? Title { get; init; }
+
+    /// <summary>不分新旧版本，全部成绩放在 <see cref="OldScores"/>。</summary>
+    [JsonProperty("merged", DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public bool Merged { get; init; }
+
     [JsonProperty("rating")]
     public int Rating
     {
