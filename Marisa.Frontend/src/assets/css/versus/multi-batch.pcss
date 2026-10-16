@@ -11,11 +11,12 @@ h1 { font:900 36px 'Microsoft YaHei',sans-serif; margin:5px 0 0; letter-spacing:
 .scope-chip { max-width:100%; overflow-wrap:anywhere; border:1px solid #d690ed77; border-radius:99px; padding:6px 16px; background:#ba42d932; color:#f1d2ff; }
 .separator { color:#9986ad; }
 
-.grid-row { display:grid; grid-template-columns:minmax(0,1fr) repeat(var(--players), 128px); column-gap:8px; }
+.grid-row { display:grid; grid-template-columns:minmax(0,1fr) repeat(var(--players), 128px); column-gap:0; }
 .table-head { align-items:end; margin-bottom:10px; }
 .song-label { padding:0 0 8px 14px; font:700 12px 'Microsoft YaHei',sans-serif; color:#baa8cd; letter-spacing:.04em; }
 .player-head {
     min-width:0;
+    margin-inline:4px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -45,8 +46,16 @@ h1 { font:900 36px 'Microsoft YaHei',sans-serif; margin:5px 0 0; letter-spacing:
 .chart-meta { display:flex; align-items:center; gap:8px; margin-top:4px; white-space:nowrap; }
 .chart-meta>b { font:900 10px 'SEGA NewRodin',sans-serif; }
 .constant { color:#ddcce9; font:700 12px 'Torus',sans-serif; }
-.score-cell { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; }
-.score-cell.best { background:linear-gradient(180deg,rgba(255,215,94,.06),rgba(255,215,94,.16)); box-shadow:inset 0 -2px 0 rgba(255,215,94,.75); }
+.score-cell { position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-width:0; }
+.score-cell.best { background:linear-gradient(180deg,rgba(255,215,94,.06),rgba(255,215,94,.16)); }
+.score-cell.best::after {
+    content:'';
+    position:absolute;
+    inset:auto 0 0;
+    height:2px;
+    background:rgba(255,215,94,.75);
+    pointer-events:none;
+}
 .achievement { font:900 19px/1 'Torus',sans-serif; font-variant-numeric:tabular-nums; color:#e7dfed; }
 .best .achievement { color:#ffe27a; }
 .achievement small { font-size:11px; margin-left:1px; color:#ab99b9; }
