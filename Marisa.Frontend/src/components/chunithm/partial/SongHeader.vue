@@ -51,17 +51,13 @@ async function fitColumns() {
     const artworkLast = artwork?.lastElementChild
     const last = charts?.lastElementChild
     if (!container || !artwork || !artworkLast || !charts || !last) return
-    // zoom 后边框会取整，需复测补偿
-    for (let pass = 0; pass < 3; pass++) {
-        if (version !== fitVersion) return
-        const artworkHeight = (artworkLast.getBoundingClientRect().bottom - artwork.getBoundingClientRect().top) / coverScale.value
-        const chartHeight = (last.getBoundingClientRect().bottom - charts.getBoundingClientRect().top) / chartScale.value
-        const heightRatio = artwork.firstElementChild === artworkLast ? Math.max(1, chartHeight / artworkHeight) : chartHeight / artworkHeight
-        const scale = (container.clientWidth - 28) / (452 * heightRatio + 624)
-        chartScale.value = Math.min(1.15, Math.max(.8, scale))
-        coverScale.value = (container.clientWidth - 28 - 624 * chartScale.value) / 452
-        await nextTick()
-    }
+    // 只在未缩放时量测：Chrome 128 前 zoom 元素的 getBoundingClientRect 不是视觉尺寸
+    const artworkHeight = artworkLast.getBoundingClientRect().bottom - artwork.getBoundingClientRect().top
+    const chartHeight = last.getBoundingClientRect().bottom - charts.getBoundingClientRect().top
+    const heightRatio = artwork.firstElementChild === artworkLast ? Math.max(1, chartHeight / artworkHeight) : chartHeight / artworkHeight
+    const scale = (container.clientWidth - 28) / (452 * heightRatio + 624)
+    chartScale.value = Math.min(1.15, Math.max(.8, scale))
+    coverScale.value = (container.clientWidth - 28 - 624 * chartScale.value) / 452
 }
 
 onMounted(fitColumns)
