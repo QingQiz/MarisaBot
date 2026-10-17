@@ -45,7 +45,10 @@ public partial class Chunithm
         return (player is null ? null : new VersusPlayerBinding<ChunithmScore>(qq, () => FetchBattleData(player)), error);
     }
 
-    private (ResolvedPlayer? Player, string? Error) ResolveVersusPlayer(Message message, long qq)
+    private (ResolvedPlayer? Player, string? Error) ResolveVersusPlayer(Message message, long qq) =>
+        ResolveScorePlayer(message, qq, "chu vs");
+
+    private (ResolvedPlayer? Player, string? Error) ResolveScorePlayer(Message message, long qq, string command)
     {
         using var realm = BotDbContext.OpenRealm();
         var server = realm.All<ChunithmBind>().FirstOrDefault(x => x.UId == qq)?.ServerName;
@@ -60,7 +63,7 @@ public partial class Chunithm
             case "DivingFish" or null:
                 return (new ResolvedPlayer(qq, null, qq == message.Sender.Id, GetDataFetcher("DivingFish", null)), null);
             default:
-                return (null, "chu vs 暂仅支持水鱼和落雪，请使用 chu bind 改绑");
+                return (null, $"{command} 暂仅支持水鱼和落雪，请使用 chu bind 改绑");
         }
     }
 

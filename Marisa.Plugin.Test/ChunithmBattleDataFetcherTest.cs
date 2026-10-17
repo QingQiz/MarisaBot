@@ -361,6 +361,57 @@ public class ChunithmBattleDataFetcherTest
         });
     }
 
+    [Test]
+    public async Task DivingFishSongQueryFiltersOnServerAndKeepsCatalogWorldsEnd()
+    {
+        AuthorizeFish(Opponent, "opponent-ticket");
+        var fetcher = new OAuthFishFetcher(Db(), [ChunithmVersusModelTest.WorldsEndSong()]);
+        _http.ForCallsTo("https://www.diving-fish.com/api/chunithmprober/player/records*").RespondWithJson(new
+        {
+            nickname = "opponent",
+            records = new
+            {
+                best = new object[]
+                {
+                    new { mid = 1, title = "song-1", score = 1_009_000, level_index = 3, level_label = "MASTER" },
+                    new { mid = 8020, title = "[狂]song-1", score = 1_010_000, level_index = 0, level_label = "Basic", fc = "alljustice" },
+                    new { mid = 8030, title = "[改]other", score = 1_000_000, level_index = 5, level_label = "World's End" }
+                }
+            }
+        });
+        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher), [1, 8020]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(data.Scores.Keys, Is.EquivalentTo(new[] { (1L, 3), (8020L, 5) }));
+            Assert.That(data.Scores[(8020, 5)].Level, Is.EqualTo("狂"));
+            Assert.That(data.Scores[(8020, 5)].FullCombo, Is.EqualTo("alljusticecritical"));
+            Assert.That(_http.CallLog.Single().Request.Url.QueryParams.FirstOrDefault("song_id"), Is.EqualTo("1,8020"));
+        });
+    }
+
+    [Test]
+    public async Task LxnsKeepsCatalogWorldsEndScoresByWorldsEndId()
+    {
+        LxnsTokenStore.SaveToken(Opponent, "opponent-ticket", "fake-refresh", 3600);
+        var fetcher = new LocalLxnsFetcher(Db(), [ChunithmVersusModelTest.WorldsEndSong()]);
+        _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player/scores").RespondWithJson(new
+        {
+            data = new object[]
+            {
+                new { id = 1, song_name = "song-1", level_index = 3, score = 1_005_000, full_combo = "fullcombo" },
+                new { id = 8021, song_name = "song-1", level_index = 5, score = 990_000, clear = "absolute" }
+            }
+        });
+        _http.ForCallsTo("https://maimai.lxns.net/api/v0/user/chunithm/player").RespondWithJson(new { data = new { name = "opponent" } });
+        var data = await fetcher.GetBattleData(new ResolvedPlayer(Opponent, null, false, fetcher), [1, 8021]);
+        Assert.Multiple(() =>
+        {
+            Assert.That(data.Scores.Keys, Is.EquivalentTo(new[] { (1L, 3), (8021L, 5) }));
+            Assert.That(data.Scores[(8021, 5)].Level, Is.EqualTo("避"));
+            Assert.That(data.Scores[(8021, 5)].Clear, Is.EqualTo("absolute"));
+        });
+    }
+
     [TestCase(false)]
     [TestCase(true)]
     public async Task BattleScoresUseNationalLevelsAndConstants(bool lxns)

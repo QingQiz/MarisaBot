@@ -1,4 +1,5 @@
 using System.Net;
+using Flurl;
 using Flurl.Http;
 using Marisa.Configuration;
 using Marisa.Plugin.Shared.DivingFish;
@@ -99,22 +100,25 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
             .ToDictionary(x => (x.Id, (int)x.LevelIndex), x => x);
     }
 
-    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player)
+    public override async Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyCollection<long>? songIds = null)
     {
         if (player.Username is not null) throw new InvalidOperationException("对战必须按绑定 QQ 读取完整成绩");
-        var response = await FetchBattleRecords(player);
+        var response = await FetchBattleRecords(player, songIds);
         if (response.Records.Best.Any(score => score is null || !score.HasScore))
             throw new InvalidDataException("水鱼完整成绩响应缺少整数 score，无法进行对战");
-        // 水鱼 WE-only 的 cids 可能返回 Basic/index 0，须按该源的 >=8000 曲目 ID 排除。
+        // 水鱼 WE 曲目从 8000 起，单谱 WE 的 cids 可能返回 Basic/index 0；只保留国服曲库中的 WE。
+        var songs = GetSongList();
+        var worldsEnd = ChunithmVersusCatalog.WorldsEndCharts(songs);
         var scores = ChunithmVersusCatalog.NormalizeScores(response.Records.Best
-            .Where(score => score.Id < 8000).Select(ChunithmBattleCompletion.FromDivingFish), GetSongList());
-        // 官方规定标准谱 1,010,000 为 AJC；只转换已验证的标准成绩，chain 已独立保存。
+            .Where(score => score.Id < 8000 || worldsEnd.ContainsKey(score.Id)).Select(ChunithmBattleCompletion.FromDivingFish), songs);
+        // 官方规定 1,010,000 为 AJC；只转换已归一化的成绩，chain 已独立保存。
         foreach (var score in scores.Values.Where(score => score.Achievement == 1_010_000))
             score.Fc = "alljusticecritical";
         return new ChunithmBattleData(response.Username, scores);
     }
 
-    protected virtual Task<ChunithmRating> FetchBattleRecords(ResolvedPlayer player) => FetchCompleteRecords(player, true);
+    protected virtual Task<ChunithmRating> FetchBattleRecords(ResolvedPlayer player, IReadOnlyCollection<long>? songIds) =>
+        FetchCompleteRecords(player, true, songIds);
 
     protected virtual async Task<ChunithmRating> FetchScoresByUsername(ReadOnlyMemory<char> username)
     {
@@ -157,7 +161,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
     /// <summary>完整记录：配置了 OAuth 时用本人票据读（只有本人能读），否则用 dev token 按账号名或 QQ 查。</summary>
     protected virtual Task<ChunithmRating> FetchScores(ResolvedPlayer player) => FetchCompleteRecords(player, false);
 
-    private async Task<ChunithmRating> FetchCompleteRecords(ResolvedPlayer player, bool allowAuthorizedOpponent)
+    private async Task<ChunithmRating> FetchCompleteRecords(ResolvedPlayer player, bool allowAuthorizedOpponent, IReadOnlyCollection<long>? songIds = null)
     {
         if (OAuthEnabled)
         {
@@ -168,6 +172,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
 
             var response = await SendBearerWithOneRetry(player.Qq, "chunithm", token =>
                 "https://www.diving-fish.com/api/chunithmprober/player/records"
+                    .SetQueryParam("song_id", songIds is { Count: > 0 } ? string.Join(',', songIds) : null)
                     .WithHeader("Authorization", $"Bearer {token}")
                     .AllowHttpStatus("400,401,403,429,503")
                     .GetAsync());

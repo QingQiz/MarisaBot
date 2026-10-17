@@ -16,11 +16,11 @@ export interface ChuSongData extends Omit<ChuSongHeaderData, 'Bpm'> {
 
 const standardNames = ['BASIC', 'ADVANCED', 'EXPERT', 'MASTER', 'ULTIMA']
 
-export function isWorldsEnd(chart: ChuSongBeatmap) {
+export function isWorldsEnd(chart: Pick<ChuSongBeatmap, 'LevelName'>) {
     return chart.LevelName.trim().toUpperCase() === "WORLD'S END"
 }
 
-export function chartDifficulty(chart: ChuSongBeatmap) {
+export function chartDifficulty(chart: Pick<ChuSongBeatmap, 'LevelName'>) {
     return isWorldsEnd(chart) ? 5 : standardNames.indexOf(chart.LevelName.trim().toUpperCase())
 }
 

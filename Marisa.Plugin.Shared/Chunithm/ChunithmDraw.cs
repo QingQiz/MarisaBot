@@ -16,6 +16,9 @@ public static class ChunithmDraw
     public static Task<string> DrawVersusMultiBatch(ChunithmVersusMulti result, int page, int round, IReadOnlyList<VersusStanding> standings) =>
         WebApi.ChunithmVersusMultiBatch(new WebContext(new { chuVersusMultiBatch = result.GetPage(page, round, standings) }).Id);
 
+    public static Task<string> DrawSongScore(ChunithmSongScore.PageData data) =>
+        WebApi.ChunithmSongScore(new WebContext(new { chuSongScore = data }).Id);
+
     public static async Task<string> DrawGroupedSong(
         IEnumerable<IGrouping<string, (double Constant, int LevelIdx, ChunithmSong Song)>> groupedSong,
         IReadOnlyDictionary<(long SongId, int LevelIdx), ChunithmScore> scores,

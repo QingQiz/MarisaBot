@@ -249,6 +249,8 @@ public static class WebApi
         return await RenderUrl("/chunithm/song?id=" + id);
     }
 
+    public static Task<string> ChunithmSongScore(Guid id) => RenderUrl("/chunithm/song-score?id=" + id);
+
     public static Task<string> ChunithmVersus(Guid id) => RenderUrl("/chunithm/versus?id=" + id);
 
     public static Task<string> ChunithmVersusBatch(Guid id) => RenderUrl("/chunithm/versus-batch?id=" + id);

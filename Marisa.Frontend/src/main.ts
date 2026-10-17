@@ -27,6 +27,7 @@ import OpLevel from "@/components/chunithm/op/OpLevel.vue";
 import OpVersion from "@/components/chunithm/op/OpVersion.vue";
 import {default as ChunithmPreview} from "@/components/chunithm/Preview.vue";
 import ChunithmSong from "@/components/chunithm/ChunithmSong.vue";
+import ChuSongScore from "@/components/chunithm/ChuSongScore.vue";
 import MaiSong from "@/components/maimai/MaiSong.vue";
 import MaiSongScore from "@/components/maimai/MaiSongScore.vue";
 import MaiVersus from "@/components/maimai/MaiVersus.vue";
@@ -73,6 +74,7 @@ const routes = [
     {path: '/chunithm/op-version', component: OpVersion},
     {path: '/chunithm/preview', component: ChunithmPreview},
     {path: '/chunithm/song', component: ChunithmSong},
+    {path: '/chunithm/song-score', component: ChuSongScore},
     {path: '/game/friberg', component: Friberg},
     {path: '/ongeki/song/:id', component: OngekiSong},
     {path: '/osu/score', component: OsuScore},

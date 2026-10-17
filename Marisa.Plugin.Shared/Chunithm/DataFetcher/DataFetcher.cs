@@ -36,7 +36,7 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player);
 
     /// <summary>对战只使用目标自己授权的完整成绩；公开 B30/N20 不能代表未游玩状态。</summary>
-    public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player) =>
+    public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyCollection<long>? songIds = null) =>
         throw new NotSupportedException("该查分器不支持 chu vs，请先 bind 改绑水鱼或落雪");
 
     /// <summary>
