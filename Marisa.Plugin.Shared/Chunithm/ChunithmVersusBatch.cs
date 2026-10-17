@@ -48,9 +48,9 @@ public sealed class ChunithmVersusBatch
     }
 
     public static ScoreView CreateScore(IReadOnlyDictionary<(long Id, int LevelIdx), ChunithmScore> scores, ChunithmVersusChart chart) =>
-        scores.TryGetValue((chart.Id, chart.LevelIndex), out var score)
+        scores.TryGetValue(chart.ScoreKey, out var score)
             ? new ScoreView("played", score.Achievement, ChunithmScore.GetRank(score.Achievement),
-                ChunithmSong.Ra(score.Achievement, (decimal)chart.Constant), score.FullCombo, score.FullChain, score.Clear ?? "")
+                chart.LevelIndex == 5 ? null : ChunithmSong.Ra(score.Achievement, (decimal)chart.Constant), score.FullCombo, score.FullChain, score.Clear ?? "")
             : new ScoreView("unplayed");
 
     private static Row CreateRow(ChunithmVersusChart chart, VersusPlayer<ChunithmScore> left, VersusPlayer<ChunithmScore> right)

@@ -3,7 +3,11 @@ namespace Marisa.Plugin.Shared.Versus;
 public sealed record VersusPlayerBinding<TScore>(long Qq, Func<Task<VersusFetchResult<TScore>>> Fetch);
 
 public sealed record VersusSingleSelection<TChart>(
-    IReadOnlyList<TChart> Charts, bool Random, string Title, string Version);
+    IReadOnlyList<TChart> Charts, bool Random, string Title, string Version, string SortLabel = "")
+{
+    /// <summary>指定的歌有多张谱面时按多曲对战处理。</summary>
+    public bool IsBatch => !Random && Charts.Count > 1;
+}
 
 public sealed record VersusRandomSelection<TChart>(int Count, string Query, IReadOnlyList<TChart> Charts);
 
@@ -44,6 +48,12 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         if (ResolvePlayers(message) is not { } players) return MarisaPluginTaskState.CompletedTask;
         if (await SelectSingle(message) is not { } selection) return MarisaPluginTaskState.CompletedTask;
         if (await FetchScores(message, players) is not { } sides) return MarisaPluginTaskState.CompletedTask;
+
+        if (selection.IsBatch)
+        {
+            await ReplyBatch(message, selection.Title, selection.Version, selection.SortLabel, selection.Charts, sides.Self, sides.Opponent);
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         TChart chart;
         if (selection.Random)
@@ -92,7 +102,7 @@ public sealed class VersusBattle<TScore, TChart> : VersusBattle
         if (await SelectSingle(message) is not { } selection) return MarisaPluginTaskState.CompletedTask;
 
         OpenRoom(message, members, new VersusRoomPlan<TChart>(selection.Title, selection.Charts, selection.Random ? 1 : null),
-            new VersusRoomPresentation(selection.Version, VersusRoomView.SingleSong));
+            new VersusRoomPresentation(selection.Version, selection.IsBatch ? VersusRoomView.Batch : VersusRoomView.SingleSong));
         return MarisaPluginTaskState.CompletedTask;
     }
 

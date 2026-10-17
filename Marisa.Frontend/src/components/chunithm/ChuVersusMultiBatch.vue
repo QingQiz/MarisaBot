@@ -36,7 +36,7 @@
                     <MaiCover game="chunithm" :song-id="row.Song.Id" :size="52" :frame-radius="9" :img-radius="6"/>
                     <div class="song-copy">
                         <div class="song-title" :class="{'has-han': /[㐀-鿿]/.test(row.Song.Title)}" :title="row.Song.Title">{{ row.Song.Title }}</div>
-                        <div class="chart-meta"><b :style="difficultyStyle(row.LevelIndex)">{{ row.LevelName }} {{ row.Level }}</b><span class="constant">{{ row.Constant.toFixed(1) }}</span></div>
+                        <div class="chart-meta"><b :style="difficultyStyle(row.LevelIndex)">{{ row.LevelName }} {{ row.Level }}</b><span v-if="row.LevelIndex !== 5" class="constant">{{ row.Constant.toFixed(1) }}</span></div>
                     </div>
                 </div>
                 <div v-for="(cell, column) in row.Cells" :key="column" class="score-cell" :class="{best: cell.Score.State === 'played' && cell.Place === 1 && playedCount(row) > 1, unplayed: cell.Score.State !== 'played'}">

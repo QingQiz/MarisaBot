@@ -3,7 +3,7 @@
         <SongHeader :song="song"/>
         <div class="flex items-center gap-4 mt-8 mb-4">
             <span class="section-tag">多人对战</span>
-            <span class="difficulty" :style="difficultyStyle(levelIndex)">{{ data.Chart.LevelName }} {{ data.Chart.Level }}<small>{{ data.Chart.Constant.toFixed(1) }}</small></span>
+            <span class="difficulty" :style="difficultyStyle(levelIndex)">{{ data.Chart.LevelName }} {{ data.Chart.Level }}<small v-if="levelIndex !== 5">{{ data.Chart.Constant.toFixed(1) }}</small></span>
             <div class="flex-1 h-[2px] rounded-full bg-white/20"></div>
             <span v-if="data.Round" class="round-badge">ROUND<b>{{ pad(data.Round) }}</b></span>
         </div>

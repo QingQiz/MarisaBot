@@ -34,7 +34,7 @@
                     <MaiCover game="chunithm" :song-id="row.Id" :size="52" :frame-radius="9" :img-radius="6"/>
                     <div class="song-copy">
                         <div class="song-title" :class="{'has-han': /[\u3400-\u9fff]/.test(row.Title)}">{{ row.Title }}</div>
-                        <div class="chart-meta"><b :style="difficultyStyle(row.LevelIndex)">{{ row.LevelName }} {{ row.Level }}</b><span class="constant">{{ row.Constant.toFixed(1) }}</span></div>
+                        <div class="chart-meta"><b :style="difficultyStyle(row.LevelIndex)">{{ row.LevelName }} {{ row.Level }}</b><span v-if="row.LevelIndex !== 5" class="constant">{{ row.Constant.toFixed(1) }}</span></div>
                         <div class="song-id">ID {{ row.Id }}</div>
                     </div>
                 </div>

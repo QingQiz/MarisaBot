@@ -11,7 +11,8 @@ public static class ChunithmVersusScope
         ["ADVANCED"] = 1, ["ADV"] = 1, ["黄谱"] = 1,
         ["EXPERT"] = 2, ["EXP"] = 2, ["红谱"] = 2,
         ["MASTER"] = 3, ["MAS"] = 3, ["MST"] = 3, ["紫谱"] = 3,
-        ["ULTIMA"] = 4, ["ULT"] = 4, ["黑谱"] = 4
+        ["ULTIMA"] = 4, ["ULT"] = 4, ["黑谱"] = 4,
+        ["WORLD'S END"] = 5, ["WORLDS END"] = 5, ["WE"] = 5, ["世终"] = 5
     };
 
     public sealed record Query(
@@ -62,7 +63,7 @@ public static class ChunithmVersusScope
         var remaining = input.Trim();
         if (remaining.Length == 0) return Fail("请输入版本、类别、等级或定数范围", out error);
         if (Regex.IsMatch(remaining, @"WORLD'?S\s*END|(?<![A-Za-z])WE(?![A-Za-z])|世终|世終", RegexOptions.IgnoreCase))
-            return Fail("chu vs 暂不支持 WORLD'S END", out error);
+            return Fail("WORLD'S END 暂只支持单曲和随机对战", out error);
 
         var levels = new HashSet<int>();
         foreach (var (alias, level) in DifficultyAliases.OrderByDescending(pair => pair.Key.Length))
