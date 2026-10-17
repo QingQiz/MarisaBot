@@ -104,22 +104,16 @@ public partial class Chunithm
         var song = await SongDb.MultiPageSelectResult(selection.Songs, message, false, true);
         if (song is null) return null;
         var cnSong = LxnsDataFetcher.GetSharedSongList().FirstOrDefault(x => x.Id == song.Id);
-        var worldsEnd = cnSong is null || selection.LevelIndex != 5 ? [] : ChunithmVersusCatalog.WorldsEndCharts([cnSong]).Values.ToArray();
-        if (worldsEnd.Length > 1)
-        {
-            message.Reply($"「{song.Title}」有多张 WORLD'S END 谱面，暂不能指定对战");
-            return null;
-        }
-        var chart = cnSong is null ? null
-            : selection.LevelIndex == 5 ? worldsEnd.SingleOrDefault() : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex);
-        if (chart is null)
+        IReadOnlyList<ChunithmVersusChart> charts = cnSong is null ? []
+            : selection.LevelIndex == 5 ? ChunithmVersusCatalog.WorldsEndCharts([cnSong]).Values.OrderBy(x => x.ScoreKey.Id).ToArray()
+            : ChunithmVersusCatalog.FindChart(cnSong, selection.LevelIndex) is { } chart ? [chart] : [];
+        if (charts.Count == 0)
         {
             message.Reply($"国服暂未收录「{song.Title}」的 {levelName} 谱面");
             return null;
         }
 
-        IReadOnlyList<ChunithmVersusChart> charts = [chart];
-        return new VersusSingleSelection<ChunithmVersusChart>(charts, false, $"{song.Title}（{levelName}）", VersusVersion(charts));
+        return new VersusSingleSelection<ChunithmVersusChart>(charts, false, $"{song.Title}（{levelName}）", VersusVersion(charts), "歌曲 ID 升序");
     }
 
     private VersusRandomSelection<ChunithmVersusChart>? ParseVersusRandom(Message message, string usage)

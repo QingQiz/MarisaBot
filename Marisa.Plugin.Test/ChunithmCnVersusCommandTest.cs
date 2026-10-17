@@ -101,6 +101,7 @@ public class ChunithmCnVersusCommandTest
         Assert.Multiple(() =>
         {
             Assert.That((chart.Id, chart.ScoreKey, chart.Level), Is.EqualTo((136L, (8136L, 5), "狂")));
+            Assert.That(single.IsBatch, Is.False);
             Assert.That(session.Battle.ChartKey(chart), Is.EqualTo((8136L, 5)));
             Assert.That(random.Charts.Select(x => x.ScoreKey), Is.EqualTo(new[] { (8136L, 5) }));
             Assert.That(view.Score, Is.EqualTo(1_009_000));
@@ -110,19 +111,55 @@ public class ChunithmCnVersusCommandTest
     }
 
     [Test]
-    public async Task WorldsEndRejectsScopesAndAmbiguousOrMissingCharts()
+    public async Task MultipleWorldsEndChartsRouteToBatchBattle()
     {
         using var session = new Session();
-        session.National[0].AddDifficulty("狂", 0, "", ChunithmSong.LevelLabel[5], 3000, "8136", "190");
         session.National[0].AddDifficulty("避", 0, "", ChunithmSong.LevelLabel[5], 2500, "8137", "190");
-        var ambiguous = await session.Battle.SelectSingle(session.Message("Äventyr we"));
-        var ambiguousReply = session.Replies().Single().Text;
+        session.National[0].AddDifficulty("狂", 0, "", ChunithmSong.LevelLabel[5], 3000, "8136", "190");
+        (string Title, string SortLabel, (long, int)[] Keys)? batch = null;
+        (VersusRoomPlan<ChunithmVersusChart> Plan, VersusRoomView View)? room = null;
+        var battle = new VersusBattle<ChunithmScore, ChunithmVersusChart>
+        {
+            CommandPrefix = "chu",
+            MatchScope = _ => false,
+            ResolvePlayer = (_, qq) => (new VersusPlayerBinding<ChunithmScore>(qq, () => Task.FromResult(
+                new VersusFetchResult<ChunithmScore>(new(qq, $"p{qq}", new Dictionary<(long, int), ChunithmScore>()), null))), null),
+            IsOpponentBindingError = _ => false,
+            SelectSingle = session.Battle.SelectSingle,
+            ParseRandom = session.Battle.ParseRandom,
+            ParseBatch = session.Battle.ParseBatch,
+            ChartKey = session.Battle.ChartKey,
+            VersionOf = session.Battle.VersionOf,
+            ReplySingle = (_, _, _, _) => throw new NotSupportedException(),
+            ReplyBatch = (_, title, _, sortLabel, charts, _, _) =>
+            {
+                batch = (title, sortLabel, charts.Select(x => x.ScoreKey).ToArray());
+                return Task.CompletedTask;
+            },
+            OpenRoom = (_, _, plan, presentation) => room = (plan, presentation.View)
+        };
+        await battle.Single(session.Message("Äventyr we"));
+        await battle.SingleRoom(session.Message("Äventyr we"), 0);
+        Assert.Multiple(() =>
+        {
+            Assert.That(batch?.Title, Is.EqualTo("Äventyr（WORLD'S END）"));
+            Assert.That(batch?.SortLabel, Is.EqualTo("歌曲 ID 升序"));
+            Assert.That(batch?.Keys, Is.EqualTo(new[] { (8136L, 5), (8137L, 5) }));
+            Assert.That(room?.Plan.Charts.Select(x => x.ScoreKey), Is.EqualTo(new[] { (8136L, 5), (8137L, 5) }));
+            Assert.That(room?.Plan.PickCount, Is.Null);
+            Assert.That(room?.View, Is.EqualTo(VersusRoomView.Batch));
+            Assert.That(session.Replies(), Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task WorldsEndRejectsScopesAndMissingCharts()
+    {
+        using var session = new Session();
         var missing = await session.Battle.SelectSingle(session.Message("MegiddØ we"));
         var missingReply = session.Replies().Single().Text;
         Assert.Multiple(() =>
         {
-            Assert.That(ambiguous, Is.Null);
-            Assert.That(ambiguousReply, Does.Contain("多张 WORLD'S END"));
             Assert.That(missing, Is.Null);
             Assert.That(missingReply, Does.Contain("WORLD'S END 谱面"));
             Assert.That(ChunithmVersusScope.TryParse("14 WE", session.National, out _, out var error), Is.False);
