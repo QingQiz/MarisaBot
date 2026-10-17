@@ -1,5 +1,5 @@
 <template>
-    <MaiCardShell v-if="data" class="mai-versus chu-versus chu-theme" :class="{'chu-ultima': data.LevelIndex === 4}" bg-key="DMY" :background="backgroundOf(data.LevelIndex)" :accent="accent" :style="{'--accent': accent, '--winner-glow': accent + '38'}">
+    <MaiCardShell v-if="data" v-bind="cardTheme(data.LevelIndex)" class="mai-versus chu-versus" :style="{'--winner-glow': accent + '38'}">
         <SongHeader :song="data.Song"/>
         <div class="flex items-center gap-4 mt-8 mb-4"><span class="section-tag">玩家对战</span><div class="flex-1 h-[2px] rounded-full bg-white/20"></div></div>
         <div class="difficulty-line"><span class="difficulty" :style="difficultyStyle(data.LevelIndex)">{{ data.LevelName }} {{ data.Level }}</span></div>
@@ -14,7 +14,7 @@
                     <div class="metrics"><div><span>RATING</span><b>{{ formatRating(player.Score.Rating) }}</b></div></div>
                 </template>
                 <div v-else class="unplayed"><span class="unplayed-mark">—</span>未游玩</div>
-                <div class="marks"><VersusMarks :combo="player.Score?.FullCombo ?? ''" :chain="player.Score?.FullChain ?? ''" :clear="player.Score?.Clear ?? ''"/></div>
+                <div class="marks"><ScoreMarks :combo="player.Score?.FullCombo ?? ''" :chain="player.Score?.FullChain ?? ''" :clear="player.Score?.Clear ?? ''"/></div>
             </div>
         </div>
         <footer class="mt-7"><span class="footer-text">MARISA BOT · VERSUS</span></footer>
@@ -28,9 +28,10 @@ import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import SongHeader from '@/components/chunithm/partial/SongHeader.vue'
-import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
-import {backgroundOf, difficultyColor, difficultyStyle} from '@/components/chunithm/utils/song-card'
-import {formatRating, formatScore, rankIcon, type ChuScore, type ChuSong} from '@/components/chunithm/utils/versus'
+import ScoreMarks from '@/components/chunithm/partial/ScoreMarks.vue'
+import {cardTheme, difficultyColor, difficultyStyle} from '@/components/chunithm/utils/song-card'
+import {formatRating, formatScore, rankIcon, type ChuScore} from '@/components/chunithm/utils/score'
+import type {ChuSong} from '@/components/chunithm/utils/versus'
 interface VersusData { Song: ChuSong; LevelIndex: number; LevelName: string; ChartIndex: number; Level: string; Constant: number; Players: {Name: string; Played: boolean; Score: ChuScore | null}[]; WinnerIndex: number }
 const route = useRoute()
 const data = ref<VersusData | null>(null)

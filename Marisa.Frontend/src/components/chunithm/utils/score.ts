@@ -56,3 +56,23 @@ export function getRank(achievement: number): ChunithmRank {
     }
     return 'd';
 }
+
+export interface ChuScore {
+    State: 'played' | 'unplayed'
+    Score: number | null
+    Rank: string | null
+    Rating: number | null
+    FullCombo: string
+    FullChain: string
+    Clear: string | null
+}
+
+const scoreFormat = new Intl.NumberFormat('en-US')
+export function formatScore(score: number | null) { return score == null ? '—' : scoreFormat.format(score) }
+export function formatRating(rating: number | null) { return rating == null ? '—' : rating.toFixed(2) }
+export function hasCombo(combo?: string | null) { return ['fullcombo', 'alljustice', 'alljusticecritical'].includes(combo ?? '') }
+export function hasChain(chain?: string | null) { return chain === 'fullchain' || chain === 'fullchain2' }
+export function hasClear(clear?: string | null) { return ['clear', 'hard', 'brave', 'absolute', 'catastrophy', 'failed'].includes(clear ?? '') }
+export function hasMarks(score: ChuScore | null) {
+    return score?.State === 'played' && (hasCombo(score.FullCombo) || hasChain(score.FullChain) || hasClear(score.Clear))
+}

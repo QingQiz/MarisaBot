@@ -1,5 +1,5 @@
 <template>
-    <MaiCardShell v-if="data" class="mai-versus-multi chu-multi chu-theme" :class="{'chu-ultima': levelIndex === 4}" bg-key="DMY" :width="920" :background="backgroundOf(levelIndex)" :accent="accent" :style="{'--accent': accent}">
+    <MaiCardShell v-if="data" v-bind="cardTheme(levelIndex)" class="mai-versus-multi chu-multi" :width="920">
         <SongHeader :song="song"/>
         <div class="flex items-center gap-4 mt-8 mb-4">
             <span class="section-tag">多人对战</span>
@@ -39,7 +39,7 @@
                             <b class="rating-value">{{ formatRating(player.Score.Rating) }}</b>
                         </template>
                         <div v-else class="racer-empty">未游玩</div>
-                        <div v-if="hasMarks(player.Score)" class="completion-row"><VersusMarks family="common" :combo="player.Score?.FullCombo ?? ''" :chain="player.Score?.FullChain ?? ''" :clear="player.Score?.Clear ?? ''"/></div>
+                        <div v-if="hasMarks(player.Score)" class="completion-row"><ScoreMarks family="common" :combo="player.Score?.FullCombo ?? ''" :chain="player.Score?.FullChain ?? ''" :clear="player.Score?.Clear ?? ''"/></div>
                     </div>
                 </div>
             </div>
@@ -60,11 +60,12 @@ import axios from 'axios'
 import {useRoute} from 'vue-router'
 import {context_get} from '@/GlobalVars'
 import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
-import VersusMarks from '@/components/chunithm/partial/VersusMarks.vue'
+import ScoreMarks from '@/components/chunithm/partial/ScoreMarks.vue'
 import SongHeader from '@/components/chunithm/partial/SongHeader.vue'
 import VersusStandings from '@/components/versus/VersusStandings.vue'
-import {backgroundOf, difficultyColor, difficultyStyle} from '@/components/chunithm/utils/song-card'
-import {formatScore, formatRating, hasClear, placeColor, placeSuffix, rankIcon, type ChuChart, type ChuScore, type VersusStanding} from '@/components/chunithm/utils/versus'
+import {cardTheme, difficultyColor, difficultyStyle} from '@/components/chunithm/utils/song-card'
+import {formatScore, formatRating, hasMarks, rankIcon, type ChuScore} from '@/components/chunithm/utils/score'
+import {placeColor, placeSuffix, type ChuChart, type VersusStanding} from '@/components/chunithm/utils/versus'
 interface Player { Name: string; Place: number | null; Score: ChuScore | null; Stamp: boolean }
 interface MultiData { Chart: ChuChart; Round: number; Players: Player[]; Standings: VersusStanding[] }
 const route = useRoute()
@@ -75,13 +76,6 @@ const levelIndex = computed(() => data.value?.Chart.LevelIndex ?? 3)
 const accent = computed(() => difficultyColor(levelIndex.value))
 const best = computed(() => Math.max(...data.value!.Players.map(p => p.Score?.Score ?? 0)))
 function pad(n: number) { return n.toString().padStart(2, '0') }
-function hasMarks(score: ChuScore | null) {
-    return score?.State === 'played' && (
-        ['fullcombo', 'alljustice', 'alljusticecritical'].includes(score.FullCombo)
-        || ['fullchain', 'fullchain2'].includes(score.FullChain)
-        || hasClear(score.Clear)
-    )
-}
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>

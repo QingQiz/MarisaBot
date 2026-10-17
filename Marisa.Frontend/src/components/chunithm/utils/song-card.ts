@@ -26,6 +26,10 @@ export function chartSurface(index: number, fadeAt: number) {
     const color = difficultyColor(index), base = index === 4 ? '#09080bb3' : '#0000006b'
     return {'--rail-color': color, background: `linear-gradient(90deg,${color}26 0%,${base} ${fadeAt}%,${base} 100%)`}
 }
+export function cardTheme(index: number) {
+    const accent = difficultyColor(index)
+    return {class: ['chu-theme', {'chu-ultima': index === 4}], bgKey: 'DMY', background: backgroundOf(index), accent, style: {'--accent': accent}}
+}
 export function backgroundOf(index: number) {
     if (index === 5) return 'linear-gradient(135deg, #1c1e26 0%, #0b0e15 66%, #171a24 100%)'
     return index === 4

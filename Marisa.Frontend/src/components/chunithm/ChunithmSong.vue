@@ -1,7 +1,6 @@
 <template>
-    <MaiCardShell v-if="song" class="chu-song chu-theme" :class="{'chu-ultima': themeIndex === 4, 'chu-we': hasWe, 'chu-we-only': themeIndex === 5}"
-                  :width="1240" pad-bottom="pb-8" bg-key="DMY" :background="background" :accent="accent"
-                  :style="{'--accent': accent}">
+    <MaiCardShell v-if="song" v-bind="cardTheme(themeIndex)" class="chu-song" :class="{'chu-we': hasWe, 'chu-we-only': themeIndex === 5}"
+                  :width="1240" pad-bottom="pb-8">
         <SongHeader :song="heading" large-cover>
             <template #artwork>
                 <section v-if="toleranceCharts.length" class="tolerance-list">
@@ -66,7 +65,7 @@ import MaiCardShell from '@/components/maimai/MaiCardShell.vue'
 import ChartChip from '@/components/chunithm/partial/ChartChip.vue'
 import SongHeader from '@/components/chunithm/partial/SongHeader.vue'
 import SongTolerance from '@/components/chunithm/partial/SongTolerance.vue'
-import {backgroundOf, chartSurface, difficultyColor} from '@/components/chunithm/utils/song-card'
+import {cardTheme, chartSurface, difficultyColor} from '@/components/chunithm/utils/song-card'
 import {chartBpm, chartCombo, chartConstant, chartDifficulty, isWorldsEnd, summaryBpm, type ChuSongBeatmap, type ChuSongData} from '@/components/chunithm/utils/song'
 import {toleranceCounts} from '@/components/chunithm/utils/tolerance'
 
@@ -83,8 +82,6 @@ const themeIndex = computed(() => {
     const standard = charts.value.map(chartDifficulty).filter(index => index >= 0 && index < 5)
     return standard.length ? Math.max(...standard) : hasWe.value ? 5 : 3
 })
-const accent = computed(() => difficultyColor(themeIndex.value))
-const background = computed(() => backgroundOf(themeIndex.value))
 const toleranceCharts = computed(() => {
     const wanted = themeIndex.value === 4 ? [3, 4] : themeIndex.value < 4 ? [themeIndex.value] : []
     return wanted.map(index => charts.value.find(chart => chartDifficulty(chart) === index))
@@ -123,6 +120,7 @@ async function fitCharters() {
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
+<style scoped lang="postcss" src="@/assets/css/chunithm/section.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/song.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/we-theme.pcss"/>
