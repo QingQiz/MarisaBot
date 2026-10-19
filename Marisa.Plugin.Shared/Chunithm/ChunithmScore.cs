@@ -36,11 +36,26 @@ public class ChunithmScore
     /// <summary>成就分上限。官方规定 1,010,000 为 AJC（全 JUSTICE）。</summary>
     public const int AchievementMax = 1_010_000;
 
+    /// <summary>SS 的起评分。</summary>
+    public const int RankSs = 100_0000;
+
+    /// <summary>SS+ 的起评分。</summary>
+    public const int RankSsp = 100_5000;
+
+    /// <summary>SSS 的起评分。</summary>
+    public const int RankSss = 100_7500;
+
+    /// <summary>SSS+ 的起评分。</summary>
+    public const int RankSssp = 100_9000;
+
     /// <summary>AJC。用分数判定，不依赖各查分器是否把 fc 归一化成了 alljusticecritical。</summary>
     public bool IsAllJusticeCritical => Achievement >= AchievementMax;
 
     /// <summary>AJ 及以上（含 AJC）。</summary>
     public bool IsAllJustice => IsAllJusticeCritical || FullCombo is "alljustice" or "alljusticecritical";
+
+    /// <summary>FC 及以上（含 AJ、AJC）。</summary>
+    public bool IsFullCombo => FullCombo is "fullcombo" or "alljustice" or "alljusticecritical";
 
     [JsonProperty("clear")]
     public string? Clear { get; set; }
@@ -97,10 +112,10 @@ public class ChunithmScore
     {
         return achievement switch
         {
-            >= 100_9000 => "sssp",
-            >= 100_7500 => "sss",
-            >= 100_5000 => "ssp",
-            >= 100_0000 => "ss",
+            >= RankSssp => "sssp",
+            >= RankSss  => "sss",
+            >= RankSsp  => "ssp",
+            >= RankSs   => "ss",
             >= 99_0000  => "sp",
             >= 97_5000  => "s",
             >= 95_0000  => "aaa",
