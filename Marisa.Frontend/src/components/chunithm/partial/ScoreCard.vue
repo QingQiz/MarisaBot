@@ -5,9 +5,15 @@ import {computed, ref} from "vue";
 import {chunithm_levelColors} from "@/GlobalVars";
 import {GetContrastingTextColor, MakeRgba} from "@/utils/color";
 import {ToFixedNoRound} from "@/utils/str";
-import {rankIcon} from "@/components/chunithm/utils/score";
+import {rankIcon, normalizeCombo, chainOfFc} from "@/components/chunithm/utils/score";
+import ScoreMarks from "@/components/chunithm/partial/ScoreMarks.vue";
 
 let props = defineProps<{ score: ChuScore }>();
+
+// b30/b50 卡片拿到的是原始 fc，借 chu vs 的 versus_* 素材族渲染标记
+// （icon_* 素材里没有 alljusticecritical，AJC 会掉到空白兜底图）
+const combo = computed(() => normalizeCombo(props.score.fc));
+const chain = computed(() => chainOfFc(props.score.fc));
 
 const imgEl = ref<typeof FallbackImage | null>(null);
 
@@ -55,11 +61,9 @@ function UpdateColor() {
                 </div>
                 <!-- footer -->
                 <div class="h-fit flex gap-1.5 items-center mt-1">
-                    <fallback-image :src="[`icon_${score.fc}.png`]"
-                                   :fallback="'icon_blank.png'"
-                                   :prefix="'/assets/chunithm/pic/'"
-                                   class="h-[30px]"
-                    />
+                    <span class="card-marks">
+                        <ScoreMarks family="common" :combo="combo" :chain="chain"/>
+                    </span>
                     <img :src="rankIcon(score.Rank)" alt="" class="h-[30px]">
                 </div>
             </div>
@@ -67,3 +71,15 @@ function UpdateColor() {
         </div>
     </div>
 </template>
+
+<style scoped lang="postcss">
+/* 标记高度对齐右侧 30px 的评级图标：134 / 26 = 155 / 30 */
+.card-marks {
+    --chu-mark-width: 155px;
+    /* 显式给定宽度：ScoreMarks 根元素是 width:100%，不给定宽会与 auto 宽度互相依赖 */
+    width: 155px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+</style>
