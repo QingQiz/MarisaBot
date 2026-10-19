@@ -35,6 +35,47 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     /// <summary>完整成绩（汇总 / OP 用），目标同样来自 <see cref="ResolvedPlayer" />。</summary>
     public abstract Task<Dictionary<(long Id, int LevelIdx), ChunithmScore>> GetScores(ResolvedPlayer player);
 
+    /// <summary>
+    ///     筛选版 b50 / b30：先拉全量成绩，挑出满足 <paramref name="predicate" /> 的谱面，
+    ///     再按曲目版本分成「旧 / 新」两组。b50 取旧 30 + 新 20，b30 合并后按 rating 取前 30。
+    ///     昵称与数据来源沿用 <see cref="GetRating" /> 的结果。
+    /// </summary>
+    public virtual async Task<ChunithmRating> GetFilteredBest(
+        ResolvedPlayer player,
+        Func<ChunithmScore, bool> predicate,
+        bool b50
+    )
+    {
+        var rating = await GetRating(player);
+        var scores = await GetScores(player);
+
+        var newest   = await FetchLatestVersions();
+        var versions = GetSongList().ToDictionary(song => song.Id, song => song.Version);
+
+        var groups = scores.Values
+            .Where(predicate)
+            .GroupBy(score => newest.Contains(NormalizeVersion(versions.GetValueOrDefault(score.Id, ""))))
+            .ToList();
+
+        var oldScores = groups.FirstOrDefault(g => !g.Key)?.OrderByDescending(s => s.Rating).ToArray() ?? [];
+        var newScores = groups.FirstOrDefault(g => g.Key)?.OrderByDescending(s => s.Rating).ToArray() ?? [];
+
+        rating.IsB50 = b50;
+        rating.Records = b50
+            ? new Records
+            {
+                Best   = oldScores.Take(30).ToArray(),
+                Recent = newScores.Take(20).ToArray()
+            }
+            : new Records
+            {
+                Best   = oldScores.Concat(newScores).OrderByDescending(s => s.Rating).Take(30).ToArray(),
+                Recent = []
+            };
+
+        return rating;
+    }
+
     /// <summary>对战只使用目标自己授权的完整成绩；公开 B30/N20 不能代表未游玩状态。</summary>
     public virtual Task<ChunithmBattleData> GetBattleData(ResolvedPlayer player, IReadOnlyCollection<long>? songIds = null) =>
         throw new NotSupportedException("该查分器不支持 chu vs，请先 bind 改绑水鱼或落雪");

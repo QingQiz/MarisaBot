@@ -849,6 +849,57 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
+    [MarisaPluginDoc("只统计 ALL JUSTICE（含 AJC）的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("aj50")]
+    private Task<MarisaPluginTaskState> Aj50(Message message) =>
+        FilteredBest(message, "AJ b50", score => score.IsAllJustice, true);
+
+    [MarisaPluginDoc("只统计 ALL JUSTICE（含 AJC）的 b30", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("aj30")]
+    private Task<MarisaPluginTaskState> Aj30(Message message) =>
+        FilteredBest(message, "AJ b30", score => score.IsAllJustice, false);
+
+    [MarisaPluginDoc("只统计 AJC（1010000）的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("ajc50")]
+    private Task<MarisaPluginTaskState> Ajc50(Message message) =>
+        FilteredBest(message, "AJC b50", score => score.IsAllJusticeCritical, true);
+
+    [MarisaPluginDoc("只统计 AJC（1010000）的 b30", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("ajc30")]
+    private Task<MarisaPluginTaskState> Ajc30(Message message) =>
+        FilteredBest(message, "AJC b30", score => score.IsAllJusticeCritical, false);
+
+    /// <summary>
+    ///     b30/b50 的筛选版：筛出满足条件的谱面再取前 N，走同一套成绩图。
+    /// </summary>
+    private async Task<MarisaPluginTaskState> FilteredBest(
+        Message message,
+        string label,
+        Func<ChunithmScore, bool> predicate,
+        bool b50
+    )
+    {
+        var player = ResolvePlayer(message, allowUsername: true);
+
+        var rating = await player.Fetcher.GetFilteredBest(player, predicate, b50);
+
+        var count = rating.Records.Best.Length + rating.Records.Recent.Length;
+        if (count == 0)
+        {
+            message.Reply($"没有符合条件的成绩（{label}）。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        rating.Title = $"{label} · {count} 首";
+
+        var ctx = new WebContext();
+        ctx.Put("rating", rating);
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id, b50)));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     [MarisaPluginDoc("查询某首歌各个难度的个人成绩", "`歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("info", "信息")]
     private async Task<MarisaPluginTaskState> SongInfo(Message message)

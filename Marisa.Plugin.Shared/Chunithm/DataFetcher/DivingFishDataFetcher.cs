@@ -112,7 +112,7 @@ public class DivingFishDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(so
         var scores = ChunithmVersusCatalog.NormalizeScores(response.Records.Best
             .Where(score => score.Id < 8000 || worldsEnd.ContainsKey(score.Id)).Select(ChunithmBattleCompletion.FromDivingFish), songs);
         // 官方规定 1,010,000 为 AJC；只转换已归一化的成绩，chain 已独立保存。
-        foreach (var score in scores.Values.Where(score => score.Achievement == 1_010_000))
+        foreach (var score in scores.Values.Where(score => score.IsAllJusticeCritical))
             score.Fc = "alljusticecritical";
         return new ChunithmBattleData(response.Username, scores);
     }

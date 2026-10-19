@@ -33,6 +33,15 @@ public class ChunithmScore
         _ => Fc ?? ""
     };
 
+    /// <summary>成就分上限。官方规定 1,010,000 为 AJC（全 JUSTICE）。</summary>
+    public const int AchievementMax = 1_010_000;
+
+    /// <summary>AJC。用分数判定，不依赖各查分器是否把 fc 归一化成了 alljusticecritical。</summary>
+    public bool IsAllJusticeCritical => Achievement >= AchievementMax;
+
+    /// <summary>AJ 及以上（含 AJC）。</summary>
+    public bool IsAllJustice => IsAllJusticeCritical || FullCombo is "alljustice" or "alljusticecritical";
+
     [JsonProperty("clear")]
     public string? Clear { get; set; }
 
