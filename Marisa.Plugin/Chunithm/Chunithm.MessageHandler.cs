@@ -327,14 +327,8 @@ public partial class Chunithm
 
     #region 汇总 / summary
 
-    private static string ParseSortFlag(ref string cmd)
-    {
-        if (cmd.EndsWith(" -d")) { cmd = cmd[..^3]; return "desc"; }
-        if (cmd.EndsWith(" -a")) { cmd = cmd[..^3]; return "asc"; }
-        return "";
-    }
-
-    [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总")]
+    [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总",
+        "子命令通用 ` --op` ` --aj` ` --fc` ` --ajc` ` --ss` ` --ss+` ` --sss` ` --sss+`，`!` 取反")]
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
@@ -343,13 +337,13 @@ public partial class Chunithm
         return await Task.FromResult(MarisaPluginTaskState.CompletedTask);
     }
 
-    [MarisaPluginDoc("获取某定数的成绩汇总", "`定数1`-`定数2` 或 `定数`")]
+    [MarisaPluginDoc("获取某定数的成绩汇总", "`定数1`-`定数2` 或 `定数`，可加筛选后缀")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> SummaryBase(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
-        var sort = ParseSortFlag(ref cmd);
+        var cmd            = message.Command.Trim().ToString();
+        var (sort, filter) = ParseSummaryFlags(ref cmd);
 
         var constants = cmd.Split('-').Select(x =>
         {
@@ -385,23 +379,31 @@ public partial class Chunithm
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
             .Where(x => x.constant >= constants[0] && x.constant <= constants[1])
+            .FilterCharts(filter, scores)
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        if (filter != ChunithmChartFilter.None && !groupedSong.Any())
+        {
+            message.Reply("没有符合条件的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var range = constants[0] == constants[1] ? $"{constants[0]:F1}" : $"{constants[0]:F1}-{constants[1]:F1}";
+        var im    = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("base", range, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取类别的成绩汇总", "`类别`")]
+    [MarisaPluginDoc("获取类别的成绩汇总", "`类别`，可加筛选后缀")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("genre", "type")]
     private async Task<MarisaPluginTaskState> SummaryGenre(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
-        var sort = ParseSortFlag(ref cmd);
+        var cmd            = message.Command.Trim().ToString();
+        var (sort, filter) = ParseSummaryFlags(ref cmd);
 
         var player  = ResolvePlayer(message);
         var fetcher = player.Fetcher;
@@ -423,23 +425,30 @@ public partial class Chunithm
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
             .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
+            .FilterCharts(filter, scores)
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.song.Levels[x.i]);
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        if (filter != ChunithmChartFilter.None && !groupedSong.Any())
+        {
+            message.Reply("没有符合条件的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("genre", genre, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取版本的成绩汇总", "使用对话选择版本")]
+    [MarisaPluginDoc("获取版本的成绩汇总", "使用对话选择版本，可加筛选后缀")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("version", "ver")]
     private async Task<MarisaPluginTaskState> SummaryVersion(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
-        var sort = ParseSortFlag(ref cmd);
+        var cmd            = message.Command.Trim().ToString();
+        var (sort, filter) = ParseSummaryFlags(ref cmd);
 
         var player  = ResolvePlayer(message);
         var fetcher = player.Fetcher;
@@ -484,23 +493,30 @@ public partial class Chunithm
                     .Select((constant, i) => (constant, i, song)))
                 .SelectMany(s => s)
                 .Where(data => data.i >= 3 && data.song.Constants[data.i] > 0)
+                .FilterCharts(filter, scores)
                 .OrderByDescending(x => x.constant)
                 .GroupBy(x => x.song.Levels[x.i]);
 
-            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+            if (filter != ChunithmChartFilter.None && !groupedSong.Any())
+            {
+                replyMessage.Reply("没有符合条件的谱面");
+                return;
+            }
+
+            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("version", version, filter));
 
             replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
     }
 
-    [MarisaPluginDoc("获取某个难度的成绩汇总", "`难度`")]
+    [MarisaPluginDoc("获取某个难度的成绩汇总", "`难度`，可加筛选后缀")]
     [MarisaPluginSubCommand(nameof(Summary))]
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> SummaryLevel(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
-        var sort = ParseSortFlag(ref cmd);
-        var lv = cmd;
+        var cmd            = message.Command.Trim().ToString();
+        var (sort, filter) = ParseSummaryFlags(ref cmd);
+        var lv             = cmd;
 
         if (LevelRegex().IsMatch(lv))
         {
@@ -533,10 +549,17 @@ public partial class Chunithm
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
             .Where(data => data.song.Levels[data.i] == lv)
+            .FilterCharts(filter, scores)
             .OrderByDescending(x => x.constant)
             .GroupBy(x => x.constant.ToString("F1"));
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        if (filter != ChunithmChartFilter.None && !groupedSong.Any())
+        {
+            message.Reply("没有符合条件的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("level", lv, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -636,12 +659,14 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取OverPower统计 (按定数范围)", "`定数1`-`定数2` 如 12.5-13.2")]
+    [MarisaPluginDoc("获取OverPower统计 (按定数范围)", "`定数1`-`定数2` 如 12.5-13.2，可加 ` --op` 只看 op 对象谱面")]
     [MarisaPluginSubCommand(nameof(ChuOp))]
     [MarisaPluginCommand("base", "b")]
     private async Task<MarisaPluginTaskState> ChuOpBase(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
+        var cmd    = message.Command.Trim().ToString();
+        var filter = StripFlag(ref cmd, "--op") ? ChunithmChartFilter.OverPower : ChunithmChartFilter.None;
+
         if (string.IsNullOrWhiteSpace(cmd))
         {
             message.Reply("请输入定数范围，如 12.5-13.2 或单个定数 15.2");
@@ -678,7 +703,14 @@ public partial class Chunithm
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
             .SelectMany(s => s)
-            .Where(x => x.constant >= a && x.constant <= b);
+            .Where(x => x.constant >= a && x.constant <= b)
+            .FilterCharts(filter, scores);
+
+        if (filter != ChunithmChartFilter.None && !songs.Any())
+        {
+            message.Reply("没有符合条件的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
@@ -714,12 +746,14 @@ public partial class Chunithm
         return MarisaPluginTaskState.CompletedTask;
     }
 
-    [MarisaPluginDoc("获取OverPower统计 (按难度范围)", "`难度1`-`难度2` 如 13-14+")]
+    [MarisaPluginDoc("获取OverPower统计 (按难度范围)", "`难度1`-`难度2` 如 13-14+，可加 ` --op` 只看 op 对象谱面")]
     [MarisaPluginSubCommand(nameof(ChuOp))]
     [MarisaPluginCommand("level", "lv")]
     private async Task<MarisaPluginTaskState> ChuOpLevel(Message message)
     {
-        var cmd = message.Command.Trim().ToString();
+        var cmd    = message.Command.Trim().ToString();
+        var filter = StripFlag(ref cmd, "--op") ? ChunithmChartFilter.OverPower : ChunithmChartFilter.None;
+
         if (string.IsNullOrWhiteSpace(cmd))
         {
             cmd = "10-15+";
@@ -751,7 +785,14 @@ public partial class Chunithm
                 if (x.song.DiffNames[x.i] == ChunithmSong.LevelLabel[5]) return false;
                 var lv = LevelToNumber(x.song.Levels[x.i]);
                 return lv >= a && lv <= b;
-            });
+            })
+            .FilterCharts(filter, scores);
+
+        if (filter != ChunithmChartFilter.None && !songs.Any())
+        {
+            message.Reply("没有符合条件的谱面");
+            return MarisaPluginTaskState.CompletedTask;
+        }
 
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
@@ -845,6 +886,57 @@ public partial class Chunithm
 
         message.Reply($"{rating.Username} ({rating.Rating})\nOld : {rating.B30}\nNew: {rating.R20}\n\n" +
                       $"推分剩余: 0.{50 - (bSum + rSum) % 50:00}\nOld 推分剩余: 0.{30 - bSum % 30:00}\nNew 推分剩余: 0.{20 - rSum % 20:00}");
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("只统计 ALL JUSTICE（含 AJC）的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("aj50")]
+    private Task<MarisaPluginTaskState> Aj50(Message message) =>
+        FilteredBest(message, "AJ b50", score => score.IsAllJustice, true);
+
+    [MarisaPluginDoc("只统计 ALL JUSTICE（含 AJC）的 b30", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("aj30")]
+    private Task<MarisaPluginTaskState> Aj30(Message message) =>
+        FilteredBest(message, "AJ b30", score => score.IsAllJustice, false);
+
+    [MarisaPluginDoc("只统计 AJC（1010000）的 b50", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("ajc50")]
+    private Task<MarisaPluginTaskState> Ajc50(Message message) =>
+        FilteredBest(message, "AJC b50", score => score.IsAllJusticeCritical, true);
+
+    [MarisaPluginDoc("只统计 AJC（1010000）的 b30", "`查分器的账号名` 或 `@某人` 或 `留空`")]
+    [MarisaPluginCommand("ajc30")]
+    private Task<MarisaPluginTaskState> Ajc30(Message message) =>
+        FilteredBest(message, "AJC b30", score => score.IsAllJusticeCritical, false);
+
+    /// <summary>
+    ///     b30/b50 的筛选版：筛出满足条件的谱面再取前 N，走同一套成绩图。
+    /// </summary>
+    private async Task<MarisaPluginTaskState> FilteredBest(
+        Message message,
+        string label,
+        Func<ChunithmScore, bool> predicate,
+        bool b50
+    )
+    {
+        var player = ResolvePlayer(message, allowUsername: true);
+
+        var rating = await GetFilteredBest(player, predicate, b50);
+
+        var count = rating.Records.Best.Length + rating.Records.Recent.Length;
+        if (count == 0)
+        {
+            message.Reply($"没有符合条件的成绩（{label}）。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        rating.Title = $"{label} · {count} 首";
+
+        var ctx = new WebContext();
+        ctx.Put("rating", rating);
+
+        message.Reply(MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id, b50)));
 
         return MarisaPluginTaskState.CompletedTask;
     }

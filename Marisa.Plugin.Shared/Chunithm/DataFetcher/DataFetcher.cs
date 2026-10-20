@@ -50,7 +50,7 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     ///     从水鱼 latest_version 接口获取当前"新版本"集合（New Best 20 依据），
     ///     运行时缓存，供各查分器统一使用，避免版本更新后硬编码失效。
     /// </summary>
-    protected static async Task<HashSet<string>> FetchLatestVersions()
+    public static async Task<HashSet<string>> FetchLatestVersions()
     {
         if (_latestVersions != null) return _latestVersions;
 
@@ -70,7 +70,7 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
     /// <summary>
     ///     版本名规范化：忽略连字符差异（水鱼带连字符如 CHUNITHM X-VERSE，本地/Louis 不带）
     /// </summary>
-    protected static string NormalizeVersion(string version) => version.Replace("-", "").Trim();
+    public static string NormalizeVersion(string version) => version.Replace("-", "").Trim();
 
     /// <summary>清除 latest_version 运行时缓存</summary>
     protected static void ResetLatestVersionsCache() => _latestVersions = null;

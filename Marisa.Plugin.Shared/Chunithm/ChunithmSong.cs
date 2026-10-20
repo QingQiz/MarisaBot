@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
 using Microsoft.CSharp.RuntimeBinder;
@@ -193,6 +193,32 @@ public partial class ChunithmSong : Song
     public override string MaxLevel()
     {
         return Levels[Constants.Select((c, i) => (c, i)).MaxBy(x => x.c).i];
+    }
+
+    /// <summary>
+    ///     op 对象谱面的数组下标，即这首歌定数最高的难度。
+    ///     WORLD'S END 不参与，同定数时取难度更高者；谱面名无法判定难度时返回 -1。
+    /// </summary>
+    public int OpObjectIndex()
+    {
+        var index      = -1;
+        var difficulty = -1;
+
+        for (var i = 0; i < DiffNames.Count && i < Constants.Count; i++)
+        {
+            var current = ChunithmVersusCatalog.DifficultyIndex(DiffNames[i]);
+
+            if (current is < 0 or > 4) continue;
+
+            if (index < 0 || Constants[i] > Constants[index] ||
+                Constants[i] == Constants[index] && current > difficulty)
+            {
+                index      = i;
+                difficulty = current;
+            }
+        }
+
+        return index;
     }
 
     public override Image GetCover()

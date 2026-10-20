@@ -76,3 +76,30 @@ export function hasClear(clear?: string | null) { return ['clear', 'hard', 'brav
 export function hasMarks(score: ChuScore | null) {
     return score?.State === 'played' && (hasCombo(score.FullCombo) || hasChain(score.FullChain) || hasClear(score.Clear))
 }
+
+/**
+ * 把各查分器的原始 fc 写法归一到 versus_* 的素材名，
+ * 与后端 ChunithmScore.FullCombo 保持一致。b30/b50 卡片拿到的是原始 fc，
+ * 里面可能是 fc/aj/ajc 这类缩写，而素材只有 fullcombo/alljustice/alljusticecritical。
+ */
+export function normalizeCombo(fc?: string | null): string {
+    switch ((fc ?? '').toLowerCase()) {
+        case 'fc':
+        case 'fullcombo':
+            return 'fullcombo';
+        case 'aj':
+        case 'alljustice':
+            return 'alljustice';
+        case 'ajc':
+        case 'alljusticecritical':
+            return 'alljusticecritical';
+        default:
+            return '';
+    }
+}
+
+/** 部分查分器会把 fullchain / fullchain2 塞在 fc 里，单独取出来当成链标记。 */
+export function chainOfFc(fc?: string | null): string {
+    const value = (fc ?? '').toLowerCase();
+    return value === 'fullchain' || value === 'fullchain2' ? value : '';
+}

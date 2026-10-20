@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Marisa.Plugin.Shared.Chunithm;
 
@@ -28,6 +28,10 @@ public class ChunithmRating
 
     [JsonProperty("nickname")]
     public string Username { get; set; }
+
+    /// <summary>筛选版 b50/b30 的标签（如「AJ b50 · 24 首」），普通 b30/b50 为 null。</summary>
+    [JsonProperty("title")]
+    public string? Title { get; set; }
 
     public decimal B30 => Math.Round(Records.Best.Sum(s => s.Rating) / 30, 2, MidpointRounding.ToZero);
     public decimal R10 => Math.Round(Records.Recent.Take(10).Sum(s => s.Rating) / 10, 2, MidpointRounding.ToZero);

@@ -52,6 +52,10 @@ function GetN20Ra() {
                                 <div class="my-2 w-[15px] bg-black"></div>
                                 <div class="text-[50px]">RATING: {{ ToFixedNoRound(best.rating, 2) }}</div>
                             </div>
+                            <div class="flex gap-2" v-if="best.title">
+                                <div class="my-2 w-[15px] bg-amber-400"></div>
+                                <div class="text-[33px] font-osu-web">{{ best.title }}</div>
+                            </div>
                             <div class="flex gap-5">
                                 <div class="w-[210px] min-w-[210px]">
                                     <div class="flex gap-2 font-console">
