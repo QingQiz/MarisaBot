@@ -19,10 +19,13 @@
 }
 
 .summary-title {
-    font-size: 56px;
+    font-size: 110px;
     margin-bottom: var(--group-gap);
 
-    @apply font-osu-web text-center;
+    /* 跟舞萌完成表保持一致：西文 Torus，中文 fallback 微软雅黑（Hiragino 兜底 macOS） */
+    font-family: 'Torus', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-weight: bold;
+    line-height: 1.2;
 }
 
 .group-title {
