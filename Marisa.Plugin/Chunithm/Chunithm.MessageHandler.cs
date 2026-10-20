@@ -327,96 +327,8 @@ public partial class Chunithm
 
     #region 汇总 / summary
 
-    private static string ParseSortFlag(ref string cmd)
-    {
-        if (cmd.EndsWith(" -d")) { cmd = cmd[..^3]; return "desc"; }
-        if (cmd.EndsWith(" -a")) { cmd = cmd[..^3]; return "asc"; }
-        return "";
-    }
-
-    private static readonly (string Flag, ChunithmChartFilter Filter)[] ChartFilterFlags =
-    [
-        ("--op",    ChunithmChartFilter.OverPower),
-        ("--aj",    ChunithmChartFilter.AllJustice),
-        ("--fc",    ChunithmChartFilter.FullCombo),
-        ("--ajc",   ChunithmChartFilter.AllJusticeCritical),
-        ("--ss",    ChunithmChartFilter.Ss),
-        ("--ss+",   ChunithmChartFilter.SsPlus),
-        ("--sss",   ChunithmChartFilter.Sss),
-        ("--sss+",  ChunithmChartFilter.SssPlus),
-        ("--!aj",   ChunithmChartFilter.NotAllJustice),
-        ("--!fc",   ChunithmChartFilter.NotFullCombo),
-        ("--!ajc",  ChunithmChartFilter.NotAllJusticeCritical),
-        ("--!ss",   ChunithmChartFilter.NotSs),
-        ("--!ss+",  ChunithmChartFilter.NotSsPlus),
-        ("--!sss",  ChunithmChartFilter.NotSss),
-        ("--!sss+", ChunithmChartFilter.NotSssPlus)
-    ];
-
-    /// <summary>剥掉末尾的单个后缀，整个命令只有后缀时也算。</summary>
-    private static bool StripFlag(ref string cmd, string flag)
-    {
-        if (cmd.Equals(flag, StringComparison.Ordinal))
-        {
-            cmd = "";
-
-            return true;
-        }
-
-        if (!cmd.EndsWith(" " + flag, StringComparison.Ordinal)) return false;
-
-        cmd = cmd[..^(flag.Length + 1)];
-
-        return true;
-    }
-
-    /// <summary>剥掉末尾的谱面筛选后缀，可以叠加。</summary>
-    private static ChunithmChartFilter ParseChartFilterFlag(ref string cmd)
-    {
-        var filter = ChunithmChartFilter.None;
-
-        while (true)
-        {
-            var stripped = false;
-
-            foreach (var (flag, value) in ChartFilterFlags)
-            {
-                if (!StripFlag(ref cmd, flag)) continue;
-
-                filter  |= value;
-                stripped =  true;
-
-                break;
-            }
-
-            if (!stripped) return filter;
-        }
-    }
-
-    /// <summary>同时解析排序与谱面筛选后缀，两类后缀的先后顺序随意。</summary>
-    private static (string Sort, ChunithmChartFilter Filter) ParseSummaryFlags(ref string cmd)
-    {
-        var sort    = "";
-        var filter  = ChunithmChartFilter.None;
-        var changed = true;
-
-        while (changed)
-        {
-            var before = cmd;
-
-            var current = ParseSortFlag(ref cmd);
-            if (current.Length > 0) sort = current;
-
-            filter |= ParseChartFilterFlag(ref cmd);
-
-            changed = cmd.Length != before.Length;
-        }
-
-        return (sort, filter);
-    }
-
     [MarisaPluginDoc("获取成绩汇总，可以 @某人 查他的汇总",
-        "各子命令通用后缀 ` --op` ` --aj` ` --fc` ` --ajc` ` --ss` ` --ss+` ` --sss` ` --sss+`，`!` 取反（如 ` --!fc`）")]
+        "子命令通用 ` --op` ` --aj` ` --fc` ` --ajc` ` --ss` ` --ss+` ` --sss` ` --sss+`，`!` 取反")]
     [MarisaPluginCommand("summary", "sum")]
     private static async Task<MarisaPluginTaskState> Summary(Message message)
     {
@@ -477,7 +389,8 @@ public partial class Chunithm
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        var range = constants[0] == constants[1] ? $"{constants[0]:F1}" : $"{constants[0]:F1}-{constants[1]:F1}";
+        var im    = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("base", range, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -522,7 +435,7 @@ public partial class Chunithm
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("genre", genre, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -590,7 +503,7 @@ public partial class Chunithm
                 return;
             }
 
-            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+            var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("version", version, filter));
 
             replyMessage.Reply(MessageDataImage.FromBase64(im));
         }
@@ -646,7 +559,7 @@ public partial class Chunithm
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort);
+        var im = await ChunithmDraw.DrawGroupedSong(groupedSong, scores, sort, SummaryTitle("level", lv, filter));
 
         message.Reply(MessageDataImage.FromBase64(im));
 
@@ -1009,7 +922,7 @@ public partial class Chunithm
     {
         var player = ResolvePlayer(message, allowUsername: true);
 
-        var rating = await player.Fetcher.GetFilteredBest(player, predicate, b50);
+        var rating = await GetFilteredBest(player, predicate, b50);
 
         var count = rating.Records.Best.Length + rating.Records.Recent.Length;
         if (count == 0)

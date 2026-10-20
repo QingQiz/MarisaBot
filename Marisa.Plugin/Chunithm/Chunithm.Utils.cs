@@ -245,4 +245,290 @@ public partial class Chunithm
 
         return MessageChain.FromImageB64(await WebApi.ChunithmBest(ctx.Id, b50));
     }
+
+    /// <summary>
+    ///     b30/b50 的筛选版：先拉全量成绩，挑出满足 <paramref name="predicate" /> 的谱面，
+    ///     再按曲目版本分成「旧 / 新」两组。b50 取旧 30 + 新 20，b30 合并后按 rating 取前 30。
+    /// </summary>
+    private static async Task<ChunithmRating> GetFilteredBest(
+        ResolvedPlayer player,
+        Func<ChunithmScore, bool> predicate,
+        bool b50
+    )
+    {
+        var fetcher  = player.Fetcher;
+        var rating   = await fetcher.GetRating(player);
+        var scores   = await fetcher.GetScores(player);
+        var newest   = await DataFetcher.FetchLatestVersions();
+        var versions = fetcher.GetSongList().ToDictionary(song => song.Id, song => song.Version);
+
+        var groups = scores.Values
+            .Where(predicate)
+            .GroupBy(score => newest.Contains(DataFetcher.NormalizeVersion(versions.GetValueOrDefault(score.Id, ""))))
+            .ToList();
+
+        var oldScores = groups.FirstOrDefault(g => !g.Key)?.OrderByDescending(s => s.Rating).ToArray() ?? [];
+        var newScores = groups.FirstOrDefault(g => g.Key)?.OrderByDescending(s => s.Rating).ToArray() ?? [];
+
+        rating.IsB50 = b50;
+        rating.Records = b50
+            ? new Records
+            {
+                Best   = oldScores.Take(30).ToArray(),
+                Recent = newScores.Take(20).ToArray()
+            }
+            : new Records
+            {
+                Best   = oldScores.Concat(newScores).OrderByDescending(s => s.Rating).Take(30).ToArray(),
+                Recent = []
+            };
+
+        return rating;
+    }
+
+    #region 汇总查询的排序与筛选后缀
+
+    private static string ParseSortFlag(ref string cmd)
+    {
+        if (cmd.EndsWith(" -d")) { cmd = cmd[..^3]; return "desc"; }
+        if (cmd.EndsWith(" -a")) { cmd = cmd[..^3]; return "asc"; }
+        return "";
+    }
+
+    private static readonly (string Flag, ChunithmChartFilter Filter)[] ChartFilterFlags =
+    [
+        ("--op",    ChunithmChartFilter.OverPower),
+        ("--aj",    ChunithmChartFilter.AllJustice),
+        ("--fc",    ChunithmChartFilter.FullCombo),
+        ("--ajc",   ChunithmChartFilter.AllJusticeCritical),
+        ("--ss",    ChunithmChartFilter.Ss),
+        ("--ss+",   ChunithmChartFilter.SsPlus),
+        ("--sss",   ChunithmChartFilter.Sss),
+        ("--sss+",  ChunithmChartFilter.SssPlus),
+        ("--!aj",   ChunithmChartFilter.NotAllJustice),
+        ("--!fc",   ChunithmChartFilter.NotFullCombo),
+        ("--!ajc",  ChunithmChartFilter.NotAllJusticeCritical),
+        ("--!ss",   ChunithmChartFilter.NotSs),
+        ("--!ss+",  ChunithmChartFilter.NotSsPlus),
+        ("--!sss",  ChunithmChartFilter.NotSss),
+        ("--!sss+", ChunithmChartFilter.NotSssPlus)
+    ];
+
+    /// <summary>剥掉末尾的单个后缀，整个命令只有后缀时也算。</summary>
+    private static bool StripFlag(ref string cmd, string flag)
+    {
+        if (cmd.Equals(flag, StringComparison.Ordinal))
+        {
+            cmd = "";
+
+            return true;
+        }
+
+        if (!cmd.EndsWith(" " + flag, StringComparison.Ordinal)) return false;
+
+        cmd = cmd[..^(flag.Length + 1)];
+
+        return true;
+    }
+
+    /// <summary>剥掉末尾的谱面筛选后缀，可以叠加。</summary>
+    private static ChunithmChartFilter ParseChartFilterFlag(ref string cmd)
+    {
+        var filter = ChunithmChartFilter.None;
+
+        while (true)
+        {
+            var stripped = false;
+
+            foreach (var (flag, value) in ChartFilterFlags)
+            {
+                if (!StripFlag(ref cmd, flag)) continue;
+
+                filter  |= value;
+                stripped =  true;
+
+                break;
+            }
+
+            if (!stripped) return filter;
+        }
+    }
+
+    /// <summary>同时解析排序与谱面筛选后缀，两类后缀的先后顺序随意。</summary>
+    private static (string Sort, ChunithmChartFilter Filter) ParseSummaryFlags(ref string cmd)
+    {
+        var sort    = "";
+        var filter  = ChunithmChartFilter.None;
+        var changed = true;
+
+        while (changed)
+        {
+            var before = cmd;
+
+            var current = ParseSortFlag(ref cmd);
+            if (current.Length > 0) sort = current;
+
+            filter |= ParseChartFilterFlag(ref cmd);
+
+            changed = cmd.Length != before.Length;
+        }
+
+        return (sort, filter);
+    }
+
+    #endregion
+
+    #region 汇总图的标题
+
+    private static readonly string[] ComboRankNames = ["FC", "AJ", "AJC"];
+    private static readonly string[] ScoreRankNames = ["SS", "SS+", "SSS", "SSS+"];
+
+    private static readonly ChunithmChartFilter[] ComboFlags =
+        [ChunithmChartFilter.FullCombo, ChunithmChartFilter.AllJustice, ChunithmChartFilter.AllJusticeCritical];
+
+    private static readonly ChunithmChartFilter[] NotComboFlags =
+        [ChunithmChartFilter.NotFullCombo, ChunithmChartFilter.NotAllJustice, ChunithmChartFilter.NotAllJusticeCritical];
+
+    private static readonly ChunithmChartFilter[] ScoreFlags =
+        [ChunithmChartFilter.Ss, ChunithmChartFilter.SsPlus, ChunithmChartFilter.Sss, ChunithmChartFilter.SssPlus];
+
+    private static readonly ChunithmChartFilter[] NotScoreFlags =
+        [ChunithmChartFilter.NotSs, ChunithmChartFilter.NotSsPlus, ChunithmChartFilter.NotSss, ChunithmChartFilter.NotSssPlus];
+
+    /// <summary>汇总图顶部的标题：[类别][参数][筛选条件]完成表，没有筛选条件时省掉最后一段。</summary>
+    private static string SummaryTitle(string category, string argument, ChunithmChartFilter filter)
+    {
+        var parts = new List<string> { category, argument };
+
+        if (DescribeChartFilter(filter) is { Length: > 0 } filterText) parts.Add(filterText);
+
+        return $"[{string.Join("][", parts)}]完成表";
+    }
+
+    /// <summary>把筛选后缀归纳成一句话，只保留有信息量的部分：冗余的取最严格的那个，区间写成 A~B。</summary>
+    private static string DescribeChartFilter(ChunithmChartFilter filter)
+    {
+        var parts = new List<string>();
+
+        if ((filter & ChunithmChartFilter.OverPower) != 0) parts.Add("OP对象");
+
+        if (DescribeRankSpan(filter, ComboFlags, NotComboFlags, ComboRankNames) is { Length: > 0 } combo) parts.Add(combo);
+        if (DescribeRankSpan(filter, ScoreFlags, NotScoreFlags, ScoreRankNames) is { Length: > 0 } span) parts.Add(span);
+
+        return string.Concat(parts);
+    }
+
+    /// <summary>
+    ///     把一组「≥ 某档」的正向后缀和「&lt; 某档」的取反后缀归纳成区间：
+    ///     `SS`（仅 SS）/ `SS~SSS+`（SS 及以上）/ `SS~SSS`（SS 到 SSS）/ `未SS`（没到 SS）。
+    /// </summary>
+    private static string DescribeRankSpan(
+        ChunithmChartFilter filter,
+        IReadOnlyList<ChunithmChartFilter> yes,
+        IReadOnlyList<ChunithmChartFilter> no,
+        IReadOnlyList<string> names)
+    {
+        var lower = -1;
+        for (var i = 0; i < names.Count; i++)
+        {
+            if ((filter & yes[i]) != 0) lower = i;
+        }
+
+        var exclusive = int.MaxValue;
+        for (var i = 0; i < names.Count; i++)
+        {
+            if ((filter & no[i]) != 0) exclusive = i;
+        }
+
+        var top   = names.Count - 1;
+        var upper = exclusive - 1;
+
+        if (lower >= 0)
+        {
+            if (exclusive == int.MaxValue) return lower == top ? names[top] : $"{names[lower]}~{names[top]}";
+            if (upper < lower) return "无";
+
+            return upper == lower ? names[lower] : $"{names[lower]}~{names[upper]}";
+        }
+
+        return exclusive == int.MaxValue ? "" : $"未{names[exclusive]}";
+    }
+
+    #endregion
+}
+
+/// <summary>汇总类指令末尾的谱面筛选后缀，可以叠加。</summary>
+[Flags]
+public enum ChunithmChartFilter
+{
+    None                  = 0,
+    OverPower             = 1 << 0,
+    FullCombo             = 1 << 1,
+    AllJustice            = 1 << 2,
+    AllJusticeCritical    = 1 << 3,
+    Ss                    = 1 << 4,
+    SsPlus                = 1 << 5,
+    Sss                   = 1 << 6,
+    SssPlus               = 1 << 7,
+    NotFullCombo          = 1 << 8,
+    NotAllJustice         = 1 << 9,
+    NotAllJusticeCritical = 1 << 10,
+    NotSs                 = 1 << 11,
+    NotSsPlus             = 1 << 12,
+    NotSss                = 1 << 13,
+    NotSssPlus            = 1 << 14
+}
+
+public static class ChunithmChartFilterExtensions
+{
+    /// <summary>与成绩有关的后缀，AJC ⊂ AJ ⊂ FC，SS ⊂ SS+ ⊂ SSS ⊂ SSS+。</summary>
+    private static readonly (ChunithmChartFilter Yes, ChunithmChartFilter No, Func<ChunithmScore, bool> Test)[]
+        AchievementTests =
+        [
+            (ChunithmChartFilter.FullCombo, ChunithmChartFilter.NotFullCombo,
+                score => score.IsFullCombo),
+            (ChunithmChartFilter.AllJustice, ChunithmChartFilter.NotAllJustice,
+                score => score.IsAllJustice),
+            (ChunithmChartFilter.AllJusticeCritical, ChunithmChartFilter.NotAllJusticeCritical,
+                score => score.IsAllJusticeCritical),
+            (ChunithmChartFilter.Ss, ChunithmChartFilter.NotSs,
+                score => score.Achievement >= ChunithmScore.RankSs),
+            (ChunithmChartFilter.SsPlus, ChunithmChartFilter.NotSsPlus,
+                score => score.Achievement >= ChunithmScore.RankSsp),
+            (ChunithmChartFilter.Sss, ChunithmChartFilter.NotSss,
+                score => score.Achievement >= ChunithmScore.RankSss),
+            (ChunithmChartFilter.SssPlus, ChunithmChartFilter.NotSssPlus,
+                score => score.Achievement >= ChunithmScore.RankSssp)
+        ];
+
+    private static readonly ChunithmChartFilter AchievementFilters =
+        AchievementTests.Aggregate(ChunithmChartFilter.None, (all, test) => all | test.Yes | test.No);
+
+    /// <summary>按 op 对象谱面与成绩状态筛选谱面。</summary>
+    public static IEnumerable<(double constant, int i, ChunithmSong song)> FilterCharts(
+        this IEnumerable<(double constant, int i, ChunithmSong song)> charts,
+        ChunithmChartFilter filter,
+        IReadOnlyDictionary<(long Id, int LevelIdx), ChunithmScore> scores)
+    {
+        if ((filter & ChunithmChartFilter.OverPower) != 0)
+        {
+            charts = charts.Where(x => x.i == x.song.OpObjectIndex());
+        }
+
+        if ((filter & AchievementFilters) == 0) return charts;
+
+        return charts.Where(x => Matches(filter, scores.GetValueOrDefault((x.song.Id, x.i))));
+    }
+
+    /// <summary>每个后缀都要成立，所以取反也能和正向叠加，没游玩的谱面只有取反会保留。</summary>
+    private static bool Matches(ChunithmChartFilter filter, ChunithmScore? score)
+    {
+        foreach (var (yes, no, test) in AchievementTests)
+        {
+            if ((filter & yes) != 0 && (score is null || !test(score))) return false;
+            if ((filter & no) != 0 && score is not null && test(score)) return false;
+        }
+
+        return true;
+    }
 }

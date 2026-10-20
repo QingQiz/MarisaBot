@@ -14,6 +14,19 @@ const data_fetched = ref(false)
 
 const grouped = ref([] as GroupSongInfo[])
 const scores  = ref({} as { [key: string]: Score })
+const title   = ref('')
+
+// 标题单独取，取不到（旧 context）时就当没有，不影响正片
+axios.get(context_get, {params: {id: id.value, name: 'Title'}})
+    .then(res => {
+        const data = res.data
+        title.value = typeof data === 'string'
+            ? (data.startsWith('"') ? JSON.parse(data) : data)
+            : data == null ? '' : String(data)
+    })
+    .catch(() => {
+        title.value = ''
+    })
 
 
 axios.all([
@@ -150,6 +163,7 @@ function GetGroupMinRank(group: any[]) {
 
 <template>
     <div class="config" v-if="data_fetched">
+        <div v-if="title" class="summary-title">{{ title }}</div>
         <div class="group">
             <div class="flex gap-10">
                 <div class="justify-center flex items-center">
