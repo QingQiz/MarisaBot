@@ -36,7 +36,6 @@ import MaiVersusMulti from "@/components/maimai/MaiVersusMulti.vue";
 import MaiVersusMultiBatch from "@/components/maimai/MaiVersusMultiBatch.vue";
 import MaiSongTitles from "@/components/maimai/MaiSongTitles.vue";
 import MaiDifficultyCurve from "@/components/maimai/MaiDifficultyCurve.vue";
-import MaiChartPreview from "@/components/maimai/MaiChartPreview.vue";
 import MaiCurveRank from "@/components/maimai/MaiCurveRank.vue";
 import MaiDanCourse from "@/components/maimai/MaiDanCourse.vue";
 import MaiValueAnalysis from "@/components/maimai/MaiValueAnalysis.vue";
@@ -57,7 +56,6 @@ const routes = [
     {path: '/maimai/versus-multi-batch', component: MaiVersusMultiBatch},
     {path: '/maimai/song-titles', component: MaiSongTitles},
     {path: '/maimai/difficulty-curve', component: MaiDifficultyCurve},
-    {path: '/maimai/chart', component: MaiChartPreview},
     {path: '/maimai/curve-rank', component: MaiCurveRank},
     {path: '/maimai/dan-course', component: MaiDanCourse},
     {path: '/maimai/value-analysis', component: MaiValueAnalysis},

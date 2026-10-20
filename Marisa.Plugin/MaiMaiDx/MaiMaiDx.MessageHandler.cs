@@ -771,7 +771,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     谱面预览
     /// </summary>
-    [MarisaPluginDoc("谱面预览，回复在线播放页链接", "可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
+    [MarisaPluginDoc("谱面预览，回复落雪查分器的预览链接","可选难度（如`白谱`，曲名前后皆可）+ `歌曲名` 或 `歌曲别名` 或 `歌曲id`")]
     [MarisaPluginCommand("chart", "谱面", "预览", "preview")]
     private async Task<MarisaPluginTaskState> SongChartPreview(Message message)
     {
@@ -799,8 +799,8 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var url = $"{ShortUrlStore.GetPublicBaseUrl()}/maimai/chart?id={song.Id}" +
-                  (levelIdx == null ? string.Empty : $"&difficulty={levelIdx}");
+        // 不带难度时 lxns 会打开它数据里的最高难度，部分曲目的 Re:MASTER 只是占位空谱
+        var url = $"https://maimai.lxns.net/chart?chart_id={song.Id}&difficulty={levelIdx ?? song.Levels.Count - 1}";
         message.Reply($"[{song.Type}] {song.Title}\n{url}");
 
         return MarisaPluginTaskState.CompletedTask;
