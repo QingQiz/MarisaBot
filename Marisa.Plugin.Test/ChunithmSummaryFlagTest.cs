@@ -15,20 +15,20 @@ public class ChunithmSummaryFlagTest
         typeof(ChunithmChartFilter).Assembly.GetType("Marisa.Plugin.Chunithm.Chunithm")!
             .GetMethod("SummaryTitle", BindingFlags.NonPublic | BindingFlags.Static)!;
 
-    [TestCase("level", "14+", ChunithmChartFilter.None, "[level][14+]完成表")]
-    [TestCase("level", "14+", ChunithmChartFilter.Ss, "[level][14+][SS~SSS+]完成表")]
-    [TestCase("level", "14+", ChunithmChartFilter.Ss | ChunithmChartFilter.NotSssPlus, "[level][14+][SS~SSS]完成表")]
-    [TestCase("level", "14+", ChunithmChartFilter.SssPlus, "[level][14+][SSS+]完成表")]
-    [TestCase("level", "14+", ChunithmChartFilter.NotSs, "[level][14+][未SS]完成表")]
-    [TestCase("genre", "ORIGINAL", ChunithmChartFilter.OverPower, "[genre][ORIGINAL][OP对象]完成表")]
+    [TestCase("level", "14+", ChunithmChartFilter.None, "level 14+ 完成表")]
+    [TestCase("level", "14+", ChunithmChartFilter.Ss, "level 14+ SS~SSS+ 完成表")]
+    [TestCase("level", "14+", ChunithmChartFilter.Ss | ChunithmChartFilter.NotSssPlus, "level 14+ SS~SSS 完成表")]
+    [TestCase("level", "14+", ChunithmChartFilter.SssPlus, "level 14+ SSS+ 完成表")]
+    [TestCase("level", "14+", ChunithmChartFilter.NotSs, "level 14+ 未SS 完成表")]
+    [TestCase("genre", "ORIGINAL", ChunithmChartFilter.OverPower, "genre ORIGINAL OP对象 完成表")]
     [TestCase("base", "14.0-14.5", ChunithmChartFilter.OverPower | ChunithmChartFilter.Ss,
-        "[base][14.0-14.5][OP对象SS~SSS+]完成表")]
-    [TestCase("level", "15", ChunithmChartFilter.FullCombo | ChunithmChartFilter.NotAllJustice, "[level][15][FC]完成表")]
-    [TestCase("level", "15", ChunithmChartFilter.NotFullCombo, "[level][15][未FC]完成表")]
+        "base 14.0-14.5 OP对象SS~SSS+ 完成表")]
+    [TestCase("level", "15", ChunithmChartFilter.FullCombo | ChunithmChartFilter.NotAllJustice, "level 15 FC 完成表")]
+    [TestCase("level", "15", ChunithmChartFilter.NotFullCombo, "level 15 未FC 完成表")]
     [TestCase("level", "15", ChunithmChartFilter.AllJusticeCritical | ChunithmChartFilter.NotAllJustice,
-        "[level][15][无]完成表")]
+        "level 15 无 完成表")]
     [TestCase("version", "CHUNITHM XVERSEX", ChunithmChartFilter.AllJusticeCritical | ChunithmChartFilter.Ss,
-        "[version][CHUNITHM XVERSEX][AJCSS~SSS+]完成表")]
+        "version CHUNITHM XVERSEX AJCSS~SSS+ 完成表")]
     public void TitleDescribesCategoryArgumentAndFilter(
         string category, string argument, ChunithmChartFilter filter, string expected)
     {

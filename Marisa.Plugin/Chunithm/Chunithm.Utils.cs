@@ -395,14 +395,16 @@ public partial class Chunithm
     private static readonly ChunithmChartFilter[] NotScoreFlags =
         [ChunithmChartFilter.NotSs, ChunithmChartFilter.NotSsPlus, ChunithmChartFilter.NotSss, ChunithmChartFilter.NotSssPlus];
 
-    /// <summary>汇总图顶部的标题：[类别][参数][筛选条件]完成表，没有筛选条件时省掉最后一段。</summary>
+    /// <summary>汇总图顶部的标题：类别 参数 筛选条件 完成表，没有筛选条件时省掉那一段。</summary>
     private static string SummaryTitle(string category, string argument, ChunithmChartFilter filter)
     {
         var parts = new List<string> { category, argument };
 
         if (DescribeChartFilter(filter) is { Length: > 0 } filterText) parts.Add(filterText);
 
-        return $"[{string.Join("][", parts)}]完成表";
+        parts.Add("完成表");
+
+        return string.Join(' ', parts);
     }
 
     /// <summary>把筛选后缀归纳成一句话，只保留有信息量的部分：冗余的取最严格的那个，区间写成 A~B。</summary>
