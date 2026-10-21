@@ -101,3 +101,17 @@ export function cardBackground(topKey: string) {
     const [c1, c2] = BG_GRADIENTS[topKey] ?? BG_GRADIENTS['DMY']
     return {background: `linear-gradient(168deg, ${c1} 0%, ${c2} 62%, #060309 100%)`}
 }
+
+/** 不随图高拉伸的卡片背景：长图正文保持主题深色，不褪成纯黑。 */
+export function tallCardBackground(topKey: string, accent: string) {
+    const [c1, c2] = BG_GRADIENTS[topKey] ?? BG_GRADIENTS['DMY']
+    const body = `color-mix(in srgb, ${c1} 10%, ${c2})`
+    return [
+        `radial-gradient(900px 640px at 16% 0px, ${accent}33 0%, transparent 70%)`,
+        `radial-gradient(640px 520px at 94% 0px, ${accent}1f 0%, transparent 70%)`,
+        `radial-gradient(1100px 1000px at 0% 2300px, ${accent}17 0%, transparent 70%) 0 0 / 100% 5600px repeat-y`,
+        `radial-gradient(1100px 1000px at 100% 5100px, ${accent}14 0%, transparent 70%) 0 0 / 100% 5600px repeat-y`,
+        `radial-gradient(1100px 520px at 50% 100%, ${accent}17 0%, transparent 72%)`,
+        `linear-gradient(172deg, ${c1} 0px, color-mix(in srgb, ${c1} 25%, ${c2}) 1100px, ${body} 2600px, ${body} 100%)`,
+    ].join(', ')
+}

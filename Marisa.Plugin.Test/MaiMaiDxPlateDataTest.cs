@@ -1649,6 +1649,35 @@ public class MaiMaiDxPlateDataTest
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    // 姓名框实际条件谱面
+    // ──────────────────────────────────────────────────────────────────────
+
+    [TestCase("樱将完成表")]
+    [TestCase("樱将红谱完成表")]
+    public void NamePlateChartsCoverBasicToMaster(string raw)
+    {
+        var charts = PlateData.NamePlateCharts(MustParse(raw), [CreateSong(500, "maimai PiNK PLUS"), CreateSong(501, "maimai PiNK")]);
+        Assert.That(charts.Select(c => (c.Song.Id, c.LevelIdx)), Is.EquivalentTo(new[] { (500L, 0), (500L, 1), (500L, 2), (500L, 3) }));
+    }
+
+    [TestCase("舞将完成表")]
+    [TestCase("霸者完成表")]
+    public void NamePlateChartsKeepWhitelistedRemaster(string raw)
+    {
+        var charts = PlateData.NamePlateCharts(MustParse(raw), [CreateSong(17, "maimai"), CreateSong(18, "maimai")]);
+        Assert.That(charts.Where(c => c.LevelIdx == 4).Select(c => c.Song.Id), Is.EquivalentTo(new[] { 17L }));
+        Assert.That(charts.Count(c => c.LevelIdx < 4), Is.EqualTo(8));
+    }
+
+    [TestCase("双将完成表", 100018, "maimai でらっくす BUDDiES")] // 宴谱
+    [TestCase("真极完成表", 70, "maimai")]                        // ジングルベル
+    [TestCase("樱大将完成表", 500, "maimai PiNK PLUS")]           // 无对应姓名框
+    public void NamePlateChartsExcluded(string raw, long id, string version)
+    {
+        Assert.That(PlateData.NamePlateCharts(MustParse(raw), [CreateSong(id, version)]), Is.Empty);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     // 难度别名剥离（curve 等按曲命令的可选难度字段，句首/句尾均可、空格可省略）。
     // 纯语法层测试：「白金ディスコ」这类以色字开头的真实歌名由调用方保护——handler
     // 整串优先搜歌，仅无结果时才用剥离结果重搜。

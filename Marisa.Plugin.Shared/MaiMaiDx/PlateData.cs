@@ -418,6 +418,18 @@ public static class PlateData
 
     private static string PlateImageName(int id) => $"UI_Plate_{id:D6}.png";
 
+    /// <summary>姓名框实际条件下的全难度谱面（舞/霸者含白名单 Re:MASTER，不含宴谱）；无对应姓名框时为空。</summary>
+    public static IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> NamePlateCharts(
+        Query query,
+        IEnumerable<MaiMaiSong> songs)
+    {
+        if (NamePlateImage(query) == null) return [];
+
+        var plate = (Selector.Plate)query.Selectors[0];
+        int[] levelIdxes = plate.Scope == PlateScope.FinaleAndEarlier ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+        return SelectCharts(query with { LevelIdxes = levelIdxes }, songs.Where(song => song.Id < 100000));
+    }
+
     public static bool MatchPlate(Selector.Plate plate, MaiMaiSong song, int levelIdx, bool includeRevival = false)
     {
         if (!plate.Versions.Any(v => string.Equals(v, song.Version, StringComparison.OrdinalIgnoreCase)))

@@ -43,6 +43,13 @@
     src: url('@/assets/fonts/SEGAMaruGothicDB.woff2') format('woff2');
 }
 
+/* 思源柔黑 Heavy 子集（GB2312 + JIS 第一水准 + 曲库名称用字），供完成表/汇总标题使用 */
+@font-face {
+    font-family: 'Resource Han Rounded';
+    font-weight: 900;
+    src: url('@/assets/fonts/ResourceHanRoundedCN-Heavy.woff2') format('woff2');
+}
+
 /* 仅含“菜”一个字形（wght 800），供 vs 卡片的印章使用 */
 @font-face {
     font-family: 'Noto Serif JP';

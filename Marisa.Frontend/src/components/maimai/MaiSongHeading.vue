@@ -2,7 +2,7 @@
     <div class="flex-1 min-w-0 pb-1">
         <h1 ref="titleEl" class="mai-title" :style="{ fontSize: size + 'px' }">{{ title }}</h1>
         <div class="flex items-baseline justify-between gap-4" :style="{ marginTop: rowTop + 'px' }">
-            <div class="artist-line" :style="{ fontSize: artistSize + 'px', marginTop: artistTop + 'px' }">{{ artist }}</div>
+            <div class="artist-line" :style="{ fontSize: artistSize + 'px', marginTop: artistTop + 'px' }"><slot name="sub">{{ artist }}</slot></div>
             <div v-if="player" class="player-inline shrink-0"><span class="player-label">PLAYER</span> {{ player }}</div>
         </div>
     </div>
