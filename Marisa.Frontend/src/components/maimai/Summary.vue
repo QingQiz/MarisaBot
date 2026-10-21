@@ -192,6 +192,11 @@ function groupMinRank(g: GroupedSong): string | null {
     }
 }
 
+// 完成态胶囊取组内最高难度的颜色
+function groupDoneColor(g: GroupedSong): string {
+    return diffColor(g.x.reduce((top, c) => c.Item2 > top.Item2 ? c : top))
+}
+
 function onCoverError(e: Event) {
     const img = e.target as HTMLImageElement
     if (!img.src.endsWith(COVER_FALLBACK)) img.src = COVER_FALLBACK
@@ -199,7 +204,7 @@ function onCoverError(e: Event) {
 </script>
 
 <template>
-    <div v-if="data_fetched" class="mai-summary mai-card antialiased" :style="{background, '--accent': accent}">
+    <div v-if="data_fetched" class="mai-summary mai-card antialiased" :style="{background}">
         <div class="dots"></div>
         <div class="relative px-12 pt-9 pb-9">
             <div class="eyebrow">MARISA BOT · {{ plate ? 'PLATE PROGRESS' : 'SUMMARY' }}</div>
@@ -241,7 +246,7 @@ function onCoverError(e: Event) {
             <div class="flex flex-col gap-9 mt-9">
                 <section v-for="g in grouped" :key="g.Key">
                     <div v-for="st in [stats(g.x)]" class="group-head">
-                        <span class="g-capsule" :class="{complete: st.done === st.total}">
+                        <span class="g-capsule" :class="{complete: st.done === st.total}" :style="{'--done': groupDoneColor(g)}">
                             <span class="g-tag">{{ g.Key }}</span>
                             <span class="g-count"><b>{{ st.done }}</b> / {{ st.total }}</span>
                         </span>
