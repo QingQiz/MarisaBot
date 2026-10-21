@@ -65,6 +65,7 @@ public static class MaiMaiDraw
     public static async Task<string> DrawPlateProgress(
         PlateData.Query query,
         IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> pairs,
+        IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> namePlateCharts,
         IReadOnlyDictionary<(long SongId, int LevelIdx), SongScore> scores,
         string title)
     {
@@ -107,6 +108,17 @@ public static class MaiMaiDraw
             Level        = query.Threshold.Level,
             DisplayName  = query.Threshold.DisplayName,
             NamePlateImg = PlateData.NamePlateImage(query),  // 游戏内成就姓名框贴图；无对应时 null
+            Difficulties = namePlateCharts.Count == 0 ? null : namePlateCharts
+                .GroupBy(t => t.LevelIdx)
+                .OrderBy(g => g.Key)
+                .Select(g => new
+                {
+                    LevelIdx = g.Key,
+                    Total    = g.Count(),
+                    Done     = g.Count(t => scores.TryGetValue((t.Song.Id, t.LevelIdx), out var s) &&
+                                            PlateData.LevelOf(query.Threshold.Dim, s) >= query.Threshold.Level),
+                })
+                .ToArray(),
         });
         return await WebApi.MaiMaiSummary(ctx.Id);
     }

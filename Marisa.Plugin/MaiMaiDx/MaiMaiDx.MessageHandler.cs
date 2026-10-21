@@ -1270,7 +1270,7 @@ public partial class MaiMaiDx
         var (_, scores) = await player.Fetcher.GetScores(player);
 
         // 标题原样使用用户输入的命令文本（含"完成表"）。
-        var im = await MaiMaiDraw.DrawPlateProgress(query!, pairs, scores, raw.Trim());
+        var im = await MaiMaiDraw.DrawPlateProgress(query!, pairs, PlateData.NamePlateCharts(query!, SongDb.SongList), scores, raw.Trim());
         message.Reply(MessageDataImage.FromBase64(im));
 
         return MarisaPluginTaskState.CompletedTask;

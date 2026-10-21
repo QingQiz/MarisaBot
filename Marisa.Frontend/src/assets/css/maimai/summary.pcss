@@ -1,176 +1,420 @@
 .mai-summary {
-    /* 全部跟 commit f035410 时 SkiaSharp 的 plate 渲染等同：cell=120, gap=40,
-       border 突出 10px, rank marker 60px, icon marker 75px。 */
-    --cell-size: 120px;
-    --cell-gap: 40px;                   /* 净缝 = gap - 2*border-overflow = 20px */
-    --col-count: 8;
-    --border-overflow: 10px;            /* 边框图比 cell 大的那一圈 */
-    --level-mark-size: 14px;            /* 难度小三角 */
-    --rank-marker-height: 42px;         /* Achievement 维度的 rank_*.png（UI_GAM 经典版裁到内容，宽按比例） */
-    --icon-marker-height: 75px;         /* Fc/Fs 的 icon_*.png（近方形） */
-    --achievement-bar-height: 42px;     /* sum 模式底部黑条 */
-    --sum-rank-height: 44px;            /* sum 模式中心 rank */
-
-    padding: 40px;
-    background: white;
-    color: #1a1a1a;
-    width: max-content;                 /* 配合 Puppeteer 截全宽 */
-
-    /* 西文 Torus 跟 b50 一致；中文 fallback YaHei (Hiragino 兜底 macOS) */
-    font-family: 'Torus', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+    position: relative;
+    width: 1296px;
+    overflow: hidden;
 }
 
-/* Tailwind preflight 给所有 img 强制 max-width:100%，会把 border / marker / rank 等
-   按 cell 宽度截断。这里整个 summary 内的 img 都解除限制。 */
 .mai-summary img {
     max-width: none;
 }
 
-/* title-row / group-title 宽度 = grid 内容宽 + border-overflow (8 cell × 120 + 7 gap × 40 + 10 = 1250px)，
-   让 stats-bar 右沿对齐"带边框"的 grid 右边界 (cell 8 的 .border-img 比 cell 右沿外突出 10px)；
-   左沿仍贴 padding 内沿，因为标题靠左对齐看起来比 -10 偏移自然。
-   stats-bar 永远靠右贴这条带边框右边界，标题靠左 + flex shrink 处理过长情况。 */
-.title-row {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 20px;
-    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
-}
-
-.title {
-    /* font-size 由 JS 真实测宽 auto-shrink（titleSize）控制 */
-    font-weight: bold;
-    line-height: 1.2;          /* 1 太紧，配合 overflow:hidden 会把 CJK descender 切掉 */
-    flex: 1 1 auto;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.title-stats {
-    flex: 0 0 720px;         /* 固定大条宽度 720px，永远贴 grid 右边界（留出空间给长标题） */
-}
-
-/* 游戏内成就姓名框（「樱将完成表」这类查询）：原尺寸居中独立一行放在标题下方。
-   注意本文件有 .mai-summary img { max-width: none }，此处用显式 width 而非 max-width。 */
-.nameplate-row {
-    display: flex;
-    justify-content: center;
-    margin: 4px 0 16px;
-    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
-}
-
-.nameplate-row img {
-    width: 720px;            /* 原尺寸 720×116 */
-    height: 116px;
-}
-
-.groups {
-    display: flex;
-    flex-direction: column;
-    gap: 50px;
-}
-
-.group {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.group-title {
-    font-size: 56px;
-    font-weight: bold;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    /* +border-overflow 与 .title-row 同理，让 group-stats 右沿对齐带边框 grid 右边界 */
-    width: calc(var(--col-count) * var(--cell-size) + (var(--col-count) - 1) * var(--cell-gap) + var(--border-overflow));
-    position: relative;       /* 给 .min-rank-center 提供 absolute 锚点 */
-}
-
-.min-rank {
-    height: 42px;
-    /* push 到 stats-bar 左边界外，跟 stats-bar 隔 group-title 的 gap (6px) */
-    margin-left: auto;
-}
-
-.group-stats {
-    margin-left: auto;
-    flex: 0 0 380px;         /* 固定小条宽度 380px，靠右对齐 grid 右边界 */
-}
-
-/* 当 .min-rank (layout=left) 存在时，它已经 margin-left:auto 推到右贴 stats-bar；
-   stats-bar 不再 auto 否则会跟 min-rank 平分剩余空间导致缝隙变大 */
-.min-rank ~ .group-stats {
-    margin-left: 0;
-}
-
-.row {
-    display: grid;
-    grid-template-columns: repeat(var(--col-count), var(--cell-size));
-    gap: var(--cell-gap);
-}
-
-.cell {
-    position: relative;
-    width: var(--cell-size);
-    height: var(--cell-size);
-}
-
-.cover {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-}
-
-.border-img {
-    position: absolute;
-    top: calc(-1 * var(--border-overflow));
-    left: calc(-1 * var(--border-overflow));
-    width: calc(var(--cell-size) + 2 * var(--border-overflow));
-    height: calc(var(--cell-size) + 2 * var(--border-overflow));
-    pointer-events: none;
-}
-
-/* plate mode 印章罩 + 居中 marker */
-.plate-stamp {
+.dots {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.40);
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, .07) 1.2px, transparent 1.6px) 0 0 / 22px 22px;
 }
 
-.plate-marker {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: var(--icon-marker-height);
+.eyebrow {
+    font: 700 12px 'Torus', sans-serif;
+    letter-spacing: .32em;
+    color: rgba(255, 255, 255, .55);
+}
+
+.heading.han :deep(.mai-title) {
+    font-family: 'Resource Han Rounded', 'Microsoft YaHei', sans-serif;
+    font-weight: 900;
+}
+
+.heading :deep(.artist-line) {
+    font-family: 'Torus', 'Microsoft YaHei', sans-serif;
+    letter-spacing: .06em;
+    color: rgba(255, 255, 255, .62);
+}
+
+.cond-chip {
+    display: inline-block;
+    padding: 3px 12px 4px;
+    border-radius: 9999px;
+    font: 700 14px 'Torus', 'Microsoft YaHei', sans-serif;
+    letter-spacing: .04em;
+    color: rgba(255, 255, 255, .85);
+    background: rgba(255, 255, 255, .08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18);
+}
+
+.big-count {
+    text-align: right;
+    font-family: 'Torus', sans-serif;
+    line-height: 1;
+}
+
+.big-count b {
+    font-size: 68px;
+    font-weight: 800;
+}
+
+.big-count span {
+    margin-left: 4px;
+    font-size: 30px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .55);
+}
+
+.big-count small {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    color: rgba(255, 255, 255, .55);
+}
+
+/* 姓名框 + 各难度剩余表：行高只由姓名框决定，表格上下沿与姓名框外框对齐 */
+.plate-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 20px;
+}
+
+.nameplate {
+    display: block;
+    width: 560px;
+    height: auto;
+}
+
+.plate-table {
+    contain: size;
+    display: grid;
+    gap: 0 2px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .09);
+}
+
+.plate-col {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, .42);
+}
+
+.plate-th {
+    padding: 6px 0;
+    text-align: center;
+    font: 900 13px 'SEGA NewRodin', sans-serif;
+    letter-spacing: .04em;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+    white-space: nowrap;
+}
+
+.plate-th.light {
+    color: #4a1d78;
+    text-shadow: none;
+}
+
+.plate-td {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: 'Torus', sans-serif;
+    line-height: 1;
+}
+
+.remain {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.remain b {
+    font-size: 32px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.remain span {
+    font: 700 11px 'Microsoft YaHei', sans-serif;
+    color: rgba(255, 255, 255, .5);
+}
+
+.remain.clear {
+    padding: 4px 0;
+    font: 900 18px 'SEGA NewRodin', sans-serif;
+    letter-spacing: .08em;
+}
+
+.frac {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .55);
+    font-variant-numeric: tabular-nums;
+}
+
+.seg-bar {
+    display: flex;
+    gap: 2px;
+    height: 30px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, .25);
+}
+
+.seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font: 700 13px 'Torus', sans-serif;
+    letter-spacing: .04em;
+    color: rgba(20, 12, 30, .75);
+}
+
+.seg b {
+    margin-left: 2px;
+    font-weight: 800;
+    color: #14081f;
+}
+
+.seg.np {
+    color: rgba(255, 255, 255, .7);
+}
+
+.seg.np b {
+    color: #fff;
+}
+
+.group-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.g-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding-right: 18px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, .06);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18);
+}
+
+.g-capsule.complete {
+    box-shadow: inset 0 0 0 1.5px var(--done), 0 0 16px -4px var(--done);
+}
+
+/* NewRodin 字形在行框内偏下偏右，按实测墨迹把内边距上移 2.5px、左移 2px */
+.g-tag {
+    min-width: 136px;
+    padding: 3.5px 20px 9.5px 16px;
+    border-radius: 9999px;
+    text-align: center;
+    font-family: 'SEGA NewRodin', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 1;
+    background: rgba(255, 255, 255, .1);
+}
+
+.g-capsule.complete .g-tag {
+    background: var(--done);
+    color: #14081f;
+}
+
+.g-count {
+    min-width: 64px;
+    text-align: right;
+    white-space: nowrap;
+    font: 700 17px 'Torus', sans-serif;
+    color: rgba(255, 255, 255, .5);
+    font-variant-numeric: tabular-nums;
+}
+
+.g-count b {
+    font-size: 21px;
+    color: #fff;
+}
+
+.g-min {
+    flex: 0 0 84px;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.g-min img {
+    height: 28px;
     width: auto;
 }
 
-.plate-marker.rank {
-    height: var(--rank-marker-height);
+.mini {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+    width: 280px;
 }
 
-/* DxScore 维度 marker: 用 width+height 固定 box + object-fit:contain，统一 1-5★ 的视觉大小。
-   官方 5★ asset 是 70×70，1-4★ 是 46×46；contain 让两边都填满 75×75 box 但保持各自宽高比。 */
-.plate-marker.dxstar {
-    width: var(--icon-marker-height);
-    height: var(--icon-marker-height);
+.mini-row {
+    display: flex;
+    gap: 1px;
+    height: 10px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.mini-row i {
+    flex-basis: 0;
+}
+
+.cells {
+    display: grid;
+    grid-template-columns: repeat(8, 128px);
+    gap: 22px 24px;
+}
+
+/* 已达成 = 原色曲绘 + 白框 + 贴章；未达成 = 褪色空位；胶带 = 难度色 */
+.slot {
+    position: relative;
+    width: 128px;
+    height: 128px;
+}
+
+.photo {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .05);
+    outline: 2px dashed rgba(255, 255, 255, .22);
+    outline-offset: -2px;
+}
+
+.inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) brightness(.42) contrast(.9);
+}
+
+.slot.got .photo {
+    background: rgba(255, 255, 255, .88);
+    outline: none;
+    box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .7);
+    transform: rotate(var(--tilt, 0deg));
+}
+
+.slot.got .cover {
+    filter: none;
+}
+
+.slot.got:nth-child(3n+1) .photo {
+    --tilt: -1.2deg;
+}
+
+.slot.got:nth-child(3n+2) .photo {
+    --tilt: .9deg;
+}
+
+.tape {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 46px;
+    height: 13px;
+    border-radius: 2px;
+    opacity: .85;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    transform: translateX(-50%) rotate(-4deg);
+}
+
+.sticker {
+    position: absolute;
+    right: -10px;
+    bottom: -8px;
+    height: 54px;
+    width: auto;
+    transform: rotate(-10deg);
+    filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+}
+
+.sticker.rank {
+    right: -12px;
+    bottom: -6px;
+    height: 32px;
+}
+
+.sticker.dxstar {
+    width: 56px;
+    height: 56px;
     object-fit: contain;
 }
 
-/* sum mode 底部成绩 + 中心 rank */
+.ach-pill {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: baseline;
+    padding: 4px 11px;
+    border-radius: 9999px;
+    white-space: nowrap;
+    background: rgba(8, 4, 16, .85);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .22);
+    font-family: 'Torus', sans-serif;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.ach-pill b {
+    font-size: 24px;
+}
+
+.ach-pill small {
+    font-size: 15px;
+    font-weight: 700;
+    opacity: .8;
+}
+
+.progress-icon {
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    height: 34px;
+    width: auto;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .7));
+}
+
+/* sum 格子沿用改版前的评级与成绩条尺寸、字体、字号 */
 .sum-rank {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -65%);
-    height: var(--sum-rank-height);
+    height: 44px;
     width: auto;
+    transform: translate(-50%, -65%);
     pointer-events: none;
 }
 
@@ -179,15 +423,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: var(--achievement-bar-height);
-    background: rgba(0, 0, 0, 0.85);
-    /* flex 字底对齐 bar 底 + 水平居中。padding-bottom 让字符 descender 离 bar 底有点空隙，
-       这样视觉中线大致落在 bar 中部（受 Consolas italic ascender 比 descender 厚一点的
-       影响，纯 flex center 会偏顶）。 */
+    height: 42px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     padding-bottom: 5px;
+    background: rgba(0, 0, 0, 0.85);
     font-weight: bold;
     font-family: 'Consolas', 'Segoe UI', 'Arial Unicode MS Font', monospace;
     line-height: 1;
@@ -199,13 +440,4 @@
 
 .ach-frac {
     font-size: 23px;
-}
-
-.level-mark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--level-mark-size);
-    height: var(--level-mark-size);
-    clip-path: polygon(0 0, 100% 0, 0 100%);
 }

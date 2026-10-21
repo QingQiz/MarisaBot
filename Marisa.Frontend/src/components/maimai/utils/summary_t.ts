@@ -46,4 +46,6 @@ export interface PlateInfo {
     DisplayName: string
     /** 游戏内成就姓名框贴图文件名（如 "UI_Plate_006125.png"）；查询无对应姓名框时为 null */
     NamePlateImg: string | null
+    /** 姓名框实际条件下各难度的完成数；查询无对应姓名框时为 null */
+    Difficulties: {LevelIdx: number, Total: number, Done: number}[] | null
 }
