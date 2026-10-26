@@ -175,6 +175,7 @@ function GetGroupMinRank(group: any[]) {
                     :group="grouped.flatMap((g: GroupSongInfo) => g.x)"
                     :scores="grouped.flatMap((g: GroupSongInfo) => g.x).map((s: typeof GroupSongInfo.x) => GetScore(s.Item3.Id, s.Item2))"
                     :detail="true"
+                    constant-source="chart"
                     class="justify-self-end"/>
             </div>
             <div v-for="{Key: key, x: group} in grouped">
@@ -183,6 +184,7 @@ function GetGroupMinRank(group: any[]) {
                     <img :src="rankIcon(GetGroupMinRank(group))" alt="" class="group-min-rank"
                          onerror="this.style.opacity=0">
                     <OverPower :group="group" :scores="group.map((s: typeof s.x) => GetScore(s.Item3.Id, s.Item2))"
+                               constant-source="chart"
                                class="justify-self-end"/>
                 </div>
                 <div class="row">

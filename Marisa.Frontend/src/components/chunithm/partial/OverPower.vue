@@ -32,6 +32,15 @@ let props = defineProps({
     showDifficulty: {
         type   : Boolean,
         default: false
+    },
+    // opMax 那一列按什么定数算：
+    // 'song'  —— 取这一行所属乐曲的最高定数。op 系列页面里一行代表这首歌的 op 对象，
+    //            OP 上限本来就是由该曲最难的谱面定的，所以保持这个口径。
+    // 'chart' —— 取这一行谱面自己的定数。汇总页（chusum）一行就是一张谱面，
+    //            和下面对 opSum 用的 score.ds 口径一致。
+    constantSource: {
+        type   : String as () => 'song' | 'chart',
+        default: 'song'
     }
 })
 
@@ -68,7 +77,9 @@ function GetOverPowerStatistic() {
         let song  = props.group[i]
         let score = props.scores[i]
 
-        let constant = Math.max(...song.Item3.Constants)
+        // 统计对象随页面而定：op 页一行代表整首歌（上限按全曲最高定数），
+        // 汇总页一行就是一张谱面（上限按这张谱面的定数）。
+        let constant = props.constantSource === 'chart' ? song.Item1 : Math.max(...song.Item3.Constants)
         opStat['opSum'] += calcOverPower(score);
         opStat[OpKey(score)] += 1
         opStat['songCnt'] += 1
