@@ -1,5 +1,5 @@
 <template>
-    <span v-if="comboSrc || chainSrc || hasClear(clear)" class="chu-marks" :class="{'common-marks': family === 'common'}">
+    <span v-if="comboSrc || chainSrc || hasClear(clear)" class="chu-marks" :class="{'common-marks': family === 'common', 'column-marks': direction === 'column'}">
         <span v-if="comboSrc" class="mark-slot" data-mark-slot="combo">
             <img class="native-mark" :src="comboSrc" :alt="comboTitle" :title="comboTitle">
         </span>
@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import {computed} from 'vue'
 import {hasChain, hasClear, hasCombo} from '@/components/chunithm/utils/score'
-const props = withDefaults(defineProps<{combo: string; chain: string; clear?: string | null; family?: 'result' | 'common'}>(), {clear: '', family: 'result'})
+const props = withDefaults(defineProps<{combo: string; chain: string; clear?: string | null; family?: 'result' | 'common'; direction?: 'row' | 'column'}>(), {clear: '', family: 'result', direction: 'row'})
 const pic = computed(() => `/assets/chunithm/pic/versus_${props.family === 'common' ? 'common_' : ''}`)
 const comboSrc = computed(() => hasCombo(props.combo) ? `${pic.value}${props.combo}.png` : '')
 const chainSrc = computed(() => hasChain(props.chain) ? `${pic.value}${props.chain}.png` : '')
@@ -26,6 +26,7 @@ const comboTitle = computed(() => ({fullcombo: 'FULL COMBO', alljustice: 'ALL JU
 
 <style scoped lang="postcss">
 .chu-marks { display:inline-flex; align-items:center; justify-content:center; width:100%; gap:8px; flex-shrink:0; }
+.column-marks { flex-direction:column; gap:4px; }
 .mark-slot { display:grid; place-items:center; width:var(--chu-mark-width,92px); aspect-ratio:276 / 48; flex-shrink:0; }
 .common-marks .mark-slot { aspect-ratio:134 / 26; }
 .native-mark { display:block; width:100%; height:100%; object-fit:fill; }

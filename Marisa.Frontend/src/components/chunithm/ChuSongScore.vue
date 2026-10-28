@@ -21,7 +21,7 @@
                     <b class="score-value">{{ formatScore(chart.Score.Score) }}</b>
                     <span class="score-rank"><img :src="rankIcon(chart.Score.Rank)" alt=""></span>
                     <b class="score-rating" :class="{missing: chart.Score.Rating == null}">{{ formatRating(chart.Score.Rating) }}</b>
-                    <span class="score-marks"><ScoreMarks family="common" :combo="chart.Score.FullCombo" :chain="chart.Score.FullChain" :clear="chart.Score.Clear"/></span>
+                    <span class="score-marks"><ScoreMarks family="common" direction="column" :combo="chart.Score.FullCombo" :chain="chart.Score.FullChain" :clear="chart.Score.Clear"/></span>
                 </template>
                 <span v-else class="score-unplayed">No Play Record</span>
             </div>
@@ -65,7 +65,7 @@ const levelChars = computed(() => Math.max(1, ...(data.value?.Charts.filter(char
 <style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/we-theme.pcss"/>
 <style scoped lang="postcss">
-.score-table { --columns:168px 64px 1fr 88px 80px 280px; display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+.score-table { --columns:168px 64px 1fr 88px 80px 130px; display:flex; flex-direction:column; gap:8px; margin-top:16px; }
 .score-head { display:grid; grid-template-columns:var(--columns); column-gap:6px; align-items:center; padding:0 16px 0 20px; font:700 12px/1 'Torus',sans-serif; letter-spacing:.14em; color:#ffffff80; text-align:center; }
 .score-row { --rail-width:4px; --rail-top:10px; --rail-bottom:10px; display:grid; grid-template-columns:var(--columns); column-gap:6px; align-items:center; height:60px; padding:0 16px 0 20px; border:1px solid #ffffff17; border-radius:10px; }
 .score-row > * { justify-self:center; }
@@ -76,6 +76,6 @@ const levelChars = computed(() => Math.max(1, ...(data.value?.Charts.filter(char
 .score-rank img { display:block; height:34px; width:auto; }
 .score-rating { font:700 22px/1 'Torus',sans-serif; color:#fff; font-variant-numeric:tabular-nums; }
 .score-rating.missing { color:#ffffff59; }
-.score-row > .score-marks { justify-self:stretch; --chu-mark-width:86px; }
+.score-row > .score-marks { justify-self:stretch; --chu-mark-width:76px; }
 .score-row > .score-unplayed { grid-column:3 / -1; justify-self:start; padding-left:28px; font:700 19px 'SEGA NewRodin',sans-serif; letter-spacing:.22em; color:#ffffff4d; }
 </style>
