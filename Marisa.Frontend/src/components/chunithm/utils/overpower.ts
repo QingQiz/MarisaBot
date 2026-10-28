@@ -34,7 +34,7 @@ export function getOpS(constT: number, score: number): number {
     return 0;
 }
 
-export function calcOverPower(score: Score): number {
+export function calcOverPower(score: Pick<Score, 'ds' | 'score' | 'fc'>): number {
     if (!score || score.score == 0) return 0;
 
     const op_s = getOpS(score.ds, score.score);
