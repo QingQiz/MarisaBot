@@ -37,16 +37,16 @@ export const RANK_STEPS: [threshold: number, rank: ChunithmRank][] = [
  * 是否满分（对应 OverPower 里的 ajc 档）。
  * 1010000 是上限，这里用 >= 而不是 ==：脏数据超过上限时也不会被漏判成普通 AJ。
  */
-export function isMaxScore(score?: Score | null): boolean {
+export function isMaxScore(score?: Pick<Score, 'score'> | null): boolean {
     return !!score && score.score >= ACHIEVEMENT_MAX;
 }
 
-export function isAllJustice(score?: Score | null): boolean {
+export function isAllJustice(score?: Pick<Score, 'fc'> | null): boolean {
     return !!score && score.fc === 'alljustice';
 }
 
 /** fullcombo / fullchain / fullchain2 统称 FC 系。 */
-export function isFullCombo(score?: Score | null): boolean {
+export function isFullCombo(score?: Pick<Score, 'fc'> | null): boolean {
     return !!score && (score.fc ?? '').startsWith('full');
 }
 

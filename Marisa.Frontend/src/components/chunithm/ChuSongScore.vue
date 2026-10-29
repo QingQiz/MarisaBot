@@ -10,7 +10,7 @@
 
         <div class="score-table">
             <div class="score-head">
-                <span></span><span>CONST</span><span>SCORE</span><span>RANK</span><span>RATING</span><span>COMPLETION</span>
+                <span></span><span>CONST</span><span>SCORE</span><span>RANK</span><span>RATING</span><span>OP</span><span>COMPLETION</span>
             </div>
             <div v-for="(chart, index) in data.Charts" :key="index" class="score-row mai-accent-rail"
                  :style="chartSurface(chart.LevelIndex, 30)" :data-level-name="chart.LevelName">
@@ -21,7 +21,9 @@
                     <b class="score-value">{{ formatScore(chart.Score.Score) }}</b>
                     <span class="score-rank"><img :src="rankIcon(chart.Score.Rank)" alt=""></span>
                     <b class="score-rating" :class="{missing: chart.Score.Rating == null}">{{ formatRating(chart.Score.Rating) }}</b>
-                    <span class="score-marks"><ScoreMarks family="common" :combo="chart.Score.FullCombo" :chain="chart.Score.FullChain" :clear="chart.Score.Clear"/></span>
+                    <span v-if="ops[index]" class="score-op"><b>{{ ops[index].op }}/{{ ops[index].max }}</b><small>{{ ops[index].rate }}%</small></span>
+                    <span v-else class="score-op missing">—</span>
+                    <span class="score-marks"><ScoreMarks family="common" direction="column" :combo="chart.Score.FullCombo" :chain="chart.Score.FullChain" :clear="chart.Score.Clear"/></span>
                 </template>
                 <span v-else class="score-unplayed">No Play Record</span>
             </div>
@@ -42,6 +44,7 @@ import ScoreMarks from '@/components/chunithm/partial/ScoreMarks.vue'
 import SongHeader from '@/components/chunithm/partial/SongHeader.vue'
 import {cardTheme, chartSurface, type ChuSongHeaderData} from '@/components/chunithm/utils/song-card'
 import {formatRating, formatScore, rankIcon, type ChuScore} from '@/components/chunithm/utils/score'
+import {calcMaxOverPower, calcOverPower} from '@/components/chunithm/utils/overpower'
 
 interface ChartScore { LevelIndex: number; LevelName: string; Level: string; Constant: number | null; Score: ChuScore }
 interface SongScoreData { Song: ChuSongHeaderData; Nickname: string; Charts: ChartScore[] }
@@ -58,6 +61,12 @@ const themeIndex = computed(() => {
     return standard.length ? Math.max(...standard) : 5
 })
 const levelChars = computed(() => Math.max(1, ...(data.value?.Charts.filter(chart => chart.LevelIndex < 5).map(chart => chart.Level.length) ?? [])))
+const ops = computed(() => data.value?.Charts.map(({Constant, Score}) => {
+    if (Constant == null || Score.Score == null) return null
+    const op = calcOverPower({ds: Constant, score: Score.Score, fc: Score.FullCombo})
+    const max = calcMaxOverPower(Constant)
+    return {op: op.toFixed(2), max: max.toFixed(2), rate: (op / max * 100).toFixed(2)}
+}) ?? [])
 </script>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
@@ -65,7 +74,7 @@ const levelChars = computed(() => Math.max(1, ...(data.value?.Charts.filter(char
 <style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/we-theme.pcss"/>
 <style scoped lang="postcss">
-.score-table { --columns:168px 64px 1fr 88px 80px 280px; display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+.score-table { --columns:168px 64px 1fr 88px 80px 140px 130px;display:flex; flex-direction:column; gap:8px; margin-top:16px; }
 .score-head { display:grid; grid-template-columns:var(--columns); column-gap:6px; align-items:center; padding:0 16px 0 20px; font:700 12px/1 'Torus',sans-serif; letter-spacing:.14em; color:#ffffff80; text-align:center; }
 .score-row { --rail-width:4px; --rail-top:10px; --rail-bottom:10px; display:grid; grid-template-columns:var(--columns); column-gap:6px; align-items:center; height:60px; padding:0 16px 0 20px; border:1px solid #ffffff17; border-radius:10px; }
 .score-row > * { justify-self:center; }
@@ -75,7 +84,9 @@ const levelChars = computed(() => Math.max(1, ...(data.value?.Charts.filter(char
 .score-value { font:700 28px/1 'Torus',sans-serif; color:#fff; font-variant-numeric:tabular-nums; text-shadow:0 2px 4px #0000008c; }
 .score-rank img { display:block; height:34px; width:auto; }
 .score-rating { font:700 22px/1 'Torus',sans-serif; color:#fff; font-variant-numeric:tabular-nums; }
-.score-rating.missing { color:#ffffff59; }
-.score-row > .score-marks { justify-self:stretch; --chu-mark-width:86px; }
+.score-rating.missing, .score-op.missing { color:#ffffff59; }
+.score-op { display:flex; flex-direction:column; align-items:center; gap:5px; font:800 19px/1 'Torus',sans-serif; color:#ffffffe6; font-variant-numeric:tabular-nums; }
+.score-op small { font:700 14px/1 'Torus',sans-serif; color:#ffffff8c; }
+.score-row > .score-marks { justify-self:stretch; --chu-mark-width:76px; }
 .score-row > .score-unplayed { grid-column:3 / -1; justify-self:start; padding-left:28px; font:700 19px 'SEGA NewRodin',sans-serif; letter-spacing:.22em; color:#ffffff4d; }
 </style>
