@@ -77,6 +77,12 @@ public class MaiScoreHubClient
         public bool DeadlineExceeded => IsDeadlineExceeded(ErrorCode, Error);
     }
 
+    public sealed record QrLoginResult(string? Token, string? AttemptId);
+
+    public sealed record QrLoginStatusResult(string Status, string? Token, string? Error);
+
+    public sealed record CabinetJobResult(string Status, string? ErrorCode, string? Error);
+
     private static string? S(JsonElement e, string k) =>
         e.TryGetProperty(k, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
@@ -235,6 +241,61 @@ public class MaiScoreHubClient
             D(root, "deadlineAt"));
     }
 
+    /// <summary>
+    ///     POST /auth/qr-login — 用玩家二维码登录。二维码已关联 MSH 账号时直接返回 token，
+    ///     否则返回 attemptId，需轮询 <see cref="QrLoginStatusAsync"/>。
+    /// </summary>
+    public async Task<QrLoginResult> QrLoginAsync(string qrCode)
+    {
+        var resp = await Req("/auth/qr-login")
+            .AllowHttpStatus("400-499")
+            .PostJsonAsync(new { qrCode });
+
+        using var doc = JsonDocument.Parse(await resp.GetStringAsync());
+        var root = doc.RootElement;
+        if (resp.StatusCode >= 400) throw ApiError(resp.StatusCode, root);
+
+        return new QrLoginResult(S(root, "token"), S(root, "attemptId"));
+    }
+
+    /// <summary>GET /auth/qr-login/{attemptId} — status 为 matched 时带 token，failed 时带 error。</summary>
+    public async Task<QrLoginStatusResult> QrLoginStatusAsync(string attemptId)
+    {
+        var json = await Req($"/auth/qr-login/{attemptId}").GetStringAsync();
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        return new QrLoginStatusResult(S(root, "status") ?? "", S(root, "token"), S(root, "error"));
+    }
+
+    /// <summary>POST /me/cabinet-score-jobs（Bearer）— 用玩家二维码创建机台抓分任务，返回任务号。</summary>
+    public async Task<string> CreateCabinetScoreJobAsync(string jwt, string qrCode)
+    {
+        var resp = await Authed("/me/cabinet-score-jobs", jwt)
+            .AllowHttpStatus("400-499")
+            .PostJsonAsync(new { qrCode });
+
+        using var doc = JsonDocument.Parse(await resp.GetStringAsync());
+        var root = doc.RootElement;
+        if (resp.StatusCode >= 400) throw ApiError(resp.StatusCode, root);
+
+        return S(root, "jobId") ?? throw new InvalidOperationException("创建抓分任务失败（响应中无任务号）");
+    }
+
+    /// <summary>GET /me/cabinet-score-jobs/{jobId}（Bearer）— 查询机台抓分任务，失败原因位于 error 对象。</summary>
+    public async Task<CabinetJobResult> GetCabinetJobAsync(string jwt, string jobId)
+    {
+        var json = await Authed($"/me/cabinet-score-jobs/{jobId}", jwt).GetStringAsync();
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        return root.TryGetProperty("error", out var error) && error.ValueKind == JsonValueKind.Object
+            ? new CabinetJobResult(S(root, "status") ?? "", S(error, "code"), S(error, "message"))
+            : new CabinetJobResult(S(root, "status") ?? "", null, null);
+    }
+
     /// <summary>GET /me（Bearer）— 看 MSH 里已配置了哪些查分器令牌。</summary>
     public async Task<ProfileResult> GetProfileAsync(string jwt)
     {
@@ -345,6 +406,9 @@ public class MaiScoreHubClient
         result = new ExportResult(status == "completed", 0, 0, S(job, "error") ?? status);
         return true;
     }
+
+    private static MaiScoreHubApiException ApiError(int statusCode, JsonElement root) =>
+        new(statusCode, S(root, "code"), S(root, "message") ?? S(root, "error") ?? $"HTTP {statusCode}");
 
     private static bool IsDeadlineExceeded(string? errorCode, string? error) =>
         errorCode == "job_deadline_exceeded" || error == "DXNet job deadline exceeded";

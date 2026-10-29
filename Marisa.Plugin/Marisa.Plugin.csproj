@@ -19,6 +19,7 @@
     <ItemGroup>
         <PackageReference Include="Flurl" Version="3.0.2"/>
         <PackageReference Include="Flurl.Http" Version="3.2.0"/>
+        <PackageReference Include="ZXing.Net" Version="0.16.11"/>
     </ItemGroup>
 
     <PropertyGroup>

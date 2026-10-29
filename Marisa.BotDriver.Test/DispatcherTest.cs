@@ -122,6 +122,10 @@ public class DispatcherTest
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 n 5 彩代")), typeof(MaiMaiDx), "SongVersusRoomRandom").SetName("mai vs 开房 n 5 彩代");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maivs开房n5")), typeof(MaiMaiDx), "SongVersusRoomRandom").SetName("maivs开房n5");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai vs 开房 b 彩代14+")), typeof(MaiMaiDx), "SongVersusRoomBatch").SetName("mai vs 开房 b 彩代14+");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 导")), typeof(MaiMaiDx), "Sync").SetName("mai 导");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 导"), MessageDataImage.FromUrl("https://gchat.qpic.cn/qr.png")), typeof(MaiMaiDx), "Sync").SetName("mai 导 with image");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 导 重导")), typeof(MaiMaiDx), "ReExport").SetName("mai 导 重导");
         }
     }
 
@@ -401,6 +405,8 @@ public class DispatcherTest
         get
         {
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum b 15")), typeof(MaiMaiDx), "MaiMaiDxSummarySongBpm").SetName("mai sum b");
+
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 导 重导")), typeof(MaiMaiDx), "Sync").SetName("mai 导 重导 skips Sync");
 
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum bpm 15")), typeof(MaiMaiDx), "MaiMaiDxSummarySongBase").SetName("mai sum bpm");
 

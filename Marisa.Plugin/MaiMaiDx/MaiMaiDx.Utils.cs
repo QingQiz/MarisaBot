@@ -405,6 +405,9 @@ public partial class MaiMaiDx
     private bool FilteredBestTrigger(Message message, IServiceProvider _serviceProvider) =>
         TryParseFilteredBest(message.Command, out _);
 
+    private static bool SyncTrigger(Message message, IServiceProvider _) =>
+        message.MessageChain!.Messages.All(m => m.Type is MessageDataType.Text or MessageDataType.Id or MessageDataType.Image);
+
     private static DxRating BuildFilteredBest(
         PlateData.Query query,
         IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> charts,
