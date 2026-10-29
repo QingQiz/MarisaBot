@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using Flurl.Http;
 using Marisa.Database;
 using Marisa.Database.Entity.Plugin.MaiMaiDx;
 using Marisa.Plugin.Shared.Dialog;
@@ -11,6 +12,9 @@ using Marisa.Plugin.Shared.MaiMaiDx;
 using Marisa.Plugin.Shared.MaiMaiDx.DataFetcher;
 using Marisa.Plugin.Shared.Util.Cacheable;
 using Marisa.Plugin.Shared.Util.SongDb;
+using SixLabors.ImageSharp.PixelFormats;
+using ZXing;
+using ZXing.Common;
 
 namespace Marisa.Plugin.MaiMaiDx;
 
@@ -208,14 +212,21 @@ public partial class MaiMaiDx
     /// <summary>正在后台同步的用户集合，防止同一用户并发发起多个 MSH 任务。</summary>
     private static readonly ConcurrentDictionary<long, byte> Syncing = new();
 
-    [MarisaPluginDoc("把成绩从NET导到查分器(水鱼/落雪)，首次使用会引导设置")]
+    private static readonly Regex MaiQrCode = new(@"^SGWCMAID\d{12}[0-9A-Fa-f]{64}$", RegexOptions.Compiled);
+
+    /// <summary>按 QQ 缓存的 MSH 登录凭据，只保存在内存中。</summary>
+    private static readonly ConcurrentDictionary<long, string> MshJwt = new();
+
+    [MarisaPluginDoc("把成绩导到查分器(水鱼/落雪)，可附二维码直接从机台取分")]
     [MarisaPluginCommand("传分", "导", "sync")]
-    [MarisaPluginTrigger(nameof(MarisaPluginTrigger.PlainTextTrigger))]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(SyncTrigger), MessageType.GroupMessage | MessageType.FriendMessage | MessageType.TempMessage)]
     private async Task<MarisaPluginTaskState> Sync(Message message)
     {
         const string usageText =
             "用法：\n" +
             "mai 导 —— 同步成绩到查分器（首次使用会引导设置）\n" +
+            "mai 导 + 二维码图片或二维码内容 —— 从机台取分并同步（首次使用需先用一张二维码登录）\n" +
+            "mai 导 重导 —— 把 MSH 中的成绩重新导出到查分器\n" +
             "mai 导 <好友码> —— 绑定/换绑好友码\n" +
             "mai 导 落雪 xxx 水鱼 yyy —— 设置查分器导入令牌（可只填其中一个）\n" +
             "令牌获取方法：\n\n" +
@@ -223,13 +234,15 @@ public partial class MaiMaiDx
             "落雪：账号详情-个人API密钥\n\n" +
             "建议发送令牌后立即「撤回」消息。";
 
-        var qq = message.Sender.Id;
-
-        string? friendCode;
-        using (var realm = BotDbContext.OpenRealm())
+        var arg   = message.Command.Trim().ToString();
+        var image = message.MessageChain!.Messages.OfType<MessageDataImage>().FirstOrDefault();
+        if (MaiQrCode.IsMatch(arg) || (image != null && arg.Length == 0))
         {
-            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
+            RunInBackground(message, () => RunQrSync(message, arg, image));
+            return MarisaPluginTaskState.CompletedTask;
         }
+
+        var qq = message.Sender.Id;
 
         var (fcArg, lxns, df, junk) = ParseSyncArgs(message.Command.ToString());
         if (junk != null)
@@ -248,6 +261,26 @@ public partial class MaiMaiDx
                 ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
                 : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
             return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 已登录 MSH 时直接存令牌并导出现有成绩，不再走 NET 好友流程
+        if (fcArg == null && newTokens is { } tokens && MshJwt.TryGetValue(qq, out var jwt))
+        {
+            RunInBackground(message, async () =>
+            {
+                var msh = new MaiScoreHubClient();
+                message.Reply("少女祈祷中...");
+                if (!string.IsNullOrWhiteSpace(tokens.Lxns)) await msh.SetTokenAsync(jwt, "lxns", tokens.Lxns);
+                if (!string.IsNullOrWhiteSpace(tokens.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", tokens.DivingFish);
+                message.Reply(await ExportToProbers(msh, jwt));
+            });
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        string? friendCode;
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
         }
 
         // 消息中携带好友码：执行绑定/换绑
@@ -394,6 +427,25 @@ public partial class MaiMaiDx
         }
     }
 
+    [MarisaPluginDoc("把 MSH 中的成绩重新导出到查分器")]
+    [MarisaPluginSubCommand(nameof(Sync))]
+    [MarisaPluginCommand(true, "重导")]
+    private static MarisaPluginTaskState ReExport(Message message)
+    {
+        if (!MshJwt.TryGetValue(message.Sender.Id, out var jwt))
+        {
+            message.Reply("尚未登录 MSH，请发送「mai 导」并附上二维码。");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        RunInBackground(message, async () =>
+        {
+            message.Reply("少女祈祷中...");
+            message.Reply(await ExportToProbers(new MaiScoreHubClient(), jwt));
+        });
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
     private static void StartSync(Message message, string friendCode, (string? Lxns, string? DivingFish)? newTokens)
     {
         if (!Syncing.TryAdd(message.Sender.Id, 0))
@@ -522,6 +574,8 @@ public partial class MaiMaiDx
             return;
         }
 
+        MshJwt[message.Sender.Id] = jwt;
+
         // 一拿到 JWT 即把令牌存入 MSH：抓分等待可能超时，提前提交可避免本次令牌白费、被迫重发令牌
         if (newTokens is { } t)
         {
@@ -588,37 +642,7 @@ public partial class MaiMaiDx
             return;
         }
 
-        // 查询 MSH 中已配置的查分器
-        var profile = await msh.GetProfileAsync(jwt);
-
-        var targets = new List<string>();
-        if (profile.HasLxns) targets.Add("lxns");
-        if (profile.HasDivingFish) targets.Add("diving-fish");
-
-        if (targets.Count == 0)
-        {
-            message.Reply("成绩已抓取，但尚未配置任何查分器令牌。发送「mai 导 落雪 xxx 水鱼 yyy」完成设置（可只填其中一个，建议发送令牌后立即「撤回」消息）。");
-            return;
-        }
-
-        var sb = new StringBuilder("同步完成：\n");
-        foreach (var p in targets)
-        {
-            var name = p == "lxns" ? "落雪" : "水鱼";
-            try
-            {
-                // 导出为异步任务，ExportAsync 内部轮询至终态后返回该查分器的回执
-                var r = await msh.ExportAsync(jwt, p);
-
-                sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
-            }
-            catch (Exception e)
-            {
-                sb.AppendLine($"{name} ❌ {e.Message}");
-            }
-        }
-
-        message.Reply(sb.ToString().TrimEnd());
+        message.Reply(await ExportToProbers(msh, jwt));
 
         async Task<MaiScoreHubClient.LoginRequestResult> CreateLoginRequest()
         {
@@ -634,6 +658,200 @@ public partial class MaiMaiDx
                 }
             }
         }
+    }
+
+    private static void RunInBackground(Message message, Func<Task> sync)
+    {
+        if (!Syncing.TryAdd(message.Sender.Id, 0))
+        {
+            message.Reply("已有一个传分任务在进行中，请在该任务结束后再次发送指令。");
+            return;
+        }
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await sync();
+            }
+            catch (FlurlHttpException e) when (e.StatusCode == 401)
+            {
+                MshJwt.TryRemove(message.Sender.Id, out _);
+                message.Reply("MSH 登录已失效，请重新发送指令。");
+            }
+            catch (Exception e)
+            {
+                message.Reply($"同步失败：{e.Message}");
+            }
+            finally
+            {
+                Syncing.TryRemove(message.Sender.Id, out _);
+            }
+        });
+    }
+
+    /// <summary>二维码同步：未登录时二维码只用于登录 MSH；已登录时用二维码创建机台抓分任务，完成后导出到查分器。</summary>
+    private static async Task RunQrSync(Message message, string arg, MessageDataImage? image)
+    {
+        var qq  = message.Sender.Id;
+        var msh = new MaiScoreHubClient();
+        MshJwt.TryGetValue(qq, out var jwt);
+
+        var qr = image == null ? arg : DecodeQr(await image.Url!.GetBytesAsync());
+        if (qr == null)
+        {
+            message.Reply("未能识别图片中的二维码，请发送清晰的二维码截图。");
+            return;
+        }
+
+        message.Reply("少女祈祷中...");
+
+        if (jwt == null || await CreateJob(jwt) is not { } jobId)
+        {
+            MshJwt[qq] = await QrLogin();
+            message.Reply("MSH 登录成功。二维码只能使用一次，请生成新的二维码，再发送「mai 导」并附上二维码以同步成绩。");
+            return;
+        }
+
+        var start    = DateTime.UtcNow;
+        var failures = 0;
+        while (DateTime.UtcNow - start < TimeSpan.FromMinutes(10))
+        {
+            await Task.Delay(PollDelayMs(DateTime.UtcNow - start));
+
+            MaiScoreHubClient.CabinetJobResult job;
+            try
+            {
+                job      = await msh.GetCabinetJobAsync(jwt, jobId);
+                failures = 0;
+            }
+            catch (Exception e)
+            {
+                if (++failures < 6) continue;
+
+                message.Reply($"同步中断：连续多次查询任务状态失败（{e.Message}）。任务完成后可发送「mai 导 重导」导出成绩。");
+                return;
+            }
+
+            if (job.Status == "completed")
+            {
+                message.Reply(await ExportToProbers(msh, jwt));
+                return;
+            }
+
+            if (job.Status != "failed") continue;
+
+            if (job.ErrorCode == "CABINET_USER_MISMATCH")
+            {
+                MshJwt.TryRemove(qq, out _);
+                message.Reply($"同步失败：{job.Error}。已退出当前 MSH 账号，请生成新的二维码重新登录。");
+            }
+            else
+            {
+                message.Reply($"同步失败：{job.Error ?? "取分任务失败"}。请生成新的二维码后重试。");
+            }
+
+            return;
+        }
+
+        message.Reply("等待超时（成绩抓取未在限定时间内完成）。任务完成后可发送「mai 导 重导」导出成绩。");
+        return;
+
+        async Task<string?> CreateJob(string token)
+        {
+            try
+            {
+                return await msh.CreateCabinetScoreJobAsync(token, qr);
+            }
+            // 登录失效或账号未绑定机台时二维码尚未被使用，改用它登录
+            catch (MaiScoreHubApiException e) when (e.StatusCode == 401 || e.ErrorCode == "CABINET_NOT_BOUND")
+            {
+                return null;
+            }
+        }
+
+        async Task<string> QrLogin()
+        {
+            var login = await msh.QrLoginAsync(qr);
+            if (login.Token != null) return login.Token;
+
+            var deadline     = DateTime.UtcNow.AddMinutes(5);
+            var pollFailures = 0;
+            while (DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(3000);
+
+                MaiScoreHubClient.QrLoginStatusResult status;
+                try
+                {
+                    status       = await msh.QrLoginStatusAsync(login.AttemptId!);
+                    pollFailures = 0;
+                }
+                catch
+                {
+                    if (++pollFailures < 6) continue;
+                    throw;
+                }
+
+                if (status.Token != null) return status.Token;
+                if (status.Status == "failed") throw new InvalidOperationException(status.Error ?? "MSH 二维码登录失败");
+            }
+
+            throw new TimeoutException("MSH 登录等待超时，请生成新的二维码后重试");
+        }
+
+        static string? DecodeQr(byte[] bytes)
+        {
+            using var img = SixLabors.ImageSharp.Image.Load<Rgba32>(bytes);
+            var pixels = new byte[img.Width * img.Height * 4];
+            img.CopyPixelDataTo(pixels);
+
+            var reader = new BarcodeReaderGeneric
+            {
+                Options = new DecodingOptions { PossibleFormats = [BarcodeFormat.QR_CODE], TryHarder = true }
+            };
+            var text = reader.Decode(pixels, img.Width, img.Height, RGBLuminanceSource.BitmapFormat.RGBA32)?.Text;
+            return text != null && MaiQrCode.IsMatch(text) ? text : null;
+        }
+    }
+
+    /// <summary>把 MSH 当前成绩导出到已配置令牌的查分器，返回回执文本。</summary>
+    private static async Task<string> ExportToProbers(MaiScoreHubClient msh, string jwt)
+    {
+        var profile = await msh.GetProfileAsync(jwt);
+
+        var targets = new List<string>();
+        if (profile.HasLxns) targets.Add("lxns");
+        if (profile.HasDivingFish) targets.Add("diving-fish");
+
+        if (targets.Count == 0)
+        {
+            return "成绩已抓取，但尚未配置任何查分器令牌。发送「mai 导 落雪 xxx 水鱼 yyy」完成设置（可只填其中一个，建议发送令牌后立即「撤回」消息）。";
+        }
+
+        var sb     = new StringBuilder("同步完成：\n");
+        var failed = false;
+        foreach (var p in targets)
+        {
+            var name = p == "lxns" ? "落雪" : "水鱼";
+            try
+            {
+                // 导出为异步任务，ExportAsync 内部轮询至终态后返回该查分器的回执
+                var r = await msh.ExportAsync(jwt, p);
+
+                sb.AppendLine(r.Success ? $"{name} ✅ 导入 {r.Exported}/{r.Scores} 条" : $"{name} ❌ {r.Message ?? "失败"}");
+                failed |= !r.Success;
+            }
+            catch (Exception e)
+            {
+                sb.AppendLine($"{name} ❌ {e.Message}");
+                failed = true;
+            }
+        }
+
+        if (failed) sb.AppendLine("可稍后发送「mai 导 重导」重新导出。");
+
+        return sb.ToString().TrimEnd();
     }
 
     #endregion

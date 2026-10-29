@@ -150,7 +150,7 @@ public class MaiScoreHubClientTest
 
         var queue = new MessageQueueProvider();
         var sender = new MessageSenderProvider(queue);
-        var message = new Message(new MessageChain(new MessageDataText("mai sync")), sender)
+        var message = new Message(new MessageChain(new MessageDataId(1, 0), new MessageDataText("mai sync")), sender)
         {
             Type = MessageType.FriendMessage,
             Sender = new SenderInfo(1001, "tester")
