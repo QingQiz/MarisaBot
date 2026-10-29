@@ -674,6 +674,11 @@ public partial class MaiMaiDx
             {
                 await sync();
             }
+            catch (FlurlHttpException e) when (e.StatusCode == 401)
+            {
+                MshJwt.TryRemove(message.Sender.Id, out _);
+                message.Reply("MSH 登录已失效，请重新发送指令。");
+            }
             catch (Exception e)
             {
                 message.Reply($"同步失败：{e.Message}");
@@ -770,12 +775,24 @@ public partial class MaiMaiDx
             var login = await msh.QrLoginAsync(qr);
             if (login.Token != null) return login.Token;
 
-            var deadline = DateTime.UtcNow.AddMinutes(5);
+            var deadline     = DateTime.UtcNow.AddMinutes(5);
+            var pollFailures = 0;
             while (DateTime.UtcNow < deadline)
             {
                 await Task.Delay(3000);
 
-                var status = await msh.QrLoginStatusAsync(login.AttemptId!);
+                MaiScoreHubClient.QrLoginStatusResult status;
+                try
+                {
+                    status       = await msh.QrLoginStatusAsync(login.AttemptId!);
+                    pollFailures = 0;
+                }
+                catch
+                {
+                    if (++pollFailures < 6) continue;
+                    throw;
+                }
+
                 if (status.Token != null) return status.Token;
                 if (status.Status == "failed") throw new InvalidOperationException(status.Error ?? "MSH 二维码登录失败");
             }
