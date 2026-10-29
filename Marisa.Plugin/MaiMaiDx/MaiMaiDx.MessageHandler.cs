@@ -244,12 +244,6 @@ public partial class MaiMaiDx
 
         var qq = message.Sender.Id;
 
-        string? friendCode;
-        using (var realm = BotDbContext.OpenRealm())
-        {
-            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
-        }
-
         var (fcArg, lxns, df, junk) = ParseSyncArgs(message.Command.ToString());
         if (junk != null)
         {
@@ -267,6 +261,26 @@ public partial class MaiMaiDx
                 ? "已有一个传分任务在进行中，请在该任务结束后再次发送指令。"
                 : "已有一个传分任务在进行中，请在该任务结束后再次发送带令牌的指令。");
             return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 已登录 MSH 时直接存令牌并导出现有成绩，不再走 NET 好友流程
+        if (fcArg == null && newTokens is { } tokens && MshJwt.TryGetValue(qq, out var jwt))
+        {
+            RunInBackground(message, async () =>
+            {
+                var msh = new MaiScoreHubClient();
+                message.Reply("少女祈祷中...");
+                if (!string.IsNullOrWhiteSpace(tokens.Lxns)) await msh.SetTokenAsync(jwt, "lxns", tokens.Lxns);
+                if (!string.IsNullOrWhiteSpace(tokens.DivingFish)) await msh.SetTokenAsync(jwt, "diving-fish", tokens.DivingFish);
+                message.Reply(await ExportToProbers(msh, jwt));
+            });
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        string? friendCode;
+        using (var realm = BotDbContext.OpenRealm())
+        {
+            friendCode = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == qq)?.FriendCode;
         }
 
         // 消息中携带好友码：执行绑定/换绑
