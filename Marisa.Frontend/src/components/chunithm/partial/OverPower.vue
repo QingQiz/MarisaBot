@@ -41,6 +41,14 @@ let props = defineProps({
     constantSource: {
         type   : String as () => 'song' | 'chart',
         default: 'song'
+    },
+    // 渲染形态：
+    // 'panel' —— 完整统计条（标题两行数字 + 明细 + 双排分段 + 中间百分比），chuop 各页在用
+    // 'bars'  —— 只有两排带档位标签的分段条，汇总页顶部用
+    // 'mini'  —— 两排 10px 细条，汇总页分组标题右侧用
+    layout: {
+        type   : String as () => 'panel' | 'bars' | 'mini',
+        default: 'panel'
     }
 })
 
@@ -192,11 +200,38 @@ const OpSegments = computed(() => {
     ]
 })
 
+// ---------- 汇总页用的简化分段条（与舞萌汇总同款：两排、右上角计数） ----------
+
+const RANK_LABELS: Record<string, string> = {ajc: 'AJC', sssp: 'SSS+', sss: 'SSS', ssp: 'SS+', ss: 'SS', oth: 'OTH', np: 'NP'}
+const OP_LABELS: Record<string, string>   = {ajc: 'AJC', aj: 'AJ', fc: 'FC', pl: 'OTH', np: 'NP'}
+
+// 与 panel 里的 tailwind 配色一致：ajc=amber-200、aj/sssp=amber-300、sss=amber-400、
+// ssp=sky-300、ss=blue-400、fc=green-500、pl=gray-100、np=gray-500。
+const RANK_BAR_COLORS: Record<string, string> = {
+    ajc: '#fde68a', sssp: '#fcd34d', sss: '#fbbf24', ssp: '#7dd3fc', ss: '#60a5fa', oth: '#f3f4f6', np: '#6b7280',
+}
+const OP_BAR_COLORS: Record<string, string> = {
+    ajc: '#fde68a', aj: '#fcd34d', fc: '#22c55e', pl: '#f3f4f6', np: '#6b7280',
+}
+
+function MakeBarRow(stat: Record<string, number>, keys: string[], labels: Record<string, string>, colors: Record<string, string>) {
+    return {
+        total: stat['songCnt'] ?? 0,
+        segs : keys.map(key => ({key: key, label: labels[key], color: colors[key], n: stat[key] ?? 0})),
+    }
+}
+
+const BarRows = computed(() => [
+    MakeBarRow(rk.value, ['ajc', 'sssp', 'sss', 'ssp', 'ss', 'oth', 'np'], RANK_LABELS, RANK_BAR_COLORS),
+    MakeBarRow(op.value, ['ajc', 'aj', 'fc', 'pl', 'np'], OP_LABELS, OP_BAR_COLORS),
+])
+
 </script>
 
 <template>
-    <div class="w-full">
-        <div class="flex gap-2 w-full text-black">
+    <!-- mini 用于分组标题右侧：根节点不能撑满整行，否则 280px 的细条会被顶到左边、右边缘对不齐 -->
+    <div :class="layout === 'mini' ? 'shrink-0' : 'w-full'">
+        <div v-if="layout === 'panel'" class="flex gap-2 w-full text-black">
             <div class="bar-title">
                 <pre>{{ op['opSum'].toFixed(2).padStart(8, ' ') }}</pre>
                 <pre>{{ op['opMax'].toFixed(2).padStart(8, ' ') }}</pre>
@@ -246,10 +281,82 @@ const OpSegments = computed(() => {
             </div>
 
         </div>
+
+        <!-- 汇总页：两排分段条（'bars' 带档位标签，'mini' 只有细色条） -->
+        <div v-else class="bar-stack" :class="layout">
+            <div v-for="(row, ri) in BarRows" :key="ri" class="bar-row">
+                <div v-for="s in row.segs.filter(x => x.n > 0)" :key="s.key" class="bar-seg"
+                     :class="{np: s.key === 'np'}"
+                     :style="{flexGrow: s.n, background: s.color}">
+                    <span v-if="layout === 'bars' && row.total > 0 && s.n / row.total > 0.06">{{ s.label }} <b>{{ s.n }}</b></span>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped lang="postcss">
+
+/* 汇总页的简化分段条：'bars' 两排 30px，'mini' 两排 10px */
+.bar-stack {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.bar-stack.bars {
+    gap: 6px;
+}
+
+.bar-stack.mini {
+    gap: 2px;
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.bar-row {
+    display: flex;
+    gap: 2px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .25);
+}
+
+.bars .bar-row {
+    height: 30px;
+}
+
+.mini .bar-row {
+    height: 10px;
+    border-radius: 3px;
+}
+
+.bar-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font: 700 13px 'Torus', sans-serif;
+    letter-spacing: .04em;
+    color: rgba(20, 12, 30, .75);
+}
+
+.bar-seg b {
+    margin-left: 2px;
+    font-weight: 800;
+    color: #14081f;
+}
+
+.bar-seg.np {
+    color: rgba(255, 255, 255, .7);
+}
+
+.bar-seg.np b {
+    color: #fff;
+}
 
 .bar-title {
     font-size: 35px;
