@@ -584,7 +584,8 @@ public partial class Chunithm
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s);
+            .SelectMany(s => s)
+            .Where(x => x.song.DiffNames[x.i] != ChunithmSong.LevelLabel[5]);
 
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
@@ -734,7 +735,8 @@ public partial class Chunithm
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s);
+            .SelectMany(s => s)
+            .Where(x => x.song.DiffNames[x.i] != ChunithmSong.LevelLabel[5]);
 
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
@@ -816,7 +818,8 @@ public partial class Chunithm
         var songs = fetcher.GetSongList()
             .Select(song => song.Constants
                 .Select((constant, i) => (constant, i, song)))
-            .SelectMany(s => s);
+            .SelectMany(s => s)
+            .Where(x => x.song.DiffNames[x.i] != ChunithmSong.LevelLabel[5]);
 
         var ctx = new WebContext();
         ctx.Put("OverPowerScores", scores);
