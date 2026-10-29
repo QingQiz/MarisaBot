@@ -10,14 +10,14 @@
             </svg>
             <span class="meta-bpm-value">{{ song.Bpm }}</span>
         </span>
-        <span v-if="song.Genre" class="meta-chip" :class="{'meta-chip-cjk': /[^\x00-\x7f]/.test(song.Genre)}">{{ song.Genre }}</span>
+        <span v-if="song.Genre" class="meta-chip">{{ genreDisplay(song.Genre) }}</span>
         <span class="meta-pill">ID {{ song.Id }}</span>
     </header>
 </template>
 
 <script setup lang="ts">
 import {ref, watchEffect} from 'vue'
-import {versionLogo, type ChuSongHeaderData} from '@/components/chunithm/utils/song-card'
+import {genreDisplay, versionLogo, type ChuSongHeaderData} from '@/components/chunithm/utils/song-card'
 const props = defineProps<{song: ChuSongHeaderData}>()
 const logo = ref('')
 watchEffect(() => { logo.value = versionLogo(props.song.Version) })
@@ -31,6 +31,5 @@ watchEffect(() => { logo.value = versionLogo(props.song.Version) })
 .bpm-icon { width:1.15em; height:1.15em; flex-shrink:0; transform:translateY(.07em); }
 .meta-bpm { min-width:0; max-width:260px; }
 .meta-bpm-value { min-width:0; white-space:pre-wrap; overflow-wrap:anywhere; }
-.meta-chip { display:inline-block; height:var(--pill-height); max-width:170px; overflow:hidden; text-overflow:ellipsis; border-radius:99px; padding:0 13px calc(var(--pill-lift) * 2); color:var(--chip-ink); background:var(--chip-bg); box-shadow:inset var(--chip-ring); font:700 14px 'Torus',sans-serif; line-height:calc(var(--pill-height) - var(--pill-lift) * 2); letter-spacing:.04em; }
-.meta-chip-cjk { font-family:'SEGA NewRodin','LXGW WenKai',sans-serif; letter-spacing:.02em; }
+.meta-chip { display:inline-block; height:var(--pill-height); max-width:170px; overflow:hidden; text-overflow:ellipsis; border-radius:99px; padding:0 13px calc(var(--pill-lift) * 2); color:var(--chip-ink); background:var(--chip-bg); box-shadow:inset var(--chip-ring); font:700 14px 'SEGA NewRodin',sans-serif; line-height:calc(var(--pill-height) - var(--pill-lift) * 2); letter-spacing:.02em; }
 </style>

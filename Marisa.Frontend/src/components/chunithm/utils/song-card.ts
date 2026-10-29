@@ -41,6 +41,14 @@ export function versionLogo(version: string) {
     if (key === 'plus') key = 'chunithm_plus'
     return key ? `/assets/chunithm/pic/logo_${key}.png` : '/assets/chunithm/pic/logo.png'
 }
+// genre：国服类别名统一显示为日服原名
+const GENRE_JP: Record<string, string> = {
+    '流行 & 动漫': 'POPS＆ANIME', 'POPS & ANIME': 'POPS＆ANIME', '东方Project': '東方Project', '其他游戏': 'VARIETY',
+    '彩绿': 'イロドリミドリ', '音击舞萌': 'ゲキマイ', '原创': 'ORIGINAL',
+}
+export function genreDisplay(genre: string) {
+    return GENRE_JP[genre] ?? genre
+}
 export function fallbackLogo(event: Event) {
     const image = event.target as HTMLImageElement
     if (image.getAttribute('src') !== '/assets/chunithm/pic/logo.png') image.src = '/assets/chunithm/pic/logo.png'
