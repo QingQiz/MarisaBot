@@ -1,94 +1,239 @@
-.config {
-    --group-gap: 50px;
-    --group-col-count: 8;
-    --group-title-font-size: 100px;
+/* chusum 汇总图：版式向舞萌汇总（maimai/summary.pcss）靠，
+   数据与素材仍是 chunithm 的：曲绘、rank_*.svg、难度色、1010000 档配色。 */
 
-    --cell-width: 200px;
-    --cell-inset: 13px;
-    --cell-gap: 30px;
-
-    --achievemnet-height: 50px;
-    --achievemnet-font-size: 43px;
-
-    /* 小三角的尺寸 */
-    --level-mark-size: 30px;
-
-    padding: var(--cell-gap);
-
-    @apply font-osu-web;
+.chu-summary {
+    --cell-size: 152px;
+    --col-count: 8;
+    --cell-gap: 24px;
 }
 
-.summary-title {
-    font-size: 110px;
-    margin-bottom: var(--group-gap);
+.eyebrow {
+    font: 700 12px 'Torus', sans-serif;
+    letter-spacing: .32em;
+    color: rgba(255, 255, 255, .55);
+}
 
-    /* 跟舞萌完成表保持一致：西文 Torus，中文 fallback 微软雅黑（Hiragino 兜底 macOS） */
+/* 标题：西文 Torus、中文微软雅黑，与舞萌完成表的标题同栈 */
+.summary-title {
     font-family: 'Torus', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-size: 96px;
     font-weight: bold;
     line-height: 1.2;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.group-title {
-    font-size: var(--group-title-font-size);
-    @apply grid grid-cols-3 place-content-center items-center;
-
-    grid-template-columns: 1fr 300px 1fr;
+.big-count {
+    text-align: right;
+    font-family: 'Torus', sans-serif;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
-.group-min-rank {
-    height: var(--group-title-font-size);
-    @apply justify-self-center;
+.big-count b {
+    font-size: 60px;
+    font-weight: 800;
 }
 
-.level-mark {
-    position: absolute;
-    width: var(--level-mark-size);
-    height: var(--level-mark-size);
-
-    top: var(--cell-inset);
-    left: var(--cell-inset);
-
-    clip-path: polygon(0% 0%, 0% 100%, 100% 0%);
+.big-count span {
+    margin-left: 4px;
+    font-size: 26px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .55);
 }
 
-.cover {
-    @apply h-full bg-cover;
+.big-count small {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    color: rgba(255, 255, 255, .55);
 }
 
-.cell {
-    position: relative;
-    width: var(--cell-width);
-    height: var(--cell-width);
-
-    padding: var(--cell-inset);
-
-    @apply bg-cover;
-}
-
-.row {
-    display: grid;
-    grid-template-columns: repeat(var(--group-col-count), var(--cell-width));
-    gap: var(--cell-gap);
-}
-
-.group {
+/* 分组标题：胶囊（定数 + 已游玩/总数）+ 虚线 + 组内最低 rank + 迷你分段条 */
+.group-head {
     display: flex;
-    flex-direction: column;
-    gap: var(--group-gap);
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
 }
 
-.achievement {
-    width: calc(var(--cell-width) - 2 * var(--cell-inset));
-    height: var(--achievemnet-height);
+.g-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding-right: 18px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, .06);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18);
+    flex-shrink: 0;
+}
 
-    bottom: var(--cell-inset);
-    left: var(--cell-inset);
-    right: var(--cell-inset);
+.g-capsule.complete {
+    box-shadow: inset 0 0 0 1.5px #fde68a, 0 0 16px -4px #fde68a;
+}
 
-    font-size: var(--achievemnet-font-size);
+.g-tag {
+    min-width: 136px;
+    padding: 3.5px 20px 9.5px 16px;
+    border-radius: 9999px;
+    text-align: center;
+    font-family: 'SEGA NewRodin', 'Torus', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 1;
+    background: rgba(255, 255, 255, .1);
+}
 
-    @apply font-console;
-    @apply absolute bg-black;
-    @apply flex flex-col place-content-center;
-    @apply text-center;
+.g-capsule.complete .g-tag {
+    background: #fde68a;
+    color: #14081f;
+}
+
+.g-count {
+    min-width: 64px;
+    text-align: right;
+    white-space: nowrap;
+    font: 700 17px 'Torus', sans-serif;
+    color: rgba(255, 255, 255, .5);
+    font-variant-numeric: tabular-nums;
+}
+
+.g-count b {
+    font-size: 21px;
+    color: #fff;
+}
+
+.g-min {
+    /* 与 maisum 一致：固定 84px 的槽位把牌子居中，各行右边缘才对得齐
+       （舞萌的 rank 牌子最宽的 SSS+ 在 28px 高时约 74px，装得下） */
+    flex: 0 0 84px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.g-min img {
+    display: block;
+    height: 28px;
+    width: auto;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .55));
+}
+
+/* 谱面格：舞萌同款「贴纸卡片」，未游玩是灰底虚线框 */
+.cells {
+    display: grid;
+    grid-template-columns: repeat(var(--col-count), var(--cell-size));
+    gap: 22px var(--cell-gap);
+}
+
+.slot {
+    position: relative;
+    width: var(--cell-size);
+    height: var(--cell-size);
+}
+
+.photo {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .05);
+    outline: 2px dashed rgba(255, 255, 255, .22);
+    outline-offset: -2px;
+}
+
+.inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 未游玩只压暗、不去色：跟随上游 #162 的口径，去色后认不出是哪首歌 */
+.cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(.5);
+}
+
+.slot.got .photo {
+    background: rgba(255, 255, 255, .88);
+    outline: none;
+    box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .7);
+}
+
+.slot.got .cover {
+    filter: none;
+}
+
+/* 舞萌汇总的随机微倾斜：已完成格按序号轻微旋转，看起来像贴上去的卡片 */
+.slot.got .photo {
+    transform: rotate(var(--tilt, 0deg));
+}
+
+.slot.got:nth-child(3n+1) .photo {
+    --tilt: -1.2deg;
+}
+
+.slot.got:nth-child(3n+2) .photo {
+    --tilt: .9deg;
+}
+
+.sum-rank {
+    position: absolute;
+    /* 位置与 maisum 完全一致：上沿落在 50%，再用 translateY(-65%) 往上提，
+       也就是牌子中心在格子上方 15% 高度处（比「封面减达成率条」再低一点，更贴成绩条）。
+       高度 52px = maisum 的 44px × 152/128 的格子比例，视觉分量与其一致。 */
+    top: 50%;
+    left: 50%;
+    height: 52px;
+    width: auto;
+    transform: translate(-50%, -65%);
+    pointer-events: none;
+}
+
+/* 达成率条：颜色由档位决定（1010000 淡金、AJ 黄、FC 绿…），与统计条配色一致 */
+.achievement-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 5px;
+    background: rgba(0, 0, 0, .85);
+    line-height: 1;
+}
+
+.ach-text {
+    font: 700 31px 'Consolas', 'Segoe UI', 'Arial Unicode MS Font', monospace;
+    letter-spacing: .01em;
+}
+
+/* 顶部难度色带（舞萌用胶带，这里用难度色） */
+.tape {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 46px;
+    height: 13px;
+    border-radius: 2px;
+    opacity: .9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    transform: translateX(-50%) rotate(-4deg);
+}
+
+/* ULTIMA 的官方红在深色卡片上分辨度低，外面补一圈黑边拉开层次 */
+.tape.ultima {
+    box-shadow: 0 0 0 3px #000, 0 1px 3px rgba(0, 0, 0, .45);
 }

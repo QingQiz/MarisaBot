@@ -15,6 +15,14 @@ export function rankIcon(rank: string | null) {
     return `/assets/chunithm/pic/rank_${(rank ?? 'd').toLowerCase()}.svg`;
 }
 
+/**
+ * 舞萌同款的 rank 牌子（PNG，宽度随等级变化、带底衬），汇总图用它替代中二原生 SVG 字片：
+ * 视觉分量更足，也和 maisum 完全一致。其他页面（b30/b50、chu vs）仍用 rankIcon。
+ */
+export function rankSummaryIcon(rank: string | null) {
+    return `/assets/maimai/pic/rank_summary_${(rank ?? 'd').toLowerCase()}.png`;
+}
+
 /** 评级阈值，从高到低。与后端 ChunithmScore.GetRank 同源，不要在页面里各写一份。 */
 export const RANK_STEPS: [threshold: number, rank: ChunithmRank][] = [
     [1_009_000, 'sssp'],

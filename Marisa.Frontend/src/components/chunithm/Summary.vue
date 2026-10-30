@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import {useRoute} from 'vue-router';
-import {ref} from 'vue';
+import {ref, computed} from 'vue';
 import axios from 'axios';
 import {context_get} from "@/GlobalVars";
 import OverPower from "@/components/chunithm/partial/OverPower.vue";
+import MaiCardShell from "@/components/maimai/MaiCardShell.vue";
 import {GroupSongInfo, Score} from "@/components/chunithm/utils/summary_t";
-import {getRank, isMaxScore, rankIcon} from "@/components/chunithm/utils/score";
+import {getRank, isMaxScore, rankSummaryIcon} from "@/components/chunithm/utils/score";
+import {difficultyColor} from "@/components/chunithm/utils/song-card";
+import {bgKeyOf, themeMainOf, tallCardBackground} from "@/components/maimai/utils/song_card";
 
 const route = useRoute()
 const id    = ref(route.query.id)
@@ -27,7 +30,6 @@ axios.get(context_get, {params: {id: id.value, name: 'Title'}})
     .catch(() => {
         title.value = ''
     })
-
 
 axios.all([
     axios.get(context_get, {params: {id: id.value, name: 'GroupedSongs'}}),
@@ -58,34 +60,42 @@ function GetScore(id: number, level: number) {
     return scores.value[`(${id}, ${level})`]
 }
 
-function GetLevelColor(level: number) {
-    // green, yellow, red, purple, black, light purple
-    const color = [
-        '#52e72b',
-        '#ffa801',
-        '#ff5a66',
-        '#c64fe4',
-        '#000000',
-        '#dbaaff'
-    ]
-    if (level >= 0 && level <= 4) return color[level]
-    else return color[5]
+const allCharts = computed(() => grouped.value.flatMap(g => g.x))
+const allScores = computed(() => allCharts.value.map(c => GetScore(c.Item3.Id, c.Item2)))
+const total     = computed(() => allCharts.value.length)
+const played    = computed(() => allScores.value.filter(Boolean).length)
+
+// 卡片主题取出现次数最多的难度，与舞萌汇总一致
+const themeIndex = computed(() => {
+    const count = [0, 0, 0, 0, 0]
+    for (const c of allCharts.value) count[c.Item2] = (count[c.Item2] ?? 0) + 1
+    return count.reduce((best, n, i) => n >= count[best] ? i : best, 0)
+})
+
+// 卡片背景：完全照搬舞萌汇总的三行（bgKeyOf / themeMainOf / tallCardBackground），
+// 主题索引同样取出现次数最多的难度；难度配色也沿用舞萌那套，保证两张图的底色一致。
+// ULTIMA 的官方红只用在谱面上的难度色带，不参与背景。
+const bgKey      = computed(() => bgKeyOf(themeIndex.value, false))
+const accent     = computed(() => themeMainOf(themeIndex.value, false))
+const background = computed(() => tallCardBackground(bgKey.value, accent.value))
+
+function GroupScores(group: GroupSongInfo['x']) {
+    return group.map(c => GetScore(c.Item3.Id, c.Item2))
 }
 
-function GetBorder(rank: string) {
-    function fallback() {
-        switch (rank) {
-            case 'ssp':
-                return 'ss';
-            default:
-                return rank
-        }
-    }
-
-    return `/assets/chunithm/pic/border_${fallback()}.png`
+function GroupPlayed(group: GroupSongInfo['x']) {
+    return GroupScores(group).filter(Boolean).length
 }
 
-// fc / 成绩 -> 档位，数值越大越好。
+function Pct(n: number, t: number) {
+    return `${t ? Math.round(n / t * 1000) / 10 : 0}%`
+}
+
+function CoverSrc(songId: number) {
+    return `/assets/chunithm/cover/${songId}.png`
+}
+
+// fc / 达成率 -> 档位，数值越大越好。
 // 1010000 是独立的最顶档，对应 OverPower.vue 里的 ajc：只看 fc 的话它和普通 AJ 分不开。
 function GetTier(score?: Score) {
     if (!score) return 0
@@ -105,7 +115,7 @@ function GetTier(score?: Score) {
     }
 }
 
-// 档位 -> 颜色。最顶档用淡金色，与 OverPower.vue 的 ajc(amber-200) 同色。
+// 档位 -> 达成率文字颜色。最顶档淡金黄色，与统计条里的 ajc(amber-200) 同色。
 function GetTierColor(tier: number, fallback = '#FFFFFF') {
     switch (tier) {
         case 5:
@@ -123,87 +133,101 @@ function GetTierColor(tier: number, fallback = '#FFFFFF') {
     }
 }
 
-// 组标题取组内最差的档位，所以整组都 1010000 才会变淡金色；
-// 只要有任意一首没打就返回 -1，由调用方的 fallback 决定颜色。
-function GetGroupMinTier(group: any[]) {
-    let min = 6
-
-    for (let i = 0; i < group.length; i++) {
-        const song  = group[i]
-        const score = GetScore(song.Item3.Id, song.Item2)
-
-        if (!score) return -1
-
-        min = Math.min(min, GetTier(score))
-    }
-
-    return min
-}
-
-function GetGroupMinRank(group: any[]) {
+// 组标题取组内最低的 rank 图标；有任何一张没打就不显示（返回空串）
+function GetGroupMinRank(group: GroupSongInfo['x']) {
     let min = 1145141919;
 
-    for (let i = 0; i < group.length; i++) {
-        const song  = group[i]
+    for (const song of group) {
         const score = GetScore(song.Item3.Id, song.Item2)
 
         if (score) {
-            if (score.score < min) {
-                min = score.score
-            }
+            if (score.score < min) min = score.score
         } else {
             return ''
         }
     }
 
-    // 评级阈值表统一放在 utils/score.ts，别在这里再抄一份
-    return getRank(min)
+    return min === 1145141919 ? '' : getRank(min)
+}
+
+// 难度色沿用 chunithm 主题色：ULTIMA 用官方红，在封面上方那道色带外面额外补一圈黑边区分
+// （纯黑色带贴在深色卡片上会糊成一片，看不出难度，所以改成「主题红 + 黑描边」）。
+function LevelColor(index: number) {
+    return difficultyColor(index)
 }
 </script>
 
 <template>
-    <div class="config" v-if="data_fetched">
-        <div v-if="title" class="summary-title">{{ title }}</div>
-        <div class="group">
-            <div class="flex gap-10">
-                <div class="justify-center flex items-center">
-                    <div class="text-[100px]">
-                        SUMMARY
+    <div v-if="data_fetched">
+        <MaiCardShell :bg-key="bgKey" :accent="accent" :background="background" :width="1480"
+                      class="chu-summary" :class="{'chu-ultima': themeIndex === 4}">
+            <div class="eyebrow">MARISA BOT · SUMMARY</div>
+
+            <!-- 标题行：右侧数字与标题同排，统计条独占下一行 -->
+            <div class="flex items-end gap-10 mt-2">
+                <div class="summary-title flex-1 min-w-0">{{ title || '完成表' }}</div>
+                <div class="big-count">
+                    <div><b>{{ played }}</b><span>/{{ total }}</span></div>
+                    <small>PLAYED · {{ Pct(played, total) }}</small>
+                </div>
+            </div>
+
+            <!-- 顶部统计条：左侧 OP 分式（opSum/opMax）、右侧完成百分比，分段条居中 -->
+            <div class="mt-6">
+                <OverPower :group="allCharts" :scores="allScores" layout="bars" numbers percent
+                           constant-source="chart"/>
+            </div>
+
+            <div class="flex flex-col gap-9 mt-9">
+                <section v-for="{Key: key, x: group} in grouped" :key="key">
+                    <div class="group-head">
+                        <span class="g-capsule" :class="{complete: GroupPlayed(group) === group.length}">
+                            <span class="g-tag">{{ key }}</span>
+                            <span class="g-count"><b>{{ GroupPlayed(group) }}</b> / {{ group.length }}</span>
+                        </span>
+                        <div class="flex-1 border-t-2 border-dashed border-white/15"></div>
+                        <!-- 没打全的分组没有最低 rank 图标，但位置要留着，否则各组统计条右边缘对不齐 -->
+                        <span class="g-min">
+                            <img v-if="GetGroupMinRank(group)" :src="rankSummaryIcon(GetGroupMinRank(group))" alt=""
+                                 onerror="this.style.opacity=0">
+                        </span>
+                        <!-- 分组自己也带一份 OP 统计（分式 + 百分比），与顶部统计条同一套表示 -->
+                        <OverPower :group="group" :scores="GroupScores(group)" layout="mini" numbers percent
+                                   constant-source="chart"/>
                     </div>
-                </div>
-                <OverPower
-                    :group="grouped.flatMap((g: GroupSongInfo) => g.x)"
-                    :scores="grouped.flatMap((g: GroupSongInfo) => g.x).map((s: typeof GroupSongInfo.x) => GetScore(s.Item3.Id, s.Item2))"
-                    :detail="true"
-                    constant-source="chart"
-                    class="justify-self-end"/>
-            </div>
-            <div v-for="{Key: key, x: group} in grouped">
-                <div class="group-title" :style="`color: ${GetTierColor(GetGroupMinTier(group), '#000000')}`">
-                    {{ key }}
-                    <img :src="rankIcon(GetGroupMinRank(group))" alt="" class="group-min-rank"
-                         onerror="this.style.opacity=0">
-                    <OverPower :group="group" :scores="group.map((s: typeof s.x) => GetScore(s.Item3.Id, s.Item2))"
-                               constant-source="chart"
-                               class="justify-self-end"/>
-                </div>
-                <div class="row">
-                    <template v-for="song in group">
-                        <div v-for="score in [GetScore(song.Item3.Id, song.Item2)]" class="cell"
-                             :style="`background-image: url('${GetBorder(score?.Rank ?? '')}')`">
-                            <div class="cover"
-                                 :style="`background-image: url('/assets/chunithm/cover/${song.Item3.Id}.png')`">
+
+                    <div class="cells">
+                        <div v-for="song in group" :key="`${song.Item3.Id}-${song.Item2}`" class="slot"
+                             :class="{got: !!GetScore(song.Item3.Id, song.Item2)}">
+                            <div class="photo">
+                                <div class="inner">
+                                    <img :src="CoverSrc(song.Item3.Id)" class="cover" alt="">
+                                    <template v-if="GetScore(song.Item3.Id, song.Item2)">
+                                        <img :src="rankSummaryIcon(getRank(GetScore(song.Item3.Id, song.Item2)!.score))"
+                                             class="sum-rank" alt="">
+                                        <div class="achievement-bar"
+                                             :style="`color: ${GetTierColor(GetTier(GetScore(song.Item3.Id, song.Item2)))}`">
+                                            <span class="ach-text">{{
+                                                    GetScore(song.Item3.Id, song.Item2)!.score.toString().padStart(7, '0')
+                                                }}</span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
-                            <div class="achievement" :style="`color: ${GetTierColor(GetTier(score))}`" v-if="score">
-                                {{ score.score.toString().padStart(7, '0') }}
-                            </div>
-                            <div class="level-mark" :style="`background-color: ${GetLevelColor(song.Item2)}`"></div>
+                            <div class="tape" :class="{ultima: song.Item2 === 4}"
+                                 :style="`background: ${LevelColor(song.Item2)}`"></div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </section>
             </div>
-        </div>
+
+            <footer class="mt-9 flex justify-end">
+                <span class="footer-text">MARISA BOT · SUMMARY</span>
+            </footer>
+        </MaiCardShell>
     </div>
 </template>
 
+<style scoped lang="postcss" src="@/assets/css/maimai/song_card.pcss"/>
+<style scoped lang="postcss" src="@/assets/css/chunithm/theme.pcss"/>
 <style scoped lang="postcss" src="@/assets/css/chunithm/summary.pcss"/>
