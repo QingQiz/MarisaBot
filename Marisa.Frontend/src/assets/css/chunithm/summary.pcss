@@ -107,18 +107,18 @@
 }
 
 .g-min {
-    /* 图标按 544:226 的比例在 48px 高时宽约 115px，不能用窄容器装，否则会溢出到统计条上 */
-    flex: 0 0 auto;
+    /* 与 maisum 一致：固定 84px 的槽位把牌子居中，各行右边缘才对得齐
+       （舞萌的 rank 牌子最宽的 SSS+ 在 28px 高时约 74px，装得下） */
+    flex: 0 0 84px;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* 右侧多留白 = 图标整体往左挪；统计条本身仍然贴右对齐 */
-    margin-right: 20px;
 }
 
 .g-min img {
     display: block;
-    height: 48px;
+    height: 28px;
     width: auto;
     filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .55));
 }
@@ -189,13 +189,14 @@
 
 .sum-rank {
     position: absolute;
-    /* 垂直居中按「封面高度 - 底部达成率条高度」算：下面的黑条不参与视觉中心，
-       否则 rank 会整体偏低。42px 与 .achievement-bar 的高度保持一致。 */
-    top: calc((100% - 42px) / 2);
+    /* 位置与 maisum 完全一致：上沿落在 50%，再用 translateY(-65%) 往上提，
+       也就是牌子中心在格子上方 15% 高度处（比「封面减达成率条」再低一点，更贴成绩条）。
+       高度 52px = maisum 的 44px × 152/128 的格子比例，视觉分量与其一致。 */
+    top: 50%;
     left: 50%;
     height: 52px;
     width: auto;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -65%);
     pointer-events: none;
 }
 

@@ -6,7 +6,7 @@ import {context_get} from "@/GlobalVars";
 import OverPower from "@/components/chunithm/partial/OverPower.vue";
 import MaiCardShell from "@/components/maimai/MaiCardShell.vue";
 import {GroupSongInfo, Score} from "@/components/chunithm/utils/summary_t";
-import {getRank, isMaxScore, rankIcon} from "@/components/chunithm/utils/score";
+import {getRank, isMaxScore, rankSummaryIcon} from "@/components/chunithm/utils/score";
 import {difficultyColor} from "@/components/chunithm/utils/song-card";
 import {bgKeyOf, themeMainOf, tallCardBackground} from "@/components/maimai/utils/song_card";
 
@@ -188,7 +188,7 @@ function LevelColor(index: number) {
                         <div class="flex-1 border-t-2 border-dashed border-white/15"></div>
                         <!-- 没打全的分组没有最低 rank 图标，但位置要留着，否则各组统计条右边缘对不齐 -->
                         <span class="g-min">
-                            <img v-if="GetGroupMinRank(group)" :src="rankIcon(GetGroupMinRank(group))" alt=""
+                            <img v-if="GetGroupMinRank(group)" :src="rankSummaryIcon(GetGroupMinRank(group))" alt=""
                                  onerror="this.style.opacity=0">
                         </span>
                         <!-- 分组自己也带一份 OP 统计（分式 + 百分比），与顶部统计条同一套表示 -->
@@ -203,7 +203,7 @@ function LevelColor(index: number) {
                                 <div class="inner">
                                     <img :src="CoverSrc(song.Item3.Id)" class="cover" alt="">
                                     <template v-if="GetScore(song.Item3.Id, song.Item2)">
-                                        <img :src="rankIcon(getRank(GetScore(song.Item3.Id, song.Item2)!.score))"
+                                        <img :src="rankSummaryIcon(getRank(GetScore(song.Item3.Id, song.Item2)!.score))"
                                              class="sum-rank" alt="">
                                         <div class="achievement-bar"
                                              :style="`color: ${GetTierColor(GetTier(GetScore(song.Item3.Id, song.Item2)))}`">
