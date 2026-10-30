@@ -191,7 +191,9 @@ function LevelColor(index: number) {
                             <img v-if="GetGroupMinRank(group)" :src="rankIcon(GetGroupMinRank(group))" alt=""
                                  onerror="this.style.opacity=0">
                         </span>
-                        <OverPower :group="group" :scores="GroupScores(group)" layout="mini" constant-source="chart"/>
+                        <!-- 分组自己也带一份 OP 统计（分式 + 百分比），与顶部统计条同一套表示 -->
+                        <OverPower :group="group" :scores="GroupScores(group)" layout="mini" numbers percent
+                                   constant-source="chart"/>
                     </div>
 
                     <div class="cells">

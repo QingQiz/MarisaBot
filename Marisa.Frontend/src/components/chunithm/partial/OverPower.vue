@@ -340,11 +340,12 @@ const OpPercent = computed(() => op.value['opMax'] === 0 ? 0 : op.value['opSum']
 
         </div>
 
-        <!-- 汇总页 / chuop 页：两排分段条（'bars' 带档位标签与难度条，'mini' 只有细色条） -->
-        <div v-else class="bar-wrap">
+        <!-- 汇总页 / chuop 页：两排分段条（'bars' 带档位标签与难度条，'mini' 只有细色条）。
+             根节点带 layout 类名，mini 形态的数字与百分比要按更小的尺寸排版 -->
+        <div v-else class="bar-wrap" :class="layout">
             <!-- 左侧：opSum / opMax 写成分式的样子（分子在上、分母在下，中间一道横线）。
                  列宽固定（分式贴右缘），各行的百分比与条形才能对齐 -->
-            <div v-if="numbers && layout === 'bars'" class="bar-nums">
+            <div v-if="numbers" class="bar-nums">
                 <span class="bar-nums-frac">
                     <b>{{ op['opSum'].toFixed(2) }}</b>
                     <i></i>
@@ -353,7 +354,7 @@ const OpPercent = computed(() => op.value['opMax'] === 0 ? 0 : op.value['opSum']
             </div>
 
             <!-- 完成百分比：跟在分式右边、条形左边，列宽固定 -->
-            <div v-if="percent && layout === 'bars'" class="bar-percent">
+            <div v-if="percent" class="bar-percent">
                 {{ OpPercent.toFixed(2) }}<small>%</small>
             </div>
 
@@ -499,6 +500,36 @@ const OpPercent = computed(() => op.value['opMax'] === 0 ? 0 : op.value['opSum']
     font-size: 24px;
     font-weight: 700;
     color: rgba(255, 255, 255, .6);
+}
+
+/* 分组标题右侧的小号形态：分式与百分比按比例缩小、列宽收窄，条形仍固定 280px 贴右。
+   字号变小后行框的墨迹偏移也变小，对齐补偿量跟着减半 */
+.bar-wrap.mini .bar-nums {
+    flex: 0 0 92px;
+    margin-bottom: 3px;
+}
+
+.bar-wrap.mini .bar-nums-frac b {
+    font-size: 19px;
+}
+
+.bar-wrap.mini .bar-nums-frac i {
+    height: 1.5px;
+    margin: 3px 0 2px;
+}
+
+.bar-wrap.mini .bar-nums-frac span {
+    font-size: 14px;
+}
+
+.bar-wrap.mini .bar-percent {
+    flex: 0 0 76px;
+    font-size: 22px;
+    margin-bottom: 3px;
+}
+
+.bar-wrap.mini .bar-percent small {
+    font-size: 14px;
 }
 
 .bar-seg-diff i {
