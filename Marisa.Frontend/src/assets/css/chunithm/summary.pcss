@@ -189,12 +189,13 @@
 
 .sum-rank {
     position: absolute;
-    top: 50%;
-    /* 封面上的 rank 保持居中；组标题里那个「组内最低 rank」标记是 .g-min，往左挪的调整在那边 */
+    /* 垂直居中按「封面高度 - 底部达成率条高度」算：下面的黑条不参与视觉中心，
+       否则 rank 会整体偏低。42px 与 .achievement-bar 的高度保持一致。 */
+    top: calc((100% - 42px) / 2);
     left: 50%;
     height: 52px;
     width: auto;
-    transform: translate(-50%, -62%);
+    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 

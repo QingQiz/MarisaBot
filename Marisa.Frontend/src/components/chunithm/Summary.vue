@@ -172,8 +172,10 @@ function LevelColor(index: number) {
                 </div>
             </div>
 
+            <!-- 顶部统计条：左侧 OP 分式（opSum/opMax）、右侧完成百分比，分段条居中 -->
             <div class="mt-6">
-                <OverPower :group="allCharts" :scores="allScores" layout="bars" constant-source="chart"/>
+                <OverPower :group="allCharts" :scores="allScores" layout="bars" numbers percent
+                           constant-source="chart"/>
             </div>
 
             <div class="flex flex-col gap-9 mt-9">
