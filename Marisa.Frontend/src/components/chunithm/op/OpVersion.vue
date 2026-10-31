@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import OverPower from "@/components/chunithm/partial/OverPower.vue";
 import { GroupSongInfo } from "../utils/summary_t";
 import { computed } from "vue";
 import { useOpData } from "./op_common";
+import OpBoard, { type OpRow } from "./OpBoard.vue";
 
 // 版本时间序 (来源: Wiki 追加日順), 从新到旧
 const versionOrder: [string, string, string][] = [
@@ -23,8 +23,8 @@ const versionOrder: [string, string, string][] = [
     ["CHUNITHM AMAZON",     "AMAZON","logo_amazon.png"],
     ["CHUNITHM STAR PLUS",  "STAR+","logo_star_plus.png"],
     ["CHUNITHM STAR",       "STAR", "logo_star.png"],
-    ["CHUNITHM AIR PLUS",   "AIR+", "logo_air_plus.png"],
-    ["CHUNITHM AIR",        "AIR",  "logo_air.png"],
+    ["CHUNITHM AIR PLUS",   "AIR+","logo_air_plus.png"],
+    ["CHUNITHM AIR",        "AIR", "logo_air.png"],
     ["CHUNITHM PLUS",       "PLUS", "logo_chunithm_plus.png"],
     ["CHUNITHM",            "無印", "logo_chunithm.png"],
 ];
@@ -41,6 +41,10 @@ function versionLabel(v: string): string {
         if (normalizeVersion(k) === key) return label;
     }
     return stripChunithm(v) || v;
+}
+
+function stripChunithm(v: string): string {
+    return v.replace(/^CHUNITHM\s*/i, "").trim();
 }
 
 function versionLogoPath(v: string): string {
@@ -63,47 +67,18 @@ const groups = computed(() => {
         return a.label.localeCompare(b.label);
     });
 });
+
+const allBest = computed(() => filterBestOP(songs.value));
+
+const rows = computed<OpRow[]>(() => groups.value.map(g => ({
+    label: versionLabel(g.label),
+    group: g.group,
+    scores: g.scores,
+    logo: versionLogoPath(g.label),
+})));
 </script>
 
 <template>
-    <div v-if="data_fetched" class="container">
-        <template v-for="f in [filterBestOP(songs)]">
-            <div class="op-container">
-                <div class="all-label">ALL</div>
-                <OverPower :scores="f.scores" :group="f.group" :detail="true" :show-difficulty="true"/>
-            </div>
-        </template>
-        <template v-for="g in groups" :key="g.label">
-            <div class="op-container">
-                <img :src="versionLogoPath(g.label)" class="ver-logo" :alt="versionLabel(g.label)">
-                <OverPower :scores="g.scores" :group="g.group" :detail="true" :show-difficulty="true"/>
-            </div>
-        </template>
-    </div>
+    <OpBoard v-if="data_fetched" :charts="allBest.group" :scores="allBest.scores"
+             :rows="rows"/>
 </template>
-
-<style scoped lang="postcss">
-.container {
-    max-width: unset;
-    width: 1200px;
-    padding: 50px;
-    @apply flex flex-col gap-16;
-}
-.op-container {
-    @apply flex items-center;
-    & > :first-child {
-        width: 180px;
-        flex-shrink: 0;
-    }
-}
-.all-label {
-    @apply text-6xl;
-}
-.ver-logo {
-    width: 100%;
-    max-width: 170px;
-    height: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-</style>
