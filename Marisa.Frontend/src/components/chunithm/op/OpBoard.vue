@@ -104,8 +104,14 @@ function RowPlayed(row: OpRow) {
     margin: 0 auto;
 }
 
-/* 类别页的标签是 2~4 个汉字，30px 时宽度差 20px，缩到 24px 正好都落在胶囊的 136px 最小宽度里 */
+/* 类别页的标签是日服类别名，按最长的 POPS＆ANIME 定宽，胶囊相应加宽 */
+.chu-op.genre-tags .op-row > .g-capsule {
+    flex-basis: 344px;
+}
+
 .chu-op.genre-tags .g-tag {
-    font-size: 24px;
+    min-width: 220px;
+    white-space: nowrap;
+    font-size: 22px;
 }
 </style>
