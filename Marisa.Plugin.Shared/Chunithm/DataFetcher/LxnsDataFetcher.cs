@@ -42,6 +42,11 @@ public class LxnsDataFetcher(SongDb<ChunithmSong> songDb) : DataFetcher(songDb),
             }
             else
             {
+                if (UnreleasedUltimaSongs.Contains((long)song.id) && song.difficulties.Count > 4)
+                {
+                    song.difficulties.RemoveAt(4);
+                }
+
                 normalData.Add(song);
             }
         }

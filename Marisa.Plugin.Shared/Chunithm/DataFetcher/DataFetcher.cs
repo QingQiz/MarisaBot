@@ -17,6 +17,12 @@ public abstract class DataFetcher(SongDb<ChunithmSong> songDb)
         2027, 2039, 2075, 2076, 2095, 2141, 2211, 2212, 2213, 921
     ];
 
+    /// <summary>
+    ///     被误放入公众号、游戏中尚未实装的 ULTIMA 谱面，同样会导致 op 计算不正确
+    /// </summary>
+    // TODO: 实装后删除
+    protected static readonly HashSet<long> UnreleasedUltimaSongs = [76];
+
     internal static bool IsDeletedSong(long id) => DeletedSongs.Contains(id);
 
     protected SongDb<ChunithmSong> SongDb { get; } = songDb;
