@@ -1,85 +1,56 @@
 <template>
     <template v-if="data_fetched">
         <div class="best-shell relative overflow-hidden" v-if="err_msg === ''">
-            <!-- Backdrop: maimai でらっくす PRiSM PLUS pastel vertical gradient -->
             <div class="absolute inset-0 pointer-events-none mai-deco-bg"></div>
 
-            <div class="relative w-best font-osu-web mai-text-shadow">
-                <!-- Header -->
-                <header class="relative px-card-x pt-16 pb-14 flex items-end justify-between gap-10 text-white">
-                    <!-- Left: maimai でらっくす PRiSM PLUS logo -->
-                    <img src="/assets/maimai/pic/logo_prism.png" alt="maimai でらっくす PRiSM PLUS"
-                         class="w-[675px] shrink-0 drop-shadow-[0_6px_12px_rgba(80,30,90,0.45)]"
-                         style="transform: translateY(-10px)"/>
+            <div class="relative w-best px-card-x font-osu-web">
+                <header class="flex items-center gap-10 pt-12 pb-12">
+                    <img src="/assets/maimai/pic/logo_prism.png" alt="" class="logo"/>
 
-                    <!-- Right: rating + breakdown -->
-                    <div class="text-right shrink-0">
-                        <div class="text-[11rem] leading-none font-black tabular-nums tracking-tight">
-                            <template v-if="total_ra >= 15000">
-                                <span v-for="(ch, i) in totalRaChars" :key="i"
-                                      class="mai-rainbow-char"
-                                      :class="[
-                                          `mai-rainbow-char--c${i % 6}`,
-                                          { 'mai-rainbow-char--banded': total_ra >= 16000 },
-                                      ]">{{ ch }}</span>
-                            </template>
-                            <span v-else>{{ total_ra }}</span>
-                        </div>
-                        <div v-if="!json.merged" class="text-3xl font-semibold mt-3 tabular-nums flex items-baseline justify-end gap-3">
-                            <span>{{ ra_old }}</span>
-                            <span class="text-white/70">+</span>
-                            <span>{{ ra_new }}</span>
-                            <span class="text-base text-white/85 ml-3 uppercase tracking-[0.3em]">old · new</span>
-                        </div>
-                    </div>
+                    <div class="player-card">
+                        <div class="eyebrow" :style="{ fontSize: subtitleFontSize }">{{ subtitle }}</div>
 
-                    <!-- Center (absolute, page-centered): subtitle + nickname -->
-                    <div class="absolute left-1/2 -translate-x-1/2 bottom-[71px] flex flex-col items-center text-center pointer-events-none">
-                        <div :style="{ fontSize: subtitleFontSize }"
-                             class="text-2xl uppercase tracking-[0.5em] font-bold mb-2 whitespace-nowrap mai-subtitle">
-                            {{ subtitle }}
+                        <div class="nick-cell">
+                            <div class="nick" :class="[`t${ratingTier}`, { rainbow: total_ra >= 15000, banded: total_ra >= 16000 }]" :style="{ fontSize: nicknameFontSize, ...NICK_SHADOWS }">
+                                <span v-for="layer in ['sticker', 'outline', 'fill']" :key="layer" :class="`nick-${layer}`">
+                                    <span v-for="(ch, i) in nicknameChars" :key="i" :class="`c${i % 6}`">{{ ch }}</span>
+                                </span>
+                            </div>
                         </div>
-                        <div :style="{ fontSize: nicknameFontSize }"
-                             class="mai-nickname tracking-tight whitespace-nowrap">
-                            <template v-if="total_ra >= 15000">
-                                <span v-for="(ch, i) in nicknameChars" :key="i"
-                                      class="mai-rainbow-char"
-                                      :class="[
-                                          `mai-rainbow-char--c${i % 6}`,
-                                          { 'mai-rainbow-char--banded': total_ra >= 16000 },
-                                      ]">{{ ch }}</span>
-                            </template>
-                            <span v-else>{{ json.nickname }}</span>
+
+                        <div class="rating-col">
+                            <div class="dxplate">
+                                <img :src="`/assets/maimai/dxrating/${ratingTier}.png`" class="dxplate-frame" alt="">
+                                <img v-if="ratingStars" :src="`/assets/maimai/dxrating/star_${ratingStars}.png`" class="dxplate-star" alt="">
+                                <div class="dxplate-nums">
+                                    <span v-for="(d, i) in ratingDigits" :key="i" class="dxplate-cell">
+                                        <img v-if="d !== ''" :src="`/assets/maimai/dxrating/num/${d}.png`" alt="">
+                                    </span>
+                                </div>
+                            </div>
+                            <div v-if="!json.merged" class="breakdown">
+                                <span class="tag old">B35</span><b>{{ ra_old }}</b>
+                                <span class="plus">+</span>
+                                <span class="tag new">B15</span><b>{{ ra_new }}</b>
+                            </div>
                         </div>
                     </div>
                 </header>
 
-                <!-- B35 (Old) section — "Old" rather than "Standard" because old-version
-                     charts can include DX charts from previous releases too. -->
-                <section class="px-card-x">
-                    <div class="flex items-baseline gap-5 pb-7">
-                        <span class="mai-section-tag bg-[#f93eac]">{{ json.merged ? 'B50' : 'B35' }}</span>
-                        <div v-if="!json.merged" class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">Old</div>
-                        <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
-                        <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(160,30,90,0.55)]">{{ ra_old }}</div>
+                <section v-for="sec in sections" :key="sec.tag" class="pb-14">
+                    <div class="sec-head">
+                        <span class="sec-tag" :style="{ background: sec.color }">{{ sec.tag }}</span>
+                        <span v-if="sec.label" class="sec-label">{{ sec.label }}</span>
+                        <div class="sec-rule"></div>
+                        <span class="sec-stat"><small>AVG</small>{{ sec.avg }}</span>
+                        <span class="sec-stat total"><small>TOTAL</small>{{ sec.total }}</span>
                     </div>
-                    <div class="grid grid-cols-5-maimai gap-card" :class="json.merged ? 'pb-[70px]' : 'pb-12'">
-                        <score-card v-for="(data, i) in json.charts.sd" v-bind:key="i" :score="data"/>
+                    <div class="grid grid-cols-5-maimai gap-card">
+                        <score-card v-for="(data, i) in sec.charts" :key="i" :score="data" :index="i + 1"/>
                     </div>
                 </section>
 
-                <!-- B15 (New) section -->
-                <section v-if="!json.merged" class="px-card-x">
-                    <div class="flex items-baseline gap-5 pb-7">
-                        <span class="mai-section-tag bg-[#6dbefe]">B15</span>
-                        <div class="text-lg uppercase tracking-[0.3em] font-bold text-white drop-shadow-[0_2px_3px_rgba(20,40,120,0.55)]">NEW</div>
-                        <div class="flex-1 h-1 bg-white/55 rounded-full self-center"></div>
-                        <div class="text-2xl tabular-nums text-white font-bold drop-shadow-[0_2px_3px_rgba(20,40,120,0.55)]">{{ ra_new }}</div>
-                    </div>
-                    <div class="grid grid-cols-5-maimai gap-card pb-[70px]">
-                        <score-card v-for="(data, i) in json.charts.dx" v-bind:key="i" :score="data"/>
-                    </div>
-                </section>
+                <footer class="pb-10 -mt-4 flex justify-end"><span class="footer-text">GENERATED BY MARISABOT</span></footer>
             </div>
         </div>
         <div v-else class="w-[1000px] h-[700px] flex items-center justify-center bg-red-600">
@@ -97,7 +68,7 @@ import {useRoute} from "vue-router";
 
 import ScoreCard from "@/components/maimai/partial/ScoreCard.vue"
 import {context_get} from '@/GlobalVars'
-import {MaiMaiRating} from "@/components/maimai/utils/best_t";
+import {MaiMaiRating, Score as MaiScore} from "@/components/maimai/utils/best_t";
 
 const route = useRoute()
 let json    = ref({} as MaiMaiRating)
@@ -133,33 +104,67 @@ const nicknameChars = computed(() => {
     }
     return out
 })
-const totalRaChars  = computed(() => Array.from(String(total_ra.value)))
+
+// 圆角膨胀：一圈不带颜色的 text-shadow（取 currentColor），外圈 + 半径圈补实中间。
+const NICK_SHADOWS = {
+    '--sticker-shadow': [ring(0.15, 32), ring(0.075, 16)].join(', '),
+    '--outline-shadow': [ring(0.06, 24), ring(0.03, 12)].join(', '),
+}
+
+function ring(r: number, n: number) {
+    return Array.from({length: n}, (_, k) => {
+        const t = 2 * Math.PI * k / n
+        return `${(r * Math.cos(t)).toFixed(3)}em ${(r * Math.sin(t)).toFixed(3)}em`
+    }).join(', ')
+}
 
 const subtitle = computed(() => `maimai DX · ${json.value?.title ?? 'best 50'}`)
 
-// Long filter titles shrink so they stay clear of the logo; fullwidth chars plus tracking count as 1.5.
+// Long filter titles shrink to stay on one line.
 const subtitleFontSize = computed(() => {
     let weight = 0
     for (const c of subtitle.value) {
         weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.5 : 1.0
     }
-    return `${Math.min(1.5, 1.5 * 26 / weight)}rem`
+    return `${Math.min(26, 26 * 30 / weight)}px`
 })
 
-// Auto-shrink nickname so long names don't collide with logo / rating columns.
-// Fullwidth chars count as 1.0, halfwidth ~0.55 — matches their actual rendered width ratio.
+// Fullwidth chars count as 1.0, halfwidth ~0.58 of the font size.
 const nicknameFontSize = computed(() => {
-    const nick = json.value?.nickname ?? ''
     let weight = 0
-    for (const c of nick) {
-        weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.0 : 0.55
+    for (const c of json.value?.nickname ?? '') {
+        weight += (c.codePointAt(0) ?? 0) > 0xFF ? 1.0 : 0.62
     }
-    if (weight <= 5)  return '8rem'
-    if (weight <= 7)  return '7rem'
-    if (weight <= 9)  return '6rem'
-    if (weight <= 12) return '5rem'
-    if (weight <= 16) return '4rem'
-    return '3rem'
+    return `${Math.min(112, 820 / (weight + 0.3))}px`
+})
+
+// 评分牌底框 01–12；金档起每 250 分加一档勋章（CiRCLE PLUS 起的规则）。
+const ratingTier = computed(() => {
+    const steps = [1000, 2000, 4000, 7000, 10000, 12000, 13000, 14000, 14500, 15000, 16000]
+    return String(steps.filter(x => total_ra.value >= x).length + 1).padStart(2, '0')
+})
+
+const ratingStars = computed(() => {
+    const ra = total_ra.value
+    if (ra < 14000) return 0
+    const base = [16000, 15000, 14500, 14000].find(x => ra >= x)!
+    return Math.min(Math.floor((ra - base) / 250) + 1, ra >= 15000 ? 4 : 2)
+})
+
+const ratingDigits = computed(() => String(total_ra.value).padStart(5, ' ').split('').map(c => c.trim()))
+
+const sections = computed(() => {
+    if (json.value.merged) return [section('B50', '', '#f93eac', json.value.charts.sd)]
+    return [
+        section('B35', 'OLD', '#f93eac', json.value.charts.sd),
+        section('B15', 'NEW', '#4aa8f5', json.value.charts.dx),
+    ]
+
+    function section(tag: string, label: string, color: string, charts: MaiScore[]) {
+        const total = charts.reduce((ra, cur) => ra + cur.ra, 0)
+        const avg = charts.length ? (total / charts.length).toFixed(1) : '0'
+        return {tag, label, color, charts, total, avg}
+    }
 })
 
 axios.get(context_get, {params: {id: id.value, name: 'b50'}}).then(data => {
@@ -203,46 +208,213 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
 
 <style scoped>
 .best-shell {
-    --card-gap: 1.75rem;
-    --card-padding: 3rem;
-    --best-width-inner: calc(400px * 5 + var(--card-gap) * 4);
+    --ink: #2b2147;
+    --card-gap: 20px;
+    --card-padding: 32px;
+    --best-width-inner: calc(412px * 5 + var(--card-gap) * 4);
     --best-width: calc(var(--best-width-inner) + var(--card-padding) * 2);
-    background-color: #ffd5cf;
+    color: var(--ink);
 }
 
-/* PRiSM PLUS pastel vertical gradient (peach bottom → pink → lavender → blue → mint top) */
+/* 薰衣草 → 薄荷渐变，白色波点与云团 */
 .mai-deco-bg {
-    background-image: linear-gradient(0deg,
-        #ffd5cf 0%,
-        #ffd5cf 31%,
-        #ffc5d5 45%,
-        #eaabff 61%,
-        #72bcfe 86%,
-        #65f2df 100%);
+    background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.55) 2.6px, transparent 3.1px) 0 0 / 26px 26px,
+        radial-gradient(700px 260px at 15% 8%, rgba(255, 255, 255, 0.7), transparent 70%),
+        radial-gradient(800px 300px at 85% 55%, rgba(255, 255, 255, 0.5), transparent 70%),
+        radial-gradient(700px 280px at 20% 92%, rgba(255, 255, 255, 0.55), transparent 70%),
+        linear-gradient(180deg, #c9b8ff 0%, #d9c6ff 30%, #c5dcff 65%, #b6f0e3 100%);
 }
 
-.mai-text-shadow {
-    text-shadow: 0 2px 4px rgba(160, 30, 90, 0.45),
-                 0 1px 2px rgba(0, 0, 0, 0.2);
+.logo {
+    width: 520px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 8px 14px rgba(80, 30, 90, 0.35));
 }
 
-.mai-section-tag {
-    display: inline-flex;
+/* 副标题单独占第一行；昵称与右侧「评分牌 + B35/B15」在第二行互相居中。 */
+.player-card {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 40px;
+    padding: 30px 40px 30px 48px;
+    border-radius: 36px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95),
+                inset 0 2px 0 #fff,
+                0 24px 50px -24px rgba(84, 36, 110, 0.55);
+}
+
+.eyebrow {
+    font-family: 'Torus', 'Microsoft YaHei', sans-serif;
+    font-weight: bold;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--ink) 55%, transparent);
+    padding-left: 0.2em;
+}
+
+.nick-cell {
+    min-width: 0;
+}
+
+.eyebrow {
+    grid-area: 1 / 1;
+}
+
+.nick-cell {
+    grid-area: 2 / 1;
+}
+
+.rating-col {
+    grid-area: 2 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+/* 评分牌：游戏原版底框 + 烤好的金色数字，5 格右对齐。 */
+.dxplate {
+    position: relative;
+    width: 560px;
+    aspect-ratio: 664 / 130;
+    filter: drop-shadow(0 6px 10px rgba(60, 20, 80, 0.3));
+}
+
+.dxplate-frame {
+    width: 100%;
+    height: 100%;
+}
+
+/* 勋章位置取自游戏 prefab：中心在底框 (630, 65)，尺寸 72×120（底框 664×130）。 */
+.dxplate-star {
+    position: absolute;
+    left: 89.46%;
+    top: 3.85%;
+    width: 10.84%;
+}
+
+.dxplate-nums {
+    position: absolute;
+    left: 46.4%;
+    top: 16.9%;
+    width: 40.4%;
+    height: 65.4%;
+    display: flex;
+    align-items: center;
+    transform: translateY(7.81%);
+}
+
+.dxplate-cell {
+    flex: 1 1 0;
+    height: 100%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem 0.85rem;
+}
+
+/* flex gap 不接受负值，字距用负 margin。 */
+.dxplate-cell + .dxplate-cell {
+    margin-left: -3.03%;
+}
+
+.dxplate-cell img {
+    height: 62.35%;
+}
+
+.breakdown {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Torus', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+}
+
+.breakdown .plus {
+    opacity: 0.4;
+    margin: 0 4px;
+}
+
+.breakdown .tag,
+.sec-tag {
+    padding: 4px 12px 3px;
     border-radius: 9999px;
     color: #fff;
-    font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: 0.05em;
-    box-shadow: 0 0 0 3px #fff,
-                0 4px 14px rgba(0, 0, 0, 0.25);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    font-weight: bold;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+}
+
+.breakdown .tag.old { background: #f93eac; }
+.breakdown .tag.new { background: #4aa8f5; }
+
+.sec-head {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 22px;
+    font-family: 'Torus', sans-serif;
+    font-weight: bold;
+}
+
+.sec-tag {
+    font-size: 30px;
+    padding: 5px 18px 3px;
+    box-shadow: 0 0 0 3px #fff, 0 6px 14px -4px rgba(0, 0, 0, 0.3);
+}
+
+.sec-label,
+.footer-text {
+    padding: 6px 8px 4px 14px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.sec-label {
+    font-size: 24px;
+    letter-spacing: 0.35em;
+    color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.sec-rule {
+    flex: 1;
+    height: 3px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35));
+}
+
+.sec-stat {
+    font-size: 36px;
+    line-height: 1;
+    padding: 8px 18px 6px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1.5px 0 #fff;
+}
+
+.sec-stat small {
+    font-size: 17px;
+    letter-spacing: 0.18em;
+    margin-right: 8px;
+    opacity: 0.55;
+    vertical-align: 4px;
+}
+
+.sec-stat.total {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: none;
 }
 
 .grid-cols-5-maimai {
-    grid-template-columns: repeat(5, minmax(400px, 400px));
+    grid-template-columns: repeat(5, 412px);
 }
 
 .gap-card {
@@ -258,69 +430,89 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     width: var(--best-width);
 }
 
-/* Subtitle "MAIMAI DX · BEST 50" — dark navy on the light pastel top of the gradient */
-.mai-subtitle {
-    font-family: Torus, 'Microsoft YaHei', sans-serif;
-    color: #1e293b;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+.footer-text {
+    font-family: 'Torus', sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 0.4em;
+    color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
-/* Rainbow-tier base (rating ≥ 15000) — per-char solid color cycle. The 6 slots
-   below cycle through bright/main/dark color triplets; this base applies only
-   the main color, used for the 15000–15999 mid-tier. */
-/* Nickname container — Noto Sans (Latin only) + YaHei/Hiragino fallback for CJK,
-   weight 700 to match the loaded face (avoids synthetic bold rendering artifacts),
-   and line-height 1.2 so the span box contains the full descender (otherwise the
-   inherited magenta text-shadow leaks through descender tails of 'p'/'q'/'g'/'y'). */
-.mai-nickname {
-    font-family: 'Noto Sans Symbols', 'Noto Sans', 'Microsoft YaHei', 'Hiragino Kaku Gothic ProN', sans-serif;
-    font-weight: 700;
-    line-height: 1.2;
+/* 昵称仿 maimai logo 字样：白色贴纸外框 + 藏青描边 + 彩色字身，三层同排版叠放。
+   外框/描边用一圈 text-shadow 做圆角膨胀，相邻字的外框自然连成一片。 */
+.nick {
+    --nick-line: #302057;
+    position: relative;
+    display: inline-grid;
+    margin: 0.16em 0 0.12em 0.16em;
+    /* 字身（em 框）中线与右侧评分牌块中线对齐的实测修正。 */
+    transform: translateY(-0.07em);
+    font-family: 'Noto Sans Symbols', 'Resource Han Rounded', 'Microsoft YaHei', sans-serif;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
-.mai-rainbow-char {
+.nick > span {
+    grid-area: 1 / 1;
+    position: relative;
+}
+
+/* 扩大每字绘制盒（背景裁切到文字时降部也有底色），负 margin 抵消，不影响排版。 */
+.nick span span {
     display: inline-block;
-    /* Drop tabular-nums inherited from the rating container — narrow digits
-       like "1" otherwise sit inside a wide fixed-width box and the diagonal
-       bands of the --banded variant land on whitespace that background-clip:text
-       masks away. Apply uniformly so both tiers stay visually consistent. */
-    font-variant-numeric: normal;
-    background-image: linear-gradient(0deg, var(--rb-color), var(--rb-color));
+    padding-block: 0.1em 0.3em;
+    margin-block: -0.1em -0.3em;
+}
+
+.nick-sticker {
+    color: #fff;
+    text-shadow: var(--sticker-shadow);
+    filter: drop-shadow(0 0 2px rgba(64, 170, 210, 0.75)) drop-shadow(0 6px 10px rgba(48, 32, 87, 0.28));
+}
+
+.nick-outline {
+    z-index: 1;
+    color: var(--nick-line);
+    text-shadow: var(--outline-shadow);
+}
+
+.nick-fill {
+    z-index: 2;
+    color: var(--tier);
+}
+
+.nick.rainbow .nick-fill span {
+    color: var(--main);
+}
+
+/* ≥16000：logo 字身那道 45° 斜切，左上角换一档色。 */
+.nick.banded .nick-fill span {
+    background: linear-gradient(135deg, var(--wedge) 0 38%, var(--main) 38% 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: transparent;
-    -webkit-text-stroke: 4px #000;
-    paint-order: stroke fill;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) saturate(1.85) brightness(1.2);
 }
 
-/* Banded variant (rating ≥ 16000) — three discrete bands at a true 45° diagonal
-   (light → main → dark, hard stops), approximating the in-game logo letter
-   style without smooth gradients. */
-.mai-rainbow-char--banded {
-    background-image: linear-gradient(135deg,
-        var(--rb-color-light) 0%,  var(--rb-color-light) 43%,
-        var(--rb-color)       43%, var(--rb-color)       68%,
-        var(--rb-color-dark)  68%, var(--rb-color-dark)  100%);
-}
+/* 彩虹档以下按评分牌段位上色。 */
+.nick.t01 { --tier: #ffffff; }
+.nick.t02 { --tier: #3fa9f5; }
+.nick.t03 { --tier: #57c443; }
+.nick.t04 { --tier: #f2c522; }
+.nick.t05 { --tier: #e8474a; }
+.nick.t06 { --tier: #9b5ad6; }
+.nick.t07 { --tier: #c97c3e; }
+.nick.t08 { --tier: #b4c2d2; }
+.nick.t09 { --tier: #eabd2a; }
+.nick.t10 { --tier: #e6d9b0; }
 
-/* c4 (indigo-violet) needs both filters disabled to render its blue hex truly:
-   - saturate(1.85) brightness(1.2) on .mai-rainbow-char shifts blue toward magenta-pink
-   - the magenta text-shadow inherited from .mai-text-shadow blends with high-B
-     glyphs at edges, also shifting perceived color toward purple
-   Other colors keep both effects so they retain the V8 vibrancy + halo. */
-.mai-rainbow-char--c4 {
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-    text-shadow: none;
-}
+/* 取色自 maimai logo 字样。 */
+.nick .c0 { --main: #de5923; --wedge: #f08c3a; }
+.nick .c1 { --main: #e9c82c; --wedge: #eea53c; }
+.nick .c2 { --main: #a7be26; --wedge: #c6d93f; }
+.nick .c3 { --main: #2b8ac3; --wedge: #4fb0e3; }
+.nick .c4 { --main: #c83d86; --wedge: #e46aa6; }
+.nick .c5 { --main: #7d55b8; --wedge: #a07ad8; }
 
-/* Per-color light / main / dark triplet, hand-tuned through pixel-level
-   comparison with the official maimai でらっくす logo letters. */
-.mai-rainbow-char--c0 { --rb-color-light: #FF8F9A; --rb-color: #FF0028; --rb-color-dark: #70000B; }  /* red */
-.mai-rainbow-char--c1 { --rb-color-light: #FF974C; --rb-color: #FF6A00; --rb-color-dark: #702F00; }  /* orange */
-.mai-rainbow-char--c2 { --rb-color-light: #FFF580; --rb-color: #FFE800; --rb-color-dark: #BDAD00; }  /* yellow */
-.mai-rainbow-char--c3 { --rb-color-light: #33FF6E; --rb-color: #00E040; --rb-color-dark: #00B233; }  /* green */
-.mai-rainbow-char--c4 { --rb-color-light: #9477E3; --rb-color: #6553FF; --rb-color-dark: #6132E3; }  /* indigo-violet */
-.mai-rainbow-char--c5 { --rb-color-light: #F1B3FF; --rb-color: #D000FF; --rb-color-dark: #70008A; }  /* purple */
 </style>
