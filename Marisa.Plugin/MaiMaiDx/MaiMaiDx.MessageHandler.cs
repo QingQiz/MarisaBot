@@ -882,7 +882,7 @@ public partial class MaiMaiDx
             NewScores = scores.Skip(DivingFishDataFetcher.OldScoreLimit).Take(DivingFishDataFetcher.NewScoreLimit).ToList()
         };
 
-        message.Reply(await RenderBest(b35));
+        message.Reply(await RenderBest(b35, message.Sender.Id));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -898,8 +898,53 @@ public partial class MaiMaiDx
 
         var b50 = await player.Fetcher.GetRating(player);
 
-        message.Reply(await RenderBest(b50));
+        message.Reply(await RenderBest(b50, message.Sender.Id));
 
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("设置 b50 背景，留空查看全部背景", "`背景名`")]
+    [MarisaPluginCommand("背景", "bg")]
+    private async Task<MarisaPluginTaskState> B50Background(Message message)
+    {
+        var name = message.Command.Trim().ToString();
+        var uid  = message.Sender.Id;
+
+        if (name.Length == 0)
+        {
+            var context = new WebContext(new
+            {
+                themes = new
+                {
+                    Themes  = B50Themes.Select(t => new { t.Key, t.Name }),
+                    Current = B50ThemeOf(uid) ?? B50Themes[0].Key,
+                    Default = B50Themes[0].Key
+                }
+            });
+
+            message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiB50Themes(context.Id)));
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var theme = B50Themes.FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || t.Key.Equals(name, StringComparison.OrdinalIgnoreCase));
+        if (theme.Key == null)
+        {
+            message.Reply($"没有这个背景，可选：{string.Join("、", B50Themes.Select(t => t.Name))}");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() =>
+        {
+            var bind = realm.All<MaiMaiDxBind>().FirstOrDefault(x => x.UId == uid);
+            if (bind == null)
+                // ServerName 留空会被路由到华立 fetcher，未绑定用户按水鱼处理
+                realm.AddWithAutoId(new MaiMaiDxBind(uid, 0) { ServerName = "DivingFish", B50Theme = theme.Key });
+            else
+                bind.B50Theme = theme.Key;
+        });
+
+        message.Reply($"b50 背景已换成{theme.Name}");
         return MarisaPluginTaskState.CompletedTask;
     }
 
@@ -930,7 +975,7 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        message.Reply(await RenderBest(b50));
+        message.Reply(await RenderBest(b50, message.Sender.Id));
 
         return MarisaPluginTaskState.CompletedTask;
     }

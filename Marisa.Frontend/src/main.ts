@@ -11,6 +11,7 @@ import '@/ExtensionMethods'
 import App from '@/App.vue'
 import ChuBestScores from "@/components/chunithm/BestScores.vue";
 import MaiBestScores from "@/components/maimai/BestScores.vue";
+import MaiB50Themes from "@/components/maimai/MaiB50Themes.vue";
 import OngekiSong from "@/components/ongeki/OngekiSong.vue";
 import OsuScore from "@/components/osu/OsuScore.vue";
 import NotFound from "@/components/NotFound.vue";
@@ -46,6 +47,7 @@ const routes = [
     {path: '/', component: NotFound},
     {path: '/help', component: Help},
     {path: '/maimai/best', component: MaiBestScores},
+    {path: '/maimai/b50-themes', component: MaiB50Themes},
     {path: '/maimai/recommend', component: Recommend},
     {path: '/maimai/summary', component: MaiMaiSummary},
     {path: '/maimai/song', component: MaiSong},
