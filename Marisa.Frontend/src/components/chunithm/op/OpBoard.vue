@@ -60,7 +60,7 @@ function RowPlayed(row: OpRow) {
                         </span>
                         <div class="op-stat">
                             <OverPower :group="row.group" :scores="row.scores" layout="bars"
-                                       numbers percent detail show-difficulty/>
+                                       numbers percent show-difficulty/>
                         </div>
                     </div>
                 </section>
@@ -113,5 +113,10 @@ function RowPlayed(row: OpRow) {
     min-width: 220px;
     white-space: nowrap;
     font-size: 22px;
+}
+
+section:first-child {
+    padding-bottom: 24px;
+    border-bottom: 2px dashed rgba(255, 255, 255, .15);
 }
 </style>

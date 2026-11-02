@@ -376,7 +376,7 @@ const OpPercent = computed(() => op.value['opMax'] === 0 ? 0 : op.value['opSum']
                             </span>
                             <span v-if="showDifficulty && layout === 'bars' && s.diffs.length" class="bar-seg-diff">
                                 <i v-for="d in s.diffs" :key="d.level"
-                                   :style="{width: d.width, background: d.color}"></i>
+                                   :style="{width: d.width, background: d.level === 3 ? 'transparent' : d.color}"></i>
                             </span>
                         </div>
                     </div>
