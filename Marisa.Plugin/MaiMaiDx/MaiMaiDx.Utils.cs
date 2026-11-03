@@ -20,9 +20,11 @@ public partial class MaiMaiDx
     /// <summary>b50 背景主题，第一个为默认；key 与前端 b50_themes.pcss 的 theme-key 对应。</summary>
     private static readonly (string Key, string Name)[] B50Themes =
     [
-        ("dots", "波点"), ("rainbow", "彩虹"), ("night", "星夜"), ("prism", "棱镜"), ("collage", "拼贴"),
-        ("holo", "全息"), ("sakura", "樱花"), ("ocean", "海洋"), ("sunset", "晚霞"), ("aurora", "极光"),
-        ("claude", "Claude"), ("chatgpt", "ChatGPT"),
+        ("dots", "波点"), ("rainbow", "彩虹"), ("prism", "棱镜"), ("holo", "全息"), ("candy", "糖果"),
+        ("sakura", "樱花"), ("matcha", "抹茶"), ("lemon", "柠檬"), ("ocean", "海洋"), ("snow", "初雪"),
+        ("sunset", "晚霞"), ("maple", "红叶"), ("honey", "蜂巢"), ("watercolor", "水彩"), ("plaid", "格纹"),
+        ("night", "星夜"), ("aurora", "极光"), ("cyber", "赛博"), ("vapor", "蒸汽波"), ("gold", "金箔"),
+        ("seigaiha", "青海波"), ("bauhaus", "包豪斯"), ("collage", "拼贴"), ("claude", "Claude"), ("chatgpt", "ChatGPT"),
     ];
 
     private static string? B50ThemeOf(long qq)

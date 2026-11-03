@@ -5,7 +5,7 @@
             <p>发送「mai 背景 名称」切换</p>
         </div>
         <div class="tiles">
-            <div v-for="t in themes" :key="t.Key" class="tile" :class="`theme-${t.Key}`">
+            <div v-for="(t, i) in themes" :key="t.Key" class="tile" :class="`theme-${t.Key}`">
                 <div v-if="t.Key === 'collage'" class="absolute inset-0 bg-collage">
                     <img v-for="id in COLLAGE" :key="id" :src="`/assets/maimai/cover/${id}.png`" alt="">
                 </div>
@@ -16,9 +16,7 @@
                         <span v-if="t.Key === current" class="tag current">当前</span>
                         <span v-if="t.Key === fallback" class="tag">默认</span>
                     </div>
-                    <div class="cards">
-                        <score-card v-for="(s, i) in SAMPLES" :key="i" :score="s" :index="i + 1"/>
-                    </div>
+                    <score-card :score="SAMPLES[i % SAMPLES.length]" :index="i % SAMPLES.length + 1"/>
                 </div>
             </div>
         </div>
@@ -54,7 +52,7 @@ axios.get(context_get, {params: {id: route.query.id, name: 'themes'}}).then(res 
 <style scoped>
 .themes-shell {
     --ink: #2b2147;
-    width: 1920px;
+    width: 2456px;
     padding: 40px 40px 44px;
     background: #f4f1fa;
     color: var(--ink);
@@ -80,14 +78,14 @@ axios.get(context_get, {params: {id: route.query.id, name: 'themes'}}).then(res 
 
 .tiles {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(5, 456px);
+    gap: 24px;
 }
 
 .tile {
     position: relative;
     overflow: hidden;
-    padding: 22px 28px 28px;
+    padding: 18px 22px 22px;
     border-radius: 28px;
     box-shadow: 0 12px 28px -14px rgba(60, 30, 90, 0.5);
 }
@@ -95,15 +93,15 @@ axios.get(context_get, {params: {id: route.query.id, name: 'themes'}}).then(res 
 .tile-head {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .name,
 .tag {
     padding: 4px 22px;
     border-radius: 9999px;
-    font: bold 40px/1.3 'Microsoft YaHei', sans-serif;
+    font: bold 34px/1.3 'Microsoft YaHei', sans-serif;
     background: rgba(255, 255, 255, 0.85);
 }
 
@@ -118,10 +116,6 @@ axios.get(context_get, {params: {id: route.query.id, name: 'themes'}}).then(res 
     background: #f93eac;
 }
 
-.cards {
-    display: flex;
-    gap: 20px;
-}
 </style>
 
 <style scoped lang="postcss" src="@/assets/css/maimai/b50_themes.pcss"/>
