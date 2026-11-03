@@ -51,6 +51,23 @@ public class MaiMaiKadaiTest
     }
 
     [Test]
+    public void AnchorSlidesDownWhenTopIsAlreadyCleared()
+    {
+        // 已达成到 10，但未完成的谱面都在 0.1..2.0：锚应落在第 10 难的未完成谱面 (1.1) 上
+        var reached = Enumerable.Range(1, 10).Select(x => (double)x).ToList();
+        var candidates = Enumerable.Range(1, 20).Select(i => Chart(i, i / 10.0)).ToList();
+
+        var result = KadaiPicker.Pick(reached, candidates, new Random(1))!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Charts[0].Difficulty, Is.InRange(0.1, 0.49));
+            Assert.That(result.Charts[1].Difficulty, Is.InRange(0.5, 0.89));
+            Assert.That(result.Charts[2].Difficulty, Is.InRange(0.9, 1.4));
+        });
+    }
+
+    [Test]
     public void FallsBackToNearestChartWhenBandIsEmpty()
     {
         var reached = Enumerable.Range(1, 10).Select(x => (double)x).ToList();

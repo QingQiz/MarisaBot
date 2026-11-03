@@ -138,7 +138,8 @@ public sealed class KadaiDifficultyCatalog
 }
 
 /// <summary>
-///     以玩家已达成谱面中最难的一首为锚出三首难度递进的课题：
+///     以玩家已达成谱面中最难的一首为锚出三首难度递进的课题（比它更难的未完成谱面不足 10 首时，
+///     锚下移到第 10 难的未完成谱面，避免高处已经打满时三档都落空）：
 ///     热身 = 比最难低 0.6~1.0，进阶 = 低 0.2~0.6，挑战 = 从低 0.2 到高 0.3；
 ///     已达成不足 5 首时按该 rating 段达成率从易到难取第 1、5、15 首左右。
 ///     同一档内优先没打过的谱面，其次是打过但成绩低的。分档参数用水鱼脱敏数据回测确定。
@@ -148,6 +149,7 @@ public static class KadaiPicker
 {
     public const int MinReached = 5;
     private const double WarmFrom = 1.0, OnFrom = 0.6, StretchFrom = 0.2, StretchTo = 0.3;
+    private const int AnchorDepth = 10;
 
     public sealed record Chart(long SongId, int LevelIdx, double Difficulty, double? Rate, SongScore? Score);
 
@@ -155,13 +157,16 @@ public static class KadaiPicker
 
     /// <summary>
     ///     玩家打过的谱面按 0.5 定数分段，取「打过至少 10 首且达成率至少 10%」的最高一段作为出题上限；
-    ///     没有这样的分段时不设上限。返回值为上限分段的起点，谱面 floor(定数×2)/2 不超过它才可出题。
+    ///     没有这样的分段时不设上限。返回值为上限分段的起点，谱面 floor(定数×2)/2 不超过它才可出题；
+    ///     同时不出比上限低 <see cref="FloorBelowCap"/> 以上的定数段（明显低于玩家水平）。
     /// </summary>
     public static double? ConstantCap(IEnumerable<(double Constant, bool Reached)> played) => played
         .GroupBy(x => Bucket(x.Constant))
         .Where(g => g.Count() >= 10 && g.Count(x => x.Reached) >= g.Count() * 0.1)
         .Select(g => (double?)g.Key)
         .Max();
+
+    public const double FloorBelowCap = 1.5;
 
     public static double Bucket(double constant) => Math.Floor(constant * 2 + 1e-9) / 2;
 
@@ -181,7 +186,8 @@ public static class KadaiPicker
             return new Result(PickInOrder(cold, easy), true);
         }
 
-        var max = reached.Max();
+        var max = Math.Min(reached.Max(),
+            candidates.Count >= AnchorDepth ? candidates.Select(c => c.Difficulty).OrderDescending().ElementAt(AnchorDepth - 1) : double.MaxValue);
         var bands = new (Func<double, bool> Contains, double Center)[]
         {
             (d => d >= max - WarmFrom && d < max - OnFrom, max - (WarmFrom + OnFrom) / 2),

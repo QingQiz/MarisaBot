@@ -560,7 +560,7 @@ public partial class MaiMaiDx
 
         var candidates = inScope
             .Where(x => !exclude.Contains((x.Song.Id, x.LevelIdx)))
-            .Where(x => cap == null || KadaiPicker.Bucket(x.Song.Constants[x.LevelIdx]) <= cap)
+            .Where(x => cap == null || KadaiPicker.Bucket(x.Song.Constants[x.LevelIdx]) is var b && b <= cap && b >= cap - KadaiPicker.FloorBelowCap)
             .Select(x => (x.Song, x.LevelIdx, Score: scores.GetValueOrDefault((x.Song.Id, x.LevelIdx))))
             .Where(x => !goal.Reached(x.Score, MaxDx(x.Song, x.LevelIdx)))
             .Select(x => Difficulty(x.Song, x.LevelIdx) is { } d
