@@ -1579,6 +1579,97 @@ public partial class MaiMaiDx
 
     #endregion
 
+    #region 课题
+
+    [MarisaPluginDoc("布置三首难度递进的课题，可选 SSS/SSS+/AP/AP+/五星，如`AP课题`、`五星课题 14+ @某人`")]
+    [MarisaPluginTrigger(typeof(MaiMaiDx), nameof(KadaiTrigger))]
+    private async Task<MarisaPluginTaskState> KadaiAssign(Message message)
+    {
+        if (!TryParseKadaiCommand(message.Command, out var goal, out var filter))
+        {
+            return MarisaPluginTaskState.NoResponse;
+        }
+
+        var player = ResolvePlayer(message);
+        var (nickname, scores, picked, error) = await PickKadai(player, goal, filter, new HashSet<(long, int)>());
+        if (picked == null)
+        {
+            message.Reply(error!);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        // 给别人布置时不覆盖对方进行中的课题，除非是原布置人
+        var old = LoadKadai(player.Qq).FirstOrDefault(x => x.Goal == goal);
+        if (player.Qq != message.Sender.Id && old != null && old.AssignerId != message.Sender.Id && !KadaiFinished(old, scores))
+        {
+            message.Reply($"对方已有进行中的{goal.Name()}课题");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var row = SaveKadai(player.Qq, goal, filter, picked.Charts, message.Sender.Id, message.Sender.Name);
+        message.Reply(await RenderKadai(player.Qq, nickname, scores, [row], picked.ColdStart));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("查看进行中的课题与完成情况，可以`@某人`")]
+    [MarisaPluginCommand("课题")]
+    private async Task<MarisaPluginTaskState> KadaiShow(Message message)
+    {
+        var player = ResolvePlayer(message);
+        var rows = LoadKadai(player.Qq);
+
+        if (rows.Count == 0)
+        {
+            message.Reply(player.IsSelf ? "还没有课题，发送「mai AP课题」等命令布置一个" : "对方还没有课题");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var (nickname, scores) = await player.Fetcher.GetScores(player);
+        message.Reply(await RenderKadai(player.Qq, nickname, scores, rows, false));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    [MarisaPluginDoc("重抽自己进行中的某个课题，沿用原来的筛选条件，如`重抽 AP课题`")]
+    [MarisaPluginCommand("重抽")]
+    private async Task<MarisaPluginTaskState> KadaiReroll(Message message)
+    {
+        if (!TryParseKadaiCommand(message.Command, out var goal, out _))
+        {
+            message.Reply("要重抽哪个课题？如「mai 重抽 AP课题」");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var player = ResolvePlayer(message);
+        if (!player.IsSelf)
+        {
+            message.Reply("只能重抽自己的课题");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var old = LoadKadai(player.Qq).FirstOrDefault(x => x.Goal == goal);
+        if (old == null)
+        {
+            message.Reply($"没有进行中的{goal.Name()}课题");
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var (nickname, scores, picked, error) = await PickKadai(player, goal, old.Filter, old.Charts.ToHashSet());
+        if (picked == null)
+        {
+            message.Reply(error!);
+            return MarisaPluginTaskState.CompletedTask;
+        }
+
+        var saved = SaveKadai(player.Qq, goal, old.Filter, picked.Charts, old.AssignerId, old.AssignerName);
+        message.Reply(await RenderKadai(player.Qq, nickname, scores, [saved], picked.ColdStart));
+
+        return MarisaPluginTaskState.CompletedTask;
+    }
+
+    #endregion
+
     #region 分数线 / 容错率
 
     /// <summary>
