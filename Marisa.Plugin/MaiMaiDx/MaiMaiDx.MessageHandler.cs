@@ -1606,7 +1606,7 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var row = SaveKadai(player.Qq, goal, filter, picked.Charts, message.Sender.Id, message.Sender.Name);
+        var row = SaveKadai(player.Qq, goal, filter, picked.Charts, [], message.Sender.Id, message.Sender.Name);
         message.Reply(await RenderKadai(player.Qq, nickname, scores, [row], picked.ColdStart));
 
         return MarisaPluginTaskState.CompletedTask;
@@ -1655,14 +1655,21 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var (nickname, scores, picked, error) = await PickKadai(player, goal, old.Filter, old.Charts.ToHashSet());
+        // 连同前两次一起排除，避免几首谱面来回出现；范围太窄抽不出时只排除当前三首
+        var (nickname, scores, picked, error) = await PickKadai(player, goal, old.Filter, old.Charts.Concat(old.Recent).ToHashSet());
+        if (picked == null)
+        {
+            (nickname, scores, picked, error) = await PickKadai(player, goal, old.Filter, old.Charts.ToHashSet());
+        }
+
         if (picked == null)
         {
             message.Reply(error!);
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var saved = SaveKadai(player.Qq, goal, old.Filter, picked.Charts, old.AssignerId, old.AssignerName);
+        var recent = old.Charts.Concat(old.Recent).Take(6).ToList();
+        var saved = SaveKadai(player.Qq, goal, old.Filter, picked.Charts, recent, old.AssignerId, old.AssignerName);
         message.Reply(await RenderKadai(player.Qq, nickname, scores, [saved], picked.ColdStart));
 
         return MarisaPluginTaskState.CompletedTask;

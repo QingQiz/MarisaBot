@@ -139,18 +139,31 @@ public sealed class KadaiDifficultyCatalog
 
 /// <summary>
 ///     以玩家已达成谱面中最难的一首为锚出三首难度递进的课题：
-///     热身 = 比最难低 0.5~1.0，进阶 = 比最难低 0.5 以内，挑战 = 比最难高 0.6 以内；
+///     热身 = 比最难低 0.6~1.0，进阶 = 低 0.2~0.6，挑战 = 从低 0.2 到高 0.3；
 ///     已达成不足 5 首时按该 rating 段达成率从易到难取第 1、5、15 首左右。
 ///     同一档内优先没打过的谱面，其次是打过但成绩低的。分档参数用水鱼脱敏数据回测确定。
+///     另按玩家自己的记录设定数上限（<see cref="ConstantCap"/>），避免出到玩家明显打不动的定数段。
 /// </summary>
 public static class KadaiPicker
 {
     public const int MinReached = 5;
-    private const double WarmFrom = 1.0, OnFrom = 0.5, StretchRange = 0.6;
+    private const double WarmFrom = 1.0, OnFrom = 0.6, StretchFrom = 0.2, StretchTo = 0.3;
 
     public sealed record Chart(long SongId, int LevelIdx, double Difficulty, double? Rate, SongScore? Score);
 
     public sealed record Result(IReadOnlyList<Chart> Charts, bool ColdStart);
+
+    /// <summary>
+    ///     玩家打过的谱面按 0.5 定数分段，取「打过至少 10 首且达成率至少 10%」的最高一段作为出题上限；
+    ///     没有这样的分段时不设上限。返回值为上限分段的起点，谱面 floor(定数×2)/2 不超过它才可出题。
+    /// </summary>
+    public static double? ConstantCap(IEnumerable<(double Constant, bool Reached)> played) => played
+        .GroupBy(x => Bucket(x.Constant))
+        .Where(g => g.Count() >= 10 && g.Count(x => x.Reached) >= g.Count() * 0.1)
+        .Select(g => (double?)g.Key)
+        .Max();
+
+    public static double Bucket(double constant) => Math.Floor(constant * 2 + 1e-9) / 2;
 
     /// <param name="reached">玩家已达成目标的全部谱面难度（不受筛选影响）。</param>
     /// <param name="candidates">筛选范围内、尚未达成目标的谱面。</param>
@@ -172,8 +185,8 @@ public static class KadaiPicker
         var bands = new (Func<double, bool> Contains, double Center)[]
         {
             (d => d >= max - WarmFrom && d < max - OnFrom, max - (WarmFrom + OnFrom) / 2),
-            (d => d >= max - OnFrom && d <= max, max - OnFrom / 2),
-            (d => d > max && d <= max + StretchRange, max + StretchRange / 2),
+            (d => d >= max - OnFrom && d < max - StretchFrom, max - (OnFrom + StretchFrom) / 2),
+            (d => d >= max - StretchFrom && d <= max + StretchTo, max + (StretchTo - StretchFrom) / 2),
         };
         var pools = bands.Select(b => candidates.Where(c => b.Contains(c.Difficulty)).ToList()).ToList();
         return new Result(PickInOrder(pools, candidates, bands.Select(b => b.Center).ToArray()), false);

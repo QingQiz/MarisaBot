@@ -458,6 +458,7 @@ public partial class MaiMaiDx
         KadaiGoal Goal,
         string Filter,
         IReadOnlyList<(long Id, int LevelIdx)> Charts,
+        IReadOnlyList<(long Id, int LevelIdx)> Recent,
         long AssignerId,
         string AssignerName,
         DateTimeOffset CreatedAt);
@@ -485,7 +486,7 @@ public partial class MaiMaiDx
             .Select(x =>
             {
                 KadaiGoals.TryParse(x.Goal, out var goal);
-                return new KadaiView(goal, x.Filter, ParseCharts(x.Charts), x.AssignerId, x.AssignerName, x.CreatedAt);
+                return new KadaiView(goal, x.Filter, ParseCharts(x.Charts), ParseCharts(x.Recent), x.AssignerId, x.AssignerName, x.CreatedAt);
             })
             .OrderBy(x => x.Goal)
             .ToList();
@@ -498,9 +499,10 @@ public partial class MaiMaiDx
     }
 
     private static KadaiView SaveKadai(
-        long qq, KadaiGoal goal, string filter, IEnumerable<KadaiPicker.Chart> charts, long assignerId, string assignerName)
+        long qq, KadaiGoal goal, string filter, IEnumerable<KadaiPicker.Chart> charts,
+        IReadOnlyList<(long Id, int LevelIdx)> recent, long assignerId, string assignerName)
     {
-        var view = new KadaiView(goal, filter, charts.Select(c => (c.SongId, c.LevelIdx)).ToList(), assignerId, assignerName, DateTimeOffset.Now);
+        var view = new KadaiView(goal, filter, charts.Select(c => (c.SongId, c.LevelIdx)).ToList(), recent, assignerId, assignerName, DateTimeOffset.Now);
         var goalName = goal.Name();
 
         using var realm = BotDbContext.OpenRealm();
@@ -511,6 +513,7 @@ public partial class MaiMaiDx
 
             row.Filter       = filter;
             row.Charts       = string.Join(',', view.Charts.Select(c => $"{c.Id}:{c.LevelIdx}"));
+            row.Recent       = string.Join(',', view.Recent.Select(c => $"{c.Id}:{c.LevelIdx}"));
             row.AssignerId   = assignerId;
             row.AssignerName = assignerName;
             row.CreatedAt    = view.CreatedAt;
@@ -546,15 +549,18 @@ public partial class MaiMaiDx
         var catalog = KadaiDifficultyCatalog.Default;
         var rating  = BestRating();
 
-        var reached = songs
-            .SelectMany(song => song.Constants.Select((_, levelIdx) => (Song: song, LevelIdx: levelIdx)))
-            .Where(x => goal.Reached(scores.GetValueOrDefault((x.Song.Id, x.LevelIdx)), MaxDx(x.Song, x.LevelIdx)))
-            .Select(x => Difficulty(x.Song, x.LevelIdx))
-            .OfType<double>()
+        var rated = songs
+            .SelectMany(song => song.Constants.Select((constant, levelIdx) => (Song: song, LevelIdx: levelIdx, Constant: constant)))
+            .Select(x => (x.Constant, Score: scores.GetValueOrDefault((x.Song.Id, x.LevelIdx)), Difficulty: Difficulty(x.Song, x.LevelIdx),
+                Reached: goal.Reached(scores.GetValueOrDefault((x.Song.Id, x.LevelIdx)), MaxDx(x.Song, x.LevelIdx))))
+            .Where(x => x.Difficulty.HasValue)
             .ToList();
+        var reached = rated.Where(x => x.Reached).Select(x => x.Difficulty!.Value).ToList();
+        var cap = KadaiPicker.ConstantCap(rated.Where(x => x.Score != null).Select(x => (x.Constant, x.Reached)));
 
         var candidates = inScope
             .Where(x => !exclude.Contains((x.Song.Id, x.LevelIdx)))
+            .Where(x => cap == null || KadaiPicker.Bucket(x.Song.Constants[x.LevelIdx]) <= cap)
             .Select(x => (x.Song, x.LevelIdx, Score: scores.GetValueOrDefault((x.Song.Id, x.LevelIdx))))
             .Where(x => !goal.Reached(x.Score, MaxDx(x.Song, x.LevelIdx)))
             .Select(x => Difficulty(x.Song, x.LevelIdx) is { } d

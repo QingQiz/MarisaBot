@@ -11,18 +11,18 @@ public class MaiMaiKadaiTest
     [Test]
     public void PicksOneChartPerBandInIncreasingDifficulty()
     {
-        // 已达成难度 1..10：热身 = [9, 9.5)，进阶 = [9.5, 10]，挑战 = (10, 10.6]
+        // 已达成难度 1..10：热身 = [9, 9.4)，进阶 = [9.4, 9.8)，挑战 = [9.8, 10.3]
         var reached = Enumerable.Range(1, 10).Select(x => (double)x).ToList();
-        var candidates = new[] { 5.0, 9.1, 9.3, 9.7, 10.0, 10.3, 12.0 }.Select((d, i) => Chart(i, d)).ToList();
+        var candidates = new[] { 5.0, 9.1, 9.3, 9.5, 9.7, 10.2, 12.0 }.Select((d, i) => Chart(i, d)).ToList();
 
         var result = KadaiPicker.Pick(reached, candidates, new Random(1))!;
 
         Assert.Multiple(() =>
         {
             Assert.That(result.ColdStart, Is.False);
-            Assert.That(result.Charts[0].Difficulty, Is.InRange(9, 9.49));
-            Assert.That(result.Charts[1].Difficulty, Is.InRange(9.5, 10));
-            Assert.That(result.Charts[2].Difficulty, Is.EqualTo(10.3));
+            Assert.That(result.Charts[0].Difficulty, Is.InRange(9, 9.39));
+            Assert.That(result.Charts[1].Difficulty, Is.InRange(9.4, 9.79));
+            Assert.That(result.Charts[2].Difficulty, Is.EqualTo(10.2));
         });
     }
 
@@ -35,7 +35,7 @@ public class MaiMaiKadaiTest
             Chart(1, 9.1, achievement: 99.0),
             Chart(2, 9.2),
             Chart(3, 9.3, achievement: 100.2),
-            Chart(4, 9.8), Chart(5, 10.3),
+            Chart(4, 9.6), Chart(5, 10.2),
         };
 
         for (var seed = 0; seed < 20; seed++)
@@ -119,6 +119,25 @@ public class MaiMaiKadaiTest
             Assert.That(KadaiGoal.FiveStar.Reached(Score(100, dx: 970), 1000), Is.True);
             Assert.That(KadaiGoal.FiveStar.Reached(Score(100, dx: 969), 1000), Is.False);
             Assert.That(KadaiGoal.Sss.Reached(null, 0), Is.False);
+        });
+    }
+
+    [Test]
+    public void ConstantCapIsHighestBucketWithEnoughPlaysAndHits()
+    {
+        var played = new List<(double, bool)>();
+        played.AddRange(Enumerable.Range(0, 20).Select(i => (13.7, i < 8)));   // 13.5 段 8/20
+        played.AddRange(Enumerable.Range(0, 20).Select(i => (14.2, i < 3)));   // 14.0 段 3/20
+        played.AddRange(Enumerable.Range(0, 20).Select(i => (14.6, i < 1)));   // 14.5 段 1/20 < 10%
+        played.AddRange(Enumerable.Range(0, 5).Select(_ => (15.0, true)));     // 15.0 段只打过 5 首
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(KadaiPicker.ConstantCap(played), Is.EqualTo(14.0));
+            Assert.That(KadaiPicker.ConstantCap(played.Where(x => x.Item1 < 14)), Is.EqualTo(13.5));
+            Assert.That(KadaiPicker.ConstantCap([(13.0, false), (13.2, false)]), Is.Null);
+            Assert.That(KadaiPicker.Bucket(14.5), Is.EqualTo(14.5));
+            Assert.That(KadaiPicker.Bucket(14.4), Is.EqualTo(14.0));
         });
     }
 

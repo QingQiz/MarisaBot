@@ -23,6 +23,9 @@ public partial class MaiMaiDxKadai : IRealmObject, IHaveId, IHaveUId
     /// <summary>三首谱面，格式 `歌曲ID:难度序号`，用逗号分隔，难度递增。</summary>
     public string Charts { get; set; } = string.Empty;
 
+    /// <summary>前两次的谱面（格式同 Charts），重抽时连同当前三首一起排除。</summary>
+    public string Recent { get; set; } = string.Empty;
+
     public long AssignerId { get; set; }
 
     public string AssignerName { get; set; } = string.Empty;
