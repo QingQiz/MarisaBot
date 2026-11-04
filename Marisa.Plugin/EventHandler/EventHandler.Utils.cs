@@ -43,14 +43,15 @@ public partial class EventHandler
     private static void MemberLeaveHandler(Message message, MessageData msg, long qq)
     {
         var m = (msg as MessageDataMemberLeave)!;
+        var who = string.IsNullOrEmpty(m.Name) ? $"{m.Id}" : $"{m.Name} ({m.Id})";
 
         if (m.Kicker == null)
         {
-            message.Reply($"{m.Name} ({m.Id}) 退群了");
+            message.Reply($"{who} 退群了");
         }
         else
         {
-            message.Reply(new MessageDataText($"{m.Name} ({m.Id}) 被"),
+            message.Reply(new MessageDataText($"{who} 被"),
                 new MessageDataAt((long)m.Kicker),
                 new MessageDataText("踢了")
             );
