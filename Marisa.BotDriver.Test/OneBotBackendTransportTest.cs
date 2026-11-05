@@ -179,6 +179,34 @@ public class OneBotBackendTransportTest
         Assert.That(mute.Time, Is.EqualTo(TimeSpan.FromSeconds(60)));
     }
 
+    [TestCase("leave", 77777L, null)]
+    [TestCase("leave", 0L, null)]
+    [TestCase("kick", 66666L, 66666L)]
+    public async Task Member_Leave_Should_Carry_Nickname_And_Only_Kicker_When_Kicked(string subType, long operatorId, long? kicker)
+    {
+        _ = _backend.RunTransport();
+        await _server.WaitForClientAsync(TimeSpan.FromSeconds(10));
+
+        await _server.PushEventAsync($$"""
+            {
+              "post_type": "notice",
+              "notice_type": "group_decrease",
+              "sub_type": "{{subType}}",
+              "group_id": 55555,
+              "user_id": 77777,
+              "operator_id": {{operatorId}}
+            }
+            """);
+
+        var message = await ReadRecvQueue();
+        var leave = (MessageDataMemberLeave)message.MessageChain!.Messages.Single();
+
+        Assert.That(message.GroupInfo!.Id, Is.EqualTo(55555));
+        Assert.That(leave.Id, Is.EqualTo(77777));
+        Assert.That(leave.Name, Is.EqualTo("stranger-77777"));
+        Assert.That(leave.Kicker, Is.EqualTo(kicker));
+    }
+
     private async Task<Message> ReadRecvQueue()
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -245,6 +273,7 @@ internal sealed class FakeOneBotServer : IAsyncDisposable
     public Channel<string> ReceivedActions { get; } = Channel.CreateUnbounded<string>();
 
     private string? _endpoint;
+    private WebSocket? _socket;
 
     public string Endpoint => _endpoint ??= ComputeEndpoint();
 
@@ -292,6 +321,7 @@ internal sealed class FakeOneBotServer : IAsyncDisposable
         }
 
         var socket = await context.WebSockets.AcceptWebSocketAsync();
+        _socket = socket;
         _clientConnected.TrySetResult();
 
         var buffer = new byte[8192];
@@ -320,9 +350,12 @@ internal sealed class FakeOneBotServer : IAsyncDisposable
         var root = document.RootElement;
         var echo = root.TryGetProperty("echo", out var echoElement) ? echoElement.GetString() : null;
 
-        var data = root.TryGetProperty("action", out var action) && action.GetString() == "get_login_info"
-            ? new Dictionary<string, object?> { ["user_id"] = 3548314110L, ["nickname"] = "test-bot" }
-            : new Dictionary<string, object?> { ["message_id"] = 42L };
+        var data = (root.TryGetProperty("action", out var action) ? action.GetString() : null) switch
+        {
+            "get_login_info"    => new Dictionary<string, object?> { ["user_id"] = 3548314110L, ["nickname"] = "test-bot" },
+            "get_stranger_info" => new Dictionary<string, object?> { ["nickname"] = $"stranger-{root.GetProperty("params").GetProperty("user_id").GetString()}" },
+            _                   => new Dictionary<string, object?> { ["message_id"] = 42L }
+        };
 
         var response = JsonSerializer.Serialize(new Dictionary<string, object?>
         {
@@ -334,6 +367,9 @@ internal sealed class FakeOneBotServer : IAsyncDisposable
 
         await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(response)), WebSocketMessageType.Text, true, _cts.Token);
     }
+
+    public Task PushEventAsync(string json) =>
+        _socket!.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)), WebSocketMessageType.Text, true, _cts.Token);
 
     public ValueTask DisposeAsync()
     {
