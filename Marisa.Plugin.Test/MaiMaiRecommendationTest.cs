@@ -98,6 +98,36 @@ public class MaiMaiRecommendationTest
     }
 
     [Test]
+    public void PlanVariesAmongNearBestChartsButSkipsCostlierOnes()
+    {
+        // 1–5 等价；6 拟合难度高出 0.6；7 未游玩，新打一首的努力远大于小幅推分
+        var songs = Enumerable.Range(1, 7).Select(id => CreateSong(id, false, 14.0)).ToList();
+        var rating = new DxRating
+        {
+            Nickname = "tester",
+            OldScores = Enumerable.Range(1, 6).Select(id => CreateScore(id, 14.0, 99.9)).ToList(),
+            NewScores = []
+        };
+        const string json = """
+        {
+          "6": {"charts": [{"li": 0, "ds": 14.0, "kind": "fitted_ds", "curve": [[0, 14.9], [20000, 14.9]], "pooled": 0.9, "band_pct": 95, "score_rank": {"rank": 1, "of": 7}}]}
+        }
+        """;
+        var catalog = RecommendationDifficultyCatalog.FromJson(json);
+
+        var picked = Enumerable.Range(0, 30)
+            .Select(seed => new MaiMaiRecommendationEngine(songs, catalog, new Random(seed)).BuildPlan(rating, rating.Rating + 1))
+            .Select(result => result.Data!.Items.Single().SongId)
+            .ToHashSet();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(picked, Has.Count.GreaterThan(1));
+            Assert.That(picked, Is.SubsetOf(new long[] { 1, 2, 3, 4, 5 }));
+        });
+    }
+
+    [Test]
     public void PlanReportsAlreadyReachedAndUnreachableTargets()
     {
         var song = CreateSong(1, false, 14.0);
