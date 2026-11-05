@@ -283,6 +283,10 @@ public class OneBotBackend : BotDriver.BotDriver
 
                 break;
             }
+            case "notice" when ReadString(root, "notice_type") == "group_decrease":
+                // 查昵称的应答要经接收循环返回，不能在循环里等
+                _ = Task.Run(() => EnqueueMemberLeave(root), ShutdownToken);
+                break;
             case "notice":
             {
                 var message = ConvertNoticeEvent(root);
@@ -506,7 +510,6 @@ public class OneBotBackend : BotDriver.BotDriver
                 new MessageDataBotMute(groupId, BotMuteDuration(root)), operatorId),
             "group_ban" when IsBotBanNotice(userId) && ReadString(root, "sub_type") == "lift_ban" => GroupNotice(root,
                 new MessageDataBotUnmute(groupId), operatorId),
-            "group_decrease" => GroupNotice(root, new MessageDataMemberLeave(userId, string.Empty, operatorId == 0 ? null : operatorId)),
             "group_increase" => GroupNotice(root, new MessageDataNewMember(userId, groupId,
                 ReadString(root, "sub_type") == "approve" || operatorId == 0 ? null : operatorId)),
             "notify" when ReadString(root, "sub_type") == "poke" => PokeNotice(root),
@@ -529,6 +532,33 @@ public class OneBotBackend : BotDriver.BotDriver
         {
             var duration = ReadLong(data, "duration");
             return duration <= 0 ? null : duration;
+        }
+    }
+
+    private async Task EnqueueMemberLeave(JsonElement root)
+    {
+        var userId = ReadLong(root, "user_id");
+        var operatorId = ReadLong(root, "operator_id");
+        long? kicker = ReadString(root, "sub_type") == "leave" || operatorId == 0 || operatorId == userId ? null : operatorId;
+
+        var leave = new MessageDataMemberLeave(userId, await Nickname(), kicker);
+        await MessageQueueProvider.RecvQueue.Writer.WriteAsync(GroupNotice(root, leave), ShutdownToken);
+
+        async Task<string> Nickname()
+        {
+            try
+            {
+                var data = await SendAction("get_stranger_info", new Dictionary<string, object?>
+                {
+                    ["user_id"] = userId.ToString()
+                });
+                return ReadString(data, "nickname") ?? string.Empty;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.Warn(ex, $"Failed to get nickname of {userId}");
+                return string.Empty;
+            }
         }
     }
 

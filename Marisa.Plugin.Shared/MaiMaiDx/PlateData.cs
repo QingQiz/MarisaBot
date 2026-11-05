@@ -809,7 +809,15 @@ public static class PlateData
         [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Query? query)
         => TryParseCore(raw, knownCharters, knownArtists, ParseMode.Best, out query, out _);
 
-    private enum ParseMode { Plate, Scope, Best }
+    /// <summary>解析课题等功能的谱面筛选：规则同条件 b50，但没有「50」后缀，也不接受成绩阈值。</summary>
+    public static bool TryParseFilter(
+        string raw,
+        IReadOnlyCollection<string> knownCharters,
+        IReadOnlyCollection<string> knownArtists,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Query? query)
+        => TryParseCore(raw, knownCharters, knownArtists, ParseMode.Filter, out query, out _);
+
+    private enum ParseMode { Plate, Scope, Best, Filter }
 
     /// <summary>含定数条件时按歌曲 ID 升序，否则按定数降序。</summary>
     public static IReadOnlyList<(double Constant, int LevelIdx, MaiMaiSong Song)> SelectScopeCharts(
@@ -874,6 +882,7 @@ public static class PlateData
         error = null;
 
         var scopeOnly = mode == ParseMode.Scope;
+        var bestLike = mode is ParseMode.Best or ParseMode.Filter;
         var trimmed = raw.Trim();
 
         if ((mode == ParseMode.Plate && !trimmed.EndsWith(CommandSuffix, StringComparison.Ordinal))
@@ -944,7 +953,7 @@ public static class PlateData
         var difficultyExplicit = explicitLevelIdxes.Count > 0;
         IReadOnlyList<int> levelIdxes = difficultyExplicit ? explicitLevelIdxes : DefaultLevelIdxes;
 
-        if (mode != ParseMode.Best && string.IsNullOrWhiteSpace(selectorPart) && selectors.Count == 0)
+        if (!bestLike && string.IsNullOrWhiteSpace(selectorPart) && selectors.Count == 0)
         {
             error = new(ErrorKind.UnknownSelector, inner);
             return false;
@@ -1074,7 +1083,7 @@ public static class PlateData
             selectors.Add(new Selector.Charter(unknownName));
         }
 
-        if (mode != ParseMode.Best && selectors.Count == 0)
+        if (!bestLike && selectors.Count == 0)
         {
             // 理论上不会走到（EmptyQuery 在更早被挡），保险兜底
             error = new(ErrorKind.UnknownSelector, inner);
@@ -1083,7 +1092,7 @@ public static class PlateData
 
         if (!difficultyExplicit)
         {
-            if (mode == ParseMode.Best || selectors.Any(s => s is Selector.Level or Selector.Constant or Selector.ConstantRange))
+            if (bestLike || selectors.Any(s => s is Selector.Level or Selector.Constant or Selector.ConstantRange))
             {
                 // 指定了等级/定数：该等级/定数的谱面可能分布在任意难度（如 6+ 只在 BASIC/ADVANCED，
                 // 13+ 在 EXPERT/MASTER/Re:MASTER），全难度都查——此时版本代字的「仅 MASTER」默认不适用。
@@ -1107,7 +1116,7 @@ public static class PlateData
         }
 
         // 阈值缺省回落：特例牌子（霸者）固定自带的成绩要求优先，否则默认 SSS（将）。
-        threshold ??= mode == ParseMode.Best
+        threshold ??= bestLike
             ? AnyScoreThreshold
             : selectors.OfType<Selector.Plate>()
                 .Select(p => p.ImpliedThreshold)
@@ -1505,7 +1514,7 @@ public static class PlateData
             }
 
             // 「50」结尾的消息很常见，这里只认完整名字，避免把其他命令的参数（如 song、line）当成曲师
-            bool IsKnownName(string known, string name) => mode == ParseMode.Best
+            bool IsKnownName(string known, string name) => bestLike
                 ? known.Equals(name, StringComparison.OrdinalIgnoreCase)
                 : known.Contains(name, StringComparison.OrdinalIgnoreCase);
         }

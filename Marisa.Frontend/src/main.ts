@@ -20,6 +20,7 @@ import OsuRecommend from "@/components/osu/OsuRecommend.vue";
 import OsuPreview from "@/components/osu/OsuPreview.vue";
 import Recommend from "@/components/maimai/Recommend.vue";
 import MaiMaiSummary from "@/components/maimai/Summary.vue";
+import MaiKadai from "@/components/maimai/MaiKadai.vue";
 import {default as ChunithmSummary} from "@/components/chunithm/Summary.vue";
 import OverPowerAll from "@/components/chunithm/OverPowerAll.vue";
 import OpBase from "@/components/chunithm/op/OpBase.vue";
@@ -50,6 +51,7 @@ const routes = [
     {path: '/maimai/b50-themes', component: MaiB50Themes},
     {path: '/maimai/recommend', component: Recommend},
     {path: '/maimai/summary', component: MaiMaiSummary},
+    {path: '/maimai/kadai', component: MaiKadai},
     {path: '/maimai/song', component: MaiSong},
     {path: '/maimai/song-score', component: MaiSongScore},
     {path: '/maimai/versus', component: MaiVersus},

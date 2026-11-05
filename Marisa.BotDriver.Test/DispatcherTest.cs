@@ -108,6 +108,15 @@ public class DispatcherTest
                 Type = MessageType.TempMessage
             }, typeof(MaiMaiDx), null).SetName("temp");
 
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai AP课题")), typeof(MaiMaiDx), "KadaiAssign").SetName("mai AP kadai");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai ap+课题 14+")), typeof(MaiMaiDx), "KadaiAssign").SetName("mai AP plus kadai with filter");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai SSS+课题")), typeof(MaiMaiDx), "KadaiAssign").SetName("mai SSS plus kadai");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai SSS课题 紫谱")), typeof(MaiMaiDx), "KadaiAssign").SetName("mai SSS kadai with difficulty");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 五星课题")), typeof(MaiMaiDx), "KadaiAssign").SetName("mai five star kadai");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 课题")), typeof(MaiMaiDx), "KadaiShow").SetName("mai kadai show");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai 重抽 AP课题")), typeof(MaiMaiDx), "KadaiReroll").SetName("mai kadai reroll");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai ap50")), typeof(MaiMaiDx), "FilteredBest").SetName("mai ap50 still filtered best");
+            yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum")), typeof(MaiMaiDx), "Summary").SetName("mai sum still summary");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver");
             yield return new TestCaseData(CreateMessage(new MessageDataText("maisumver")), typeof(MaiMaiDx), "SummaryVersion").SetName("maisumver");
             yield return new TestCaseData(CreateMessage(new MessageDataText("mai sum ver白")), typeof(MaiMaiDx), "SummaryVersion").SetName("mai sum ver白");

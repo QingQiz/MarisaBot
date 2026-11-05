@@ -477,6 +477,199 @@ public partial class MaiMaiDx
 
     #endregion
 
+    #region 课题
+
+    private static readonly System.Text.RegularExpressions.Regex KadaiCommandRegex = new(
+        @"^\s*(SSS\+|SSS|AP\+|AP|五星)\s*课题(.*)$",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline,
+        TimeSpan.FromSeconds(1));
+
+    private sealed record KadaiView(
+        KadaiGoal Goal,
+        string Filter,
+        IReadOnlyList<(long Id, int LevelIdx)> Charts,
+        IReadOnlyList<(long Id, int LevelIdx)> Recent,
+        long AssignerId,
+        string AssignerName,
+        DateTimeOffset CreatedAt);
+
+    private bool KadaiTrigger(Message message, IServiceProvider _serviceProvider) => TryParseKadaiCommand(message.Command, out _, out _);
+
+    private static bool TryParseKadaiCommand(ReadOnlyMemory<char> command, out KadaiGoal goal, out string filter)
+    {
+        goal   = default;
+        filter = string.Empty;
+
+        var match = KadaiCommandRegex.Match(command.ToString());
+        if (!match.Success || !KadaiGoals.TryParse(match.Groups[1].Value, out goal)) return false;
+
+        filter = match.Groups[2].Value.Trim();
+        return true;
+    }
+
+    private static List<KadaiView> LoadKadai(long qq)
+    {
+        using var realm = BotDbContext.OpenRealm();
+
+        return realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxKadai>().Where(x => x.UId == qq).ToList()
+            .Where(x => KadaiGoals.TryParse(x.Goal, out _))
+            .Select(x =>
+            {
+                KadaiGoals.TryParse(x.Goal, out var goal);
+                return new KadaiView(goal, x.Filter, ParseCharts(x.Charts), ParseCharts(x.Recent), x.AssignerId, x.AssignerName, x.CreatedAt);
+            })
+            .OrderBy(x => x.Goal)
+            .ToList();
+
+        static List<(long, int)> ParseCharts(string text) => text
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Split(':'))
+            .Select(x => (long.Parse(x[0]), int.Parse(x[1])))
+            .ToList();
+    }
+
+    private static KadaiView SaveKadai(
+        long qq, KadaiGoal goal, string filter, IEnumerable<KadaiPicker.Chart> charts,
+        IReadOnlyList<(long Id, int LevelIdx)> recent, long assignerId, string assignerName)
+    {
+        var view = new KadaiView(goal, filter, charts.Select(c => (c.SongId, c.LevelIdx)).ToList(), recent, assignerId, assignerName, DateTimeOffset.Now);
+        var goalName = goal.Name();
+
+        using var realm = BotDbContext.OpenRealm();
+        realm.Write(() =>
+        {
+            var row = realm.All<Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxKadai>().FirstOrDefault(x => x.UId == qq && x.Goal == goalName)
+                   ?? realm.AddWithAutoId(new Marisa.Database.Entity.Plugin.MaiMaiDx.MaiMaiDxKadai { UId = qq, Goal = goalName });
+
+            row.Filter       = filter;
+            row.Charts       = string.Join(',', view.Charts.Select(c => $"{c.Id}:{c.LevelIdx}"));
+            row.Recent       = string.Join(',', view.Recent.Select(c => $"{c.Id}:{c.LevelIdx}"));
+            row.AssignerId   = assignerId;
+            row.AssignerName = assignerName;
+            row.CreatedAt    = view.CreatedAt;
+        });
+
+        return view;
+    }
+
+    private bool KadaiFinished(KadaiView row, Dictionary<(long Id, int LevelIdx), SongScore> scores) => row.Charts.All(c =>
+        SongDb.GetSongById(c.Id) is { } song && c.LevelIdx < song.Charts.Count &&
+        row.Goal.Reached(scores.GetValueOrDefault(c), song.Charts[c.LevelIdx].Notes.Sum() * 3));
+
+    /// <summary>按玩家已达成的谱面出三首课题；filter 只限定出题范围，玩家水平按全部成绩算。</summary>
+    private async Task<(string? Nickname, Dictionary<(long Id, int LevelIdx), SongScore> Scores, KadaiPicker.Result? Result, string? Error)>
+        PickKadai(ResolvedPlayer player, KadaiGoal goal, string filter, IReadOnlySet<(long, int)> exclude)
+    {
+        var songs = SongDb.SongList.Where(song => song.Id <= 100000).ToList();
+        var inScope = songs.SelectMany(song => song.Constants.Select((_, levelIdx) => (Song: song, LevelIdx: levelIdx)));
+
+        if (filter.Length > 0)
+        {
+            var (charters, artists) = ChartersAndArtists();
+            if (!PlateData.TryParseFilter(filter, charters, artists, out var query))
+            {
+                return (null, [], null, $"看不懂筛选条件「{filter}」");
+            }
+
+            inScope = PlateData.SelectCharts(query, songs).Select(x => (x.Song, x.LevelIdx));
+        }
+
+        var (nickname, scores) = await player.Fetcher.GetScores(player);
+        var fitted  = await DivingFishChartStatsProvider.Default.GetAsync();
+        var catalog = KadaiDifficultyCatalog.Default;
+        var rating  = BestRating();
+
+        var rated = songs
+            .SelectMany(song => song.Constants.Select((constant, levelIdx) => (Song: song, LevelIdx: levelIdx, Constant: constant)))
+            .Select(x => (x.Constant, Score: scores.GetValueOrDefault((x.Song.Id, x.LevelIdx)), Difficulty: Difficulty(x.Song, x.LevelIdx),
+                Reached: goal.Reached(scores.GetValueOrDefault((x.Song.Id, x.LevelIdx)), MaxDx(x.Song, x.LevelIdx))))
+            .Where(x => x.Difficulty.HasValue)
+            .ToList();
+        var reached = rated.Where(x => x.Reached).Select(x => x.Difficulty!.Value).ToList();
+        var cap = KadaiPicker.ConstantCap(rated.Where(x => x.Score != null).Select(x => (x.Constant, x.Reached)));
+
+        var candidates = inScope
+            .Where(x => !exclude.Contains((x.Song.Id, x.LevelIdx)))
+            .Where(x => cap == null || KadaiPicker.Bucket(x.Song.Constants[x.LevelIdx]) is var b && b <= cap && b >= cap - KadaiPicker.FloorBelowCap)
+            .Select(x => (x.Song, x.LevelIdx, Score: scores.GetValueOrDefault((x.Song.Id, x.LevelIdx))))
+            .Where(x => !goal.Reached(x.Score, MaxDx(x.Song, x.LevelIdx)))
+            .Select(x => Difficulty(x.Song, x.LevelIdx) is { } d
+                ? new KadaiPicker.Chart(x.Song.Id, x.LevelIdx, d, catalog.RateAt(x.Song.Id, x.LevelIdx, goal, rating), x.Score)
+                : null)
+            .OfType<KadaiPicker.Chart>()
+            .ToList();
+
+        var result = KadaiPicker.Pick(reached, candidates, Random.Shared);
+        return result != null
+            ? (nickname, scores, result, null)
+            : (nickname, scores, null, filter.Length > 0 ? "筛选范围内未完成的谱面不足三首" : $"未{goal.Name()}的谱面不足三首");
+
+        static long MaxDx(MaiMaiSong song, int levelIdx) => levelIdx < song.Charts.Count ? song.Charts[levelIdx].Notes.Sum() * 3 : 0;
+
+        double? Difficulty(MaiMaiSong song, int levelIdx) =>
+            catalog.TryGetDifficulty(song.Id, levelIdx, goal, song.Constants[levelIdx], fitted.TryGet(song.Id, levelIdx, out var fit) ? fit : null, out var d) ? d : null;
+
+        int BestRating()
+        {
+            var rated = scores.Values
+                .Where(s => s.Id <= 100000)
+                .Select(s => (s.Rating, IsNew: SongDb.GetSongById(s.Id)?.Info.IsNew ?? false))
+                .ToList();
+            return rated.Where(x => !x.IsNew).Select(x => x.Rating).OrderDescending().Take(DivingFishDataFetcher.OldScoreLimit).Sum()
+                 + rated.Where(x => x.IsNew).Select(x => x.Rating).OrderDescending().Take(DivingFishDataFetcher.NewScoreLimit).Sum();
+        }
+    }
+
+    private async Task<MessageChain> RenderKadai(
+        long qq, string? nickname, Dictionary<(long Id, int LevelIdx), SongScore> scores, IReadOnlyList<KadaiView> rows, bool coldStart)
+    {
+        var context = new WebContext(new
+        {
+            kadai = new
+            {
+                Nickname  = nickname ?? string.Empty,
+                ColdStart = coldStart,
+                Items = rows.Select(row => new
+                {
+                    Goal = row.Goal.Name(),
+                    row.Filter,
+                    Assigner = row.AssignerId == qq ? null : row.AssignerName,
+                    row.CreatedAt,
+                    Charts = row.Charts.Select(c => Chart(c.Id, c.LevelIdx, row.Goal)).OfType<object>().ToList()
+                })
+            }
+        });
+
+        return MessageChain.FromImageB64(await WebApi.MaiMaiKadai(context.Id));
+
+        object? Chart(long id, int levelIdx, KadaiGoal goal)
+        {
+            var song = SongDb.GetSongById(id);
+            if (song == null || levelIdx >= song.Levels.Count) return null;
+
+            var score = scores.GetValueOrDefault((id, levelIdx));
+            var maxDx = levelIdx < song.Charts.Count ? song.Charts[levelIdx].Notes.Sum() * 3 : 0;
+
+            return new
+            {
+                song.Id, song.Title, song.Type,
+                LevelIndex  = levelIdx,
+                Level       = song.Levels[levelIdx],
+                Constant    = song.Constants[levelIdx],
+                Played      = score != null,
+                Achievement = score?.Achievement,
+                Rank        = score?.Rank,
+                Fc          = score?.Fc,
+                Fs          = score?.Fs,
+                DxScore     = score?.DxScore,
+                MaxDx       = maxDx,
+                Done        = goal.Reached(score, maxDx),
+            };
+        }
+    }
+
+    #endregion
+
     #region recommend
 
     private MaiMaiRecommendationEngine CreateRecommendationEngine()
