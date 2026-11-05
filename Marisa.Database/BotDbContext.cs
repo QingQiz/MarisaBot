@@ -23,7 +23,7 @@ public static class BotDbContext
 
         return Realm.GetInstance(new RealmConfiguration(DatabasePath)
         {
-            SchemaVersion = 8,
+            SchemaVersion = 9,
         });
     }
 

@@ -113,7 +113,7 @@ public sealed class MaiMaiRecommendationEngine
                 return new MaiMaiRecommendationPlanResult(MaiMaiRecommendationPlanStatus.Unreachable, null);
             }
 
-            Apply(candidates[0], old, @new, ref step);
+            Apply(PickNearBest(candidates), old, @new, ref step);
         }
 
         var projected = Total(old, @new);
@@ -131,6 +131,20 @@ public sealed class MaiMaiRecommendationEngine
         var data = new MaiMaiRecommendationCardData(
             "plan", rating.Nickname, rating.Rating, targetRating, projected, items);
         return new MaiMaiRecommendationPlanResult(MaiMaiRecommendationPlanStatus.Success, data);
+
+        // 在努力与难度都接近最优的候选里随机，每次查询给出不同路线
+        Candidate PickNearBest(List<Candidate> sorted)
+        {
+            const double effortSlack = 0.2;
+            const double difficultySlack = 0.2;
+
+            var best = sorted[0];
+            var nearBest = sorted
+                .TakeWhile(x => x.Effort <= best.Effort + effortSlack)
+                .Where(x => x.DifficultyOrder <= best.DifficultyOrder + difficultySlack)
+                .ToList();
+            return nearBest[_random.Next(nearBest.Count)];
+        }
     }
 
     private void AddQuick(ICollection<MaiMaiRecommendationItem> items, IReadOnlyList<Candidate> candidates)
