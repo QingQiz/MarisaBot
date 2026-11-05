@@ -20,6 +20,7 @@ export interface Score {
     achievements: number;
     ds: number;
     dxScore: number;
+    max_dx: number;
     fc: string;
     fs: string;
     level: string;

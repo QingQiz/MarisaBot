@@ -17,6 +17,19 @@ namespace Marisa.Plugin.MaiMaiDx;
 
 public partial class MaiMaiDx
 {
+    private async Task<MessageChain> RenderBest(DxRating b50)
+    {
+        foreach (var score in b50.OldScores.Concat(b50.NewScores))
+        {
+            var song = SongDb.GetSongById(score.Id);
+            score.MaxDx = song != null && score.LevelIdx < song.Charts.Count ? song.Charts[score.LevelIdx].Notes.Sum() * 3 : 0;
+        }
+
+        var context = new WebContext(new { b50 });
+
+        return MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id));
+    }
+
     private const int MaxVersusRandomCount = MaiVersusBatch.DefaultPageSize;
 
     private VersusBattle? _battle;

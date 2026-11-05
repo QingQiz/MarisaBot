@@ -1,154 +1,277 @@
 <template>
-    <div class="card-outer relative h-[200px] w-[400px] rounded-3xl overflow-hidden isolate"
-         :style="outer_style">
-        <div class="card-inner absolute inset-[2px] overflow-hidden bg-white/85 rounded-[22px] mai-glass-fade">
-            <!-- cover (right side) -->
-            <fallback-image
-                ref="imgEl" @load="UpdateColor"
-                :src="available_cover" fallback="/assets/maimai/cover/0.png"
-                class="absolute right-0 top-0 h-full w-[200px] object-cover"/>
+    <div class="sc" :style="{'--lv': level_color}">
+        <div class="ambient"><fallback-image :src="covers" fallback="/assets/maimai/cover/0.png" alt=""/></div>
+        <div class="veil"></div>
 
-            <!-- cover-color tint: opaque on left, fades into cover on right -->
-            <div class="absolute inset-0 z-10 pointer-events-none"
-                 :style="`background: linear-gradient(to right, ${MakeRgba(img_color, 1)} 0%, ${MakeRgba(img_color, 1)} 50%, ${MakeRgba(img_color, 0)} 100%)`"></div>
-
-            <!-- level color accent stripe — half-inset rounded pill -->
-            <div class="absolute left-[6px] top-[15px] bottom-[15px] w-[6px] z-30 rounded-full"
-                 :style="{ background: level_color }"></div>
-
-            <!-- text content -->
-            <div class="absolute inset-y-0 left-0 z-30 w-[270px] pl-5 pr-2 py-1.5 flex flex-col justify-between"
-                 :style="{ color: text_color }">
-                <div class="flex items-center gap-2">
-                    <div class="px-3 py-0.5 rounded-md text-3xl font-bold tabular-nums leading-tight"
-                         :style="{ background: level_color, color: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }">
-                        {{ score.ds.toFixed(1) }}
-                    </div>
-                    <div class="text-3xl font-extrabold tabular-nums" :style="{ textShadow: text_shadow }">
-                        {{ score.ra }}
-                    </div>
-                </div>
-
-                <div class="text-4xl font-black leading-tight whitespace-nowrap overflow-hidden overflow-ellipsis tracking-tight mai-title ml-[2px] mr-[-72px]"
-                     :style="{ textShadow: text_shadow }">
-                    {{ score.title }}
-                </div>
-
-                <div class="flex items-baseline tabular-nums"
-                     :style="{ textShadow: text_shadow, transform: 'translateY(-6px)' }">
-                    <span class="text-6xl font-black leading-none">
-                        {{ score.achievements < 100 ? '0' : '' }}{{ Math.floor(score.achievements) }}.
-                    </span>
-                    <span class="text-4xl font-extrabold leading-none">
-                        {{ score.achievements.toFixed(4).split('.')[1] }}
-                    </span>
-                    <span class="text-2xl font-bold opacity-75 ml-0.5 leading-none">%</span>
-                </div>
-
-                <div class="flex items-center gap-1.5">
-                    <img :src="`/assets/maimai/pic/type_${score.type.toLowerCase()}.png`" alt=""
-                         class="h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
-                    <img :src="`/assets/maimai/pic/rank_${score.rate}.png`" alt=""
-                         class="h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
-                    <img v-if="score.fc !== ''" :src="`/assets/maimai/pic/icon_${score.fc}.png`" alt=""
-                         class="h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
-                    <img v-if="score.fs !== ''" :src="`/assets/maimai/pic/icon_${score.fs}.png`" alt=""
-                         class="h-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
-                </div>
-            </div>
+        <div class="head">
+            <div class="title">{{ score.title }}</div>
+            <span class="score-tag">
+                <span class="ds" :class="{light: score.level_index === 4}">{{ score.ds.toFixed(1) }}</span>
+                <span class="ra">{{ score.ra }}</span>
+            </span>
         </div>
 
-        <!-- specular highlight overlay — top edge sheen + diagonal corner hotspot -->
-        <div class="absolute inset-0 z-[35] pointer-events-none rounded-3xl mai-glass-shine"></div>
+        <div class="jacket">
+            <div class="jacket-img"><fallback-image :src="covers" fallback="/assets/maimai/cover/0.png" alt=""/></div>
+            <span class="rank-no">#{{ index }}</span>
+            <img :src="`/assets/maimai/pic/type_${score.type.toLowerCase()}.png`" class="type-tag" alt="">
+        </div>
 
-        <!-- rim lighting / inner highlight overlay (above content) -->
-        <div class="absolute inset-0 z-40 pointer-events-none rounded-3xl"
-             :style="{ boxShadow: rim_inset }"></div>
+        <div class="body">
+            <div class="ach-row">
+                <span class="ach">
+                    <span class="ach-int">{{ Math.floor(score.achievements) }}</span><span class="ach-frac">.{{ score.achievements.toFixed(4).split('.')[1] }}</span><span class="ach-pct">%</span>
+                </span>
+                <img :src="`/assets/maimai/pic/rank_summary_${score.rate}.png`" class="rank" alt="">
+            </div>
+
+            <div class="badges">
+                <img :src="`/assets/maimai/pic/icon_${score.fc || 'blank'}.png`" class="icon" alt="">
+                <img :src="`/assets/maimai/pic/icon_${score.fs || 'blank'}.png`" class="icon" alt="">
+                <img v-if="dx_star" :src="`/assets/maimai/pic/music_icon_dxstar_${dx_star}.png`" class="star" alt="">
+                <span v-else class="star star-blank"></span>
+                <span class="dx"><b>{{ score.dxScore }}</b><small>/{{ score.max_dx }}</small></span>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed} from "vue";
 import FallbackImage from "@/components/utils/FallbackImage.vue";
 import {maimai_alternativeCover, maimai_levelColors} from "@/GlobalVars";
 import {Score as MaiScore} from "@/components/maimai/utils/best_t";
-import {GetContrastingTextColor, MakeRgba} from "@/utils/color";
-import {getDisplacementFilter} from "@/components/maimai/utils/liquidGlass";
+import {dxScoreStar} from "@/components/maimai/utils/ordinal";
 
-const props = defineProps<{ score: MaiScore }>()
-const imgEl = ref<typeof FallbackImage | null>(null)
+const props = defineProps<{ score: MaiScore, index: number }>()
 
-let img_color = ref({r: 240, g: 210, b: 220})
-
-let level_color = computed(() => maimai_levelColors[props.score.level_index ?? 0])
-let available_cover = computed(() => maimai_alternativeCover(props.score.song_id ?? 0))
-
-const text_color = computed(() => GetContrastingTextColor(img_color.value))
-
-const text_shadow = computed(() => text_color.value === '#000000'
-    ? '0 1px 0 rgba(255,255,255,0.55), 0 0 6px rgba(255,255,255,0.4)'
-    : '0 1px 3px rgba(0,0,0,0.55), 0 1px 1px rgba(0,0,0,0.6)')
-
-// Liquid-glass refraction filter (SVG feDisplacementMap with mild chromatic aberration)
-const liquid_filter = computed(() => {
-    const url = getDisplacementFilter({width: 400, height: 200, radius: 24, depth: 9, strength: 150, chromaticAberration: 14})
-    return `url("${url}") saturate(1.2) brightness(1.05)`
-})
-
-const outer_style = computed(() => ({
-    boxShadow: '0 0 0 1px rgba(255,255,255,0.55), 0 10px 26px -8px rgba(80,30,90,0.45)',
-    backdropFilter: liquid_filter.value,
-    ['-webkit-backdrop-filter' as string]: liquid_filter.value,
-}))
-
-// Inner rim highlight — top + bottom + sides give the iOS-style glass edge lighting
-const rim_inset = 'inset 0 1.5px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.4), inset 1px 0 0 rgba(255,255,255,0.45), inset -1px 0 0 rgba(255,255,255,0.3)'
-
-function UpdateColor() {
-    const c = imgEl.value?.GetAverageRGB(0, 0, 12, 200)
-    if (c && (c.r > 0 || c.g > 0 || c.b > 0)) {
-        img_color.value = c
-    }
-}
+const level_color = computed(() => maimai_levelColors[props.score.level_index ?? 0])
+const covers = computed(() => maimai_alternativeCover(props.score.song_id ?? 0))
+const dx_star = computed(() => dxScoreStar(props.score.dxScore, props.score.max_dx))
 </script>
 
 <style scoped>
-/* feather the inner card's outer edge so it blends softly into the glass rim */
-.mai-glass-fade {
-    -webkit-mask-image:
-        linear-gradient(to right, transparent 0, #000 1.5px, #000 calc(100% - 1.5px), transparent 100%),
-        linear-gradient(to bottom, transparent 0, #000 1.5px, #000 calc(100% - 1.5px), transparent 100%);
-    -webkit-mask-composite: source-in;
-            mask-image:
-        linear-gradient(to right, transparent 0, #000 1.5px, #000 calc(100% - 1.5px), transparent 100%),
-        linear-gradient(to bottom, transparent 0, #000 1.5px, #000 calc(100% - 1.5px), transparent 100%);
-            mask-composite: intersect;
+.sc {
+    --ink: #2b2147;
+    --edge: 16px;
+    position: relative;
+    width: 412px;
+    height: 180px;
+    border-radius: 24px;
+    overflow: hidden;
+    isolation: isolate;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9),
+                0 14px 30px -14px rgba(84, 36, 110, 0.55);
+    color: var(--ink);
 }
 
-/* Song title — SEGA NewRodin EB, the font maimai actually uses for song titles
-   in-game. It is already Extra Bold, so the old Maru Gothic approach's 2.2px
-   text-stroke faux-bold is no longer needed. Maru Gothic kept as a fallback for
-   any glyph NewRodin lacks. */
-.mai-title {
-    font-family: 'SEGA NewRodin', 'SEGA Maru Gothic', 'Torus', 'Hiragino Kaku Gothic ProN', 'Microsoft YaHei', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* NewRodin EB has tall vertical metrics; its glyph ink overshoots the
-       line-box top & bottom, which the ellipsis's overflow:hidden would clip.
-       Extend the clip region with padding and cancel the layout impact with
-       equal negative margins, so descenders/kana render fully without shifting
-       the card layout. */
-    padding-block: 7px 10px;
-    margin-block: -7px -10px;
+.ambient {
+    position: absolute;
+    inset: -40px;
+    filter: blur(26px) saturate(1.6);
+    opacity: 0.55;
+    z-index: -2;
 }
 
-/* Specular highlight: top sheen + diagonal corner shine — kept very soft */
-.mai-glass-shine {
-    background:
-        /* top horizontal sheen — subtle, fades fast */
-        linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 5%, rgba(255,255,255,0) 14%),
-        /* diagonal hotspot — gentle light from top-left */
-        linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 78%, rgba(255,255,255,0.05) 100%);
-    mix-blend-mode: screen;
+.veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.72) 40%, rgba(255, 255, 255, 0.8) 100%);
+    box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+    border-radius: inherit;
+}
+
+.head {
+    position: absolute;
+    left: 18px;
+    right: var(--edge);
+    top: 7px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.title {
+    flex: 1;
+    min-width: 0;
+    font-family: 'SEGA NewRodin', 'Microsoft YaHei', sans-serif;
+    font-weight: 900;
+    font-size: 34px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-block: 4px 0.2em;
+    margin-block: -4px -0.2em;
+}
+
+/* 定数（难度色）+ RA（墨色）合成一枚双色胶囊。 */
+.score-tag {
+    flex-shrink: 0;
+    display: flex;
+    border-radius: 9999px;
+    overflow: hidden;
+    font: bold 21px/1.15 'Torus', sans-serif;
+    letter-spacing: -0.02em;
+    box-shadow: 0 3px 8px -2px color-mix(in srgb, var(--lv) 70%, transparent);
+}
+
+.ds {
+    padding: 2px 6px 1px 9px;
+    background: var(--lv);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.ds.light {
+    color: #5b2a86;
+    text-shadow: none;
+}
+
+.ra {
+    padding: 2px 9px 1px 6px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.jacket {
+    position: absolute;
+    left: 14px;
+    top: 62px;
+    width: 104px;
+    height: 104px;
+    border-radius: 14px;
+    box-shadow: 0 0 0 3px var(--lv), 0 8px 18px -6px rgba(0, 0, 0, 0.45);
+}
+
+.jacket-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.ambient :deep(img),
+.jacket-img :deep(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rank-no {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    min-width: 42px;
+    padding: 2px 7px 1px 6px;
+    border-radius: 14px 0 12px 0;
+    background: var(--lv);
+    color: #fff;
+    font: bold 17px/1.1 'Torus', sans-serif;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.type-tag {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    height: 19px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+
+.body {
+    position: absolute;
+    left: 132px;
+    right: var(--edge);
+    top: 60px;
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ach-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.ach {
+    font-family: 'Torus', sans-serif;
+    font-weight: bold;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+}
+
+.ach-int {
+    font-size: 50px;
+}
+
+.ach-frac {
+    font-size: 36px;
+}
+
+.ach-pct {
+    font-size: 22px;
+    margin-left: 1px;
+    opacity: 0.6;
+}
+
+/* 评级图标无透明边距，底边落在基线上即与整数大字（字高约 32px）大致居中。 */
+.rank {
+    height: 29px;
+}
+
+.badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+}
+
+.badges .icon {
+    height: 42px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.dx {
+    display: flex;
+    align-items: center;
+    font: bold 27px/1 'Torus', sans-serif;
+    white-space: nowrap;
+}
+
+.dx small {
+    font-size: 21px;
+    opacity: 0.55;
+}
+
+.star {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+/* 无星时用星形剪影占位，配色同 icon_blank（浅灰底 + 深一档描边）；剪影取 5 星图，1–4 星图右下两角被画布截平。 */
+.star-blank {
+    position: relative;
+    background: #d4d5da;
+    -webkit-mask: url(/assets/maimai/pic/music_icon_dxstar_5.png) center / contain no-repeat;
+            mask: url(/assets/maimai/pic/music_icon_dxstar_5.png) center / contain no-repeat;
+}
+
+.star-blank::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    background: #e9eaed;
+    -webkit-mask: inherit;
+            mask: inherit;
 }
 </style>

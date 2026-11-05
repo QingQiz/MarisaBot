@@ -15,6 +15,9 @@ public class SongScore
     [JsonProperty("dxScore")]
     public int DxScore { get; set; }
 
+    [JsonProperty("max_dx")]
+    public long MaxDx { get; set; }
+
     [JsonProperty("fc")]
     public string Fc { get; set; }
 
