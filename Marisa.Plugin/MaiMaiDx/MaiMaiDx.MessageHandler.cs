@@ -1122,7 +1122,7 @@ public partial class MaiMaiDx
     /// <summary>
     ///     段位認定曲目表
     /// </summary>
-    [MarisaPluginDoc("查询段位认定的曲目与判定规则", "可选`版本`（缺省国服现行）+ `段位名`，如：`prism 十段`")]
+    [MarisaPluginDoc("查询段位认定的曲目与判定规则", "可选`版本`（缺省国服现行）和`段位名`，顺序不限，如：`prism 十段`、`十段 prism`")]
     [MarisaPluginCommand("dan", "段位表", "段位")]
     private static MarisaPluginTaskState DanCourse(Message message)
     {
