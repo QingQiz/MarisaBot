@@ -147,9 +147,14 @@ public static class WebApi
         return $"{baseUrl}/{relativeUrl}";
     }
 
-    public static async Task<string> MaiMaiBest(Guid guid)
+    public static async Task<string> MaiMaiBest(Guid guid, string? theme = null)
     {
-        return await RenderUrl("/maimai/best?id=" + guid);
+        return await RenderUrl("/maimai/best?id=" + guid + (theme == null ? "" : "&bg=" + theme));
+    }
+
+    public static async Task<string> MaiMaiB50Themes(Guid guid)
+    {
+        return await RenderUrl("/maimai/b50-themes?id=" + guid);
     }
 
     public static async Task<string> MaiMaiRank(Guid guid)
