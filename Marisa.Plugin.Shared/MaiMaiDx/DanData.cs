@@ -59,59 +59,44 @@ public static class DanData
         ["初", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
     /// <summary>
-    ///     解析「[版本] 段位名」（版本可省，空格可省）。
+    ///     解析「[版本] 段位名」（版本可省、可写在段位名前或后，空格可省）。
     ///     段位名接受简繁（皆传→皆伝、里→裏）、数字（10段→十段）与裸「皆伝」（唯一歧义消解为真皆伝）。
     /// </summary>
     public static bool TryParse(string input, out string version, out string dani, out string? error)
     {
-        version = DefaultVersion;
-        dani    = "";
-        error   = null;
+        dani  = "";
+        error = null;
 
+        var ver  = DefaultVersion;
         var rest = input.Trim();
         if (rest.Length == 0)
         {
-            error = "请指定段位名，如：十段、真皆伝、prism 十段、1.40 裏皆伝";
+            version = ver;
+            error   = "请指定段位名，如：十段、真皆伝、prism 十段、1.40 裏皆伝";
             return false;
         }
 
-        foreach (var (token, ver) in VersionTokensLongestFirst)
-        {
-            if (!rest.StartsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
-            version = ver;
-            rest    = rest[token.Length..].Trim();
-
-            // 基版本后跟独立的 plus/+ → 升级为对应 PLUS 档
-            if (rest.StartsWith('+') && PlusUpgradeMap.TryGetValue(version, out var p1))
-            {
-                version = p1;
-                rest    = rest[1..].Trim();
-            }
-            else if (rest.StartsWith("plus", StringComparison.OrdinalIgnoreCase)
-                     && PlusUpgradeMap.TryGetValue(version, out var p2))
-            {
-                version = p2;
-                rest    = rest[4..].Trim();
-            }
-            break;
-        }
+        // 段位名总以「段」「伝」结尾，版本 token 都不以它们结尾，从尾部识别版本不会吞掉段位名
+        if (!TakeLeadingVersion()) TakeTrailingVersion();
+        version = ver;
 
         if (rest.Length == 0)
         {
-            error = $"请在版本后指定段位名，如：{input.Trim()} 十段";
+            error = $"请指定段位名，如：{input.Trim()} 十段";
             return false;
         }
 
         if (!TryCanonicalizeDani(rest, out dani))
         {
-            // 尾部本身是合法段位名时，指向版本报错（如「splash 十段」的 splash 不是已知版本）
-            var lastSpace = rest.LastIndexOf(' ');
-            if (lastSpace > 0 && TryCanonicalizeDani(rest[(lastSpace + 1)..], out _))
-            {
-                error = $"无法识别版本：{rest[..lastSpace].Trim()}（可用档号 1.17-1.70 或版本名，如 prism、彩、magical、廻）";
-                return false;
-            }
-            error = $"无法识别段位名：{rest}（可用：初段-十段、真初段-真十段、真皆伝、裏皆伝）";
+            // 一端本身是合法段位名时，指向版本报错（如「splash 十段」「十段 splash」的 splash 不是已知版本）
+            var lastSpace  = rest.LastIndexOf(' ');
+            var firstSpace = rest.IndexOf(' ');
+            var unknown = lastSpace > 0 && TryCanonicalizeDani(rest[(lastSpace + 1)..], out _) ? rest[..lastSpace]
+                : firstSpace > 0 && TryCanonicalizeDani(rest[..firstSpace], out _) ? rest[(firstSpace + 1)..]
+                : null;
+            error = unknown != null
+                ? $"无法识别版本：{unknown.Trim()}（可用档号 1.17-1.70 或版本名，如 prism、彩、magical、廻）"
+                : $"无法识别段位名：{rest}（可用：初段-十段、真初段-真十段、真皆伝、裏皆伝）";
             return false;
         }
 
@@ -123,6 +108,49 @@ public static class DanData
         }
 
         return true;
+
+        bool TakeLeadingVersion()
+        {
+            foreach (var (token, v) in VersionTokensLongestFirst)
+            {
+                if (!rest.StartsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
+                ver  = v;
+                rest = rest[token.Length..].Trim();
+
+                // 基版本后跟独立的 plus/+ → 升级为对应 PLUS 档
+                var plusLength = rest.StartsWith('+') ? 1 : rest.StartsWith("plus", StringComparison.OrdinalIgnoreCase) ? 4 : 0;
+                if (plusLength > 0 && PlusUpgradeMap.TryGetValue(ver, out var plus))
+                {
+                    ver  = plus;
+                    rest = rest[plusLength..].Trim();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        void TakeTrailingVersion()
+        {
+            foreach (var (token, v) in VersionTokensLongestFirst)
+            {
+                if (!rest.EndsWith(token, StringComparison.OrdinalIgnoreCase)) continue;
+                ver  = v;
+                rest = rest[..^token.Length].Trim();
+                return;
+            }
+
+            // 基版本与 plus/+ 拆写：「五段 uni plus」
+            var plusLength = rest.EndsWith('+') ? 1 : rest.EndsWith("plus", StringComparison.OrdinalIgnoreCase) ? 4 : 0;
+            if (plusLength == 0) return;
+            var head = rest[..^plusLength].TrimEnd();
+            foreach (var (token, v) in VersionTokensLongestFirst)
+            {
+                if (!head.EndsWith(token, StringComparison.OrdinalIgnoreCase) || !PlusUpgradeMap.TryGetValue(v, out var plus)) continue;
+                ver  = plus;
+                rest = head[..^token.Length].Trim();
+                return;
+            }
+        }
     }
 
     private static bool TryCanonicalizeDani(string raw, out string dani)

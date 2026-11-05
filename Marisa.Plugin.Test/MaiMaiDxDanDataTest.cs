@@ -54,6 +54,16 @@ public class MaiMaiDxDanDataTest
     [TestCase("fes plus 十段",       "1.35", "十段")]
     [TestCase("prism +真皆传",       "1.55", "真皆伝")]
     [TestCase("1.30 裏皆伝",         "1.30", "裏皆伝")] // 裏皆伝设立边界（1.17/1.25 在拒绝组）
+    [TestCase("真十段 circle",       "1.60", "真十段")] // 版本写在段位名后
+    [TestCase("真十段circle",        "1.60", "真十段")]
+    [TestCase("十段 1.50",           "1.50", "十段")]
+    [TestCase("十段彩",              "1.55", "十段")]
+    [TestCase("里皆传 cir+",         "1.65", "裏皆伝")]
+    [TestCase("五段 universe plus",  "1.25", "五段")]
+    [TestCase("五段 uni plus",       "1.25", "五段")]
+    [TestCase("真皆传 prism +",      "1.55", "真皆伝")]
+    [TestCase("十段 1.50+",          "1.55", "十段")]
+    [TestCase("真1段 MAGICAL",       "1.70", "真初段")]
     public void ParsesVersionToken(string raw, string version, string dani)
     {
         Assert.That(DanData.TryParse(raw, out var v, out var d, out _), Is.True);
@@ -72,15 +82,19 @@ public class MaiMaiDxDanDataTest
     [TestCase("xyz")]
     [TestCase("1.17 裏皆伝")]
     [TestCase("1.25 里皆传")]
+    [TestCase("裏皆伝 1.17")]
+    [TestCase("十段 plus")]
     public void RejectsInvalidInput(string raw)
     {
         Assert.That(DanData.TryParse(raw, out _, out _, out var error), Is.False);
         Assert.That(error, Is.Not.Null.And.Not.Empty);
     }
 
-    // 前缀不是已知版本而尾部是合法段位名时，错误指向版本而非段位名
+    // 一端不是已知版本而另一端是合法段位名时，错误指向版本而非段位名
     [TestCase("splash 十段")]
     [TestCase("1.15 真皆伝")]
+    [TestCase("十段 splash")]
+    [TestCase("真皆伝 1.15")]
     public void UnknownVersionYieldsVersionError(string raw)
     {
         Assert.That(DanData.TryParse(raw, out _, out _, out var error), Is.False);
