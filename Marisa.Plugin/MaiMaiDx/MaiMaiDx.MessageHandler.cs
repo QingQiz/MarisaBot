@@ -882,9 +882,7 @@ public partial class MaiMaiDx
             NewScores = scores.Skip(DivingFishDataFetcher.OldScoreLimit).Take(DivingFishDataFetcher.NewScoreLimit).ToList()
         };
 
-        var context = new WebContext(new { b50 = b35 });
-
-        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+        message.Reply(await RenderBest(b35));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -900,11 +898,7 @@ public partial class MaiMaiDx
 
         var b50 = await player.Fetcher.GetRating(player);
 
-        var context = new WebContext();
-
-        context.Put("b50", b50);
-
-        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+        message.Reply(await RenderBest(b50));
 
         return MarisaPluginTaskState.CompletedTask;
     }
@@ -936,9 +930,7 @@ public partial class MaiMaiDx
             return MarisaPluginTaskState.CompletedTask;
         }
 
-        var context = new WebContext(new { b50 });
-
-        message.Reply(MessageChain.FromImageB64(await WebApi.MaiMaiBest(context.Id)));
+        message.Reply(await RenderBest(b50));
 
         return MarisaPluginTaskState.CompletedTask;
     }
