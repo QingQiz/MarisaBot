@@ -29,6 +29,13 @@
     src: url("@/assets/fonts/Torus-SemiBold.otf") format("opentype");
 }
 
+@font-face {
+    font-family: 'Exo 2';
+    font-weight: 900;
+    font-style: italic;
+    src: url('/assets/font/Exo2-BlackItalic.ttf') format('truetype');
+}
+
 
 
 @font-face {

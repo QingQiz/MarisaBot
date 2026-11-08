@@ -19,14 +19,9 @@
                         </div>
 
                         <div class="rating-col">
-                            <div class="dxplate">
-                                <img :src="`/assets/maimai/dxrating/${ratingTier}.png`" class="dxplate-frame" alt="">
-                                <img v-if="ratingStars" :src="`/assets/maimai/dxrating/star_${ratingStars}.png`" class="dxplate-star" alt="">
-                                <div class="dxplate-nums">
-                                    <span v-for="(d, i) in ratingDigits" :key="i" class="dxplate-cell">
-                                        <img v-if="d !== ''" :src="`/assets/maimai/dxrating/num/${d}.png`" alt="">
-                                    </span>
-                                </div>
+                            <div class="rating" :class="`r${ratingTier}`">
+                                <small>DX RATING<span v-if="ratingStars" class="stars"><i v-for="n in ratingStars" :key="n"></i></span></small>
+                                <b>{{ total_ra }}</b>
                             </div>
                             <div v-if="!json.merged" class="breakdown">
                                 <span class="tag old">B35</span><b>{{ ra_old }}</b>
@@ -138,20 +133,19 @@ const nicknameFontSize = computed(() => {
     return `${Math.min(112, 820 / (weight + 0.3))}px`
 })
 
-// 评分牌底框 01–12；金档起每 250 分加一档勋章（CiRCLE PLUS 起的规则）。
+// 评分段位 01–12，与游戏评分牌底框一致。
 const ratingTier = computed(() => {
     const steps = [1000, 2000, 4000, 7000, 10000, 12000, 13000, 14000, 14500, 15000, 16000]
     return String(steps.filter(x => total_ra.value >= x).length + 1).padStart(2, '0')
 })
 
+// CiRCLE PLUS 起 14000 以上的星数，见 https://info-maimai.sega.jp/8674/ ：每 250 分一颗，金/白金最多 2 颗，虹最多 4 颗。
 const ratingStars = computed(() => {
     const ra = total_ra.value
     if (ra < 14000) return 0
     const base = [16000, 15000, 14500, 14000].find(x => ra >= x)!
     return Math.min(Math.floor((ra - base) / 250) + 1, ra >= 15000 ? 4 : 2)
 })
-
-const ratingDigits = computed(() => String(total_ra.value).padStart(5, ' ').split('').map(c => c.trim()))
 
 const sections = computed(() => {
     if (json.value.merged) return [section('B50', '', '#f93eac', json.value.charts.sd)]
@@ -279,54 +273,61 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     gap: 12px;
 }
 
-/* 评分牌：游戏原版底框 + 烤好的金色数字，5 格右对齐。 */
-.dxplate {
-    position: relative;
-    width: 560px;
-    aspect-ratio: 664 / 130;
-    filter: drop-shadow(0 6px 10px rgba(60, 20, 80, 0.3));
-}
-
-.dxplate-frame {
-    width: 100%;
-    height: 100%;
-}
-
-/* 勋章位置取自游戏 prefab：中心在底框 (630, 65)，尺寸 72×120（底框 664×130）。 */
-.dxplate-star {
-    position: absolute;
-    left: 89.46%;
-    top: 3.85%;
-    width: 10.84%;
-}
-
-.dxplate-nums {
-    position: absolute;
-    left: 46.4%;
-    top: 16.9%;
-    width: 40.4%;
-    height: 65.4%;
+/* 评分：斜切色块，底色按段位取游戏评分牌的配色，金属档用同色系硬边条纹。 */
+.rating {
+    --on: #fff;
     display: flex;
-    align-items: center;
-    transform: translateY(7.81%);
+    align-items: baseline;
+    gap: 18px;
+    padding: 4px 44px 8px 36px;
+    transform: skewX(-14deg);
+    background: var(--fill);
+    color: var(--on);
+    box-shadow: 8px 8px 0 var(--ink);
 }
 
-.dxplate-cell {
-    flex: 1 1 0;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.rating > * {
+    transform: skewX(14deg);
 }
 
-/* flex gap 不接受负值，字距用负 margin。 */
-.dxplate-cell + .dxplate-cell {
-    margin-left: -3.03%;
+.rating small {
+    font: 900 italic 25px 'Exo 2', sans-serif;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
-.dxplate-cell img {
-    height: 62.35%;
+.rating b {
+    font: 900 italic 96px/1 'Exo 2', sans-serif;
+    letter-spacing: -0.03em;
+    text-shadow: 4px 4px 0 rgba(43, 33, 71, 0.35);
 }
+
+.stars {
+    display: inline-flex;
+    gap: 9px;
+    margin-left: 12px;
+    vertical-align: 2px;
+}
+
+.stars i {
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    background: currentColor;
+}
+
+.rating.r01 { --fill: #dfe3ea; --on: var(--ink); }
+.rating.r02 { --fill: #3fa9f5; }
+.rating.r03 { --fill: #45b944; }
+.rating.r04 { --fill: #f5a623; --on: var(--ink); }
+.rating.r05 { --fill: #ef4b56; }
+.rating.r06 { --fill: #a956dc; }
+.rating.r07 { --fill: linear-gradient(115deg, #b8763e 0 58%, #d99a5f 58% 74%, #b8763e 74%); }
+.rating.r08 { --fill: linear-gradient(115deg, #9fb3c8 0 58%, #d3dfeb 58% 74%, #9fb3c8 74%); --on: var(--ink); }
+.rating.r09 { --fill: linear-gradient(115deg, #f0b31c 0 58%, #ffdc6b 58% 74%, #f0b31c 74%); --on: var(--ink); }
+.rating.r10 { --fill: linear-gradient(115deg, #e9dcae 0 58%, #fbf5df 58% 74%, #e9dcae 74%); --on: var(--ink); }
+.rating.r11 { --fill: linear-gradient(105deg, #f6a96d 0 17%, #f4d36a 17% 34%, #cfe07a 34% 50%, #8fcbee 50% 67%, #ee9cc4 67% 84%, #bfa3e6 84%); --on: var(--ink); }
+.rating.r12 { --fill: linear-gradient(105deg, #de5923 0 17%, #e9c82c 17% 34%, #a7be26 34% 50%, #2b8ac3 50% 67%, #c83d86 67% 84%, #7d55b8 84%); }
 
 .breakdown {
     display: flex;
