@@ -29,7 +29,4 @@ public partial class MaiMaiDxBind : IRealmObject, IHaveId, IHaveUId
     ///     仅存好友码（非机密），查分器导入令牌不落库。可空：老数据自动迁移。
     /// </summary>
     public string? FriendCode { get; set; }
-
-    /// <summary>b50 背景主题 key；为空时用默认主题。</summary>
-    public string? B50Theme { get; set; }
 }

@@ -69,7 +69,12 @@ import {context_get} from '@/GlobalVars'
 import {MaiMaiRating, Score as MaiScore} from "@/components/maimai/utils/best_t";
 
 const route = useRoute()
-const theme = String(route.query.bg || 'dots')
+// 每次渲染随机一种背景，样式见 b50_themes.pcss
+const THEMES = [
+    'dots', 'rainbow', 'prism', 'holo', 'candy', 'sakura', 'matcha', 'lemon', 'ocean', 'snow', 'sunset', 'maple', 'honey',
+    'watercolor', 'plaid', 'night', 'aurora', 'cyber', 'vapor', 'gold', 'seigaiha', 'bauhaus', 'collage', 'claude', 'chatgpt',
+]
+const theme = THEMES[Math.floor(Math.random() * THEMES.length)]
 let json    = ref({} as MaiMaiRating)
 let id      = ref(route.query.id)
 let err_msg = ref('')

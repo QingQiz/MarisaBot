@@ -1,5 +1,4 @@
-/* b50 背景主题。外层加 theme-<key>，背景层 .mai-deco-bg 按主题铺底；
-   b50 页与背景预览页通过 <style scoped src> 共用。主题列表（key 与中文名）以 C# 端为准。 */
+/* b50 背景主题。外层加 theme-<key>，背景层 .mai-deco-bg 按主题铺底；主题列表见 BestScores.vue 的 THEMES。 */
 
 .mai-deco-bg {
     background-color: #ffd5cf;
@@ -231,14 +230,7 @@
         #f3ead6;
 }
 
-/* 蒸汽波：暮紫天空、网格与横纹落日；落日在 b50 页面替代 logo，在预览格里放右上角 */
-.theme-vapor {
-    --sun-paint: linear-gradient(180deg, #ffd36e 0%, #ff9a8b 55%, #ff6ec7 100%);
-    --sun-mask:
-        radial-gradient(circle closest-side, #000 99.5%, transparent 100%),
-        linear-gradient(180deg, #000 0 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 75%, transparent 75% 81%, #000 81% 88%, transparent 88% 95%, #000 95%);
-}
-
+/* 蒸汽波：暮紫天空、网格，logo 换成横纹落日 */
 .theme-vapor .mai-deco-bg {
     background:
         linear-gradient(rgba(255, 255, 255, 0.16) 2px, transparent 2px) 0 0 / 100% 60px,
@@ -246,28 +238,17 @@
         linear-gradient(180deg, #2a1052 0%, #6a24c9 35%, #e057c0 70%, #ffae96 100%);
 }
 
-.theme-vapor .logo,
-.tile.theme-vapor .mai-deco-bg::before {
-    background: var(--sun-paint);
-    -webkit-mask: var(--sun-mask);
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-}
-
 .theme-vapor .logo {
     height: 340px;
     margin-block: -35px;
     object-position: -9999px 0;
     filter: none;
-}
-
-.tile.theme-vapor .mai-deco-bg::before {
-    content: '';
-    position: absolute;
-    top: -96px;
-    right: 28px;
-    width: 240px;
-    aspect-ratio: 1;
+    background: linear-gradient(180deg, #ffd36e 0%, #ff9a8b 55%, #ff6ec7 100%);
+    -webkit-mask:
+        radial-gradient(circle closest-side, #000 99.5%, transparent 100%),
+        linear-gradient(180deg, #000 0 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 75%, transparent 75% 81%, #000 81% 88%, transparent 88% 95%, #000 95%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
 }
 
 /* 蜂巢：蜂蜜色六边形格 */
