@@ -1,6 +1,9 @@
 <template>
     <template v-if="data_fetched">
-        <div class="best-shell relative overflow-hidden" v-if="err_msg === ''">
+        <div class="best-shell relative overflow-hidden" :class="`theme-${theme}`" v-if="err_msg === ''">
+            <div v-if="theme === 'collage'" class="absolute inset-0 pointer-events-none bg-collage">
+                <img v-for="c in [...json.charts.dx, ...json.charts.sd].slice(0, 30)" :key="c.song_id + '-' + c.level_index" :src="`/assets/maimai/cover/${c.song_id}.png`" alt="">
+            </div>
             <div class="absolute inset-0 pointer-events-none mai-deco-bg"></div>
 
             <div class="relative w-best px-card-x font-osu-web">
@@ -66,6 +69,12 @@ import {context_get} from '@/GlobalVars'
 import {MaiMaiRating, Score as MaiScore} from "@/components/maimai/utils/best_t";
 
 const route = useRoute()
+// 每次渲染随机一种背景，样式见 b50_themes.pcss
+const THEMES = [
+    'dots', 'rainbow', 'prism', 'holo', 'candy', 'sakura', 'matcha', 'lemon', 'ocean', 'snow', 'sunset', 'maple', 'honey',
+    'watercolor', 'plaid', 'night', 'aurora', 'cyber', 'vapor', 'gold', 'seigaiha', 'bauhaus', 'collage', 'claude', 'chatgpt',
+]
+const theme = THEMES[Math.floor(Math.random() * THEMES.length)]
 let json    = ref({} as MaiMaiRating)
 let id      = ref(route.query.id)
 let err_msg = ref('')
@@ -208,16 +217,6 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
     --best-width-inner: calc(412px * 5 + var(--card-gap) * 4);
     --best-width: calc(var(--best-width-inner) + var(--card-padding) * 2);
     color: var(--ink);
-}
-
-/* 薰衣草 → 薄荷渐变，白色波点与云团 */
-.mai-deco-bg {
-    background:
-        radial-gradient(circle, rgba(255, 255, 255, 0.55) 2.6px, transparent 3.1px) 0 0 / 26px 26px,
-        radial-gradient(700px 260px at 15% 8%, rgba(255, 255, 255, 0.7), transparent 70%),
-        radial-gradient(800px 300px at 85% 55%, rgba(255, 255, 255, 0.5), transparent 70%),
-        radial-gradient(700px 280px at 20% 92%, rgba(255, 255, 255, 0.55), transparent 70%),
-        linear-gradient(180deg, #c9b8ff 0%, #d9c6ff 30%, #c5dcff 65%, #b6f0e3 100%);
 }
 
 .logo {
@@ -517,3 +516,5 @@ function IsMaiMaiRating(payload: unknown): payload is MaiMaiRating {
 .nick .c5 { --main: #7d55b8; --wedge: #a07ad8; }
 
 </style>
+
+<style scoped lang="postcss" src="@/assets/css/maimai/b50_themes.pcss"/>

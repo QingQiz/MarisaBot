@@ -1,0 +1,305 @@
+/* b50 背景主题。外层加 theme-<key>，背景层 .mai-deco-bg 按主题铺底；主题列表见 BestScores.vue 的 THEMES。 */
+
+.mai-deco-bg {
+    background-color: #ffd5cf;
+}
+
+/* 彩虹：PRiSM PLUS 粉彩纵向渐变（原版） */
+.theme-rainbow .mai-deco-bg {
+    background:
+        radial-gradient(900px 520px at 8% 0, rgba(255, 255, 255, 0.55), transparent 70%),
+        radial-gradient(1000px 700px at 100% 100%, rgba(255, 255, 255, 0.45), transparent 70%),
+        repeating-linear-gradient(-38deg, rgba(255, 255, 255, 0.07) 0 3px, transparent 3px 28px),
+        linear-gradient(0deg, #ffd5cf 0%, #ffd5cf 28%, #ffc5d5 44%, #eaabff 62%, #72bcfe 86%, #65f2df 100%);
+}
+
+/* 波点（默认）：薰衣草 → 薄荷，白色波点与云团 */
+.theme-dots .mai-deco-bg {
+    background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.55) 2.6px, transparent 3.1px) 0 0 / 26px 26px,
+        radial-gradient(700px 260px at 15% 8%, rgba(255, 255, 255, 0.7), transparent 70%),
+        radial-gradient(800px 300px at 85% 55%, rgba(255, 255, 255, 0.5), transparent 70%),
+        radial-gradient(700px 280px at 20% 92%, rgba(255, 255, 255, 0.55), transparent 70%),
+        linear-gradient(180deg, #c9b8ff 0%, #d9c6ff 30%, #c5dcff 65%, #b6f0e3 100%);
+}
+
+/* 星夜：深靛蓝夜空 + 星点 + 星云光晕 */
+.theme-night .mai-deco-bg {
+    background:
+        radial-gradient(1.4px 1.4px at 22px 30px, #fff, transparent) 0 0 / 170px 150px,
+        radial-gradient(1px 1px at 90px 110px, rgba(255, 255, 255, 0.8), transparent) 0 0 / 230px 190px,
+        radial-gradient(1.8px 1.8px at 140px 60px, rgba(255, 240, 200, 0.9), transparent) 0 0 / 310px 270px,
+        radial-gradient(1200px 760px at 18% 0%, rgba(120, 80, 220, 0.55), transparent 70%),
+        radial-gradient(1000px 820px at 92% 38%, rgba(40, 120, 220, 0.35), transparent 70%),
+        radial-gradient(1000px 820px at 8% 78%, rgba(200, 60, 160, 0.3), transparent 70%),
+        linear-gradient(180deg, #141034 0%, #22184e 50%, #1a1240 100%);
+}
+
+/* 棱镜：浅薰衣草底 + 两道斜向彩虹光束 */
+.theme-prism .mai-deco-bg {
+    background:
+        radial-gradient(1.6px 1.6px at 30px 40px, rgba(255, 255, 255, 0.95), transparent) 0 0 / 200px 180px,
+        linear-gradient(118deg, transparent 18%, rgba(255, 110, 160, 0.28) 24%, rgba(255, 200, 100, 0.28) 29%, rgba(120, 225, 160, 0.28) 34%, rgba(100, 180, 255, 0.28) 39%, rgba(180, 130, 255, 0.28) 44%, transparent 51%),
+        linear-gradient(118deg, transparent 58%, rgba(255, 110, 160, 0.2) 62%, rgba(255, 200, 100, 0.2) 65%, rgba(120, 225, 160, 0.2) 68%, rgba(100, 180, 255, 0.2) 71%, rgba(180, 130, 255, 0.2) 74%, transparent 79%),
+        radial-gradient(900px 600px at 0% 0%, rgba(255, 255, 255, 0.9), transparent 70%),
+        linear-gradient(180deg, #ebe6fb 0%, #f3ecfa 50%, #e9eefb 100%);
+}
+
+/* 拼贴：曲绘铺满后重度模糊，再罩一层白纱（曲绘层由页面放在背景层之下） */
+.theme-collage .mai-deco-bg {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.5));
+}
+
+.bg-collage {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    filter: blur(40px) saturate(1.5);
+    transform: scale(1.1);
+}
+
+.bg-collage img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+/* 全息：珠光锥形渐变 + 细斜纹 */
+.theme-holo .mai-deco-bg {
+    background:
+        repeating-linear-gradient(62deg, rgba(255, 255, 255, 0.16) 0 2px, transparent 2px 10px),
+        radial-gradient(900px 700px at 12% 6%, rgba(255, 255, 255, 0.75), transparent 70%),
+        conic-gradient(from 200deg at 70% 30%, #ffd3ef, #d4e4ff, #cffff0, #fff2c4, #ffd9d0, #e7d4ff, #ffd3ef),
+        #f2e8ff;
+}
+
+/* 樱花：粉白渐变 + 飘落花瓣 */
+.theme-sakura .mai-deco-bg {
+    background:
+        radial-gradient(9px 5px at 40px 30px, rgba(255, 150, 190, 0.75), transparent) 0 0 / 190px 170px,
+        radial-gradient(6px 10px at 120px 110px, rgba(255, 175, 205, 0.7), transparent) 0 0 / 230px 210px,
+        radial-gradient(8px 5px at 60px 150px, rgba(255, 200, 220, 0.85), transparent) 0 0 / 290px 250px,
+        radial-gradient(5px 8px at 200px 60px, rgba(255, 140, 180, 0.6), transparent) 0 0 / 340px 300px,
+        radial-gradient(1000px 600px at 10% 0%, rgba(255, 255, 255, 0.85), transparent 70%),
+        radial-gradient(900px 700px at 95% 60%, rgba(255, 190, 215, 0.6), transparent 70%),
+        linear-gradient(180deg, #ffe6ef 0%, #fff3f7 45%, #ffdbe8 100%);
+}
+
+/* 海洋：天青 → 海蓝，顶部光柱 + 气泡 */
+.theme-ocean .mai-deco-bg {
+    background:
+        radial-gradient(circle at 40px 40px, transparent 5px, rgba(255, 255, 255, 0.55) 6px, transparent 7.5px) 0 0 / 210px 230px,
+        radial-gradient(circle at 150px 120px, transparent 9px, rgba(255, 255, 255, 0.4) 10px, transparent 11.5px) 0 0 / 320px 290px,
+        radial-gradient(circle at 90px 200px, rgba(255, 255, 255, 0.5) 3px, transparent 4px) 0 0 / 260px 250px,
+        linear-gradient(100deg, transparent 22%, rgba(255, 255, 255, 0.22) 27%, transparent 33%, transparent 52%, rgba(255, 255, 255, 0.16) 56%, transparent 61%),
+        radial-gradient(1400px 700px at 50% 0%, rgba(255, 255, 255, 0.5), transparent 70%),
+        linear-gradient(180deg, #a6f2ff 0%, #6fd2f5 35%, #4cb3ec 70%, #3d95dc 100%);
+}
+
+/* 晚霞：暮紫天空过渡到橙粉地平线 */
+.theme-sunset .mai-deco-bg {
+    background:
+        radial-gradient(1.4px 1.4px at 30px 20px, rgba(255, 255, 255, 0.85), transparent) 0 0 / 200px 160px,
+        radial-gradient(1400px 500px at 80% 100%, rgba(255, 220, 140, 0.7), transparent 70%),
+        radial-gradient(1200px 600px at 10% 40%, rgba(255, 140, 180, 0.35), transparent 70%),
+        linear-gradient(180deg, #5b4bb0 0%, #9a62c9 28%, #e07aa8 58%, #ff9f8a 80%, #ffc37a 100%);
+}
+
+/* 极光：深海军蓝夜空 + 绿青紫极光带 */
+.theme-aurora .mai-deco-bg {
+    background:
+        radial-gradient(1.2px 1.2px at 20px 30px, rgba(255, 255, 255, 0.85), transparent) 0 0 / 180px 160px,
+        radial-gradient(1.6px 1.6px at 120px 90px, rgba(200, 255, 240, 0.8), transparent) 0 0 / 290px 240px,
+        radial-gradient(1500px 320px at 30% 6%, rgba(80, 255, 180, 0.42), transparent 70%),
+        radial-gradient(1300px 280px at 72% 16%, rgba(110, 140, 255, 0.4), transparent 70%),
+        radial-gradient(1500px 340px at 40% 48%, rgba(60, 230, 210, 0.3), transparent 70%),
+        radial-gradient(1300px 300px at 80% 62%, rgba(170, 100, 255, 0.3), transparent 70%),
+        radial-gradient(1500px 340px at 25% 88%, rgba(80, 255, 170, 0.28), transparent 70%),
+        linear-gradient(180deg, #08172e 0%, #0d2440 50%, #0a1a33 100%);
+}
+
+/* Claude：泛黄纸白底 + 深陶土橙色块与光晕 + 细纸纹 */
+.theme-claude .mai-deco-bg {
+    background:
+        repeating-linear-gradient(0deg, rgba(110, 80, 40, 0.035) 0 1px, transparent 1px 3px),
+        radial-gradient(900px 520px at 0% 0%, rgba(193, 95, 60, 0.85), rgba(217, 119, 87, 0.45) 45%, transparent 75%),
+        radial-gradient(1000px 640px at 100% 100%, rgba(193, 95, 60, 0.75), rgba(217, 119, 87, 0.35) 45%, transparent 75%),
+        radial-gradient(800px 600px at 100% 30%, rgba(217, 119, 87, 0.22), transparent 70%),
+        radial-gradient(800px 600px at 0% 65%, rgba(217, 119, 87, 0.2), transparent 70%),
+        linear-gradient(180deg, #f2ecdc 0%, #efe7d4 50%, #ece3cd 100%);
+}
+
+/* ChatGPT：OpenAI 2025 品牌的灰蓝「天空 / 地平线」柔焦渐变，点缀经典绿 #10a37f */
+.theme-chatgpt .mai-deco-bg {
+    background:
+        radial-gradient(1400px 520px at 30% 0%, rgba(255, 255, 255, 0.75), transparent 70%),
+        radial-gradient(1100px 700px at 100% 18%, rgba(118, 160, 214, 0.45), transparent 70%),
+        radial-gradient(1300px 420px at 50% 52%, rgba(255, 236, 214, 0.75), transparent 72%),
+        radial-gradient(900px 600px at 0% 72%, rgba(16, 163, 127, 0.16), transparent 70%),
+        radial-gradient(1200px 700px at 90% 100%, rgba(78, 108, 156, 0.4), transparent 72%),
+        linear-gradient(180deg, #c9d8ea 0%, #dfe6ee 30%, #eceae6 52%, #d3dbe5 75%, #a9b9cf 100%);
+}
+
+/* 抹茶：浅抹茶绿渐变 + 细粉点 */
+.theme-matcha .mai-deco-bg {
+    background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.4) 1.5px, transparent 2px) 0 0 / 22px 22px,
+        radial-gradient(900px 600px at 10% 0%, rgba(255, 255, 255, 0.75), transparent 70%),
+        radial-gradient(1000px 700px at 100% 100%, rgba(110, 150, 60, 0.35), transparent 70%),
+        linear-gradient(180deg, #e6efcd 0%, #d2e2ab 50%, #bcd38f 100%);
+}
+
+/* 柠檬：柠檬黄 → 薄荷苏打 + 气泡 */
+.theme-lemon .mai-deco-bg {
+    background:
+        radial-gradient(circle at 40px 40px, transparent 6px, rgba(255, 255, 255, 0.75) 7px, transparent 8.5px) 0 0 / 180px 200px,
+        radial-gradient(circle at 130px 140px, transparent 10px, rgba(255, 255, 255, 0.6) 11px, transparent 12.5px) 0 0 / 260px 240px,
+        radial-gradient(circle at 90px 90px, rgba(255, 255, 255, 0.7) 3px, transparent 4px) 0 0 / 220px 170px,
+        radial-gradient(1100px 700px at 0% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+        linear-gradient(180deg, #fff59d 0%, #fff3c4 45%, #d6f6cf 100%);
+}
+
+/* 糖果：粉白薄荷斜条纹，罩一层白纱 */
+.theme-candy .mai-deco-bg {
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)),
+        repeating-linear-gradient(135deg, #ffd3e6 0 26px, #fff6fa 26px 52px, #d3f5ea 52px 78px, #fff6fa 78px 104px);
+}
+
+/* 红叶：暖橙渐变 + 散落枫叶色斑 */
+.theme-maple .mai-deco-bg {
+    background:
+        radial-gradient(26px 16px at 50px 60px, rgba(214, 64, 36, 0.65), transparent) 0 0 / 230px 210px,
+        radial-gradient(18px 26px at 160px 130px, rgba(238, 132, 34, 0.65), transparent) 0 0 / 280px 250px,
+        radial-gradient(22px 14px at 100px 220px, rgba(190, 50, 40, 0.55), transparent) 0 0 / 330px 290px,
+        radial-gradient(1100px 700px at 0% 0%, rgba(255, 255, 255, 0.6), transparent 70%),
+        linear-gradient(180deg, #ffe4c6 0%, #ffcb9e 50%, #ffa47e 100%);
+}
+
+/* 初雪：浅冰蓝 + 大小雪点 */
+.theme-snow .mai-deco-bg {
+    background:
+        radial-gradient(circle at 30px 40px, #fff 2.5px, transparent 3.5px) 0 0 / 150px 140px,
+        radial-gradient(circle at 100px 90px, rgba(255, 255, 255, 0.9) 1.5px, transparent 2.5px) 0 0 / 190px 170px,
+        radial-gradient(circle at 60px 150px, rgba(255, 255, 255, 0.95) 4px, transparent 5px) 0 0 / 280px 260px,
+        radial-gradient(1200px 700px at 50% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+        linear-gradient(180deg, #d6e7f8 0%, #eef4fb 50%, #c6daf0 100%);
+}
+
+/* 青海波：靛蓝底上的传统波纹 */
+.theme-seigaiha .mai-deco-bg {
+    --w: #3d64a8;
+    --b: #22417a;
+    background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(255, 255, 255, 0.18), transparent 70%),
+        radial-gradient(circle at 100% 150%, var(--b) 24%, var(--w) 24% 28%, var(--b) 28% 36%, var(--w) 36% 40%, transparent 40%) 0 0 / 80px 40px,
+        radial-gradient(circle at 0 150%, var(--b) 24%, var(--w) 24% 28%, var(--b) 28% 36%, var(--w) 36% 40%, transparent 40%) 0 0 / 80px 40px,
+        radial-gradient(circle at 50% 100%, var(--w) 10%, var(--b) 10% 23%, var(--w) 23% 30%, var(--b) 30% 43%, var(--w) 43% 50%, var(--b) 50% 63%, var(--w) 63% 71%, transparent 71%) 0 0 / 80px 40px,
+        radial-gradient(circle at 100% 50%, var(--w) 5%, var(--b) 5% 15%, var(--w) 15% 20%, var(--b) 20% 29%, var(--w) 29% 34%, var(--b) 34% 44%, var(--w) 44% 49%, transparent 49%) 0 0 / 80px 40px,
+        radial-gradient(circle at 0 50%, var(--w) 5%, var(--b) 5% 15%, var(--w) 15% 20%, var(--b) 20% 29%, var(--w) 29% 34%, var(--b) 34% 44%, var(--w) 44% 49%, transparent 49%) 0 0 / 80px 40px,
+        var(--b);
+}
+
+/* 格纹：米白底红绿苏格兰格 */
+.theme-plaid .mai-deco-bg {
+    background:
+        repeating-linear-gradient(0deg, rgba(196, 40, 52, 0.22) 0 26px, transparent 26px 52px, rgba(30, 90, 64, 0.2) 52px 60px, transparent 60px 104px),
+        repeating-linear-gradient(90deg, rgba(196, 40, 52, 0.22) 0 26px, transparent 26px 52px, rgba(30, 90, 64, 0.2) 52px 60px, transparent 60px 104px),
+        #f6efe2;
+}
+
+/* 水彩：纸白底上晕开的粉彩色块 */
+.theme-watercolor .mai-deco-bg {
+    background:
+        repeating-linear-gradient(0deg, rgba(120, 100, 80, 0.025) 0 1px, transparent 1px 3px),
+        radial-gradient(260px 200px at 120px 110px, rgba(255, 140, 170, 0.38), transparent 70%) 0 0 / 1000px 900px,
+        radial-gradient(320px 230px at 520px 80px, rgba(130, 185, 255, 0.36), transparent 70%) 0 0 / 1000px 900px,
+        radial-gradient(300px 260px at 360px 330px, rgba(160, 225, 170, 0.38), transparent 70%) 0 0 / 1000px 900px,
+        radial-gradient(280px 220px at 820px 420px, rgba(255, 205, 110, 0.38), transparent 70%) 0 0 / 1000px 900px,
+        radial-gradient(300px 240px at 150px 640px, rgba(190, 150, 255, 0.36), transparent 70%) 0 0 / 1000px 900px,
+        radial-gradient(260px 220px at 640px 720px, rgba(255, 160, 130, 0.34), transparent 70%) 0 0 / 1000px 900px,
+        #fbf8f2;
+}
+
+/* 包豪斯：米色底 + 红三角、蓝方块、黄四分圆与黑色短条 */
+.theme-bauhaus .mai-deco-bg {
+    background:
+        linear-gradient(135deg, #e2453a 50%, transparent 50.2%) 0 0 / 420px 340px no-repeat,
+        linear-gradient(#2c5aa6, #2c5aa6) right 0 top 0 / 260px 130px no-repeat,
+        radial-gradient(circle 340px at 0 100%, #f2c230 98%, transparent 100%) left bottom / 340px 340px no-repeat,
+        linear-gradient(#1d1d1d, #1d1d1d) right 0 bottom 0 / 420px 14px no-repeat,
+        #f3ead6;
+}
+
+/* 蒸汽波：暮紫天空、网格，logo 换成横纹落日 */
+.theme-vapor .mai-deco-bg {
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.16) 2px, transparent 2px) 0 0 / 100% 60px,
+        linear-gradient(90deg, rgba(255, 255, 255, 0.16) 2px, transparent 2px) 0 0 / 80px 100%,
+        linear-gradient(180deg, #2a1052 0%, #6a24c9 35%, #e057c0 70%, #ffae96 100%);
+}
+
+.theme-vapor .logo {
+    height: 340px;
+    margin-block: -35px;
+    object-position: -9999px 0;
+    filter: none;
+    background: linear-gradient(180deg, #ffd36e 0%, #ff9a8b 55%, #ff6ec7 100%);
+    -webkit-mask:
+        radial-gradient(circle closest-side, #000 99.5%, transparent 100%),
+        linear-gradient(180deg, #000 0 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 75%, transparent 75% 81%, #000 81% 88%, transparent 88% 95%, #000 95%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+}
+
+/* 蜂巢：蜂蜜色六边形格 */
+.theme-honey .mai-deco-bg {
+    --c1: #e9a62a;
+    --c2: #f6c75a;
+    background:
+        radial-gradient(1100px 700px at 10% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
+        linear-gradient(30deg, var(--c1) 12%, transparent 12.5% 87%, var(--c1) 87.5%) 0 0 / 80px 140px,
+        linear-gradient(150deg, var(--c1) 12%, transparent 12.5% 87%, var(--c1) 87.5%) 0 0 / 80px 140px,
+        linear-gradient(30deg, var(--c1) 12%, transparent 12.5% 87%, var(--c1) 87.5%) 40px 70px / 80px 140px,
+        linear-gradient(150deg, var(--c1) 12%, transparent 12.5% 87%, var(--c1) 87.5%) 40px 70px / 80px 140px,
+        linear-gradient(60deg, var(--c2) 25%, transparent 25.5% 75%, var(--c2) 75%) 0 0 / 80px 140px,
+        linear-gradient(60deg, var(--c2) 25%, transparent 25.5% 75%, var(--c2) 75%) 40px 70px / 80px 140px,
+        #f3bb44;
+}
+
+/* 金箔：拉丝金属金渐变 + 斜向高光带 + 亮/暗金碎箔 */
+.theme-gold .mai-deco-bg {
+    background:
+        radial-gradient(circle at 30px 40px, rgba(255, 250, 220, 0.95) 1.6px, transparent 2.6px) 0 0 / 150px 140px,
+        radial-gradient(7px 4px at 120px 100px, rgba(255, 244, 196, 0.85), transparent) 0 0 / 230px 210px,
+        radial-gradient(4px 7px at 70px 170px, rgba(150, 100, 10, 0.45), transparent) 0 0 / 290px 250px,
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 4px),
+        linear-gradient(115deg, transparent 8%, rgba(255, 248, 210, 0.55) 18%, transparent 30%, transparent 46%, rgba(255, 248, 210, 0.45) 58%, transparent 70%, transparent 82%, rgba(255, 248, 210, 0.4) 90%, transparent 98%),
+        linear-gradient(180deg, #e6b93a 0%, #f7d774 18%, #d4a72c 38%, #f3cf63 58%, #c99a22 78%, #f0c95a 100%);
+}
+
+/* 赛博：深紫夜色 + 霓虹青品红网格 */
+.theme-cyber .mai-deco-bg {
+    background:
+        linear-gradient(rgba(0, 255, 240, 0.14) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(90deg, rgba(255, 0, 200, 0.12) 1px, transparent 1px) 0 0 / 48px 48px,
+        radial-gradient(1200px 600px at 20% 0%, rgba(255, 0, 200, 0.38), transparent 70%),
+        radial-gradient(1200px 700px at 90% 60%, rgba(0, 230, 255, 0.3), transparent 70%),
+        linear-gradient(180deg, #0b0820 0%, #120a2e 50%, #070615 100%);
+}
+
+/* 深色主题：玩家卡与分区头的半透明白在深底上会发灰，改不透明。 */
+.theme-night .player-card,
+.theme-aurora .player-card,
+.theme-cyber .player-card,
+.theme-vapor .player-card,
+.theme-seigaiha .player-card {
+    background: linear-gradient(135deg, #ffffff, #f1eef8);
+}
+
+.theme-night :is(.sec-label, .footer-text),
+.theme-aurora :is(.sec-label, .footer-text),
+.theme-cyber :is(.sec-label, .footer-text),
+.theme-vapor :is(.sec-label, .footer-text),
+.theme-seigaiha :is(.sec-label, .footer-text) {
+    background: rgba(255, 255, 255, 0.9);
+}
